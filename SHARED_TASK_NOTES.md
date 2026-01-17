@@ -1,16 +1,17 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed issues #1-#11 (T001-T011) - Setup phase monorepo configuration + event schemas
-- ~262 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #1-#12 (T001-T012) - Setup phase monorepo + testing utilities
+- ~261 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
 
 ## Notes
-- pnpm is not installed in the CI environment; pnpm-specific features in .npmrc cause npm warnings but don't block work
-- The `status: in-progress` label was created during this iteration for issue tracking
+- pnpm is now installed globally and should be used for workspace operations
+- The `status: in-progress` label was created for issue tracking
 - All PRs are being squash-merged to main
+- Local npm registry (Verdaccio) is running at localhost:4873
 
 ## Workflow
 1. `npm run next-issue` - claims highest priority issue
