@@ -1,0 +1,57 @@
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: unite-discord-postgres-test
+    restart: "no"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: unite_discord_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d unite_discord_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: unite-discord-redis-test
+    restart: "no"
+    command: redis-server --appendonly no
+    ports:
+      - "6380:6379"
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  localstack-test:
+    image: localstack/localstack:3
+    container_name: unite-discord-localstack-test
+    restart: "no"
+    environment:
+      SERVICES: s3,sqs,sns,dynamodb
+      DEBUG: 0
+      PERSISTENCE: 0
+    ports:
+      - "4567:4566"
+    tmpfs:
+      - /var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+networks:
+  default:
+    name: unite-discord-test-network
