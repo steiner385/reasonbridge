@@ -43,3 +43,10 @@ export interface CreateResponseRequest {
   propositionIds?: string[];
   acknowledgedFeedback?: boolean;
 }
+
+export interface UpdateResponseRequest {
+  content: string;
+  citedSources?: string[];
+  containsOpinion?: boolean;
+  containsFactualClaims?: boolean;
+}
