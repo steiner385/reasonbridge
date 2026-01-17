@@ -41,21 +41,22 @@
 - Completed issue #86 (T090) - Alignment summary visualization
 - Completed issue #87 (T091) - Alignment reasoning modal
 - Completed issue #88 (T092) - Proposition alignment tracking (GET endpoint)
-- ~192 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #89 (T093) - Proposition alignment view component
+- ~191 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #88 (T092) - Implement proposition alignment tracking:**
-- Added GET /propositions/:propositionId/alignment endpoint
-- Exposed existing getUserAlignment service method via controller
-- Returns user's alignment on a proposition if it exists, null otherwise
-- Completes the alignment API alongside existing PUT and DELETE endpoints
-- Build passing
-- Merged via PR #450
+**Completed Issue #89 (T093) - Create proposition alignment view:**
+- Created PropositionAlignmentView component in `frontend/src/components/propositions/`
+- Composite component combining AlignmentInput and AlignmentSummary
+- Displays complete proposition view with statement, consensus meter, and input controls
+- Handles authenticated and unauthenticated states
+- Configurable size variants (sm/md/lg)
+- Build passing, TypeScript types complete
+- Merged via PR #451
 
-**Previous: Completed Issue #87 (T091) - Implement alignment reasoning modal:**
-- Created AlignmentReasoningModal component in `frontend/src/components/alignments/`
-- Modal interface for adding detailed reasoning to alignments with stance-specific UI
-- Merged via PR #449
+**Previous: Completed Issue #88 (T092) - Implement proposition alignment tracking:**
+- Added GET /propositions/:propositionId/alignment endpoint to complete alignment API
+- Merged via PR #450
 
 **Response & Alignment System Progress:**
 - Backend:
