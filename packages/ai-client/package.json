@@ -1,0 +1,51 @@
+{
+  "name": "@unite-discord/ai-client",
+  "version": "0.1.0",
+  "description": "AI client wrapper for AWS Bedrock integration",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./bedrock": {
+      "types": "./dist/bedrock/index.d.ts",
+      "import": "./dist/bedrock/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.504.0"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3"
+  },
+  "peerDependencies": {
+    "@unite-discord/common": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@unite-discord/common": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
