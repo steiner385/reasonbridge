@@ -1,0 +1,578 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER SERVICE ENTITIES
+// ============================================================================
+
+/// User account with trust scores and verification status
+model User {
+  id                       String   @id @default(uuid()) @db.Uuid
+  email                    String   @unique
+  displayName              String   @map("display_name") @db.VarChar(50)
+  cognitoSub               String   @unique @map("cognito_sub")
+  verificationLevel        VerificationLevel @default(BASIC) @map("verification_level")
+  trustScoreAbility        Decimal  @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
+  trustScoreBenevolence    Decimal  @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
+  trustScoreIntegrity      Decimal  @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
+  moralFoundationProfile   Json?    @map("moral_foundation_profile")
+  positionFingerprint      Json?    @map("position_fingerprint")
+  topicAffinities          Json?    @map("topic_affinities")
+  status                   UserStatus @default(ACTIVE)
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  verificationRecords      VerificationRecord[]
+  following                UserFollow[] @relation("Follower")
+  followers                UserFollow[] @relation("Followed")
+  createdTopics            DiscussionTopic[]
+  responses                Response[]
+  alignments               Alignment[]
+  proposedTopicLinks       TopicLink[] @relation("LinkProposer")
+  createdPropositions      Proposition[]
+  appeals                  Appeal[]
+  moderationApprovals      ModerationAction[] @relation("ModeratorApproval")
+  appealReviews            Appeal[] @relation("AppealReviewer")
+
+  @@index([cognitoSub])
+  @@index([email])
+  @@index([displayName])
+  @@map("users")
+}
+
+enum VerificationLevel {
+  BASIC
+  ENHANCED
+  VERIFIED_HUMAN
+
+  @@map("verification_level")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+
+  @@map("user_status")
+}
+
+/// Tracks user verification records (email, phone, government ID)
+model VerificationRecord {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  type              VerificationType
+  status            VerificationStatus @default(PENDING)
+  verifiedAt        DateTime? @map("verified_at")
+  expiresAt         DateTime? @map("expires_at")
+  providerReference String?  @map("provider_reference")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([status])
+  @@map("verification_records")
+}
+
+enum VerificationType {
+  EMAIL
+  PHONE
+  GOVERNMENT_ID
+
+  @@map("verification_type")
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+
+  @@map("verification_status")
+}
+
+/// Tracks user follow relationships
+model UserFollow {
+  id          String   @id @default(uuid()) @db.Uuid
+  followerId  String   @map("follower_id") @db.Uuid
+  followedId  String   @map("followed_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followed    User     @relation("Followed", fields: [followedId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followedId])
+  @@index([followerId])
+  @@index([followedId])
+  @@map("user_follows")
+}
+
+// ============================================================================
+// DISCUSSION SERVICE ENTITIES
+// ============================================================================
+
+/// A discussion topic with tags and propositions
+model DiscussionTopic {
+  id                      String   @id @default(uuid()) @db.Uuid
+  title                   String   @db.VarChar(200)
+  description             String   @db.Text
+  creatorId               String   @map("creator_id") @db.Uuid
+  status                  TopicStatus @default(SEEDING)
+  evidenceStandards       EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  minimumDiversityScore   Decimal  @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
+  currentDiversityScore   Decimal? @map("current_diversity_score") @db.Decimal(3, 2)
+  participantCount        Int      @default(0) @map("participant_count")
+  responseCount           Int      @default(0) @map("response_count")
+  crossCuttingThemes      String[] @map("cross_cutting_themes")
+  createdAt               DateTime @default(now()) @map("created_at")
+  activatedAt             DateTime? @map("activated_at")
+  archivedAt              DateTime? @map("archived_at")
+
+  // Relations
+  creator                 User     @relation(fields: [creatorId], references: [id])
+  tags                    TopicTag[]
+  sourceLinks             TopicLink[] @relation("SourceTopic")
+  targetLinks             TopicLink[] @relation("TargetTopic")
+  propositions            Proposition[]
+  responses               Response[]
+  commonGroundAnalyses    CommonGroundAnalysis[]
+
+  @@index([status])
+  @@index([creatorId])
+  @@index([createdAt(sort: Desc)])
+  @@map("discussion_topics")
+}
+
+enum TopicStatus {
+  SEEDING
+  ACTIVE
+  ARCHIVED
+
+  @@map("topic_status")
+}
+
+enum EvidenceStandard {
+  MINIMAL
+  STANDARD
+  RIGOROUS
+
+  @@map("evidence_standard")
+}
+
+/// Tags for categorizing discussion topics
+model Tag {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @unique @db.VarChar(50)
+  slug          String   @unique
+  usageCount    Int      @default(0) @map("usage_count")
+  aiSynonyms    String[] @map("ai_synonyms")
+  parentThemeId String?  @map("parent_theme_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  parentTheme   Tag?     @relation("TagHierarchy", fields: [parentThemeId], references: [id])
+  childThemes   Tag[]    @relation("TagHierarchy")
+  topics        TopicTag[]
+
+  @@index([usageCount(sort: Desc)])
+  @@map("tags")
+}
+
+/// Junction table for topic-tag relationships
+model TopicTag {
+  topicId   String   @map("topic_id") @db.Uuid
+  tagId     String   @map("tag_id") @db.Uuid
+  source    TagSource
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  topic     DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  tag       Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([topicId, tagId])
+  @@index([tagId])
+  @@map("topic_tags")
+}
+
+enum TagSource {
+  CREATOR
+  AI_SUGGESTED
+  COMMUNITY
+
+  @@map("tag_source")
+}
+
+/// Links between related discussion topics
+model TopicLink {
+  id                  String   @id @default(uuid()) @db.Uuid
+  sourceTopicId       String   @map("source_topic_id") @db.Uuid
+  targetTopicId       String   @map("target_topic_id") @db.Uuid
+  relationshipType    TopicRelationshipType @map("relationship_type")
+  linkSource          LinkSource @map("link_source")
+  proposerId          String?  @map("proposer_id") @db.Uuid
+  confirmationStatus  ConfirmationStatus @default(PENDING) @map("confirmation_status")
+  confirmedByCount    Int      @default(0) @map("confirmed_by_count")
+  rejectedByCount     Int      @default(0) @map("rejected_by_count")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  sourceTopic         DiscussionTopic @relation("SourceTopic", fields: [sourceTopicId], references: [id], onDelete: Cascade)
+  targetTopic         DiscussionTopic @relation("TargetTopic", fields: [targetTopicId], references: [id], onDelete: Cascade)
+  proposer            User?    @relation("LinkProposer", fields: [proposerId], references: [id])
+
+  @@unique([sourceTopicId, targetTopicId, relationshipType])
+  @@index([sourceTopicId])
+  @@index([targetTopicId])
+  @@index([relationshipType])
+  @@index([confirmationStatus])
+  @@map("topic_links")
+}
+
+enum TopicRelationshipType {
+  BUILDS_ON
+  RESPONDS_TO
+  CONTRADICTS
+  RELATED
+  SHARES_PROPOSITION
+
+  @@map("topic_relationship_type")
+}
+
+enum LinkSource {
+  AI_SUGGESTED
+  USER_PROPOSED
+
+  @@map("link_source")
+}
+
+enum ConfirmationStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+
+  @@map("confirmation_status")
+}
+
+/// A proposition/claim within a discussion topic
+model Proposition {
+  id                    String   @id @default(uuid()) @db.Uuid
+  topicId               String   @map("topic_id") @db.Uuid
+  statement             String   @db.VarChar(1000)
+  source                PropositionSource
+  creatorId             String?  @map("creator_id") @db.Uuid
+  parentPropositionId   String?  @map("parent_proposition_id") @db.Uuid
+  supportCount          Int      @default(0) @map("support_count")
+  opposeCount           Int      @default(0) @map("oppose_count")
+  nuancedCount          Int      @default(0) @map("nuanced_count")
+  consensusScore        Decimal? @map("consensus_score") @db.Decimal(3, 2)
+  evidencePool          Json?    @map("evidence_pool")
+  status                PropositionStatus @default(ACTIVE)
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  // Relations
+  topic                 DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  creator               User?    @relation(fields: [creatorId], references: [id])
+  parentProposition     Proposition? @relation("PropositionHierarchy", fields: [parentPropositionId], references: [id])
+  childPropositions     Proposition[] @relation("PropositionHierarchy")
+  alignments            Alignment[]
+  responses             ResponseProposition[]
+
+  @@index([topicId])
+  @@index([parentPropositionId])
+  @@index([topicId, consensusScore(sort: Desc)])
+  @@map("propositions")
+}
+
+enum PropositionSource {
+  AI_IDENTIFIED
+  USER_CREATED
+
+  @@map("proposition_source")
+}
+
+enum PropositionStatus {
+  ACTIVE
+  MERGED
+  ARCHIVED
+
+  @@map("proposition_status")
+}
+
+/// A response/comment in a discussion topic
+model Response {
+  id                    String   @id @default(uuid()) @db.Uuid
+  topicId               String   @map("topic_id") @db.Uuid
+  authorId              String   @map("author_id") @db.Uuid
+  content               String   @db.Text
+  citedSources          Json?    @map("cited_sources")
+  containsOpinion       Boolean  @default(false) @map("contains_opinion")
+  containsFactualClaims Boolean  @default(false) @map("contains_factual_claims")
+  status                ResponseStatus @default(VISIBLE)
+  revisionCount         Int      @default(0) @map("revision_count")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  topic                 DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author                User     @relation(fields: [authorId], references: [id])
+  propositions          ResponseProposition[]
+  feedback              Feedback[]
+  factCheckResults      FactCheckResult[]
+
+  @@index([topicId])
+  @@index([authorId])
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("responses")
+}
+
+enum ResponseStatus {
+  VISIBLE
+  HIDDEN
+  REMOVED
+
+  @@map("response_status")
+}
+
+/// Junction table for response-proposition relationships
+model ResponseProposition {
+  responseId      String   @map("response_id") @db.Uuid
+  propositionId   String   @map("proposition_id") @db.Uuid
+  relevanceScore  Decimal? @map("relevance_score") @db.Decimal(3, 2)
+
+  // Relations
+  response        Response    @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  proposition     Proposition @relation(fields: [propositionId], references: [id], onDelete: Cascade)
+
+  @@id([responseId, propositionId])
+  @@map("response_propositions")
+}
+
+/// User alignment (support/oppose/nuanced) on a proposition
+model Alignment {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  propositionId       String   @map("proposition_id") @db.Uuid
+  stance              AlignmentStance
+  nuanceExplanation   String?  @map("nuance_explanation") @db.Text
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposition         Proposition @relation(fields: [propositionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propositionId])
+  @@index([propositionId])
+  @@map("alignments")
+}
+
+enum AlignmentStance {
+  SUPPORT
+  OPPOSE
+  NUANCED
+
+  @@map("alignment_stance")
+}
+
+/// AI-generated common ground analysis for a topic
+model CommonGroundAnalysis {
+  id                            String   @id @default(uuid()) @db.Uuid
+  topicId                       String   @map("topic_id") @db.Uuid
+  version                       Int
+  agreementZones                Json     @map("agreement_zones")
+  misunderstandings             Json
+  genuineDisagreements          Json     @map("genuine_disagreements")
+  overallConsensusScore         Decimal? @map("overall_consensus_score") @db.Decimal(3, 2)
+  participantCountAtGeneration  Int      @map("participant_count_at_generation")
+  responseCountAtGeneration     Int      @map("response_count_at_generation")
+  modelVersion                  String   @map("model_version")
+  createdAt                     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  topic                         DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId])
+  @@index([topicId, version(sort: Desc)])
+  @@map("common_ground_analyses")
+}
+
+// ============================================================================
+// AI SERVICE ENTITIES
+// ============================================================================
+
+/// AI-generated feedback on a response
+model Feedback {
+  id                    String   @id @default(uuid()) @db.Uuid
+  responseId            String   @map("response_id") @db.Uuid
+  type                  FeedbackType
+  subtype               String?
+  suggestionText        String   @map("suggestion_text") @db.Text
+  reasoning             String   @db.Text
+  confidenceScore       Decimal  @map("confidence_score") @db.Decimal(3, 2)
+  educationalResources  Json?    @map("educational_resources")
+  userAcknowledged      Boolean  @default(false) @map("user_acknowledged")
+  userRevised           Boolean  @default(false) @map("user_revised")
+  userHelpfulRating     HelpfulRating? @map("user_helpful_rating")
+  displayedToUser       Boolean  @map("displayed_to_user")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  // Relations
+  response              Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([type])
+  @@index([displayedToUser, createdAt])
+  @@map("feedback")
+}
+
+enum FeedbackType {
+  FALLACY
+  INFLAMMATORY
+  UNSOURCED
+  BIAS
+  AFFIRMATION
+
+  @@map("feedback_type")
+}
+
+enum HelpfulRating {
+  HELPFUL
+  NOT_HELPFUL
+
+  @@map("helpful_rating")
+}
+
+// ============================================================================
+// FACT-CHECK SERVICE ENTITIES
+// ============================================================================
+
+/// Fact-check results for claims in responses
+model FactCheckResult {
+  id                    String   @id @default(uuid()) @db.Uuid
+  responseId            String   @map("response_id") @db.Uuid
+  claimText             String   @map("claim_text") @db.Text
+  claimStartOffset      Int      @map("claim_start_offset")
+  claimEndOffset        Int      @map("claim_end_offset")
+  sources               Json
+  hasConflictingSources Boolean  @default(false) @map("has_conflicting_sources")
+  displayedAs           String   @default("Related Context") @map("displayed_as")
+  createdAt             DateTime @default(now()) @map("created_at")
+  expiresAt             DateTime @map("expires_at")
+
+  // Relations
+  response              Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([expiresAt])
+  @@map("fact_check_results")
+}
+
+// ============================================================================
+// MODERATION SERVICE ENTITIES
+// ============================================================================
+
+/// Moderation actions taken on content or users
+model ModerationAction {
+  id              String   @id @default(uuid()) @db.Uuid
+  targetType      ModerationTargetType @map("target_type")
+  targetId        String   @map("target_id") @db.Uuid
+  actionType      ModerationActionType @map("action_type")
+  severity        ModerationSeverity
+  reasoning       String   @db.Text
+  aiRecommended   Boolean  @default(false) @map("ai_recommended")
+  aiConfidence    Decimal? @map("ai_confidence") @db.Decimal(3, 2)
+  approvedById    String?  @map("approved_by_id") @db.Uuid
+  approvedAt      DateTime? @map("approved_at")
+  status          ModerationStatus @default(PENDING)
+  createdAt       DateTime @default(now()) @map("created_at")
+  executedAt      DateTime? @map("executed_at")
+
+  // Relations
+  approvedBy      User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
+  appeals         Appeal[]
+
+  @@index([targetType, targetId])
+  @@index([status])
+  @@index([severity])
+  @@map("moderation_actions")
+}
+
+enum ModerationTargetType {
+  RESPONSE
+  USER
+  TOPIC
+
+  @@map("moderation_target_type")
+}
+
+enum ModerationActionType {
+  EDUCATE
+  WARN
+  HIDE
+  REMOVE
+  SUSPEND
+  BAN
+
+  @@map("moderation_action_type")
+}
+
+enum ModerationSeverity {
+  NON_PUNITIVE
+  CONSEQUENTIAL
+
+  @@map("moderation_severity")
+}
+
+enum ModerationStatus {
+  PENDING
+  ACTIVE
+  APPEALED
+  REVERSED
+
+  @@map("moderation_status")
+}
+
+/// Appeals against moderation actions
+model Appeal {
+  id                  String   @id @default(uuid()) @db.Uuid
+  moderationActionId  String   @map("moderation_action_id") @db.Uuid
+  appellantId         String   @map("appellant_id") @db.Uuid
+  reason              String   @db.Text
+  status              AppealStatus @default(PENDING)
+  reviewerId          String?  @map("reviewer_id") @db.Uuid
+  decisionReasoning   String?  @map("decision_reasoning") @db.Text
+  createdAt           DateTime @default(now()) @map("created_at")
+  resolvedAt          DateTime? @map("resolved_at")
+
+  // Relations
+  moderationAction    ModerationAction @relation(fields: [moderationActionId], references: [id], onDelete: Cascade)
+  appellant           User     @relation(fields: [appellantId], references: [id])
+  reviewer            User?    @relation("AppealReviewer", fields: [reviewerId], references: [id])
+
+  @@unique([moderationActionId, appellantId])
+  @@index([moderationActionId])
+  @@index([status])
+  @@map("appeals")
+}
+
+enum AppealStatus {
+  PENDING
+  UNDER_REVIEW
+  UPHELD
+  DENIED
+
+  @@map("appeal_status")
+}
