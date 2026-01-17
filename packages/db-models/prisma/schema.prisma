@@ -177,6 +177,7 @@ enum EvidenceStandard {
 }
 
 /// Tags for categorizing discussion topics
+/// Validation: Name must be 2-50 characters (max 50 enforced by VarChar, min 2 at application level)
 model Tag {
   id            String   @id @default(uuid()) @db.Uuid
   name          String   @unique @db.VarChar(50)
