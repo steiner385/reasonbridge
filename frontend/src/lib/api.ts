@@ -127,7 +127,7 @@ export class ApiClient {
     let data: unknown;
     try {
       data = isJson ? await response.json() : await response.text();
-    } catch (error) {
+    } catch {
       data = null;
     }
 
@@ -149,6 +149,7 @@ export class ApiClient {
     endpoint: string,
     options: ApiRequestOptions = {},
   ): Promise<T> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { params, skipAuth, ...fetchOptions } = options;
 
     const url = this.buildURL(endpoint, params);

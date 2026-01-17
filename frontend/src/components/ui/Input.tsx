@@ -60,7 +60,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     // Generate a unique ID if not provided
-    const inputId = id || `input-${React.useId()}`;
+    const generatedId = React.useId();
+    const inputId = id || `input-${generatedId}`;
     const hasError = Boolean(error);
 
     // Size styles

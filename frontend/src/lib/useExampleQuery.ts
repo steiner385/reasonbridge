@@ -31,7 +31,7 @@ export function useExampleQuery() {
           message: `API is ${response.status}`,
           timestamp: new Date().toISOString(),
         };
-      } catch (error) {
+      } catch {
         // Fallback if API is not available
         return {
           message: 'TanStack Query is configured and ready!',
