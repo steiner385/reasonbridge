@@ -18,6 +18,7 @@
     "// === WORKSPACE COMMANDS ===": "",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
+    "test:unit": "echo 'No unit tests configured yet' && exit 0",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
