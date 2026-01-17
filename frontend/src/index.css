@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply min-h-screen bg-gray-50 text-gray-900 antialiased;
+  }
+
+  #root {
+    @apply min-h-screen flex flex-col;
+  }
+}
+
+@layer components {
+  /* Custom component styles will go here */
+}
+
+@layer utilities {
+  /* Custom utility classes will go here */
+}
