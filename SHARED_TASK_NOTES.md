@@ -14,17 +14,20 @@
 - Completed issue #69 (T073) - Reusable TopicCard component
 - Completed issue #70 (T074) - Topic detail page
 - Completed issue #71 (T075) - Search bar component
-- ~227 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #72 (T076) - Topic filtering UI component
+- ~226 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #71 (T075): Create search bar component:
-- Created reusable SearchBar component in frontend/src/components/search/
-- Three size variants (sm, md, lg) with customizable placeholder
-- Optional search button, clear button, and loading states
-- Search icon indicator and animated loading spinner
-- Full keyboard support (Enter key submission)
-- onSearch and onChange callbacks for flexible integration
-- Accessible with ARIA labels, follows existing component patterns
+Issue #72 (T076): Implement topic filtering UI:
+- Created reusable TopicFilterUI component in frontend/src/components/topics/
+- Extracted filtering logic from TopicsPage into composable component
+- Status filtering (All, Seeding, Active, Archived) with visual indicators
+- Sort options (Newest First, Most Participants, Most Responses)
+- Tag filtering with search input, Apply/Clear buttons, Enter key support
+- Active filter badges display showing currently applied filters
+- Props-based control (filters, onFiltersChange) for full flexibility
+- Follows existing component patterns (Button, Input, Card)
+- TypeScript type safety, responsive layout, keyboard accessible
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
