@@ -9,18 +9,19 @@
 - Completed issue #45 (T049) - React Router with route definitions
 - Completed issue #46 (T050) - TanStack Query for data fetching
 - Completed issue #47 (T051) - API client wrapper with authentication
-- ~241 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #48 (T052) - Base UI components (Button, Input, Card)
+- Completed issue #49 (T053) - Playwright E2E testing setup
+- ~239 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #47 (T051): Create API client wrapper with auth in frontend/src/lib/api.ts:
-- Created ApiClient class with full REST methods (GET, POST, PUT, PATCH, DELETE)
-- Implemented bearer token authentication with localStorage
-- Added automatic auth header injection for authenticated requests
-- Created custom ApiError class for error handling
-- Added environment variable support (VITE_API_BASE_URL)
-- Created .env.example with API configuration
-- Updated useExampleQuery to demonstrate API client usage
-- All tests passing (typecheck)
+Issue #49 (T053): Set up Playwright for E2E testing in frontend/:
+- Installed @playwright/test@1.57.0 and Chromium browser
+- Created playwright.config.ts with CI-optimized settings
+- Set up e2e/ test directory with example.spec.ts (5 test cases)
+- Added 5 npm scripts: test:e2e, test:e2e:ui, test:e2e:headed, test:e2e:debug, test:e2e:report
+- Updated .gitignore with Playwright artifacts
+- Created comprehensive E2E testing README
+- All tests discoverable (5 tests in 1 file)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
