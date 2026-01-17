@@ -6,3 +6,5 @@ export { default as ThreadedResponseDisplay } from './ThreadedResponseDisplay';
 export type { ThreadedResponseDisplayProps } from './ThreadedResponseDisplay';
 export { default as EditResponseModal } from './EditResponseModal';
 export type { EditResponseModalProps } from './EditResponseModal';
+export { default as VoteButtons } from './VoteButtons';
+export type { VoteButtonsProps } from './VoteButtons';
