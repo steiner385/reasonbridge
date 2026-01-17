@@ -1,0 +1,38 @@
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Generated files
+*.generated.ts
+*.generated.js
+
+# Config files (non-TypeScript)
+*.config.js
+*.config.mjs
+!.eslintrc.js
+
+# Spec files
+specs/
+
+# Infrastructure as code
+infrastructure/cdk/
+infrastructure/helm/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

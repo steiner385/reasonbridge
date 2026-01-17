@@ -18,8 +18,8 @@
     "// === WORKSPACE COMMANDS ===": "",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "lint": "pnpm -r lint",
-    "lint:fix": "pnpm -r lint:fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "pnpm -r format",
     "clean": "pnpm -r clean",
     "typecheck": "pnpm -r typecheck",
@@ -31,8 +31,14 @@
     "docker:test": "docker compose -f docker-compose.test.yml up -d"
   },
   "devDependencies": {
-    "typescript": "5.7.3",
-    "@types/node": "20.17.12"
+    "@types/node": "20.17.12",
+    "@typescript-eslint/eslint-plugin": "8.21.0",
+    "@typescript-eslint/parser": "8.21.0",
+    "eslint": "8.57.1",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-airbnb-typescript": "18.0.0",
+    "eslint-plugin-import": "2.31.0",
+    "typescript": "5.7.3"
   },
   "keywords": [
     "discussion",
