@@ -6,7 +6,8 @@
 - Completed issue #31 (T031) - User Service scaffolded with NestJS, Prisma integration, and health check
 - Completed issue #32 (T032) - Discussion Service scaffolded with NestJS, Prisma integration, and health check
 - Completed issue #33 (T033) - AI Service scaffolded with NestJS, Prisma module, and Bedrock stub
-- ~255 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #34 (T034) - Moderation Service scaffolded with NestJS and Prisma module
+- ~254 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
