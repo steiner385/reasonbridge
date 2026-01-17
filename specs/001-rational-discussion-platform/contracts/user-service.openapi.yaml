@@ -1,0 +1,568 @@
+openapi: 3.1.0
+info:
+  title: uniteDiscord User Service API
+  description: User account management, verification, trust scores, and social follows
+  version: 1.0.0
+  contact:
+    name: uniteDiscord Team
+
+servers:
+  - url: /api/v1/users
+    description: User service base path
+
+tags:
+  - name: Users
+    description: User profile operations
+  - name: Verification
+    description: Identity verification operations
+  - name: Trust
+    description: Trust score operations
+  - name: Follows
+    description: User following operations
+
+paths:
+  /me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [Users]
+      summary: Update current user profile
+      operationId: updateCurrentUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Display name already taken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /me/moral-foundations:
+    get:
+      tags: [Users]
+      summary: Get own moral foundation profile (educational view)
+      description: Returns user's inferred moral foundation profile with educational framing
+      operationId: getMyMoralFoundations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Moral foundation profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoralFoundationProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Profile not yet computed (insufficient activity)
+
+  /{userId}:
+    get:
+      tags: [Users]
+      summary: Get public user profile
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Public user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUserProfile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /verification/phone:
+    post:
+      tags: [Verification]
+      summary: Initiate phone verification
+      operationId: initiatePhoneVerification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phoneNumber]
+              properties:
+                phoneNumber:
+                  type: string
+                  pattern: '^\+[1-9]\d{1,14}$'
+      responses:
+        '200':
+          description: Verification initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verificationId:
+                    type: string
+                    format: uuid
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          description: Too many verification attempts
+
+  /verification/phone/confirm:
+    post:
+      tags: [Verification]
+      summary: Confirm phone verification code
+      operationId: confirmPhoneVerification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [verificationId, code]
+              properties:
+                verificationId:
+                  type: string
+                  format: uuid
+                code:
+                  type: string
+                  pattern: '^\d{6}$'
+      responses:
+        '200':
+          description: Verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationRecord'
+        '400':
+          description: Invalid or expired code
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /verification/government-id:
+    post:
+      tags: [Verification]
+      summary: Initiate government ID verification
+      description: Creates a verification session with third-party provider
+      operationId: initiateIdVerification
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Verification session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionUrl:
+                    type: string
+                    format: uri
+                    description: Redirect URL for third-party verification
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Already verified or verification in progress
+
+  /{userId}/trust:
+    get:
+      tags: [Trust]
+      summary: Get user trust scores
+      operationId: getUserTrustScores
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Trust scores (Mayer ABI model)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustScores'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /me/following:
+    get:
+      tags: [Follows]
+      summary: Get users I follow
+      operationId: getFollowing
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: List of followed users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/followers:
+    get:
+      tags: [Follows]
+      summary: Get my followers
+      operationId: getFollowers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: List of followers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /{userId}/follow:
+    post:
+      tags: [Follows]
+      summary: Follow a user
+      operationId: followUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Successfully followed
+        '400':
+          description: Cannot follow self
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already following
+
+    delete:
+      tags: [Follows]
+      summary: Unfollow a user
+      operationId: unfollowUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully unfollowed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not following this user
+
+  /recommendations/follow:
+    get:
+      tags: [Follows]
+      summary: Get follow recommendations
+      description: Returns users with different perspectives to follow (anti-echo-chamber)
+      operationId: getFollowRecommendations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 5
+      responses:
+        '200':
+          description: Recommended users to follow
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FollowRecommendation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageSize:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    PageCursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: Opaque cursor for pagination
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    UserProfile:
+      type: object
+      required: [id, displayName, verificationLevel, trustScores, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+          minLength: 3
+          maxLength: 50
+        verificationLevel:
+          $ref: '#/components/schemas/VerificationLevel'
+        trustScores:
+          $ref: '#/components/schemas/TrustScores'
+        topicAffinities:
+          type: array
+          items:
+            type: object
+            properties:
+              tagId:
+                type: string
+                format: uuid
+              tagName:
+                type: string
+              weight:
+                type: number
+                minimum: 0
+                maximum: 1
+        followerCount:
+          type: integer
+        followingCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    PublicUserProfile:
+      type: object
+      required: [id, displayName, verificationLevel, trustScores]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        verificationLevel:
+          $ref: '#/components/schemas/VerificationLevel'
+        trustScores:
+          $ref: '#/components/schemas/TrustScores'
+        followerCount:
+          type: integer
+        isFollowing:
+          type: boolean
+          description: Whether current user follows this user (if authenticated)
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 3
+          maxLength: 50
+
+    VerificationLevel:
+      type: string
+      enum: [basic, enhanced, verified_human]
+
+    VerificationRecord:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [email, phone, government_id]
+        status:
+          type: string
+          enum: [pending, verified, rejected, expired]
+        verifiedAt:
+          type: string
+          format: date-time
+
+    TrustScores:
+      type: object
+      description: Mayer ABI Model trust dimensions
+      required: [ability, benevolence, integrity]
+      properties:
+        ability:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Quality of contributions, accuracy of claims
+        benevolence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Helpfulness ratings, constructive engagement
+        integrity:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Behavioral consistency, account age, verification status
+
+    MoralFoundationProfile:
+      type: object
+      description: User's inferred moral foundation weights with educational framing
+      properties:
+        foundations:
+          type: object
+          properties:
+            care:
+              type: number
+              minimum: 0
+              maximum: 1
+            fairness:
+              type: number
+              minimum: 0
+              maximum: 1
+            loyalty:
+              type: number
+              minimum: 0
+              maximum: 1
+            authority:
+              type: number
+              minimum: 0
+              maximum: 1
+            sanctity:
+              type: number
+              minimum: 0
+              maximum: 1
+            liberty:
+              type: number
+              minimum: 0
+              maximum: 1
+        educationalSummary:
+          type: string
+          description: Plain-language description (e.g., "Your arguments tend to emphasize fairness and care")
+        learnMoreUrl:
+          type: string
+          format: uri
+
+    FollowList:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicUserProfile'
+        nextCursor:
+          type: string
+        totalCount:
+          type: integer
+
+    FollowRecommendation:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/PublicUserProfile'
+        reason:
+          type: string
+          description: Why this user is recommended (e.g., "You might find their viewpoint interesting")
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
