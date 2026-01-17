@@ -7,6 +7,15 @@
 - Completed issues #38-#42 (T042-T046) - Complete event infrastructure (pub/sub + DLQ)
 - Completed issues #43-#49 (T047-T053) - Frontend setup (React, Tailwind, Router, Query, UI, E2E)
 - Completed issues #50-#53 (T054-T057) - Complete CDK infrastructure with tests
+- Completed issue #54 (T058) - Cognito user pool configuration
+- Completed issue #56 (T060) - /auth/login endpoint
+- Completed issue #57 (T061) - /auth/refresh endpoint
+- Completed issue #58 (T062) - Registration form component
+- Completed issue #59 (T063) - Login form component
+- Completed issue #60 (T064) - GET /users/me endpoint
+- Completed issue #61 (T065) - PUT /users/me profile update endpoint
+- Completed issue #62 (T066) - Profile page component
+- Completed issue #63 (T067) - Profile edit form component
 - Completed issue #64 (T068) - Avatar upload with S3
 - Completed issue #65 (T069) - GET /topics endpoint with filtering
 - Completed issue #66 (T070) - GET /topics/:id detail endpoint
@@ -22,15 +31,6 @@
 - Completed issue #76 (T080) - Response edit endpoint (PUT)
 - Completed issue #77 (T081) - Response composer component
 - Completed issue #78 (T082) - Response card component
-- Completed issue #54 (T058) - Cognito user pool configuration
-- Completed issue #56 (T060) - /auth/login endpoint
-- Completed issue #57 (T061) - /auth/refresh endpoint
-- Completed issue #58 (T062) - Registration form component
-- Completed issue #59 (T063) - Login form component
-- Completed issue #60 (T064) - GET /users/me endpoint
-- Completed issue #61 (T065) - PUT /users/me profile update endpoint
-- Completed issue #62 (T066) - Profile page component
-- Completed issue #63 (T067) - Profile edit form component
 - Completed issue #79 (T083) - Threaded response display component
 - Completed issue #80 (T084) - Edit response modal component
 - Completed issue #81 (T085) - Response voting (upvote/downvote)
@@ -47,6 +47,8 @@
 - Completed issue #92 (T096) - E2E test for submitting responses to topics
 - Completed issue #93 (T097) - E2E test for expressing alignment on responses
 - Completed issue #94 (T098) - E2E test for thread navigation and reply
+- GitHub issues #1-#96 are closed, issues #97-#400 don't exist
+- Open issues start at #401+ (Polish/test tasks T342+)
 - ~186 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
@@ -73,8 +75,40 @@
 - Complete voting system (backend + frontend UI component)
 - User alignment tracking on propositions (backend complete)
 
+## CRITICAL ISSUE: GitHub Issues Have Wrong Descriptions
+
+The GitHub issues were created with mismatched descriptions. For example:
+- Issue #95 title says "[T099] Implement Bedrock client wrapper" but tasks.md shows T099 should be "Unit test ResponseAnalyzer"
+- Issue #55 title says "[T059] Implement /auth/register endpoint" but tasks.md shows T059 should be "Unit test DiscussionService"
+
+**Root cause**: The `scripts/create-issues.sh` script created issues with descriptions that don't match the current tasks.md file.
+
+**Impact**: Cannot reliably work from GitHub issues - must use tasks.md as source of truth.
+
+**Action Taken**: Closed issues #95 and #96 as they had incorrect descriptions.
+
+## CRITICAL ISSUE: Missing Source Files (RESOLVED)
+
+Service `src/` directories were missing from the working tree (only `dist/` and `node_modules/` present).
+
+**Resolution**: Restored all source files from origin/main:
+```bash
+for svc in services/*/; do git checkout origin/main -- "$svc/src" 2>/dev/null; done
+git checkout origin/main -- frontend/src frontend/tests
+```
+
+This suggests either:
+1. A build process that deletes source files
+2. A .gitignore issue
+3. Accidental deletion
+
+**Status**: All 147 source files restored and committed.
+
 ## Next Steps
-Run `npm run next-issue` to claim and implement the next highest priority issue.
+
+1. **Fix GitHub issues** - Either recreate issues #97-#400 from current tasks.md with correct descriptions, or work directly from tasks.md
+2. **Identify next task** - Based on tasks.md, find the first incomplete task after T098 (US1 is complete, start US2 tasks)
+3. Run `npm run next-issue` to claim and implement next highest priority issue
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
