@@ -37,22 +37,22 @@
 - Completed issue #82 (T086) - Vote buttons component
 - Completed issue #83 (T087) - POST /alignments endpoint
 - Completed issue #84 (T088) - Alignment aggregation logic
-- ~196 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #85 (T089) - Alignment input component
+- ~195 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #84 (T088) - Implement alignment aggregation logic:**
-- Created AlignmentAggregationService in `services/discussion-service/src/alignments/`
+**Completed Issue #85 (T089) - Create alignment input component:**
+- Created AlignmentInput component in `frontend/src/components/alignments/`
 - Key features:
-  - `updatePropositionAggregates()` - Recalculates support/oppose/nuanced counts after alignment changes
-  - `calculateConsensusScore()` - Computes normalized consensus score (0.00-1.00)
-  - Consensus formula: ((support - oppose) / total + 1) / 2
-  - Automatic aggregation on alignment create/update/delete
-- Integration:
-  - Added aggregation calls to AlignmentsService setAlignment() and removeAlignment()
-  - Registered as provider in AlignmentsModule
-- Updates Proposition fields: supportCount, opposeCount, nuancedCount, consensusScore
+  - Three stance buttons: Support (agree), Oppose (disagree), Nuanced
+  - Expandable textarea for nuanced explanations
+  - Size variants (sm/md/lg) and orientation (horizontal/vertical)
+  - Toggle behavior (click again to remove alignment)
+  - Disabled state support
+  - Optional button labels
+- Placeholder Playwright tests created
 - Build passing
-- Merged via PR #446
+- Merged via PR #447
 
 **Response & Alignment System Progress:**
 - Backend:
