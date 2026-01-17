@@ -40,22 +40,21 @@
 - Completed issue #85 (T089) - Alignment input component
 - Completed issue #86 (T090) - Alignment summary visualization
 - Completed issue #87 (T091) - Alignment reasoning modal
-- ~193 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #88 (T092) - Proposition alignment tracking (GET endpoint)
+- ~192 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #87 (T091) - Implement alignment reasoning modal:**
+**Completed Issue #88 (T092) - Implement proposition alignment tracking:**
+- Added GET /propositions/:propositionId/alignment endpoint
+- Exposed existing getUserAlignment service method via controller
+- Returns user's alignment on a proposition if it exists, null otherwise
+- Completes the alignment API alongside existing PUT and DELETE endpoints
+- Build passing
+- Merged via PR #450
+
+**Previous: Completed Issue #87 (T091) - Implement alignment reasoning modal:**
 - Created AlignmentReasoningModal component in `frontend/src/components/alignments/`
-- Key features:
-  - Modal interface for adding detailed reasoning to alignments
-  - Stance-specific UI (green=support, red=oppose, blue=nuanced)
-  - Custom icons and messaging for each stance type
-  - Textarea with character counting and validation
-  - Configurable minimum character requirement
-  - Real-time error feedback
-  - Tips section for writing effective reasoning
-  - Full keyboard and accessibility support
-- Placeholder Playwright tests created
-- Build and lint passing
+- Modal interface for adding detailed reasoning to alignments with stance-specific UI
 - Merged via PR #449
 
 **Response & Alignment System Progress:**
