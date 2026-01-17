@@ -33,26 +33,33 @@
 - Completed issue #63 (T067) - Profile edit form component
 - Completed issue #79 (T083) - Threaded response display component
 - Completed issue #80 (T084) - Edit response modal component
-- ~200 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #81 (T085) - Response voting (upvote/downvote)
+- ~199 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #80 (T084) - Create edit response modal:**
-- Created reusable Modal base component (UI library)
-- Implemented EditResponseModal with full editing capabilities
-- Form pre-population from existing response data
-- Character count validation (min/max)
-- Cited sources management (add/remove with URL validation)
-- Opinion and factual claims checkboxes
-- Save button only enabled when changes detected
-- Full accessibility (ARIA, focus trap, keyboard navigation)
-- Merged via PR #442
+**Completed Issue #81 (T085) - Implement response voting:**
+- Added Vote model to Prisma schema with VoteType enum (UPVOTE/DOWNVOTE)
+- Created database migration with proper indexes and unique constraints
+- Implemented VotesService with full voting logic:
+  - Toggle behavior (same vote type removes vote)
+  - Vote switching (upvote ↔ downvote)
+  - Vote summaries (upvotes, downvotes, score, userVote)
+  - Authorization (cannot vote on own responses)
+- Created VotesController with REST endpoints:
+  - POST /responses/:responseId/vote
+  - DELETE /responses/:responseId/vote
+  - GET /responses/:responseId/votes
+- Integrated VotesModule into AppModule
+- Added VoteSummaryDto to ResponseDto
+- Merged via PR #443
 
 **Response System Progress:**
-- Backend: POST /responses, GET /responses, PUT /responses, threading support
+- Backend: Full CRUD (POST, GET, PUT), threading support, voting system
 - Frontend: ResponseCard, ResponseComposer, ThreadedResponseDisplay, EditResponseModal components
 - Full response CRUD with threading (parentId relationships)
 - Visual thread indicators and collapsible threads
 - Modal-based response editing with validation
+- Response voting with upvote/downvote (backend complete)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
