@@ -13,8 +13,13 @@
   - Fact-Check Service (port 3006)
 - ~251 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
+## Recent Iteration (2026-01-17)
+Completed T036 (notification-service) and T037 (fact-check-service) in this iteration.
+Both services follow the established NestJS+Fastify+Prisma pattern.
+
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
+Next recommended: #38 (T042) - Create SQS queue definitions in LocalStack (infrastructure task)
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
