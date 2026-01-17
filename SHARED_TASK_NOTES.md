@@ -10,15 +10,16 @@
 - Completed issue #65 (T069) - GET /topics endpoint with filtering
 - Completed issue #66 (T070) - GET /topics/:id detail endpoint
 - Completed issue #67 (T071) - Topic search endpoint
-- ~231 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #68 (T072) - Topic list page with filtering and pagination
+- ~230 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #67 (T071): Implement topic search endpoint:
-- Added GET /topics/search route to TopicsController
-- Added searchTopics method to TopicsService
-- Search across title and description fields (case-insensitive)
-- Pagination support (page, limit)
-- Results ordered by creation date (newest first)
+Issue #68 (T072): Create topic list page:
+- Created TopicsPage component with filtering by status (SEEDING/ACTIVE/ARCHIVED)
+- Implemented sorting by creation date, participant count, and response count
+- Added pagination with visual page navigation
+- Integrated with backend GET /topics API using React Query
+- Added /topics route and navigation link from home page
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
