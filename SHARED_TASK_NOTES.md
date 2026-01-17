@@ -8,16 +8,19 @@
 - Completed issue #44 (T048) - TailwindCSS with comprehensive design tokens
 - Completed issue #45 (T049) - React Router with route definitions
 - Completed issue #46 (T050) - TanStack Query for data fetching
-- ~242 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #47 (T051) - API client wrapper with authentication
+- ~241 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #46 (T050): Set up TanStack Query for data fetching in frontend/src/lib/:
-- Installed @tanstack/react-query v5.90.18
-- Created queryClient.ts with optimized defaults (5min stale, 10min cache)
-- Created QueryProvider.tsx wrapper component
-- Integrated QueryProvider into main.tsx app root
-- Added useExampleQuery.ts as reference implementation
-- All tests passing (typecheck, lint, build: 207KB bundle)
+Issue #47 (T051): Create API client wrapper with auth in frontend/src/lib/api.ts:
+- Created ApiClient class with full REST methods (GET, POST, PUT, PATCH, DELETE)
+- Implemented bearer token authentication with localStorage
+- Added automatic auth header injection for authenticated requests
+- Created custom ApiError class for error handling
+- Added environment variable support (VITE_API_BASE_URL)
+- Created .env.example with API configuration
+- Updated useExampleQuery to demonstrate API client usage
+- All tests passing (typecheck)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
