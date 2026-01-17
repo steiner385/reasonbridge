@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import type { UpdateProfileDto } from './dto/update-profile.dto.js';
 
 @Injectable()
 export class UsersService {
@@ -37,5 +38,24 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  /**
+   * Update a user's profile by their Cognito sub
+   * @param cognitoSub - The Cognito user ID from JWT token
+   * @param updateProfileDto - The fields to update
+   * @returns Updated user object
+   */
+  async updateProfile(cognitoSub: string, updateProfileDto: UpdateProfileDto) {
+    // First verify the user exists
+    await this.findByCognitoSub(cognitoSub);
+
+    // Update the user
+    const updatedUser = await this.prisma.user.update({
+      where: { cognitoSub },
+      data: updateProfileDto,
+    });
+
+    return updatedUser;
   }
 }
