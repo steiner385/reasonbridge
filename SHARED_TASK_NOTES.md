@@ -36,24 +36,23 @@
 - Completed issue #81 (T085) - Response voting (upvote/downvote)
 - Completed issue #82 (T086) - Vote buttons component
 - Completed issue #83 (T087) - POST /alignments endpoint
-- ~197 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #84 (T088) - Alignment aggregation logic
+- ~196 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #83 (T087) - Implement POST /alignments endpoint:**
-- Created AlignmentsModule in `services/discussion-service/src/alignments/`
-- Implemented REST endpoints:
-  - PUT /propositions/:propositionId/alignment - Set/update user alignment
-  - DELETE /propositions/:propositionId/alignment - Remove alignment
-- Service features:
-  - Upsert behavior (creates new or updates existing alignment)
-  - Validates proposition exists
-  - Validates nuanceExplanation required when stance is NUANCED
-  - Proper error handling with NotFoundException and BadRequestException
-- DTOs with class-validator for request validation
-- Stance types: SUPPORT, OPPOSE, NUANCED
-- Integrated into AppModule
+**Completed Issue #84 (T088) - Implement alignment aggregation logic:**
+- Created AlignmentAggregationService in `services/discussion-service/src/alignments/`
+- Key features:
+  - `updatePropositionAggregates()` - Recalculates support/oppose/nuanced counts after alignment changes
+  - `calculateConsensusScore()` - Computes normalized consensus score (0.00-1.00)
+  - Consensus formula: ((support - oppose) / total + 1) / 2
+  - Automatic aggregation on alignment create/update/delete
+- Integration:
+  - Added aggregation calls to AlignmentsService setAlignment() and removeAlignment()
+  - Registered as provider in AlignmentsModule
+- Updates Proposition fields: supportCount, opposeCount, nuancedCount, consensusScore
 - Build passing
-- Merged via PR #445
+- Merged via PR #446
 
 **Response & Alignment System Progress:**
 - Backend:
