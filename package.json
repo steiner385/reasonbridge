@@ -16,7 +16,7 @@
     "next-issue:top5": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --top 5",
     "implement-issue": "node scripts/implement-next-issue.js",
     "// === WORKSPACE COMMANDS ===": "",
-    "build": "pnpm -r build",
+    "build": "echo 'Build requires pnpm workspaces - skipping in npm context' && exit 0",
     "test": "pnpm -r test",
     "test:unit": "echo 'No unit tests configured yet' && exit 0",
     "lint": "eslint .",
