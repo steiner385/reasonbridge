@@ -35,31 +35,36 @@
 - Completed issue #80 (T084) - Edit response modal component
 - Completed issue #81 (T085) - Response voting (upvote/downvote)
 - Completed issue #82 (T086) - Vote buttons component
-- ~198 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #83 (T087) - POST /alignments endpoint
+- ~197 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #82 (T086) - Create vote buttons component:**
-- Created reusable VoteButtons component in `frontend/src/components/responses/VoteButtons.tsx`
-- Features:
-  - Upvote/downvote button controls with SVG icons
-  - Visual feedback for active vote state (highlighted when user has voted)
-  - Vote count display with color coding (positive=blue, negative=red, neutral=gray)
-  - Support for vertical and horizontal orientations
-  - Three size variants (sm, md, lg)
-  - Disabled state support
-  - Full TypeScript support with comprehensive props interface
-- Exported from responses/index.ts for easy importing
-- Added placeholder Playwright tests
-- Build and lint passing
-- Merged via PR #444
+**Completed Issue #83 (T087) - Implement POST /alignments endpoint:**
+- Created AlignmentsModule in `services/discussion-service/src/alignments/`
+- Implemented REST endpoints:
+  - PUT /propositions/:propositionId/alignment - Set/update user alignment
+  - DELETE /propositions/:propositionId/alignment - Remove alignment
+- Service features:
+  - Upsert behavior (creates new or updates existing alignment)
+  - Validates proposition exists
+  - Validates nuanceExplanation required when stance is NUANCED
+  - Proper error handling with NotFoundException and BadRequestException
+- DTOs with class-validator for request validation
+- Stance types: SUPPORT, OPPOSE, NUANCED
+- Integrated into AppModule
+- Build passing
+- Merged via PR #445
 
-**Response System Progress:**
-- Backend: Full CRUD (POST, GET, PUT), threading support, voting system
+**Response & Alignment System Progress:**
+- Backend:
+  - Responses: Full CRUD (POST, GET, PUT), threading support, voting system
+  - Alignments: Set/update/remove user stances on propositions
 - Frontend: ResponseCard, ResponseComposer, ThreadedResponseDisplay, EditResponseModal, VoteButtons components
 - Full response CRUD with threading (parentId relationships)
 - Visual thread indicators and collapsible threads
 - Modal-based response editing with validation
 - Complete voting system (backend + frontend UI component)
+- User alignment tracking on propositions (backend complete)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
