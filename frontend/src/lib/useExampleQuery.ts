@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiClient } from './api';
 
 /**
- * Example query hook demonstrating TanStack Query usage
+ * Example query hook demonstrating TanStack Query usage with API client
  *
  * This hook serves as a reference implementation for creating
  * data fetching hooks throughout the application.
@@ -22,11 +23,21 @@ export function useExampleQuery() {
   return useQuery({
     queryKey: ['example'],
     queryFn: async () => {
-      // This is a placeholder - replace with actual API calls
-      return {
-        message: 'TanStack Query is configured and ready!',
-        timestamp: new Date().toISOString(),
-      };
+      // Example using the API client
+      // Replace '/health' with your actual endpoint
+      try {
+        const response = await apiClient.get<{ status: string; uptime: number }>('/health');
+        return {
+          message: `API is ${response.status}`,
+          timestamp: new Date().toISOString(),
+        };
+      } catch (error) {
+        // Fallback if API is not available
+        return {
+          message: 'TanStack Query is configured and ready!',
+          timestamp: new Date().toISOString(),
+        };
+      }
     },
   });
 }
