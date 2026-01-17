@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { AlignmentDto } from './dto/alignment.dto.js';
 import type { SetAlignmentDto } from './dto/set-alignment.dto.js';
+import { AlignmentAggregationService } from './alignment-aggregation.service.js';
 
 @Injectable()
 export class AlignmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly aggregationService: AlignmentAggregationService,
+  ) {}
 
   /**
    * Set or update user alignment on a proposition
@@ -49,6 +53,10 @@ export class AlignmentsService {
           nuanceExplanation: setAlignmentDto.nuanceExplanation || null,
         },
       });
+
+      // Update proposition aggregates after alignment change
+      await this.aggregationService.updatePropositionAggregates(propositionId);
+
       return this.mapToAlignmentDto(updatedAlignment);
     }
 
@@ -61,6 +69,9 @@ export class AlignmentsService {
         nuanceExplanation: setAlignmentDto.nuanceExplanation || null,
       },
     });
+
+    // Update proposition aggregates after new alignment
+    await this.aggregationService.updatePropositionAggregates(propositionId);
 
     return this.mapToAlignmentDto(newAlignment);
   }
@@ -85,6 +96,9 @@ export class AlignmentsService {
     await this.prisma.alignment.delete({
       where: { id: alignment.id },
     });
+
+    // Update proposition aggregates after alignment removal
+    await this.aggregationService.updatePropositionAggregates(propositionId);
   }
 
   /**
