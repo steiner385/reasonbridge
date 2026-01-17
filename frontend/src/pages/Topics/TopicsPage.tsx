@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTopics } from '../../lib/useTopics';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { TopicCard } from '../../components/topics';
+import { TopicCard, TopicFilterUI } from '../../components/topics';
 import type { GetTopicsParams } from '../../types/topic';
 
 function TopicsPage() {
@@ -15,18 +15,8 @@ function TopicsPage() {
 
   const { data, isLoading, error } = useTopics(filters);
 
-  const handleStatusFilter = (status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED') => {
-    const newFilters: GetTopicsParams = { ...filters, page: 1 };
-    if (status) {
-      newFilters.status = status;
-    } else {
-      delete newFilters.status;
-    }
+  const handleFiltersChange = (newFilters: GetTopicsParams) => {
     setFilters(newFilters);
-  };
-
-  const handleSortChange = (sortBy: 'createdAt' | 'participantCount' | 'responseCount') => {
-    setFilters({ ...filters, sortBy, page: 1 });
   };
 
   const handlePageChange = (page: number) => {
@@ -58,54 +48,13 @@ function TopicsPage() {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6" padding="md">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-700 self-center">Status:</span>
-            <Button
-              size="sm"
-              variant={!filters.status ? 'primary' : 'outline'}
-              onClick={() => handleStatusFilter(undefined)}
-            >
-              All
-            </Button>
-            <Button
-              size="sm"
-              variant={filters.status === 'SEEDING' ? 'primary' : 'outline'}
-              onClick={() => handleStatusFilter('SEEDING')}
-            >
-              Seeding
-            </Button>
-            <Button
-              size="sm"
-              variant={filters.status === 'ACTIVE' ? 'primary' : 'outline'}
-              onClick={() => handleStatusFilter('ACTIVE')}
-            >
-              Active
-            </Button>
-            <Button
-              size="sm"
-              variant={filters.status === 'ARCHIVED' ? 'primary' : 'outline'}
-              onClick={() => handleStatusFilter('ARCHIVED')}
-            >
-              Archived
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-700 self-center">Sort by:</span>
-            <select
-              className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              value={filters.sortBy || 'createdAt'}
-              onChange={(e) => handleSortChange(e.target.value as 'createdAt' | 'participantCount' | 'responseCount')}
-            >
-              <option value="createdAt">Newest First</option>
-              <option value="participantCount">Most Participants</option>
-              <option value="responseCount">Most Responses</option>
-            </select>
-          </div>
-        </div>
-      </Card>
+      <div className="mb-6">
+        <TopicFilterUI
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          showTagFilter={true}
+        />
+      </div>
 
       {/* Loading State */}
       {isLoading && (
