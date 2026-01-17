@@ -1,0 +1,36 @@
+import type { User, VerificationLevel, UserStatus } from '@unite-discord/db-models';
+
+/**
+ * Response DTO for user data
+ */
+export class UserResponseDto {
+  id: string;
+  email: string;
+  displayName: string;
+  verificationLevel: VerificationLevel;
+  trustScoreAbility: number;
+  trustScoreBenevolence: number;
+  trustScoreIntegrity: number;
+  moralFoundationProfile: any | null;
+  positionFingerprint: any | null;
+  topicAffinities: any | null;
+  status: UserStatus;
+  createdAt: Date;
+  updatedAt: Date;
+
+  constructor(user: User) {
+    this.id = user.id;
+    this.email = user.email;
+    this.displayName = user.displayName;
+    this.verificationLevel = user.verificationLevel;
+    this.trustScoreAbility = Number(user.trustScoreAbility);
+    this.trustScoreBenevolence = Number(user.trustScoreBenevolence);
+    this.trustScoreIntegrity = Number(user.trustScoreIntegrity);
+    this.moralFoundationProfile = user.moralFoundationProfile;
+    this.positionFingerprint = user.positionFingerprint;
+    this.topicAffinities = user.topicAffinities;
+    this.status = user.status;
+    this.createdAt = user.createdAt;
+    this.updatedAt = user.updatedAt;
+  }
+}
