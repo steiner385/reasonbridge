@@ -35,6 +35,10 @@ yarn-error.log*
 coverage/
 .nyc_output/
 
+# Test artifacts
+playwright-report/
+test-results/
+
 # Cache
 .turbo/
 .cache/

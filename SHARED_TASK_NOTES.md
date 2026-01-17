@@ -1,8 +1,9 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
-- ~259 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #1-#16 (T001-T016) - Setup phase + initial Prisma entities
+- #16 was closed as already complete (VerificationRecord already defined in schema)
+- ~258 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
