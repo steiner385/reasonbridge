@@ -1,0 +1,7 @@
+# Shared packages
+# See plan.md for package details:
+# - common (shared types, utilities, constants)
+# - db-models (Prisma schema, migrations)
+# - ai-client (Bedrock client wrapper)
+# - event-schemas (event contracts)
+# - testing-utils (shared test helpers)

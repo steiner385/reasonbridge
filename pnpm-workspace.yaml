@@ -1,0 +1,12 @@
+packages:
+  # Backend microservices
+  - 'services/*'
+
+  # Shared packages
+  - 'packages/*'
+
+  # Frontend application
+  - 'frontend'
+
+  # Infrastructure (CDK, Helm, etc.)
+  - 'infrastructure/*'

@@ -1,0 +1,10 @@
+# Backend microservices (NestJS)
+# See plan.md for service details:
+# - api-gateway
+# - user-service
+# - discussion-service
+# - ai-service
+# - moderation-service
+# - recommendation-service
+# - notification-service
+# - fact-check-service
