@@ -16,8 +16,14 @@ function HomePage() {
           </p>
           <nav className="flex gap-4">
             <Link
-              to="/about"
+              to="/topics"
               className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg shadow transition-colors duration-200"
+            >
+              Browse Topics
+            </Link>
+            <Link
+              to="/about"
+              className="bg-secondary-500 hover:bg-secondary-600 text-white font-medium px-6 py-3 rounded-lg shadow transition-colors duration-200"
             >
               About
             </Link>

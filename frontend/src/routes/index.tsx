@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import AboutPage from '../pages/AboutPage';
+import TopicsPage from '../pages/Topics';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -17,6 +18,10 @@ export const routes: RouteObject[] = [
   {
     path: '/about',
     element: <AboutPage />,
+  },
+  {
+    path: '/topics',
+    element: <TopicsPage />,
   },
   {
     path: '*',
