@@ -7,7 +7,7 @@ This directory contains AWS CDK infrastructure-as-code for the Unite Discord pla
 The infrastructure consists of four main stacks:
 
 1. **EksStack** - Amazon EKS cluster with multi-AZ VPC
-2. **RdsStack** - PostgreSQL 15 database with multi-AZ deployment
+2. **RdsStack** - Aurora Serverless v2 PostgreSQL 15.5 cluster with auto-scaling
 3. **ElastiCacheStack** - Redis cluster for caching and sessions
 4. **BedrockStack** - IAM roles and permissions for Amazon Bedrock AI services
 
@@ -83,8 +83,10 @@ Creates:
 ### RdsStack
 
 Creates:
-- PostgreSQL 15 database instance (t3.medium)
-- Multi-AZ deployment
+- Aurora Serverless v2 PostgreSQL 15.5 cluster
+- Writer instance with auto-scaling (0.5-16 ACUs)
+- Reader instance with auto-scaling (0.5-16 ACUs)
+- Multi-AZ deployment with automatic failover
 - Automated backups (7-day retention)
 - Performance Insights enabled
 - Secrets Manager for credentials
@@ -116,7 +118,7 @@ Creates:
 ## Cost Optimization
 
 - EKS node groups use autoscaling
-- RDS has multi-AZ enabled (can disable for dev)
+- Aurora Serverless v2 scales down to 0.5 ACUs when idle
 - ElastiCache uses t3.medium instances (adjust for production)
 - Backup retention set to 7 days (adjust as needed)
 
