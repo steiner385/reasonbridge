@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTopics } from '../../lib/useTopics';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card';
+import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { TopicCard } from '../../components/topics';
 import type { GetTopicsParams } from '../../types/topic';
 
 function TopicsPage() {
@@ -128,78 +128,7 @@ function TopicsPage() {
               </Card>
             ) : (
               data.data.map((topic) => (
-                <Card
-                  key={topic.id}
-                  variant="default"
-                  padding="lg"
-                  hoverable
-                  clickable
-                >
-                  <CardHeader title={topic.title}>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-xs font-medium px-2 py-1 rounded ${
-                        topic.status === 'ACTIVE'
-                          ? 'bg-green-100 text-green-700'
-                          : topic.status === 'SEEDING'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {topic.status}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {new Date(topic.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardBody>
-                    <p className="text-gray-700 mb-4 line-clamp-2">
-                      {topic.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span>{topic.participantCount} participants</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                        </svg>
-                        <span>{topic.responseCount} responses</span>
-                      </div>
-                      {topic.currentDiversityScore !== null && (
-                        <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          <span>Diversity: {topic.currentDiversityScore.toFixed(1)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {topic.tags && topic.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {topic.tags.map((tag) => (
-                          <span
-                            key={tag.id}
-                            className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded"
-                          >
-                            #{tag.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <Link
-                      to={`/topics/${topic.id}`}
-                      className="inline-block text-primary-600 hover:text-primary-700 font-medium text-sm"
-                    >
-                      View Discussion →
-                    </Link>
-                  </CardBody>
-                </Card>
+                <TopicCard key={topic.id} topic={topic} />
               ))
             )}
           </div>
