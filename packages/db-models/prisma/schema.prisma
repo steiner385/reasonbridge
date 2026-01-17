@@ -125,6 +125,10 @@ model UserFollow {
 // ============================================================================
 
 /// A discussion topic with tags and propositions
+/// Validation rules enforced at application level:
+/// - Title must be 10-200 characters (schema enforces max 200 via VarChar)
+/// - Requires 2-5 tags (enforced via TopicTag relations)
+/// - Cannot transition to ACTIVE until minimum_diversity_score is met
 model DiscussionTopic {
   id                    String           @id @default(uuid()) @db.Uuid
   title                 String           @db.VarChar(200)
