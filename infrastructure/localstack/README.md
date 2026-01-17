@@ -5,10 +5,66 @@ This directory contains initialization scripts and configuration for LocalStack,
 ## Overview
 
 LocalStack is configured via `docker-compose.yml` to emulate the following AWS services:
-- **SQS**: Message queuing for event-driven architecture
-- **SNS**: Pub/sub notifications (topics defined in `init-topics.sh`)
+- **SNS**: Pub/sub notifications for event broadcasting (topics defined in `init-topics.sh`)
+- **SQS**: Message queuing for event consumption (queues defined in `init-queues.sh`)
 - **S3**: Object storage for file uploads
 - **DynamoDB**: NoSQL database (if needed)
+
+## SNS Topics
+
+The `init-topics.sh` script creates all required SNS topics and SNS-to-SQS subscriptions for the platform's event-driven pub/sub architecture.
+
+### Event Topics
+
+| Topic Name | Publisher Service(s) | Event Type | Description |
+|------------|---------------------|------------|-------------|
+| `response-created` | Discussion Service | Core Event | New response submitted by user |
+| `response-analyzed` | AI Service | Core Event | Response analysis completed with feedback |
+| `topic-participant-joined` | Discussion Service | Core Event | User joins a discussion topic |
+| `moderation-action-requested` | AI Service | Moderation | AI detects content requiring moderation |
+| `user-trust-updated` | Moderation Service | Moderation | User trust score changed |
+| `common-ground-generated` | AI Service | Analysis | Common ground identified between perspectives |
+| `notification-email` | Any Service | Notification | Email notification requested |
+| `notification-push` | Any Service | Notification | Push notification requested |
+| `system-audit` | Any Service | System | Audit event for compliance logging |
+
+### Topic-to-Queue Subscriptions
+
+SNS-to-SQS subscriptions are **managed by application services at startup** due to LocalStack 3 Community Edition limitations with CLI-based subscription creation. Each service creates its own subscriptions programmatically using the AWS SDK.
+
+The following subscription mappings should be implemented by services:
+
+| SNS Topic | Subscribed SQS Queue(s) | Consuming Service(s) | Created By |
+|-----------|------------------------|---------------------|------------|
+| `response-created` | `response-analysis-queue` | AI Service | AI Service on startup |
+| `response-analyzed` | `discussion-events-queue` | Discussion Service | Discussion Service on startup |
+| `topic-participant-joined` | `recommendation-queue` | Recommendation Service | Recommendation Service on startup |
+| `moderation-action-requested` | `moderation-queue` | Moderation Service | Moderation Service on startup |
+| `user-trust-updated` | `user-trust-queue` | User Service | User Service on startup |
+| `common-ground-generated` | `common-ground-queue`, `notification-queue` | Discussion Service, Notification Service | Both services on startup |
+| `notification-email` | `email-queue` | Notification Service (email worker) | Notification Service on startup |
+| `notification-push` | `notification-queue` | Notification Service (push worker) | Notification Service on startup |
+| `system-audit` | `audit-log-queue` | Audit Service | Audit Service on startup |
+
+**Implementation Note**: Each service should create its SNS-to-SQS subscriptions during initialization using code similar to:
+
+```typescript
+// Example: AI Service subscribing to response-created topic
+await snsClient.subscribe({
+  TopicArn: 'arn:aws:sns:us-east-1:000000000000:response-created',
+  Protocol: 'sqs',
+  Endpoint: 'arn:aws:sqs:us-east-1:000000000000:response-analysis-queue'
+});
+```
+
+### Pub/Sub Benefits
+
+Using SNS topics with SQS subscribers provides:
+- **Fan-out**: Single event can trigger multiple services (e.g., `common-ground-generated` → Discussion + Notification)
+- **Decoupling**: Publishers don't need to know about consumers
+- **Reliability**: Messages persisted in SQS until processed
+- **Scalability**: Multiple consumers can process messages in parallel
+- **Filtering**: Subscription filter policies can route specific events (future enhancement)
 
 ## SQS Queues
 
@@ -73,15 +129,37 @@ The queues are automatically created when you start the docker-compose stack:
 docker-compose up -d
 ```
 
-The `init-queues.sh` script runs as part of LocalStack's startup process.
+The `init-queues.sh` and `init-topics.sh` scripts run as part of LocalStack's startup process.
 
 ### Manual Re-initialization
 
-To manually re-run the initialization script:
+To manually re-run the initialization scripts:
 
 ```bash
 # From the project root
+# Re-initialize queues
 docker-compose exec localstack /bin/bash -c "bash /etc/localstack/init/ready.d/init-queues.sh"
+
+# Re-initialize topics and subscriptions
+docker-compose exec localstack /bin/bash -c "bash /etc/localstack/init/ready.d/init-topics.sh"
+```
+
+### Accessing SNS Topics
+
+All topics are accessible via the AWS CLI or SDKs using the LocalStack endpoint:
+
+```bash
+# List all topics
+aws --endpoint-url=http://localhost:4566 sns list-topics
+
+# Publish a test event
+aws --endpoint-url=http://localhost:4566 sns publish \
+  --topic-arn arn:aws:sns:us-east-1:000000000000:response-created \
+  --message '{"eventType":"response.created","data":{"responseId":"123","content":"test"}}'
+
+# List subscriptions for a topic
+aws --endpoint-url=http://localhost:4566 sns list-subscriptions-by-topic \
+  --topic-arn arn:aws:sns:us-east-1:000000000000:response-created
 ```
 
 ### Accessing Queues
