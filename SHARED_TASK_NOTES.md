@@ -3,16 +3,19 @@
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
 - Completed issues #30-#37 (T030-T037) - All core services scaffolded
-- Completed issue #38 (T042) - SQS queue definitions in LocalStack
-- ~250 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #38-#39 (T042-T043) - SNS/SQS event infrastructure in LocalStack
+- ~249 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
-## Recent Completion
-Issue #38 (T042): Created comprehensive SQS queue infrastructure for event-driven architecture:
-- 7 primary event processing queues (response-analysis, discussion-events, moderation, notification, user-trust, recommendation, common-ground)
-- 3 utility queues (email, audit-log, global-dlq)
-- Each primary queue has dedicated DLQ with appropriate retry policies
-- Auto-initialized via docker-compose LocalStack mount
-- Comprehensive README with usage examples
+## Recent Completions
+Issue #39 (T043): Created comprehensive SNS topic infrastructure for pub/sub architecture:
+- 9 event topics organized by domain (discussion, moderation, AI analysis, notifications, system)
+- Topics auto-initialized via docker-compose LocalStack mount
+- Subscriptions managed by application services at startup (LocalStack 3 CE limitation workaround)
+- Comprehensive documentation with TypeScript implementation examples
+
+Issue #38 (T042): Created comprehensive SQS queue infrastructure:
+- 7 primary event processing queues + 3 utility queues
+- Each queue has dedicated DLQ with retry policies
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
