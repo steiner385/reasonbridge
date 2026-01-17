@@ -5,18 +5,18 @@
 - Completed issues #30-#37 (T030-T037) - All core services scaffolded
 - Completed issues #38-#42 (T042-T046) - Complete event infrastructure (pub/sub + DLQ)
 - Completed issues #43-#49 (T047-T053) - Frontend setup (React, Tailwind, Router, Query, UI, E2E)
-- Completed issue #50 (T054) - CDK project structure for AWS infrastructure
-- ~238 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #50-#51 (T054-T055) - CDK infrastructure with Aurora Serverless v2
+- ~237 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #50 (T054): Create CDK project structure:
-- Created infrastructure/cdk/ directory with CDK v2.173.4
-- EksStack: VPC + EKS cluster (K8s 1.31) with general + AI node groups
-- RdsStack: PostgreSQL 15 with multi-AZ, backups, performance insights
-- ElastiCacheStack: Redis 7.1 with replication and encryption
-- BedrockStack: IAM permissions for Claude models
-- TypeScript build system configured and verified
-- Comprehensive README with deployment instructions
+Issue #51 (T055): Migrate RDS stack to Aurora Serverless v2:
+- Replaced DatabaseInstance with DatabaseCluster (Aurora PostgreSQL 15.5)
+- Writer instance: auto-scales 0.5-16 ACUs
+- Reader instance: auto-scales 0.5-16 ACUs
+- Multi-AZ with automatic failover
+- Cost-effective pay-per-use pricing
+- Maintained encryption, backups, performance insights
+- Updated README with Aurora Serverless v2 details
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
