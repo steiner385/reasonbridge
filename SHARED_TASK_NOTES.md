@@ -42,21 +42,20 @@
 - Completed issue #87 (T091) - Alignment reasoning modal
 - Completed issue #88 (T092) - Proposition alignment tracking (GET endpoint)
 - Completed issue #89 (T093) - Proposition alignment view component
-- ~191 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #90 (T094) - E2E test for user registration and login flow
+- ~190 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #89 (T093) - Create proposition alignment view:**
-- Created PropositionAlignmentView component in `frontend/src/components/propositions/`
-- Composite component combining AlignmentInput and AlignmentSummary
-- Displays complete proposition view with statement, consensus meter, and input controls
-- Handles authenticated and unauthenticated states
-- Configurable size variants (sm/md/lg)
-- Build passing, TypeScript types complete
-- Merged via PR #451
+**Completed Issue #90 (T094) - E2E: User registration and login flow:**
+- Created comprehensive E2E test suite in `frontend/e2e/user-registration-login-flow.spec.ts`
+- 6 test cases covering complete registration → login journey
+- Tests: successful flow, duplicate email prevention, password validation, credential errors, navigation
+- All tests properly structured and recognized by Playwright
+- Merged via PR #452
 
-**Previous: Completed Issue #88 (T092) - Implement proposition alignment tracking:**
-- Added GET /propositions/:propositionId/alignment endpoint to complete alignment API
-- Merged via PR #450
+**Previous: Completed Issue #89 (T093) - Create proposition alignment view:**
+- Created PropositionAlignmentView component combining AlignmentInput and AlignmentSummary
+- Merged via PR #451
 
 **Response & Alignment System Progress:**
 - Backend:
