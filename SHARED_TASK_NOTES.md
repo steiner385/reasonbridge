@@ -1,8 +1,8 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed issues #1-#12 (T001-T012) - Setup phase monorepo + testing utilities
-- ~261 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #1-#13 (T001-T013) - Setup phase monorepo + db-models package
+- ~260 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
