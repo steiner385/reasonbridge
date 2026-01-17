@@ -2,24 +2,20 @@
 
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
-- Completed issues #30-#37 (T030-T037) - All core services scaffolded:
-  - API Gateway (port 3000)
-  - User Service (port 3001)
-  - Discussion Service (port 3002)
-  - AI Service (port 3002)
-  - Moderation Service (port 3003)
-  - Recommendation Service (port 3004)
-  - Notification Service (port 3005) - with Socket.io
-  - Fact-Check Service (port 3006)
-- ~251 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #30-#37 (T030-T037) - All core services scaffolded
+- Completed issue #38 (T042) - SQS queue definitions in LocalStack
+- ~250 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
-## Recent Iteration (2026-01-17)
-Completed T036 (notification-service) and T037 (fact-check-service) in this iteration.
-Both services follow the established NestJS+Fastify+Prisma pattern.
+## Recent Completion
+Issue #38 (T042): Created comprehensive SQS queue infrastructure for event-driven architecture:
+- 7 primary event processing queues (response-analysis, discussion-events, moderation, notification, user-trust, recommendation, common-ground)
+- 3 utility queues (email, audit-log, global-dlq)
+- Each primary queue has dedicated DLQ with appropriate retry policies
+- Auto-initialized via docker-compose LocalStack mount
+- Comprehensive README with usage examples
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
-Next recommended: #38 (T042) - Create SQS queue definitions in LocalStack (infrastructure task)
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
