@@ -31,25 +31,25 @@
 - Completed issue #61 (T065) - PUT /users/me profile update endpoint
 - Completed issue #62 (T066) - Profile page component
 - Completed issue #63 (T067) - Profile edit form component
-- ~202 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #79 (T083) - Threaded response display component
+- ~201 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #63 (T067) - Create profile edit form:**
-- Created ProfileEditForm component with display name editing
-- Implemented validation (3-50 characters, required)
-- Added real-time validation on blur and change
-- Included loading states and error handling
-- Optional cancel button support via onCancel prop
-- Added E2E test placeholders for future integration
-- Merged via PR #440
+**Completed Issue #79 (T083) - Create threaded response display:**
+- Created ThreadedResponseDisplay component for nested responses
+- Implemented tree building algorithm (flat list → hierarchical structure)
+- Added visual threading indicators (lines connecting parent/child)
+- Expand/collapse functionality for response threads
+- Reply button support with onReply callback
+- Depth limiting (maxDepth) to prevent excessive nesting
+- Empty state handling with friendly message
+- Merged via PR #441
 
-**Authentication & User Management Progress:**
-- Backend: POST /auth/login, POST /auth/refresh, GET /users/me, PUT /users/me
-- Frontend: RegistrationForm, LoginForm, ProfilePage, UserProfilePage, ProfileEditForm components
-- JWT verification using Cognito public keys (RS256)
-- Full CRUD for user profile management
-- Profile viewing with trust scores and activity stats
-- Profile editing with validation
+**Response System Progress:**
+- Backend: POST /responses, GET /responses, PUT /responses, threading support
+- Frontend: ResponseCard, ResponseComposer, ThreadedResponseDisplay components
+- Full response CRUD with threading (parentId relationships)
+- Visual thread indicators and collapsible threads
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
