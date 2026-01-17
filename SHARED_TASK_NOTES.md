@@ -23,41 +23,27 @@
 - Completed issue #77 (T081) - Response composer component
 - Completed issue #78 (T082) - Response card component
 - Completed issue #54 (T058) - Cognito user pool configuration
-- ~210 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #56 (T060) - /auth/login endpoint
+- ~209 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #54 (T058):**
-- Implemented Cognito user pool configuration for authentication ✅
-  - Created CognitoStack in CDK infrastructure
-  - Email-based authentication with self-registration
-  - Custom attributes: displayName, verificationLevel
-  - Optional MFA (SMS and TOTP)
-  - OAuth 2.0 authorization code grant
-  - Token validity: 1h (access/ID), 30d (refresh)
-  - Comprehensive test coverage (all tests pass)
-  - Merged via PR #432
+**Completed Issue #56 (T060):**
+- Implemented /auth/login endpoint with AWS Cognito integration ✅
+  - Created AuthModule with POST /auth/login endpoint
+  - Implemented CognitoService using @aws-sdk/client-cognito-identity-provider
+  - Added LoginDto and LoginResponseDto with validation
+  - USER_PASSWORD_AUTH flow for email/password authentication
+  - Returns JWT tokens (access, ID, refresh) on successful login
+  - Comprehensive error handling for Cognito errors
+  - Updated .env.example with Cognito configuration
+  - Merged via PR #433
 
-**Authentication Setup:**
-- User Pool: unite-user-pool
-- Hosted UI domain: unite-discord-{account-id}.auth.us-east-1.amazoncognito.com
-- Verification levels: basic (email), enhanced (phone), verified_human (ID)
-- Password policy: 12+ chars with complexity requirements
+**Authentication Endpoints:**
+- POST /auth/login - Authenticate user with email/password
+- Returns: accessToken, idToken, refreshToken, expiresIn, tokenType
 
 ## Next Steps
-**In Progress: Issue #55 (T059) - /auth/register endpoint**
-- Branch created: `feature/t059-auth-register-endpoint`
-- Dependencies added: @aws-sdk/client-cognito-identity-provider, class-validator, class-transformer
-- Remaining work:
-  1. Create auth module with DTOs (RegisterDto, LoginDto, etc.)
-  2. Implement CognitoService to interact with user pool
-  3. Implement AuthService with register/login logic
-  4. Create user records in DB after successful Cognito registration
-  5. Implement AuthController with /auth/register endpoint
-  6. Add tests for auth endpoints
-  7. Create PR and merge
-
-**For next iteration:**
-Continue implementing issue #55 or run `npm run next-issue` to select a different task.
+Run `npm run next-issue` to claim and implement the next highest priority issue.
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
