@@ -2,12 +2,14 @@
 
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
-- Completed issue #30 (T030) - API Gateway service scaffolded with NestJS and Fastify
-- Completed issue #31 (T031) - User Service scaffolded with NestJS, Prisma integration, and health check
-- Completed issue #32 (T032) - Discussion Service scaffolded with NestJS, Prisma integration, and health check
-- Completed issue #33 (T033) - AI Service scaffolded with NestJS, Prisma module, and Bedrock stub
-- Completed issue #34 (T034) - Moderation Service scaffolded with NestJS and Prisma module
-- ~254 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #30-#35 (T030-T035) - All core services scaffolded:
+  - API Gateway (port 3000)
+  - User Service (port 3001)
+  - Discussion Service (port 3002)
+  - AI Service (port 3002)
+  - Moderation Service (port 3003)
+  - Recommendation Service (port 3004)
+- ~253 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
