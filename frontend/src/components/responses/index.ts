@@ -4,3 +4,5 @@ export { default as ResponseCard } from './ResponseCard';
 export type { ResponseCardProps } from './ResponseCard';
 export { default as ThreadedResponseDisplay } from './ThreadedResponseDisplay';
 export type { ThreadedResponseDisplayProps } from './ThreadedResponseDisplay';
+export { default as EditResponseModal } from './EditResponseModal';
+export type { EditResponseModalProps } from './EditResponseModal';
