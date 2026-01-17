@@ -1,0 +1,182 @@
+#!/usr/bin/env groovy
+/**
+ * E2E Tests Pipeline for uniteDiscord
+ * Runs Playwright E2E tests with browser support
+ */
+
+@Library('unitediscord-lib@main') _
+
+pipeline {
+    agent {
+        node {
+            label 'e2e'
+        }
+    }
+
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        timeout(time: 60, unit: 'MINUTES')
+    }
+
+    environment {
+        CI = 'true'
+        NODE_ENV = 'test'
+        GITHUB_OWNER = 'steiner385'
+        GITHUB_REPO = 'uniteDiscord'
+        PLAYWRIGHT_BROWSERS_PATH = '/home/jenkins/agent/.playwright-cache'
+        // Playwright will use this for the base URL
+        PLAYWRIGHT_BASE_URL = 'http://localhost:5173'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                }
+                echo "Running E2E tests for commit: ${env.GIT_COMMIT_SHORT}"
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    # Remove any local .npmrc that might cause issues
+                    rm -f .npmrc
+
+                    # Ensure we use the public npm registry
+                    npm config set registry https://registry.npmjs.org
+
+                    # Install pnpm if not available
+                    if ! command -v pnpm &> /dev/null; then
+                        npm install -g pnpm@9
+                    fi
+
+                    # Install dependencies
+                    pnpm install --frozen-lockfile || pnpm install
+                '''
+            }
+        }
+
+        stage('Install Playwright Browsers') {
+            steps {
+                sh '''
+                    cd frontend
+
+                    # Check if browsers are already cached
+                    if [ ! -f "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed-unite" ]; then
+                        echo "Installing Playwright browsers..."
+                        mkdir -p "${PLAYWRIGHT_BROWSERS_PATH}"
+                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium --with-deps || \
+                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium
+                        touch "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed-unite"
+                    else
+                        echo "Playwright browsers already cached"
+                    fi
+                '''
+            }
+        }
+
+        stage('Start Test Infrastructure') {
+            steps {
+                sh '''
+                    echo "Starting test infrastructure..."
+                    docker compose -f docker-compose.test.yml up -d --wait || docker compose -f docker-compose.test.yml up -d
+
+                    # Wait for services to be ready
+                    echo "Waiting for PostgreSQL..."
+                    for i in $(seq 1 30); do
+                        if docker exec unite-discord-postgres-test pg_isready -U test -d unite_discord_test 2>/dev/null; then
+                            echo "PostgreSQL is ready"
+                            break
+                        fi
+                        echo "Waiting for PostgreSQL... attempt $i/30"
+                        sleep 2
+                    done
+
+                    echo "Waiting for Redis..."
+                    for i in $(seq 1 15); do
+                        if docker exec unite-discord-redis-test redis-cli ping 2>/dev/null | grep -q PONG; then
+                            echo "Redis is ready"
+                            break
+                        fi
+                        echo "Waiting for Redis... attempt $i/15"
+                        sleep 2
+                    done
+                '''
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                sh '''
+                    cd frontend
+                    pnpm run build || npm run build
+                '''
+            }
+        }
+
+        stage('E2E Tests') {
+            steps {
+                sh '''
+                    cd frontend
+
+                    # Clear previous test artifacts
+                    rm -rf playwright-report test-results allure-results
+
+                    # Run Playwright tests
+                    # The webServer config in playwright.config.ts will start the dev server
+                    pnpm run test:e2e || npm run test:e2e
+                '''
+            }
+            post {
+                always {
+                    // Archive Playwright report
+                    archiveArtifacts artifacts: 'frontend/playwright-report/**', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'frontend/test-results/**', allowEmptyArchive: true
+
+                    // Publish HTML report
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'frontend/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright E2E Report'
+                    ])
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                // Collect test metrics
+                sh '''
+                    mkdir -p reports/metrics
+
+                    # Count test results from Playwright output
+                    PASSED=$(grep -c "passed" frontend/test-results/.last-run.json 2>/dev/null || echo "0")
+                    FAILED=$(grep -c "failed" frontend/test-results/.last-run.json 2>/dev/null || echo "0")
+
+                    echo "📊 E2E Test Results: ${PASSED} passed, ${FAILED} failed"
+                '''
+            }
+
+            // Stop test infrastructure
+            sh '''
+                echo "Stopping test infrastructure..."
+                docker compose -f docker-compose.test.yml down -v || true
+            '''
+        }
+        success {
+            echo '✅ E2E tests passed!'
+        }
+        failure {
+            echo '❌ E2E tests failed - check Playwright Report for details'
+        }
+    }
+}

@@ -484,24 +484,170 @@ infrastructure/     # CDK, Helm, Docker
 
 ---
 
-## Phase 11: Polish & Cross-Cutting Concerns
+## Phase 11: Testing Infrastructure & TDD Setup
+
+**Purpose**: Comprehensive testing infrastructure aligned with plan.md Testing Strategy
+
+**⚠️ TDD Requirement**: This phase establishes the testing framework that enables test-first development for all subsequent work
+
+### Test Framework Configuration
+
+- [ ] T278 [P] Configure Vitest with 80% coverage threshold in packages/shared/vitest.config.ts
+- [ ] T279 [P] Configure Vitest for services in services/api/vitest.config.ts with Prisma mocking
+- [ ] T280 [P] Configure Vitest for frontend in frontend/vitest.config.ts with React Testing Library
+- [ ] T281 Create shared Vitest setup with MSW handlers in packages/testing-utils/src/setup.ts
+- [ ] T282 [P] Configure Playwright with axe-core in frontend/playwright.config.ts
+- [ ] T283 [P] Create Playwright accessibility helper in frontend/tests/e2e/helpers/a11y.ts
+
+### Test Database Infrastructure
+
+- [ ] T284 Create docker-compose.test.yml with isolated postgres for integration tests
+- [ ] T285 Create Prisma test client factory in packages/testing-utils/src/prisma-test-client.ts
+- [ ] T286 Create database cleanup utility in packages/testing-utils/src/db-cleanup.ts
+- [ ] T287 Create database seeding scripts in packages/db-models/prisma/seed/test-fixtures.ts
+
+### Test Fixtures & Factories
+
+- [ ] T288 [P] Create User fixtures in packages/testing-utils/src/fixtures/users.fixture.ts
+- [ ] T289 [P] Create Topic fixtures in packages/testing-utils/src/fixtures/topics.fixture.ts
+- [ ] T290 [P] Create Response fixtures in packages/testing-utils/src/fixtures/responses.fixture.ts
+- [ ] T291 [P] Create Feedback fixtures in packages/testing-utils/src/fixtures/feedback.fixture.ts
+- [ ] T292 [P] Create ModerationAction fixtures in packages/testing-utils/src/fixtures/moderation.fixture.ts
+- [ ] T293 Create User factory with Faker in packages/testing-utils/src/factories/user.factory.ts
+- [ ] T294 [P] Create Topic factory in packages/testing-utils/src/factories/topic.factory.ts
+- [ ] T295 [P] Create Response factory in packages/testing-utils/src/factories/response.factory.ts
+
+### MSW (Mock Service Worker) Setup
+
+- [ ] T296 Create MSW server configuration in packages/testing-utils/src/msw/server.ts
+- [ ] T297 [P] Create OAuth mock handlers in packages/testing-utils/src/msw/handlers/oauth.ts
+- [ ] T298 [P] Create Bedrock AI mock handlers in packages/testing-utils/src/msw/handlers/bedrock.ts
+- [ ] T299 [P] Create fact-check API mock handlers in packages/testing-utils/src/msw/handlers/fact-check.ts
+- [ ] T300 [P] Create user-service mock handlers in packages/testing-utils/src/msw/handlers/user-service.ts
+- [ ] T301 [P] Create discussion-service mock handlers in packages/testing-utils/src/msw/handlers/discussion-service.ts
+
+### Contract Testing Setup
+
+- [ ] T302 Configure Pact provider in packages/testing-utils/src/pact/provider.ts
+- [ ] T303 [P] Configure Pact consumer for ai-service in services/api/tests/contract/ai-service.consumer.pact.ts
+- [ ] T304 [P] Configure Pact consumer for user-service in services/api/tests/contract/user-service.consumer.pact.ts
+- [ ] T305 Create OpenAPI validation helper in packages/testing-utils/src/openapi/validator.ts
+- [ ] T306 [P] Create contract test for user-service OpenAPI in services/user-service/tests/contract/openapi.spec.ts
+- [ ] T307 [P] Create contract test for discussion-service OpenAPI in services/discussion-service/tests/contract/openapi.spec.ts
+- [ ] T308 [P] Create contract test for ai-service OpenAPI in services/ai-service/tests/contract/openapi.spec.ts
+
+### Error Code Testing
+
+- [ ] T309 Create error code taxonomy in packages/shared/src/errors/error-codes.ts
+- [ ] T310 [P] Create error code contract tests in packages/shared/tests/errors/error-codes.spec.ts
+- [ ] T311 Create error response schema validator in packages/testing-utils/src/validators/error-response.ts
+
+### Performance Testing Setup
+
+- [ ] T312 Create k6 load test script in e2e/tests/performance/api-load.js
+- [ ] T313 [P] Create k6 spike test configuration in e2e/tests/performance/spike-test.js
+- [ ] T314 [P] Create k6 soak test configuration in e2e/tests/performance/soak-test.js
+- [ ] T315 Create performance assertion helper in packages/testing-utils/src/perf/latency-assertions.ts
+- [ ] T316 Add database query timing assertions in packages/testing-utils/src/perf/query-timing.ts
+
+### Accessibility Testing Setup
+
+- [ ] T317 Create WCAG 2.2 AA test configuration in frontend/tests/e2e/accessibility/wcag-config.ts
+- [ ] T318 [P] Create keyboard navigation test helper in frontend/tests/e2e/accessibility/keyboard-nav.ts
+- [ ] T319 [P] Create screen reader announcement test helper in frontend/tests/e2e/accessibility/aria-live.ts
+- [ ] T320 Create accessibility regression test baseline in frontend/tests/e2e/accessibility/baseline.spec.ts
+
+### E2E Test Scaffolding per User Story
+
+- [ ] T321 [P] Create E2E test scaffold for US1 in e2e/tests/user-journeys/us1-join-discussion.spec.ts
+- [ ] T322 [P] Create E2E test scaffold for US2 in e2e/tests/user-journeys/us2-feedback.spec.ts
+- [ ] T323 [P] Create E2E test scaffold for US3 in e2e/tests/user-journeys/us3-common-ground.spec.ts
+- [ ] T324 [P] Create E2E test scaffold for US4 in e2e/tests/user-journeys/us4-verification.spec.ts
+- [ ] T325 [P] Create E2E test scaffold for US5 in e2e/tests/user-journeys/us5-moderation.spec.ts
+- [ ] T326 [P] Create E2E test scaffold for US6 in e2e/tests/user-journeys/us6-topic-creation.spec.ts
+
+### CI Pipeline Integration
+
+- [ ] T327 Add unit test stage to Jenkinsfile with coverage report
+- [ ] T328 [P] Add integration test stage to Jenkinsfile with Testcontainers
+- [ ] T329 [P] Add contract test stage to Jenkinsfile with Pact publishing
+- [ ] T330 Add E2E test stage to Jenkinsfile (main branch only)
+- [ ] T331 [P] Add accessibility test stage to Jenkinsfile
+- [ ] T332 Configure coverage thresholds enforcement in CI (80% line coverage gate)
+- [ ] T333 Add flaky test quarantine process in CI
+
+### Test Reporting & Documentation
+
+- [ ] T334 [P] Configure HTML coverage report generation in vitest.config.ts
+- [ ] T335 [P] Configure Playwright HTML report in playwright.config.ts
+- [ ] T336 Create test naming convention guide in docs/testing/conventions.md
+- [ ] T337 [P] Create TDD workflow guide in docs/testing/tdd-workflow.md
+
+**Checkpoint**: Testing infrastructure complete - TDD workflow fully operational
+
+---
+
+## Phase 12: AI Model Testing
+
+**Purpose**: Specialized testing for local AI models and cloud LLM integration
+
+### Local AI Model Unit Tests
+
+- [ ] T338 [P] Create tone analyzer golden tests in packages/ai-models/tests/unit/tone-analyzer.spec.ts
+- [ ] T339 [P] Create bias detector golden tests in packages/ai-models/tests/unit/bias-detector.spec.ts
+- [ ] T340 [P] Create fallacy detector golden tests in packages/ai-models/tests/unit/fallacy-detector.spec.ts
+- [ ] T341 [P] Create claim extractor golden tests in packages/ai-models/tests/unit/claim-extractor.spec.ts
+
+### AI Model Performance Tests
+
+- [ ] T342 Create tone analyzer latency benchmark (<100ms) in packages/ai-models/tests/perf/tone-latency.bench.ts
+- [ ] T343 [P] Create bias detector latency benchmark (<100ms) in packages/ai-models/tests/perf/bias-latency.bench.ts
+- [ ] T344 [P] Create fallacy detector latency benchmark (<100ms) in packages/ai-models/tests/perf/fallacy-latency.bench.ts
+- [ ] T345 [P] Create claim extractor latency benchmark (<200ms) in packages/ai-models/tests/perf/claim-latency.bench.ts
+
+### AI Model Contract Tests
+
+- [ ] T346 Create ToneAnalysis output schema contract in packages/ai-models/tests/contract/tone-schema.spec.ts
+- [ ] T347 [P] Create BiasAnalysis output schema contract in packages/ai-models/tests/contract/bias-schema.spec.ts
+- [ ] T348 [P] Create FallacyDetection output schema contract in packages/ai-models/tests/contract/fallacy-schema.spec.ts
+- [ ] T349 [P] Create ClaimExtraction output schema contract in packages/ai-models/tests/contract/claim-schema.spec.ts
+
+### Cloud LLM Integration Tests
+
+- [ ] T350 Create Bedrock response mock fixtures in services/ai-service/tests/fixtures/bedrock-responses/
+- [ ] T351 [P] Create common ground analysis prompt snapshot tests in services/ai-service/tests/snapshots/common-ground.snap.ts
+- [ ] T352 [P] Create moral foundation analysis prompt snapshot tests in services/ai-service/tests/snapshots/moral-foundations.snap.ts
+- [ ] T353 Create Bedrock response schema validation in services/ai-service/tests/contract/bedrock-schema.spec.ts
+- [ ] T354 Create LLM timeout and retry test in services/ai-service/tests/integration/bedrock-resilience.spec.ts
+
+### AI Confidence Threshold Tests
+
+- [ ] T355 Test 80% confidence threshold enforcement in services/ai-service/tests/unit/confidence-threshold.spec.ts
+- [ ] T356 [P] Test low-confidence silent logging in services/ai-service/tests/unit/silent-logging.spec.ts
+- [ ] T357 Test confidence metadata storage for monitoring in services/ai-service/tests/integration/confidence-tracking.spec.ts
+
+**Checkpoint**: AI testing infrastructure complete - all AI components have contract and performance tests
+
+---
+
+## Phase 13: Polish & Cross-Cutting Concerns
 
 **Purpose**: Quality improvements, performance optimization, documentation
 
-- [ ] T264 [P] Add comprehensive error codes in packages/common/src/errors/
-- [ ] T265 [P] Add OpenAPI spec generation to all services
-- [ ] T266 [P] Add Prometheus metrics endpoints to all services
-- [ ] T267 Implement distributed tracing with X-Ray across services
-- [ ] T268 Add request correlation IDs in api-gateway
-- [ ] T269 [P] Performance optimize database queries with EXPLAIN ANALYZE
-- [ ] T270 [P] Add Redis caching layer to high-traffic endpoints
-- [ ] T271 Implement graceful degradation for AI service failures
-- [ ] T272 [P] Add skeleton loaders for all async content in frontend
-- [ ] T273 [P] Accessibility audit and WCAG 2.1 AA fixes
-- [ ] T274 Security audit: OWASP top 10 checklist
-- [ ] T275 Load testing with k6 against 10,000 concurrent users target
-- [ ] T276 Run quickstart.md validation end-to-end
-- [ ] T277 Update CLAUDE.md with implemented architecture
+- [ ] T358 [P] Add comprehensive error codes in packages/common/src/errors/
+- [ ] T359 [P] Add OpenAPI spec generation to all services
+- [ ] T360 [P] Add Prometheus metrics endpoints to all services
+- [ ] T361 Implement distributed tracing with X-Ray across services
+- [ ] T362 Add request correlation IDs in api-gateway
+- [ ] T363 [P] Performance optimize database queries with EXPLAIN ANALYZE
+- [ ] T364 [P] Add Redis caching layer to high-traffic endpoints
+- [ ] T365 Implement graceful degradation for AI service failures
+- [ ] T366 [P] Add skeleton loaders for all async content in frontend
+- [ ] T367 [P] Accessibility audit and WCAG 2.2 AA fixes
+- [ ] T368 Security audit: OWASP top 10 checklist
+- [ ] T369 Load testing with k6 against 10,000 concurrent users target
+- [ ] T370 Run quickstart.md validation end-to-end
+- [ ] T371 Update CLAUDE.md with implemented architecture
 
 ---
 
@@ -514,8 +660,19 @@ Phase 1: Setup                    → No dependencies
 Phase 2: Foundational             → Depends on Setup (BLOCKS all user stories)
 Phase 3-8: User Stories (US1-US6) → All depend on Foundational
 Phase 9-10: Extensions            → Depend on relevant user stories
-Phase 11: Polish                  → After all stories complete
+Phase 11: Testing Infrastructure  → Can start after Setup, parallel with Foundational
+Phase 12: AI Model Testing        → Depends on AI service scaffolding (Phase 2)
+Phase 13: Polish                  → After all stories complete
 ```
+
+### Testing Phase Integration
+
+**Recommended Order**:
+1. Complete Phase 1: Setup
+2. Start Phase 2: Foundational + Phase 11: Testing Infrastructure (parallel)
+3. Testing infrastructure enables TDD for user story implementation
+4. Complete Phase 12: AI Model Testing before US2 (AI feedback)
+5. All user story tests written FIRST, then implementation
 
 ### User Story Dependencies
 
@@ -616,8 +773,68 @@ After Foundational phase:
 | US6 | T211-T240 (30 tasks) | 8 parallel |
 | Following | T241-T252 (12 tasks) | 5 parallel |
 | Fact-Check | T253-T263 (11 tasks) | 3 parallel |
-| Polish | T264-T277 (14 tasks) | 7 parallel |
-| **Total** | **277 tasks** | **111 parallel** |
+| **Testing Infrastructure** | **T278-T337 (60 tasks)** | **40 parallel** |
+| **AI Model Testing** | **T338-T357 (20 tasks)** | **16 parallel** |
+| Polish | T358-T371 (14 tasks) | 7 parallel |
+| **Total** | **357 tasks** | **167 parallel** |
+
+### Testing Tasks Breakdown
+
+| Category | Tasks | Purpose |
+|----------|-------|---------|
+| Test Framework Config | T278-T283 (6 tasks) | Vitest, Playwright, axe-core setup |
+| Test Database | T284-T287 (4 tasks) | Isolated test DB, cleanup, seeding |
+| Fixtures & Factories | T288-T295 (8 tasks) | Deterministic test data |
+| MSW Mocking | T296-T301 (6 tasks) | API mocking for unit/integration |
+| Contract Testing | T302-T311 (10 tasks) | Pact, OpenAPI validation |
+| Performance Testing | T312-T316 (5 tasks) | k6 load tests, latency assertions |
+| Accessibility Testing | T317-T320 (4 tasks) | WCAG 2.2 AA automation |
+| E2E Scaffolds | T321-T326 (6 tasks) | User story E2E test shells |
+| CI Integration | T327-T333 (7 tasks) | Jenkins pipeline stages |
+| Test Documentation | T334-T337 (4 tasks) | Reports, guides, conventions |
+| AI Unit Tests | T338-T341 (4 tasks) | Local model golden tests |
+| AI Performance | T342-T345 (4 tasks) | Latency benchmarks |
+| AI Contracts | T346-T349 (4 tasks) | Output schema validation |
+| Cloud LLM Tests | T350-T354 (5 tasks) | Bedrock mocks, snapshots |
+| Confidence Tests | T355-T357 (3 tasks) | 80% threshold enforcement |
+
+---
+
+## TDD Workflow
+
+### Test-First Development Order
+
+For each user story, follow this order:
+
+```
+1. E2E Test Scaffold (failing)     ← Defines acceptance criteria
+2. Contract Tests (failing)        ← Defines API boundaries
+3. Integration Tests (failing)     ← Defines service behavior
+4. Unit Tests (failing)            ← Defines function behavior
+5. Implementation                  ← Make tests pass
+6. Refactor                        ← Keep tests green
+```
+
+### Coverage Requirements
+
+| Component | Target | Enforcement |
+|-----------|--------|-------------|
+| Services (business logic) | 80% line | CI gate (T332) |
+| API Routes | 100% endpoints | Contract tests |
+| React Components | 70% line | Vitest |
+| Critical Paths | 100% | E2E tests |
+| Error Scenarios | All codes | Integration tests |
+| AI Models | 90% | Unit + contract tests |
+
+### Testing Infrastructure Priority
+
+Complete these before starting user story implementations:
+
+1. **T278-T283**: Test framework configuration (Vitest, Playwright)
+2. **T284-T287**: Test database infrastructure
+3. **T296-T301**: MSW mock handlers
+4. **T302-T311**: Contract testing setup
+5. **T327-T333**: CI pipeline integration
 
 ---
 
@@ -629,3 +846,5 @@ After Foundational phase:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Constitution compliance checked at each story checkpoint
+- **Testing infrastructure (Phase 11) should start parallel with Foundational (Phase 2)**
+- **AI model tests (Phase 12) must complete before US2 implementation**

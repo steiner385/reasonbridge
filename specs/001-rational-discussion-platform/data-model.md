@@ -633,3 +633,204 @@ Services reference entities from other services by ID only, never by direct data
 4. **Phase 4**: Moderation entities (moderation-service)
 
 Each phase can be deployed independently due to microservice isolation.
+
+---
+
+## Testing Considerations
+
+### Database Test Strategy
+
+**Test Database Isolation**:
+```typescript
+// Per-test isolation pattern
+beforeEach(async () => {
+  await prisma.$transaction([
+    prisma.feedback.deleteMany(),
+    prisma.alignment.deleteMany(),
+    prisma.response.deleteMany(),
+    prisma.proposition.deleteMany(),
+    prisma.discussionTopic.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
+});
+```
+
+**Test Fixtures per Entity**:
+
+| Entity | Fixture File | Key Scenarios |
+|--------|--------------|---------------|
+| User | `users.fixture.ts` | verified, basic, suspended, high-trust, low-trust |
+| DiscussionTopic | `topics.fixture.ts` | seeding, active, archived, high-diversity, low-diversity |
+| Proposition | `propositions.fixture.ts` | high-consensus, contested, sub-proposition |
+| Response | `responses.fixture.ts` | with-sources, opinion-marked, with-claims, flagged |
+| Feedback | `feedback.fixture.ts` | fallacy, inflammatory, affirmation, low-confidence |
+| ModerationAction | `moderation.fixture.ts` | pending, approved, appealed, reversed |
+
+### Entity Validation Tests
+
+Each entity requires validation tests for:
+
+1. **Required Fields**: Test creation fails without required fields
+2. **Field Constraints**: Test length limits, enum values, format validation
+3. **Relationship Integrity**: Test foreign key constraints
+4. **State Transitions**: Test valid and invalid state changes
+5. **Computed Fields**: Test derived values update correctly
+
+**Example Pattern**:
+```typescript
+describe('User Entity', () => {
+  describe('creation', () => {
+    it('should create user with valid data', async () => {
+      const user = await createUser({ email: 'test@example.com', displayName: 'Test User' });
+      expect(user.id).toBeDefined();
+      expect(user.verificationLevel).toBe('basic');
+    });
+
+    it('should reject duplicate email', async () => {
+      await createUser({ email: 'test@example.com' });
+      await expect(createUser({ email: 'test@example.com' }))
+        .rejects.toThrow(/unique constraint/i);
+    });
+
+    it('should reject display name shorter than 3 chars', async () => {
+      await expect(createUser({ displayName: 'AB' }))
+        .rejects.toThrow(/validation/i);
+    });
+  });
+
+  describe('trust score updates', () => {
+    it('should update ability score within bounds', async () => {
+      const user = await createUser();
+      const updated = await updateTrustScore(user.id, { ability: 0.85 });
+      expect(updated.trustScoreAbility).toBe(0.85);
+    });
+
+    it('should reject trust score above 1.0', async () => {
+      const user = await createUser();
+      await expect(updateTrustScore(user.id, { ability: 1.5 }))
+        .rejects.toThrow(/out of range/i);
+    });
+  });
+});
+```
+
+### State Machine Tests
+
+Entities with state require explicit transition tests:
+
+```typescript
+describe('DiscussionTopic State Transitions', () => {
+  it('seeding → active when diversity threshold met', async () => {
+    const topic = await createTopic({ status: 'seeding', minimumDiversityScore: 0.3 });
+    await addDiverseParticipants(topic.id, 5); // Raises diversity above threshold
+
+    const updated = await attemptActivation(topic.id);
+    expect(updated.status).toBe('active');
+    expect(updated.activatedAt).toBeDefined();
+  });
+
+  it('seeding → active rejected when diversity below threshold', async () => {
+    const topic = await createTopic({ status: 'seeding', minimumDiversityScore: 0.5 });
+    await addSimilarParticipants(topic.id, 5); // Low diversity
+
+    await expect(attemptActivation(topic.id))
+      .rejects.toThrow(/DISCUSSION_003/); // Error code for diversity not met
+  });
+
+  it('active → archived after 90 days inactivity', async () => {
+    const topic = await createTopic({ status: 'active' });
+    await simulateTimePassage(91, 'days');
+
+    await runArchivalJob();
+    const updated = await getTopic(topic.id);
+    expect(updated.status).toBe('archived');
+  });
+});
+```
+
+### JSONB Schema Validation
+
+All JSONB fields require schema validation tests:
+
+```typescript
+describe('JSONB Field Validation', () => {
+  describe('moral_foundation_profile', () => {
+    it('should accept valid 6-foundation profile', async () => {
+      const profile = { care: 0.8, fairness: 0.7, loyalty: 0.5, authority: 0.4, sanctity: 0.3, liberty: 0.6 };
+      const user = await updateProfile(userId, { moralFoundationProfile: profile });
+      expect(user.moralFoundationProfile).toEqual(profile);
+    });
+
+    it('should reject missing foundation', async () => {
+      const profile = { care: 0.8, fairness: 0.7 }; // Missing 4 foundations
+      await expect(updateProfile(userId, { moralFoundationProfile: profile }))
+        .rejects.toThrow(/validation/i);
+    });
+
+    it('should reject foundation value out of range', async () => {
+      const profile = { care: 1.5, fairness: 0.7, loyalty: 0.5, authority: 0.4, sanctity: 0.3, liberty: 0.6 };
+      await expect(updateProfile(userId, { moralFoundationProfile: profile }))
+        .rejects.toThrow(/out of range/i);
+    });
+  });
+});
+```
+
+### Cross-Service Reference Tests
+
+Integration tests for service boundaries:
+
+```typescript
+describe('Cross-Service References', () => {
+  it('discussion-service should resolve user display names via API', async () => {
+    const user = await userService.create({ displayName: 'Test User' });
+    const response = await discussionService.createResponse({
+      topicId,
+      authorId: user.id,
+      content: 'Test response',
+    });
+
+    const enriched = await discussionService.getResponseWithAuthor(response.id);
+    expect(enriched.author.displayName).toBe('Test User');
+  });
+
+  it('should handle user-service unavailable gracefully', async () => {
+    mockUserServiceUnavailable();
+
+    const responses = await discussionService.getTopicResponses(topicId);
+    expect(responses[0].author).toEqual({ id: authorId, displayName: 'Unknown User' });
+  });
+});
+```
+
+### Performance Test Assertions
+
+Database query performance validation:
+
+```typescript
+describe('Query Performance', () => {
+  beforeAll(async () => {
+    // Seed large dataset for realistic performance testing
+    await seedLargeDataset({ users: 10000, topics: 500, responsesPerTopic: 100 });
+  });
+
+  it('GET /discussions should complete within 100ms', async () => {
+    const start = performance.now();
+    await request(app).get('/discussions?limit=20');
+    expect(performance.now() - start).toBeLessThan(100);
+  });
+
+  it('common ground analysis query should complete within 500ms', async () => {
+    const start = performance.now();
+    await discussionService.getCommonGroundAnalysis(largeTopicId);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+
+  it('should use index for topic listing', async () => {
+    const explain = await prisma.$queryRaw`
+      EXPLAIN ANALYZE SELECT * FROM discussion_topic WHERE status = 'active' ORDER BY created_at DESC LIMIT 20
+    `;
+    expect(explain[0]['QUERY PLAN']).toContain('Index Scan');
+  });
+});
+```

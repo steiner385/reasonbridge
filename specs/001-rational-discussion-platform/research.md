@@ -327,6 +327,322 @@ User → Cognito (OAuth/email) → JWT → API Gateway → Services
 
 ---
 
+## 13. Testing Strategy (TDD Implementation)
+
+**Decision**: Test-Driven Development with comprehensive coverage across all test types
+
+### Test Framework Selection
+
+| Test Type | Framework | Rationale |
+|-----------|-----------|-----------|
+| Unit Tests | Vitest | Fast, ESM-native, Jest-compatible API, excellent TypeScript support |
+| Integration Tests | Supertest + Testcontainers | Real HTTP testing, containerized dependencies |
+| E2E Tests | Playwright | Cross-browser, excellent async handling, accessibility built-in |
+| Contract Tests | Pact + OpenAPI | Consumer-driven contracts, schema validation |
+| Performance Tests | k6 | JavaScript-based, easy CI integration |
+
+### Test Pyramid Distribution
+
+```
+                    ┌─────────────────┐
+                    │   E2E Tests     │  ← Playwright (critical paths)
+                    │   (~10% tests)  │  ← 6 user stories × 3-4 scenarios each
+                    └────────┬────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │    Integration Tests        │  ← Supertest + Testcontainers
+              │      (~30% tests)           │  ← All API endpoints, DB operations
+              └──────────────┬──────────────┘
+                             │
+    ┌────────────────────────┴────────────────────────┐
+    │              Unit Tests (~60% tests)            │  ← Vitest
+    │  Services, utilities, components, hooks         │
+    └─────────────────────────────────────────────────┘
+```
+
+### TDD Workflow per User Story
+
+Each user story follows this test-first development flow:
+
+```
+1. Write E2E test (failing) → Defines acceptance criteria
+2. Write integration tests (failing) → Defines API contracts
+3. Write unit tests (failing) → Defines service behavior
+4. Implement code → Make tests pass
+5. Refactor → Keep tests green
+6. Run full suite → Verify no regressions
+```
+
+### Testing Configuration by Service
+
+| Service | Unit Coverage Target | Integration Pattern | E2E Scenarios |
+|---------|---------------------|---------------------|---------------|
+| API Gateway | 80% | Supertest + MSW | Auth flows |
+| Discussion Service | 85% | Testcontainers (Postgres) | Topic CRUD, responses |
+| AI Service | 90% | Mock LLM responses | Feedback display |
+| User Service | 80% | Testcontainers (Postgres) | Profile, verification |
+| Moderation Service | 85% | Testcontainers + fixtures | Moderation workflow |
+| Recommendation Service | 75% | Mock data | Discovery flows |
+
+### Mocking Strategy
+
+| Dependency | Unit Test Mock | Integration Test Approach |
+|------------|----------------|---------------------------|
+| Database (Postgres) | Prisma mock client | Testcontainers postgres |
+| Cache (Redis) | In-memory mock | Testcontainers redis |
+| LLM (Bedrock) | MSW handler | MSW handler with fixtures |
+| OAuth Providers | MSW handler | MSW handler |
+| Fact-Check APIs | MSW handler | MSW handler with fixtures |
+| Message Queue (SQS) | LocalStack mock | LocalStack in Docker |
+
+### Test Data Management
+
+**Fixture Strategy**:
+```typescript
+// Shared fixtures for consistent test data
+const fixtures = {
+  users: {
+    verified: { id: 'user-1', verificationLevel: 'verified', trustScore: { ability: 80, benevolence: 75, integrity: 90 } },
+    basic: { id: 'user-2', verificationLevel: 'basic', trustScore: { ability: 50, benevolence: 50, integrity: 50 } },
+    bot: { id: 'user-3', verificationLevel: 'none', botScore: 0.95 },
+  },
+  discussions: {
+    active: { id: 'disc-1', status: 'active', propositionCount: 5 },
+    seeding: { id: 'disc-2', status: 'seeding', propositionCount: 2 },
+  },
+};
+```
+
+**Factory Pattern**:
+```typescript
+// Dynamic test data generation
+const createUser = (overrides: Partial<User> = {}): User => ({
+  id: faker.string.uuid(),
+  email: faker.internet.email(),
+  displayName: faker.person.fullName(),
+  verificationLevel: 'basic',
+  ...overrides,
+});
+```
+
+### AI Testing Patterns
+
+**Real-time AI (Local Models)**:
+```typescript
+// Unit test for bias detector
+describe('BiasDetector', () => {
+  it('should detect ad hominem pattern', async () => {
+    const result = await biasDetector.analyze("You're wrong because you're stupid");
+    expect(result.patterns).toContainEqual(
+      expect.objectContaining({ type: 'ad_hominem', confidence: expect.any(Number) })
+    );
+    expect(result.patterns[0].confidence).toBeGreaterThan(0.8);
+  });
+
+  it('should complete within latency target', async () => {
+    const start = performance.now();
+    await biasDetector.analyze('Sample text for analysis');
+    expect(performance.now() - start).toBeLessThan(100);
+  });
+});
+```
+
+**Cloud LLM (Bedrock)**:
+```typescript
+// Integration test with mocked Bedrock
+describe('CommonGroundAnalyzer', () => {
+  beforeAll(() => {
+    server.use(
+      http.post('https://bedrock-runtime.*.amazonaws.com/model/*/invoke', () => {
+        return HttpResponse.json(mockBedrockResponse);
+      })
+    );
+  });
+
+  it('should return valid common ground analysis', async () => {
+    const result = await analyzer.generateAnalysis(discussionId);
+    expect(CommonGroundAnalysisSchema.safeParse(result).success).toBe(true);
+    expect(result.agreementZones).toBeDefined();
+    expect(result.genuineDisagreements).toBeDefined();
+  });
+});
+```
+
+### Accessibility Testing
+
+**Automated WCAG 2.2 AA Checks**:
+```typescript
+// Playwright accessibility test
+test.describe('Accessibility', () => {
+  test('Discussion page meets WCAG 2.2 AA', async ({ page }) => {
+    await page.goto('/discussions/test-discussion');
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
+      .analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+
+  test('AI feedback is announced to screen readers', async ({ page }) => {
+    await page.goto('/discussions/test-discussion/compose');
+    await page.fill('[data-testid="response-input"]', 'You are wrong because...');
+
+    // Verify ARIA live region updates
+    const feedback = page.locator('[role="alert"][aria-live="polite"]');
+    await expect(feedback).toBeVisible();
+    await expect(feedback).toHaveAttribute('aria-label', expect.stringContaining('AI Assistant'));
+  });
+
+  test('All interactive elements are keyboard accessible', async ({ page }) => {
+    await page.goto('/discussions/test-discussion');
+
+    // Tab through all interactive elements
+    const focusableElements = await page.locator('button, a, input, [tabindex="0"]').all();
+    for (const element of focusableElements) {
+      await element.focus();
+      await expect(element).toBeFocused();
+    }
+  });
+});
+```
+
+### Performance Testing
+
+**k6 Load Test Configuration**:
+```javascript
+// k6 load test for API endpoints
+export const options = {
+  stages: [
+    { duration: '1m', target: 100 },   // Ramp up
+    { duration: '3m', target: 1000 },  // Sustained load
+    { duration: '1m', target: 10000 }, // Peak load (SC-014)
+    { duration: '1m', target: 0 },     // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<200'],   // NFR-004
+    http_req_failed: ['rate<0.01'],     // <1% error rate
+  },
+};
+
+export default function () {
+  const responses = http.batch([
+    ['GET', `${BASE_URL}/discussions`],
+    ['GET', `${BASE_URL}/discussions/${DISCUSSION_ID}`],
+  ]);
+
+  check(responses[0], {
+    'discussions list status is 200': (r) => r.status === 200,
+    'discussions list under 100ms': (r) => r.timings.duration < 100,
+  });
+}
+```
+
+### Contract Testing
+
+**OpenAPI Validation**:
+```typescript
+// API response contract validation
+describe('API Contracts', () => {
+  const apiSpec = loadOpenAPISpec('./contracts/api.yaml');
+
+  it('GET /discussions matches OpenAPI schema', async () => {
+    const response = await request(app).get('/discussions');
+    const validation = validateAgainstSchema(response.body, apiSpec.paths['/discussions'].get.responses['200']);
+    expect(validation.valid).toBe(true);
+  });
+
+  it('Error responses match error schema', async () => {
+    const response = await request(app).get('/discussions/non-existent');
+    const validation = validateAgainstSchema(response.body, apiSpec.components.schemas.ErrorResponse);
+    expect(validation.valid).toBe(true);
+    expect(response.body.code).toMatch(/^[A-Z]+_\d{3}$/);
+  });
+});
+```
+
+**Pact Consumer Tests**:
+```typescript
+// Frontend consumer expectations for AI service
+describe('AI Service Consumer Contract', () => {
+  it('expects bias analysis response', async () => {
+    await provider.addInteraction({
+      state: 'text contains potential bias',
+      uponReceiving: 'a request for bias analysis',
+      withRequest: {
+        method: 'POST',
+        path: '/analyze/bias',
+        body: { text: 'Some potentially biased text' },
+      },
+      willRespondWith: {
+        status: 200,
+        body: {
+          patterns: like([{ type: 'confirmation_bias', confidence: 0.85, suggestion: 'Consider...' }]),
+          overallConfidence: like(0.85),
+        },
+      },
+    });
+
+    const result = await biasAnalysisClient.analyze('Some potentially biased text');
+    expect(result.patterns).toBeDefined();
+  });
+});
+```
+
+### CI Integration
+
+**Jenkins Pipeline Test Stages**:
+```groovy
+stage('Unit Tests') {
+  steps {
+    sh 'pnpm test:unit --coverage'
+  }
+  post {
+    always {
+      publishHTML([
+        reportDir: 'coverage',
+        reportFiles: 'index.html',
+        reportName: 'Coverage Report'
+      ])
+    }
+  }
+}
+
+stage('Integration Tests') {
+  steps {
+    sh 'docker-compose -f docker-compose.test.yml up -d'
+    sh 'pnpm test:integration'
+    sh 'docker-compose -f docker-compose.test.yml down'
+  }
+}
+
+stage('Contract Tests') {
+  steps {
+    sh 'pnpm test:contract'
+    sh 'pnpm pact:publish'
+  }
+}
+
+stage('E2E Tests') {
+  when { branch 'main' }
+  steps {
+    sh 'pnpm playwright install'
+    sh 'pnpm test:e2e'
+  }
+  post {
+    always {
+      publishHTML([
+        reportDir: 'playwright-report',
+        reportFiles: 'index.html',
+        reportName: 'E2E Report'
+      ])
+    }
+  }
+}
+```
+
+---
+
 ## Unresolved Items
 
 None - all technical decisions made based on user-specified constraints (AWS, K8s, RDS, Bedrock).

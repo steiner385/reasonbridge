@@ -1,10 +1,79 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed tasks T001-T098 (Setup phase + most of US1 - Join and Participate)
+- Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
+- Completed issues #21-#29 (T021-T029) - All schema entities defined + initial migration
+- Completed issues #30-#37 (T030-T037) - All core services scaffolded
+- Completed issues #38-#42 (T042-T046) - Complete event infrastructure (pub/sub + DLQ)
+- Completed issues #43-#49 (T047-T053) - Frontend setup (React, Tailwind, Router, Query, UI, E2E)
+- Completed issues #50-#53 (T054-T057) - Complete CDK infrastructure with tests
+- Completed issue #54 (T058) - Cognito user pool configuration
+- Completed issue #56 (T060) - /auth/login endpoint
+- Completed issue #57 (T061) - /auth/refresh endpoint
+- Completed issue #58 (T062) - Registration form component
+- Completed issue #59 (T063) - Login form component
+- Completed issue #60 (T064) - GET /users/me endpoint
+- Completed issue #61 (T065) - PUT /users/me profile update endpoint
+- Completed issue #62 (T066) - Profile page component
+- Completed issue #63 (T067) - Profile edit form component
+- Completed issue #64 (T068) - Avatar upload with S3
+- Completed issue #65 (T069) - GET /topics endpoint with filtering
+- Completed issue #66 (T070) - GET /topics/:id detail endpoint
+- Completed issue #67 (T071) - Topic search endpoint
+- Completed issue #68 (T072) - Topic list page with filtering and pagination
+- Completed issue #69 (T073) - Reusable TopicCard component
+- Completed issue #70 (T074) - Topic detail page
+- Completed issue #71 (T075) - Search bar component
+- Completed issue #72 (T076) - Topic filtering UI component
+- Completed issue #73 (T077) - POST /responses endpoint
+- Completed issue #74 (T078) - GET /responses for topic
+- Completed issue #75 (T079) - Response threading (parentId)
+- Completed issue #76 (T080) - Response edit endpoint (PUT)
+- Completed issue #77 (T081) - Response composer component
+- Completed issue #78 (T082) - Response card component
+- Completed issue #79 (T083) - Threaded response display component
+- Completed issue #80 (T084) - Edit response modal component
+- Completed issue #81 (T085) - Response voting (upvote/downvote)
+- Completed issue #82 (T086) - Vote buttons component
+- Completed issue #83 (T087) - POST /alignments endpoint
+- Completed issue #84 (T088) - Alignment aggregation logic
+- Completed issue #85 (T089) - Alignment input component
+- Completed issue #86 (T090) - Alignment summary visualization
+- Completed issue #87 (T091) - Alignment reasoning modal
+- Completed issue #88 (T092) - Proposition alignment tracking (GET endpoint)
+- Completed issue #89 (T093) - Proposition alignment view component
+- Completed issue #90 (T094) - E2E test for user registration and login flow
+- Completed issue #91 (T095) - E2E test for browsing topics and viewing details
+- Completed issue #92 (T096) - E2E test for submitting responses to topics
+- Completed issue #93 (T097) - E2E test for expressing alignment on responses
+- Completed issue #94 (T098) - E2E test for thread navigation and reply
 - GitHub issues #1-#96 are closed, issues #97-#400 don't exist
 - Open issues start at #401+ (Polish/test tasks T342+)
-- Issue #55 still open but has wrong description
+- ~186 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+
+## Latest Iteration Summary (2026-01-17)
+**Completed Issue #94 (T098) - E2E: Thread navigation and reply:**
+- Created comprehensive E2E test suite in `frontend/e2e/thread-navigation-reply.spec.ts`
+- 10 test cases covering complete threaded discussion workflow
+- Tests: thread display with nesting, collapse/expand controls, reply functionality
+- Tests: URL hash navigation, empty states, thread structure preservation
+- Tests: visual indicators (lines/indentation), depth limiting (maxDepth)
+- Merged via PR #456
+
+**Previous: Completed Issue #93 (T097) - E2E: Express alignment on response:**
+- Created comprehensive E2E test suite with 25 test cases covering alignment workflow
+- Merged via PR #455
+
+**Response & Alignment System Progress:**
+- Backend:
+  - Responses: Full CRUD (POST, GET, PUT), threading support, voting system
+  - Alignments: Set/update/remove user stances on propositions
+- Frontend: ResponseCard, ResponseComposer, ThreadedResponseDisplay, EditResponseModal, VoteButtons components
+- Full response CRUD with threading (parentId relationships)
+- Visual thread indicators and collapsible threads
+- Modal-based response editing with validation
+- Complete voting system (backend + frontend UI component)
+- User alignment tracking on propositions (backend complete)
 
 ## CRITICAL ISSUE: GitHub Issues Have Wrong Descriptions
 
@@ -16,9 +85,13 @@ The GitHub issues were created with mismatched descriptions. For example:
 
 **Impact**: Cannot reliably work from GitHub issues - must use tasks.md as source of truth.
 
-## CRITICAL ISSUE: Missing Source Files
+**Action Taken**: Closed issues #95 and #96 as they had incorrect descriptions.
 
-Service `src/` directories were missing from the working tree (only `dist/` and `node_modules/` present). Had to restore them with:
+## CRITICAL ISSUE: Missing Source Files (RESOLVED)
+
+Service `src/` directories were missing from the working tree (only `dist/` and `node_modules/` present).
+
+**Resolution**: Restored all source files from origin/main:
 ```bash
 for svc in services/*/; do git checkout origin/main -- "$svc/src" 2>/dev/null; done
 git checkout origin/main -- frontend/src frontend/tests
@@ -29,14 +102,13 @@ This suggests either:
 2. A .gitignore issue
 3. Accidental deletion
 
+**Status**: All 147 source files restored and committed.
+
 ## Next Steps
 
-1. **Audit the repository state** - verify all source files are present and tracked
-2. **Fix GitHub issues** - either:
-   - Close all issues #15-#400 and recreate them from current tasks.md
-   - Update issue descriptions to match tasks.md
-   - Work directly from tasks.md and ignore GitHub issue descriptions
-3. **Identify next task** - Based on tasks.md, find the first incomplete task after T098
+1. **Fix GitHub issues** - Either recreate issues #97-#400 from current tasks.md with correct descriptions, or work directly from tasks.md
+2. **Identify next task** - Based on tasks.md, find the first incomplete task after T098 (US1 is complete, start US2 tasks)
+3. Run `npm run next-issue` to claim and implement next highest priority issue
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
@@ -44,12 +116,10 @@ This suggests either:
 - All PRs are being squash-merged to main
 - Local npm registry (Verdaccio) is running at localhost:4873
 
-## Workflow (Currently Broken)
-The intended workflow doesn't work due to GitHub issue mismatches:
-1. ~~`npm run next-issue` - claims highest priority issue~~ (Issues have wrong descriptions)
-2. Instead: Check tasks.md directly for next incomplete task
-3. Create feature branch from main
-4. Implement, commit, push
-5. Create PR via `gh pr create`
-6. Merge via `gh pr merge --squash`
-7. Pull main, repeat
+## Workflow
+1. `npm run next-issue` - claims highest priority issue
+2. Create feature branch from main
+3. Implement, commit, push
+4. Create PR via `gh pr create`
+5. Merge via `gh pr merge --squash`
+6. Pull main, repeat
