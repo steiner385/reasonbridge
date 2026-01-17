@@ -88,6 +88,23 @@ export class ResponsesService {
       throw new BadRequestException('Cannot add responses to archived topics');
     }
 
+    // Verify parent response exists if parentId is provided
+    if (createResponseDto.parentId) {
+      const parentResponse = await this.prisma.response.findUnique({
+        where: { id: createResponseDto.parentId },
+        select: { id: true, topicId: true },
+      });
+
+      if (!parentResponse) {
+        throw new NotFoundException(`Parent response with ID ${createResponseDto.parentId} not found`);
+      }
+
+      // Verify parent response belongs to the same topic
+      if (parentResponse.topicId !== topicId) {
+        throw new BadRequestException('Parent response must belong to the same topic');
+      }
+    }
+
     // Transform citedSources to JSON format if provided
     let citedSourcesJson: any = null;
     if (createResponseDto.citedSources && createResponseDto.citedSources.length > 0) {
@@ -103,6 +120,7 @@ export class ResponsesService {
       data: {
         topicId,
         authorId,
+        parentId: createResponseDto.parentId ?? null,
         content: createResponseDto.content.trim(),
         citedSources: citedSourcesJson,
         containsOpinion: createResponseDto.containsOpinion ?? false,
@@ -180,6 +198,7 @@ export class ResponsesService {
       id: response.id,
       content: response.content,
       authorId: response.authorId,
+      parentId: response.parentId ?? null,
       author,
       citedSources,
       containsOpinion: response.containsOpinion,

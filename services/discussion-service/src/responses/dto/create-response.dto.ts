@@ -9,6 +9,11 @@ export class CreateResponseDto {
   content!: string;
 
   /**
+   * Optional parent response ID for threading (replies to another response)
+   */
+  parentId?: string;
+
+  /**
    * Array of cited source URLs
    */
   citedSources?: string[];
