@@ -2,7 +2,8 @@
 
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
-- ~259 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #30 (T030) - API Gateway service scaffolded with NestJS and Fastify
+- ~258 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
