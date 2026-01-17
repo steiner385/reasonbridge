@@ -1,0 +1,5 @@
+packages:
+  - 'packages/*'
+  - 'services/*'
+  - 'frontend'
+  - 'e2e'

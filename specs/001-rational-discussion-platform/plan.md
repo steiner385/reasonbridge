@@ -3,242 +3,254 @@
 **Branch**: `001-rational-discussion-platform` | **Date**: 2026-01-17 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-rational-discussion-platform/spec.md`
 
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+
 ## Summary
 
-Build a web-based platform for rational discussion across diverse perspectives, featuring AI-powered communication guidance, proposition-based discussion organization, common ground analysis, and anti-bot measures. The platform uses psychological frameworks (Kahneman, Haidt, Fogg, Gross, Mayer) to facilitate productive discourse.
+Build a web-based public discussion platform called "uniteDiscord" that facilitates rational discourse across diverse perspectives. The platform features proposition-based discussion organization, AI-assisted communication feedback (bias detection, fact-checking prompts), common ground analysis using Moral Foundations Theory, anti-bot measures with trust scoring (Mayer's ABI Model), and graduated moderation with human-in-the-loop for consequential actions.
 
-**Technical Approach**: Microservices architecture on AWS EKS with TypeScript backend services, React frontend, PostgreSQL (RDS) for persistence, and Amazon Bedrock for AI capabilities.
+**Technical Approach**: Hybrid AI architecture with lightweight local models for real-time feedback (<500ms) and cloud LLMs for complex synthesis (<5s). React 18 frontend with Node.js 20 LTS backend, PostgreSQL for persistence, and structured event logging with correlation IDs for comprehensive testing and observability.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend)
 **Primary Dependencies**:
-- Backend: NestJS (microservices framework), Prisma ORM, Bull (job queues), Socket.io (real-time)
+- Backend: Express.js/Fastify, Prisma ORM, OpenTelemetry, Zod validation
 - Frontend: React 18, TanStack Query, Zustand, Tailwind CSS
-- Infrastructure: AWS CDK, Helm charts for K8s
+- AI: OpenAI API (cloud LLM), TensorFlow.js/ONNX (local inference)
+- Testing: Vitest, Playwright, Supertest, MSW (Mock Service Worker)
 
-**Storage**:
-- PostgreSQL 15 (AWS RDS) - primary relational data
-- Redis (ElastiCache) - caching, session storage, rate limiting
-- S3 - static assets, user uploads
-
+**Storage**: PostgreSQL 15+ with full-text search, Redis for caching/sessions
 **Testing**:
-- Jest (unit/integration)
-- Playwright (E2E)
-- Pact (contract testing between microservices)
-- k6 (load testing)
+- Unit: Vitest with 80% coverage threshold
+- Integration: Supertest for API, Prisma with test database
+- E2E: Playwright with accessibility assertions
+- Contract: OpenAPI schema validation, Pact for consumer-driven contracts
 
-**Target Platform**:
-- Development: Local workstation, local Jenkins, Docker Compose
-- Production: AWS EKS (Kubernetes), multi-AZ deployment
-
-**Project Type**: Web application (microservices backend + SPA frontend)
-
+**Target Platform**: Web (Linux server deployment, modern browsers)
+**Project Type**: Web application (monorepo with frontend + backend + shared packages)
 **Performance Goals**:
-- API p95 latency: <200ms for reads, <500ms for writes
-- Real-time AI feedback: <500ms (local models)
-- Complex AI analysis: <5s (Bedrock)
-- 10,000 concurrent users (SC-014)
+- API: 200ms p95 response time (NFR-004)
+- AI feedback: 500ms for real-time analysis (NFR-005)
+- Concurrent users: 10,000 without degradation (SC-014)
 
 **Constraints**:
-- Database queries <100ms (Constitution IV)
-- Initial response within 3 seconds (Constitution IV)
-- 80% test coverage for business logic (Constitution II)
+- 99.9% availability (NFR-010)
+- WCAG 2.2 AA accessibility (NFR-007)
+- Graceful degradation for external dependencies (NFR-011)
 
-**Scale/Scope**:
-- 10,000 concurrent users
-- ~44 functional requirements
-- 9 core entities
-- 8+ microservices
+**Scale/Scope**: 10,000 concurrent users, ~50 screens/views
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### I. Code Quality
+### I. Code Quality ✅
+- **Linting**: ESLint configured with TypeScript strict rules; CI enforces zero warnings
+- **Type Safety**: TypeScript strict mode enabled; `any` prohibited with eslint rule
+- **Code Review**: GitHub branch protection requires 1+ approval
+- **DRY Principle**: Shared logic in `packages/shared/` for cross-project use
+- **Documentation**: TSDoc required for all public APIs via eslint-plugin-jsdoc
+- **Error Handling**: Async error boundaries required; structured error codes (NFR-014)
 
-| Requirement | Plan Compliance |
-|-------------|-----------------|
-| Linting with zero warnings | ✅ ESLint + Prettier configured in all services |
-| TypeScript strict mode, no `any` | ✅ `strict: true` in all tsconfig.json |
-| Code review required | ✅ GitHub branch protection on `main` and `develop` |
-| DRY - extract shared logic | ✅ Shared packages: `@unite/common`, `@unite/ai-client`, `@unite/db-models` |
-| Public API documentation | ✅ OpenAPI specs auto-generated, TSDoc for internal APIs |
-| Explicit error handling | ✅ NestJS exception filters, Result pattern for service methods |
+### II. Testing Standards ✅ (TDD Focus)
+- **Coverage Threshold**: 80% line coverage enforced via Vitest coverage reports
+- **Test-First**: All bug fixes require failing test before implementation
+- **Test Categories**:
+  - Unit tests: Vitest for all pure functions, services, utilities
+  - Integration tests: Supertest + Prisma test database for API endpoints
+  - E2E tests: Playwright for critical user journeys
+  - Contract tests: OpenAPI validation + Pact for AI service boundaries
+- **Test Naming**: `describe('ComponentName')` + `it('should [expected behavior] when [condition]')`
+- **Mocking**: MSW for external APIs; Prisma mocks for unit tests
+- **CI Gate**: All tests must pass; flaky test quarantine process defined
 
-### II. Testing Standards
+### III. User Experience Consistency ✅
+- **Response Time Feedback**: Loading indicators for operations >1s (React Suspense)
+- **Error Messages**: Structured error codes with actionable user-facing messages (NFR-015)
+- **Command Patterns**: Consistent API response format via shared schemas
+- **Accessibility**: WCAG 2.2 AA compliance with Playwright axe-core assertions
+- **Graceful Degradation**: Circuit breakers for external services (NFR-011)
+- **Confirmation for Destructive Actions**: Modal confirmations for delete/moderation actions
 
-| Requirement | Plan Compliance |
-|-------------|-----------------|
-| 80% coverage for business logic | ✅ Jest coverage thresholds in CI |
-| Test-first for bug fixes | ✅ PR template includes test requirement |
-| Unit tests for pure functions | ✅ All services have `/tests/unit/` |
-| Integration tests for DB/API | ✅ Testcontainers for DB, Pact for service contracts |
-| Contract tests for external APIs | ✅ Pact provider/consumer tests |
-| Test naming convention | ✅ `[unit]_[scenario]_[expected]` enforced by lint rule |
-| CI gate - all tests pass | ✅ Jenkins pipeline blocks on test failure |
-
-### III. User Experience Consistency
-
-| Requirement | Plan Compliance |
-|-------------|-----------------|
-| Loading indicator >1s | ✅ Frontend skeleton loaders, optimistic updates |
-| Actionable error messages | ✅ Error codes map to user-friendly messages |
-| Consistent patterns | ✅ Design system with component library |
-| Accessibility | ✅ WCAG 2.1 AA target, axe-core in E2E tests |
-| Graceful degradation | ✅ Circuit breakers, fallback UI states |
-| Confirmation for destructive actions | ✅ Modal confirmations for delete/remove actions |
-
-### IV. Performance Requirements
-
-| Requirement | Plan Compliance |
-|-------------|-----------------|
-| Response within 3 seconds | ✅ SLA monitoring, async processing for heavy ops |
-| Memory <512MB per process | ✅ Container resource limits, memory profiling |
-| Startup <30 seconds | ✅ Lazy loading, health check timeouts |
-| Rate limiting with backoff | ✅ Redis-based rate limiter, exponential backoff |
-| DB queries <100ms | ✅ Query analysis, Prisma query logging, indexes |
-| 100 concurrent users per service | ✅ HPA scaling, load testing in CI |
-
-**Constitution Check Status**: ✅ PASS - All requirements addressed in plan
+### IV. Performance Requirements ✅
+- **API Response**: 200ms p95 target (NFR-004); CI performance regression tests
+- **Memory Usage**: Monitored via OpenTelemetry metrics
+- **Rate Limiting**: Token bucket implementation with exponential backoff
+- **Database Queries**: Query performance assertions in integration tests (<100ms)
+- **Concurrent Users**: Load testing in CI for 10,000 concurrent user simulation
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/001-rational-discussion-platform/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output (OpenAPI specs)
-└── tasks.md             # Phase 2 output (/speckit.tasks)
+specs/[###-feature]/
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
 
 ```text
-# Microservices Backend
-services/
-├── api-gateway/              # Kong/custom gateway, auth, rate limiting
-│   ├── src/
-│   └── tests/
-├── user-service/             # Account, auth, verification, trust scores
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── entities/
-│   │   └── events/
-│   └── tests/
-├── discussion-service/       # Topics, propositions, responses, alignments
-│   ├── src/
-│   └── tests/
-├── ai-service/               # Bedrock integration, feedback, analysis
-│   ├── src/
-│   │   ├── analyzers/        # Bias, fallacy, tone detection
-│   │   ├── synthesizers/     # Common ground, moral foundations
-│   │   └── clients/          # Bedrock, fact-check APIs
-│   └── tests/
-├── moderation-service/       # Flags, actions, appeals, human queue
-│   ├── src/
-│   └── tests/
-├── recommendation-service/   # Topic discovery, follow suggestions
-│   ├── src/
-│   └── tests/
-├── notification-service/     # Real-time updates, email
-│   ├── src/
-│   └── tests/
-└── fact-check-service/       # External fact-check API integration
-    ├── src/
-    └── tests/
-
-# Shared Packages
 packages/
-├── common/                   # Shared types, utilities, constants
-├── db-models/               # Prisma schema, migrations
-├── ai-client/               # Bedrock client wrapper
-├── event-schemas/           # Event contracts for async messaging
-└── testing-utils/           # Shared test helpers
+├── shared/                    # Shared types, utilities, validation schemas
+│   ├── src/
+│   │   ├── types/            # Domain types (User, Discussion, Proposition, etc.)
+│   │   ├── schemas/          # Zod validation schemas
+│   │   ├── errors/           # Error code taxonomy (AUTH_001, VALIDATION_002, etc.)
+│   │   └── utils/            # Shared utilities
+│   └── tests/
+│       └── unit/
 
-# Frontend
+├── ai-models/                 # Local AI inference models
+│   ├── src/
+│   │   ├── bias-detection/   # System 1/System 2 pattern detection
+│   │   ├── tone-analysis/    # Inflammatory language detection
+│   │   ├── fallacy-detection/# Logical fallacy identification
+│   │   └── claim-extraction/ # Factual claim identification
+│   └── tests/
+│       ├── unit/
+│       └── contract/         # AI model output contracts
+
+services/
+├── api/                       # Core backend API service
+│   ├── src/
+│   │   ├── routes/           # Express/Fastify route handlers
+│   │   ├── middleware/       # Auth, rate limiting, error handling
+│   │   ├── services/         # Business logic services
+│   │   ├── repositories/     # Data access layer (Prisma)
+│   │   ├── events/           # Structured event logging
+│   │   └── jobs/             # Background job processing
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── migrations/
+│   └── tests/
+│       ├── unit/             # Service/utility unit tests
+│       ├── integration/      # API endpoint tests with test DB
+│       └── contract/         # OpenAPI schema validation
+
+├── ai-service/                # AI synthesis service (cloud LLM integration)
+│   ├── src/
+│   │   ├── common-ground/    # Common ground analysis
+│   │   ├── moral-foundations/# Moral foundation mapping
+│   │   ├── fact-check/       # Fact-check API integration
+│   │   └── translation/      # Argument translation across viewpoints
+│   └── tests/
+│       ├── unit/
+│       ├── integration/
+│       └── contract/         # LLM response contracts
+
 frontend/
 ├── src/
 │   ├── components/
-│   │   ├── ui/              # Design system primitives
-│   │   ├── discussion/      # Topic, proposition, response components
-│   │   ├── analysis/        # Common ground, consensus meters
-│   │   └── moderation/      # Feedback, flags, appeals
-│   ├── pages/
-│   │   ├── home/
-│   │   ├── topic/
-│   │   ├── profile/
-│   │   └── onboarding/
-│   ├── services/            # API clients
-│   ├── stores/              # Zustand state
-│   └── hooks/
+│   │   ├── ui/               # Design system components
+│   │   ├── discussion/       # Discussion-specific components
+│   │   ├── feedback/         # AI feedback display components
+│   │   └── moderation/       # Moderation UI components
+│   ├── pages/                # Route-based page components
+│   ├── hooks/                # Custom React hooks
+│   ├── services/             # API client services
+│   ├── stores/               # Zustand state stores
+│   └── utils/
 └── tests/
-    ├── unit/
-    ├── integration/
-    └── e2e/
+    ├── unit/                 # Component unit tests
+    ├── integration/          # Hook/store integration tests
+    └── e2e/                  # Playwright E2E tests
 
-# Infrastructure
 infrastructure/
-├── cdk/                     # AWS CDK stacks
-│   ├── lib/
-│   │   ├── eks-stack.ts
-│   │   ├── rds-stack.ts
-│   │   ├── elasticache-stack.ts
-│   │   └── bedrock-stack.ts
-│   └── bin/
-├── helm/                    # Kubernetes Helm charts
-│   ├── unite-services/
-│   └── unite-frontend/
-├── docker/                  # Dockerfiles for each service
-└── jenkins/                 # Pipeline definitions
-    ├── Jenkinsfile
-    └── jobs/
+├── docker/                    # Docker configurations
+├── k8s/                       # Kubernetes manifests (if applicable)
+└── terraform/                 # Infrastructure as code
 
-# Local Development
-docker-compose.yml           # Local dev environment
-docker-compose.test.yml      # Test environment
-Makefile                     # Common commands
+e2e/                           # Cross-service E2E tests
+├── tests/
+│   ├── user-journeys/        # Critical user path tests
+│   ├── accessibility/        # WCAG 2.2 AA compliance tests
+│   └── performance/          # Load and performance tests
+└── fixtures/                  # Test data fixtures
 ```
 
-**Structure Decision**: Microservices architecture chosen to support:
-1. Independent scaling of AI-heavy services
-2. Team parallelization across services
-3. Isolation of third-party dependencies (Bedrock, fact-check APIs)
-4. Kubernetes-native deployment on EKS
+**Structure Decision**: Web application monorepo with pnpm workspaces. Separates concerns into:
+- `packages/` for shared code and local AI models
+- `services/` for backend microservices (API + AI service)
+- `frontend/` for React web application
+- `e2e/` for cross-cutting end-to-end tests
+
+Each package/service has co-located tests following the unit/integration/contract/e2e pattern aligned with constitution testing standards.
 
 ## Complexity Tracking
 
-| Decision | Justification | Simpler Alternative Rejected Because |
-|----------|---------------|--------------------------------------|
-| 8 microservices instead of monolith | AI services have different scaling needs (CPU-bound), discussion service is I/O-bound; independent deployability required for CI/CD | Monolith would couple AI processing with user-facing latency SLAs |
-| Separate fact-check service | External API rate limits and latency isolation; can cache independently | Embedding in AI service would complicate caching and rate limit handling |
-| Event-driven architecture | Common ground analysis is async (5s budget); moderation queue requires decoupling | Synchronous calls would block user actions on AI processing |
+> **Fill ONLY if Constitution Check has violations that must be justified**
 
-## Microservice Boundaries
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| Separate ai-service | AI synthesis tasks (common ground, moral foundations) require different scaling/cost profile | Embedding in main API would couple AI costs to API scaling |
+| Local AI models package | Real-time feedback requires <500ms latency | Cloud-only would exceed latency requirements for composition-time feedback |
 
-| Service | Responsibilities | Key Entities |
-|---------|------------------|--------------|
-| **api-gateway** | Authentication, rate limiting, request routing, API composition | Session tokens |
-| **user-service** | Registration, OAuth, verification, trust scores, following | User, VerificationRecord |
-| **discussion-service** | Topics, propositions, responses, alignments, tags, links | Topic, Proposition, Response, Tag, TopicLink |
-| **ai-service** | Real-time feedback, bias detection, common ground synthesis | Feedback, CommonGroundAnalysis |
-| **moderation-service** | Flags, human review queue, actions, appeals | ModerationAction, Appeal |
-| **recommendation-service** | Topic discovery, follow suggestions, perspective diversity | UserAffinity, RecommendationLog |
-| **notification-service** | WebSocket connections, push notifications, email | NotificationPreference |
-| **fact-check-service** | External API integration, caching, credibility scoring | FactCheckResult, SourceCredibility |
+## Testing Strategy (TDD Implementation)
 
-## Event-Driven Communication
+### Test Pyramid
 
-| Event | Publisher | Subscribers |
-|-------|-----------|-------------|
-| `response.created` | discussion-service | ai-service (analysis), notification-service |
-| `response.analyzed` | ai-service | discussion-service (update feedback) |
-| `topic.participant.joined` | discussion-service | recommendation-service (diversity check) |
-| `moderation.action.requested` | ai-service | moderation-service (queue) |
-| `user.trust.updated` | moderation-service | user-service (score update) |
-| `common-ground.generated` | ai-service | discussion-service, notification-service |
+```
+                    ┌─────────────────┐
+                    │   E2E Tests     │  ← Playwright (critical paths only)
+                    │   (~10% tests)  │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │    Integration Tests        │  ← Supertest, Prisma test DB
+              │      (~30% tests)           │
+              └──────────────┬──────────────┘
+                             │
+    ┌────────────────────────┴────────────────────────┐
+    │              Unit Tests (~60% tests)            │  ← Vitest, MSW
+    │  Pure functions, services, components, hooks    │
+    └─────────────────────────────────────────────────┘
+```
+
+### Test Categories by User Story
+
+| User Story | Unit Tests | Integration Tests | E2E Tests |
+|------------|-----------|-------------------|-----------|
+| US-1: Join Discussion | Auth service, Discussion service | POST /discussions/:id/join, GET /discussions | Full signup → join → post flow |
+| US-2: Communication Feedback | Bias detector, Tone analyzer, Fallacy detector | POST /responses (with feedback) | Compose → receive feedback → revise |
+| US-3: Common Ground Analysis | Analysis algorithms | GET /discussions/:id/analysis | View analysis, real-time updates |
+| US-4: Human Authenticity | Trust calculator, Rate limiter | POST /auth/verify, Bot detection | Verification flow, trust display |
+| US-5: Moderation | Moderation service, Escalation detector | Moderation endpoints | Moderator workflow |
+| US-6: Topic Creation | Topic service, Diversity calculator | POST /topics | Full topic creation flow |
+
+### Contract Testing Strategy
+
+| Boundary | Contract Type | Tool |
+|----------|---------------|------|
+| Frontend ↔ API | OpenAPI 3.1 | openapi-typescript, Supertest |
+| API ↔ AI Service | AsyncAPI + JSON Schema | Pact |
+| AI Service ↔ OpenAI | Response schema validation | Zod + snapshot tests |
+| API ↔ Fact-Check APIs | Response schema validation | MSW + contract fixtures |
+
+### Performance Test Requirements
+
+| Metric | Target | Test Approach |
+|--------|--------|---------------|
+| API p95 latency | <200ms | k6 load tests in CI |
+| AI feedback latency | <500ms | Benchmark tests with timeout assertions |
+| Concurrent users | 10,000 | k6 soak test (staging environment) |
+| Database query time | <100ms | Integration test assertions |
+
+### Accessibility Testing
+
+- **Automated**: Playwright with @axe-core/playwright for WCAG 2.2 AA
+- **Manual Checklist**: Keyboard navigation, screen reader compatibility
+- **CI Integration**: Accessibility violations fail the build
+
+### Test Data Management
+
+- **Fixtures**: JSON fixtures for deterministic test data
+- **Factories**: Factory functions for dynamic test data generation
+- **Database Seeding**: Prisma seed scripts for development and test environments
+- **AI Mocking**: MSW handlers for consistent AI response simulation
