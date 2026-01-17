@@ -32,24 +32,27 @@
 - Completed issue #62 (T066) - Profile page component
 - Completed issue #63 (T067) - Profile edit form component
 - Completed issue #79 (T083) - Threaded response display component
-- ~201 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #80 (T084) - Edit response modal component
+- ~200 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #79 (T083) - Create threaded response display:**
-- Created ThreadedResponseDisplay component for nested responses
-- Implemented tree building algorithm (flat list → hierarchical structure)
-- Added visual threading indicators (lines connecting parent/child)
-- Expand/collapse functionality for response threads
-- Reply button support with onReply callback
-- Depth limiting (maxDepth) to prevent excessive nesting
-- Empty state handling with friendly message
-- Merged via PR #441
+**Completed Issue #80 (T084) - Create edit response modal:**
+- Created reusable Modal base component (UI library)
+- Implemented EditResponseModal with full editing capabilities
+- Form pre-population from existing response data
+- Character count validation (min/max)
+- Cited sources management (add/remove with URL validation)
+- Opinion and factual claims checkboxes
+- Save button only enabled when changes detected
+- Full accessibility (ARIA, focus trap, keyboard navigation)
+- Merged via PR #442
 
 **Response System Progress:**
 - Backend: POST /responses, GET /responses, PUT /responses, threading support
-- Frontend: ResponseCard, ResponseComposer, ThreadedResponseDisplay components
+- Frontend: ResponseCard, ResponseComposer, ThreadedResponseDisplay, EditResponseModal components
 - Full response CRUD with threading (parentId relationships)
 - Visual thread indicators and collapsible threads
+- Modal-based response editing with validation
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
