@@ -15,19 +15,23 @@
 - Completed issue #70 (T074) - Topic detail page
 - Completed issue #71 (T075) - Search bar component
 - Completed issue #72 (T076) - Topic filtering UI component
-- ~226 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #73 (T077) - POST /responses endpoint
+- ~225 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #72 (T076): Implement topic filtering UI:
-- Created reusable TopicFilterUI component in frontend/src/components/topics/
-- Extracted filtering logic from TopicsPage into composable component
-- Status filtering (All, Seeding, Active, Archived) with visual indicators
-- Sort options (Newest First, Most Participants, Most Responses)
-- Tag filtering with search input, Apply/Clear buttons, Enter key support
-- Active filter badges display showing currently applied filters
-- Props-based control (filters, onFiltersChange) for full flexibility
-- Follows existing component patterns (Button, Input, Card)
-- TypeScript type safety, responsive layout, keyboard accessible
+Issue #73 (T077): Implement POST /responses endpoint:
+- Created complete NestJS responses module in services/discussion-service/src/responses/
+- DTOs for request validation (CreateResponseDto) and response mapping (ResponseDto)
+- ResponsesService with business logic:
+  * Content validation (10-10000 characters)
+  * Topic existence and status verification
+  * Cited sources in JSON format with metadata
+  * Proposition associations via ResponseProposition junction table
+  * Prisma model to DTO mapping with type safety
+- ResponsesController with POST /topics/:topicId/responses endpoint
+- Returns 201 Created with full response data including author and propositions
+- Follows existing NestJS patterns, integrated with PrismaModule
+- Uses placeholder authorId (JWT auth pending implementation)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
