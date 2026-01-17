@@ -1,0 +1,56 @@
+{
+  "name": "@unite-discord/testing-utils",
+  "version": "0.1.0",
+  "description": "Shared test helpers, mocks, and fixtures for uniteDiscord",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mocks": {
+      "types": "./dist/mocks/index.d.ts",
+      "import": "./dist/mocks/index.js"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures/index.d.ts",
+      "import": "./dist/fixtures/index.js"
+    },
+    "./assertions": {
+      "types": "./dist/assertions/index.d.ts",
+      "import": "./dist/assertions/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@unite-discord/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.12",
+    "typescript": "5.7.3"
+  },
+  "peerDependencies": {
+    "@types/jest": ">=29.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/jest": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
