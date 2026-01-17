@@ -315,6 +315,7 @@ model Response {
   id                    String   @id @default(uuid()) @db.Uuid
   topicId               String   @map("topic_id") @db.Uuid
   authorId              String   @map("author_id") @db.Uuid
+  parentId              String?  @map("parent_id") @db.Uuid
   content               String   @db.Text
   citedSources          Json?    @map("cited_sources")
   containsOpinion       Boolean  @default(false) @map("contains_opinion")
@@ -327,12 +328,15 @@ model Response {
   // Relations
   topic                 DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
   author                User     @relation(fields: [authorId], references: [id])
+  parent                Response? @relation("ResponseThreading", fields: [parentId], references: [id], onDelete: Cascade)
+  replies               Response[] @relation("ResponseThreading")
   propositions          ResponseProposition[]
   feedback              Feedback[]
   factCheckResults      FactCheckResult[]
 
   @@index([topicId])
   @@index([authorId])
+  @@index([parentId])
   @@index([topicId, createdAt(sort: Desc)])
   @@index([status])
   @@map("responses")

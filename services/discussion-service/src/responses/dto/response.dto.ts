@@ -23,6 +23,7 @@ export interface ResponseDto {
   id: string;
   content: string;
   authorId: string;
+  parentId?: string | null;
   author?: UserSummaryDto | undefined;
   citedSources?: CitedSourceDto[] | undefined;
   containsOpinion: boolean;
