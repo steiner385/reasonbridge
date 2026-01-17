@@ -1,0 +1,149 @@
+#!/usr/bin/env groovy
+/**
+ * Main CI Pipeline for uniteDiscord
+ */
+
+@Library('unitediscord-lib@main') _
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        timeout(time: 60, unit: 'MINUTES')
+        disableConcurrentBuilds(abortPrevious: true)
+    }
+
+    environment {
+        GITHUB_OWNER = 'steiner385'
+        GITHUB_REPO = 'uniteDiscord'
+        CI = 'true'
+        NODE_ENV = 'test'
+    }
+
+    stages {
+        stage('Initialize') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                }
+                echo "Building commit: ${env.GIT_COMMIT_SHORT}"
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    # Remove any local .npmrc that might point to Verdaccio
+                    rm -f .npmrc
+
+                    # Ensure we use the public npm registry
+                    npm config set registry https://registry.npmjs.org
+
+                    # Increase Node.js memory limit for large dependency trees
+                    export NODE_OPTIONS="--max-old-space-size=4096"
+
+                    # Install dependencies with retry logic for npm "Exit handler" bug
+                    # See: https://github.com/npm/cli/issues/4028
+                    install_with_retry() {
+                        local max_attempts=3
+                        local attempt=1
+
+                        while [ $attempt -le $max_attempts ]; do
+                            echo "npm install attempt $attempt of $max_attempts"
+
+                            if npm ci --legacy-peer-deps; then
+                                echo "npm ci succeeded on attempt $attempt"
+                                return 0
+                            fi
+
+                            echo "npm ci failed, cleaning cache and retrying..."
+                            npm cache clean --force
+                            rm -rf node_modules
+
+                            if [ $attempt -eq $max_attempts ]; then
+                                echo "All npm ci attempts failed, trying npm install..."
+                                npm install --legacy-peer-deps
+                                return $?
+                            fi
+
+                            attempt=$((attempt + 1))
+                            sleep 5
+                        done
+                    }
+
+                    install_with_retry
+                '''
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                script {
+                    // Run Vitest unit tests with JSON reporter for failure analysis
+                    def testResult = sh(
+                        script: '''#!/bin/bash
+                            set -o pipefail
+                            npm run test:unit -- --reporter=json --reporter=default --outputFile=test-results.json 2>&1 | tee test-output.log
+                        ''',
+                        returnStatus: true
+                    )
+                    env.TEST_EXIT_CODE = testResult.toString()
+                    env.TEST_RESULTS_FILE = 'test-results.json'
+
+                    if (testResult != 0) {
+                        error("Unit tests failed with exit code ${testResult}")
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Publish Allure test reports if results exist
+            script {
+                if (fileExists('allure-results')) {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        results: [[path: 'allure-results']]
+                    ])
+                }
+            }
+        }
+        success {
+            echo 'Build succeeded!'
+        }
+        failure {
+            echo 'Build failed!'
+            script {
+                if (env.TEST_RESULTS_FILE && fileExists(env.TEST_RESULTS_FILE)) {
+                    // Analyze test failures and create grouped GitHub issues
+                    echo 'Analyzing test failures...'
+                    analyzeTestFailures(
+                        testResultsFile: env.TEST_RESULTS_FILE,
+                        maxIssues: 10
+                    )
+                }
+                // NOTE: No fallback to generic issue creation
+                // Infrastructure failures should be investigated and fixed,
+                // not automatically tracked as GitHub issues
+            }
+        }
+    }
+}
