@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ResponsesService } from './responses.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
 import type { ResponseDto } from './dto/response.dto.js';
@@ -6,6 +6,21 @@ import type { ResponseDto } from './dto/response.dto.js';
 @Controller('topics')
 export class ResponsesController {
   constructor(private readonly responsesService: ResponsesService) {}
+
+  /**
+   * GET /topics/:topicId/responses
+   * Get all responses for a discussion topic
+   *
+   * @param topicId - The ID of the topic to get responses for
+   * @returns Array of responses for the topic
+   */
+  @Get(':topicId/responses')
+  @HttpCode(HttpStatus.OK)
+  async getResponsesForTopic(
+    @Param('topicId') topicId: string,
+  ): Promise<ResponseDto[]> {
+    return this.responsesService.getResponsesForTopic(topicId);
+  }
 
   /**
    * POST /topics/:topicId/responses

@@ -8,6 +8,52 @@ export class ResponsesService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * Get all responses for a discussion topic
+   * @param topicId - The ID of the topic to get responses for
+   * @returns Array of responses for the topic
+   */
+  async getResponsesForTopic(topicId: string): Promise<ResponseDto[]> {
+    // Verify topic exists
+    const topic = await this.prisma.discussionTopic.findUnique({
+      where: { id: topicId },
+      select: { id: true },
+    });
+
+    if (!topic) {
+      throw new NotFoundException(`Topic with ID ${topicId} not found`);
+    }
+
+    // Fetch all responses for the topic
+    const responses = await this.prisma.response.findMany({
+      where: { topicId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
+        propositions: {
+          include: {
+            proposition: {
+              select: {
+                id: true,
+                statement: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc', // Order by creation time, oldest first
+      },
+    });
+
+    // Map to ResponseDto array
+    return responses.map((response) => this.mapToResponseDto(response));
+  }
+
+  /**
    * Create a new response to a discussion topic
    * @param topicId - The ID of the topic to respond to
    * @param authorId - The ID of the user creating the response
