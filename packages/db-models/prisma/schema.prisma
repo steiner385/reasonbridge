@@ -37,6 +37,7 @@ model User {
   followers           UserFollow[]         @relation("Followed")
   createdTopics       DiscussionTopic[]
   responses           Response[]
+  votes               Vote[]
   alignments          Alignment[]
   proposedTopicLinks  TopicLink[]          @relation("LinkProposer")
   createdPropositions Proposition[]
@@ -340,6 +341,7 @@ model Response {
   propositions     ResponseProposition[]
   feedback         Feedback[]
   factCheckResults FactCheckResult[]
+  votes            Vote[]
 
   @@index([topicId])
   @@index([authorId])
@@ -369,6 +371,32 @@ model ResponseProposition {
 
   @@id([responseId, propositionId])
   @@map("response_propositions")
+}
+
+/// Vote on a response (upvote/downvote)
+model Vote {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  responseId String   @map("response_id") @db.Uuid
+  voteType   VoteType @map("vote_type")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, responseId])
+  @@index([responseId])
+  @@index([userId])
+  @@map("votes")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+
+  @@map("vote_type")
 }
 
 /// User alignment (support/oppose/nuanced) on a proposition
