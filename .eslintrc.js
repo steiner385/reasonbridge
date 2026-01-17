@@ -15,6 +15,7 @@ module.exports = {
     'airbnb-typescript/base',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'prettier',
   ],
   plugins: ['@typescript-eslint'],
   rules: {
@@ -75,7 +76,7 @@ module.exports = {
     {
       // React frontend overrides
       files: ['frontend/**/*.tsx', 'frontend/**/*.ts'],
-      extends: ['airbnb', 'airbnb-typescript', 'airbnb/hooks'],
+      extends: ['airbnb', 'airbnb-typescript', 'airbnb/hooks', 'prettier'],
       parserOptions: {
         project: './frontend/tsconfig.json',
       },
