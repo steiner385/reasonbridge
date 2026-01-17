@@ -73,4 +73,44 @@ export class CognitoService {
       throw new UnauthorizedException('Authentication failed');
     }
   }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const params: InitiateAuthCommandInput = {
+        AuthFlow: 'REFRESH_TOKEN_AUTH' as AuthFlowType,
+        ClientId: this.clientId,
+        AuthParameters: {
+          REFRESH_TOKEN: refreshToken,
+        },
+      };
+
+      const command = new InitiateAuthCommand(params);
+      const response = await this.cognitoClient.send(command);
+
+      if (!response.AuthenticationResult) {
+        throw new UnauthorizedException('Token refresh failed');
+      }
+
+      return {
+        accessToken: response.AuthenticationResult.AccessToken!,
+        idToken: response.AuthenticationResult.IdToken!,
+        expiresIn: response.AuthenticationResult.ExpiresIn!,
+        tokenType: response.AuthenticationResult.TokenType || 'Bearer',
+      };
+    } catch (error: unknown) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      // Handle Cognito-specific errors
+      const errorObj = error as { name?: string };
+      if (errorObj.name === 'NotAuthorizedException') {
+        throw new UnauthorizedException('Invalid or expired refresh token');
+      }
+
+      // Log unexpected errors but don't expose details to user
+      console.error('Cognito token refresh error:', error);
+      throw new UnauthorizedException('Token refresh failed');
+    }
+  }
 }
