@@ -3,15 +3,15 @@
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
 - Completed issues #30-#37 (T030-T037) - All core services scaffolded
-- Completed issues #38-#40 (T042-T044) - Event infrastructure + EventPublisher utility
-- ~248 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #38-#41 (T042-T045) - Complete event infrastructure (pub/sub)
+- ~247 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #40 (T044): Implemented EventPublisher utility in packages/common:
-- EventPublisher interface with publish/publishBatch methods
-- SnsEventPublisher class for AWS SNS integration
-- Support for event metadata enrichment, message attributes, FIFO queues
-- Lazy AWS SDK loading for optimal cold start performance
+Issue #41 (T045): Implemented EventSubscriber base class in packages/common:
+- EventSubscriber abstract base class with handler registration (on/off)
+- SqsEventSubscriber class for AWS SQS polling
+- Support for long polling, concurrent processing, graceful shutdown
+- Automatic message acknowledgement with error handling and retry logic
 - Available at @unite-discord/common/events
 
 ## Next Steps
