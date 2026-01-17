@@ -45,20 +45,22 @@
 - Completed issue #90 (T094) - E2E test for user registration and login flow
 - Completed issue #91 (T095) - E2E test for browsing topics and viewing details
 - Completed issue #92 (T096) - E2E test for submitting responses to topics
-- ~188 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #93 (T097) - E2E test for expressing alignment on responses
+- ~187 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #92 (T096) - E2E: Submit response to topic:**
-- Created comprehensive E2E test suite in `frontend/e2e/submit-response-to-topic.spec.ts`
-- 10 test cases covering complete response submission flow
-- Tests: form display, validation, character count, metadata checkboxes
-- Tests: cited sources (add/validate/remove), complete submission with all fields
-- Tests: button state management based on form validation
-- Merged via PR #454
+**Completed Issue #93 (T097) - E2E: Express alignment on response:**
+- Created comprehensive E2E test suite in `frontend/e2e/express-alignment-on-response.spec.ts`
+- 25 test cases covering alignment interaction workflow
+- Tests: alignment display, support/oppose/nuanced stances, explanation requirements
+- Tests: authentication checks, consensus visualization, real-time updates
+- Tests: component integration (PropositionAlignmentView + AlignmentInput + AlignmentSummary)
+- Tests: error handling, multiple propositions per response, relevance scores
+- Merged via PR #455
 
-**Previous: Completed Issue #91 (T095) - E2E: Browse topics and view details:**
-- Created comprehensive E2E test suite with 10 test cases covering browse → detail flow
-- Merged via PR #453
+**Previous: Completed Issue #92 (T096) - E2E: Submit response to topic:**
+- Created comprehensive E2E test suite with 10 test cases covering response submission
+- Merged via PR #454
 
 **Response & Alignment System Progress:**
 - Backend:
