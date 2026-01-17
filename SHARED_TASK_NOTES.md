@@ -24,23 +24,24 @@
 - Completed issue #78 (T082) - Response card component
 - Completed issue #54 (T058) - Cognito user pool configuration
 - Completed issue #56 (T060) - /auth/login endpoint
-- ~209 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #57 (T061) - /auth/refresh endpoint
+- ~208 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #56 (T060):**
-- Implemented /auth/login endpoint with AWS Cognito integration ✅
-  - Created AuthModule with POST /auth/login endpoint
-  - Implemented CognitoService using @aws-sdk/client-cognito-identity-provider
-  - Added LoginDto and LoginResponseDto with validation
-  - USER_PASSWORD_AUTH flow for email/password authentication
-  - Returns JWT tokens (access, ID, refresh) on successful login
-  - Comprehensive error handling for Cognito errors
-  - Updated .env.example with Cognito configuration
-  - Merged via PR #433
+**Completed Issue #57 (T061):**
+- Implemented /auth/refresh endpoint with AWS Cognito integration ✅
+  - Added POST /auth/refresh endpoint to AuthController
+  - Implemented refreshAccessToken method in CognitoService
+  - REFRESH_TOKEN_AUTH flow for token refresh
+  - Returns new access and ID tokens without re-authentication
+  - Added RefreshDto and RefreshResponseDto with validation
+  - Error handling for invalid/expired refresh tokens
+  - Merged via PR #434
 
 **Authentication Endpoints:**
 - POST /auth/login - Authenticate user with email/password
-- Returns: accessToken, idToken, refreshToken, expiresIn, tokenType
+- POST /auth/refresh - Refresh access tokens using refresh token
+- Returns: accessToken, idToken, expiresIn, tokenType
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
