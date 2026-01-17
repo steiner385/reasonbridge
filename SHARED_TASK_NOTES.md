@@ -47,22 +47,22 @@
 - Completed issue #92 (T096) - E2E test for submitting responses to topics
 - Completed issue #93 (T097) - E2E test for expressing alignment on responses
 - Completed issue #94 (T098) - E2E test for thread navigation and reply
-- GitHub issues #1-#96 are closed, issues #97-#400 don't exist
-- Open issues start at #401+ (Polish/test tasks T342+)
-- ~186 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #97 (T101) - POST /feedback/request endpoint
+- ~185 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #94 (T098) - E2E: Thread navigation and reply:**
-- Created comprehensive E2E test suite in `frontend/e2e/thread-navigation-reply.spec.ts`
-- 10 test cases covering complete threaded discussion workflow
-- Tests: thread display with nesting, collapse/expand controls, reply functionality
-- Tests: URL hash navigation, empty states, thread structure preservation
-- Tests: visual indicators (lines/indentation), depth limiting (maxDepth)
-- Merged via PR #456
+**Completed Issue #97 (T101) - POST /feedback/request endpoint:**
+- Created FeedbackController with POST /feedback/request endpoint
+- Created FeedbackService to orchestrate feedback generation
+- Created DTOs (RequestFeedbackDto, FeedbackResponseDto)
+- Created FeedbackModule and registered in AppModule
+- Integrated with Prisma for database operations
+- Uses BedrockService stub (actual AI integration in future tasks)
+- Merged via PR #458
 
-**Previous: Completed Issue #93 (T097) - E2E: Express alignment on response:**
-- Created comprehensive E2E test suite with 25 test cases covering alignment workflow
-- Merged via PR #455
+**Previous: Completed Issue #94 (T098) - E2E: Thread navigation and reply:**
+- Created comprehensive E2E test suite in `frontend/e2e/thread-navigation-reply.spec.ts`
+- Merged via PR #456
 
 **Response & Alignment System Progress:**
 - Backend:
@@ -74,18 +74,6 @@
 - Modal-based response editing with validation
 - Complete voting system (backend + frontend UI component)
 - User alignment tracking on propositions (backend complete)
-
-## CRITICAL ISSUE: GitHub Issues Have Wrong Descriptions
-
-The GitHub issues were created with mismatched descriptions. For example:
-- Issue #95 title says "[T099] Implement Bedrock client wrapper" but tasks.md shows T099 should be "Unit test ResponseAnalyzer"
-- Issue #55 title says "[T059] Implement /auth/register endpoint" but tasks.md shows T059 should be "Unit test DiscussionService"
-
-**Root cause**: The `scripts/create-issues.sh` script created issues with descriptions that don't match the current tasks.md file.
-
-**Impact**: Cannot reliably work from GitHub issues - must use tasks.md as source of truth.
-
-**Action Taken**: Closed issues #95 and #96 as they had incorrect descriptions.
 
 ## CRITICAL ISSUE: Missing Source Files (RESOLVED)
 
@@ -106,9 +94,7 @@ This suggests either:
 
 ## Next Steps
 
-1. **Fix GitHub issues** - Either recreate issues #97-#400 from current tasks.md with correct descriptions, or work directly from tasks.md
-2. **Identify next task** - Based on tasks.md, find the first incomplete task after T098 (US1 is complete, start US2 tasks)
-3. Run `npm run next-issue` to claim and implement next highest priority issue
+Run `npm run next-issue` to claim and implement the next highest priority issue.
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
