@@ -10,7 +10,6 @@ pipeline {
     agent {
         node {
             label 'e2e'
-            customWorkspace '/home/jenkins/agent/workspace-kindash'
         }
     }
 
@@ -23,20 +22,14 @@ pipeline {
     environment {
         CI = 'true'
         NODE_ENV = 'test'
+        GITHUB_OWNER = 'steiner385'
         GITHUB_REPO = 'uniteDiscord'
         PLAYWRIGHT_BROWSERS_PATH = '/home/jenkins/agent/.playwright-cache'
-        // DATABASE_URL is exported dynamically after containers are connected to Jenkins network
-        // This follows the MachShop pattern for inter-container communication
+        // Playwright will use this for the base URL
+        PLAYWRIGHT_BASE_URL = 'http://localhost:5173'
     }
 
     stages {
-        stage('Pre-Cleanup') {
-            steps {
-                echo 'Running pre-cleanup to ensure clean test environment...'
-                sh 'bash scripts/ci-cleanup.sh || true'
-            }
-        }
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -44,48 +37,41 @@ pipeline {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
                 echo "Running E2E tests for commit: ${env.GIT_COMMIT_SHORT}"
-                // Override DATABASE_URL in .env.test for CI environment
-                // Test containers are connected to Jenkins network in Database Setup stage
-                sh '''
-                    sed -i 's|DATABASE_URL=.*|DATABASE_URL="postgresql://testuser:testpassword@kindash-e2e-postgres:5432/kindash_e2e_test"|g' .env.test
-                    sed -i 's|TEST_DATABASE_URL=.*|TEST_DATABASE_URL="postgresql://testuser:testpassword@kindash-e2e-postgres:5432/kindash_e2e_test"|g' .env.test
-                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                // Fix Verdaccio URLs and install dependencies
                 sh '''
+                    # Remove any local .npmrc that might cause issues
                     rm -f .npmrc
+
+                    # Ensure we use the public npm registry
                     npm config set registry https://registry.npmjs.org
 
-                    # Fix package-lock.json URLs if they point to local Verdaccio
-                    # npm ci uses resolved URLs from lock file, ignoring registry config
-                    if grep -q 'localhost:4873' package-lock.json 2>/dev/null; then
-                        echo "Fixing Verdaccio URLs in package-lock.json..."
-                        sed -i 's|http://localhost:4873|https://registry.npmjs.org|g' package-lock.json
+                    # Install pnpm if not available
+                    if ! command -v pnpm &> /dev/null; then
+                        npm install -g pnpm@9
                     fi
 
-                    # Smart install - only if node_modules is stale or missing
-                    if [ ! -d "node_modules" ] || [ "package-lock.json" -nt "node_modules/.package-lock.json" ]; then
-                        echo "Installing dependencies..."
-                        npm ci --legacy-peer-deps
-                        cp package-lock.json node_modules/.package-lock.json
-                    else
-                        echo "Dependencies up to date, skipping install"
-                    fi
+                    # Install dependencies
+                    pnpm install --frozen-lockfile || pnpm install
                 '''
-                // Install Playwright browsers with caching
+            }
+        }
+
+        stage('Install Playwright Browsers') {
+            steps {
                 sh '''
+                    cd frontend
+
                     # Check if browsers are already cached
-                    if [ ! -f "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed" ]; then
+                    if [ ! -f "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed-unite" ]; then
                         echo "Installing Playwright browsers..."
                         mkdir -p "${PLAYWRIGHT_BROWSERS_PATH}"
-                        # Use chromium only (not chrome) to avoid system dependency issues
-                        # Skip browser validation to prevent su root requirement
+                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium --with-deps || \
                         PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium
-                        touch "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed"
+                        touch "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed-unite"
                     else
                         echo "Playwright browsers already cached"
                     fi
@@ -93,168 +79,73 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                // Build the application
-                sh 'npm run build'
-
-                // Build Docker images for E2E testing (separate from container startup)
-                sh '''
-                    echo "Building E2E Docker images..."
-                    docker-compose -f docker/docker-compose.e2e.yml build
-                '''
-            }
-        }
-
         stage('Start Test Infrastructure') {
             steps {
-                // Force clean up and restart E2E test containers (app + postgres)
                 sh '''
-                    echo "Cleaning up any existing test containers..."
+                    echo "Starting test infrastructure..."
+                    docker compose -f docker-compose.test.yml up -d --wait || docker compose -f docker-compose.test.yml up -d
 
-                    # Stop and remove containers by name first
-                    docker stop kindash-e2e-app kindash-e2e-postgres 2>/dev/null || true
-                    docker rm -f kindash-e2e-app kindash-e2e-postgres 2>/dev/null || true
-
-                    # Then use docker-compose to clean up
-                    docker-compose -f docker/docker-compose.e2e.yml down -v --remove-orphans --timeout 10 || true
-
-                    # Remove any containers using the E2E ports
-                    docker ps -q --filter "publish=5433" | xargs -r docker stop || true
-                    docker ps -q --filter "publish=3010" | xargs -r docker stop || true
-                    docker ps -aq --filter "publish=5433" | xargs -r docker rm -f || true
-                    docker ps -aq --filter "publish=3010" | xargs -r docker rm -f || true
-
-                    # Kill any processes on test ports (multiple methods)
-                    fuser -k 5433/tcp 2>/dev/null || true
-                    fuser -k 3010/tcp 2>/dev/null || true
-
-                    # Alternative: use ss/netstat to find and kill
-                    for port in 5433 3010; do
-                        pid=$(ss -tlnp 2>/dev/null | grep ":${port}" | grep -oP 'pid=\\K[0-9]+' | head -1)
-                        if [ -n "$pid" ]; then
-                            echo "Killing process $pid on port $port"
-                            kill -9 $pid 2>/dev/null || true
-                        fi
-                    done
-
-                    # Wait for ports to be fully released
-                    sleep 5
-
-                    # Verify ports are free
-                    for port in 5433 3010; do
-                        if ss -tln | grep -q ":${port}"; then
-                            echo "WARNING: Port $port still in use after cleanup"
-                        else
-                            echo "Port $port is free"
-                        fi
-                    done
-
-                    echo "Starting E2E test containers..."
-                    docker-compose -f docker/docker-compose.e2e.yml up -d
-
-                    # Connect containers to Jenkins network BEFORE health checks
-                    # This allows the Jenkins agent to reach the containers
-                    echo "Connecting containers to Jenkins network..."
-                    docker network connect docker-compose_jenkins-network kindash-e2e-postgres || true
-                    docker network connect docker-compose_jenkins-network kindash-e2e-app || true
-
-                    # Get container IP on Jenkins network for health checks
-                    APP_IP=$(docker inspect kindash-e2e-app --format '{{range .NetworkSettings.Networks}}{{if eq .NetworkID "'$(docker network inspect docker-compose_jenkins-network --format '{{.Id}}')'"}}{{.IPAddress}}{{end}}{{end}}')
-                    echo "App container IP on Jenkins network: $APP_IP"
-
-                    # Wait for PostgreSQL to be ready (use container name since we're on same network)
-                    echo "Waiting for PostgreSQL to be healthy..."
+                    # Wait for services to be ready
+                    echo "Waiting for PostgreSQL..."
                     for i in $(seq 1 30); do
-                        docker exec kindash-e2e-postgres pg_isready -U testuser -d kindash_e2e_test && break
-                        echo "Waiting for postgres... attempt $i/30"
+                        if docker exec unite-discord-postgres-test pg_isready -U test -d unite_discord_test 2>/dev/null; then
+                            echo "PostgreSQL is ready"
+                            break
+                        fi
+                        echo "Waiting for PostgreSQL... attempt $i/30"
                         sleep 2
                     done
 
-                    # Wait for app to be healthy using container IP
-                    echo "Waiting for app to be healthy..."
-                    APP_HEALTHY=false
-                    for i in $(seq 1 60); do
-                        if curl -sf http://${APP_IP}:3010/health; then
-                            echo "App is healthy!"
-                            APP_HEALTHY=true
+                    echo "Waiting for Redis..."
+                    for i in $(seq 1 15); do
+                        if docker exec unite-discord-redis-test redis-cli ping 2>/dev/null | grep -q PONG; then
+                            echo "Redis is ready"
                             break
                         fi
-                        # Also try localhost in case port mapping works
-                        if curl -sf http://localhost:3010/health; then
-                            echo "App is healthy via localhost!"
-                            APP_HEALTHY=true
-                            break
-                        fi
-                        # Also try container name
-                        if curl -sf http://kindash-e2e-app:3010/health; then
-                            echo "App is healthy via hostname!"
-                            APP_HEALTHY=true
-                            break
-                        fi
-                        echo "Waiting for app... attempt $i/60"
+                        echo "Waiting for Redis... attempt $i/15"
                         sleep 2
                     done
-
-                    # If app failed to become healthy, output container logs for debugging
-                    if [ "$APP_HEALTHY" = "false" ]; then
-                        echo "=============================================="
-                        echo "APP CONTAINER FAILED TO START - SHOWING LOGS"
-                        echo "=============================================="
-                        echo "Container status:"
-                        docker ps -a --filter "name=kindash-e2e-app"
-                        echo ""
-                        echo "Container logs (last 100 lines):"
-                        docker logs kindash-e2e-app --tail 100 2>&1 || echo "Failed to get container logs"
-                        echo "=============================================="
-                        exit 1
-                    fi
                 '''
             }
         }
 
-        stage('Clear Test Artifacts') {
+        stage('Build Frontend') {
             steps {
-                // Only clear test artifacts, NOT test infrastructure containers
-                sh 'rm -rf allure-results playwright-report test-results'
+                sh '''
+                    cd frontend
+                    pnpm run build || npm run build
+                '''
             }
         }
 
         stage('E2E Tests') {
             steps {
-                // Run E2E tests against the containerized app
-                // Export DATABASE_URL AFTER containers are connected to Jenkins network
-                // This allows Jenkins agent to resolve container hostname (MachShop pattern)
                 sh '''
-                    rm -rf allure-results
+                    cd frontend
 
-                    # Export DATABASE_URL using container hostname (works because containers are on Jenkins network)
-                    export DATABASE_URL="postgresql://testuser:testpassword@kindash-e2e-postgres:5432/kindash_e2e_test"
+                    # Clear previous test artifacts
+                    rm -rf playwright-report test-results allure-results
 
-                    # USE_EXISTING_SERVER=true tells Playwright not to start its own server
-                    # E2E_BASE_URL uses container hostname (since Jenkins is on same Docker network)
-                    USE_EXISTING_SERVER=true E2E_BASE_URL=http://kindash-e2e-app:3010 npm run test:e2e
+                    # Run Playwright tests
+                    # The webServer config in playwright.config.ts will start the dev server
+                    pnpm run test:e2e || npm run test:e2e
                 '''
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
-                    script {
-                        if (fileExists('allure-results')) {
-                            // Allure report with historical trend tracking (last 30 builds)
-                            allure([
-                                includeProperties: true,
-                                jdk: '',
-                                results: [[path: 'allure-results']],
-                                reportBuildPolicy: 'ALWAYS',
-                                report: 'allure-report',
-                                properties: [
-                                    [key: 'allure.results.directory', value: 'allure-results'],
-                                    [key: 'allure.report.history.enabled', value: 'true']
-                                ]
-                            ])
-                        }
-                    }
+                    // Archive Playwright report
+                    archiveArtifacts artifacts: 'frontend/playwright-report/**', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'frontend/test-results/**', allowEmptyArchive: true
+
+                    // Publish HTML report
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'frontend/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright E2E Report'
+                    ])
                 }
             }
         }
@@ -263,74 +154,29 @@ pipeline {
     post {
         always {
             script {
-                // Analyze Allure results and create GitHub issues for failures
-                if (fileExists('allure-results')) {
-                    analyzeAllureFailures(
-                        allureResultsDir: 'allure-results',
-                        testType: 'E2E',
-                        maxIssues: 10
-                    )
-                }
-
-                // Collect test execution metrics for dashboard tracking
+                // Collect test metrics
                 sh '''
-                    # Create metrics directory if it doesn't exist
                     mkdir -p reports/metrics
 
-                    # Extract test results from Allure results
-                    PASSED=$(find allure-results -name '*-result.json' 2>/dev/null | xargs grep -l '"status":"passed"' | wc -l || echo "0")
-                    FAILED=$(find allure-results -name '*-result.json' 2>/dev/null | xargs grep -l '"status":"failed"' | wc -l || echo "0")
-                    BROKEN=$(find allure-results -name '*-result.json' 2>/dev/null | xargs grep -l '"status":"broken"' | wc -l || echo "0")
-                    TOTAL=$((PASSED + FAILED + BROKEN))
-                    PASS_RATE=0
+                    # Count test results from Playwright output
+                    PASSED=$(grep -c "passed" frontend/test-results/.last-run.json 2>/dev/null || echo "0")
+                    FAILED=$(grep -c "failed" frontend/test-results/.last-run.json 2>/dev/null || echo "0")
 
-                    if [ "$TOTAL" -gt 0 ]; then
-                        PASS_RATE=$(awk "BEGIN {printf \\"%.2f\\", ($PASSED / $TOTAL) * 100}")
-                    fi
-
-                    # Write metrics to JSONL file for historical tracking
-                    echo "{\\"build\\":\\"${BUILD_NUMBER}\\",\\"passed\\":${PASSED},\\"failed\\":${FAILED},\\"broken\\":${BROKEN},\\"total\\":${TOTAL},\\"pass_rate\\":${PASS_RATE},\\"timestamp\\":\\"$(date -Iseconds)\\",\\"branch\\":\\"${GIT_BRANCH}\\",\\"commit\\":\\"${GIT_COMMIT_SHORT}\\"}" >> reports/metrics/test-execution.jsonl
-
-                    echo "📊 Test Metrics: ${PASSED} passed, ${FAILED} failed, ${BROKEN} broken (${PASS_RATE}% pass rate)"
+                    echo "📊 E2E Test Results: ${PASSED} passed, ${FAILED} failed"
                 '''
-
-                // Check if pass rate is below threshold and alert
-                def passRate = sh(script: '''
-                    tail -1 reports/metrics/test-execution.jsonl 2>/dev/null | grep -o '"pass_rate":[0-9.]*' | cut -d: -f2 || echo "100"
-                ''', returnStdout: true).trim().toFloat()
-
-                if (passRate < 90.0) {
-                    echo "⚠️ WARNING: Test pass rate (${passRate}%) is below 90% threshold!"
-                    // Send notification via Jenkins notification plugin or email
-                    emailext(
-                        subject: "uniteDiscord E2E Tests: Low Pass Rate Alert (${passRate}%)",
-                        body: """
-                            E2E test pass rate has dropped below 90%:
-                            - Pass Rate: ${passRate}%
-                            - Build: ${BUILD_NUMBER}
-                            - Branch: ${GIT_BRANCH}
-                            - Commit: ${GIT_COMMIT_SHORT}
-
-                            View Allure Report: ${BUILD_URL}allure
-                            View Build: ${BUILD_URL}
-                        """,
-                        to: '${DEFAULT_RECIPIENTS}',
-                        recipientProviders: [developers(), requestor()]
-                    )
-                }
             }
-            // Post-cleanup: Always clean up Docker resources after tests
-            echo 'Running post-cleanup to free Docker resources...'
-            sh 'bash scripts/ci-cleanup.sh || true'
 
-            // Archive metrics for historical tracking
-            archiveArtifacts artifacts: 'reports/metrics/test-execution.jsonl', allowEmptyArchive: true
+            // Stop test infrastructure
+            sh '''
+                echo "Stopping test infrastructure..."
+                docker compose -f docker-compose.test.yml down -v || true
+            '''
         }
         success {
             echo '✅ E2E tests passed!'
         }
         failure {
-            echo '❌ E2E tests failed - check Allure Report and GitHub issues for details'
+            echo '❌ E2E tests failed - check Playwright Report for details'
         }
     }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /**
  * Integration Tests Pipeline for uniteDiscord
- * Runs integration tests with database setup (similar to E2E pipeline)
+ * Runs integration tests with database setup
  */
 
 @Library('unitediscord-lib@main') _
@@ -10,7 +10,6 @@ pipeline {
     agent {
         node {
             label 'integration'
-            customWorkspace '/home/jenkins/agent/workspace-kindash-integration'
         }
     }
 
@@ -23,19 +22,13 @@ pipeline {
     environment {
         CI = 'true'
         NODE_ENV = 'test'
+        GITHUB_OWNER = 'steiner385'
         GITHUB_REPO = 'uniteDiscord'
-        // DATABASE_URL is exported dynamically after containers are connected to Jenkins network
-        // This follows the MachShop pattern for inter-container communication
+        // Database URL for test container
+        DATABASE_URL = 'postgresql://test:test@localhost:5433/unite_discord_test'
     }
 
     stages {
-        stage('Pre-Cleanup') {
-            steps {
-                echo 'Running pre-cleanup to ensure clean test environment...'
-                sh 'bash scripts/ci-cleanup.sh || true'
-            }
-        }
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -43,11 +36,6 @@ pipeline {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
                 echo "Running integration tests for commit: ${env.GIT_COMMIT_SHORT}"
-                // Override DATABASE_URL in .env.test for CI environment
-                sh '''
-                    sed -i 's|DATABASE_URL=.*|DATABASE_URL="postgresql://postgres:postgres@kindash-postgres-integration:5432/kindash_integration"|g' .env.test
-                    sed -i 's|TEST_DATABASE_URL=.*|TEST_DATABASE_URL="postgresql://postgres:postgres@kindash-postgres-integration:5432/kindash_integration"|g' .env.test
-                '''
             }
         }
 
@@ -57,20 +45,13 @@ pipeline {
                     rm -f .npmrc
                     npm config set registry https://registry.npmjs.org
 
-                    # Fix package-lock.json URLs if they point to local Verdaccio
-                    if grep -q 'localhost:4873' package-lock.json 2>/dev/null; then
-                        echo "Fixing Verdaccio URLs in package-lock.json..."
-                        sed -i 's|http://localhost:4873|https://registry.npmjs.org|g' package-lock.json
+                    # Install pnpm if not available
+                    if ! command -v pnpm &> /dev/null; then
+                        npm install -g pnpm@9
                     fi
 
-                    # Smart install - only if node_modules is stale or missing
-                    if [ ! -d "node_modules" ] || [ "package-lock.json" -nt "node_modules/.package-lock.json" ]; then
-                        echo "Installing dependencies..."
-                        npm ci --legacy-peer-deps
-                        cp package-lock.json node_modules/.package-lock.json
-                    else
-                        echo "Dependencies up to date, skipping install"
-                    fi
+                    # Install dependencies
+                    pnpm install --frozen-lockfile || pnpm install
                 '''
             }
         }
@@ -78,57 +59,41 @@ pipeline {
         stage('Start Test Infrastructure') {
             steps {
                 sh '''
-                    echo "Cleaning up any existing integration test containers..."
-
-                    # Stop and remove containers by name first
-                    docker stop kindash-postgres-integration 2>/dev/null || true
-                    docker rm -f kindash-postgres-integration 2>/dev/null || true
-
-                    # Remove any containers using the integration test port
-                    docker ps -q --filter "publish=5434" | xargs -r docker stop || true
-                    docker ps -aq --filter "publish=5434" | xargs -r docker rm -f || true
-
-                    # Kill any processes on test ports
-                    fuser -k 5434/tcp 2>/dev/null || true
-
-                    # Wait for ports to be fully released
-                    sleep 3
-
-                    echo "Starting integration test database..."
-                    docker run -d \
-                        --name kindash-postgres-integration \
-                        -e POSTGRES_USER=postgres \
-                        -e POSTGRES_PASSWORD=postgres \
-                        -e POSTGRES_DB=kindash_integration \
-                        -p 5434:5432 \
-                        postgres:15-alpine
-
-                    # Connect container to Jenkins network
-                    echo "Connecting container to Jenkins network..."
-                    docker network connect docker-compose_jenkins-network kindash-postgres-integration || true
+                    echo "Starting test infrastructure..."
+                    docker compose -f docker-compose.test.yml up -d --wait || docker compose -f docker-compose.test.yml up -d
 
                     # Wait for PostgreSQL to be ready
-                    echo "Waiting for PostgreSQL to be healthy..."
+                    echo "Waiting for PostgreSQL..."
                     for i in $(seq 1 30); do
-                        docker exec kindash-postgres-integration pg_isready -U postgres -d kindash_integration && break
-                        echo "Waiting for postgres... attempt $i/30"
+                        if docker exec unite-discord-postgres-test pg_isready -U test -d unite_discord_test 2>/dev/null; then
+                            echo "PostgreSQL is ready"
+                            break
+                        fi
+                        echo "Waiting for PostgreSQL... attempt $i/30"
                         sleep 2
                     done
 
-                    echo "PostgreSQL is ready!"
+                    # Wait for Redis
+                    echo "Waiting for Redis..."
+                    for i in $(seq 1 15); do
+                        if docker exec unite-discord-redis-test redis-cli ping 2>/dev/null | grep -q PONG; then
+                            echo "Redis is ready"
+                            break
+                        fi
+                        echo "Waiting for Redis... attempt $i/15"
+                        sleep 2
+                    done
+
+                    echo "Test infrastructure is ready!"
                 '''
             }
         }
 
         stage('Database Setup') {
             steps {
-                // Export DATABASE_URL AFTER container is connected to Jenkins network
-                // This allows Jenkins agent to resolve container hostname (MachShop pattern)
                 sh '''
-                    # Export DATABASE_URL using container hostname (works because container is on Jenkins network)
-                    export DATABASE_URL="postgresql://postgres:postgres@kindash-postgres-integration:5432/kindash_integration"
-
                     echo "Running database migrations..."
+                    cd packages/db-models
                     npx prisma migrate deploy || npx prisma db push --accept-data-loss
 
                     echo "Generating Prisma client..."
@@ -146,16 +111,10 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 script {
-                    // Export DATABASE_URL AFTER container is connected to Jenkins network
-                    // This allows Jenkins agent to resolve container hostname (MachShop pattern)
                     def testResult = sh(
                         script: '''#!/bin/bash
                             set -o pipefail
-
-                            # Export DATABASE_URL using container hostname (works because container is on Jenkins network)
-                            export DATABASE_URL="postgresql://postgres:postgres@kindash-postgres-integration:5432/kindash_integration"
-
-                            npm run test:integration 2>&1 | tee test-output.log
+                            pnpm run test:integration 2>&1 | tee test-output.log
                         ''',
                         returnStatus: true
                     )
@@ -168,6 +127,9 @@ pipeline {
             }
             post {
                 always {
+                    // Publish JUnit results if available
+                    junit allowEmptyResults: true, testResults: '**/coverage/integration-junit.xml'
+
                     script {
                         if (fileExists('allure-results')) {
                             allure([
@@ -186,50 +148,28 @@ pipeline {
     post {
         always {
             script {
-                // Analyze Allure results and create GitHub issues for failures
-                if (fileExists('allure-results')) {
-                    analyzeAllureFailures(
-                        allureResultsDir: 'allure-results',
-                        testType: 'Integration',
-                        maxIssues: 10
-                    )
-                }
-
                 // Collect test execution metrics
                 sh '''
                     mkdir -p reports/metrics
-
-                    PASSED=$(find allure-results -name '*-result.json' 2>/dev/null | xargs grep -l '"status":"passed"' | wc -l || echo "0")
-                    FAILED=$(find allure-results -name '*-result.json' 2>/dev/null | xargs grep -l '"status":"failed"' | wc -l || echo "0")
-                    BROKEN=$(find allure-results -name '*-result.json' 2>/dev/null | xargs grep -l '"status":"broken"' | wc -l || echo "0")
-                    TOTAL=$((PASSED + FAILED + BROKEN))
-                    PASS_RATE=0
-
-                    if [ "$TOTAL" -gt 0 ]; then
-                        PASS_RATE=$(awk "BEGIN {printf \\"%.2f\\", ($PASSED / $TOTAL) * 100}")
-                    fi
-
-                    echo "{\\"build\\":\\"${BUILD_NUMBER}\\",\\"passed\\":${PASSED},\\"failed\\":${FAILED},\\"broken\\":${BROKEN},\\"total\\":${TOTAL},\\"pass_rate\\":${PASS_RATE},\\"timestamp\\":\\"$(date -Iseconds)\\",\\"branch\\":\\"${GIT_BRANCH}\\",\\"commit\\":\\"${GIT_COMMIT_SHORT}\\"}" >> reports/metrics/integration-test-execution.jsonl
-
-                    echo "Test Metrics: ${PASSED} passed, ${FAILED} failed, ${BROKEN} broken (${PASS_RATE}% pass rate)"
+                    echo "📊 Integration tests completed"
                 '''
             }
 
-            // Post-cleanup: Always clean up Docker resources after tests
-            echo 'Running post-cleanup to free Docker resources...'
+            // Stop test infrastructure
             sh '''
-                docker stop kindash-postgres-integration 2>/dev/null || true
-                docker rm -f kindash-postgres-integration 2>/dev/null || true
+                echo "Stopping test infrastructure..."
+                docker compose -f docker-compose.test.yml down -v || true
             '''
 
-            // Archive metrics for historical tracking
-            archiveArtifacts artifacts: 'reports/metrics/integration-test-execution.jsonl', allowEmptyArchive: true
+            // Archive metrics
+            archiveArtifacts artifacts: 'reports/metrics/**', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'test-output.log', allowEmptyArchive: true
         }
         success {
-            echo 'Integration tests passed!'
+            echo '✅ Integration tests passed!'
         }
         failure {
-            echo 'Integration tests failed - check Allure Report and GitHub issues for details'
+            echo '❌ Integration tests failed - check logs for details'
         }
     }
 }
