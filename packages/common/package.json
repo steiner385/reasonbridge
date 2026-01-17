@@ -17,6 +17,10 @@
     "./utils": {
       "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "import": "./dist/events/index.js"
     }
   },
   "files": [
@@ -28,7 +32,10 @@
     "typecheck": "tsc --noEmit",
     "dev": "tsc --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@aws-sdk/client-sns": "^3.504.0",
+    "@unite-discord/event-schemas": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "5.7.3"
   },
