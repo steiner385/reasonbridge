@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { GetTopicsQueryDto } from './dto/get-topics-query.dto.js';
 import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-response.dto.js';
@@ -101,6 +101,47 @@ export class TopicsService {
         limit,
         totalPages: Math.ceil(total / limit),
       },
+    };
+  }
+
+  async getTopicById(id: string): Promise<TopicResponseDto> {
+    const topic = await this.prisma.discussionTopic.findUnique({
+      where: { id },
+      include: {
+        tags: {
+          include: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!topic) {
+      throw new NotFoundException(`Topic with ID ${id} not found`);
+    }
+
+    return {
+      id: topic.id,
+      title: topic.title,
+      description: topic.description,
+      creatorId: topic.creatorId,
+      status: topic.status,
+      evidenceStandards: topic.evidenceStandards,
+      minimumDiversityScore: topic.minimumDiversityScore.toNumber(),
+      currentDiversityScore: topic.currentDiversityScore?.toNumber() ?? null,
+      participantCount: topic.participantCount,
+      responseCount: topic.responseCount,
+      crossCuttingThemes: topic.crossCuttingThemes,
+      createdAt: topic.createdAt,
+      activatedAt: topic.activatedAt,
+      archivedAt: topic.archivedAt,
+      tags: topic.tags.map((tt) => tt.tag),
     };
   }
 }
