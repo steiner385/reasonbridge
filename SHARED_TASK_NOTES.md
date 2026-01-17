@@ -17,16 +17,18 @@
 - Completed issue #72 (T076) - Topic filtering UI component
 - Completed issue #73 (T077) - POST /responses endpoint
 - Completed issue #74 (T078) - GET /responses for topic
-- ~224 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #75 (T079) - Response threading (parentId)
+- ~223 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #74 (T078): Implement GET /responses for topic:
-- Added GET /topics/:topicId/responses endpoint to ResponsesController
-- Implemented getResponsesForTopic service method in ResponsesService
-- Returns array of responses ordered by creation time (oldest first)
-- Includes author info and associated propositions via Prisma relations
-- Validates topic exists before fetching responses (404 if not found)
-- Reuses existing ResponseDto and mapToResponseDto helper
+Issue #75 (T079): Implement response threading with parentId:
+- Added parentId field to Response model in Prisma schema
+- Added self-referential relation for threading (parent/replies)
+- Updated CreateResponseDto to accept optional parentId
+- Updated ResponseDto to include parentId field
+- Added validation to ensure parent response exists and belongs to same topic
+- parentId is optional (null for top-level responses)
+- Enables hierarchical threaded discussions
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
