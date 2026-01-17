@@ -27,25 +27,32 @@
 - Completed issue #57 (T061) - /auth/refresh endpoint
 - Completed issue #58 (T062) - Registration form component
 - Completed issue #59 (T063) - Login form component
-- Completed issue #60 (T064) - /users/me endpoint
-- ~205 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #60 (T064) - GET /users/me endpoint
+- Completed issue #61 (T065) - PUT /users/me profile update endpoint
+- ~204 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #60:**
+**Completed Issues #60-61:**
 
-**Issue #60 (T064) - Implement /users/me endpoint:**
+**Issue #60 (T064) - Implement GET /users/me endpoint:**
 - Created JWT authentication infrastructure with JwtAuthGuard
 - Verifies JWT tokens against Cognito JWKS endpoint
 - Created CurrentUser decorator for extracting user from JWT payload
-- Implemented GET /users/me endpoint in UsersController
 - Returns comprehensive user profile (trust scores, verification level, profiles)
-- UsersService handles user data access via Prisma
 - Merged via PR #437
 
-**Authentication Progress:**
-- Backend: POST /auth/login, POST /auth/refresh, GET /users/me
+**Issue #61 (T065) - Implement PUT /users/me endpoint:**
+- Created UpdateProfileDto with validation for displayName (1-50 chars)
+- Added updateProfile method to UsersService
+- Enabled global ValidationPipe in main.ts
+- Users can update their own profile securely
+- Merged via PR #438
+
+**Authentication & User Management Progress:**
+- Backend: POST /auth/login, POST /auth/refresh, GET /users/me, PUT /users/me
 - Frontend: RegistrationForm, LoginForm components
 - JWT verification using Cognito public keys (RS256)
+- Full CRUD for user profile management
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
