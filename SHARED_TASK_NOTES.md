@@ -3,19 +3,16 @@
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
 - Completed issues #30-#37 (T030-T037) - All core services scaffolded
-- Completed issues #38-#39 (T042-T043) - SNS/SQS event infrastructure in LocalStack
-- ~249 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #38-#40 (T042-T044) - Event infrastructure + EventPublisher utility
+- ~248 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #39 (T043): Created comprehensive SNS topic infrastructure for pub/sub architecture:
-- 9 event topics organized by domain (discussion, moderation, AI analysis, notifications, system)
-- Topics auto-initialized via docker-compose LocalStack mount
-- Subscriptions managed by application services at startup (LocalStack 3 CE limitation workaround)
-- Comprehensive documentation with TypeScript implementation examples
-
-Issue #38 (T042): Created comprehensive SQS queue infrastructure:
-- 7 primary event processing queues + 3 utility queues
-- Each queue has dedicated DLQ with retry policies
+Issue #40 (T044): Implemented EventPublisher utility in packages/common:
+- EventPublisher interface with publish/publishBatch methods
+- SnsEventPublisher class for AWS SNS integration
+- Support for event metadata enrichment, message attributes, FIFO queues
+- Lazy AWS SDK loading for optimal cold start performance
+- Available at @unite-discord/common/events
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
