@@ -3,15 +3,16 @@
 ## Current Status
 - Completed issues #1-#14 (T001-T014) - Setup phase monorepo + ai-client package
 - Completed issues #30-#37 (T030-T037) - All core services scaffolded
-- Completed issues #38-#41 (T042-T045) - Complete event infrastructure (pub/sub)
-- ~247 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #38-#42 (T042-T046) - Complete event infrastructure (pub/sub + DLQ)
+- ~246 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #41 (T045): Implemented EventSubscriber base class in packages/common:
-- EventSubscriber abstract base class with handler registration (on/off)
-- SqsEventSubscriber class for AWS SQS polling
-- Support for long polling, concurrent processing, graceful shutdown
-- Automatic message acknowledgement with error handling and retry logic
+Issue #42 (T046): Implemented dead-letter queue handler in packages/common:
+- DeadLetterQueueHandler class for processing failed messages from DLQ
+- DlqMonitor class for monitoring queue depth and alerting
+- Support for requeuing messages to source queue after fixes
+- Support for permanently deleting poison messages
+- Detailed failure metadata tracking and statistics
 - Available at @unite-discord/common/events
 
 ## Next Steps
