@@ -44,7 +44,20 @@
 - Password policy: 12+ chars with complexity requirements
 
 ## Next Steps
-Run `npm run next-issue` to claim and implement the next highest priority issue.
+**In Progress: Issue #55 (T059) - /auth/register endpoint**
+- Branch created: `feature/t059-auth-register-endpoint`
+- Dependencies added: @aws-sdk/client-cognito-identity-provider, class-validator, class-transformer
+- Remaining work:
+  1. Create auth module with DTOs (RegisterDto, LoginDto, etc.)
+  2. Implement CognitoService to interact with user pool
+  3. Implement AuthService with register/login logic
+  4. Create user records in DB after successful Cognito registration
+  5. Implement AuthController with /auth/register endpoint
+  6. Add tests for auth endpoints
+  7. Create PR and merge
+
+**For next iteration:**
+Continue implementing issue #55 or run `npm run next-issue` to select a different task.
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
