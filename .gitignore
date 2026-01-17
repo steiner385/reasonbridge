@@ -1,34 +1,44 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
-# Build output
+# Build outputs
 dist/
 build/
 *.tsbuildinfo
 
-# Environment
+# Environment files (NEVER commit secrets)
 .env
 .env.local
 .env.*.local
 
-# IDE
+# IDE and editor
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 
 # Logs
+logs/
 *.log
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 # Test coverage
 coverage/
+.nyc_output/
+
+# Cache
+.turbo/
+.cache/
+.parcel-cache/
 
 # Temporary files
 tmp/

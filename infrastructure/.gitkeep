@@ -1,0 +1,6 @@
+# Infrastructure as Code
+# See plan.md for structure:
+# - cdk/ (AWS CDK stacks)
+# - helm/ (Kubernetes Helm charts)
+# - docker/ (Dockerfiles for services)
+# - jenkins/ (CI/CD pipeline definitions)

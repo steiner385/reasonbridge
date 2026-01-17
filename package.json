@@ -1,0 +1,55 @@
+{
+  "name": "unite-discord",
+  "version": "0.1.0",
+  "description": "uniteDiscord - Rational Discussion Platform",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "// === ISSUE PRIORITIZATION ===": "",
+    "next-issue": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --claim --verbose",
+    "next-issue:preview": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --verbose",
+    "next-issue:top5": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --top 5",
+    "implement-issue": "node scripts/implement-next-issue.js",
+    "// === WORKSPACE COMMANDS ===": "",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
+    "clean": "pnpm -r clean",
+    "typecheck": "pnpm -r typecheck",
+    "// === DEVELOPMENT ===": "",
+    "dev": "pnpm -r --parallel dev",
+    "// === DOCKER ===": "",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:test": "docker compose -f docker-compose.test.yml up -d"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.12",
+    "@typescript-eslint/eslint-plugin": "8.21.0",
+    "@typescript-eslint/parser": "8.21.0",
+    "eslint": "8.57.1",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-airbnb-typescript": "18.0.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "prettier": "3.4.2",
+    "typescript": "5.7.3"
+  },
+  "keywords": [
+    "discussion",
+    "rational-discourse",
+    "ai-moderation",
+    "monorepo",
+    "pnpm-workspace"
+  ],
+  "author": "",
+  "license": "ISC"
+}

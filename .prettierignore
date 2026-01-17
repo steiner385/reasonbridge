@@ -1,0 +1,34 @@
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Generated files
+*.generated.ts
+*.generated.js
+
+# Infrastructure as code
+infrastructure/cdk/cdk.out/
+infrastructure/helm/
+
+# Git
+.git/
+
+# Spec files (don't reformat documentation)
+specs/

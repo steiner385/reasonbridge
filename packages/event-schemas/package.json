@@ -1,0 +1,49 @@
+{
+  "name": "@unite-discord/event-schemas",
+  "version": "0.1.0",
+  "description": "Event type definitions for uniteDiscord async messaging",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./discussion": {
+      "types": "./dist/discussion.d.ts",
+      "import": "./dist/discussion.js"
+    },
+    "./ai": {
+      "types": "./dist/ai.d.ts",
+      "import": "./dist/ai.js"
+    },
+    "./moderation": {
+      "types": "./dist/moderation.d.ts",
+      "import": "./dist/moderation.js"
+    },
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "import": "./dist/base.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
