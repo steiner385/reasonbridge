@@ -9,14 +9,16 @@
 - Completed issue #64 (T068) - Avatar upload with S3
 - Completed issue #65 (T069) - GET /topics endpoint with filtering
 - Completed issue #66 (T070) - GET /topics/:id detail endpoint
-- ~232 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #67 (T071) - Topic search endpoint
+- ~231 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #66 (T070): Implement GET /topics/:id detail:
-- Added GET /topics/:id route to TopicsController
-- Added getTopicById method to TopicsService with proper error handling
-- Returns 404 NotFoundException if topic not found
-- Includes topic tags in response using same data structure as list endpoint
+Issue #67 (T071): Implement topic search endpoint:
+- Added GET /topics/search route to TopicsController
+- Added searchTopics method to TopicsService
+- Search across title and description fields (case-insensitive)
+- Pagination support (page, limit)
+- Results ordered by creation date (newest first)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
