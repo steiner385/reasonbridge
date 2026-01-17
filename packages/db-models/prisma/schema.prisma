@@ -221,6 +221,7 @@ enum TagSource {
 }
 
 /// Links between related discussion topics
+/// Unique constraint prevents duplicate links of same type between same topics
 model TopicLink {
   id                 String                @id @default(uuid()) @db.Uuid
   sourceTopicId      String                @map("source_topic_id") @db.Uuid
