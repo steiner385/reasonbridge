@@ -47,6 +47,8 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./infrastructure/localstack/init-queues.sh:/etc/localstack/init/ready.d/init-queues.sh
+      - ./infrastructure/localstack/init-topics.sh:/etc/localstack/init/ready.d/init-topics.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
