@@ -161,7 +161,32 @@ pnpm --filter db-models prisma generate
 pnpm --filter db-models db:seed
 ```
 
-## Testing
+## Testing (Test-Driven Development)
+
+This project follows TDD principles. All new features and bug fixes should follow the test-first approach.
+
+### TDD Workflow
+
+```
+1. Write failing E2E test (acceptance criteria)
+2. Write failing integration tests (API contracts)
+3. Write failing unit tests (service behavior)
+4. Implement minimum code to pass tests
+5. Refactor while keeping tests green
+6. Run full test suite before commit
+```
+
+### Test Commands
+
+| Command | Description | Coverage Requirement |
+|---------|-------------|---------------------|
+| `pnpm test` | Run all tests | 80% line coverage |
+| `pnpm test:unit` | Unit tests (Vitest) | 80% for business logic |
+| `pnpm test:integration` | Integration tests | API endpoints covered |
+| `pnpm test:e2e` | E2E tests (Playwright) | Critical paths covered |
+| `pnpm test:contract` | Contract tests (Pact) | All API boundaries |
+| `pnpm test:watch` | Watch mode for TDD | - |
+| `pnpm test:coverage` | Generate coverage report | - |
 
 ### Unit Tests
 
@@ -172,31 +197,223 @@ pnpm test:unit
 # Run with coverage
 pnpm test:unit --coverage
 
-# Watch mode
+# Watch mode (recommended for TDD)
 pnpm test:unit --watch
+
+# Run specific test file
+pnpm test:unit src/services/discussion.test.ts
+
+# Run tests matching pattern
+pnpm test:unit --testNamePattern="should create proposition"
+```
+
+**Writing Unit Tests (TDD Pattern)**:
+```typescript
+// 1. Start with a failing test
+describe('DiscussionService', () => {
+  describe('createProposition', () => {
+    it('should create proposition with AI-identified source', async () => {
+      // Arrange
+      const discussionId = 'test-discussion';
+      const statement = 'Climate change requires immediate action';
+
+      // Act
+      const proposition = await discussionService.createProposition({
+        discussionId,
+        statement,
+        source: 'ai_identified',
+      });
+
+      // Assert
+      expect(proposition.id).toBeDefined();
+      expect(proposition.source).toBe('ai_identified');
+      expect(proposition.consensusScore).toBeNull(); // No alignments yet
+    });
+
+    it('should require creator_id for user-created propositions', async () => {
+      await expect(
+        discussionService.createProposition({
+          discussionId: 'test',
+          statement: 'Test',
+          source: 'user_created',
+          // Missing creatorId
+        })
+      ).rejects.toThrow('VALIDATION_001');
+    });
+  });
+});
 ```
 
 ### Integration Tests
 
 ```bash
-# Start test infrastructure
-make docker:up
+# Start test infrastructure (required)
+make docker:test-up
 
 # Run integration tests
 pnpm test:integration
+
+# Run with verbose output
+pnpm test:integration --verbose
+
+# Clean up after tests
+make docker:test-down
+```
+
+**Integration Test Setup**:
+```typescript
+// tests/integration/setup.ts
+import { prisma } from '@uniteDiscord/db-models';
+import { startTestServer } from './helpers';
+
+beforeAll(async () => {
+  await startTestServer();
+});
+
+beforeEach(async () => {
+  // Clean database between tests
+  await prisma.$transaction([
+    prisma.feedback.deleteMany(),
+    prisma.response.deleteMany(),
+    prisma.proposition.deleteMany(),
+    prisma.discussionTopic.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});
+```
+
+**Integration Test Pattern**:
+```typescript
+describe('POST /discussions/:id/responses', () => {
+  it('should create response and trigger AI feedback', async () => {
+    // Arrange
+    const user = await createTestUser();
+    const topic = await createTestTopic();
+    const token = await getAuthToken(user);
+
+    // Act
+    const response = await request(app)
+      .post(`/api/v1/discussions/${topic.id}/responses`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        content: 'This is a well-reasoned response with sources.',
+        citedSources: [{ url: 'https://example.com/study' }],
+      });
+
+    // Assert
+    expect(response.status).toBe(201);
+    expect(response.body.id).toBeDefined();
+    expect(response.body.feedback).toBeDefined(); // AI feedback included
+  });
+
+  it('should return RATE_LIMIT_001 when posting too quickly', async () => {
+    const user = await createTestUser();
+    const token = await getAuthToken(user);
+
+    // Post 10 responses rapidly
+    for (let i = 0; i < 10; i++) {
+      await request(app)
+        .post(`/api/v1/discussions/${topicId}/responses`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ content: `Response ${i}` });
+    }
+
+    // 11th should be rate limited
+    const response = await request(app)
+      .post(`/api/v1/discussions/${topicId}/responses`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ content: 'One more' });
+
+    expect(response.status).toBe(429);
+    expect(response.body.code).toBe('RATE_LIMIT_001');
+  });
+});
 ```
 
 ### E2E Tests
 
 ```bash
+# Install Playwright browsers (first time)
+pnpm --filter frontend playwright install
+
 # Start the full stack
 make dev
 
 # In another terminal, run Playwright
 pnpm --filter frontend test:e2e
 
-# Run with UI
+# Run with UI mode (recommended for debugging)
 pnpm --filter frontend test:e2e --ui
+
+# Run specific test file
+pnpm --filter frontend test:e2e tests/e2e/discussion.spec.ts
+
+# Run with tracing for debugging
+pnpm --filter frontend test:e2e --trace on
+```
+
+**E2E Test Pattern (User Story Coverage)**:
+```typescript
+// tests/e2e/us-02-communication-feedback.spec.ts
+import { test, expect } from '@playwright/test';
+import { AxeBuilder } from '@axe-core/playwright';
+
+test.describe('US-02: Receive Constructive Feedback on Communication', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/discussions/test-topic');
+    await loginAsTestUser(page);
+  });
+
+  test('should receive non-blocking suggestion for inflammatory language', async ({ page }) => {
+    // Navigate to compose
+    await page.click('[data-testid="compose-response"]');
+
+    // Type inflammatory content
+    await page.fill('[data-testid="response-input"]',
+      "You're completely wrong and anyone who thinks that is an idiot.");
+
+    // AI feedback should appear
+    const feedback = page.locator('[data-testid="ai-feedback"]');
+    await expect(feedback).toBeVisible();
+    await expect(feedback).toContainText('AI Assistant');
+    await expect(feedback).toContainText('personal attack');
+
+    // Feedback should NOT block posting
+    await expect(page.locator('[data-testid="submit-response"]')).toBeEnabled();
+  });
+
+  test('should acknowledge improvement after revision', async ({ page }) => {
+    await page.click('[data-testid="compose-response"]');
+
+    // Type content that triggers feedback
+    await page.fill('[data-testid="response-input"]',
+      "You're wrong because you're stupid.");
+
+    await expect(page.locator('[data-testid="ai-feedback"]')).toBeVisible();
+
+    // Revise the content
+    await page.fill('[data-testid="response-input"]',
+      "I disagree with this position because the evidence suggests otherwise.");
+
+    // Positive acknowledgment should appear
+    await expect(page.locator('[data-testid="ai-feedback"]'))
+      .toContainText('Thanks for taking a moment to refine');
+  });
+
+  test('should meet WCAG 2.2 AA accessibility standards', async ({ page }) => {
+    await page.click('[data-testid="compose-response"]');
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
+      .analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+});
 ```
 
 ### Contract Tests (Pact)
@@ -205,8 +422,95 @@ pnpm --filter frontend test:e2e --ui
 # Run consumer tests (generates pacts)
 pnpm test:pact:consumer
 
-# Run provider tests (verifies pacts)
+# Run provider verification
 pnpm test:pact:provider
+
+# Publish pacts to broker (CI only)
+pnpm pact:publish
+```
+
+**Consumer Contract Pattern**:
+```typescript
+// tests/contract/ai-service.consumer.pact.ts
+import { PactV3, MatchersV3 } from '@pact-foundation/pact';
+
+const { like, eachLike } = MatchersV3;
+
+describe('AI Service Consumer Contract', () => {
+  const provider = new PactV3({
+    consumer: 'DiscussionService',
+    provider: 'AIService',
+  });
+
+  it('returns bias analysis for text with detected patterns', async () => {
+    await provider
+      .given('text contains ad hominem pattern')
+      .uponReceiving('a request for bias analysis')
+      .withRequest({
+        method: 'POST',
+        path: '/analyze/bias',
+        headers: { 'Content-Type': 'application/json' },
+        body: { text: "You're wrong because you're biased" },
+      })
+      .willRespondWith({
+        status: 200,
+        body: {
+          patterns: eachLike({
+            type: like('ad_hominem'),
+            confidence: like(0.92),
+            suggestion: like('Consider addressing the argument rather than the person'),
+            startOffset: like(0),
+            endOffset: like(38),
+          }),
+          overallConfidence: like(0.92),
+          displayToUser: like(true),
+        },
+      });
+
+    await provider.executeTest(async (mockServer) => {
+      const result = await aiClient.analyzeBias(
+        "You're wrong because you're biased",
+        mockServer.url
+      );
+      expect(result.patterns).toHaveLength(1);
+      expect(result.patterns[0].type).toBe('ad_hominem');
+    });
+  });
+});
+```
+
+### Performance Tests
+
+```bash
+# Run k6 load tests (requires k6 installed)
+k6 run tests/performance/api-load.js
+
+# Run with specific scenario
+k6 run --env SCENARIO=spike tests/performance/api-load.js
+```
+
+### Test Coverage Requirements
+
+| Component | Coverage Target | Enforced By |
+|-----------|----------------|-------------|
+| Services (business logic) | 80% lines | CI gate |
+| API Routes | 100% endpoints | Contract tests |
+| React Components | 70% lines | Vitest |
+| Critical User Paths | 100% | E2E tests |
+| Error Scenarios | All error codes | Integration tests |
+
+### CI Pipeline Test Stages
+
+```
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│   Lint &    │ → │    Unit     │ → │ Integration │ → │  Contract   │
+│  Type Check │   │    Tests    │   │    Tests    │   │    Tests    │
+└─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘
+                                                              │
+                                                              ▼
+                                           ┌─────────────────────────────┐
+                                           │      E2E Tests (main only)  │
+                                           └─────────────────────────────┘
 ```
 
 ## AI Service Development
