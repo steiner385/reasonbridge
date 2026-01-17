@@ -11,15 +11,16 @@
 - Completed issue #66 (T070) - GET /topics/:id detail endpoint
 - Completed issue #67 (T071) - Topic search endpoint
 - Completed issue #68 (T072) - Topic list page with filtering and pagination
-- ~230 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #69 (T073) - Reusable TopicCard component
+- ~229 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #68 (T072): Create topic list page:
-- Created TopicsPage component with filtering by status (SEEDING/ACTIVE/ARCHIVED)
-- Implemented sorting by creation date, participant count, and response count
-- Added pagination with visual page navigation
-- Integrated with backend GET /topics API using React Query
-- Added /topics route and navigation link from home page
+Issue #69 (T073): Create topic card component:
+- Extracted topic display logic from TopicsPage into reusable TopicCard component
+- Component displays title, status badge, creation date, participant/response counts
+- Shows diversity score and topic tags
+- Supports configurable description truncation and custom onClick handlers
+- Refactored TopicsPage to use TopicCard for cleaner, more maintainable code
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
