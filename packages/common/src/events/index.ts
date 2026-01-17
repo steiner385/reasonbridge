@@ -62,3 +62,15 @@ export type {
 } from './EventSubscriber.js';
 
 export { EventSubscriber, SqsEventSubscriber } from './EventSubscriber.js';
+
+// Dead Letter Queue exports
+export type {
+  DlqHandlerConfig,
+  DlqMessageHandler,
+  DlqMessageMetadata,
+  DlqMonitorConfig,
+  DlqProcessingResult,
+  DlqStats,
+} from './DeadLetterQueueHandler.js';
+
+export { DeadLetterQueueHandler, DlqMonitor } from './DeadLetterQueueHandler.js';
