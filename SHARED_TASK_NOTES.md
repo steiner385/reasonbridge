@@ -27,24 +27,25 @@
 - Completed issue #57 (T061) - /auth/refresh endpoint
 - Completed issue #58 (T062) - Registration form component
 - Completed issue #59 (T063) - Login form component
-- ~206 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #60 (T064) - /users/me endpoint
+- ~205 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #59:**
+**Completed Issue #60:**
 
-**Issue #59 (T063) - Create login form component:**
-- Created LoginForm component in frontend/src/components/auth/
-- Email and password input fields with real-time validation
-- Remember me checkbox for user convenience
-- Forgot password link and registration link
-- Follows RegistrationForm patterns with existing UI components
-- Comprehensive Playwright e2e tests for form interactions and accessibility
-- Merged via PR #436
+**Issue #60 (T064) - Implement /users/me endpoint:**
+- Created JWT authentication infrastructure with JwtAuthGuard
+- Verifies JWT tokens against Cognito JWKS endpoint
+- Created CurrentUser decorator for extracting user from JWT payload
+- Implemented GET /users/me endpoint in UsersController
+- Returns comprehensive user profile (trust scores, verification level, profiles)
+- UsersService handles user data access via Prisma
+- Merged via PR #437
 
 **Authentication Progress:**
-- Backend: POST /auth/login, POST /auth/refresh
+- Backend: POST /auth/login, POST /auth/refresh, GET /users/me
 - Frontend: RegistrationForm, LoginForm components
-- Password validation consistent with Cognito requirements
+- JWT verification using Cognito public keys (RS256)
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
