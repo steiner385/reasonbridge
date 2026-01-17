@@ -106,6 +106,25 @@ importers:
         specifier: ^6.0.7
         version: 6.4.1(@types/node@20.17.12)(jiti@1.21.7)(tsx@4.21.0)
 
+  infrastructure/cdk:
+    dependencies:
+      aws-cdk-lib:
+        specifier: 2.173.4
+        version: 2.173.4(constructs@10.4.5)
+      constructs:
+        specifier: ^10.0.0
+        version: 10.4.5
+    devDependencies:
+      '@types/node':
+        specifier: 20.17.12
+        version: 20.17.12
+      aws-cdk:
+        specifier: 2.173.4
+        version: 2.173.4
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
   packages/ai-client:
     dependencies:
       '@aws-sdk/client-bedrock-runtime':
@@ -459,6 +478,21 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@aws-cdk/asset-awscli-v1@2.2.261':
+    resolution: {integrity: sha512-XkKvgG/OxrEYtVTt2Q9gaD58Qn90fnX/dNczL4k6myeii7UgAGPmqh+I+1uKohCWGKIKd+4Gz2xWBL/tPi4YIA==}
+
+  '@aws-cdk/asset-kubectl-v20@2.1.4':
+    resolution: {integrity: sha512-Ps2MkmjYgMyflagqQ4dgTElc7Vwpqj8spw8dQVFiSeaaMPsuDSNsPax3/HjuDuwqsmLdaCZc6umlxYLpL0kYDA==}
+
+  '@aws-cdk/asset-node-proxy-agent-v6@2.1.0':
+    resolution: {integrity: sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==}
+
+  '@aws-cdk/cloud-assembly-schema@38.0.1':
+    resolution: {integrity: sha512-KvPe+NMWAulfNVwY7jenFhzhuLhLqJ/OPy5jx7wUstbjnYnjRVLpUHPU3yCjXFE0J8cuJVdx95BJ4rOs66Pi9w==}
+    bundledDependencies:
+      - jsonschema
+      - semver
 
   '@aws-crypto/crc32@5.2.0':
     resolution: {integrity: sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==}
@@ -1797,6 +1831,29 @@ packages:
   avvio@8.4.0:
     resolution: {integrity: sha512-CDSwaxINFy59iNwhYnkvALBwZiTydGkOecZyPkqBpABYR1KqGEsET0VOOYDwtleZSUIdeY36DC2bSZ24CO1igA==}
 
+  aws-cdk-lib@2.173.4:
+    resolution: {integrity: sha512-0reN94TzkWmyVZDDBlYB4qzJUig8wTHEe82YLHlWRUhrU78fT+drVGUr+lYZwwETaZ+8fLdCOl9ULvFNq7iczQ==}
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      constructs: ^10.0.0
+    bundledDependencies:
+      - '@balena/dockerignore'
+      - case
+      - fs-extra
+      - ignore
+      - jsonschema
+      - minimatch
+      - punycode
+      - semver
+      - table
+      - yaml
+      - mime-types
+
+  aws-cdk@2.173.4:
+    resolution: {integrity: sha512-zgs3xU28VEKIwHwJHu0ZHeoEmwLGnHS2jPCMc2MsIMZu+a7CKyE77Tw6LwJkuuB96BQyqr6xJB3SbeWjXmcFhQ==}
+    engines: {node: '>= 14.15.0'}
+    hasBin: true
+
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -1884,6 +1941,9 @@ packages:
 
   consola@2.15.3:
     resolution: {integrity: sha512-9vAdYbHj6x2fLKC4+oPH0kFzY/orMZyG2Aj+kNylHxKGJ/Ed4dpNyAQYwJOdqO4zdM7XpVHmyejQDcQHrnuXbw==}
+
+  constructs@10.4.5:
+    resolution: {integrity: sha512-fOoP70YLevMZr5avJHx2DU3LNYmC6wM8OwdrNewMZou1kZnPGOeVzBrRjZNgFDHUlulYUjkpFRSpTE3D+n+ZSg==}
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -3360,6 +3420,14 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@aws-cdk/asset-awscli-v1@2.2.261': {}
+
+  '@aws-cdk/asset-kubectl-v20@2.1.4': {}
+
+  '@aws-cdk/asset-node-proxy-agent-v6@2.1.0': {}
+
+  '@aws-cdk/cloud-assembly-schema@38.0.1': {}
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
@@ -5080,6 +5148,18 @@ snapshots:
       '@fastify/error': 3.4.1
       fastq: 1.20.1
 
+  aws-cdk-lib@2.173.4(constructs@10.4.5):
+    dependencies:
+      '@aws-cdk/asset-awscli-v1': 2.2.261
+      '@aws-cdk/asset-kubectl-v20': 2.1.4
+      '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
+      '@aws-cdk/cloud-assembly-schema': 38.0.1
+      constructs: 10.4.5
+
+  aws-cdk@2.173.4:
+    optionalDependencies:
+      fsevents: 2.3.2
+
   balanced-match@1.0.2: {}
 
   base64id@2.0.0: {}
@@ -5166,6 +5246,8 @@ snapshots:
   confusing-browser-globals@1.0.11: {}
 
   consola@2.15.3: {}
+
+  constructs@10.4.5: {}
 
   convert-source-map@2.0.0: {}
 
