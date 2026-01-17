@@ -29,30 +29,27 @@
 - Completed issue #59 (T063) - Login form component
 - Completed issue #60 (T064) - GET /users/me endpoint
 - Completed issue #61 (T065) - PUT /users/me profile update endpoint
-- ~204 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #62 (T066) - Profile page component
+- ~203 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issues #60-61:**
-
-**Issue #60 (T064) - Implement GET /users/me endpoint:**
-- Created JWT authentication infrastructure with JwtAuthGuard
-- Verifies JWT tokens against Cognito JWKS endpoint
-- Created CurrentUser decorator for extracting user from JWT payload
-- Returns comprehensive user profile (trust scores, verification level, profiles)
-- Merged via PR #437
-
-**Issue #61 (T065) - Implement PUT /users/me endpoint:**
-- Created UpdateProfileDto with validation for displayName (1-50 chars)
-- Added updateProfile method to UsersService
-- Enabled global ValidationPipe in main.ts
-- Users can update their own profile securely
-- Merged via PR #438
+**Completed Issue #62 (T066) - Create profile page component:**
+- Created User, UserProfile type definitions with verification levels and trust scores
+- Implemented useCurrentUser hook for authenticated user profile
+- Implemented useUser hook for fetching any user by ID
+- Created ProfilePage component (/profile route) for current user
+- Created UserProfilePage component (/profile/:id route) for viewing others
+- Added trust score visualization with progress bars
+- Includes activity stats (topics, responses, followers, following)
+- Added E2E tests with Playwright
+- Merged via PR #439
 
 **Authentication & User Management Progress:**
 - Backend: POST /auth/login, POST /auth/refresh, GET /users/me, PUT /users/me
-- Frontend: RegistrationForm, LoginForm components
+- Frontend: RegistrationForm, LoginForm, ProfilePage, UserProfilePage components
 - JWT verification using Cognito public keys (RS256)
 - Full CRUD for user profile management
+- Profile viewing with trust scores and activity stats
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
