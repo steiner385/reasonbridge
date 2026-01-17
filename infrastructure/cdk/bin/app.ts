@@ -4,6 +4,7 @@ import { EksStack } from '../lib/eks-stack.js';
 import { RdsStack } from '../lib/rds-stack.js';
 import { ElastiCacheStack } from '../lib/elasticache-stack.js';
 import { BedrockStack } from '../lib/bedrock-stack.js';
+import { CognitoStack } from '../lib/cognito-stack.js';
 
 const app = new cdk.App();
 
@@ -54,6 +55,17 @@ elastiCacheStack.addDependency(eksStack);
 new BedrockStack(app, 'UniteBedrockStack', {
   env,
   description: 'Unite Discord Platform - Bedrock IAM Permissions',
+  tags: {
+    Project: 'unite-discord',
+    Environment: process.env.ENVIRONMENT || 'dev',
+    ManagedBy: 'CDK',
+  },
+});
+
+// Create Cognito stack (User authentication and authorization)
+new CognitoStack(app, 'UniteCognitoStack', {
+  env,
+  description: 'Unite Discord Platform - Cognito User Pool',
   tags: {
     Project: 'unite-discord',
     Environment: process.env.ENVIRONMENT || 'dev',

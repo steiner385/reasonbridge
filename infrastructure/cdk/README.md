@@ -4,12 +4,13 @@ This directory contains AWS CDK infrastructure-as-code for the Unite Discord pla
 
 ## Architecture Overview
 
-The infrastructure consists of four main stacks:
+The infrastructure consists of five main stacks:
 
 1. **EksStack** - Amazon EKS cluster with multi-AZ VPC
 2. **RdsStack** - Aurora Serverless v2 PostgreSQL 15.5 cluster with auto-scaling
 3. **ElastiCacheStack** - Redis cluster for caching and sessions
 4. **BedrockStack** - IAM roles and permissions for Amazon Bedrock AI services
+5. **CognitoStack** - User authentication and authorization with Cognito User Pool
 
 ## Prerequisites
 
@@ -106,6 +107,35 @@ Creates:
 - IAM role for Bedrock access
 - Permissions for Claude models
 - Service account integration for EKS
+
+### CognitoStack
+
+Creates:
+- Cognito User Pool for user authentication
+- User Pool Client for web application OAuth
+- Hosted UI domain for authentication flows
+- MFA support (optional, SMS and TOTP)
+- Custom attributes: displayName, verificationLevel
+- Password policy (12+ chars, complexity requirements)
+- Email verification and recovery
+- Advanced security mode for fraud detection
+
+**Authentication Flow**:
+- Email-based sign-in with password
+- Self-registration enabled
+- Email verification required
+- Optional MFA for enhanced security
+- OAuth 2.0 authorization code grant
+- JWT tokens (1-hour access/ID, 30-day refresh)
+
+**Custom Attributes**:
+- `displayName` (3-50 chars) - User's public pseudonym
+- `verificationLevel` (basic/enhanced/verified_human) - Verification tier
+
+**Verification Levels**:
+- **basic**: Email verified only
+- **enhanced**: Phone verified (SMS MFA)
+- **verified_human**: Third-party ID verification
 
 ## Security
 
