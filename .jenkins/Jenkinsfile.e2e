@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 /**
- * E2E Tests Pipeline for KinDash
+ * E2E Tests Pipeline for uniteDiscord
  * Runs Playwright E2E tests with browser support
  */
 
-@Library('kindash-lib@main') _
+@Library('unitediscord-lib@main') _
 
 pipeline {
     agent {
@@ -23,7 +23,7 @@ pipeline {
     environment {
         CI = 'true'
         NODE_ENV = 'test'
-        GITHUB_REPO = 'KinDash'
+        GITHUB_REPO = 'uniteDiscord'
         PLAYWRIGHT_BROWSERS_PATH = '/home/jenkins/agent/.playwright-cache'
         // DATABASE_URL is exported dynamically after containers are connected to Jenkins network
         // This follows the MachShop pattern for inter-container communication
@@ -303,7 +303,7 @@ pipeline {
                     echo "⚠️ WARNING: Test pass rate (${passRate}%) is below 90% threshold!"
                     // Send notification via Jenkins notification plugin or email
                     emailext(
-                        subject: "KinDash E2E Tests: Low Pass Rate Alert (${passRate}%)",
+                        subject: "uniteDiscord E2E Tests: Low Pass Rate Alert (${passRate}%)",
                         body: """
                             E2E test pass rate has dropped below 90%:
                             - Pass Rate: ${passRate}%
