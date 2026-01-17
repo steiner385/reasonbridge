@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
+import { UpdateResponseDto } from './dto/update-response.dto.js';
 import type { ResponseDto, CitedSourceDto, UserSummaryDto } from './dto/response.dto.js';
 
 @Injectable()
@@ -175,6 +176,166 @@ export class ResponsesService {
 
     // Map to ResponseDto
     return this.mapToResponseDto(completeResponse!);
+  }
+
+  /**
+   * Update an existing response
+   * @param responseId - The ID of the response to update
+   * @param authorId - The ID of the user requesting the update (for authorization)
+   * @param updateResponseDto - The updated response data
+   * @returns The updated response
+   */
+  async updateResponse(
+    responseId: string,
+    authorId: string,
+    updateResponseDto: UpdateResponseDto,
+  ): Promise<ResponseDto> {
+    // Fetch the existing response
+    const existingResponse = await this.prisma.response.findUnique({
+      where: { id: responseId },
+      select: {
+        id: true,
+        authorId: true,
+        topicId: true,
+        status: true,
+        topic: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!existingResponse) {
+      throw new NotFoundException(`Response with ID ${responseId} not found`);
+    }
+
+    // Authorization: Only the author can edit their response
+    if (existingResponse.authorId !== authorId) {
+      throw new ForbiddenException('You can only edit your own responses');
+    }
+
+    // Cannot edit hidden or removed responses
+    if (existingResponse.status === 'HIDDEN' || existingResponse.status === 'REMOVED') {
+      throw new BadRequestException(`Cannot edit responses with status: ${existingResponse.status}`);
+    }
+
+    // Cannot edit responses in archived topics
+    if (existingResponse.topic.status === 'ARCHIVED') {
+      throw new BadRequestException('Cannot edit responses in archived topics');
+    }
+
+    // Validate content if provided
+    if (updateResponseDto.content !== undefined) {
+      if (!updateResponseDto.content || updateResponseDto.content.trim().length < 10) {
+        throw new BadRequestException('Response content must be at least 10 characters');
+      }
+
+      if (updateResponseDto.content.length > 10000) {
+        throw new BadRequestException('Response content must not exceed 10000 characters');
+      }
+    }
+
+    // Prepare update data
+    const updateData: any = {};
+
+    if (updateResponseDto.content !== undefined) {
+      updateData.content = updateResponseDto.content.trim();
+    }
+
+    if (updateResponseDto.containsOpinion !== undefined) {
+      updateData.containsOpinion = updateResponseDto.containsOpinion;
+    }
+
+    if (updateResponseDto.containsFactualClaims !== undefined) {
+      updateData.containsFactualClaims = updateResponseDto.containsFactualClaims;
+    }
+
+    if (updateResponseDto.citedSources !== undefined) {
+      updateData.citedSources = updateResponseDto.citedSources.length > 0
+        ? updateResponseDto.citedSources.map((url) => ({
+            url,
+            title: null,
+            extractedAt: new Date().toISOString(),
+          }))
+        : null;
+    }
+
+    // Increment revision count
+    updateData.revisionCount = {
+      increment: 1,
+    };
+
+    // Update the response
+    const updatedResponse = await this.prisma.response.update({
+      where: { id: responseId },
+      data: updateData,
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
+        propositions: {
+          include: {
+            proposition: {
+              select: {
+                id: true,
+                statement: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Handle proposition associations if provided
+    if (updateResponseDto.propositionIds !== undefined) {
+      // Delete existing associations
+      await this.prisma.responseProposition.deleteMany({
+        where: { responseId },
+      });
+
+      // Create new associations if provided
+      if (updateResponseDto.propositionIds.length > 0) {
+        await this.prisma.responseProposition.createMany({
+          data: updateResponseDto.propositionIds.map((propositionId) => ({
+            responseId,
+            propositionId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // Fetch updated response with new propositions
+      const responseWithPropositions = await this.prisma.response.findUnique({
+        where: { id: responseId },
+        include: {
+          author: {
+            select: {
+              id: true,
+              displayName: true,
+            },
+          },
+          propositions: {
+            include: {
+              proposition: {
+                select: {
+                  id: true,
+                  statement: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return this.mapToResponseDto(responseWithPropositions!);
+    }
+
+    // Map to ResponseDto
+    return this.mapToResponseDto(updatedResponse);
   }
 
   /**
