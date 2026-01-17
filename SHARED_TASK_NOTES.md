@@ -20,22 +20,25 @@
 - Completed issue #75 (T079) - Response threading (parentId)
 - Completed issue #76 (T080) - Response edit endpoint (PUT)
 - Completed issue #77 (T081) - Response composer component
-- ~221 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #78 (T082) - Response card component
+- ~220 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #77 (T081): Create response composer component:
-- Created ResponseComposer component with rich form features:
-  - Text input with character count validation (10-10000 chars)
-  - Real-time character count display with warnings
-  - Cited sources management with URL validation and add/remove functionality
-  - Opinion and factual claims metadata checkboxes
-  - Support for threaded replies via optional parentId prop
-  - Loading states and comprehensive error handling
-  - Form reset on successful submission
-  - Accessibility features (ARIA labels, roles, keyboard navigation)
-- Added Response type definitions matching backend DTOs
-- Follows existing UI component patterns (Button, Input)
-- TypeScript type checking and build passed
+Issue #78 (T082): Create response card component:
+- Created ResponseCard component for displaying user responses:
+  - Author display with display name and timestamp formatting
+  - Relative time display (5m ago, 2h ago, 3d ago)
+  - Revision tracking ("edited N times")
+  - Content display with optional truncation and "Read more" button
+  - Metadata badges for opinion and factual claims
+  - Cited sources display with clickable links (shows up to 3, "+N more")
+  - Related propositions display with relevance scores (optional)
+  - Status indicators for hidden/removed responses
+  - Highlighted state for selected responses
+  - Custom action slot in header for menus/buttons
+- Reuses existing Card UI component and Response types
+- Full TypeScript type safety with comprehensive props interface
+- Passes type checking, linting, and production build
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
