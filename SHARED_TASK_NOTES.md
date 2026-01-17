@@ -16,22 +16,17 @@
 - Completed issue #71 (T075) - Search bar component
 - Completed issue #72 (T076) - Topic filtering UI component
 - Completed issue #73 (T077) - POST /responses endpoint
-- ~225 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #74 (T078) - GET /responses for topic
+- ~224 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Recent Completions
-Issue #73 (T077): Implement POST /responses endpoint:
-- Created complete NestJS responses module in services/discussion-service/src/responses/
-- DTOs for request validation (CreateResponseDto) and response mapping (ResponseDto)
-- ResponsesService with business logic:
-  * Content validation (10-10000 characters)
-  * Topic existence and status verification
-  * Cited sources in JSON format with metadata
-  * Proposition associations via ResponseProposition junction table
-  * Prisma model to DTO mapping with type safety
-- ResponsesController with POST /topics/:topicId/responses endpoint
-- Returns 201 Created with full response data including author and propositions
-- Follows existing NestJS patterns, integrated with PrismaModule
-- Uses placeholder authorId (JWT auth pending implementation)
+Issue #74 (T078): Implement GET /responses for topic:
+- Added GET /topics/:topicId/responses endpoint to ResponsesController
+- Implemented getResponsesForTopic service method in ResponsesService
+- Returns array of responses ordered by creation time (oldest first)
+- Includes author info and associated propositions via Prisma relations
+- Validates topic exists before fetching responses (404 if not found)
+- Reuses existing ResponseDto and mapToResponseDto helper
 
 ## Next Steps
 Run `npm run next-issue` to claim and implement the next highest priority issue.
