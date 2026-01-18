@@ -18,3 +18,6 @@ export type { BridgingSuggestionsSectionProps } from './BridgingSuggestionsSecti
 
 export { default as PropositionClusterView } from './PropositionClusterView';
 export type { PropositionClusterViewProps } from './PropositionClusterView';
+
+export { CommonGroundHistory } from './CommonGroundHistory';
+export type { CommonGroundHistoryProps } from './CommonGroundHistory';
