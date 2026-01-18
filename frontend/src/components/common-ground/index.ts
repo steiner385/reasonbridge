@@ -21,3 +21,9 @@ export type { PropositionClusterViewProps } from './PropositionClusterView';
 
 export { CommonGroundHistory } from './CommonGroundHistory';
 export type { CommonGroundHistoryProps } from './CommonGroundHistory';
+
+export { default as ShareModal } from './ShareModal';
+export type { ShareModalProps } from './ShareModal';
+
+export { default as ShareButton } from './ShareButton';
+export type { ShareButtonProps } from './ShareButton';
