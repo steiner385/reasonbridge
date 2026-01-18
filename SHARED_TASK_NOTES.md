@@ -2,12 +2,41 @@
 
 ## Current Status
 
-- Completed issue #184 (T188) - Implement ModerationActionRepository
-- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All moderation service unit tests passing ✅
+- Completed issue #185 (T189) - Implement moderation notifications
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All notification service tests passing (54 total: 12 new moderation + 23 common-ground + 19 gateway) ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
+
+## Latest Completed (2026-01-18 - Iteration 27)
+
+**Issue #185 (T189) - Implement moderation notifications:**
+- Created ModerationNotificationHandler (services/notification-service/src/handlers/moderation-notification.handler.ts)
+  - Handles moderation.action.requested events with support for all action types (educate, warn, hide, remove, suspend, ban)
+  - Handles user.trust.updated events tracking Mayer ABI trust components (ability, benevolence, integrity)
+  - Smart notification title and body generation based on action type and severity
+  - Support for multiple target types: response, user, topic
+  - AI confidence scores and violation context included in metadata
+- Enhanced NotificationGateway (services/notification-service/src/gateways/notification.gateway.ts)
+  - Added subscribe:moderation and unsubscribe:moderation WebSocket message handlers
+  - Added subscribe:trust-updates and unsubscribe:trust-updates for user-specific updates
+  - Implemented emitModerationActionRequested() for real-time broadcasts
+  - Implemented emitUserTrustUpdated() for real-time broadcasts
+  - Room-based routing: 'moderation:actions' for actions, 'user:{userId}:trust' for trust updates
+- Updated HandlersModule to register ModerationNotificationHandler as provider
+- Enhanced test fixtures (services/notification-service/src/__tests__/fixtures/test-data.ts)
+  - Added mock entities: Response, User, ModerationAction
+  - Added mock events: ModerationActionRequested, UserTrustUpdated
+- Created comprehensive integration tests (services/notification-service/src/__tests__/integration/moderation-handler.integration.test.ts)
+  - 12 tests covering all event handling scenarios
+  - Tests for response, user, and topic moderation targets
+  - Tests for different action types (educate, warn, hide, remove, suspend, ban)
+  - Tests for severity levels (consequential, non-punitive)
+  - Tests for trust update reasons (moderation_action, positive_contribution, appeal_upheld, periodic_recalculation)
+  - Error handling and edge case tests
+- All 54 notification service tests passing
+- Merged via PR #575 (commit f974127)
 
 ## Latest Completed (2026-01-18 - Iteration 26)
 
