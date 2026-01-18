@@ -9,13 +9,75 @@ import type { SuggestionResult } from '../services/suggestions.service.js';
 export class TagSuggester {
   // Common topic categories for fallback suggestions
   private readonly categoryKeywords = {
-    politics: ['government', 'policy', 'election', 'political', 'democracy', 'legislation', 'congress', 'parliament'],
-    science: ['research', 'study', 'scientific', 'experiment', 'hypothesis', 'theory', 'data', 'evidence'],
-    technology: ['software', 'hardware', 'computer', 'digital', 'internet', 'code', 'programming', 'algorithm'],
-    economics: ['market', 'economy', 'financial', 'trade', 'business', 'investment', 'fiscal', 'monetary'],
-    health: ['medical', 'healthcare', 'treatment', 'disease', 'health', 'medicine', 'clinical', 'patient'],
-    environment: ['climate', 'environmental', 'nature', 'pollution', 'sustainability', 'ecosystem', 'conservation'],
-    education: ['school', 'learning', 'teaching', 'education', 'student', 'university', 'academic', 'curriculum'],
+    politics: [
+      'government',
+      'policy',
+      'election',
+      'political',
+      'democracy',
+      'legislation',
+      'congress',
+      'parliament',
+    ],
+    science: [
+      'research',
+      'study',
+      'scientific',
+      'experiment',
+      'hypothesis',
+      'theory',
+      'data',
+      'evidence',
+    ],
+    technology: [
+      'software',
+      'hardware',
+      'computer',
+      'digital',
+      'internet',
+      'code',
+      'programming',
+      'algorithm',
+    ],
+    economics: [
+      'market',
+      'economy',
+      'financial',
+      'trade',
+      'business',
+      'investment',
+      'fiscal',
+      'monetary',
+    ],
+    health: [
+      'medical',
+      'healthcare',
+      'treatment',
+      'disease',
+      'health',
+      'medicine',
+      'clinical',
+      'patient',
+    ],
+    environment: [
+      'climate',
+      'environmental',
+      'nature',
+      'pollution',
+      'sustainability',
+      'ecosystem',
+      'conservation',
+    ],
+    education: [
+      'school',
+      'learning',
+      'teaching',
+      'education',
+      'student',
+      'university',
+      'academic',
+      'curriculum',
+    ],
     social: ['community', 'society', 'culture', 'social', 'demographic', 'population', 'public'],
   };
 
@@ -55,7 +117,7 @@ export class TagSuggester {
     const detected: string[] = [];
 
     for (const [category, keywords] of Object.entries(this.categoryKeywords)) {
-      const matchCount = keywords.filter(keyword => text.includes(keyword)).length;
+      const matchCount = keywords.filter((keyword) => text.includes(keyword)).length;
       if (matchCount >= 1) {
         detected.push(category);
       }
@@ -72,22 +134,101 @@ export class TagSuggester {
 
     // Common stop words to filter out
     const stopWords = new Set([
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-      'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been',
-      'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-      'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these',
-      'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which',
-      'who', 'when', 'where', 'why', 'how', 'about', 'into', 'through',
-      'during', 'before', 'after', 'above', 'below', 'between', 'under',
-      'again', 'further', 'then', 'once', 'here', 'there', 'all', 'both',
-      'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor',
-      'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just',
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'in',
+      'on',
+      'at',
+      'to',
+      'for',
+      'of',
+      'with',
+      'by',
+      'from',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'being',
+      'have',
+      'has',
+      'had',
+      'do',
+      'does',
+      'did',
+      'will',
+      'would',
+      'could',
+      'should',
+      'may',
+      'might',
+      'can',
+      'this',
+      'that',
+      'these',
+      'those',
+      'i',
+      'you',
+      'he',
+      'she',
+      'it',
+      'we',
+      'they',
+      'what',
+      'which',
+      'who',
+      'when',
+      'where',
+      'why',
+      'how',
+      'about',
+      'into',
+      'through',
+      'during',
+      'before',
+      'after',
+      'above',
+      'below',
+      'between',
+      'under',
+      'again',
+      'further',
+      'then',
+      'once',
+      'here',
+      'there',
+      'all',
+      'both',
+      'each',
+      'few',
+      'more',
+      'most',
+      'other',
+      'some',
+      'such',
+      'no',
+      'nor',
+      'not',
+      'only',
+      'own',
+      'same',
+      'so',
+      'than',
+      'too',
+      'very',
+      'just',
     ]);
 
     // Extract meaningful words (longer than 4 characters, not stop words)
     const keywords = words
-      .map(word => word.replace(/[^a-z]/g, ''))
-      .filter(word => word.length > 4 && !stopWords.has(word))
+      .map((word) => word.replace(/[^a-z]/g, ''))
+      .filter((word) => word.length > 4 && !stopWords.has(word))
       .reduce((acc, word) => {
         acc.set(word, (acc.get(word) || 0) + 1);
         return acc;
@@ -105,7 +246,7 @@ export class TagSuggester {
    */
   private calculateConfidence(suggestionCount: number, text: string): number {
     if (suggestionCount === 0) {
-      return 0.50; // Low confidence for no suggestions
+      return 0.5; // Low confidence for no suggestions
     }
 
     // Base confidence on suggestion count and text length

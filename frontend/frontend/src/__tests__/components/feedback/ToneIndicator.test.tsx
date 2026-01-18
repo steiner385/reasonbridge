@@ -12,8 +12,10 @@ describe('ToneIndicator', () => {
     responseId: 'response-1',
     type: FeedbackType.INFLAMMATORY,
     subtype: ToneSubtype.HOSTILE_TONE,
-    suggestionText: 'I noticed this response might come across as hostile. Have you considered rephrasing?',
-    reasoning: 'The language includes dismissive phrases and strong negations that may escalate tension.',
+    suggestionText:
+      'I noticed this response might come across as hostile. Have you considered rephrasing?',
+    reasoning:
+      'The language includes dismissive phrases and strong negations that may escalate tension.',
     confidenceScore: 0.85,
     userAcknowledged: false,
     userRevised: false,
@@ -104,12 +106,7 @@ describe('ToneIndicator', () => {
 
   describe('User Interactions', () => {
     it('should call onAcknowledge when acknowledge button is clicked', () => {
-      render(
-        <ToneIndicator
-          feedback={baseFeedback}
-          onAcknowledge={mockAcknowledge}
-        />
-      );
+      render(<ToneIndicator feedback={baseFeedback} onAcknowledge={mockAcknowledge} />);
 
       const acknowledgeButton = screen.getByRole('button', { name: /Acknowledge feedback/i });
       fireEvent.click(acknowledgeButton);
@@ -123,14 +120,11 @@ describe('ToneIndicator', () => {
         userAcknowledged: true,
       };
 
-      render(
-        <ToneIndicator
-          feedback={acknowledgedFeedback}
-          onAcknowledge={mockAcknowledge}
-        />
-      );
+      render(<ToneIndicator feedback={acknowledgedFeedback} onAcknowledge={mockAcknowledge} />);
 
-      expect(screen.queryByRole('button', { name: /Acknowledge feedback/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /Acknowledge feedback/i }),
+      ).not.toBeInTheDocument();
     });
 
     it('should toggle reasoning section when button is clicked', () => {
@@ -151,12 +145,7 @@ describe('ToneIndicator', () => {
         userAcknowledged: true,
       };
 
-      render(
-        <ToneIndicator
-          feedback={acknowledgedFeedback}
-          onRateHelpful={mockRateHelpful}
-        />
-      );
+      render(<ToneIndicator feedback={acknowledgedFeedback} onRateHelpful={mockRateHelpful} />);
 
       expect(screen.getByText(/Was this helpful?/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Mark as helpful/i })).toBeInTheDocument();
@@ -169,12 +158,7 @@ describe('ToneIndicator', () => {
         userAcknowledged: true,
       };
 
-      render(
-        <ToneIndicator
-          feedback={acknowledgedFeedback}
-          onRateHelpful={mockRateHelpful}
-        />
-      );
+      render(<ToneIndicator feedback={acknowledgedFeedback} onRateHelpful={mockRateHelpful} />);
 
       const helpfulButton = screen.getByRole('button', { name: /Mark as helpful/i });
       fireEvent.click(helpfulButton);

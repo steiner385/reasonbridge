@@ -1,11 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClarityScoreDisplay } from '../../../components/feedback/ClarityScoreDisplay';
-import { Feedback, FeedbackType, HelpfulRating, ClarityMetrics } from '../../../types/feedback';
+import { Feedback, FeedbackType, ClarityMetrics } from '../../../types/feedback';
 
 describe('ClarityScoreDisplay', () => {
   const mockAcknowledge = jest.fn();
-  const mockRateHelpful = jest.fn();
 
   const unsourcedFeedback: Feedback = {
     id: 'feedback-1',
@@ -52,18 +51,14 @@ describe('ClarityScoreDisplay', () => {
 
   describe('Rendering', () => {
     it('should render clarity score with feedback', () => {
-      render(
-        <ClarityScoreDisplay feedback={[unsourcedFeedback, biasFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[unsourcedFeedback, biasFeedback]} />);
 
       expect(screen.getByText(/Clarity Score/i)).toBeInTheDocument();
       expect(screen.getByText(/AI-powered analysis/i)).toBeInTheDocument();
     });
 
     it('should calculate and display overall clarity score from feedback', () => {
-      render(
-        <ClarityScoreDisplay feedback={[unsourcedFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[unsourcedFeedback]} />);
 
       // Should show a score (calculated from feedback)
       expect(screen.getByRole('region', { name: /Clarity analysis/i })).toBeInTheDocument();
@@ -74,7 +69,7 @@ describe('ClarityScoreDisplay', () => {
         <ClarityScoreDisplay
           feedback={[unsourcedFeedback, biasFeedback]}
           metrics={customMetrics}
-        />
+        />,
       );
 
       // Should display the custom overall score
@@ -83,12 +78,7 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should render in compact mode', () => {
-      const { container } = render(
-        <ClarityScoreDisplay
-          feedback={[unsourcedFeedback]}
-          compact
-        />
-      );
+      const { container } = render(<ClarityScoreDisplay feedback={[unsourcedFeedback]} compact />);
 
       const compactElement = container.querySelector('.inline-flex');
       expect(compactElement).toBeInTheDocument();
@@ -104,18 +94,14 @@ describe('ClarityScoreDisplay', () => {
 
   describe('Score Calculation', () => {
     it('should calculate sourcing score based on unsourced feedback', () => {
-      render(
-        <ClarityScoreDisplay feedback={[unsourcedFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[unsourcedFeedback]} />);
 
       expect(screen.getByText(/Sourcing/i)).toBeInTheDocument();
       // With 1 unsourced feedback, score should be reduced
     });
 
     it('should calculate neutrality score based on bias feedback', () => {
-      render(
-        <ClarityScoreDisplay feedback={[biasFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[biasFeedback]} />);
 
       expect(screen.getByText(/Neutrality/i)).toBeInTheDocument();
       // With 1 bias feedback, score should be reduced
@@ -127,9 +113,7 @@ describe('ClarityScoreDisplay', () => {
         confidenceScore: 0.75, // Below 0.80 threshold
       };
 
-      render(
-        <ClarityScoreDisplay feedback={[lowConfidenceFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[lowConfidenceFeedback]} />);
 
       // Should show no issues since feedback is below threshold
       expect(screen.getByText(/No clarity issues detected/i)).toBeInTheDocument();
@@ -141,9 +125,7 @@ describe('ClarityScoreDisplay', () => {
         displayedToUser: false,
       };
 
-      render(
-        <ClarityScoreDisplay feedback={[hiddenFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[hiddenFeedback]} />);
 
       // Should show no issues since feedback is not displayed to user
       expect(screen.getByText(/No clarity issues detected/i)).toBeInTheDocument();
@@ -152,12 +134,7 @@ describe('ClarityScoreDisplay', () => {
 
   describe('Metric Visualization', () => {
     it('should display sourcing score with progress bar', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} />);
 
       expect(screen.getByText(/Sourcing/i)).toBeInTheDocument();
       expect(screen.getByText('75%')).toBeInTheDocument();
@@ -167,47 +144,27 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should display neutrality score with progress bar', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} />);
 
       expect(screen.getByText(/Neutrality/i)).toBeInTheDocument();
       expect(screen.getByText('88%')).toBeInTheDocument();
     });
 
     it('should display specificity score with progress bar', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} />);
 
       expect(screen.getByText(/Specificity/i)).toBeInTheDocument();
       expect(screen.getByText('92%')).toBeInTheDocument();
     });
 
     it('should show issue counts for sourcing', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} />);
 
       expect(screen.getByText(/2 unsourced claims detected/i)).toBeInTheDocument();
     });
 
     it('should show issue counts for neutrality', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} />);
 
       expect(screen.getByText(/1 bias indicator detected/i)).toBeInTheDocument();
     });
@@ -216,45 +173,35 @@ describe('ClarityScoreDisplay', () => {
   describe('Score Labels and Colors', () => {
     it('should show "Excellent" label for scores >= 0.9', () => {
       const excellentMetrics = { ...customMetrics, overallClarityScore: 0.95 };
-      render(
-        <ClarityScoreDisplay feedback={[]} metrics={excellentMetrics} />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={excellentMetrics} />);
 
       expect(screen.getByText('Excellent')).toBeInTheDocument();
     });
 
     it('should show "Good" label for scores >= 0.8', () => {
       const goodMetrics = { ...customMetrics, overallClarityScore: 0.85 };
-      render(
-        <ClarityScoreDisplay feedback={[]} metrics={goodMetrics} />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={goodMetrics} />);
 
       expect(screen.getByText('Good')).toBeInTheDocument();
     });
 
     it('should show "Fair" label for scores >= 0.7', () => {
       const fairMetrics = { ...customMetrics, overallClarityScore: 0.75 };
-      render(
-        <ClarityScoreDisplay feedback={[]} metrics={fairMetrics} />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={fairMetrics} />);
 
       expect(screen.getByText('Fair')).toBeInTheDocument();
     });
 
     it('should show "Needs Improvement" label for scores >= 0.6', () => {
       const needsImprovementMetrics = { ...customMetrics, overallClarityScore: 0.65 };
-      render(
-        <ClarityScoreDisplay feedback={[]} metrics={needsImprovementMetrics} />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={needsImprovementMetrics} />);
 
       expect(screen.getByText('Needs Improvement')).toBeInTheDocument();
     });
 
     it('should show "Poor" label for scores < 0.6', () => {
       const poorMetrics = { ...customMetrics, overallClarityScore: 0.45 };
-      render(
-        <ClarityScoreDisplay feedback={[]} metrics={poorMetrics} />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={poorMetrics} />);
 
       expect(screen.getByText('Poor')).toBeInTheDocument();
     });
@@ -263,10 +210,7 @@ describe('ClarityScoreDisplay', () => {
   describe('Feedback Items', () => {
     it('should display unsourced feedback items', () => {
       render(
-        <ClarityScoreDisplay
-          feedback={[unsourcedFeedback]}
-          onAcknowledge={mockAcknowledge}
-        />
+        <ClarityScoreDisplay feedback={[unsourcedFeedback]} onAcknowledge={mockAcknowledge} />,
       );
 
       expect(screen.getByText(/Sourcing needed/i)).toBeInTheDocument();
@@ -274,21 +218,14 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should display bias feedback items', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[biasFeedback]}
-          onAcknowledge={mockAcknowledge}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[biasFeedback]} onAcknowledge={mockAcknowledge} />);
 
       expect(screen.getByText(/Consider neutral language/i)).toBeInTheDocument();
       expect(screen.getByText(biasFeedback.suggestionText)).toBeInTheDocument();
     });
 
     it('should show confidence scores for feedback items', () => {
-      render(
-        <ClarityScoreDisplay feedback={[unsourcedFeedback]} />
-      );
+      render(<ClarityScoreDisplay feedback={[unsourcedFeedback]} />);
 
       expect(screen.getByText(/Confidence: 85%/i)).toBeInTheDocument();
     });
@@ -297,10 +234,7 @@ describe('ClarityScoreDisplay', () => {
   describe('User Interactions', () => {
     it('should call onAcknowledge when feedback is acknowledged', () => {
       render(
-        <ClarityScoreDisplay
-          feedback={[unsourcedFeedback]}
-          onAcknowledge={mockAcknowledge}
-        />
+        <ClarityScoreDisplay feedback={[unsourcedFeedback]} onAcknowledge={mockAcknowledge} />,
       );
 
       const acknowledgeButton = screen.getByRole('button', { name: /Acknowledge feedback/i });
@@ -316,13 +250,12 @@ describe('ClarityScoreDisplay', () => {
       };
 
       render(
-        <ClarityScoreDisplay
-          feedback={[acknowledgedFeedback]}
-          onAcknowledge={mockAcknowledge}
-        />
+        <ClarityScoreDisplay feedback={[acknowledgedFeedback]} onAcknowledge={mockAcknowledge} />,
       );
 
-      expect(screen.queryByRole('button', { name: /Acknowledge feedback/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /Acknowledge feedback/i }),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -334,12 +267,7 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should have progress bars with proper ARIA attributes', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} />);
 
       const progressBars = screen.getAllByRole('progressbar');
       expect(progressBars.length).toBeGreaterThan(0);
@@ -352,13 +280,7 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should have status role in compact mode', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[]}
-          metrics={customMetrics}
-          compact
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[]} metrics={customMetrics} compact />);
 
       expect(screen.getByRole('status')).toBeInTheDocument();
     });
@@ -366,11 +288,7 @@ describe('ClarityScoreDisplay', () => {
 
   describe('Multiple Feedback Items', () => {
     it('should display all clarity-related feedback items', () => {
-      render(
-        <ClarityScoreDisplay
-          feedback={[unsourcedFeedback, biasFeedback]}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[unsourcedFeedback, biasFeedback]} />);
 
       expect(screen.getByText(/Sourcing needed/i)).toBeInTheDocument();
       expect(screen.getByText(/Consider neutral language/i)).toBeInTheDocument();
@@ -390,11 +308,7 @@ describe('ClarityScoreDisplay', () => {
         createdAt: new Date(),
       };
 
-      render(
-        <ClarityScoreDisplay
-          feedback={[unsourcedFeedback, toneFeedback]}
-        />
-      );
+      render(<ClarityScoreDisplay feedback={[unsourcedFeedback, toneFeedback]} />);
 
       // Should only show unsourced feedback, not tone feedback
       expect(screen.getByText(/Sourcing needed/i)).toBeInTheDocument();

@@ -58,9 +58,7 @@ export type SuggestionResponse = TagSuggestionsResponse | TopicLinkSuggestionsRe
 /**
  * Type guard to check if response is TagSuggestionsResponse
  */
-export function isTagSuggestion(
-  response: SuggestionResponse
-): response is TagSuggestionsResponse {
+export function isTagSuggestion(response: SuggestionResponse): response is TagSuggestionsResponse {
   return !('linkSuggestions' in response);
 }
 
@@ -68,7 +66,7 @@ export function isTagSuggestion(
  * Type guard to check if response is TopicLinkSuggestionsResponse
  */
 export function isTopicLinkSuggestion(
-  response: SuggestionResponse
+  response: SuggestionResponse,
 ): response is TopicLinkSuggestionsResponse {
   return 'linkSuggestions' in response;
 }

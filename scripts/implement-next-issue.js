@@ -27,20 +27,20 @@ const __dirname = dirname(__filename);
 // Import priority calculation logic
 const PRIORITY_WEIGHTS = {
   labels: {
-    'P0': 1000,
-    'critical': 500,
+    P0: 1000,
+    critical: 500,
     'high-priority': 300,
-    'bug': 200,
-    'security': 400,
-    'performance': 150,
-    'accessibility': 180,
+    bug: 200,
+    security: 400,
+    performance: 150,
+    accessibility: 180,
     'test-failure': 250,
-    'regression': 350,
-    'blocker': 600,
+    regression: 350,
+    blocker: 600,
     'needs-attention': 100,
     'quick-win': 50,
-    'documentation': 30,
-    'enhancement': 40,
+    documentation: 30,
+    enhancement: 40,
     'good-first-issue': 20,
   },
   age: {
@@ -58,7 +58,7 @@ const PRIORITY_WEIGHTS = {
   },
   p0Priority: {
     multiplier: 10,
-  }
+  },
 };
 
 function extractP0Priority(issue) {
@@ -80,7 +80,7 @@ function calculatePriorityScore(issue) {
   }
 
   // Label scoring
-  issue.labels.forEach(label => {
+  issue.labels.forEach((label) => {
     const labelName = typeof label === 'string' ? label : label.name;
     score += PRIORITY_WEIGHTS.labels[labelName.toLowerCase()] || 0;
   });
@@ -90,7 +90,10 @@ function calculatePriorityScore(issue) {
   score += Math.min(ageInDays * PRIORITY_WEIGHTS.age.factor, PRIORITY_WEIGHTS.age.max);
 
   // Comment scoring
-  score += Math.min(issue.comments * PRIORITY_WEIGHTS.comments.factor, PRIORITY_WEIGHTS.comments.max);
+  score += Math.min(
+    issue.comments * PRIORITY_WEIGHTS.comments.factor,
+    PRIORITY_WEIGHTS.comments.max,
+  );
 
   // Unassigned bonus
   if (!issue.assignees || issue.assignees.length === 0) {
@@ -117,7 +120,7 @@ function findNextIssue() {
     // Fetch all open, unassigned issues
     const result = execSync(
       'gh issue list --state open --assignee "" --limit 200 --json number,title,labels,assignees,createdAt,updatedAt,comments,milestone,body',
-      { encoding: 'utf-8' }
+      { encoding: 'utf-8' },
     );
 
     const issues = JSON.parse(result);
@@ -130,11 +133,13 @@ function findNextIssue() {
     console.log(`📊 Found ${issues.length} unassigned issues. Calculating priorities...`);
 
     // Calculate priority for each issue
-    const prioritized = issues.map(issue => ({
-      ...issue,
-      priorityScore: calculatePriorityScore(issue),
-      p0Priority: extractP0Priority(issue)
-    })).sort((a, b) => b.priorityScore - a.priorityScore);
+    const prioritized = issues
+      .map((issue) => ({
+        ...issue,
+        priorityScore: calculatePriorityScore(issue),
+        p0Priority: extractP0Priority(issue),
+      }))
+      .sort((a, b) => b.priorityScore - a.priorityScore);
 
     // Show top 10 candidates
     console.log('\n📈 Top 10 Priority Issues:');
@@ -142,7 +147,7 @@ function findNextIssue() {
 
     prioritized.slice(0, 10).forEach((issue, index) => {
       const p0 = issue.p0Priority !== null ? `[P0.${issue.p0Priority}] ` : '';
-      const labels = issue.labels.map(l => typeof l === 'string' ? l : l.name).join(', ');
+      const labels = issue.labels.map((l) => (typeof l === 'string' ? l : l.name)).join(', ');
       console.log(`${index + 1}. ${p0}#${issue.number}: ${issue.title}`);
       console.log(`   Score: ${issue.priorityScore.toFixed(0)} | Labels: ${labels}`);
       console.log('');
@@ -207,7 +212,7 @@ function assignIssue(issueNumber, username) {
 
 function generateImplementationPlan(issue) {
   const p0 = extractP0Priority(issue);
-  const labels = issue.labels.map(l => typeof l === 'string' ? l : l.name);
+  const labels = issue.labels.map((l) => (typeof l === 'string' ? l : l.name));
 
   console.log('\n📝 Implementation Plan:');
   console.log('─'.repeat(80));
@@ -236,7 +241,13 @@ function generateImplementationPlan(issue) {
 
   if (issue.body) {
     console.log('\n📄 Description:');
-    console.log(issue.body.split('\n').slice(0, 10).map(line => '   ' + line).join('\n'));
+    console.log(
+      issue.body
+        .split('\n')
+        .slice(0, 10)
+        .map((line) => '   ' + line)
+        .join('\n'),
+    );
     if (issue.body.split('\n').length > 10) {
       console.log('   [... truncated ...]');
     }
@@ -291,14 +302,21 @@ async function main() {
 
   // Save issue context for reference
   const contextPath = path.join(__dirname, '..', '.current-issue.json');
-  fs.writeFileSync(contextPath, JSON.stringify({
-    number: nextIssue.number,
-    title: nextIssue.title,
-    branch: branchName,
-    startedAt: new Date().toISOString(),
-    priority: nextIssue.priorityScore,
-    p0Priority: nextIssue.p0Priority
-  }, null, 2));
+  fs.writeFileSync(
+    contextPath,
+    JSON.stringify(
+      {
+        number: nextIssue.number,
+        title: nextIssue.title,
+        branch: branchName,
+        startedAt: new Date().toISOString(),
+        priority: nextIssue.priorityScore,
+        p0Priority: nextIssue.p0Priority,
+      },
+      null,
+      2,
+    ),
+  );
 
   console.log('\n✅ Ready to implement! Issue context saved to .current-issue.json');
   console.log(`\n💡 Tip: Use 'gh issue view ${nextIssue.number}' to see full issue details`);

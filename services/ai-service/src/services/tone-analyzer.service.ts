@@ -138,7 +138,10 @@ export class ToneAnalyzerService {
    */
   private createReasoning(issues: { pattern: string; match: string }[]): string {
     const uniqueMatches = [...new Set(issues.map((i) => i.match))];
-    const examples = uniqueMatches.slice(0, 2).map((m) => `"${m}"`).join(', ');
+    const examples = uniqueMatches
+      .slice(0, 2)
+      .map((m) => `"${m}"`)
+      .join(', ');
 
     return `Detected ${issues.length} instance(s) of potentially inflammatory language (e.g., ${examples}). While passion is valuable, personal attacks or hostile tone can shut down productive dialogue and violate community standards.`;
   }

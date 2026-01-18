@@ -32,7 +32,7 @@ export function useFeedbackActions() {
    * Calls the backend API to persist the dismissal
    */
   const dismissFeedback = useCallback(async (options: DismissFeedbackOptions) => {
-    setState(prev => ({ ...prev, isDismissing: true, error: null }));
+    setState((prev) => ({ ...prev, isDismissing: true, error: null }));
 
     try {
       // Call backend API to dismiss feedback
@@ -52,7 +52,7 @@ export function useFeedbackActions() {
       }
 
       // Update local state
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         dismissedFeedback: new Set([...prev.dismissedFeedback, options.feedbackId]),
         isDismissing: false,
@@ -61,7 +61,7 @@ export function useFeedbackActions() {
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to dismiss feedback';
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: errorMessage,
         isDismissing: false,
@@ -78,14 +78,14 @@ export function useFeedbackActions() {
     (feedbackId: string) => {
       return state.dismissedFeedback.has(feedbackId);
     },
-    [state.dismissedFeedback]
+    [state.dismissedFeedback],
   );
 
   /**
    * Clear all dismissed feedback (reset state)
    */
   const clearDismissed = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       dismissedFeedback: new Set(),
     }));

@@ -61,12 +61,12 @@ For inline display (e.g., in response previews):
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `feedback` | `Feedback` | required | Feedback object from AI service |
-| `onAcknowledge` | `(id: string) => void` | optional | Callback when user acknowledges feedback |
-| `onRateHelpful` | `(id: string, rating: HelpfulRating) => void` | optional | Callback when user rates feedback |
-| `compact` | `boolean` | `false` | Show minimal inline version |
+| Prop            | Type                                          | Default  | Description                              |
+| --------------- | --------------------------------------------- | -------- | ---------------------------------------- |
+| `feedback`      | `Feedback`                                    | required | Feedback object from AI service          |
+| `onAcknowledge` | `(id: string) => void`                        | optional | Callback when user acknowledges feedback |
+| `onRateHelpful` | `(id: string, rating: HelpfulRating) => void` | optional | Callback when user rates feedback        |
+| `compact`       | `boolean`                                     | `false`  | Show minimal inline version              |
 
 ### Tone Variants
 
@@ -114,6 +114,7 @@ The component expects the `Feedback` type which matches the Prisma schema in `pa
 ### Testing
 
 See `__tests__/components/feedback/ToneIndicator.test.tsx` for comprehensive test coverage including:
+
 - Rendering variants
 - User interactions
 - Confidence threshold enforcement

@@ -6,16 +6,10 @@ import { PrismaClient } from '@unite-discord/db-models';
  * Implements lifecycle hooks to connect and disconnect gracefully.
  */
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
     super({
-      log:
-        process.env['NODE_ENV'] === 'development'
-          ? ['query', 'error', 'warn']
-          : ['error'],
+      log: process.env['NODE_ENV'] === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
   }
 

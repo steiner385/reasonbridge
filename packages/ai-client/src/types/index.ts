@@ -101,11 +101,7 @@ export class AIClientError extends Error {
   public readonly code: AIClientErrorCode;
   public override readonly cause?: Error | undefined;
 
-  constructor(
-    message: string,
-    code: AIClientErrorCode,
-    cause?: Error | undefined
-  ) {
+  constructor(message: string, code: AIClientErrorCode, cause?: Error | undefined) {
     super(message);
     this.code = code;
     this.cause = cause;

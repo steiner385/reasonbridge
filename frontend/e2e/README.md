@@ -5,6 +5,7 @@ This directory contains end-to-end tests for the Unite Discord frontend applicat
 ## Running Tests
 
 ### Prerequisites
+
 - The Playwright browsers must be installed: `npx playwright install`
 - For the first time, install system dependencies: `npx playwright install-deps`
 
@@ -30,6 +31,7 @@ npm run test:e2e:report
 ## Test Structure
 
 Tests are organized in the `e2e/` directory:
+
 - `example.spec.ts` - Example test suite demonstrating basic patterns
 
 ## Configuration
@@ -37,6 +39,7 @@ Tests are organized in the `e2e/` directory:
 The Playwright configuration is in `playwright.config.ts` at the frontend root.
 
 Key settings:
+
 - Base URL: `http://localhost:5173` (configurable via `PLAYWRIGHT_BASE_URL`)
 - Browser: Chromium (can be extended to Firefox, WebKit)
 - Screenshots: Captured on failure
@@ -61,6 +64,7 @@ test.describe('Feature Name', () => {
 ## CI/CD Integration
 
 The tests are configured to run optimally in CI environments:
+
 - Retries: 2 retries on CI, 0 locally
 - Workers: 1 on CI, unlimited locally
 - Forbid `.only`: Tests with `.only` will fail on CI

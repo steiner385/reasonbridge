@@ -97,12 +97,9 @@ export class BedrockClient implements IAIClient {
    * @throws AIClientError on failure
    */
   async complete(request: CompletionRequest): Promise<CompletionResponse> {
-    const maxTokens =
-      request.maxTokens ?? this.config.maxTokens ?? DEFAULT_CONFIG.maxTokens;
+    const maxTokens = request.maxTokens ?? this.config.maxTokens ?? DEFAULT_CONFIG.maxTokens;
     const temperature =
-      request.temperature ??
-      this.config.temperature ??
-      DEFAULT_CONFIG.temperature;
+      request.temperature ?? this.config.temperature ?? DEFAULT_CONFIG.temperature;
 
     const messages: BedrockMessage[] = request.messages.map((msg) => ({
       role: msg.role as ConversationRole,
@@ -113,9 +110,7 @@ export class BedrockClient implements IAIClient {
       const command = new ConverseCommand({
         modelId: this.config.modelId,
         messages,
-        system: request.systemPrompt
-          ? [{ text: request.systemPrompt }]
-          : undefined,
+        system: request.systemPrompt ? [{ text: request.systemPrompt }] : undefined,
         inferenceConfig: {
           maxTokens,
           temperature,
@@ -125,19 +120,14 @@ export class BedrockClient implements IAIClient {
       const response = await this.client.send(command);
 
       const outputContent = response.output?.message?.content?.[0];
-      const content =
-        outputContent && 'text' in outputContent
-          ? (outputContent.text ?? '')
-          : '';
+      const content = outputContent && 'text' in outputContent ? (outputContent.text ?? '') : '';
 
       return {
         content,
         usage: {
           inputTokens: response.usage?.inputTokens ?? 0,
           outputTokens: response.usage?.outputTokens ?? 0,
-          totalTokens:
-            (response.usage?.inputTokens ?? 0) +
-            (response.usage?.outputTokens ?? 0),
+          totalTokens: (response.usage?.inputTokens ?? 0) + (response.usage?.outputTokens ?? 0),
         },
         stopReason: mapStopReason(response.stopReason),
       };
@@ -164,42 +154,28 @@ export class BedrockClient implements IAIClient {
     if (error instanceof Error) {
       const name = error.name;
 
-      if (
-        name === 'AccessDeniedException' ||
-        name === 'UnrecognizedClientException'
-      ) {
+      if (name === 'AccessDeniedException' || name === 'UnrecognizedClientException') {
         return new AIClientError(
           'Authentication failed. Check AWS credentials.',
           'AUTHENTICATION_ERROR',
-          error
+          error,
         );
       }
 
-      if (
-        name === 'ThrottlingException' ||
-        name === 'ServiceQuotaExceededException'
-      ) {
+      if (name === 'ThrottlingException' || name === 'ServiceQuotaExceededException') {
         return new AIClientError(
           'Rate limit exceeded. Try again later.',
           'RATE_LIMIT_ERROR',
-          error
+          error,
         );
       }
 
       if (name === 'ModelTimeoutException' || name === 'TimeoutError') {
-        return new AIClientError(
-          'Request timed out.',
-          'TIMEOUT_ERROR',
-          error
-        );
+        return new AIClientError('Request timed out.', 'TIMEOUT_ERROR', error);
       }
 
       if (name === 'ValidationException' || name === 'ModelErrorException') {
-        return new AIClientError(
-          `Model error: ${error.message}`,
-          'MODEL_ERROR',
-          error
-        );
+        return new AIClientError(`Model error: ${error.message}`, 'MODEL_ERROR', error);
       }
 
       return new AIClientError(error.message, 'UNKNOWN_ERROR', error);

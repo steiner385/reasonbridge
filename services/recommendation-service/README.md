@@ -5,6 +5,7 @@ Recommendation service for personalized content suggestions.
 ## Overview
 
 This service provides personalized recommendation capabilities for the uniteDiscord platform, including:
+
 - Content discovery and suggestions
 - User interest profiling
 - Trending topics and discussions
@@ -53,14 +54,15 @@ pnpm typecheck
 ## API Endpoints
 
 ### Health Check
+
 - **GET** `/health` - Service health status
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Service port | `3004` |
-| `DATABASE_URL` | PostgreSQL connection string | - |
+| Variable       | Description                  | Default |
+| -------------- | ---------------------------- | ------- |
+| `PORT`         | Service port                 | `3004`  |
+| `DATABASE_URL` | PostgreSQL connection string | -       |
 
 ## Current Implementation Status
 

@@ -100,10 +100,7 @@ export class FeedbackAnalyticsService {
       const acknowledgedCount = items.filter((f) => f.userAcknowledged).length;
       const revisionCount = items.filter((f) => f.userRevised).length;
       const dismissedCount = items.filter((f) => f.dismissedAt !== null).length;
-      const totalConfidence = items.reduce(
-        (sum, f) => sum + Number(f.confidenceScore),
-        0,
-      );
+      const totalConfidence = items.reduce((sum, f) => sum + Number(f.confidenceScore), 0);
       const averageConfidence = items.length > 0 ? totalConfidence / items.length : 0;
 
       return {

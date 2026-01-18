@@ -1,9 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Get, Param, NotFoundException } from '@nestjs/common';
 import { SuggestionsService } from '../services/suggestions.service.js';
-import {
-  TagSuggestionsRequestDto,
-  TagSuggestionsResponseDto,
-} from './dto/tag-suggestions.dto.js';
+import { TagSuggestionsRequestDto, TagSuggestionsResponseDto } from './dto/tag-suggestions.dto.js';
 import {
   TopicLinkSuggestionsRequestDto,
   TopicLinkSuggestionsResponseDto,
@@ -66,7 +63,7 @@ export class SuggestionsController {
 
     // Map internal TopicLinkSuggestion to DTO format
     const linkSuggestions: TopicLinkDto[] = result.linkSuggestions
-      ? result.linkSuggestions.map(link => ({
+      ? result.linkSuggestions.map((link) => ({
           targetTopicId: link.targetTopicId,
           relationshipType: link.relationshipType,
           reasoning: link.reasoning,
