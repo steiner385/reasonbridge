@@ -2,12 +2,39 @@
 
 ## Current Status
 
-- Completed issue #186 (T190) - Implement moderation history tracking
-- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #187 (T191) - Implement AppealService for moderation appeal management
+- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All moderation service tests passing (54 total: 24 repository + 21 content-screening + 9 ai-review) ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
+
+## Latest Completed (2026-01-18 - Iteration 29)
+
+**Issue #187 (T191) - Implement AppealService for moderation appeal management:**
+- Created AppealService (`services/moderation-service/src/services/appeal.service.ts`) with:
+  - Core appeal management methods encapsulating all appeal logic
+  - `createAppeal()` - Appeal creation with comprehensive validation (20-5000 char reasoning)
+  - `getPendingAppeals()` - Retrieve pending appeals with cursor pagination
+  - `assignAppealToModerator()` - Route appeals to specific moderators (moderator assignment)
+  - `unassignAppeal()` - Return appeals to pending queue for reassignment
+  - `reviewAppeal()` - Review workflow with moderation action reversal on upheld
+  - `getAppealById()` - Retrieve specific appeal details with context
+  - `getAppealStatistics()` - Aggregated metrics and analytics
+- Moderator assignment workflow:
+  - PENDING → UNDER_REVIEW (when assigned to moderator)
+  - UNDER_REVIEW → UPHELD/DENIED (when reviewed)
+  - Ability to unassign and return to PENDING for reallocation
+  - Appeals track reviewer information and decision reasoning
+- Appeal lifecycle management:
+  - Status transitions: PENDING → UNDER_REVIEW/PENDING → UPHELD/DENIED
+  - Moderation action reversal when appeal is upheld
+  - Event publishing for appeal upheld (trust score updates)
+- Integration improvements:
+  - Updated ModerationModule to export AppealService
+  - All 54 moderation tests continue to pass
+  - TypeScript compilation successful
+- Merged via PR #578
 
 ## Latest Completed (2026-01-18 - Iteration 28)
 
