@@ -2,14 +2,35 @@
 
 ## Current Status
 
-- Completed issue #190 (T194) - Create moderation dashboard page
-- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- Frontend build successful (366MB gzipped with moderation dashboard)
+- Completed issue #191 (T195) - Create moderation queue view
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Frontend build successful (374kB gzipped with moderation queue)
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 32)
+## Latest Completed (2026-01-18 - Iteration 33)
+
+**Issue #191 (T195) - Create moderation queue view:**
+- Created ModerationQueueView component (frontend/src/components/moderation/ModerationQueueView.tsx:1-462)
+- Features: Comprehensive queue management with filtering, sorting, pagination
+  - Filter by status (pending, active, appealed, reversed)
+  - Filter by severity (non-punitive, consequential)
+  - Filter by action type (educate, warn, hide, remove, suspend, ban)
+  - Sort by date or severity with ascending/descending toggle
+  - Pagination support (20 items per page)
+  - Quick approve/reject action buttons
+  - AI recommendation badges with confidence scores
+- Integrated with ModerationDashboardPage (frontend/src/pages/Admin/ModerationDashboardPage.tsx:14-423)
+  - Added new "Queue" tab with dedicated queue view
+  - Tab shows pending actions by default
+- Updated component exports (frontend/src/components/moderation/index.ts:7,10)
+- All TypeScript types properly defined (frontend/src/types/moderation.ts)
+- Build: Successful (374kB gzipped), ESLint passes (0 warnings/errors), TypeScript strict mode passes
+- Pre-existing CI failures in ai-service (unrelated to this PR)
+- Merged via PR #584 (squash merge)
+
+## Previous Completed (2026-01-18 - Iteration 32)
 
 **Issue #190 (T194) - Create moderation dashboard page:**
 - Created ModerationDashboardPage component (frontend/src/pages/Admin/ModerationDashboardPage.tsx) with:
