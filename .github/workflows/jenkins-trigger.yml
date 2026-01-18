@@ -46,30 +46,28 @@ jobs:
           JENKINS_URL="${JENKINS_URL%/}"
 
           # Fetch CSRF crumb from Jenkins (required for POST requests)
-          echo "Fetching Jenkins CSRF crumb from ${JENKINS_URL}/crumbIssuer/api/json..."
-          CRUMB_RESPONSE=$(curl -vvv -u "${JENKINS_USER}:${JENKINS_TOKEN}" \
-            "${JENKINS_URL}/crumbIssuer/api/json" 2>&1 | tail -50)
+          # Try HTTPS first (with insecure flag for self-signed certs), then fall back to HTTP
+          echo "Fetching Jenkins CSRF crumb..."
 
-          echo "Crumb Response:"
-          echo "$CRUMB_RESPONSE"
+          # Ensure HTTPS is used
+          JENKINS_CRUMB_URL="${JENKINS_URL/http:/https:}/crumbIssuer/api/json"
 
-          # Try to extract crumb value - handle both JSON formats
-          CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -o '"crumb":"[^"]*"' | cut -d'"' -f4)
+          CRUMB_RESPONSE=$(curl -sL -k -u "${JENKINS_USER}:${JENKINS_TOKEN}" \
+            "$JENKINS_CRUMB_URL" 2>/dev/null || echo '{}')
+
+          echo "Crumb response: $CRUMB_RESPONSE"
+
+          # Extract crumb value from JSON (format: {"crumb":"value","crumbRequestField":"field-name"})
+          CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -o '"crumb":"[^"]*"' | head -1 | cut -d'"' -f4)
+          CRUMB_FIELD=$(echo "$CRUMB_RESPONSE" | grep -o '"crumbRequestField":"[^"]*"' | head -1 | cut -d'"' -f4)
+          CRUMB_FIELD="${CRUMB_FIELD:-Jenkins-Crumb}"
 
           if [ -z "$CRUMB_VALUE" ]; then
-            # Try alternative parsing
-            CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -o 'crumb.*' | head -1)
-            echo "Could not parse crumb in standard format, got: $CRUMB_VALUE"
-          fi
-
-          if [ -z "$CRUMB_VALUE" ]; then
-            echo "::warning::Could not fetch Jenkins CSRF crumb"
-            # Use empty crumb header as fallback
-            CRUMB_ARGS="-H 'Jenkins-Crumb: '"
-            echo "Attempting trigger with empty crumb header..."
+            echo "::warning::Could not fetch Jenkins CSRF crumb - will attempt without"
+            CRUMB_ARGS=""
           else
-            echo "✅ CSRF crumb fetched: $CRUMB_VALUE"
-            CRUMB_ARGS="-H 'Jenkins-Crumb: $CRUMB_VALUE'"
+            echo "✅ CSRF crumb fetched (field: $CRUMB_FIELD)"
+            CRUMB_ARGS="-H '${CRUMB_FIELD}: ${CRUMB_VALUE}'"
           fi
 
           # Trigger Jenkins build with parameters (using -L to follow redirects)
