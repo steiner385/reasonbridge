@@ -82,3 +82,62 @@ export const mockCommonGroundUpdatedEvent = {
     reason: 'threshold_reached',
   },
 };
+
+export const testResponseId = '950e8400-e29b-41d4-a716-446655440000';
+export const testModerationActionId = '960e8400-e29b-41d4-a716-446655440000';
+
+export const mockResponse = {
+  id: testResponseId,
+  authorId: testUserId1,
+  topicId: testTopicId,
+  content: 'This is a test response that contains concerning content',
+  createdAt: new Date('2026-01-17'),
+  updatedAt: new Date('2026-01-17'),
+};
+
+export const mockUser = {
+  id: testUserId1,
+  displayName: 'Test User',
+  email: 'test@example.com',
+  createdAt: new Date('2026-01-17'),
+};
+
+export const mockModerationActionRequestedEvent = {
+  type: 'moderation.action.requested',
+  timestamp: new Date().toISOString(),
+  payload: {
+    targetType: 'response' as const,
+    targetId: testResponseId,
+    actionType: 'warn' as const,
+    severity: 'consequential' as const,
+    reasoning: 'Content violates community guidelines on respectful discourse',
+    aiConfidence: 0.92,
+    violationContext: {
+      flaggedContent: 'This is a test response that contains concerning content',
+      violatedGuideline: 'Respectful Discourse Policy',
+      priorActions: 1,
+    },
+    requestedAt: new Date().toISOString(),
+  },
+};
+
+export const mockUserTrustUpdatedEvent = {
+  type: 'user.trust.updated',
+  timestamp: new Date().toISOString(),
+  payload: {
+    userId: testUserId1,
+    previousScores: {
+      ability: 0.75,
+      benevolence: 0.80,
+      integrity: 0.85,
+    },
+    newScores: {
+      ability: 0.72,
+      benevolence: 0.78,
+      integrity: 0.81,
+    },
+    reason: 'moderation_action' as const,
+    moderationActionId: testModerationActionId,
+    updatedAt: new Date().toISOString(),
+  },
+};

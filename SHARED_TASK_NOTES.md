@@ -2,14 +2,27 @@
 
 ## Current Status
 
-- Completed issue #183 (T187) - Implement temporary ban functionality
-- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #184 (T188) - Implement ModerationActionRepository
+- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All moderation service unit tests passing ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 25)
+## Latest Completed (2026-01-18 - Iteration 26)
+
+**Issue #184 (T188) - Implement ModerationActionRepository:**
+- Created `services/moderation-service/src/repositories/moderation-action.repository.ts`
+- Implemented comprehensive data access layer for ModerationAction entity
+- CRUD operations: create, findById, update, delete, reject, approve
+- Query methods with cursor-based pagination: findMany, findByTarget, findByUserId, findByModerator
+- Filtering methods: findPending, findActive, findAppealed, findBySeverity, findByActionType, findAiRecommended
+- Ban management: findExpiredBans, liftBan with automatic expiry handling
+- Statistics aggregation: getStatistics() with date-range support and grouping by status/severity/actionType
+- Comprehensive unit tests (24 tests, all passing) covering interface contracts, CRUD ops, filtering, and statistics
+- Merged via PR #573 (commit 36a695d)
+
+## Previous Completed (2026-01-18 - Iteration 25)
 
 **Issue #183 (T187) - Implement temporary ban functionality:**
 - Added temporary ban fields to ModerationAction schema (packages/db-models/prisma/schema.prisma):
