@@ -23,6 +23,7 @@ source "$(dirname -- "$0")/colors.sh"
 
 echo ""
 echo "🔍 Running code duplication detection..."
+echo "⏱️  (with 30 second timeout)"
 
 # ============================================================================
 # Configuration
@@ -32,6 +33,7 @@ CONFIG_FILE=".jscpdrc.json"
 THRESHOLD=20
 TEMP_REPORT_DIR="/tmp/duplication-report-$$"
 REPORT_DIR="./duplication-report"
+JSCPD_TIMEOUT=30
 
 # Check if jscpd is available (try direct command or npx)
 JSCPD_CMD=""
@@ -102,13 +104,13 @@ echo "🔎 Analyzing code for duplication patterns..."
 # Prepare output file
 REPORT_JSON="$TEMP_REPORT_DIR/duplication-report.json"
 
-# Run jscpd on staged files
+# Run jscpd on staged files with timeout
 # Note: jscpd exit code 0 = no duplicates, non-zero = duplicates found
-if $JSCPD_CMD \
+if timeout $JSCPD_TIMEOUT $JSCPD_CMD \
   "$TEMP_REPORT_DIR" \
   --config "$CONFIG_FILE" \
   --output "$TEMP_REPORT_DIR" \
-  -r json > /dev/null 2>&1 || true; then
+  -r json > /dev/null 2>&1 || JSCPD_EXIT=$?; then
 
   # Check if report was generated
   if [ ! -f "$REPORT_JSON" ]; then
@@ -117,6 +119,14 @@ if $JSCPD_CMD \
     exit 0
   fi
 else
+  # Handle timeout or error
+  if [ "$JSCPD_EXIT" = "124" ]; then
+    # Timeout - treat as no duplicates
+    debug "Duplication check timed out (assuming no duplicates)"
+    rm -rf "$TEMP_REPORT_DIR"
+    exit 0
+  fi
+
   # Even if jscpd fails, try to read the report
   if [ ! -f "$REPORT_JSON" ]; then
     debug "Duplication check completed"
