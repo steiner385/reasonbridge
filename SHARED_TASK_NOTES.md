@@ -2,26 +2,36 @@
 
 ## Current Status
 
-- **E2E tests: ALL PASSING** ✅
-  - 223 tests passing
-  - 61 tests skipped (unimplemented features: user story 4 trust indicators, login, registration, browse topics, user profile APIs)
-  - 0 failures
-  - Tests run with `npm run test:e2e` (18-20s runtime)
-- Main branch synced with all e2e tests verified passing
-- All merge conflicts resolved successfully
-- Branch pushed to origin/main
-- ~162 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #163 (T167) - Implement manual review queue (BotDetector service)
+- ~161 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All 223 E2E tests passing ✅
 
-## Next Steps for Future Iterations
+## Latest Completed (2026-01-18 - Iteration 11)
 
-- All e2e tests currently passing - no immediate test failures to fix
-- Future work should focus on implementing missing features:
-  - User registration and login flow (/register, /login routes)
-  - Browse topics functionality (API endpoints)
-  - User profile API endpoints
-  - Then unskip corresponding e2e tests
+**Issue #163 (T167) - Implement manual review queue (BotDetector service):**
+- Created BotDetectorService in `services/user-service/src/services/bot-detector.service.ts`
+  - Detects rapid account creation patterns (< 24h = very suspicious, < 1 week = suspicious)
+  - Detects rapid posting patterns (average < 5 minutes between posts)
+  - Detects topic concentration (narrow focus on limited topics)
+  - Risk scoring system (0.0-1.0 scale, threshold 0.4 for requiring additional verification)
+  - Human-readable reasoning for detected patterns
+- Implements coordinated posting pattern detection across accounts
+  - Timing coordination detection (multiple users in tight time windows)
+  - New account coordination detection (3+ very new accounts on same topic)
+  - Confidence scoring and affected user ID tracking
+- Integrated BotDetectorService into UsersService and UsersModule
+  - Added checkAndHandleBotPatterns() method to UsersService
+  - Injected BotDetectorService as dependency
+- Created comprehensive unit tests (9 test cases)
+  - All patterns tested: very new, new, rapid posting, topic concentration
+  - Risk scoring validation
+  - Suspicious marking verification
+  - Normal user behavior verification
+  - Coordinated posting detection tests
+- TypeScript build verified successful (no compilation errors)
+- Merged via PR #545
 
-## Latest Completed (2026-01-18 - Iteration 5)
+## Previous Completed (2026-01-18 - Iteration 5)
 
 **E2E Tests Verified & Main Branch Merged (PR #544):**
 - Ran full e2e test suite: `npm run test:e2e`
