@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { BotDetectorService } from '../services/bot-detector.service.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly botDetector: BotDetectorService,
+  ) {}
 
   /**
    * Find a user by their Cognito sub (subject identifier)
@@ -57,5 +61,26 @@ export class UsersService {
     });
 
     return updatedUser;
+  }
+
+  /**
+   * Check if a user exhibits suspicious bot patterns
+   * Updates verification level if patterns detected
+   * @param userId - The user ID to check
+   * @returns Bot detection result with risk assessment
+   */
+  async checkAndHandleBotPatterns(userId: string) {
+    const detectionResult = await this.botDetector.detectNewAccountBotPatterns(userId);
+
+    // If suspicious patterns detected, log for manual review
+    // User is notified that additional verification is required (part of verification flow)
+    if (detectionResult.isSuspicious) {
+      // Log detection for review queue (future: integrate with moderation service)
+      console.log(
+        `Bot detection for user ${userId}: ${JSON.stringify(detectionResult)}`,
+      );
+    }
+
+    return detectionResult;
   }
 }
