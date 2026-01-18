@@ -12,3 +12,6 @@ export type { SharedPointCardProps } from './SharedPointCard';
 
 export { default as DivergencePointCard } from './DivergencePointCard';
 export type { DivergencePointCardProps } from './DivergencePointCard';
+
+export { default as BridgingSuggestionsSection } from './BridgingSuggestionsSection';
+export type { BridgingSuggestionsSectionProps } from './BridgingSuggestionsSection';

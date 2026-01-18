@@ -174,3 +174,88 @@ export interface DivergencePoint {
    */
   underlyingValues?: string[];
 }
+
+/**
+ * Individual bridging suggestion connecting different perspectives
+ */
+export interface BridgingSuggestion {
+  /**
+   * ID of the proposition being bridged
+   */
+  propositionId: string;
+
+  /**
+   * Source position/stance (e.g., "SUPPORT", "OPPOSE", "NUANCED")
+   */
+  sourcePosition: string;
+
+  /**
+   * Target position/stance to bridge toward
+   */
+  targetPosition: string;
+
+  /**
+   * Suggested language that bridges the perspectives
+   */
+  bridgingLanguage: string;
+
+  /**
+   * Identified area of common ground between positions
+   */
+  commonGround: string;
+
+  /**
+   * Explanation of why this bridging is valuable
+   */
+  reasoning: string;
+
+  /**
+   * Confidence score for this suggestion (0-1)
+   */
+  confidenceScore: number;
+}
+
+/**
+ * Response from bridging suggestions API endpoint
+ */
+export interface BridgingSuggestionsResponse {
+  /**
+   * The topic ID these suggestions are for
+   */
+  topicId: string;
+
+  /**
+   * Array of bridging suggestions
+   */
+  suggestions: BridgingSuggestion[];
+
+  /**
+   * Overall consensus score derived from propositions (0-1)
+   */
+  overallConsensusScore: number;
+
+  /**
+   * Areas where genuine disagreement exists
+   */
+  conflictAreas: string[];
+
+  /**
+   * Areas where agreement/common ground exists
+   */
+  commonGroundAreas: string[];
+
+  /**
+   * Overall confidence score for the analysis (0-1)
+   */
+  confidenceScore: number;
+
+  /**
+   * Reasoning for the overall analysis
+   */
+  reasoning: string;
+
+  /**
+   * AI attribution label
+   */
+  attribution: string;
+}

@@ -109,7 +109,7 @@ const getViewpointColor = (index: number) => {
     { bg: 'bg-teal-100', border: 'border-teal-400', text: 'text-teal-800' },
     { bg: 'bg-orange-100', border: 'border-orange-400', text: 'text-orange-800' },
   ];
-  return colors[index % colors.length];
+  return colors[index % colors.length]!;
 };
 
 /**
