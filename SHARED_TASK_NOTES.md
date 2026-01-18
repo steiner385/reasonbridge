@@ -2,12 +2,40 @@
 
 ## Current Status
 
-- Completed issue #189 (T193) - Create flag content button/modal
-- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All tests passing (131 user-service, 97 discussion-service) ✅
+- Completed issue #190 (T194) - Create moderation dashboard page
+- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Frontend build successful (366MB gzipped with moderation dashboard)
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
+
+## Latest Completed (2026-01-18 - Iteration 32)
+
+**Issue #190 (T194) - Create moderation dashboard page:**
+- Created ModerationDashboardPage component (frontend/src/pages/Admin/ModerationDashboardPage.tsx) with:
+  - Overview tab: Queue statistics (pending actions, critical actions, avg review time)
+  - Distribution of moderation actions by type visualization (educate, warn, hide, remove, suspend, ban)
+  - Recent pending actions with approve/reject inline buttons
+  - Recent appeals with uphold/deny buttons
+  - Actions tab: Filter by status (pending, active, appealed, reversed) with list view
+  - Appeals tab: View all appeals with status filtering
+- Created moderation API service (frontend/src/lib/moderation-api.ts) with methods:
+  - getModerationActions() - List with filtering by status/severity
+  - getModerationAction() - Get action details
+  - approveModerationAction() - Approve pending action
+  - rejectModerationAction() - Reject pending action
+  - getAppeals() - List appeals with status filtering
+  - getAppeal() - Get appeal details
+  - reviewAppeal() - Uphold or deny appeal
+  - getQueueStats() - Get queue statistics
+- Created moderation types (frontend/src/types/moderation.ts) extending existing flag types with:
+  - ModerationAction, Appeal, QueueStats interfaces
+  - ModerationActionListResponse, AppealsListResponse
+  - Type enums: ModerationTargetType, ModerationActionType, ModerationSeverity, ModerationActionStatus, AppealStatus
+- Added /admin/moderation route to frontend routes
+- Fixed pre-existing TypeScript exactOptionalPropertyTypes error in FlagContentButton component
+- Merged PR #582 via squash merge to main
+- Resolved merge conflicts with existing VerificationPage route and moderation types
 
 ## Latest Completed (2026-01-18 - Iteration 31)
 
