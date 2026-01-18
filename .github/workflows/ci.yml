@@ -33,6 +33,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Install detect-secrets
+        run: |
+          pipx install detect-secrets
+        continue-on-error: true
+
       - name: Secrets Scan
         run: bash .husky/pre-commit-secrets-scan
         continue-on-error: false
