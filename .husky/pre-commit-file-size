@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# ============================================================================
+# Pre-Commit Hook: File Size Limit Check
+# ============================================================================
+# Prevents accidentally committing large binary files, bundled assets, or
+# other files that shouldn't be in version control
+#
+# Default limits:
+# - 5MB: Hard limit for any file (blocks commit)
+# - 1MB: Soft limit with warning for specific file types
+#
+# Usage: Called automatically by git pre-commit hook
+# Can be tested standalone: bash .husky/pre-commit-file-size
+# ============================================================================
+
+set -e
+
+# Source color utilities
+source "$(dirname -- "$0")/colors.sh"
+
+echo ""
+echo "📦 Checking file sizes..."
+
+# ============================================================================
+# Configuration
+# ============================================================================
+
+# Hard limit: 5MB - no files should exceed this
+HARD_LIMIT_BYTES=$((5 * 1024 * 1024))
+
+# Soft limit: 1MB - warning for specific types
+SOFT_LIMIT_BYTES=$((1 * 1024 * 1024))
+
+# File types that should be especially small
+MONITORED_TYPES=("image|video|audio|zip|tar|gz|pdf|exe|dll|so")
+
+# ============================================================================
+# Get Staged Files
+# ============================================================================
+
+# Get list of staged files (exclude deleted files)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null | grep -v "^$" || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  success "No files to check"
+  exit 0
+fi
+
+# ============================================================================
+# Check File Sizes
+# ============================================================================
+
+HARD_VIOLATIONS=()
+SOFT_VIOLATIONS=()
+
+while IFS= read -r file; do
+  # Get file size from the index (staged version)
+  FILE_SIZE=$(git cat-file -s ":$file" 2>/dev/null || echo "0")
+
+  # Check hard limit
+  if [ "$FILE_SIZE" -gt "$HARD_LIMIT_BYTES" ]; then
+    SIZE_MB=$(echo "scale=2; $FILE_SIZE / 1024 / 1024" | bc 2>/dev/null || echo "unknown")
+    HARD_VIOLATIONS+=("$file ($SIZE_MB MB)")
+    continue
+  fi
+
+  # Check soft limit for monitored file types
+  if [ "$FILE_SIZE" -gt "$SOFT_LIMIT_BYTES" ]; then
+    # Check if file matches monitored types (case-insensitive)
+    if echo "$file" | grep -iE "\.($(echo $MONITORED_TYPES | tr '|' '|'))$" > /dev/null 2>&1; then
+      SIZE_KB=$(echo "scale=0; $FILE_SIZE / 1024" | bc 2>/dev/null || echo "unknown")
+      SOFT_VIOLATIONS+=("$file ($SIZE_KB KB)")
+    fi
+  fi
+done <<< "$STAGED_FILES"
+
+# ============================================================================
+# Report Results
+# ============================================================================
+
+# Hard violations = failure
+if [ ${#HARD_VIOLATIONS[@]} -gt 0 ]; then
+  echo ""
+  error "Large files detected that exceed hard limit (5MB)!"
+  echo ""
+  echo "📍 Files that are too large:"
+
+  for violation in "${HARD_VIOLATIONS[@]}"; do
+    warning "  $violation"
+  done
+
+  echo ""
+  echo "🔧 Required Actions:"
+  echo ""
+  echo "1. REMOVE large files from git:"
+  echo "   git rm --cached $file  # Remove from staging"
+  echo "   git commit -m 'chore: remove large file'"
+  echo ""
+  echo "2. ADD to .gitignore:"
+  echo "   echo '$file' >> .gitignore"
+  echo ""
+  echo "3. FOR BINARY FILES, USE GIT LFS:"
+  echo "   git lfs install"
+  echo "   git lfs track '*.bin' '*.pdf' '*.zip'"
+  echo "   git add .gitattributes"
+  echo ""
+  echo "4. FOR ASSETS, CONSIDER:"
+  echo "   - Uploading to CDN"
+  echo "   - Storing in cloud storage (S3, Azure Blob, etc.)"
+  echo "   - Using a monorepo tool like Nx or Turborepo"
+  echo ""
+
+  exit 1
+fi
+
+# Soft violations = warning but pass
+if [ ${#SOFT_VIOLATIONS[@]} -gt 0 ]; then
+  echo ""
+  warning "Large files detected (> 1MB) - consider external storage:"
+  echo ""
+
+  for violation in "${SOFT_VIOLATIONS[@]}"; do
+    info "  $violation"
+  done
+
+  echo ""
+  info "These files are allowed but might slow down clone/checkout."
+  info "Consider using Git LFS or cloud storage for large binary files."
+  echo ""
+fi
+
+# All checks passed
+success "File size check passed"
+exit 0

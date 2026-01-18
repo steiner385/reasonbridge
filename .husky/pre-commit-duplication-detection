@@ -1,0 +1,213 @@
+#!/bin/bash
+
+# ============================================================================
+# Pre-Commit Hook: Code Duplication Detection
+# ============================================================================
+# Prevents commits with excessive code duplication (>20% threshold)
+# Uses jscpd to detect duplicated code blocks and generates reports
+#
+# Configuration: .jscpdrc.json
+# - Threshold: 20% (fails if exceeded)
+# - Min Lines: 10 (minimum lines to detect as duplication)
+# - Min Tokens: 15 (minimum tokens to detect as duplication)
+# - Ignores: node_modules, dist, tests, generated files, coverage
+#
+# Usage: Called automatically by git pre-commit hook
+# Can be tested standalone: bash .husky/pre-commit-duplication-detection
+# ============================================================================
+
+set -e
+
+# Source color utilities
+source "$(dirname -- "$0")/colors.sh"
+
+echo ""
+echo "🔍 Running code duplication detection..."
+
+# ============================================================================
+# Configuration
+# ============================================================================
+
+CONFIG_FILE=".jscpdrc.json"
+THRESHOLD=20
+TEMP_REPORT_DIR="/tmp/duplication-report-$$"
+REPORT_DIR="./duplication-report"
+
+# Check if jscpd is available (try direct command or npx)
+JSCPD_CMD=""
+if command -v jscpd &> /dev/null; then
+  JSCPD_CMD="jscpd"
+elif command -v npx &> /dev/null; then
+  JSCPD_CMD="npx jscpd"
+else
+  error "jscpd not found in PATH and npx not available"
+  echo ""
+  echo "Please install jscpd:"
+  echo "  npm install --save-dev jscpd"
+  echo ""
+  exit 1
+fi
+
+# ============================================================================
+# Get Changed Files
+# ============================================================================
+
+# Get list of staged files (exclude deleted files)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null | grep -v "^$" || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  success "No files to scan"
+  exit 0
+fi
+
+# Filter to code files only (TypeScript, JavaScript)
+CODE_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+if [ -z "$CODE_FILES" ]; then
+  debug "No code files to scan"
+  exit 0
+fi
+
+debug "Found $(echo "$CODE_FILES" | wc -l) code files to analyze"
+
+# ============================================================================
+# Prepare Temporary Directory with Staged Content
+# ============================================================================
+
+# Create temporary directory for analysis
+mkdir -p "$TEMP_REPORT_DIR"
+
+echo "📋 Extracting staged files for analysis..."
+
+# Extract staged content to temp directory (preserves structure)
+while IFS= read -r file; do
+  # Create directory structure
+  dir=$(dirname "$file")
+  mkdir -p "$TEMP_REPORT_DIR/$dir"
+
+  # Get staged content and write to temp file
+  if git show ":$file" > "$TEMP_REPORT_DIR/$file" 2>/dev/null; then
+    debug "  ✓ $file"
+  else
+    debug "  ✗ $file (not in index)"
+  fi
+done <<< "$CODE_FILES"
+
+# ============================================================================
+# Run Duplication Detection
+# ============================================================================
+
+echo "🔎 Analyzing code for duplication patterns..."
+
+# Prepare output file
+REPORT_JSON="$TEMP_REPORT_DIR/duplication-report.json"
+
+# Run jscpd on staged files
+# Note: jscpd exit code 0 = no duplicates, non-zero = duplicates found
+if $JSCPD_CMD \
+  "$TEMP_REPORT_DIR" \
+  --config "$CONFIG_FILE" \
+  --output "$TEMP_REPORT_DIR" \
+  -r json > /dev/null 2>&1 || true; then
+
+  # Check if report was generated
+  if [ ! -f "$REPORT_JSON" ]; then
+    debug "No duplication report generated"
+    rm -rf "$TEMP_REPORT_DIR"
+    exit 0
+  fi
+else
+  # Even if jscpd fails, try to read the report
+  if [ ! -f "$REPORT_JSON" ]; then
+    debug "Duplication check completed"
+    rm -rf "$TEMP_REPORT_DIR"
+    exit 0
+  fi
+fi
+
+# ============================================================================
+# Parse and Analyze Results
+# ============================================================================
+
+# Extract statistics from report using jq
+STATISTICS=$(jq '.statistics // {}' "$REPORT_JSON" 2>/dev/null || echo '{}')
+TOTAL_TOKENS=$(echo "$STATISTICS" | jq '.total // 0' 2>/dev/null || echo '0')
+DUPLICATED_TOKENS=$(echo "$STATISTICS" | jq '.duplicatedTokens // 0' 2>/dev/null || echo '0')
+
+# Calculate percentage
+if [ "$TOTAL_TOKENS" -gt 0 ]; then
+  PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($DUPLICATED_TOKENS / $TOTAL_TOKENS) * 100}")
+else
+  PERCENTAGE="0"
+fi
+
+# ============================================================================
+# Report Results
+# ============================================================================
+
+if (( $(echo "$PERCENTAGE <= $THRESHOLD" | bc -l 2>/dev/null || echo "1") )); then
+  # Duplication within acceptable threshold
+  success "Code duplication check passed (${PERCENTAGE}% < ${THRESHOLD}%)"
+
+  # Copy report to permanent location
+  mkdir -p "$REPORT_DIR"
+  cp "$REPORT_JSON" "$REPORT_DIR/duplication-report.json" 2>/dev/null || true
+
+  # Cleanup temp files
+  rm -rf "$TEMP_REPORT_DIR"
+  exit 0
+else
+  # Duplication exceeds threshold - block commit
+  echo ""
+  error "Code duplication exceeds threshold!"
+  echo ""
+  echo "📊 Duplication Statistics:"
+  echo "  Threshold: ${THRESHOLD}%"
+  echo "  Detected: ${PERCENTAGE}%"
+  echo "  Duplicated tokens: ${DUPLICATED_TOKENS} / ${TOTAL_TOKENS}"
+  echo ""
+
+  # Extract and display duplicated files
+  DUPLICATED_FILES=$(jq -r '.duplicates[]? | .firstFile // empty' "$REPORT_JSON" 2>/dev/null | sort | uniq || true)
+
+  if [ -n "$DUPLICATED_FILES" ]; then
+    echo "📄 Files with duplication:"
+    echo "$DUPLICATED_FILES" | while read -r file; do
+      # Show relative path (remove temp directory prefix)
+      display_path=$(echo "$file" | sed "s|^$TEMP_REPORT_DIR/||")
+      warning "  $display_path"
+    done
+    echo ""
+  fi
+
+  echo "🔧 Required Actions:"
+  echo ""
+  echo "1. REVIEW duplicated code:"
+  echo "   Open duplication-report/duplication-report.json for details"
+  echo ""
+  echo "2. REFACTOR to eliminate duplication:"
+  echo "   - Extract common patterns into shared utilities"
+  echo "   - Create reusable components or functions"
+  echo "   - Consider utility libraries for common patterns"
+  echo ""
+  echo "3. STRATEGIES TO REDUCE DUPLICATION:"
+  echo "   - Create a shared service for common logic"
+  echo "   - Extract to custom hooks (for React components)"
+  echo "   - Use composition over duplication"
+  echo "   - Create utility functions for repeated patterns"
+  echo ""
+  echo "4. IF DUPLICATION IS ACCEPTABLE:"
+  echo "   - Document why in code comments"
+  echo "   - Increase threshold in .jscpdrc.json if intentional"
+  echo ""
+
+  # Copy full report to permanent location for review
+  mkdir -p "$REPORT_DIR"
+  cp "$REPORT_JSON" "$REPORT_DIR/duplication-report.json" 2>/dev/null || true
+  echo "📖 Full report: $REPORT_DIR/duplication-report.json"
+  echo ""
+
+  # Cleanup temp files
+  rm -rf "$TEMP_REPORT_DIR"
+  exit 1
+fi

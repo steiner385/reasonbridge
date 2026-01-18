@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Prevent direct pushes to main branch
+protected_branch='main'
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [ "$current_branch" = "$protected_branch" ]; then
+    echo "⛔ Direct push to main branch is not allowed!"
+    echo "📝 Please create a feature branch and submit a pull request."
+    echo ""
+    echo "To create a new branch:"
+    echo "  git checkout -b feature/your-feature-name"
+    echo "  git push --set-upstream origin feature/your-feature-name"
+    echo ""
+    echo "If you really need to push to main (not recommended), use:"
+    echo "  git push --no-verify"
+    exit 1
+fi
+
+# Check if pushing to remote main
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "refs/heads/$protected_branch" ]; then
+        echo "⛔ Direct push to remote main branch is not allowed!"
+        echo "📝 Please create a pull request instead."
+        exit 1
+    fi
+done
+
+exit 0
