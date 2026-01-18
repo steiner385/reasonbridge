@@ -5,10 +5,10 @@ import { IsEnum, IsString, Matches, ValidateIf } from 'class-validator';
  * User specifies which type of verification they want to complete
  */
 export class VerificationRequestDto {
-  @IsEnum(['PHONE', 'GOVERNMENT_ID'], {
-    message: 'Verification type must be either PHONE or GOVERNMENT_ID',
+  @IsEnum(['PHONE', 'GOVERNMENT_ID', 'VIDEO'], {
+    message: 'Verification type must be PHONE, GOVERNMENT_ID, or VIDEO',
   })
-  type!: 'PHONE' | 'GOVERNMENT_ID';
+  type!: 'PHONE' | 'GOVERNMENT_ID' | 'VIDEO';
 
   /**
    * Phone number for phone verification requests (E.164 format)
@@ -20,4 +20,14 @@ export class VerificationRequestDto {
     message: 'Phone number must be in E.164 format (e.g., +12125551234)',
   })
   phoneNumber?: string;
+
+  /**
+   * Challenge type for video verification
+   * Determines what the user must do in their video
+   */
+  @ValidateIf((obj) => obj.type === 'VIDEO')
+  @IsEnum(['RANDOM_PHRASE', 'RANDOM_GESTURE', 'TIMESTAMP'], {
+    message: 'Video challenge type must be RANDOM_PHRASE, RANDOM_GESTURE, or TIMESTAMP',
+  })
+  challengeType?: 'RANDOM_PHRASE' | 'RANDOM_GESTURE' | 'TIMESTAMP';
 }

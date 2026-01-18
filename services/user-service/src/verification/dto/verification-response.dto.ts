@@ -23,6 +23,7 @@ export class VerificationResponseDto {
   /**
    * For phone verification: message indicating next steps
    * For government ID: session URL or redirect information
+   * For video verification: challenge instruction text
    */
   message?: string;
 
@@ -30,6 +31,61 @@ export class VerificationResponseDto {
    * For government ID verification: URL where user should complete verification
    */
   sessionUrl?: string;
+
+  /**
+   * For video verification: details about the challenge to complete
+   */
+  challenge?: VideoChallenge;
+
+  /**
+   * For video verification: pre-signed S3 URL where user uploads video
+   */
+  videoUploadUrl?: string;
+
+  /**
+   * For video verification: when the upload URL expires
+   */
+  videoUploadExpiresAt?: string; // ISO 8601 datetime
+
+  /**
+   * For video verification: maximum allowed file size in bytes
+   */
+  videoMaxFileSize?: number;
+
+  /**
+   * For video verification: minimum video duration in seconds
+   */
+  videoMinDurationSeconds?: number;
+
+  /**
+   * For video verification: maximum video duration in seconds
+   */
+  videoMaxDurationSeconds?: number;
+}
+
+/**
+ * Video challenge details
+ */
+export interface VideoChallenge {
+  /**
+   * Type of challenge: RANDOM_PHRASE, RANDOM_GESTURE, or TIMESTAMP
+   */
+  type: 'RANDOM_PHRASE' | 'RANDOM_GESTURE' | 'TIMESTAMP';
+
+  /**
+   * Instructions for what the user should do
+   */
+  instruction: string;
+
+  /**
+   * For phrase-based challenges: the phrase to say
+   */
+  randomValue?: string;
+
+  /**
+   * For timestamp-based challenges: the timestamp to show
+   */
+  timestamp?: string;
 }
 
 /**
