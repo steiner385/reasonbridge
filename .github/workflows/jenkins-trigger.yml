@@ -40,8 +40,11 @@ jobs:
 
           echo "Triggering Jenkins build for: $BUILD_CAUSE"
 
-          # Trigger Jenkins build with parameters
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          # Normalize Jenkins URL (remove trailing slash if present)
+          JENKINS_URL="${JENKINS_URL%/}"
+
+          # Trigger Jenkins build with parameters (using -L to follow redirects)
+          RESPONSE=$(curl -sL -w "\n%{http_code}" -X POST \
             "${JENKINS_URL}/job/uniteDiscord-ci/buildWithParameters" \
             --user "${JENKINS_USER}:${JENKINS_TOKEN}" \
             --data-urlencode "BRANCH=${BRANCH}" \
