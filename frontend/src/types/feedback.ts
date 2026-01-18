@@ -33,6 +33,8 @@ export interface Feedback {
   confidenceScore: number;
   educationalResources?: Record<string, unknown>;
   displayedToUser: boolean;
+  dismissedAt?: Date | string;
+  dismissalReason?: string;
   createdAt: Date | string;
 }
 
@@ -49,7 +51,16 @@ export interface FeedbackResponse {
   confidenceScore: number;
   educationalResources?: Record<string, unknown>;
   displayedToUser: boolean;
+  dismissedAt?: Date | string;
+  dismissalReason?: string;
   createdAt: Date | string;
+}
+
+/**
+ * Request to dismiss feedback
+ */
+export interface DismissFeedbackRequest {
+  dismissalReason?: string;
 }
 
 /**

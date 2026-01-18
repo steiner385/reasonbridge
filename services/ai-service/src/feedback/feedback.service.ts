@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
-import { RequestFeedbackDto, FeedbackResponseDto } from './dto/index.js';
+import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto } from './dto/index.js';
 import { Prisma } from '@unite-discord/db-models';
 
 /**
@@ -67,6 +67,36 @@ export class FeedbackService {
     }
 
     return this.mapToResponseDto(feedback);
+  }
+
+  /**
+   * Dismiss feedback
+   * Marks feedback as dismissed with optional reason
+   * @param id Feedback UUID
+   * @param dto Dismissal information (optional reason)
+   * @returns Updated feedback record
+   * @throws NotFoundException if feedback not found
+   */
+  async dismissFeedback(id: string, dto: DismissFeedbackDto): Promise<FeedbackResponseDto> {
+    // Verify the feedback exists
+    const feedback = await this.prisma.feedback.findUnique({
+      where: { id },
+    });
+
+    if (!feedback) {
+      throw new NotFoundException(`Feedback with ID ${id} not found`);
+    }
+
+    // Update dismissal tracking fields
+    const updatedFeedback = await this.prisma.feedback.update({
+      where: { id },
+      data: {
+        dismissedAt: new Date(),
+        dismissalReason: dto.dismissalReason ?? null,
+      },
+    });
+
+    return this.mapToResponseDto(updatedFeedback);
   }
 
   /**

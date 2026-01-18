@@ -1,6 +1,6 @@
-import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { FeedbackService } from './feedback.service.js';
-import { RequestFeedbackDto, FeedbackResponseDto } from './dto/index.js';
+import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto } from './dto/index.js';
 
 /**
  * Controller for feedback-related endpoints
@@ -33,5 +33,22 @@ export class FeedbackController {
   @HttpCode(HttpStatus.OK)
   async getFeedback(@Param('id') id: string): Promise<FeedbackResponseDto> {
     return this.feedbackService.getFeedbackById(id);
+  }
+
+  /**
+   * Dismiss feedback
+   * PATCH /feedback/:id/dismiss
+   *
+   * @param id Feedback UUID
+   * @param dto Dismissal information (optional reason)
+   * @returns Updated feedback record
+   */
+  @Patch(':id/dismiss')
+  @HttpCode(HttpStatus.OK)
+  async dismissFeedback(
+    @Param('id') id: string,
+    @Body() dto: DismissFeedbackDto,
+  ): Promise<FeedbackResponseDto> {
+    return this.feedbackService.dismissFeedback(id, dto);
   }
 }
