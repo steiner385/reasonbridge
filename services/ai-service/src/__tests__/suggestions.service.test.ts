@@ -1,16 +1,21 @@
 import { SuggestionsService } from '../services/suggestions.service.js';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
 import { TopicLinkSuggester, TopicRelationshipType } from '../synthesizers/topic-link.suggester.js';
+import { BridgingSuggester } from '../synthesizers/bridging.suggester.js';
 
 describe('SuggestionsService', () => {
   let service: SuggestionsService;
   let tagSuggester: TagSuggester;
   let topicLinkSuggester: TopicLinkSuggester;
+  let bridgingSuggester: BridgingSuggester;
 
   beforeEach(() => {
     tagSuggester = new TagSuggester();
     topicLinkSuggester = new TopicLinkSuggester();
-    service = new SuggestionsService(tagSuggester, topicLinkSuggester);
+    // Create mock Prisma for BridgingSuggester
+    const mockPrisma = { proposition: { findMany: async () => [] } } as any;
+    bridgingSuggester = new BridgingSuggester(mockPrisma);
+    service = new SuggestionsService(tagSuggester, topicLinkSuggester, bridgingSuggester);
   });
 
   it('should be defined', () => {
