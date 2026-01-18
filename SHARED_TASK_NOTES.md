@@ -2,21 +2,19 @@
 
 ## Current Status
 
-- All tests passing (133 total: 113 in ai-service, 20 in discussion-service)
-- All lint, format, and type checks passing on main
-- Main branch clean and up to date with origin
-- Ready for next issue
-- ~161 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #125 (T129) - Implement divergence point identification
+- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
-## Latest Completed (2026-01-17)
+## Latest Completed (2026-01-18)
 
-**Test Verification & Branch Merge:**
-
-- Ran all unit tests - all 133 tests passing (8 new tests from divergence point service)
-- Merged local main with remote main (PR #495: divergence point identification service)
-- Resolved divergent branches successfully
-- All tests passing after merge
-- Main branch pushed and synchronized with origin
+**Issue #125 (T129) - Implement divergence point identification:**
+- Created DivergencePointService in discussion-service (services/discussion-service/src/services/divergence-point.service.ts)
+- Identifies where viewpoints diverge (genuine disagreements vs misunderstandings)
+- Calculates polarization scores (0-1 scale, peaks at 50/50 split)
+- Filters divergence: requires >20% on both sides, <40% nuance
+- Added comprehensive DTOs (services/discussion-service/src/services/divergence-point.dto.ts)
+- 8 new tests, all passing
+- Merged via PR #495
 
 ## Notes
 
