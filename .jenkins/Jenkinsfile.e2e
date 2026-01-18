@@ -30,6 +30,20 @@ pipeline {
     }
 
     stages {
+        stage('Setup Environment') {
+            steps {
+                script {
+                    // Detect which docker compose command is available
+                    def dockerComposeCmd = sh(
+                        script: 'docker compose version &>/dev/null && echo "docker compose" || echo "docker-compose"',
+                        returnStdout: true
+                    ).trim()
+                    env.DOCKER_COMPOSE = dockerComposeCmd
+                    echo "Using Docker Compose command: ${env.DOCKER_COMPOSE}"
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -49,18 +63,10 @@ pipeline {
                     # Ensure we use the public npm registry
                     npm config set registry https://registry.npmjs.org
 
-                    # Enable pnpm via corepack (built into Node.js 20+)
-                    # This avoids global npm install permission issues
-                    corepack enable || true
-                    corepack prepare pnpm@9 --activate || npm install -g pnpm@9 || true
-
-                    # Fallback: use npx if pnpm still not available
-                    if ! command -v pnpm &> /dev/null; then
-                        echo "Using npx pnpm as fallback..."
-                        npx pnpm@9 install --frozen-lockfile || npx pnpm@9 install
-                    else
-                        pnpm install --frozen-lockfile || pnpm install
-                    fi
+                    # Use npx pnpm directly to avoid permission issues with global install
+                    # npx will cache pnpm locally and use it
+                    echo "Installing dependencies with npx pnpm..."
+                    npx pnpm@9 install --frozen-lockfile || npx pnpm@9 install
                 '''
             }
         }
@@ -74,8 +80,9 @@ pipeline {
                     if [ ! -f "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed-unite" ]; then
                         echo "Installing Playwright browsers..."
                         mkdir -p "${PLAYWRIGHT_BROWSERS_PATH}"
-                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium --with-deps || \
-                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium
+                        # Install chromium without system deps (--with-deps needs root)
+                        # The e2e agent should have deps pre-installed
+                        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium || true
                         touch "${PLAYWRIGHT_BROWSERS_PATH}/.browsers-installed-unite"
                     else
                         echo "Playwright browsers already cached"
@@ -87,8 +94,14 @@ pipeline {
         stage('Start Test Infrastructure') {
             steps {
                 sh '''
-                    echo "Starting test infrastructure..."
-                    docker-compose -f docker-compose.test.yml up -d --wait || docker-compose -f docker-compose.test.yml up -d
+                    echo "Cleaning up any existing test containers..."
+                    ${DOCKER_COMPOSE} -f docker-compose.test.yml down -v 2>/dev/null || true
+
+                    # Also clean up by container name in case compose state is inconsistent
+                    docker rm -f unite-discord-postgres-test unite-discord-redis-test unite-localstack-test 2>/dev/null || true
+
+                    echo "Starting test infrastructure with: ${DOCKER_COMPOSE}"
+                    ${DOCKER_COMPOSE} -f docker-compose.test.yml up -d --wait || ${DOCKER_COMPOSE} -f docker-compose.test.yml up -d
 
                     # Wait for services to be ready
                     echo "Waiting for PostgreSQL..."
@@ -118,7 +131,7 @@ pipeline {
             steps {
                 sh '''
                     cd frontend
-                    pnpm run build || npm run build
+                    npx pnpm@9 run build || npm run build
                 '''
             }
         }
@@ -133,7 +146,7 @@ pipeline {
 
                     # Run Playwright tests
                     # The webServer config in playwright.config.ts will start the dev server
-                    pnpm run test:e2e || npm run test:e2e
+                    npx pnpm@9 run test:e2e || npm run test:e2e
                 '''
             }
             post {
@@ -173,8 +186,8 @@ pipeline {
 
             // Stop test infrastructure
             sh '''
-                echo "Stopping test infrastructure..."
-                docker-compose -f docker-compose.test.yml down -v || true
+                echo "Stopping test infrastructure with: ${DOCKER_COMPOSE}"
+                ${DOCKER_COMPOSE} -f docker-compose.test.yml down -v || true
             '''
         }
         success {
