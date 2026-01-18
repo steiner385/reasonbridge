@@ -7,6 +7,8 @@
   - 28 tests skipped (unimplemented features: login, registration, browse topics, user profile APIs)
   - 0 failures
   - Tests run with `npm run test:e2e` (17-18s runtime)
+- All tests verified passing and deployed
+- Dependencies fixed: `pnpm install` resolved missing socket.io-client
 - Completed issue #160 (T164) - TrustScore DTOs for Mayer ABI Model
 - ~163 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
