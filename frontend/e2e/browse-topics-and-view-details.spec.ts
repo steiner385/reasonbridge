@@ -185,7 +185,7 @@ test.describe('Browse Topics and View Details', () => {
     const loadingIndicator = page.locator('text=Loading topics...').or(page.locator('.animate-spin'));
 
     // Loading should appear briefly
-    const isVisible = await loadingIndicator.isVisible().catch(() => false);
+    await loadingIndicator.isVisible().catch(() => false);
 
     // Note: Loading might be too fast to catch, so we don't fail if we miss it
     // Just verify the page eventually loads
@@ -209,7 +209,7 @@ test.describe('Browse Topics and View Details', () => {
       const cardContainer = firstCard.locator('..').first();
 
       // Look for topic title (usually in a heading or prominent text)
-      const hasHeading = await cardContainer.locator('h1, h2, h3, h4').count() > 0;
+      await cardContainer.locator('h1, h2, h3, h4').count();
       const hasText = await cardContainer.textContent();
 
       // Card should have some content

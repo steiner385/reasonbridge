@@ -54,7 +54,7 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
         vagueStatements: 0, // Placeholder
       },
     };
-  }, [feedback, metrics]);
+  }, [clarityFeedback, metrics]);
 
   const getScoreColor = (score: number): string => {
     if (score >= 0.8) return 'text-green-600';
@@ -256,7 +256,7 @@ const FeedbackItem: React.FC<{
   feedback: Feedback;
   onAcknowledge?: (id: string) => void;
   onRateHelpful?: (id: string, rating: HelpfulRating) => void;
-}> = ({ feedback, onAcknowledge, onRateHelpful }) => {
+}> = ({ feedback, onAcknowledge }) => {
   const getFeedbackIcon = (type: FeedbackType): string => {
     if (type === FeedbackType.UNSOURCED) return '📎';
     if (type === FeedbackType.BIAS) return '⚖️';
