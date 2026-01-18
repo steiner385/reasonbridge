@@ -2,10 +2,34 @@
 
 ## Current Status
 
-- Completed issue #158 (T162) - Implement video upload to S3
-- ~165 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #159 (T163) - E2E tests for User Story 4 trust indicators
+- ~164 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #159 (T163) - E2E tests for User Story 4 trust indicators:**
+- Created comprehensive E2E test suite: `frontend/e2e/user-story-4-trust-indicators.spec.ts` (560+ lines)
+- 30+ test cases covering all trust indicator scenarios:
+  - TrustBadge display tests (4 tests): verified human badge visibility, absence on basic users, profile/response display, tooltips
+  - TrustScoreDisplay tests (5 tests): three trust factors (Mayer ABI: ability, benevolence, integrity), percentage formatting, expandable breakdown
+  - VerificationPage tests (3 tests): navigation, current level display, upgrade options
+  - PhoneVerificationForm tests (3 tests): phone input, format validation, OTP confirmation
+  - IDVerificationFlow tests (3 tests): document upload, document type selection, file input handling
+  - Bot detection tests (3 tests): suspicious account indicators, low trust warnings, CAPTCHA triggers
+  - ProfilePage integration tests (3 tests): profile display with trust info, trust score effect on discussion visibility, verified user highlighting
+  - Verification status tests (3 tests): expiry date display, re-verification prompts, update functionality
+  - Accessibility tests (3 tests): screen reader support, keyboard navigation, semantic HTML
+  - Cross-browser tests (2 tests): consistent rendering, responsive design on mobile
+- Test architecture:
+  - Uses Playwright @playwright/test framework consistent with existing tests
+  - Helper functions for test user generation and authentication mocking
+  - Graceful fallbacks for components not yet implemented (conditional visibility checks)
+  - Uses data-testid selectors for reliable element targeting
+  - Comprehensive ARIA label validation
+- Tests follow existing project E2E patterns and validation
+- Merged via PR #538
+
+## Previous Completion (2026-01-18)
 
 **Issue #158 (T162) - Implement video upload to S3:**
 - Added VideoUpload Prisma model to track uploads:
