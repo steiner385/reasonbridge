@@ -2,14 +2,45 @@
 
 ## Current Status
 
-- Completed issue #176 (T180) - Implement AI-assisted moderation review
-- ~153 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All 30 moderation service unit tests passing ✅
-- Main branch synced with origin/main (commit 1c55ebb)
+- Completed issue #177 (T181) - Implement moderation action endpoints
+- ~152 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All moderation service unit tests passing ✅
+- Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 20)
+## Latest Completed (2026-01-18 - Iteration 21)
+
+**Issue #177 (T181) - Implement moderation action endpoints:**
+- Created ModerationActionsService (services/moderation-service/src/services/moderation-actions.service.ts:1-416)
+  - listActions(): List moderation actions with filtering by targetType/status/severity
+  - createAction(): Create moderator-initiated actions with validation
+  - getAction(): Retrieve action details including related appeals
+  - approveAction(): Approve pending consequential actions with optional reasoning updates
+  - rejectAction(): Reject pending actions with moderator reasoning
+  - getUserActions(): Get moderation history for specific users
+  - sendCoolingOffPrompt(): Send non-punitive cooling-off interventions
+  - Cursor-based pagination for all list endpoints
+  - Smart severity mapping: NON_PUNITIVE (educate/warn) vs CONSEQUENTIAL (hide/remove/suspend/ban)
+  - Case-insensitive enum mapping between API and database formats
+
+- Added seven moderation action endpoints to ModerationController:
+  - GET /actions: List moderation actions with filtering/pagination
+  - POST /actions: Create new moderation actions (moderator-initiated)
+  - GET /actions/{actionId}: Get action details with appeals
+  - POST /actions/{actionId}/approve: Approve pending consequential actions
+  - POST /actions/{actionId}/reject: Reject pending actions with reason
+  - GET /users/{userId}/actions: Get user's moderation history
+  - POST /interventions/cooling-off: Send cooling-off intervention prompts
+  - Comprehensive input validation for all endpoints
+
+- Updated ModerationModule with ModerationActionsService provider and exports
+- Fixed TypeScript type issues in ai-review.service.ts (Decimal to number conversion)
+
+- Merged via PR #562 (commit ca4f8a0)
+- Resolves T181 and closes issue #177
+
+## Previous Completed (2026-01-18 - Iteration 20)
 
 **Issue #176 (T180) - Implement AI-assisted moderation review:**
 - Created AIReviewService (services/moderation-service/src/services/ai-review.service.ts:1-248)
