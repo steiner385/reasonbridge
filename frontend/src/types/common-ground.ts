@@ -259,3 +259,79 @@ export interface BridgingSuggestionsResponse {
    */
   attribution: string;
 }
+
+/**
+ * Represents a cluster of related propositions
+ */
+export interface PropositionCluster {
+  /**
+   * Unique identifier for this cluster
+   */
+  id: string;
+
+  /**
+   * Representative summary of the cluster's main theme
+   */
+  theme: string;
+
+  /**
+   * Propositions that belong to this cluster
+   */
+  propositionIds: string[];
+
+  /**
+   * Number of propositions in this cluster
+   */
+  size: number;
+
+  /**
+   * Similarity score for propositions in this cluster (0.00-1.00)
+   */
+  cohesionScore: number;
+
+  /**
+   * Keywords that characterize this cluster
+   */
+  keywords: string[];
+}
+
+/**
+ * Result of proposition clustering analysis
+ */
+export interface PropositionClusteringResult {
+  /**
+   * ID of the analyzed topic
+   */
+  topicId: string;
+
+  /**
+   * Generated clusters
+   */
+  clusters: PropositionCluster[];
+
+  /**
+   * Propositions that didn't fit into any cluster (outliers)
+   */
+  unclusteredPropositionIds: string[];
+
+  /**
+   * Overall clustering quality score (0.00-1.00)
+   * Higher means better-defined clusters
+   */
+  qualityScore: number;
+
+  /**
+   * Method used for clustering
+   */
+  method: 'pattern-based' | 'semantic-ai' | 'hybrid';
+
+  /**
+   * Confidence in the clustering result (0.00-1.00)
+   */
+  confidence: number;
+
+  /**
+   * Reasoning behind the clustering approach
+   */
+  reasoning: string;
+}
