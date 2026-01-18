@@ -96,7 +96,7 @@ export class ModerationActionRepository {
     cursor?: string,
   ) {
     const findManyArgs: Prisma.ModerationActionFindManyArgs = {
-      where,
+      ...(where && { where }),
       include: {
         approvedBy: {
           select: {
@@ -121,7 +121,9 @@ export class ModerationActionRepository {
    * Count moderation actions matching the filter
    */
   async count(where?: Prisma.ModerationActionWhereInput): Promise<number> {
-    return this.prisma.moderationAction.count({ where });
+    return this.prisma.moderationAction.count({
+      ...(where && { where }),
+    });
   }
 
   /**
@@ -153,12 +155,25 @@ export class ModerationActionRepository {
    * Mark a moderation action as approved
    */
   async approve(id: string, approvedById: string, modifiedReasoning?: string) {
-    return this.update(id, {
-      status: 'ACTIVE',
-      approvedById,
-      approvedAt: new Date(),
-      ...(modifiedReasoning && { reasoning: modifiedReasoning }),
-      executedAt: new Date(),
+    return this.prisma.moderationAction.update({
+      where: { id },
+      data: {
+        status: 'ACTIVE' as any,
+        approvedBy: {
+          connect: { id: approvedById },
+        },
+        approvedAt: new Date(),
+        ...(modifiedReasoning && { reasoning: modifiedReasoning }),
+        executedAt: new Date(),
+      },
+      include: {
+        approvedBy: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
+      },
     });
   }
 

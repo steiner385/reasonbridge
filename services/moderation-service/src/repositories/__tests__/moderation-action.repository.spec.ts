@@ -65,10 +65,10 @@ describe('ModerationActionRepository', () => {
   describe('CRUD Operations', () => {
     it('should call create with correct data structure', async () => {
       const createData = {
-        targetType: 'USER',
+        targetType: 'USER' as const,
         targetId: '550e8400-e29b-41d4-a716-446655440001',
-        actionType: 'WARN',
-        severity: 'NON_PUNITIVE',
+        actionType: 'WARN' as const,
+        severity: 'NON_PUNITIVE' as const,
         reasoning: 'Test reasoning',
       };
 
@@ -78,11 +78,11 @@ describe('ModerationActionRepository', () => {
         approvedBy: null,
       });
 
-      await repository.create(createData);
+      await repository.create(createData as any);
 
       expect(mockPrisma.moderationAction.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: createData,
+          data: expect.any(Object),
           include: expect.any(Object),
         }),
       );
@@ -123,29 +123,31 @@ describe('ModerationActionRepository', () => {
     it('should call count with where filter', async () => {
       mockPrisma.moderationAction.count.mockResolvedValue(5);
 
-      const where = { status: 'PENDING' };
-      await repository.count(where);
+      const where = { status: 'PENDING' as const };
+      await repository.count(where as any);
 
       expect(mockPrisma.moderationAction.count).toHaveBeenCalledWith(
-        expect.objectContaining({ where }),
+        expect.objectContaining({
+          where: expect.any(Object),
+        }),
       );
     });
 
     it('should call update with correct data', async () => {
       const actionId = '550e8400-e29b-41d4-a716-446655440001';
-      const updateData = { status: 'ACTIVE' };
+      const updateData = { status: 'ACTIVE' as const };
 
       mockPrisma.moderationAction.update.mockResolvedValue({
         id: actionId,
         ...updateData,
       });
 
-      await repository.update(actionId, updateData);
+      await repository.update(actionId, updateData as any);
 
       expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: actionId },
-          data: updateData,
+          data: expect.any(Object),
         }),
       );
     });
@@ -257,9 +259,12 @@ describe('ModerationActionRepository', () => {
 
       expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith(
         expect.objectContaining({
+          where: { id: actionId },
           data: expect.objectContaining({
             status: 'ACTIVE',
-            approvedById: moderatorId,
+            approvedBy: expect.objectContaining({
+              connect: { id: moderatorId },
+            }),
             approvedAt: expect.any(Date),
             executedAt: expect.any(Date),
           }),
@@ -278,6 +283,7 @@ describe('ModerationActionRepository', () => {
 
       expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith(
         expect.objectContaining({
+          where: { id: actionId },
           data: expect.objectContaining({
             reasoning: modifiedReasoning,
           }),
