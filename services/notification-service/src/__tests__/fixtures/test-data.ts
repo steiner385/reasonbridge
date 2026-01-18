@@ -20,7 +20,7 @@ export const mockTopic = {
 };
 
 export const mockCommonGroundGeneratedEvent = {
-  type: 'common-ground.generated' as const,
+  type: 'common-ground.generated',
   timestamp: new Date().toISOString(),
   payload: {
     topicId: testTopicId,
@@ -48,7 +48,7 @@ export const mockCommonGroundGeneratedEvent = {
 };
 
 export const mockCommonGroundUpdatedEvent = {
-  type: 'common-ground.updated' as const,
+  type: 'common-ground.updated',
   timestamp: new Date().toISOString(),
   payload: {
     topicId: testTopicId,

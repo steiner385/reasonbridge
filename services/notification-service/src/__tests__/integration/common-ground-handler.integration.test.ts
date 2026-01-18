@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Integration tests for CommonGroundNotificationHandler
  * Tests event-driven notification creation and WebSocket broadcasting
@@ -71,9 +70,7 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
       });
 
       // Verify WebSocket event was emitted
-      expect(gateway.emitCommonGroundGenerated).toHaveBeenCalledWith(
-        mockCommonGroundGeneratedEvent,
-      );
+      expect(gateway.emitCommonGroundGenerated).toHaveBeenCalledWith(mockCommonGroundGeneratedEvent);
     });
 
     it('should fetch topic details correctly', async () => {
@@ -119,9 +116,7 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
     it('should emit WebSocket event immediately', async () => {
       await handler.handleCommonGroundGenerated(mockCommonGroundGeneratedEvent);
 
-      expect(gateway.emitCommonGroundGenerated).toHaveBeenCalledWith(
-        mockCommonGroundGeneratedEvent,
-      );
+      expect(gateway.emitCommonGroundGenerated).toHaveBeenCalledWith(mockCommonGroundGeneratedEvent);
     });
 
     it('should handle events with empty analysis', async () => {
@@ -145,9 +140,9 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
       mockPrisma.discussionTopic.findUnique.mockRejectedValueOnce(new Error('Database error'));
 
       // Should throw the error
-      await expect(
-        handler.handleCommonGroundGenerated(mockCommonGroundGeneratedEvent),
-      ).rejects.toThrow('Database error');
+      await expect(handler.handleCommonGroundGenerated(mockCommonGroundGeneratedEvent)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
