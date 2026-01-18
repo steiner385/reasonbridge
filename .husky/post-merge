@@ -1,0 +1,117 @@
+#!/bin/sh
+
+# ============================================================================
+# Post-Merge Hook: Dependency Installation Safety Check
+# ============================================================================
+# Ensures npm dependencies are installed after pulling changes
+# Only runs install if:
+# 1. package.json or pnpm-lock.yaml was modified
+# 2. Critical packages (jscpd, detect-secrets, etc.) are missing
+#
+# This provides a fail-safe without incurring overhead on every pull
+#
+# Usage: Called automatically after 'git pull' or 'git merge'
+# ============================================================================
+
+set -e
+
+# Source color utilities if available
+SCRIPT_DIR="$(dirname -- "$0")"
+if [ -f "$SCRIPT_DIR/colors.sh" ]; then
+  . "$SCRIPT_DIR/colors.sh"
+else
+  success() { printf "✅ %s\n" "$1"; }
+  error() { printf "❌ %s\n" "$1"; }
+  warning() { printf "⚠️  %s\n" "$1"; }
+  info() { printf "ℹ  %s\n" "$1"; }
+fi
+
+echo ""
+echo "🔍 Checking if dependency installation is needed..."
+
+# ============================================================================
+# Check if package.json or lock files were modified in this merge
+# ============================================================================
+
+CHANGED_FILES=$(git diff-tree -r --name-only --no-commit-id MERGE_HEAD HEAD 2>/dev/null || true)
+
+# Check for package.json or lock file changes
+INSTALL_NEEDED=0
+
+if echo "$CHANGED_FILES" | grep -qE "package\.json|pnpm-lock\.yaml|package-lock\.json|yarn\.lock"; then
+  info "📋 Dependency files changed (package.json or lock files)"
+  INSTALL_NEEDED=1
+fi
+
+# ============================================================================
+# Check if critical packages are missing (fail-safe)
+# ============================================================================
+
+if [ $INSTALL_NEEDED -eq 0 ]; then
+  # Even if files didn't change, check if critical packages are missing
+  MISSING_PACKAGES=0
+
+  # Check for critical hook dependencies
+  if ! command -v jq &> /dev/null; then
+    warning "⚠️  jq not found (needed for hook scripts)"
+    MISSING_PACKAGES=1
+  fi
+
+  # Check if node_modules is empty (fresh clone)
+  if [ ! -d "node_modules" ] || [ -z "$(ls -A node_modules 2>/dev/null)" ]; then
+    info "📋 node_modules is empty (fresh clone detected)"
+    MISSING_PACKAGES=1
+  fi
+
+  if [ $MISSING_PACKAGES -eq 1 ]; then
+    INSTALL_NEEDED=1
+  fi
+fi
+
+# ============================================================================
+# Install if needed
+# ============================================================================
+
+if [ $INSTALL_NEEDED -eq 1 ]; then
+  echo ""
+  info "⚙️  Installing dependencies..."
+  echo ""
+
+  # Detect package manager
+  if [ -f "pnpm-lock.yaml" ]; then
+    if ! command -v pnpm &> /dev/null; then
+      error "pnpm is required but not installed"
+      echo "Install pnpm: npm install -g pnpm"
+      exit 1
+    fi
+    pnpm install --frozen-lockfile 2>&1 | tail -5
+    INSTALL_STATUS=$?
+  elif [ -f "yarn.lock" ]; then
+    if ! command -v yarn &> /dev/null; then
+      error "yarn is required but not installed"
+      echo "Install yarn: npm install -g yarn"
+      exit 1
+    fi
+    yarn install --frozen-lockfile 2>&1 | tail -5
+    INSTALL_STATUS=$?
+  else
+    npm ci 2>&1 | tail -5
+    INSTALL_STATUS=$?
+  fi
+
+  if [ $INSTALL_STATUS -ne 0 ]; then
+    echo ""
+    error "Failed to install dependencies"
+    warning "Please run: pnpm install (or npm install / yarn install)"
+    exit 1
+  fi
+
+  echo ""
+  success "Dependencies installed successfully"
+  echo ""
+else
+  success "No dependency installation needed"
+  echo ""
+fi
+
+exit 0
