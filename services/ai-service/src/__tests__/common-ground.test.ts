@@ -36,7 +36,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 9,
           opposeCount: 1,
           nuancedCount: 0,
-          consensusScore: 0.90,
+          consensusScore: 0.9,
           alignments: [
             { userId: 'user-1', stance: 'SUPPORT' },
             { userId: 'user-2', stance: 'SUPPORT' },
@@ -62,11 +62,9 @@ describe('CommonGroundSynthesizer', () => {
       const result = await synthesizer.synthesize(topicData);
 
       expect(result.agreementZones).toHaveLength(1);
-      expect(result.agreementZones[0].proposition).toBe(
-        'Climate change is a serious issue'
-      );
-      expect(result.agreementZones[0].agreementPercentage).toBe(90);
-      expect(result.agreementZones[0].participantCount).toBe(9);
+      expect(result.agreementZones[0]?.proposition).toBe('Climate change is a serious issue');
+      expect(result.agreementZones[0]?.agreementPercentage).toBe(90);
+      expect(result.agreementZones[0]?.participantCount).toBe(9);
     });
 
     it('should identify misunderstandings with high nuanced responses', async () => {
@@ -86,8 +84,7 @@ describe('CommonGroundSynthesizer', () => {
             {
               userId: 'user-5',
               stance: 'NUANCED',
-              nuanceExplanation:
-                'I support free speech but with limits on hate speech',
+              nuanceExplanation: 'I support free speech but with limits on hate speech',
             },
             {
               userId: 'user-6',
@@ -97,8 +94,7 @@ describe('CommonGroundSynthesizer', () => {
             {
               userId: 'user-7',
               stance: 'NUANCED',
-              nuanceExplanation:
-                'I oppose absolute free speech due to harm prevention',
+              nuanceExplanation: 'I oppose absolute free speech due to harm prevention',
             },
             {
               userId: 'user-8',
@@ -129,12 +125,8 @@ describe('CommonGroundSynthesizer', () => {
       const result = await synthesizer.synthesize(topicData);
 
       expect(result.misunderstandings).toHaveLength(1);
-      expect(result.misunderstandings[0].topic).toBe(
-        'Free speech should be absolute'
-      );
-      expect(result.misunderstandings[0].interpretations.length).toBeGreaterThanOrEqual(
-        2
-      );
+      expect(result.misunderstandings[0]?.topic).toBe('Free speech should be absolute');
+      expect(result.misunderstandings[0]?.interpretations.length).toBeGreaterThanOrEqual(2);
     });
 
     it('should identify genuine disagreements with balanced opposition', async () => {
@@ -145,7 +137,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 5,
           opposeCount: 5,
           nuancedCount: 0,
-          consensusScore: 0.50,
+          consensusScore: 0.5,
           alignments: [
             {
               userId: 'user-1',
@@ -187,16 +179,16 @@ describe('CommonGroundSynthesizer', () => {
       const result = await synthesizer.synthesize(topicData);
 
       expect(result.genuineDisagreements).toHaveLength(1);
-      expect(result.genuineDisagreements[0].proposition).toBe(
-        'Taxation should be increased for higher earners'
+      expect(result.genuineDisagreements[0]?.proposition).toBe(
+        'Taxation should be increased for higher earners',
       );
-      expect(result.genuineDisagreements[0].viewpoints).toHaveLength(2);
+      expect(result.genuineDisagreements[0]?.viewpoints).toHaveLength(2);
 
-      const supportViewpoint = result.genuineDisagreements[0].viewpoints.find(
-        (v) => v.position === 'Support'
+      const supportViewpoint = result.genuineDisagreements[0]?.viewpoints.find(
+        (v) => v.position === 'Support',
       );
-      const opposeViewpoint = result.genuineDisagreements[0].viewpoints.find(
-        (v) => v.position === 'Oppose'
+      const opposeViewpoint = result.genuineDisagreements[0]?.viewpoints.find(
+        (v) => v.position === 'Oppose',
       );
 
       expect(supportViewpoint).toBeDefined();
@@ -213,7 +205,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 9,
           opposeCount: 1,
           nuancedCount: 0,
-          consensusScore: 0.90,
+          consensusScore: 0.9,
           alignments: [],
         },
         {
@@ -222,7 +214,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 6,
           opposeCount: 4,
           nuancedCount: 0,
-          consensusScore: 0.60,
+          consensusScore: 0.6,
           alignments: [],
         },
       ];
@@ -257,7 +249,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 8,
           opposeCount: 2,
           nuancedCount: 0,
-          consensusScore: 0.80,
+          consensusScore: 0.8,
           alignments: [],
         },
       ];
@@ -273,9 +265,7 @@ describe('CommonGroundSynthesizer', () => {
 
       // Only the high participation proposition should be included
       expect(result.agreementZones).toHaveLength(1);
-      expect(result.agreementZones[0].proposition).toBe(
-        'High participation proposition'
-      );
+      expect(result.agreementZones[0]?.proposition).toBe('High participation proposition');
     });
 
     it('should sort agreement zones by percentage descending', async () => {
@@ -286,7 +276,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 7,
           opposeCount: 3,
           nuancedCount: 0,
-          consensusScore: 0.70,
+          consensusScore: 0.7,
           alignments: [],
         },
         {
@@ -295,7 +285,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 9,
           opposeCount: 1,
           nuancedCount: 0,
-          consensusScore: 0.90,
+          consensusScore: 0.9,
           alignments: [],
         },
         {
@@ -304,7 +294,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 8,
           opposeCount: 2,
           nuancedCount: 0,
-          consensusScore: 0.80,
+          consensusScore: 0.8,
           alignments: [],
         },
       ];
@@ -319,12 +309,12 @@ describe('CommonGroundSynthesizer', () => {
       const result = await synthesizer.synthesize(topicData);
 
       expect(result.agreementZones).toHaveLength(3);
-      expect(result.agreementZones[0].proposition).toBe('High agreement');
-      expect(result.agreementZones[1].proposition).toBe('Higher agreement');
-      expect(result.agreementZones[2].proposition).toBe('Medium agreement');
-      expect(result.agreementZones[0].agreementPercentage).toBe(90);
-      expect(result.agreementZones[1].agreementPercentage).toBe(80);
-      expect(result.agreementZones[2].agreementPercentage).toBe(70);
+      expect(result.agreementZones[0]?.proposition).toBe('High agreement');
+      expect(result.agreementZones[1]?.proposition).toBe('Higher agreement');
+      expect(result.agreementZones[2]?.proposition).toBe('Medium agreement');
+      expect(result.agreementZones[0]?.agreementPercentage).toBe(90);
+      expect(result.agreementZones[1]?.agreementPercentage).toBe(80);
+      expect(result.agreementZones[2]?.agreementPercentage).toBe(70);
     });
 
     it('should handle mixed scenario with all analysis types', async () => {
@@ -336,7 +326,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 9,
           opposeCount: 1,
           nuancedCount: 0,
-          consensusScore: 0.90,
+          consensusScore: 0.9,
           alignments: [
             {
               userId: 'user-1',
@@ -393,7 +383,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 5,
           opposeCount: 5,
           nuancedCount: 0,
-          consensusScore: 0.50,
+          consensusScore: 0.5,
           alignments: [
             {
               userId: 'user-1',
@@ -459,7 +449,7 @@ describe('CommonGroundSynthesizer', () => {
           supportCount: 8,
           opposeCount: 2,
           nuancedCount: 0,
-          consensusScore: 0.80,
+          consensusScore: 0.8,
           alignments: [
             {
               userId: 'user-1',
@@ -494,10 +484,8 @@ describe('CommonGroundSynthesizer', () => {
 
       const result = await synthesizer.synthesize(topicData);
 
-      expect(result.agreementZones[0].supportingEvidence).toHaveLength(3);
-      expect(result.agreementZones[0].supportingEvidence).toContain(
-        'Evidence point 1'
-      );
+      expect(result.agreementZones[0]?.supportingEvidence).toHaveLength(3);
+      expect(result.agreementZones[0]?.supportingEvidence).toContain('Evidence point 1');
     });
   });
 });

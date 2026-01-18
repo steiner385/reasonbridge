@@ -65,7 +65,9 @@ describe('Feedback API Integration Tests', () => {
         findUnique: async () => mockFeedback,
         update: async (args: any) => ({ ...mockFeedback, ...args.data }),
         findMany: async () => [mockFeedback],
-        groupBy: async () => [{ type: 'INFLAMMATORY', _count: { type: 1 }, _avg: { confidenceScore: 0.85 } }],
+        groupBy: async () => [
+          { type: 'INFLAMMATORY', _count: { type: 1 }, _avg: { confidenceScore: 0.85 } },
+        ],
       },
     };
 
@@ -112,7 +114,7 @@ describe('Feedback API Integration Tests', () => {
         feedbackService.requestFeedback({
           responseId: 'non-existent-id',
           content: 'Test content',
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -205,7 +207,7 @@ describe('Feedback API Integration Tests', () => {
       };
 
       await expect(
-        feedbackService.dismissFeedback('non-existent-id', { dismissalReason: 'Test' })
+        feedbackService.dismissFeedback('non-existent-id', { dismissalReason: 'Test' }),
       ).rejects.toThrow();
     });
   });

@@ -200,7 +200,7 @@ test.describe('Apply Suggestion Flow - Tag Suggestions', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tag, source: 'AI_SUGGESTED' }),
-        }).then(r => r.json())
+        }).then((r) => r.json()),
       );
       return Promise.all(promises);
     }, suggestionsData.suggestions);
@@ -315,19 +315,17 @@ test.describe('Apply Suggestion Flow - Topic Link Suggestions', () => {
     });
 
     // Verify each link suggestion has required properties
-    suggestionsData.linkSuggestions.forEach((link: {
-      targetTopicId: string;
-      relationshipType: string;
-      reasoning: string;
-    }) => {
-      expect(link.targetTopicId).toBeDefined();
-      expect(link.relationshipType).toBeDefined();
-      expect(link.reasoning).toBeDefined();
+    suggestionsData.linkSuggestions.forEach(
+      (link: { targetTopicId: string; relationshipType: string; reasoning: string }) => {
+        expect(link.targetTopicId).toBeDefined();
+        expect(link.relationshipType).toBeDefined();
+        expect(link.reasoning).toBeDefined();
 
-      // Verify relationship type is valid
-      const validTypes = ['supports', 'contradicts', 'extends', 'questions', 'relates_to'];
-      expect(validTypes).toContain(link.relationshipType);
-    });
+        // Verify relationship type is valid
+        const validTypes = ['supports', 'contradicts', 'extends', 'questions', 'relates_to'];
+        expect(validTypes).toContain(link.relationshipType);
+      },
+    );
   });
 
   test('should successfully apply a topic link suggestion', async ({ page }) => {
@@ -388,7 +386,7 @@ test.describe('Apply Suggestion Flow - Topic Link Suggestions', () => {
 
     // Verify we have multiple relationship types
     const relationshipTypes = suggestionsData.linkSuggestions.map(
-      (link: { relationshipType: string }) => link.relationshipType
+      (link: { relationshipType: string }) => link.relationshipType,
     );
 
     const uniqueTypes = Array.from(new Set(relationshipTypes));
