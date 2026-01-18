@@ -2,12 +2,33 @@
 
 ## Current Status
 
-- Completed issue #165 (T169) - Create verification request page
-- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #167 (T171) - Create challenge display component
+- ~159 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All 223 E2E tests passing ✅
 - Main branch synced with all implementations
 
-## Latest Completed (2026-01-18 - Iteration 7)
+## Latest Completed (2026-01-18 - Iteration 13)
+
+**Issue #167 (T171) - Create challenge display component:**
+- Created ChallengeDisplayComponent (frontend/src/components/verification/ChallengeDisplayComponent.tsx)
+- Displays video verification challenges with support for three types:
+  - RANDOM_PHRASE: Shows phrase to say with type-specific tips (speak clearly, face visible, good lighting)
+  - RANDOM_GESTURE: Shows gesture to perform with tips (slow movements, body in frame, deliberate actions)
+  - TIMESTAMP: Shows current timestamp with tips (display on screen, use clock/phone, make visible)
+- Component features:
+  - Type-specific icons (🎤 🎤 🎤 ⏰) for visual feedback
+  - Challenge content display with highlighted values
+  - Type-specific tips in collapsible sections
+  - General recording instructions (5 steps)
+  - Full accessibility support with semantic HTML
+  - Tailwind CSS styling matching existing components
+- Added export to verification component barrel (frontend/src/components/verification/index.ts)
+- Frontend builds successfully with no TypeScript errors
+- Type imports properly configured for verbatimModuleSyntax
+- Merged via PR #549
+- Resolves US4 (Human Authenticity) verification flow
+
+## Previous Completed (2026-01-18 - Iteration 7)
 
 **Issue #165 (T169) - Create verification request page:**
 - Created VerificationPage component (main page for verification management)
