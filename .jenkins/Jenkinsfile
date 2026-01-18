@@ -93,7 +93,7 @@ pipeline {
                     def testResult = sh(
                         script: '''#!/bin/bash
                             set -o pipefail
-                            npm run test:unit -- --json --outputFile=test-results.json 2>&1 | tee test-output.log
+                            npm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
                         ''',
                         returnStatus: true
                     )
