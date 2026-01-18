@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { GetTopicsQueryDto } from './dto/get-topics-query.dto.js';
 import { SearchTopicsQueryDto } from './dto/search-topics-query.dto.js';
@@ -8,7 +10,10 @@ import { Prisma } from '@unite-discord/db-models';
 
 @Injectable()
 export class TopicsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async getTopics(query: GetTopicsQueryDto): Promise<PaginatedTopicsResponseDto> {
     const {
@@ -221,6 +226,17 @@ export class TopicsService {
     topicId: string,
     version?: number,
   ): Promise<CommonGroundResponseDto> {
+    // Generate cache key based on whether a specific version is requested
+    const cacheKey = version
+      ? `common-ground:topic:${topicId}:v${version}`
+      : `common-ground:topic:${topicId}:latest`;
+
+    // Try to get from cache first
+    const cached = await this.cacheManager.get<CommonGroundResponseDto>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     // First verify the topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },
@@ -249,7 +265,7 @@ export class TopicsService {
     }
 
     // Map database model to DTO
-    return {
+    const result: CommonGroundResponseDto = {
       id: analysis.id,
       version: analysis.version,
       agreementZones: analysis.agreementZones as any,
@@ -260,5 +276,20 @@ export class TopicsService {
       responseCountAtGeneration: analysis.responseCountAtGeneration,
       generatedAt: analysis.createdAt,
     };
+
+    // Cache the result with a 1-hour TTL
+    await this.cacheManager.set(cacheKey, result, 3600000);
+
+    return result;
+  }
+
+  /**
+   * Invalidate common ground cache for a specific topic
+   * Called when new analysis is generated
+   */
+  async invalidateCommonGroundCache(topicId: string): Promise<void> {
+    const latestKey = `common-ground:topic:${topicId}:latest`;
+    await this.cacheManager.del(latestKey);
+    // Note: Versioned caches remain valid as analysis versions are immutable
   }
 }
