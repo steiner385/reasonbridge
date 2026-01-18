@@ -3,71 +3,43 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
 import type { UserTrustUpdatedEvent, ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
 import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
+import type {
+  CreateActionRequest,
+  ApproveActionRequest,
+  RejectActionRequest,
+  ModerationActionResponse,
+  ModerationActionDetailResponse,
+  ListActionsResponse,
+  CoolingOffPromptRequest,
+  CoolingOffPromptResponse,
+} from '../dto/moderation-action.dto.js';
+import type {
+  CreateAppealRequest,
+  AppealResponse,
+  ReviewAppealRequest,
+  PendingAppealResponse,
+  ListAppealResponse,
+} from '../dto/appeal.dto.js';
 
-export interface CreateActionRequest {
-  targetType: 'response' | 'user' | 'topic';
-  targetId: string;
-  actionType: 'educate' | 'warn' | 'hide' | 'remove' | 'suspend' | 'ban';
-  reasoning: string;
-}
+// Re-export DTOs for backward compatibility
+export type {
+  CreateActionRequest,
+  ApproveActionRequest,
+  RejectActionRequest,
+  ModerationActionResponse,
+  ModerationActionDetailResponse,
+  ListActionsResponse,
+  CoolingOffPromptRequest,
+  CoolingOffPromptResponse,
+} from '../dto/moderation-action.dto.js';
 
-export interface ApproveActionRequest {
-  modifiedReasoning?: string;
-}
-
-export interface RejectActionRequest {
-  reason: string;
-}
-
-export interface CreateAppealRequest {
-  reason: string;
-}
-
-export interface AppealResponse {
-  id: string;
-  moderationActionId: string;
-  appellantId: string;
-  reason: string;
-  status: string;
-  reviewerId: string | null;
-  decisionReasoning: string | null;
-  createdAt: string;
-  resolvedAt: string | null;
-}
-
-export interface ReviewAppealRequest {
-  decision: 'upheld' | 'denied';
-  reasoning: string;
-}
-
-export interface PendingAppealResponse extends AppealResponse {
-  moderationAction?: ModerationActionResponse | undefined;
-}
-
-export interface ModerationActionResponse {
-  id: string;
-  targetType: string;
-  targetId: string;
-  actionType: string;
-  severity: string;
-  reasoning: string;
-  aiRecommended: boolean;
-  aiConfidence: number | null;
-  approvedBy: {
-    id: string;
-    displayName: string;
-  } | null;
-  approvedAt: string | null;
-  status: string;
-  createdAt: string;
-  executedAt: string | null;
-}
-
-export interface ModerationActionDetailResponse extends ModerationActionResponse {
-  targetContent?: Record<string, unknown>;
-  appeal?: Record<string, unknown> | null;
-  relatedActions?: ModerationActionResponse[];
-}
+export type {
+  CreateAppealRequest,
+  AppealResponse,
+  ReviewAppealRequest,
+  PendingAppealResponse,
+  ListAppealResponse,
+} from '../dto/appeal.dto.js';
 
 /**
  * ModerationActionsService handles moderation action management.
@@ -89,11 +61,7 @@ export class ModerationActionsService {
     severity?: 'NON_PUNITIVE' | 'CONSEQUENTIAL',
     limit: number = 20,
     cursor?: string,
-  ): Promise<{
-    actions: ModerationActionResponse[];
-    nextCursor: string | null;
-    totalCount: number;
-  }> {
+  ): Promise<ListActionsResponse> {
     type WhereInput = {
       targetType?: 'RESPONSE' | 'USER' | 'TOPIC';
       status?: 'PENDING' | 'ACTIVE' | 'APPEALED' | 'REVERSED';
@@ -343,11 +311,7 @@ export class ModerationActionsService {
     userId: string,
     limit: number = 20,
     cursor?: string,
-  ): Promise<{
-    actions: ModerationActionResponse[];
-    nextCursor: string | null;
-    totalCount: number;
-  }> {
+  ): Promise<ListActionsResponse> {
     const where = {
       targetId: userId,
       targetType: 'USER' as const,
@@ -392,7 +356,7 @@ export class ModerationActionsService {
     userIds: string[],
     topicId: string,
     prompt: string,
-  ): Promise<{ sent: number }> {
+  ): Promise<CoolingOffPromptResponse> {
     // This is a non-punitive intervention
     // In a full implementation, this would create notification records
     // For now, we'll just track that the action was taken
@@ -484,11 +448,7 @@ export class ModerationActionsService {
   async getPendingAppeals(
     limit: number = 20,
     cursor?: string,
-  ): Promise<{
-    appeals: PendingAppealResponse[];
-    nextCursor: string | null;
-    totalCount: number;
-  }> {
+  ): Promise<ListAppealResponse> {
     const where = {
       status: 'PENDING' as const,
     };

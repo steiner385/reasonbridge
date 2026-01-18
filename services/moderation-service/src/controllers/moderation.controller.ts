@@ -11,13 +11,18 @@ import type {
   CreateActionRequest,
   ApproveActionRequest,
   RejectActionRequest,
-  CreateAppealRequest,
-  AppealResponse,
   ModerationActionResponse,
   ModerationActionDetailResponse,
+  ListActionsResponse,
+  CoolingOffPromptResponse,
+} from '../dto/moderation-action.dto.js';
+import type {
+  CreateAppealRequest,
+  AppealResponse,
   ReviewAppealRequest,
   PendingAppealResponse,
-} from '../services/moderation-actions.service.js';
+  ListAppealResponse,
+} from '../dto/appeal.dto.js';
 
 export interface ScreenContentRequest {
   contentId: string;
@@ -138,11 +143,7 @@ export class ModerationController {
     @Query('severity') severity?: string,
     @Query('limit') limit: number = 20,
     @Query('cursor') cursor?: string,
-  ): Promise<{
-    actions: ModerationActionResponse[];
-    nextCursor: string | null;
-    totalCount: number;
-  }> {
+  ): Promise<ListActionsResponse> {
     const targetTypeEnum = targetType?.toUpperCase() as
       | 'RESPONSE'
       | 'USER'
@@ -222,11 +223,7 @@ export class ModerationController {
     @Param('userId') userId: string,
     @Query('limit') limit: number = 20,
     @Query('cursor') cursor?: string,
-  ): Promise<{
-    actions: ModerationActionResponse[];
-    nextCursor: string | null;
-    totalCount: number;
-  }> {
+  ): Promise<ListActionsResponse> {
     return this.actionsService.getUserActions(userId, limit, cursor);
   }
 
@@ -276,11 +273,7 @@ export class ModerationController {
   async getPendingAppeals(
     @Query('limit') limit: number = 20,
     @Query('cursor') cursor?: string,
-  ): Promise<{
-    appeals: PendingAppealResponse[];
-    nextCursor: string | null;
-    totalCount: number;
-  }> {
+  ): Promise<ListAppealResponse> {
     return this.actionsService.getPendingAppeals(limit, cursor);
   }
 
