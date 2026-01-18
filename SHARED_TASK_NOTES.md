@@ -2,11 +2,26 @@
 
 ## Current Status
 
-- Completed issue #120 (T124) - Implement common ground analysis algorithm
-- All lint checks, formatting checks, and TypeScript type checks passing
-- ~165 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #121 (T125) - Implement proposition clustering
+- All tests passing in discussion-service (12 new tests)
+- ~164 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #121 (T125) - Implement proposition clustering:**
+
+- Implemented PropositionClustererService for grouping related propositions
+- Created comprehensive DTOs for clustering (services/discussion-service/src/dto/proposition-cluster.dto.ts:123)
+- Key features:
+  - Pattern-based keyword similarity using Jaccard index
+  - Hierarchical agglomerative clustering algorithm
+  - Configurable similarity threshold (default: 0.2)
+  - Cohesion scoring and quality metrics
+  - Keyword extraction with stop word filtering
+- Set up Jest testing infrastructure for discussion-service
+- Added 12 comprehensive unit tests (all passing)
+- Pattern-based implementation ready for future AI enhancement with AWS Bedrock
+- Merged via PR #485
 
 **Issue #120 (T124) - Implement common ground analysis algorithm:**
 
@@ -22,31 +37,12 @@
 - Pattern-based implementation ready for future AI enhancement with AWS Bedrock
 - Merged via PR #484
 
-## Latest Completed (2026-01-17)
-
-**Lint Check Fixes:**
-
-- Fixed all ESLint errors (10 errors resolved)
-- Fixed unused variables in test files
-- Fixed unused imports in feedback components
-- Fixed React Hook dependency warnings
-- Added ESLint override for vitest config files to suppress import/no-unresolved errors
-- Fixed TypeScript errors in topic-link suggester tests (added optional chaining for array access)
-- Ran Prettier to format all files
-- All checks passing: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`
-
-**Additional ESLint fixes:**
-
-- Fixed all ESLint errors and warnings (11 total issues)
-- Removed unused variables and imports across multiple files
-- Fixed React hooks dependencies
-- All lint checks now passing cleanly
-
 ## Notes
 
 - pnpm is now installed globally and should be used for workspace operations
 - The `status: in-progress` label was created for issue tracking
 - All PRs are being squash-merged to main
+- Jest is now set up for both ai-service and discussion-service
 
 ## Workflow
 
