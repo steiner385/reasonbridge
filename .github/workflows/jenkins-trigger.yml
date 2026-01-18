@@ -70,27 +70,23 @@ jobs:
             CRUMB_ARGS="-H '${CRUMB_FIELD}: ${CRUMB_VALUE}'"
           fi
 
-          # Trigger Jenkins build with parameters (using -L to follow redirects)
-          if [ -z "$CRUMB_VALUE" ]; then
-            # No crumb available, try without it
-            RESPONSE=$(curl -sL -w "\n%{http_code}" -X POST \
-              "${JENKINS_URL}/job/uniteDiscord-ci/buildWithParameters" \
-              --user "${JENKINS_USER}:${JENKINS_TOKEN}" \
-              --data-urlencode "BRANCH=${BRANCH}" \
-              --data-urlencode "GITHUB_SHA=${{ github.sha }}" \
-              --data-urlencode "GITHUB_PR=${{ github.event.pull_request.number }}" \
-              --data-urlencode "BUILD_CAUSE=${BUILD_CAUSE}")
-          else
-            # Use the fetched crumb in the header
-            RESPONSE=$(curl -sL -w "\n%{http_code}" -X POST \
-              -H "${CRUMB_FIELD}: ${CRUMB_VALUE}" \
-              "${JENKINS_URL}/job/uniteDiscord-ci/buildWithParameters" \
-              --user "${JENKINS_USER}:${JENKINS_TOKEN}" \
-              --data-urlencode "BRANCH=${BRANCH}" \
-              --data-urlencode "GITHUB_SHA=${{ github.sha }}" \
-              --data-urlencode "GITHUB_PR=${{ github.event.pull_request.number }}" \
-              --data-urlencode "BUILD_CAUSE=${BUILD_CAUSE}")
+          # Build the Jenkins URL with crumb parameter if available
+          JENKINS_BUILD_URL="${JENKINS_URL}/job/uniteDiscord-ci/buildWithParameters"
+          if [ ! -z "$CRUMB_VALUE" ]; then
+            # Add crumb as URL parameter (some Jenkins configs require this)
+            JENKINS_BUILD_URL="${JENKINS_BUILD_URL}?${CRUMB_FIELD}=${CRUMB_VALUE}"
           fi
+
+          # Trigger Jenkins build with parameters (using -L to follow redirects)
+          RESPONSE=$(curl -sL -w "\n%{http_code}" -X POST \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "${CRUMB_FIELD}: ${CRUMB_VALUE}" \
+            "$JENKINS_BUILD_URL" \
+            --user "${JENKINS_USER}:${JENKINS_TOKEN}" \
+            --data-urlencode "BRANCH=${BRANCH}" \
+            --data-urlencode "GITHUB_SHA=${{ github.sha }}" \
+            --data-urlencode "GITHUB_PR=${{ github.event.pull_request.number }}" \
+            --data-urlencode "BUILD_CAUSE=${BUILD_CAUSE}")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 
