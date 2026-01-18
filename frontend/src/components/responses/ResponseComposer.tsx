@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import type { CreateResponseRequest } from '../../types/response';
+import type { FeedbackResponse } from '../../types/feedback';
+import { apiClient } from '../../lib/api';
 
 export interface ResponseComposerProps {
   /**
@@ -61,6 +63,9 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FeedbackResponse[]>([]);
+  const [isRequestingFeedback, setIsRequestingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,8 +104,42 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
       setCurrentSource('');
       setContainsOpinion(false);
       setContainsFactualClaims(false);
+      setFeedback([]);
+      setFeedbackError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit response');
+    }
+  };
+
+  const handleRequestFeedback = async () => {
+    if (content.trim().length < minLength) {
+      setFeedbackError(`Content must be at least ${minLength} characters to request feedback`);
+      return;
+    }
+
+    setIsRequestingFeedback(true);
+    setFeedbackError(null);
+
+    try {
+      // For now, we'll generate a temporary response ID
+      // In a real implementation, this would come from a draft save or the response after submission
+      const tempResponseId = crypto.randomUUID();
+
+      const response = await apiClient.post<FeedbackResponse>(
+        '/feedback/request',
+        {
+          responseId: tempResponseId,
+          content: content.trim(),
+        }
+      );
+
+      setFeedback([response]);
+    } catch (err) {
+      setFeedbackError(
+        err instanceof Error ? err.message : 'Failed to request feedback'
+      );
+    } finally {
+      setIsRequestingFeedback(false);
     }
   };
 
@@ -272,6 +311,79 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
             This response contains factual claims
           </label>
         </div>
+      </div>
+
+      {/* AI Feedback Request */}
+      <div className="border-t pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-700">AI Feedback (Optional)</h3>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleRequestFeedback}
+            isLoading={isRequestingFeedback}
+            disabled={content.trim().length < minLength || isLoading || isRequestingFeedback}
+          >
+            Request Feedback
+          </Button>
+        </div>
+
+        {feedbackError && (
+          <p className="text-sm text-fallacy-DEFAULT mb-2" role="alert">
+            {feedbackError}
+          </p>
+        )}
+
+        {feedback.length > 0 && (
+          <div className="space-y-3">
+            {feedback.map((item) => (
+              <div
+                key={item.id}
+                className={`p-4 rounded-lg border-l-4 ${
+                  item.type === 'AFFIRMATION'
+                    ? 'bg-green-50 border-green-500'
+                    : item.type === 'FALLACY'
+                    ? 'bg-red-50 border-red-500'
+                    : item.type === 'INFLAMMATORY'
+                    ? 'bg-orange-50 border-orange-500'
+                    : item.type === 'UNSOURCED'
+                    ? 'bg-yellow-50 border-yellow-500'
+                    : 'bg-blue-50 border-blue-500'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-xs font-semibold px-2 py-1 rounded ${
+                        item.type === 'AFFIRMATION'
+                          ? 'bg-green-100 text-green-800'
+                          : item.type === 'FALLACY'
+                          ? 'bg-red-100 text-red-800'
+                          : item.type === 'INFLAMMATORY'
+                          ? 'bg-orange-100 text-orange-800'
+                          : item.type === 'UNSOURCED'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {item.type}
+                    </span>
+                    {item.subtype && (
+                      <span className="text-xs text-gray-600">({item.subtype})</span>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {Math.round(item.confidenceScore * 100)}% confident
+                  </span>
+                </div>
+                <p className="text-sm text-gray-800 mb-2">{item.suggestionText}</p>
+                {item.reasoning && (
+                  <p className="text-xs text-gray-600 italic">{item.reasoning}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}
