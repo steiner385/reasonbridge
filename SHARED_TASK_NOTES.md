@@ -2,12 +2,197 @@
 
 ## Current Status
 
-- Completed issue #186 (T190) - Implement moderation history tracking
-- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All moderation service tests passing (54 total: 24 repository + 21 content-screening + 9 ai-review) ✅
+- Issue #194 (T198) - Create appeal status page COMPLETED and PR #592 created
+- ~170 open issues remaining
 - Main branch synced with origin/main
-- Current development branch at main - ready for next issue
-- No failing tests - project at stable state ready for next issue
+- Code compiles successfully, no TypeScript errors in AppealStatusPage
+- PR blocked by pre-existing CI infrastructure issues (detect-secrets not installed)
+
+## Latest In Progress (2026-01-18 - Iteration 36)
+
+**Issue #194 (T198) - Create appeal status page:**
+- Created AppealStatusPage component (frontend/src/pages/Appeal/AppealStatusPage.tsx:1-400)
+- Added /appeals route (frontend/src/routes/index.tsx:12, 66-68)
+- Features:
+  - View all appeals with collapsible detail cards
+  - Filter by status (all, pending, under_review, upheld, denied)
+  - Display original moderation action details
+  - Show moderator decisions and reasoning
+  - Timeline info (submitted, resolved dates)
+  - Status badges with color coding
+  - Helpful info about appeal process
+- Code compiles successfully, TypeScript strict mode passes
+- Fixed pnpm-lock.yaml issue from #589 (packages/shared dependencies)
+- PR #592 created: https://github.com/steiner385/uniteDiscord/pull/592
+
+**CI Status:** PR checks failing due to pre-existing infrastructure issues:
+- `detect-secrets` tool not installed in CI environment (not code-related)
+- PR Size Check: PASSED ✅
+- Security Scan: PASSED ✅
+- Quick Validation: FAILED (due to lockfile generation, now fixed)
+- Build Check: FAILED (depends on Security & Quality Gates passing)
+- Code quality is good - ready for merge once CI infrastructure is fixed
+
+## Latest Completed (2026-01-18 - Iteration 35)
+
+**Issue #324 (L0) - Create top-level README.md:**
+- Enhanced existing README.md with all required GitHub best practices sections
+- Added status badges: license, Node.js version, pnpm version, project version
+- Added comprehensive table of contents for navigation
+- Added Features section highlighting key platform capabilities (tone analysis, common ground, clarity scoring, etc.)
+- Added Configuration section with:
+  - Environment variables setup instructions
+  - Database setup and management commands (Prisma)
+- Added Testing section with all test types (unit, integration, contract, e2e)
+- Added API Documentation section with OpenAPI/GraphQL references
+- Enhanced Contributing guidelines with detailed step-by-step workflow
+- Added Additional Documentation links to frontend and architecture docs
+- Added License and Support sections
+- All sections follow GitHub markdown best practices
+- Renders correctly on GitHub
+- Links to existing documentation are valid
+- Merged via PR #588 (squash merge) to main
+
+## Previous Completed (2026-01-18 - Iteration 34)
+
+**Issue #192 (T196) - Create moderation action buttons:**
+- Created ModerationActionButtons reusable component (frontend/src/components/moderation/ModerationActionButtons.tsx)
+- Features:
+  - Approve/reject action buttons with loading states and error handling
+  - Optional reject reasoning textarea input for additional context
+  - Configurable button size (sm/md/lg) and styling
+  - Support for disabled state and custom className
+  - Callbacks for onApprove, onReject, onError for parent component integration
+- API Integration: Uses existing approveModerationAction and rejectModerationAction functions
+- Only renders for pending actions (properly filters out non-pending states)
+- Comprehensive unit tests (30+ test cases covering all scenarios):
+  - Rendering logic and visibility conditions
+  - Approve/reject action processing with API integration
+  - Loading states and button disabling during processing
+  - Error handling and display
+  - Optional reasoning input functionality
+  - Disabled state behavior
+  - Callback invocation verification
+- Added to moderation component exports (frontend/src/components/moderation/index.ts)
+- All tests passing (131 tests across suite)
+- Merged via PR #585 (squash merge)
+
+## Previous Completed (2026-01-18 - Iteration 33)
+
+**Issue #191 (T195) - Create moderation queue view:**
+- Created ModerationQueueView component (frontend/src/components/moderation/ModerationQueueView.tsx:1-462)
+- Features: Comprehensive queue management with filtering, sorting, pagination
+  - Filter by status (pending, active, appealed, reversed)
+  - Filter by severity (non-punitive, consequential)
+  - Filter by action type (educate, warn, hide, remove, suspend, ban)
+  - Sort by date or severity with ascending/descending toggle
+  - Pagination support (20 items per page)
+  - Quick approve/reject action buttons
+  - AI recommendation badges with confidence scores
+- Integrated with ModerationDashboardPage (frontend/src/pages/Admin/ModerationDashboardPage.tsx:14-423)
+  - Added new "Queue" tab with dedicated queue view
+  - Tab shows pending actions by default
+- Updated component exports (frontend/src/components/moderation/index.ts:7,10)
+- All TypeScript types properly defined (frontend/src/types/moderation.ts)
+- Build: Successful (374kB gzipped), ESLint passes (0 warnings/errors), TypeScript strict mode passes
+- Pre-existing CI failures in ai-service (unrelated to this PR)
+- Merged via PR #584 (squash merge)
+
+## Previous Completed (2026-01-18 - Iteration 32)
+
+**Issue #190 (T194) - Create moderation dashboard page:**
+- Created ModerationDashboardPage component (frontend/src/pages/Admin/ModerationDashboardPage.tsx) with:
+  - Overview tab: Queue statistics (pending actions, critical actions, avg review time)
+  - Distribution of moderation actions by type visualization (educate, warn, hide, remove, suspend, ban)
+  - Recent pending actions with approve/reject inline buttons
+  - Recent appeals with uphold/deny buttons
+  - Actions tab: Filter by status (pending, active, appealed, reversed) with list view
+  - Appeals tab: View all appeals with status filtering
+- Created moderation API service (frontend/src/lib/moderation-api.ts) with methods:
+  - getModerationActions() - List with filtering by status/severity
+  - getModerationAction() - Get action details
+  - approveModerationAction() - Approve pending action
+  - rejectModerationAction() - Reject pending action
+  - getAppeals() - List appeals with status filtering
+  - getAppeal() - Get appeal details
+  - reviewAppeal() - Uphold or deny appeal
+  - getQueueStats() - Get queue statistics
+- Created moderation types (frontend/src/types/moderation.ts) extending existing flag types with:
+  - ModerationAction, Appeal, QueueStats interfaces
+  - ModerationActionListResponse, AppealsListResponse
+  - Type enums: ModerationTargetType, ModerationActionType, ModerationSeverity, ModerationActionStatus, AppealStatus
+- Added /admin/moderation route to frontend routes
+- Fixed pre-existing TypeScript exactOptionalPropertyTypes error in FlagContentButton component
+- Merged PR #582 via squash merge to main
+- Resolved merge conflicts with existing VerificationPage route and moderation types
+
+## Latest Completed (2026-01-18 - Iteration 31)
+
+**Issue #189 (T193) - Create flag content button/modal:**
+- Created moderation types (frontend/src/types/moderation.ts) with FlagContentRequest/Response interfaces
+- Implemented FlagContentButton component (frontend/src/components/moderation/FlagContentButton.tsx)
+- Implemented FlagContentModal component (frontend/src/components/moderation/FlagContentModal.tsx) with form validation
+- Added useFlagContent hook (frontend/src/lib/useFlagContent.ts) for POST /moderation/flag API integration
+- Integrated flag button into ThreadedResponseDisplay (frontend/src/components/responses/ThreadedResponseDisplay.tsx)
+- Features: categorized flags (inappropriate, spam, misinformation, harassment, hate-speech, violence, copyright, privacy, other)
+- Form validation, anonymity option, loading states, success feedback
+- Fully typed TypeScript, accessible ARIA labels
+- Merged via PR #581
+
+## Latest Completed (2026-01-18 - Iteration 30)
+
+**Issue #188 (T192) - Implement moderation analytics service:**
+- Created ModerationQueueService (`services/moderation-service/src/services/moderation-queue.service.ts`) with:
+  - `getQueue()` method to retrieve pending moderation items with filtering by type ('action'/'appeal'/'report') and priority
+  - `getQueueStats()` to provide queue statistics (pending counts, average resolution time, oldest item age)
+  - `getAnalytics()` for detailed moderation metrics over time periods (approval/reversal/appeal rates)
+  - Priority calculation logic based on action severity (CONSEQUENTIAL, MEDIUM, NON_PUNITIVE) and AI confidence
+  - ISO 8601 duration formatting for wait times (PT1H30M, P2D, etc)
+  - Cursor-based pagination support for queue items
+  - Queue items support: 'action', 'appeal' types (reports will be added when Report model is implemented)
+- Architecture features:
+  - Handles ModerationAction and Appeal models from existing schema
+  - Calculates average resolution time from resolved actions in last 30 days
+  - Tracks oldest pending item to identify bottlenecks
+  - Extensible design with TODOs for Report model integration
+- Created comprehensive unit tests (40+ test cases) in `moderation-queue.service.spec.ts`:
+  - Service instantiation and method availability
+  - Queue item interface validation
+  - Priority calculation logic for actions and appeals
+  - Wait time formatting in various durations
+  - Queue filtering by type and pagination
+  - Statistics and analytics calculations
+  - Interface contracts and response formats
+- Updated ModerationModule to export ModerationQueueService
+- TypeScript compilation successful (moderation-service builds without errors)
+- Merged via PR #580
+
+## Latest Completed (2026-01-18 - Iteration 29)
+
+**Issue #187 (T191) - Implement AppealService for moderation appeal management:**
+- Created AppealService (`services/moderation-service/src/services/appeal.service.ts`) with:
+  - Core appeal management methods encapsulating all appeal logic
+  - `createAppeal()` - Appeal creation with comprehensive validation (20-5000 char reasoning)
+  - `getPendingAppeals()` - Retrieve pending appeals with cursor pagination
+  - `assignAppealToModerator()` - Route appeals to specific moderators (moderator assignment)
+  - `unassignAppeal()` - Return appeals to pending queue for reassignment
+  - `reviewAppeal()` - Review workflow with moderation action reversal on upheld
+  - `getAppealById()` - Retrieve specific appeal details with context
+  - `getAppealStatistics()` - Aggregated metrics and analytics
+- Moderator assignment workflow:
+  - PENDING → UNDER_REVIEW (when assigned to moderator)
+  - UNDER_REVIEW → UPHELD/DENIED (when reviewed)
+  - Ability to unassign and return to PENDING for reallocation
+  - Appeals track reviewer information and decision reasoning
+- Appeal lifecycle management:
+  - Status transitions: PENDING → UNDER_REVIEW/PENDING → UPHELD/DENIED
+  - Moderation action reversal when appeal is upheld
+  - Event publishing for appeal upheld (trust score updates)
+- Integration improvements:
+  - Updated ModerationModule to export AppealService
+  - All 54 moderation tests continue to pass
+  - TypeScript compilation successful
+- Merged via PR #578
 
 ## Latest Completed (2026-01-18 - Iteration 28)
 
