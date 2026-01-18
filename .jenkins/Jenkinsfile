@@ -54,7 +54,7 @@ pipeline {
 
         stage('Build Packages') {
             steps {
-                sh 'npx pnpm -r run build --filter=./packages/*'
+                sh 'npx pnpm --filter "./packages/*" -r run build'
             }
         }
 
