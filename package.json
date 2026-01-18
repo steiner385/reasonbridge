@@ -88,5 +88,10 @@
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "@nestjs/platform-fastify@<11.1.10": ">=11.1.11"
+    }
   }
 }

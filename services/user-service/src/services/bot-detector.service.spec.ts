@@ -248,9 +248,7 @@ describe('BotDetectorService', () => {
       const result = await service.detectCoordinatedPostingPatterns('topic-1');
 
       expect(result.length).toBeGreaterThan(0);
-      const newAccountPattern = result.find(
-        (p) => p.pattern === 'new_account_coordination',
-      );
+      const newAccountPattern = result.find((p) => p.pattern === 'new_account_coordination');
       expect(newAccountPattern).toBeDefined();
       expect(newAccountPattern?.confidence).toBeGreaterThan(0);
     });
