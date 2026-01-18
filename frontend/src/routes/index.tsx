@@ -9,6 +9,7 @@ import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
 import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
+import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -61,6 +62,10 @@ export const routes: RouteObject[] = [
   {
     path: '/admin/moderation',
     element: <ModerationDashboardPage />,
+  },
+  {
+    path: '/appeals',
+    element: <AppealStatusPage />,
   },
   {
     path: '*',
