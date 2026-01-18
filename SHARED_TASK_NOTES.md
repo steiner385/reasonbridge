@@ -2,10 +2,29 @@
 
 ## Current Status
 
-- Completed issue #155 (T159) - Performance test: Common ground calculation at scale
-- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #156 (T160) - Implement POST /verification/request
+- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #156 (T160) - Implement POST /verification/request:**
+- Created verification request endpoint for US4 (Human Authenticity)
+- Implemented VerificationRequestDto with validation (PHONE | GOVERNMENT_ID types)
+- Implemented VerificationResponseDto for type-specific responses
+- Created VerificationService with methods:
+  - requestVerification() - Creates verification records with 24-hour expiry
+  - getPendingVerifications() - Retrieves non-expired verifications
+  - cancelVerification() - Allows users to cancel verification attempts
+- Created VerificationController with POST /verification/request endpoint
+- Supports PHONE verification with E.164 formatted phone numbers
+- Supports GOVERNMENT_ID verification with placeholder session URLs
+- Phone number stored in providerReference for future SMS provider integration
+- Prevents duplicate pending verifications (same type)
+- Added comprehensive unit tests (10 test cases)
+- TypeScript compilation verified successful
+- Merged via PR #534
+
+## Previous Completions (2026-01-18)
 
 **Issue #155 (T159) - Performance test: Common ground calculation at scale:**
 - Created comprehensive performance test suite: `services/discussion-service/src/__tests__/common-ground-performance.test.ts`
