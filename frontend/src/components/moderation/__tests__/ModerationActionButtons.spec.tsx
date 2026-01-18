@@ -1,6 +1,7 @@
 /**
  * Unit tests for ModerationActionButtons component
  */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
