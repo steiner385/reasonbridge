@@ -2,11 +2,38 @@
 
 ## Current Status
 
-- Completed issues #163-164 (T167, T168) - Bot detection and verification events
-- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #163-166 (T167, T168, T169, T170) - Verification infrastructure and video recording
+- ~158 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All 223 E2E tests passing ✅
 
-## Latest Completed (2026-01-18 - Iteration 12)
+## Latest Completed (2026-01-18 - Iteration 13)
+
+**Issue #166 (T170) - Create video recording component:**
+- Created verification.ts types (frontend/src/types/verification.ts):
+  - VerificationType, VerificationStatus, VideoChallengeType enums
+  - VideoChallenge, VideoConstraints, VerificationResponse interfaces
+  - VideoUploadMetadata, VideoUploadResponse, VideoRecorderState, VideoRecorderControls
+- Implemented VideoRecordingComponent (frontend/src/components/verification/VideoRecordingComponent.tsx):
+  - MediaRecorder API integration for camera/audio capture
+  - Automatic stream cleanup with useEffect
+  - Real-time recording timer display
+  - Video preview and playback functionality
+  - Challenge instruction display (supports RANDOM_PHRASE, RANDOM_GESTURE, TIMESTAMP types)
+  - Recording controls: Start, Stop, Retake, Submit
+  - Duration validation (min/max seconds) with user feedback
+  - File size validation (max bytes limit)
+  - Validation status display with checkmarks
+  - Comprehensive error handling for camera access failures
+  - Upload error display and loading state management
+  - Responsive UI with Tailwind CSS styling
+  - Fully accessible form controls
+- Updated verification/index.ts barrel exports to include VideoRecordingComponent
+- Resolved merge conflicts with T169 (verification request page) - merged complementary types
+- Build verification: TypeScript compilation successful, 159 modules transpiled
+- Vite production build: 342 kB gzipped, 0 errors
+- Merged via PR #548
+
+## Previous Completed (2026-01-18 - Iteration 12)
 
 **Issue #164 (T168) - Implement verification events:**
 - Created UserEvent schema in `packages/event-schemas/src/user.ts`
