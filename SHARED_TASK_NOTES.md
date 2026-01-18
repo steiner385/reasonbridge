@@ -2,14 +2,41 @@
 
 ## Current Status
 
-- Completed issue #182 (T186 & T187) - User warning system DTOs
-- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #183 (T187) - Implement temporary ban functionality
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All moderation service unit tests passing ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 24)
+## Latest Completed (2026-01-18 - Iteration 25)
+
+**Issue #183 (T187) - Implement temporary ban functionality:**
+- Added temporary ban fields to ModerationAction schema (packages/db-models/prisma/schema.prisma):
+  * isTemporary: Boolean flag for temporary vs permanent bans
+  * banDurationDays: Int for original duration in days
+  * expiresAt: DateTime for automatic lift timestamp
+  * liftedAt: DateTime for when ban was lifted
+  * Added index on expiresAt for efficient expiration queries
+- Implemented ModerationActionsService methods:
+  * createTemporaryBan(userId, durationDays, reasoning, moderatorId): Create 1-365 day bans
+  * autoLiftExpiredBans(): Scheduled job to automatically lift expired bans
+  * getUserBanStatus(userId): Check current ban status and expiration time
+  * Updated mapModerationActionToResponse() to include temporary ban fields
+- Created DTOs in moderation-action.dto.ts:
+  * CreateTemporaryBanRequest with userId, durationDays (1-365), reasoning
+  * UserBanStatusResponse with isBanned, isTemporaryBan, expiresAt, action
+  * AutoLiftBansResponse with lifted count
+  * Extended ModerationActionResponse with temporary ban fields
+- Added controller endpoints:
+  * POST /moderation/bans/temporary - Create temporary ban with validation
+  * GET /moderation/bans/user/:userId/status - Check ban status and expiration
+  * POST /moderation/bans/auto-lift - Manual auto-lift trigger (for scheduled tasks)
+- Features: Duration validation (1-365 days), automatic lifting, status tracking, event publishing
+- TypeScript compilation successful, Prisma client regenerated
+- Merged via PR #571 (commit 2d98828)
+
+## Previous Completed (2026-01-18 - Iteration 24)
 
 **Issue #182 (T186 & T187) - User warning system (Create ModerationAction and Appeal DTOs):**
 - Created services/moderation-service/src/dto/moderation-action.dto.ts with full action DTOs
