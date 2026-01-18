@@ -103,8 +103,21 @@ pipeline {
                     echo "Cleaning up any existing test containers..."
                     ${DOCKER_COMPOSE} -f docker-compose.test.yml down -v 2>/dev/null || true
 
-                    # Also clean up by container name in case compose state is inconsistent
-                    docker rm -f unite-discord-postgres-test unite-discord-redis-test unite-localstack-test 2>/dev/null || true
+                    # Clean up containers by name (matching docker-compose.test.yml)
+                    docker rm -f unite-postgres-test unite-redis-test unite-localstack-test 2>/dev/null || true
+
+                    # Kill any containers using our ports
+                    for port in 5433 6380 4567; do
+                        container=$(docker ps -q --filter "publish=$port" 2>/dev/null)
+                        if [ -n "$container" ]; then
+                            echo "Stopping container using port $port: $container"
+                            docker stop $container 2>/dev/null || true
+                            docker rm -f $container 2>/dev/null || true
+                        fi
+                    done
+
+                    # Wait a moment for ports to be released
+                    sleep 2
 
                     echo "Starting test infrastructure with: ${DOCKER_COMPOSE}"
                     ${DOCKER_COMPOSE} -f docker-compose.test.yml up -d --wait || ${DOCKER_COMPOSE} -f docker-compose.test.yml up -d
@@ -112,7 +125,7 @@ pipeline {
                     # Wait for services to be ready
                     echo "Waiting for PostgreSQL..."
                     for i in $(seq 1 30); do
-                        if docker exec unite-discord-postgres-test pg_isready -U test -d unite_discord_test 2>/dev/null; then
+                        if docker exec unite-postgres-test pg_isready -U unite_test -d unite_test 2>/dev/null; then
                             echo "PostgreSQL is ready"
                             break
                         fi
@@ -122,7 +135,7 @@ pipeline {
 
                     echo "Waiting for Redis..."
                     for i in $(seq 1 15); do
-                        if docker exec unite-discord-redis-test redis-cli ping 2>/dev/null | grep -q PONG; then
+                        if docker exec unite-redis-test redis-cli ping 2>/dev/null | grep -q PONG; then
                             echo "Redis is ready"
                             break
                         fi
