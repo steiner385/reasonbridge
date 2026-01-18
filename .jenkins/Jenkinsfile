@@ -26,8 +26,8 @@ pipeline {
         stage('Initialize') {
             steps {
                 checkout scm
-                // Clean any untracked files and directories from previous builds
-                sh 'git clean -ffdx'
+                // Remove stale test directories that may exist from previous builds
+                sh 'rm -rf frontend/frontend || true'
                 script {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
