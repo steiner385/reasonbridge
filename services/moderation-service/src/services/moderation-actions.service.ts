@@ -19,6 +19,22 @@ export interface RejectActionRequest {
   reason: string;
 }
 
+export interface CreateAppealRequest {
+  reason: string;
+}
+
+export interface AppealResponse {
+  id: string;
+  moderationActionId: string;
+  appellantId: string;
+  reason: string;
+  status: string;
+  reviewerId: string | null;
+  decisionReasoning: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
 export interface ModerationActionResponse {
   id: string;
   targetType: string;
@@ -377,6 +393,83 @@ export class ModerationActionsService {
   }
 
   /**
+   * Create an appeal against a moderation action
+   */
+  async createAppeal(
+    actionId: string,
+    appellantId: string,
+    request: CreateAppealRequest,
+  ): Promise<AppealResponse> {
+    if (!request.reason || request.reason.trim().length === 0) {
+      throw new BadRequestException('reason is required');
+    }
+
+    if (request.reason.length < 20) {
+      throw new BadRequestException(
+        'Appeal reason must be at least 20 characters long',
+      );
+    }
+
+    if (request.reason.length > 5000) {
+      throw new BadRequestException(
+        'Appeal reason cannot exceed 5000 characters',
+      );
+    }
+
+    const action = await this.prisma.moderationAction.findUnique({
+      where: { id: actionId },
+    });
+
+    if (!action) {
+      throw new NotFoundException(
+        `Moderation action ${actionId} not found`,
+      );
+    }
+
+    if (action.status === 'REVERSED') {
+      throw new BadRequestException(
+        'Cannot appeal a moderation action that has already been reversed',
+      );
+    }
+
+    // Check if an appeal already exists for this action by this user
+    const existingAppeal = await this.prisma.appeal.findUnique({
+      where: {
+        moderationActionId_appellantId: {
+          moderationActionId: actionId,
+          appellantId: appellantId,
+        },
+      },
+    });
+
+    if (existingAppeal) {
+      if (existingAppeal.status === 'PENDING' || existingAppeal.status === 'UNDER_REVIEW') {
+        throw new BadRequestException(
+          'An appeal for this moderation action is already pending review',
+        );
+      }
+    }
+
+    // Create the appeal and update the action status to APPEALED
+    const appeal = await this.prisma.appeal.create({
+      data: {
+        moderationActionId: actionId,
+        appellantId: appellantId,
+        reason: request.reason,
+        status: 'PENDING',
+      },
+    });
+
+    // Update the moderation action status to APPEALED
+    await this.prisma.moderationAction.update({
+      where: { id: actionId },
+      data: { status: 'APPEALED' },
+    });
+
+    return this.mapAppealToResponse(appeal);
+  }
+
+  /**
    * Map target type string to enum value
    */
   private mapTargetType(
@@ -446,6 +539,23 @@ export class ModerationActionsService {
       status: action.status.toLowerCase(),
       createdAt: action.createdAt.toISOString(),
       executedAt: action.executedAt?.toISOString() || null,
+    };
+  }
+
+  /**
+   * Map Prisma appeal to response DTO
+   */
+  private mapAppealToResponse(appeal: any): AppealResponse {
+    return {
+      id: appeal.id,
+      moderationActionId: appeal.moderationActionId,
+      appellantId: appeal.appellantId,
+      reason: appeal.reason,
+      status: appeal.status.toLowerCase(),
+      reviewerId: appeal.reviewerId,
+      decisionReasoning: appeal.decisionReasoning,
+      createdAt: appeal.createdAt.toISOString(),
+      resolvedAt: appeal.resolvedAt?.toISOString() || null,
     };
   }
 }
