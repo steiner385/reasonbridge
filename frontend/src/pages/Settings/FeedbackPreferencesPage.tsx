@@ -29,20 +29,21 @@ const DEFAULT_PREFERENCES: FeedbackPreferences = {
 /**
  * Sensitivity level configurations
  */
-const SENSITIVITY_CONFIGS: Record<FeedbackSensitivity, { threshold: number; description: string }> = {
-  low: {
-    threshold: 0.9,
-    description: 'Only show high-confidence feedback (90%+)',
-  },
-  medium: {
-    threshold: 0.7,
-    description: 'Show moderate to high-confidence feedback (70%+)',
-  },
-  high: {
-    threshold: 0.5,
-    description: 'Show all feedback including low-confidence items (50%+)',
-  },
-};
+const SENSITIVITY_CONFIGS: Record<FeedbackSensitivity, { threshold: number; description: string }> =
+  {
+    low: {
+      threshold: 0.9,
+      description: 'Only show high-confidence feedback (90%+)',
+    },
+    medium: {
+      threshold: 0.7,
+      description: 'Show moderate to high-confidence feedback (70%+)',
+    },
+    high: {
+      threshold: 0.5,
+      description: 'Show all feedback including low-confidence items (50%+)',
+    },
+  };
 
 function FeedbackPreferencesPage() {
   // In a real implementation, this would load from user settings API
@@ -196,8 +197,12 @@ function FeedbackPreferencesPage() {
                   <label key={key} className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={preferences.enabledTypes[key as keyof typeof preferences.enabledTypes]}
-                      onChange={() => handleToggleType(key as keyof typeof preferences.enabledTypes)}
+                      checked={
+                        preferences.enabledTypes[key as keyof typeof preferences.enabledTypes]
+                      }
+                      onChange={() =>
+                        handleToggleType(key as keyof typeof preferences.enabledTypes)
+                      }
                       className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                       disabled={!preferences.enabled}
                     />
@@ -264,18 +269,10 @@ function FeedbackPreferencesPage() {
 
             {/* Action Buttons */}
             <div className="flex justify-between items-center pt-4">
-              <Button
-                variant="secondary"
-                onClick={handleReset}
-                disabled={isSaving}
-              >
+              <Button variant="secondary" onClick={handleReset} disabled={isSaving}>
                 Reset to Defaults
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleSave}
-                disabled={isSaving}
-              >
+              <Button variant="primary" onClick={handleSave} disabled={isSaving}>
                 {isSaving ? 'Saving...' : 'Save Preferences'}
               </Button>
             </div>

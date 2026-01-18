@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
-import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto, FeedbackSensitivity } from './dto/index.js';
+import {
+  RequestFeedbackDto,
+  FeedbackResponseDto,
+  DismissFeedbackDto,
+  FeedbackSensitivity,
+} from './dto/index.js';
 import { Prisma } from '@unite-discord/db-models';
 
 /**

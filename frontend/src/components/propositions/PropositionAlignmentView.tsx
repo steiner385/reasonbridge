@@ -115,9 +115,7 @@ const PropositionAlignmentView: React.FC<PropositionAlignmentViewProps> = ({
         {/* Proposition Statement */}
         {showStatement && (
           <div>
-            <h3 className={`font-semibold text-gray-900 ${currentSize.statement}`}>
-              {statement}
-            </h3>
+            <h3 className={`font-semibold text-gray-900 ${currentSize.statement}`}>{statement}</h3>
           </div>
         )}
 

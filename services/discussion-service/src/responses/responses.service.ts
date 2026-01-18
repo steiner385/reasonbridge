@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
@@ -97,7 +102,9 @@ export class ResponsesService {
       });
 
       if (!parentResponse) {
-        throw new NotFoundException(`Parent response with ID ${createResponseDto.parentId} not found`);
+        throw new NotFoundException(
+          `Parent response with ID ${createResponseDto.parentId} not found`,
+        );
       }
 
       // Verify parent response belongs to the same topic
@@ -217,7 +224,9 @@ export class ResponsesService {
 
     // Cannot edit hidden or removed responses
     if (existingResponse.status === 'HIDDEN' || existingResponse.status === 'REMOVED') {
-      throw new BadRequestException(`Cannot edit responses with status: ${existingResponse.status}`);
+      throw new BadRequestException(
+        `Cannot edit responses with status: ${existingResponse.status}`,
+      );
     }
 
     // Cannot edit responses in archived topics
@@ -252,13 +261,14 @@ export class ResponsesService {
     }
 
     if (updateResponseDto.citedSources !== undefined) {
-      updateData.citedSources = updateResponseDto.citedSources.length > 0
-        ? updateResponseDto.citedSources.map((url) => ({
-            url,
-            title: null,
-            extractedAt: new Date().toISOString(),
-          }))
-        : null;
+      updateData.citedSources =
+        updateResponseDto.citedSources.length > 0
+          ? updateResponseDto.citedSources.map((url) => ({
+              url,
+              title: null,
+              extractedAt: new Date().toISOString(),
+            }))
+          : null;
     }
 
     // Increment revision count

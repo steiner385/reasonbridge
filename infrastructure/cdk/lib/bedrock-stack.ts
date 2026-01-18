@@ -23,10 +23,7 @@ export class BedrockStack extends cdk.Stack {
     this.bedrockAccessRole.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: [
-          'bedrock:InvokeModel',
-          'bedrock:InvokeModelWithResponseStream',
-        ],
+        actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'],
         resources: [
           // Claude models
           `arn:aws:bedrock:${this.region}::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0`,
@@ -35,7 +32,7 @@ export class BedrockStack extends cdk.Stack {
           // Allow future Claude models
           `arn:aws:bedrock:${this.region}::foundation-model/anthropic.claude-*`,
         ],
-      })
+      }),
     );
 
     // Add Bedrock model listing permissions (for monitoring/debugging)
@@ -44,7 +41,7 @@ export class BedrockStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ['bedrock:ListFoundationModels', 'bedrock:GetFoundationModel'],
         resources: ['*'],
-      })
+      }),
     );
 
     // Allow assuming this role from specified service accounts
@@ -55,7 +52,7 @@ export class BedrockStack extends cdk.Stack {
             effect: iam.Effect.ALLOW,
             principals: [new iam.ArnPrincipal(roleArn)],
             actions: ['sts:AssumeRole'],
-          })
+          }),
         );
       });
     }

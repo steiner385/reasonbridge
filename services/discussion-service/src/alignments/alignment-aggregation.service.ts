@@ -24,11 +24,7 @@ export class AlignmentAggregationService {
     const nuancedCount = alignments.filter((a) => a.stance === 'NUANCED').length;
 
     // Calculate consensus score
-    const consensusScore = this.calculateConsensusScore(
-      supportCount,
-      opposeCount,
-      nuancedCount
-    );
+    const consensusScore = this.calculateConsensusScore(supportCount, opposeCount, nuancedCount);
 
     // Update proposition with aggregated data
     await this.prisma.proposition.update({
@@ -60,7 +56,7 @@ export class AlignmentAggregationService {
   private calculateConsensusScore(
     supportCount: number,
     opposeCount: number,
-    nuancedCount: number
+    nuancedCount: number,
   ): Decimal | null {
     const totalAlignments = supportCount + opposeCount + nuancedCount;
 

@@ -83,18 +83,20 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   // Upvote button classes
   const upvoteClasses = `
     ${buttonBaseClasses}
-    ${userVote === 'up'
-      ? 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-      : 'text-gray-500 hover:bg-gray-100 hover:text-primary-600'
+    ${
+      userVote === 'up'
+        ? 'bg-primary-100 text-primary-700 hover:bg-primary-200'
+        : 'text-gray-500 hover:bg-gray-100 hover:text-primary-600'
     }
   `;
 
   // Downvote button classes
   const downvoteClasses = `
     ${buttonBaseClasses}
-    ${userVote === 'down'
-      ? 'bg-red-100 text-red-700 hover:bg-red-200'
-      : 'text-gray-500 hover:bg-gray-100 hover:text-red-600'
+    ${
+      userVote === 'down'
+        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+        : 'text-gray-500 hover:bg-gray-100 hover:text-red-600'
     }
   `;
 
@@ -107,9 +109,7 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
 
   // Vote count color based on value
   const voteCountColor =
-    voteCount > 0 ? 'text-primary-700' :
-    voteCount < 0 ? 'text-red-700' :
-    'text-gray-600';
+    voteCount > 0 ? 'text-primary-700' : voteCount < 0 ? 'text-red-700' : 'text-gray-600';
 
   const handleUpvote = () => {
     if (!disabled && onUpvote) {

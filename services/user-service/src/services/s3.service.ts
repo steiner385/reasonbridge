@@ -23,24 +23,18 @@ export class S3Service {
   private readonly region: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.region =
-      this.configService.get<string>('AWS_REGION') || 'us-east-1';
-    this.bucket =
-      this.configService.get<string>('S3_AVATAR_BUCKET') ||
-      'unite-discord-avatars';
+    this.region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
+    this.bucket = this.configService.get<string>('S3_AVATAR_BUCKET') || 'unite-discord-avatars';
 
     this.s3Client = new S3Client({
       region: this.region,
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey:
-          this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
+        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
       },
     });
 
-    this.logger.log(
-      `S3Service initialized with bucket: ${this.bucket}, region: ${this.region}`
-    );
+    this.logger.log(`S3Service initialized with bucket: ${this.bucket}, region: ${this.region}`);
   }
 
   /**
@@ -50,11 +44,7 @@ export class S3Service {
    * @param mimeType - MIME type of the file
    * @returns Upload result with key and URL
    */
-  async uploadAvatar(
-    userId: string,
-    file: Buffer,
-    mimeType: string
-  ): Promise<UploadResult> {
+  async uploadAvatar(userId: string, file: Buffer, mimeType: string): Promise<UploadResult> {
     const fileHash = crypto.createHash('md5').update(file).digest('hex');
     const ext = this.getExtensionFromMimeType(mimeType);
     const key = `avatars/${userId}/${fileHash}${ext}`;

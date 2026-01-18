@@ -126,19 +126,14 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
       // In a real implementation, this would come from a draft save or the response after submission
       const tempResponseId = crypto.randomUUID();
 
-      const response = await apiClient.post<FeedbackResponse>(
-        '/feedback/request',
-        {
-          responseId: tempResponseId,
-          content: content.trim(),
-        }
-      );
+      const response = await apiClient.post<FeedbackResponse>('/feedback/request', {
+        responseId: tempResponseId,
+        content: content.trim(),
+      });
 
       setFeedback([response]);
     } catch (err) {
-      setFeedbackError(
-        err instanceof Error ? err.message : 'Failed to request feedback'
-      );
+      setFeedbackError(err instanceof Error ? err.message : 'Failed to request feedback');
     } finally {
       setIsRequestingFeedback(false);
     }
@@ -175,7 +170,10 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="response-content" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label
+          htmlFor="response-content"
+          className="block text-sm font-medium text-gray-700 mb-1.5"
+        >
           Your Response
           <span className="text-fallacy-DEFAULT ml-1">*</span>
         </label>
@@ -201,8 +199,8 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               !isValid && characterCount > 0
                 ? 'text-fallacy-DEFAULT'
                 : characterCount >= maxLength * 0.9
-                ? 'text-secondary-600'
-                : 'text-gray-500'
+                  ? 'text-secondary-600'
+                  : 'text-gray-500'
             }`}
           >
             {characterCount} / {maxLength} characters
@@ -264,12 +262,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
                   disabled={isLoading}
                   aria-label={`Remove source ${source}`}
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -335,11 +328,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           </p>
         )}
 
-        <FeedbackDisplayPanel
-          feedback={feedback}
-          title=""
-          showEmptyState={false}
-        />
+        <FeedbackDisplayPanel feedback={feedback} title="" showEmptyState={false} />
       </div>
 
       {/* Action Buttons */}
@@ -353,12 +342,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           {parentId ? 'Post Reply' : 'Post Response'}
         </Button>
         {showCancel && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
         )}

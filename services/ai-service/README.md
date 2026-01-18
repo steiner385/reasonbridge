@@ -5,6 +5,7 @@ AI service for content analysis and moderation using AWS Bedrock.
 ## Overview
 
 This service provides AI-powered capabilities for the uniteDiscord platform, including:
+
 - Content analysis and classification
 - Automated moderation
 - Sentiment analysis
@@ -57,14 +58,15 @@ pnpm typecheck
 ## API Endpoints
 
 ### Health Check
+
 - **GET** `/health` - Service health status
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Service port | `3002` |
-| `DATABASE_URL` | PostgreSQL connection string | - |
+| Variable       | Description                  | Default |
+| -------------- | ---------------------------- | ------- |
+| `PORT`         | Service port                 | `3002`  |
+| `DATABASE_URL` | PostgreSQL connection string | -       |
 
 ## Current Implementation Status
 

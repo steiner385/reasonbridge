@@ -17,9 +17,7 @@ export class ResponsesController {
    */
   @Get(':topicId/responses')
   @HttpCode(HttpStatus.OK)
-  async getResponsesForTopic(
-    @Param('topicId') topicId: string,
-  ): Promise<ResponseDto[]> {
+  async getResponsesForTopic(@Param('topicId') topicId: string): Promise<ResponseDto[]> {
     return this.responsesService.getResponsesForTopic(topicId);
   }
 

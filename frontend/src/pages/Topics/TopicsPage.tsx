@@ -42,9 +42,7 @@ function TopicsPage() {
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Discussion Topics</h1>
-        <p className="text-gray-600">
-          Browse and join rational discussions on various topics
-        </p>
+        <p className="text-gray-600">Browse and join rational discussions on various topics</p>
       </div>
 
       {/* Filters */}
@@ -76,9 +74,7 @@ function TopicsPage() {
                 </div>
               </Card>
             ) : (
-              data.data.map((topic) => (
-                <TopicCard key={topic.id} topic={topic} />
-              ))
+              data.data.map((topic) => <TopicCard key={topic.id} topic={topic} />)
             )}
           </div>
 
@@ -87,9 +83,9 @@ function TopicsPage() {
             <Card padding="md">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
-                  Showing {((data.meta.page - 1) * data.meta.limit) + 1} to{' '}
-                  {Math.min(data.meta.page * data.meta.limit, data.meta.total)} of{' '}
-                  {data.meta.total} topics
+                  Showing {(data.meta.page - 1) * data.meta.limit + 1} to{' '}
+                  {Math.min(data.meta.page * data.meta.limit, data.meta.total)} of {data.meta.total}{' '}
+                  topics
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -102,11 +98,13 @@ function TopicsPage() {
                   </Button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: data.meta.totalPages }, (_, i) => i + 1)
-                      .filter(page => {
+                      .filter((page) => {
                         const current = data.meta.page;
-                        return page === 1 ||
-                               page === data.meta.totalPages ||
-                               (page >= current - 1 && page <= current + 1);
+                        return (
+                          page === 1 ||
+                          page === data.meta.totalPages ||
+                          (page >= current - 1 && page <= current + 1)
+                        );
                       })
                       .map((page, idx, arr) => (
                         <div key={page} className="flex items-center">

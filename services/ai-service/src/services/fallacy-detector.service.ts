@@ -122,7 +122,7 @@ export class FallacyDetectorService {
       ad_hominem:
         'Focus on addressing the argument itself rather than attacking the person making it. What specific claims can you refute?',
       strawman:
-        'Ensure you\'re responding to the actual argument being made, not a misrepresented version. Can you quote their exact position?',
+        "Ensure you're responding to the actual argument being made, not a misrepresented version. Can you quote their exact position?",
       false_dichotomy:
         'Consider whether there are more than two options available. Are there middle-ground positions or alternative approaches?',
       slippery_slope:
@@ -245,7 +245,7 @@ export class FallacyDetectorService {
             url: 'https://en.wikipedia.org/wiki/Argument_from_authority',
           },
           {
-            title: 'When Authorities Aren\'t Enough',
+            title: "When Authorities Aren't Enough",
             url: 'https://yourlogicalfallacyis.com/appeal-to-authority',
           },
         ],

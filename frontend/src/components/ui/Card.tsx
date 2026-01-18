@@ -39,7 +39,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       className = '',
       ...props
     },
-    ref
+    ref,
   ) => {
     // Base styles
     const baseStyles = 'rounded-xl transition-all';
@@ -79,7 +79,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 
 Card.displayName = 'Card';
@@ -105,24 +105,16 @@ export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ title, subtitle, action, children, className = '', ...props }, ref) => {
     return (
-      <div
-        ref={ref}
-        className={`flex items-start justify-between mb-4 ${className}`}
-        {...props}
-      >
+      <div ref={ref} className={`flex items-start justify-between mb-4 ${className}`} {...props}>
         <div className="flex-1">
-          {title && (
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          )}
-          {subtitle && (
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
-          )}
+          {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
+          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
           {children}
         </div>
         {action && <div className="ml-4 flex-shrink-0">{action}</div>}
       </div>
     );
-  }
+  },
 );
 
 CardHeader.displayName = 'CardHeader';
@@ -136,7 +128,7 @@ export const CardBody = React.forwardRef<HTMLDivElement, CardBodyProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 
 CardBody.displayName = 'CardBody';
@@ -153,15 +145,11 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
     const borderStyles = bordered ? 'border-t border-gray-200 pt-4' : '';
 
     return (
-      <div
-        ref={ref}
-        className={`mt-4 ${borderStyles} ${className}`}
-        {...props}
-      >
+      <div ref={ref} className={`mt-4 ${borderStyles} ${className}`} {...props}>
         {children}
       </div>
     );
-  }
+  },
 );
 
 CardFooter.displayName = 'CardFooter';

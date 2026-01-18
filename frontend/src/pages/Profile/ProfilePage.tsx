@@ -26,11 +26,11 @@ function ProfilePage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Unable to Load Profile
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Profile</h2>
               <p className="text-gray-600 mb-4">
-                {error instanceof Error ? error.message : 'An error occurred while loading your profile.'}
+                {error instanceof Error
+                  ? error.message
+                  : 'An error occurred while loading your profile.'}
               </p>
               <Link to="/">
                 <Button variant="primary">Go to Home</Button>
@@ -48,12 +48,8 @@ function ProfilePage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Not Logged In
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Please log in to view your profile.
-              </p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Not Logged In</h2>
+              <p className="text-gray-600 mb-4">Please log in to view your profile.</p>
               <Link to="/">
                 <Button variant="primary">Go to Home</Button>
               </Link>
@@ -86,18 +82,14 @@ function ProfilePage() {
         <CardBody>
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {user.displayName}
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900">{user.displayName}</h2>
               <p className="text-gray-600">{user.email}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
               <div>
                 <p className="text-sm font-medium text-gray-500">Verification Level</p>
-                <p className="text-lg text-gray-900">
-                  {user.verificationLevel.replace('_', ' ')}
-                </p>
+                <p className="text-lg text-gray-900">{user.verificationLevel.replace('_', ' ')}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Status</p>

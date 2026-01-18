@@ -28,7 +28,9 @@ test.describe('User Registration and Login Flow', () => {
     await page.goto('/register');
 
     // Verify we're on the registration page
-    const registrationHeading = page.getByRole('heading', { name: /sign up|register|create account/i });
+    const registrationHeading = page.getByRole('heading', {
+      name: /sign up|register|create account/i,
+    });
     await expect(registrationHeading).toBeVisible();
 
     // Step 2: Fill out registration form
@@ -86,7 +88,7 @@ test.describe('User Registration and Login Flow', () => {
     let foundIndicator = false;
     for (const indicator of authenticatedIndicators) {
       const count = await indicator.count();
-      if (count > 0 && await indicator.first().isVisible()) {
+      if (count > 0 && (await indicator.first().isVisible())) {
         foundIndicator = true;
         break;
       }
@@ -209,7 +211,9 @@ test.describe('User Registration and Login Flow', () => {
 
     // Should navigate to registration page
     await expect(page).toHaveURL(/\/register/);
-    const registrationHeading = page.getByRole('heading', { name: /sign up|register|create account/i });
+    const registrationHeading = page.getByRole('heading', {
+      name: /sign up|register|create account/i,
+    });
     await expect(registrationHeading).toBeVisible();
 
     // Find and click "Already have account" link
