@@ -1,5 +1,6 @@
 export { default as FeedbackDisplayPanel } from './FeedbackDisplayPanel';
 export type { FeedbackDisplayPanelProps } from './FeedbackDisplayPanel';
+export { default as FallacyWarnings } from './FallacyWarnings';
 export { default as SuggestionCards } from './SuggestionCards';
 export type { SuggestionCardsProps } from './SuggestionCards';
 export { default as SuggestionPanel } from './SuggestionPanel';
