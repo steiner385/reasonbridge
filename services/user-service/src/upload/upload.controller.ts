@@ -11,13 +11,7 @@ import {
 import { UploadService } from './upload.service.js';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-];
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 
 interface UploadAvatarDto {
   file: string; // Base64 encoded file
@@ -33,17 +27,14 @@ export class UploadController {
    * Accepts base64-encoded file data in the request body
    */
   @Post('avatar/:userId')
-  async uploadAvatar(
-    @Param('userId') userId: string,
-    @Body() dto: UploadAvatarDto
-  ) {
+  async uploadAvatar(@Param('userId') userId: string, @Body() dto: UploadAvatarDto) {
     if (!dto.file) {
       throw new BadRequestException('No file data provided');
     }
 
     if (!ALLOWED_MIME_TYPES.includes(dto.mimetype)) {
       throw new BadRequestException(
-        `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`
+        `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`,
       );
     }
 
@@ -52,15 +43,11 @@ export class UploadController {
 
     if (fileBuffer.length > MAX_FILE_SIZE) {
       throw new BadRequestException(
-        `File too large. Maximum size: ${MAX_FILE_SIZE / 1024 / 1024}MB`
+        `File too large. Maximum size: ${MAX_FILE_SIZE / 1024 / 1024}MB`,
       );
     }
 
-    const result = await this.uploadService.uploadAvatar(
-      userId,
-      fileBuffer,
-      dto.mimetype
-    );
+    const result = await this.uploadService.uploadAvatar(userId, fileBuffer, dto.mimetype);
 
     return {
       success: true,

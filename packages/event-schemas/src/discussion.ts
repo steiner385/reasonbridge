@@ -73,7 +73,10 @@ export interface TopicParticipantJoinedPayload {
  * Event published when a user joins a discussion topic
  */
 export interface TopicParticipantJoinedEvent
-  extends BaseEvent<typeof DISCUSSION_EVENT_TYPES.TOPIC_PARTICIPANT_JOINED, TopicParticipantJoinedPayload> {
+  extends BaseEvent<
+    typeof DISCUSSION_EVENT_TYPES.TOPIC_PARTICIPANT_JOINED,
+    TopicParticipantJoinedPayload
+  > {
   type: typeof DISCUSSION_EVENT_TYPES.TOPIC_PARTICIPANT_JOINED;
 }
 

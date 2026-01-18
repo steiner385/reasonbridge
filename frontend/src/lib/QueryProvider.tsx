@@ -10,9 +10,5 @@ interface QueryProviderProps {
  * Wrapper component that provides TanStack Query context to the application
  */
 export function QueryProvider({ children }: QueryProviderProps) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

@@ -108,7 +108,7 @@ export function createDiscussion(overrides: Partial<Discussion> = {}): Discussio
  */
 export function createDiscussions(
   count: number,
-  overrides: Partial<Discussion> = {}
+  overrides: Partial<Discussion> = {},
 ): Discussion[] {
   return Array.from({ length: count }, () => createDiscussion(overrides));
 }
@@ -135,7 +135,7 @@ export function createContribution(overrides: Partial<Contribution> = {}): Contr
  */
 export function createContributions(
   count: number,
-  overrides: Partial<Contribution> = {}
+  overrides: Partial<Contribution> = {},
 ): Contribution[] {
   return Array.from({ length: count }, () => createContribution(overrides));
 }
@@ -145,7 +145,7 @@ export function createContributions(
  */
 export function createThreadedContributions(
   discussionId: DiscussionId,
-  structure: { depth: number; breadth: number }
+  structure: { depth: number; breadth: number },
 ): Contribution[] {
   const contributions: Contribution[] = [];
 

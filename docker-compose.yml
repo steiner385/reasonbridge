@@ -1,69 +1,65 @@
+version: '3.8'
+
 services:
   postgres:
-    image: postgres:16-alpine
-    container_name: unite-discord-postgres
-    restart: unless-stopped
+    image: postgres:15-alpine
+    container_name: unite-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-unite}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev}
-      POSTGRES_DB: ${POSTGRES_DB:-unite_discord}
+      POSTGRES_USER: unite
+      POSTGRES_PASSWORD: unite
+      POSTGRES_DB: unite_dev
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-unite} -d ${POSTGRES_DB:-unite_discord}"]
+      test: ['CMD-SHELL', 'pg_isready -U unite -d unite_dev']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
 
   redis:
     image: redis:7-alpine
-    container_name: unite-discord-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
+    container_name: unite-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
 
   localstack:
-    image: localstack/localstack:3
-    container_name: unite-discord-localstack
-    restart: unless-stopped
+    image: localstack/localstack:3.0
+    container_name: unite-localstack
     environment:
-      SERVICES: s3,sqs,sns,dynamodb
-      DEBUG: ${LOCALSTACK_DEBUG:-0}
+      SERVICES: s3,sqs,sns
+      DEBUG: 0
       PERSISTENCE: 1
     ports:
-      - "${LOCALSTACK_PORT:-4566}:4566"
-      - "4510-4559:4510-4559"
+      - '4566:4566'
     volumes:
       - localstack_data:/var/lib/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./infrastructure/localstack/init-queues.sh:/etc/localstack/init/ready.d/init-queues.sh
-      - ./infrastructure/localstack/init-topics.sh:/etc/localstack/init/ready.d/init-topics.sh
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: unite-mailhog
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.53
+    container_name: unite-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - '16686:16686'
+      - '4318:4318'
 
 volumes:
   postgres_data:
-    driver: local
   redis_data:
-    driver: local
   localstack_data:
-    driver: local
-
-networks:
-  default:
-    name: unite-discord-network

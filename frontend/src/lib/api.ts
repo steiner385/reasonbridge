@@ -132,11 +132,7 @@ export class ApiClient {
     }
 
     if (!response.ok) {
-      throw new ApiError(
-        `Request failed: ${response.statusText}`,
-        response.status,
-        data,
-      );
+      throw new ApiError(`Request failed: ${response.statusText}`, response.status, data);
     }
 
     return data as T;
@@ -145,10 +141,7 @@ export class ApiClient {
   /**
    * Make an HTTP request
    */
-  async request<T = unknown>(
-    endpoint: string,
-    options: ApiRequestOptions = {},
-  ): Promise<T> {
+  async request<T = unknown>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { params, skipAuth, ...fetchOptions } = options;
 
@@ -168,20 +161,14 @@ export class ApiClient {
       }
 
       // Network errors or other fetch failures
-      throw new ApiError(
-        error instanceof Error ? error.message : 'Network request failed',
-        0,
-      );
+      throw new ApiError(error instanceof Error ? error.message : 'Network request failed', 0);
     }
   }
 
   /**
    * GET request
    */
-  async get<T = unknown>(
-    endpoint: string,
-    options?: ApiRequestOptions,
-  ): Promise<T> {
+  async get<T = unknown>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
@@ -233,10 +220,7 @@ export class ApiClient {
   /**
    * DELETE request
    */
-  async delete<T = unknown>(
-    endpoint: string,
-    options?: ApiRequestOptions,
-  ): Promise<T> {
+  async delete<T = unknown>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 

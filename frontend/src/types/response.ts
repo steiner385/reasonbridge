@@ -2,16 +2,15 @@
  * Response types matching the backend ResponseDto
  */
 
+import type { UserSummary } from './user';
+
 export interface CitedSource {
   url: string;
   title?: string;
   extractedAt?: string;
 }
 
-export interface UserSummary {
-  id: string;
-  displayName: string;
-}
+export type { UserSummary };
 
 export interface ResponseProposition {
   id: string;
@@ -43,4 +42,11 @@ export interface CreateResponseRequest {
   containsFactualClaims?: boolean;
   propositionIds?: string[];
   acknowledgedFeedback?: boolean;
+}
+
+export interface UpdateResponseRequest {
+  content: string;
+  citedSources?: string[];
+  containsOpinion?: boolean;
+  containsFactualClaims?: boolean;
 }

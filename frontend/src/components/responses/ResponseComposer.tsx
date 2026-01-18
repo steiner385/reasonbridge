@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { FeedbackDisplayPanel } from '../feedback';
 import type { CreateResponseRequest } from '../../types/response';
+import type { FeedbackResponse } from '../../types/feedback';
+import { apiClient } from '../../lib/api';
 
 export interface ResponseComposerProps {
   /**
@@ -61,6 +64,9 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FeedbackResponse[]>([]);
+  const [isRequestingFeedback, setIsRequestingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,8 +105,37 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
       setCurrentSource('');
       setContainsOpinion(false);
       setContainsFactualClaims(false);
+      setFeedback([]);
+      setFeedbackError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit response');
+    }
+  };
+
+  const handleRequestFeedback = async () => {
+    if (content.trim().length < minLength) {
+      setFeedbackError(`Content must be at least ${minLength} characters to request feedback`);
+      return;
+    }
+
+    setIsRequestingFeedback(true);
+    setFeedbackError(null);
+
+    try {
+      // For now, we'll generate a temporary response ID
+      // In a real implementation, this would come from a draft save or the response after submission
+      const tempResponseId = crypto.randomUUID();
+
+      const response = await apiClient.post<FeedbackResponse>('/feedback/request', {
+        responseId: tempResponseId,
+        content: content.trim(),
+      });
+
+      setFeedback([response]);
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : 'Failed to request feedback');
+    } finally {
+      setIsRequestingFeedback(false);
     }
   };
 
@@ -135,7 +170,10 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="response-content" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label
+          htmlFor="response-content"
+          className="block text-sm font-medium text-gray-700 mb-1.5"
+        >
           Your Response
           <span className="text-fallacy-DEFAULT ml-1">*</span>
         </label>
@@ -161,8 +199,8 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               !isValid && characterCount > 0
                 ? 'text-fallacy-DEFAULT'
                 : characterCount >= maxLength * 0.9
-                ? 'text-secondary-600'
-                : 'text-gray-500'
+                  ? 'text-secondary-600'
+                  : 'text-gray-500'
             }`}
           >
             {characterCount} / {maxLength} characters
@@ -224,12 +262,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
                   disabled={isLoading}
                   aria-label={`Remove source ${source}`}
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -274,6 +307,30 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
         </div>
       </div>
 
+      {/* AI Feedback Request */}
+      <div className="border-t pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-700">AI Feedback (Optional)</h3>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleRequestFeedback}
+            isLoading={isRequestingFeedback}
+            disabled={content.trim().length < minLength || isLoading || isRequestingFeedback}
+          >
+            Request Feedback
+          </Button>
+        </div>
+
+        {feedbackError && (
+          <p className="text-sm text-fallacy-DEFAULT mb-2" role="alert">
+            {feedbackError}
+          </p>
+        )}
+
+        <FeedbackDisplayPanel feedback={feedback} title="" showEmptyState={false} />
+      </div>
+
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button
@@ -285,12 +342,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           {parentId ? 'Post Reply' : 'Post Response'}
         </Button>
         {showCancel && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
         )}

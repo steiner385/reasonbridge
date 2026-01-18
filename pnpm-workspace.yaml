@@ -1,12 +1,5 @@
 packages:
-  # Backend microservices
-  - 'services/*'
-
-  # Shared packages
   - 'packages/*'
-
-  # Frontend application
+  - 'services/*'
   - 'frontend'
-
-  # Infrastructure (CDK, Helm, etc.)
-  - 'infrastructure/*'
+  - 'e2e'
