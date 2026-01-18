@@ -7,6 +7,7 @@ import CommonGroundDemoPage from '../pages/Topics/CommonGroundDemoPage';
 import AgreementVisualizationDemoPage from '../pages/Topics/AgreementVisualizationDemoPage';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
+import { VerificationPage } from '../pages/Verification/VerificationPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -51,6 +52,10 @@ export const routes: RouteObject[] = [
   {
     path: '/settings/feedback',
     element: <FeedbackPreferencesPage />,
+  },
+  {
+    path: '/verification',
+    element: <VerificationPage />,
   },
   {
     path: '*',
