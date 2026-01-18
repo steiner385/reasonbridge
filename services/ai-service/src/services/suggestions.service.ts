@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
 import { TopicLinkSuggester, type TopicLinkSuggestionResult } from '../synthesizers/topic-link.suggester.js';
+import { BridgingSuggester, type BridgingSuggestionResult } from '../synthesizers/bridging.suggester.js';
 
 /**
  * Suggestion result from synthesizers
@@ -20,6 +21,7 @@ export class SuggestionsService {
   constructor(
     private readonly tagSuggester: TagSuggester,
     private readonly topicLinkSuggester: TopicLinkSuggester,
+    private readonly bridgingSuggester: BridgingSuggester,
   ) {}
 
   /**
@@ -47,5 +49,15 @@ export class SuggestionsService {
     existingTopics?: Array<{ id: string; title: string; content: string }>,
   ): Promise<TopicLinkSuggestionResult> {
     return this.topicLinkSuggester.suggest(topicId, title, content, existingTopics);
+  }
+
+  /**
+   * Generate bridging suggestions for a topic
+   * Analyzes propositions and alignments to suggest ways to bridge different perspectives
+   * @param topicId The topic ID to analyze
+   * @returns Bridging suggestions with confidence scores
+   */
+  async generateBridgingSuggestions(topicId: string): Promise<BridgingSuggestionResult> {
+    return this.bridgingSuggester.suggest(topicId);
   }
 }
