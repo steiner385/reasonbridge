@@ -25,8 +25,8 @@ pipeline {
         GITHUB_OWNER = 'steiner385'
         GITHUB_REPO = 'uniteDiscord'
         PLAYWRIGHT_BROWSERS_PATH = '/home/jenkins/agent/.playwright-cache'
-        // Playwright will use this for the base URL
-        PLAYWRIGHT_BASE_URL = 'http://localhost:5173'
+        // Playwright will use this for the base URL (4173 is vite preview port)
+        PLAYWRIGHT_BASE_URL = 'http://localhost:4173'
     }
 
     stages {
@@ -164,7 +164,7 @@ pipeline {
                     rm -rf playwright-report test-results allure-results
 
                     # Run Playwright tests
-                    # The webServer config in playwright.config.ts will start the dev server
+                    # The webServer config in playwright.config.ts will start the preview server
                     npx pnpm@9 run test:e2e || npm run test:e2e
                 '''
             }
@@ -174,15 +174,8 @@ pipeline {
                     archiveArtifacts artifacts: 'frontend/playwright-report/**', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'frontend/test-results/**', allowEmptyArchive: true
 
-                    // Publish HTML report
-                    publishHTML(target: [
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'frontend/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright E2E Report'
-                    ])
+                    // Note: publishHTML requires HTML Publisher Plugin to be installed
+                    // If not installed, reports are still archived above
                 }
             }
         }
