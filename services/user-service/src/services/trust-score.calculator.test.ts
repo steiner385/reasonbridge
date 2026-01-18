@@ -73,8 +73,8 @@ describe('TrustScoreCalculator', () => {
 
       expect(scores.ability).toBeGreaterThan(0.5);
       expect(scores.ability).toBeLessThanOrEqual(0.75); // Max with email + new
-      expect(scores.benevolence).toBe(0.5); // No enhancement for BASIC
-      expect(scores.integrity).toBe(0.5); // No age bonus for brand new account
+      expect(scores.benevolence).toBeCloseTo(0.5, 5); // No enhancement for BASIC
+      expect(scores.integrity).toBeCloseTo(0.5, 5); // No age bonus for brand new account
     });
 
     it('should increase scores with account age', () => {

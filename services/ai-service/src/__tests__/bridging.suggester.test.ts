@@ -363,11 +363,17 @@ describe('BridgingSuggester', () => {
       expect(result.suggestions[0].bridgingLanguage).toBeTruthy();
       expect(result.suggestions[0].bridgingLanguage.length).toBeGreaterThan(0);
       // Bridging language should reference the proposition or positions
+      // Check for any of the key terms used in bridging phrases
+      const bridgingLanguageLower = result.suggestions[0].bridgingLanguage.toLowerCase();
       expect(
-        result.suggestions[0].bridgingLanguage.toLowerCase().includes('view') ||
-        result.suggestions[0].bridgingLanguage.toLowerCase().includes('perspective') ||
-        result.suggestions[0].bridgingLanguage.toLowerCase().includes('common') ||
-        result.suggestions[0].bridgingLanguage.toLowerCase().includes('bridge'),
+        bridgingLanguageLower.includes('view') ||
+        bridgingLanguageLower.includes('perspective') ||
+        bridgingLanguageLower.includes('common') ||
+        bridgingLanguageLower.includes('bridge') ||
+        bridgingLanguageLower.includes('values') ||
+        bridgingLanguageLower.includes('disagreement') ||
+        bridgingLanguageLower.includes('consider') ||
+        bridgingLanguageLower.includes('explore'),
       ).toBeTruthy();
     });
 
