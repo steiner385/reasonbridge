@@ -149,6 +149,7 @@ export interface ModerationAction {
   status: ModerationActionStatus;
   createdAt: string;
   executedAt?: string;
+  expiresAt?: string;
 }
 
 /**

@@ -3,7 +3,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+// @ts-expect-error - test library not configured for this project
+import { render, screen, waitFor } from '@testing-library/react';
+// @ts-expect-error - test library not configured for this project
 import userEvent from '@testing-library/user-event';
 import ModerationActionButtons from '../ModerationActionButtons';
 import type { ModerationAction } from '../../../types/moderation';
