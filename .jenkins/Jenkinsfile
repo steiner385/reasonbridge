@@ -52,6 +52,12 @@ pipeline {
             }
         }
 
+        stage('Build Packages') {
+            steps {
+                sh 'npx pnpm -r run build --filter=./packages/*'
+            }
+        }
+
         stage('Lint') {
             steps {
                 sh 'npx pnpm run lint'
