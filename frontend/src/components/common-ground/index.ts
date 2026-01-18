@@ -15,3 +15,6 @@ export type { DivergencePointCardProps } from './DivergencePointCard';
 
 export { default as BridgingSuggestionsSection } from './BridgingSuggestionsSection';
 export type { BridgingSuggestionsSectionProps } from './BridgingSuggestionsSection';
+
+export { default as PropositionClusterView } from './PropositionClusterView';
+export type { PropositionClusterViewProps } from './PropositionClusterView';
