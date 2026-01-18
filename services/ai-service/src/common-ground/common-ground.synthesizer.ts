@@ -109,6 +109,33 @@ export class CommonGroundSynthesizer {
   }
 
   /**
+   * Calculate agreement percentage for a proposition
+   *
+   * @param supportCount - Number of participants who support
+   * @param opposeCount - Number of participants who oppose
+   * @param nuancedCount - Number of participants with nuanced positions
+   * @returns Agreement percentage (0-100) rounded to nearest integer, or null if no data
+   */
+  calculateAgreementPercentage(
+    supportCount: number,
+    opposeCount: number,
+    nuancedCount: number,
+  ): number | null {
+    const totalAlignments = supportCount + opposeCount + nuancedCount;
+
+    // No alignments = no agreement percentage
+    if (totalAlignments === 0) {
+      return null;
+    }
+
+    // Agreement percentage is the proportion of support relative to total alignments
+    const agreementPercentage = (supportCount / totalAlignments) * 100;
+
+    // Round to nearest integer
+    return Math.round(agreementPercentage);
+  }
+
+  /**
    * Identify propositions with high agreement
    */
   private identifyAgreementZones(propositions: PropositionWithAlignments[]): AgreementZone[] {
@@ -122,10 +149,14 @@ export class CommonGroundSynthesizer {
         continue;
       }
 
-      const agreementPercentage = (prop.supportCount / totalAlignments) * 100;
+      const agreementPercentage = this.calculateAgreementPercentage(
+        prop.supportCount,
+        prop.opposeCount,
+        prop.nuancedCount,
+      );
 
       // Check if this meets the agreement threshold
-      if (agreementPercentage >= this.AGREEMENT_THRESHOLD * 100) {
+      if (agreementPercentage !== null && agreementPercentage >= this.AGREEMENT_THRESHOLD * 100) {
         // Extract supporting evidence from nuanced explanations
         const supportingEvidence = prop.alignments
           .filter((a) => (a.stance === 'SUPPORT' || a.stance === 'NUANCED') && a.nuanceExplanation)
@@ -134,7 +165,7 @@ export class CommonGroundSynthesizer {
 
         agreementZones.push({
           proposition: prop.statement,
-          agreementPercentage: Math.round(agreementPercentage),
+          agreementPercentage,
           supportingEvidence,
           participantCount: prop.supportCount,
         });
