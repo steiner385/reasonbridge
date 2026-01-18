@@ -46,20 +46,30 @@ jobs:
           JENKINS_URL="${JENKINS_URL%/}"
 
           # Fetch CSRF crumb from Jenkins (required for POST requests)
-          echo "Fetching Jenkins CSRF crumb..."
-          CRUMB_RESPONSE=$(curl -sL -u "${JENKINS_USER}:${JENKINS_TOKEN}" \
-            "${JENKINS_URL}/crumbIssuer/api/json" 2>/dev/null)
+          echo "Fetching Jenkins CSRF crumb from ${JENKINS_URL}/crumbIssuer/api/json..."
+          CRUMB_RESPONSE=$(curl -vvv -u "${JENKINS_USER}:${JENKINS_TOKEN}" \
+            "${JENKINS_URL}/crumbIssuer/api/json" 2>&1 | tail -50)
 
-          # Extract crumb value from JSON response
-          CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -oP '"crumb":"?\K[^"]*' || echo "")
-          CRUMB_HEADER=$(echo "$CRUMB_RESPONSE" | grep -oP '"crumbRequestField":"\K[^"]*' || echo "Jenkins-Crumb")
+          echo "Crumb Response:"
+          echo "$CRUMB_RESPONSE"
+
+          # Try to extract crumb value - handle both JSON formats
+          CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -o '"crumb":"[^"]*"' | cut -d'"' -f4)
 
           if [ -z "$CRUMB_VALUE" ]; then
-            echo "::warning::Could not fetch Jenkins CSRF crumb, attempting trigger without crumb..."
-            CRUMB_ARGS=""
+            # Try alternative parsing
+            CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -o 'crumb.*' | head -1)
+            echo "Could not parse crumb in standard format, got: $CRUMB_VALUE"
+          fi
+
+          if [ -z "$CRUMB_VALUE" ]; then
+            echo "::warning::Could not fetch Jenkins CSRF crumb"
+            # Use empty crumb header as fallback
+            CRUMB_ARGS="-H 'Jenkins-Crumb: '"
+            echo "Attempting trigger with empty crumb header..."
           else
-            echo "CSRF crumb fetched successfully"
-            CRUMB_ARGS="-H '${CRUMB_HEADER}: ${CRUMB_VALUE}'"
+            echo "✅ CSRF crumb fetched: $CRUMB_VALUE"
+            CRUMB_ARGS="-H 'Jenkins-Crumb: $CRUMB_VALUE'"
           fi
 
           # Trigger Jenkins build with parameters (using -L to follow redirects)
