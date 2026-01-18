@@ -14,6 +14,10 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
+    triggers {
+        githubPush()
+    }
+
     stages {
         stage('Notify Start') {
             steps {
