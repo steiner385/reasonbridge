@@ -2,9 +2,20 @@
 
 ## Current Status
 
-- E2E tests fully operational: 116 passing, 28 skipped (unimplemented features)
-- All tests configured to work with correct Vite dev server port
+- E2E test baseline fixed: 116 passing, 28 skipped (original 21 failures resolved)
+- Configuration issue resolved: Playwright now uses correct Vite port (3000)
+- Note: Main branch has additional test failures (9 new tests) - these are new tests from main branch merge that need updating for current app state:
+  - example.spec.ts: 4 failures (testing header/footer text that doesn't match current layout)
+  - profile-page.spec.ts: 5 failures (tests unskipped in main branch need API mocking or skipping)
+  - These are separate from original task scope of fixing the initial 21 failing tests
 - ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+
+## Next Steps for Future Iterations
+
+- Fix 9 new test failures on main:
+  - Skip profile-page API tests or set up API mocking
+  - Update example.spec.ts selectors to match actual HomePage layout (h2 instead of h1)
+  - Run `npm run test:e2e` and ensure all pass before PR
 
 ## Latest Completed (2026-01-18)
 
