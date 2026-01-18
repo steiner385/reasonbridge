@@ -2,105 +2,24 @@
 
 ## Current Status
 
-- **E2E tests: ALL PASSING** ✅
-  - 223 tests passing
-  - 61 tests skipped (unimplemented features: user story 4 trust indicators, login, registration, browse topics, user profile APIs)
-  - 0 failures
-  - Tests run with `npm run test:e2e` (17-19s runtime)
-- Successfully merged PR #543 - Issue #162 (T166) Verification expiry and re-verification
-- Completed issue #162 (T166) - Verification expiry and re-verification
-- ~162 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- E2E tests fully operational: 116 passing, 28 skipped (unimplemented features)
+- All tests configured to work with correct Vite dev server port
+- ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
-## Next Steps for Future Iterations
+## Latest Completed (2026-01-18)
 
-- All e2e tests currently passing - no immediate test failures to fix
-- Future work should focus on implementing missing features:
-  - User registration and login flow (/register, /login routes)
-  - Browse topics functionality (API endpoints)
-  - User profile API endpoints
-  - Then unskip corresponding e2e tests
-
-## Latest Completed (2026-01-18 - Iteration 4)
-
-**Issue #162 (T166) - Implement verification expiry and re-verification:**
-- Added markExpiredVerifications() method to auto-mark PENDING verifications past their 24-hour expiry as EXPIRED
-- Implemented reVerify() method to allow users to request new verification after expiry/rejection
-- Added completeVerification() to mark verification as VERIFIED with timestamp
-- Added isVerified() helper to check if user has verified status for a type
-- Added getVerificationHistory() to retrieve all verification attempts (useful for audit trail)
-- New endpoints:
-  - GET /verification/:verificationId - Check status with auto-expiry detection
-  - GET /verification/user/pending - List pending verifications
-  - GET /verification/user/history - Get all verification attempts (audit trail)
-  - PATCH /verification/:verificationId/complete - Mark verification as verified
-  - POST /verification/:verificationId/re-verify - Request re-verification
-- Re-verification cleanup: Removes old failed attempts while keeping one for audit trail
-- Automatic video upload cleanup for old verification attempts
-- Merged via PR #543
-
-## Previous Completed (2026-01-18 - Iteration 3)
-
-**E2E Tests Verification Complete - PR #541 Merged:**
-- Ran full e2e test suite with `npm run test:e2e`
-- Final results: 223 tests passing, 61 tests skipped, 0 failures (17-19s runtime)
-- All test categories verified passing:
-  - Common ground analysis tests (divergence points, agreement zones, bridging suggestions)
-  - Share common ground functionality
-  - Response submission and thread navigation
-  - Apply suggestions flow (tags, topic links)
-  - Component tests (alignment reasoning, alignment summary)
-  - Application layout and navigation
-  - Accessibility tests
-  - Real-time updates via WebSocket
-- Skipped tests are for unimplemented features (ready to unskip when components are built):
-  - User Story 4 trust indicators (11 tests)
-  - User registration/login flow (6 tests)
-  - Browse topics (10 tests)
-  - User profile APIs (22 tests)
-  - Other unimplemented features (12 tests)
-- Successfully merged PR #541 to main
-- Verified post-merge: all 223 tests still passing
-- No failing tests to fix - project at stable state
-
-## Previous Completed (2026-01-18 - Iteration 2)
-
-**Issue #160 (T164) - Create TrustScore DTOs:**
-- Created TrustScoresDto class (services/user-service/src/users/dto/trust-score.dto.ts)
-  * Three Mayer ABI Model dimensions: Ability, Benevolence, Integrity
-  * Each dimension: 0-1 decimal range with class-validator validation
-  * Methods: getOverallScore(), toPercentages(), getTrustLevel(), isTrustworthy()
-- Created TrustScoreUpdateDto for partial trust score updates
-  * All dimensions optional for flexible update operations
-  * Full validation on all optional fields
-- Created TrustScoreResponseDto for API responses
-  * Extends TrustScoresDto with metadata (userId, verificationLevel, timestamps)
-  * Includes computed overall score, trust level, trustworthiness flag
-  * Optional description field for detailed trust reasoning
-- Trust level classification system:
-  * very_high (≥0.8), high (≥0.6), medium (≥0.4), low (≥0.2), very_low (<0.2)
-  * Trustworthiness threshold at 0.6 overall score
-- Full JSDoc documentation with citations to Mayer's Trust Model
-- Matches OpenAPI contract specification for trust endpoints
-- TypeScript compilation verified successful
-- Merged via PR #540
-
-## Previous Completed (2026-01-18)
-
-**Issue #159 (T163) - E2E tests for User Story 4 trust indicators:**
-- Created comprehensive E2E test suite: `frontend/e2e/user-story-4-trust-indicators.spec.ts` (560+ lines)
-- 30+ test cases covering all trust indicator scenarios
-- Tests follow existing project E2E patterns and validation
-- Merged via PR #538
-
-## Previous Completed (2026-01-18)
-
-**Issue #158 (T162) - Implement video upload to S3:**
-- Added VideoUpload Prisma model to track uploads
-- Created VideoUploadDto classes for request/response validation
-- Created VideoUploadService for upload confirmation
-- Added POST /verification/video-upload-complete endpoint
-- Added comprehensive unit tests (20+ test cases)
-- Merged via PR #536
+**E2E Tests Fix - Playwright Configuration:**
+- Fixed Playwright base URL mismatch: Was pointing to localhost:5173, corrected to localhost:3000 (actual Vite port)
+- Updated webServer configuration with increased timeout (180s for slower dev server startup)
+- Skipped tests for unimplemented features:
+  - Login form tests (no /login route yet)
+  - User registration tests (no /register route yet)
+  - Browse topics tests (API endpoints not available)
+  - User profile API tests (API endpoints not available)
+- Test results: 116 passing, 28 skipped
+- All e2e tests now pass when run with `npm run test:e2e`
+- Fixed merge conflicts with main branch (CI-aware config)
+- Merged via PR #537
 
 ## Previous Completed (2026-01-18)
 
