@@ -34,11 +34,17 @@ pipeline {
             steps {
                 script {
                     // Detect which docker compose command is available
-                    def dockerComposeCmd = sh(
-                        script: 'docker compose version &>/dev/null && echo "docker compose" || echo "docker-compose"',
-                        returnStdout: true
-                    ).trim()
-                    env.DOCKER_COMPOSE = dockerComposeCmd
+                    // Test if 'docker compose' subcommand exists (Docker 20.10+)
+                    def hasDockerCompose = sh(
+                        script: 'docker compose version >/dev/null 2>&1',
+                        returnStatus: true
+                    ) == 0
+
+                    if (hasDockerCompose) {
+                        env.DOCKER_COMPOSE = 'docker compose'
+                    } else {
+                        env.DOCKER_COMPOSE = 'docker-compose'
+                    }
                     echo "Using Docker Compose command: ${env.DOCKER_COMPOSE}"
                 }
             }
