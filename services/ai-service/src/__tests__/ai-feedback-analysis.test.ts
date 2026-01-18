@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
 import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
 import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
@@ -11,18 +10,15 @@ import { FeedbackType } from '@unite-discord/db-models';
  */
 describe('AI Feedback Analysis', () => {
   let analyzer: ResponseAnalyzerService;
+  let toneAnalyzer: ToneAnalyzerService;
+  let fallacyDetector: FallacyDetectorService;
+  let clarityAnalyzer: ClarityAnalyzerService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ResponseAnalyzerService,
-        ToneAnalyzerService,
-        FallacyDetectorService,
-        ClarityAnalyzerService,
-      ],
-    }).compile();
-
-    analyzer = module.get<ResponseAnalyzerService>(ResponseAnalyzerService);
+  beforeEach(() => {
+    toneAnalyzer = new ToneAnalyzerService();
+    fallacyDetector = new FallacyDetectorService();
+    clarityAnalyzer = new ClarityAnalyzerService();
+    analyzer = new ResponseAnalyzerService(toneAnalyzer, fallacyDetector, clarityAnalyzer);
   });
 
   describe('Affirmative Feedback', () => {

@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { SuggestionsService } from '../services/suggestions.service.js';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
 import { TopicLinkSuggester, TopicRelationshipType } from '../synthesizers/topic-link.suggester.js';
@@ -8,14 +7,10 @@ describe('SuggestionsService', () => {
   let tagSuggester: TagSuggester;
   let topicLinkSuggester: TopicLinkSuggester;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [SuggestionsService, TagSuggester, TopicLinkSuggester],
-    }).compile();
-
-    service = module.get<SuggestionsService>(SuggestionsService);
-    tagSuggester = module.get<TagSuggester>(TagSuggester);
-    topicLinkSuggester = module.get<TopicLinkSuggester>(TopicLinkSuggester);
+  beforeEach(() => {
+    tagSuggester = new TagSuggester();
+    topicLinkSuggester = new TopicLinkSuggester();
+    service = new SuggestionsService(tagSuggester, topicLinkSuggester);
   });
 
   it('should be defined', () => {
