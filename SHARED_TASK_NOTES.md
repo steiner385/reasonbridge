@@ -2,14 +2,49 @@
 
 ## Current Status
 
-- Completed issue #175 (T179) - Implement automated content screening
-- ~154 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All 21 content screening unit tests passing ✅
-- Main branch synced with origin/main (commit 75a85f4)
+- Completed issue #176 (T180) - Implement AI-assisted moderation review
+- ~153 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All 30 moderation service unit tests passing ✅
+- Main branch synced with origin/main (commit 1c55ebb)
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 19)
+## Latest Completed (2026-01-18 - Iteration 20)
+
+**Issue #176 (T180) - Implement AI-assisted moderation review:**
+- Created AIReviewService (services/moderation-service/src/services/ai-review.service.ts:1-248)
+  - submitAiRecommendation(): Submit AI-recommended moderation actions with confidence (0-1)
+  - getPendingRecommendations(): Retrieve pending recommendations sorted by confidence desc
+  - getRecommendationStats(): Analytics on approval rates, patterns, confidence averages
+  - approveRecommendation(): Mark recommendations as ACTIVE with moderator tracking
+  - rejectRecommendation(): Reject with reasoning and change status to APPEALED
+  - Smart severity mapping: NON_PUNITIVE (educate/warn) vs CONSEQUENTIAL (hide/remove/suspend/ban)
+  - Full validation: confidence range, action types, target types
+  - Request/response DTOs with ISO date formatting
+
+- Added three new ModerationController endpoints:
+  - POST /moderation/actions/ai-recommend: Submit AI recommendations
+  - GET /moderation/actions/ai-pending: Retrieve moderator queue
+  - GET /moderation/ai-stats: Get AI recommendation statistics
+  - Comprehensive input validation (all fields required, type checks, ranges)
+  - Service injection for both ContentScreeningService and AIReviewService
+
+- Updated ModerationModule with AIReviewService provider and PrismaModule import
+
+- Comprehensive test suite: 9 tests all passing ✅
+  - Service instantiation and method availability
+  - Request/response interface validation
+  - All valid target types (response, user, topic) case-insensitive
+  - All valid action types (educate, warn, hide, remove, suspend, ban)
+  - Confidence range validation (0-1)
+  - Response DTO field verification
+  - Severity mapping logic (non-punitive vs consequential)
+  - Target type string normalization
+
+- Merged via PR #559 (commit 1c55ebb)
+- Resolves T180 and closes issue #176
+
+## Previous Completed (2026-01-18 - Iteration 19)
 
 **Issue #175 (T179) - Implement automated content screening:**
 - Created ContentScreeningService (services/moderation-service/src/services/content-screening.service.ts:1-384)
