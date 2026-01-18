@@ -75,6 +75,31 @@ These run one after another:
     - `fix(api): resolve database timeout`
     - `docs: update README`
 
+## Safe Commit Wrapper
+
+A wrapper script (`bin/git-commit-wrapper`) prevents accidental bypass attempts:
+
+**Features:**
+- ✅ Detects and blocks `--no-verify` or `-n` flags
+- ✅ Provides clear error messages with guidance
+- ✅ Explains why each quality gate is important
+- ✅ Guides developers through the proper fix process
+- ✅ Perfect for agentic coding sessions to ensure code quality
+
+**Usage:**
+```bash
+# Use npm script instead of git commit directly
+npm run commit -- -m "feat: your message"
+# Instead of: git commit -m "feat: your message"
+```
+
+**If someone tries to bypass:**
+```bash
+$ npm run commit -- -n -m "message"
+❌ ERROR: Using --no-verify or -n is not permitted in this repository
+[Shows detailed guidance on how to properly fix issues]
+```
+
 ## Installation & Setup
 
 ### 1. Install Dependencies
@@ -164,17 +189,30 @@ pnpm install
 - Existing violations in codebase won't block commits
 - Only new violations in staged changes will block
 
-### Issue: Need to bypass hooks temporarily
+### Issue: Attempting to bypass hooks with `--no-verify` or `-n`
+
+**⛔ IMPORTANT: Do NOT use `--no-verify` or `-n` flags. This bypasses critical security and quality checks.**
+
+If you try to use these flags with the safe commit script:
+
 ```bash
-# Bypass all hooks
-git commit -n  # or git commit --no-verify
-
-# Bypass only pre-commit (not pre-push)
-git commit --no-verify
-
-# Bypass only pre-push
-git push --no-verify
+$ npm run commit -- -n -m "message"
+❌ ERROR: Using --no-verify or -n is not permitted in this repository
 ```
+
+The wrapper script will:
+1. **Reject** the bypass attempt
+2. **Explain why** hooks are mandatory
+3. **Guide you** through the proper fix process
+
+**Why these flags are blocked:**
+- They bypass secrets detection (can leak API keys, passwords, tokens)
+- They bypass TypeScript checking (can commit broken code)
+- They bypass test validation (can introduce regressions)
+- They bypass code quality checks (duplication, console.log, etc.)
+
+**If a hook is genuinely broken:**
+Contact the team to discuss the issue. Never bypass - always fix the root cause.
 
 ### Issue: Secrets false positive
 ```bash
@@ -190,9 +228,33 @@ git commit -m "chore: update secrets baseline"
 # Default is 20, can be increased to 25-30 for larger projects
 ```
 
-## Development Workflow
+## Safe Commit Workflow
 
-Typical workflow with these hooks:
+### Using the Safe Commit Script (Recommended)
+
+Instead of using `git commit` directly, use the `npm run commit` script which prevents accidental bypass attempts:
+
+```bash
+# Normal commit
+npm run commit -- -m "feat(module): implement feature"
+
+# With amend
+npm run commit -- -m "fix: resolve issue" --amend
+
+# With all changes
+npm run commit -- -m "docs: update README" -a
+
+# For full test suite (before releases)
+FULL_TEST=true npm run commit -- -m "release: v1.0.0"
+```
+
+**Why use `npm run commit`?**
+- Prevents accidental use of `--no-verify` or `-n` flags
+- Provides clear guidance if you try to bypass hooks
+- Ensures consistent commit behavior across the team
+- Great for agentic coding sessions to enforce code quality
+
+### Full Development Workflow
 
 ```bash
 # 1. Create feature branch
@@ -205,7 +267,7 @@ git checkout -b feature/my-feature
 git add .
 
 # 4. Commit (hooks run automatically)
-git commit -m "feat(module): implement feature"
+npm run commit -- -m "feat(module): implement feature"
 # Hooks check: secrets, duplication, root structure, deps, types, console, imports, tests, formatting
 
 # 5. Push to remote
