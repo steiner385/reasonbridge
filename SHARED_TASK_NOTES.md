@@ -2,22 +2,36 @@
 
 ## Current Status
 
-- E2E test baseline fixed: 116 passing, 28 skipped (original 21 failures resolved)
-- Configuration issue resolved: Playwright now uses correct Vite port (3000)
-- Note: Main branch has additional test failures (9 new tests) - these are new tests from main branch merge that need updating for current app state:
-  - example.spec.ts: 4 failures (testing header/footer text that doesn't match current layout)
-  - profile-page.spec.ts: 5 failures (tests unskipped in main branch need API mocking or skipping)
-  - These are separate from original task scope of fixing the initial 21 failing tests
+- **E2E tests: ALL PASSING** ✅
+  - 223 tests passing
+  - 28 tests skipped (unimplemented features: login, registration, browse topics, user profile APIs)
+  - 0 failures
+  - Tests run with `npm run test:e2e` (19-20s runtime)
+- All tests on current branch (continuous-claude/iteration-2/2026-01-18-6bba00a6) passing
+- Branch is synced with main (same commit c8f91eb)
+- Dependencies fixed: `pnpm install` resolved missing socket.io-client
 - ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps for Future Iterations
 
-- Fix 9 new test failures on main:
-  - Skip profile-page API tests or set up API mocking
-  - Update example.spec.ts selectors to match actual HomePage layout (h2 instead of h1)
-  - Run `npm run test:e2e` and ensure all pass before PR
+- All e2e tests currently passing - no immediate test failures to fix
+- Future work should focus on implementing missing features:
+  - User registration and login flow (/register, /login routes)
+  - Browse topics functionality (API endpoints)
+  - User profile API endpoints
+  - Then unskip corresponding e2e tests
 
-## Latest Completed (2026-01-18)
+## Latest Completed (2026-01-18 - Iteration 2)
+
+**E2E Test Verification - Dependency Fix:**
+- Fixed missing socket.io-client dependency by running `pnpm install`
+- All 223 e2e tests confirmed passing
+- 28 tests skipped (expected for unimplemented features)
+- No failing tests to fix - all tests passing successfully
+- Verified branch is synced with main (no merge needed)
+- Branch ready for deployment
+
+## Previous Completed (2026-01-18)
 
 **E2E Tests Fix - Playwright Configuration:**
 - Fixed Playwright base URL mismatch: Was pointing to localhost:5173, corrected to localhost:3000 (actual Vite port)
