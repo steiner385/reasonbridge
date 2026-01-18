@@ -13,6 +13,10 @@ import type {
   CommonGroundGeneratedEvent,
   CommonGroundUpdatedEvent,
 } from '@unite-discord/event-schemas/ai';
+import type {
+  ModerationActionRequestedEvent,
+  UserTrustUpdatedEvent,
+} from '@unite-discord/event-schemas/moderation';
 
 /**
  * WebSocket Gateway for real-time notifications
@@ -139,6 +143,132 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
     this.logger.log(
       `Broadcasted common-ground.updated event for topic ${event.payload.topicId} to room ${room}`,
+    );
+  }
+
+  /**
+   * Subscribe to moderation action updates
+   */
+  @SubscribeMessage('subscribe:moderation')
+  async handleSubscribeModeration(
+    @MessageBody() data: Record<string, any>,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const room = 'moderation:actions';
+
+    await client.join(room);
+    this.logger.log(`Client ${client.id} subscribed to moderation updates`);
+
+    client.emit('subscription:confirmed', {
+      type: 'moderation',
+      room,
+    });
+  }
+
+  /**
+   * Unsubscribe from moderation action updates
+   */
+  @SubscribeMessage('unsubscribe:moderation')
+  async handleUnsubscribeModeration(
+    @MessageBody() _data: Record<string, any>,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const room = 'moderation:actions';
+
+    await client.leave(room);
+    this.logger.log(`Client ${client.id} unsubscribed from moderation updates`);
+
+    client.emit('unsubscription:confirmed', {
+      type: 'moderation',
+      room,
+    });
+  }
+
+  /**
+   * Broadcast moderation action requested event to subscribed clients
+   * Called by ModerationNotificationHandler when event is received
+   */
+  emitModerationActionRequested(event: ModerationActionRequestedEvent): void {
+    const room = 'moderation:actions';
+
+    this.server.to(room).emit('moderation:action-requested', {
+      targetType: event.payload.targetType,
+      targetId: event.payload.targetId,
+      actionType: event.payload.actionType,
+      severity: event.payload.severity,
+      reasoning: event.payload.reasoning,
+      aiConfidence: event.payload.aiConfidence,
+      violationContext: event.payload.violationContext,
+      requestedAt: event.payload.requestedAt,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(
+      `Broadcasted moderation.action.requested event for ${event.payload.targetType} ${event.payload.targetId} to room ${room}`,
+    );
+  }
+
+  /**
+   * Subscribe to trust updates for a specific user
+   */
+  @SubscribeMessage('subscribe:trust-updates')
+  async handleSubscribeTrustUpdates(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const { userId } = data;
+    const room = `user:${userId}:trust`;
+
+    await client.join(room);
+    this.logger.log(`Client ${client.id} subscribed to trust updates for user ${userId}`);
+
+    client.emit('subscription:confirmed', {
+      type: 'trust-updates',
+      userId,
+      room,
+    });
+  }
+
+  /**
+   * Unsubscribe from trust updates for a specific user
+   */
+  @SubscribeMessage('unsubscribe:trust-updates')
+  async handleUnsubscribeTrustUpdates(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const { userId } = data;
+    const room = `user:${userId}:trust`;
+
+    await client.leave(room);
+    this.logger.log(`Client ${client.id} unsubscribed from trust updates for user ${userId}`);
+
+    client.emit('unsubscription:confirmed', {
+      type: 'trust-updates',
+      userId,
+      room,
+    });
+  }
+
+  /**
+   * Broadcast user trust updated event to subscribed clients
+   * Called by ModerationNotificationHandler when event is received
+   */
+  emitUserTrustUpdated(event: UserTrustUpdatedEvent): void {
+    const room = `user:${event.payload.userId}:trust`;
+
+    this.server.to(room).emit('user:trust-updated', {
+      userId: event.payload.userId,
+      reason: event.payload.reason,
+      previousScores: event.payload.previousScores,
+      newScores: event.payload.newScores,
+      moderationActionId: event.payload.moderationActionId,
+      updatedAt: event.payload.updatedAt,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(
+      `Broadcasted user.trust.updated event for user ${event.payload.userId} to room ${room}`,
     );
   }
 }
