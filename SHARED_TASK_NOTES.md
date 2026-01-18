@@ -2,10 +2,46 @@
 
 ## Current Status
 
-- Completed issue #147 (T151) - Unit tests: Divergence identification
-- ~158 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #150 (T154) - Integration tests: Real-time updates (WebSocket)
+- ~157 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #150 (T154) - Integration tests: Real-time updates (WebSocket):**
+- Created comprehensive integration test suite for WebSocket real-time notifications
+- Test locations:
+  - Gateway tests: services/notification-service/src/__tests__/integration/notification.gateway.integration.test.ts
+  - Handler tests: services/notification-service/src/__tests__/integration/common-ground-handler.integration.test.ts
+  - Fixtures: services/notification-service/src/__tests__/fixtures/test-data.ts
+- Test results: 42 tests, all passing ✅
+  - NotificationGateway Integration Tests (19 tests):
+    - Event routing to correct Socket.io rooms
+    - Payload transformation and data preservation
+    - Event versioning and version progression
+    - Change reason tracking (threshold_reached, time_elapsed)
+    - Timestamp handling (ISO format)
+    - Multi-event broadcast handling
+    - Complex analysis data preservation
+  - CommonGroundNotificationHandler Integration Tests (23 tests):
+    - Generated event handling with topic fetching
+    - Updated event handling with change tracking
+    - Notification creation and WebSocket emission
+    - Metadata preservation (version, scores, analysis)
+    - Event-driven integration (sequential and concurrent)
+    - Error handling and graceful failures
+    - Topic recipient resolution
+    - Participant count tracking
+- Added test infrastructure:
+  - vitest.config.ts for service-level testing
+  - Test fixtures with realistic event payloads
+  - Test setup utilities
+- Dependencies added:
+  - @nestjs/testing, @types/socket.io, socket.io-client, vitest
+- Build verification: TypeScript compilation successful, all tests passing
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #528
+
+## Previous Completions (2026-01-18)
 
 **Issue #147 (T151) - Unit tests: Divergence identification:**
 - Verified comprehensive unit test suite for DivergencePointService
