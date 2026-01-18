@@ -2,12 +2,31 @@
 
 ## Current Status
 
-- Completed issue #185 (T189) - Implement moderation notifications
-- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All notification service tests passing (54 total: 12 new moderation + 23 common-ground + 19 gateway) ✅
+- Completed issue #186 (T190) - Implement moderation history tracking
+- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All moderation service tests passing (54 total: 24 repository + 21 content-screening + 9 ai-review) ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
+
+## Latest Completed (2026-01-18 - Iteration 28)
+
+**Issue #186 (T190) - Implement moderation history tracking:**
+- Fixed TypeScript compilation errors in moderation service repository
+- Fixed `findMany` method to properly handle optional `where` parameter with conditional spreading
+- Fixed `count` method to handle optional `where` parameter correctly
+- Updated `approve` method to use Prisma relation syntax (`approvedBy.connect`) instead of direct field assignment
+- Updated test expectations in moderation-action.repository.spec.ts to match new implementation
+- All 54 tests passing (24 repository + 21 content-screening + 9 ai-review) ✅
+- Key moderation history tracking features already implemented:
+  - `getUserActions(userId)` - Get all moderation actions against a specific user
+  - `findByUserId(userId)` - Find actions where user is the target with cursor pagination
+  - `findByModerator(moderatorId)` - Find all actions approved by a moderator
+  - `getStatistics(startDate?, endDate?)` - Get aggregated moderation statistics with grouping
+  - Various filtering methods (by status, severity, action type, AI recommended, etc.)
+  - Complete audit trail with timestamps, moderator attribution, appeal history
+  - Cursor-based pagination for efficient history queries
+- Merged via PR #576
 
 ## Latest Completed (2026-01-18 - Iteration 27)
 
