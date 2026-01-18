@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BotDetectorService } from './bot-detector.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -23,28 +23,20 @@ const createMockUser = (overrides: any = {}) => ({
 
 describe('BotDetectorService', () => {
   let service: BotDetectorService;
-  let prismaService: PrismaService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        BotDetectorService,
-        {
-          provide: PrismaService,
-          useValue: {
-            user: {
-              findUnique: jest.fn(),
-            },
-            response: {
-              findMany: jest.fn(),
-            },
-          },
-        },
-      ],
-    }).compile();
+  const mockPrismaService = {
+    user: {
+      findUnique: vi.fn(),
+    },
+    response: {
+      findMany: vi.fn(),
+    },
+  } as unknown as PrismaService;
 
-    service = module.get<BotDetectorService>(BotDetectorService);
-    prismaService = module.get<PrismaService>(PrismaService);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Direct instantiation - bypasses NestJS DI issues with vitest
+    service = new BotDetectorService(mockPrismaService);
   });
 
   it('should be defined', () => {
@@ -61,7 +53,7 @@ describe('BotDetectorService', () => {
         createdAt: oneHourAgo,
       }) as any;
 
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
 
       const result = await service.detectNewAccountBotPatterns('user-1');
 
@@ -79,7 +71,7 @@ describe('BotDetectorService', () => {
         createdAt: twoDaysAgo,
       }) as any;
 
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
 
       const result = await service.detectNewAccountBotPatterns('user-2');
 
@@ -107,7 +99,7 @@ describe('BotDetectorService', () => {
         responses,
       }) as any;
 
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
 
       const result = await service.detectNewAccountBotPatterns('user-3');
 
@@ -136,7 +128,7 @@ describe('BotDetectorService', () => {
         responses,
       }) as any;
 
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
 
       const result = await service.detectNewAccountBotPatterns('user-4');
 
@@ -164,7 +156,7 @@ describe('BotDetectorService', () => {
         responses,
       }) as any;
 
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
 
       const result = await service.detectNewAccountBotPatterns('user-5');
 
@@ -192,7 +184,7 @@ describe('BotDetectorService', () => {
         responses,
       }) as any;
 
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
 
       const result = await service.detectNewAccountBotPatterns('user-6');
 
@@ -202,7 +194,7 @@ describe('BotDetectorService', () => {
     });
 
     it('should throw error for non-existent user', async () => {
-      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null);
+      (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       await expect(service.detectNewAccountBotPatterns('non-existent')).rejects.toThrow(
         'User not found',
@@ -212,7 +204,7 @@ describe('BotDetectorService', () => {
 
   describe('detectCoordinatedPostingPatterns', () => {
     it('should return empty array for topics with fewer than 5 responses', async () => {
-      jest.spyOn(prismaService.response, 'findMany').mockResolvedValue([
+      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
         {
           id: 'response-1',
           topicId: 'topic-1',
@@ -231,8 +223,9 @@ describe('BotDetectorService', () => {
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
       const mockResponses = [];
-      // Create 5 responses from 3 very new accounts (created < 24h ago)
-      for (let i = 0; i < 5; i++) {
+      // Create 10 responses from 7 very new accounts (created < 24h ago)
+      // Service requires >= 7 new accounts to get confidence > 0.6
+      for (let i = 0; i < 10; i++) {
         mockResponses.push({
           id: `response-${i}`,
           topicId: 'topic-1',
@@ -240,17 +233,15 @@ describe('BotDetectorService', () => {
           author: {
             id: `user-${i}`,
             createdAt:
-              i < 3
-                ? new Date(now.getTime() - 60 * 60 * 1000) // Very new
-                : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // Older
+              i < 7
+                ? new Date(now.getTime() - 60 * 60 * 1000) // Very new (7 accounts)
+                : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // Older (3 accounts)
           },
           createdAt: new Date(oneHourAgo.getTime() + i * 10 * 60 * 1000),
         } as any);
       }
 
-      jest
-        .spyOn(prismaService.response, 'findMany')
-        .mockResolvedValue(mockResponses);
+      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponses);
 
       const result = await service.detectCoordinatedPostingPatterns('topic-1');
 
@@ -259,7 +250,7 @@ describe('BotDetectorService', () => {
         (p) => p.pattern === 'new_account_coordination',
       );
       expect(newAccountPattern).toBeDefined();
-      expect(newAccountPattern?.confidence).toBeGreaterThan(0);
+      expect(newAccountPattern?.confidence).toBeGreaterThan(0.6);
     });
 
     it('should detect timing coordination pattern', async () => {
@@ -282,9 +273,7 @@ describe('BotDetectorService', () => {
         } as any);
       }
 
-      jest
-        .spyOn(prismaService.response, 'findMany')
-        .mockResolvedValue(mockResponses);
+      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponses);
 
       const result = await service.detectCoordinatedPostingPatterns('topic-1');
 

@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { VideoUploadService } from './video-upload.service.js';
 import { VideoUploadCompleteDto } from './dto/video-upload.dto.js';
@@ -23,14 +22,12 @@ const VerificationStatus = {
 
 // Mock AWS SDK
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: vi.fn(),
+  S3Client: vi.fn().mockImplementation(() => ({})),
   HeadObjectCommand: vi.fn(),
 }));
 
 describe('VideoUploadService', () => {
   let service: VideoUploadService;
-  let prismaService: PrismaService;
-  let configService: ConfigService;
 
   const mockVerificationRecord = {
     id: 'verification-123',
@@ -74,8 +71,8 @@ describe('VideoUploadService', () => {
   };
 
   const mockConfigService = {
-    get: <T>(key: string): T | undefined => mockConfig[key] as T | undefined,
-  };
+    get: vi.fn(<T>(key: string): T | undefined => mockConfig[key] as T | undefined),
+  } as unknown as ConfigService;
 
   const mockPrismaService = {
     verificationRecord: {
@@ -87,27 +84,16 @@ describe('VideoUploadService', () => {
       findMany: vi.fn(),
       deleteMany: vi.fn(),
     },
-  };
+  } as unknown as PrismaService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        VideoUploadService,
-        {
-          provide: PrismaService,
-          useValue: mockPrismaService,
-        },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-      ],
-    }).compile();
-
-    service = module.get<VideoUploadService>(VideoUploadService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    configService = module.get<ConfigService>(ConfigService);
+  beforeEach(() => {
     vi.clearAllMocks();
+    // Reset mock implementations
+    (mockConfigService.get as ReturnType<typeof vi.fn>).mockImplementation(
+      <T>(key: string): T | undefined => mockConfig[key] as T | undefined
+    );
+    // Direct instantiation - bypasses NestJS DI issues with vitest mocks
+    service = new VideoUploadService(mockPrismaService, mockConfigService);
   });
 
   describe('confirmVideoUpload', () => {
@@ -119,10 +105,10 @@ describe('VideoUploadService', () => {
     };
 
     it('should confirm video upload successfully', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVerificationRecord,
       );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
+      (mockPrismaService.videoUpload.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVideoUploadRecord,
       );
 
@@ -140,7 +126,7 @@ describe('VideoUploadService', () => {
     });
 
     it('should throw error if verification record not found', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(null);
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
 
       await expect(service.confirmVideoUpload('user-123', dto)).rejects.toThrow(
         BadRequestException,
@@ -152,7 +138,7 @@ describe('VideoUploadService', () => {
         ...mockVerificationRecord,
         userId: 'different-user',
       };
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         differentUserVerification,
       );
 
@@ -166,7 +152,7 @@ describe('VideoUploadService', () => {
         ...mockVerificationRecord,
         type: VerificationType.PHONE,
       };
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         nonVideoVerification,
       );
 
@@ -180,7 +166,7 @@ describe('VideoUploadService', () => {
         ...mockVerificationRecord,
         status: VerificationStatus.REJECTED,
       };
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         rejectedVerification,
       );
 
@@ -190,7 +176,7 @@ describe('VideoUploadService', () => {
     });
 
     it('should throw error if file size exceeds maximum', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVerificationRecord,
       );
 
@@ -201,7 +187,7 @@ describe('VideoUploadService', () => {
     });
 
     it('should throw error for unsupported MIME type', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVerificationRecord,
       );
 
@@ -212,10 +198,10 @@ describe('VideoUploadService', () => {
     });
 
     it('should accept valid video MIME types', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVerificationRecord,
       );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
+      (mockPrismaService.videoUpload.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVideoUploadRecord,
       );
 
@@ -223,10 +209,10 @@ describe('VideoUploadService', () => {
 
       for (const mimeType of validMimeTypes) {
         vi.clearAllMocks();
-        mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+        (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
           mockVerificationRecord,
         );
-        mockPrismaService.videoUpload.create.mockResolvedValueOnce(
+        (mockPrismaService.videoUpload.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
           mockVideoUploadRecord,
         );
 
@@ -239,24 +225,24 @@ describe('VideoUploadService', () => {
     });
 
     it('should set correct expiry date (30 days from now)', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVerificationRecord,
       );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
+      (mockPrismaService.videoUpload.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVideoUploadRecord,
       );
 
       await service.confirmVideoUpload('user-123', dto);
 
-      const createCall = mockPrismaService.videoUpload.create.mock.calls[0];
+      const createCall = (mockPrismaService.videoUpload.create as ReturnType<typeof vi.fn>).mock.calls[0];
       expect(createCall[0].data.expiresAt).toBeInstanceOf(Date);
     });
 
     it('should return message indicating video is being processed', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVerificationRecord,
       );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
+      (mockPrismaService.videoUpload.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVideoUploadRecord,
       );
 
@@ -268,7 +254,7 @@ describe('VideoUploadService', () => {
 
   describe('getVideoUpload', () => {
     it('should retrieve video upload by verification ID', async () => {
-      mockPrismaService.videoUpload.findUnique.mockResolvedValueOnce(
+      (mockPrismaService.videoUpload.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
         mockVideoUploadRecord,
       );
 
@@ -281,7 +267,7 @@ describe('VideoUploadService', () => {
     });
 
     it('should return null if video upload not found', async () => {
-      mockPrismaService.videoUpload.findUnique.mockResolvedValueOnce(null);
+      (mockPrismaService.videoUpload.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
 
       const result = await service.getVideoUpload('nonexistent');
 
@@ -292,7 +278,7 @@ describe('VideoUploadService', () => {
   describe('getUserVideoUploads', () => {
     it('should retrieve all video uploads for a user', async () => {
       const uploads = [mockVideoUploadRecord, { ...mockVideoUploadRecord, id: 'video-2' }];
-      mockPrismaService.videoUpload.findMany.mockResolvedValueOnce(uploads);
+      (mockPrismaService.videoUpload.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce(uploads);
 
       const result = await service.getUserVideoUploads('user-123');
 
@@ -304,7 +290,7 @@ describe('VideoUploadService', () => {
     });
 
     it('should return empty array if user has no uploads', async () => {
-      mockPrismaService.videoUpload.findMany.mockResolvedValueOnce([]);
+      (mockPrismaService.videoUpload.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
 
       const result = await service.getUserVideoUploads('user-123');
 
@@ -314,7 +300,7 @@ describe('VideoUploadService', () => {
 
   describe('deleteExpiredVideoUploads', () => {
     it('should delete expired video uploads', async () => {
-      mockPrismaService.videoUpload.deleteMany.mockResolvedValueOnce({
+      (mockPrismaService.videoUpload.deleteMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         count: 5,
       });
 
@@ -325,7 +311,7 @@ describe('VideoUploadService', () => {
     });
 
     it('should return 0 if no expired uploads', async () => {
-      mockPrismaService.videoUpload.deleteMany.mockResolvedValueOnce({
+      (mockPrismaService.videoUpload.deleteMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         count: 0,
       });
 

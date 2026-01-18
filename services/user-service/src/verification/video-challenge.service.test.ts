@@ -1,12 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { VideoVerificationService } from './video-challenge.service.js';
 import { ConfigService } from '@nestjs/config';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock AWS SDK
+// Mock AWS SDK before importing the service
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: vi.fn(),
+  S3Client: vi.fn().mockImplementation(() => ({})),
   PutObjectCommand: vi.fn(),
 }));
 
@@ -16,7 +15,6 @@ vi.mock('@aws-sdk/s3-request-presigner', () => ({
 
 describe('VideoVerificationService', () => {
   let service: VideoVerificationService;
-  let _configService: ConfigService;
 
   const mockConfig: Record<string, unknown> = {
     AWS_REGION: 'us-east-1',
@@ -30,22 +28,17 @@ describe('VideoVerificationService', () => {
   };
 
   const mockConfigService = {
-    get: <T>(key: string): T | undefined => mockConfig[key] as T | undefined,
-  };
+    get: vi.fn(<T>(key: string): T | undefined => mockConfig[key] as T | undefined),
+  } as unknown as ConfigService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        VideoVerificationService,
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-      ],
-    }).compile();
-
-    service = module.get<VideoVerificationService>(VideoVerificationService);
-    _configService = module.get<ConfigService>(ConfigService);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset mock implementation for each test
+    (mockConfigService.get as ReturnType<typeof vi.fn>).mockImplementation(
+      <T>(key: string): T | undefined => mockConfig[key] as T | undefined
+    );
+    // Direct instantiation - bypasses NestJS DI issues with vitest mocks
+    service = new VideoVerificationService(mockConfigService);
   });
 
   describe('generateChallenge', () => {
@@ -120,8 +113,8 @@ describe('VideoVerificationService', () => {
 
   describe('generateUploadUrl', () => {
     it('should generate a valid upload URL', async () => {
-      const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-      getSignedUrl.mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
+      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+      vi.mocked(getSignedUrl).mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
 
       const url = await service.generateUploadUrl(
         'user-123',
@@ -133,8 +126,8 @@ describe('VideoVerificationService', () => {
     });
 
     it('should generate upload URL with custom filename', async () => {
-      const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-      getSignedUrl.mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
+      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+      vi.mocked(getSignedUrl).mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
 
       const url = await service.generateUploadUrl(
         'user-123',
@@ -147,10 +140,8 @@ describe('VideoVerificationService', () => {
     });
 
     it('should throw BadRequestException on S3 error', async () => {
-      const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-      getSignedUrl.mockRejectedValueOnce(
-        new Error('S3 service error'),
-      );
+      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+      vi.mocked(getSignedUrl).mockRejectedValueOnce(new Error('S3 service error'));
 
       await expect(
         service.generateUploadUrl('user-123', 'verification-456'),
@@ -158,13 +149,13 @@ describe('VideoVerificationService', () => {
     });
 
     it('should include userId and verificationId in metadata', async () => {
-      const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-      getSignedUrl.mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
+      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+      const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+      vi.mocked(getSignedUrl).mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
 
       await service.generateUploadUrl('user-123', 'verification-456');
 
       // Verify that PutObjectCommand was called with correct metadata
-      const { PutObjectCommand } = require('@aws-sdk/client-s3');
       expect(PutObjectCommand).toHaveBeenCalled();
     });
   });
@@ -179,22 +170,12 @@ describe('VideoVerificationService', () => {
       expect(constraints.maxDurationSeconds).toBe(30);
     });
 
-    it('should use default values when config is not set', async () => {
-      const moduleWithDefaults = await Test.createTestingModule({
-        providers: [
-          VideoVerificationService,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: () => undefined,
-            },
-          },
-        ],
-      }).compile();
+    it('should use default values when config is not set', () => {
+      const mockEmptyConfigService = {
+        get: vi.fn(() => undefined),
+      } as unknown as ConfigService;
 
-      const serviceWithDefaults = moduleWithDefaults.get<VideoVerificationService>(
-        VideoVerificationService,
-      );
+      const serviceWithDefaults = new VideoVerificationService(mockEmptyConfigService);
       const constraints = serviceWithDefaults.getVideoConstraints();
 
       expect(constraints.maxFileSize).toBe(100 * 1024 * 1024); // 100MB default
