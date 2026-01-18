@@ -103,3 +103,32 @@ export interface FallacyWarningsProps {
   /** Whether to show educational resources */
   showEducationalResources?: boolean;
 }
+
+/**
+ * Sensitivity level for feedback display
+ */
+export type FeedbackSensitivity = 'low' | 'medium' | 'high';
+
+/**
+ * User preferences for feedback behavior
+ */
+export interface FeedbackPreferences {
+  /** Whether feedback is globally enabled */
+  enabled: boolean;
+  /** Sensitivity level - affects confidence threshold for display */
+  sensitivity: FeedbackSensitivity;
+  /** Minimum confidence threshold to display feedback (0.0-1.0) */
+  minConfidenceThreshold: number;
+  /** Whether to show educational resources with feedback */
+  showEducationalResources: boolean;
+  /** Whether to auto-dismiss low-confidence feedback after user review */
+  autoDismissLowConfidence: boolean;
+  /** Types of feedback to display (filter) */
+  enabledTypes: {
+    fallacy: boolean;
+    inflammatory: boolean;
+    unsourced: boolean;
+    bias: boolean;
+    affirmation: boolean;
+  };
+}
