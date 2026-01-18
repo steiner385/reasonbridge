@@ -26,6 +26,18 @@ pipeline {
             }
         }
 
+        stage('Build Dependencies') {
+            steps {
+                sh '''
+                    # Build shared packages (required before tests can import them)
+                    pnpm -r --filter="@unite-discord/*" build
+
+                    # Generate Prisma client (required for database-dependent tests)
+                    pnpm --filter="@unite-discord/db-models" exec prisma generate
+                '''
+            }
+        }
+
         stage('Lint & Type Check') {
             parallel {
                 stage('Lint') {
