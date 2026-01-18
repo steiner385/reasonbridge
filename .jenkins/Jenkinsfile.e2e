@@ -27,9 +27,7 @@ pipeline {
         PLAYWRIGHT_BROWSERS_PATH = '/home/jenkins/agent/.playwright-cache'
         // Playwright will use this for the base URL (4173 is vite preview port)
         PLAYWRIGHT_BASE_URL = 'http://localhost:4173'
-        // AWS Bedrock configuration
-        AWS_REGION = 'us-east-1'
-        BEDROCK_MODEL_ID = 'anthropic.claude-3-sonnet-20240229-v1:0'
+        // AWS Bedrock configuration is injected via withAwsCredentials shared library
     }
 
     stages {
@@ -160,21 +158,20 @@ pipeline {
 
         stage('E2E Tests') {
             steps {
-                // Inject AWS credentials for Bedrock AI service during E2E tests
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    sh '''
-                        cd frontend
+                // Inject AWS credentials for Bedrock AI service during E2E tests via shared library
+                script {
+                    withAwsCredentials {
+                        sh '''
+                            cd frontend
 
-                        # Clear previous test artifacts
-                        rm -rf playwright-report test-results allure-results
+                            # Clear previous test artifacts
+                            rm -rf playwright-report test-results allure-results
 
-                        # Run Playwright tests
-                        # The webServer config in playwright.config.ts will start the preview server
-                        npx pnpm@9 run test:e2e || npm run test:e2e
-                    '''
+                            # Run Playwright tests
+                            # The webServer config in playwright.config.ts will start the preview server
+                            npx pnpm@9 run test:e2e || npm run test:e2e
+                        '''
+                    }
                 }
             }
             post {

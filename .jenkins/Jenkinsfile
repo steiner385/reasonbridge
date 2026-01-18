@@ -20,9 +20,7 @@ pipeline {
         GITHUB_REPO = 'uniteDiscord'
         CI = 'true'
         NODE_ENV = 'test'
-        // AWS Bedrock configuration
-        AWS_REGION = 'us-east-1'
-        BEDROCK_MODEL_ID = 'anthropic.claude-3-sonnet-20240229-v1:0'
+        // AWS Bedrock configuration is injected via withAwsCredentials shared library
     }
 
     stages {
@@ -69,12 +67,9 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                // Inject AWS credentials for Bedrock AI service tests
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    script {
+                // Inject AWS credentials for Bedrock AI service tests via shared library
+                script {
+                    withAwsCredentials {
                         // Run tests with JSON output for intelligent failure analysis
                         // Use pipefail to capture Jest's exit code, not tee's
                         def testResult = sh(
