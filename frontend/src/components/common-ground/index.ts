@@ -9,3 +9,6 @@ export type { AgreementVennDiagramProps } from './AgreementVennDiagram';
 
 export { default as SharedPointCard } from './SharedPointCard';
 export type { SharedPointCardProps } from './SharedPointCard';
+
+export { default as DivergencePointCard } from './DivergencePointCard';
+export type { DivergencePointCardProps } from './DivergencePointCard';
