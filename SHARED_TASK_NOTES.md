@@ -2,11 +2,30 @@
 
 ## Current Status
 
-- Completed issue #163 (T167) - Implement manual review queue (BotDetector service)
-- ~161 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issues #163-164 (T167, T168) - Bot detection and verification events
+- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All 223 E2E tests passing ✅
 
-## Latest Completed (2026-01-18 - Iteration 11)
+## Latest Completed (2026-01-18 - Iteration 12)
+
+**Issue #164 (T168) - Implement verification events:**
+- Created UserEvent schema in `packages/event-schemas/src/user.ts`
+  - 7 event types for verification and bot detection lifecycle
+  - VerificationRequestedEvent: When user initiates verification (phone/ID/video)
+  - VerificationCompletedEvent: When verification succeeds with provider reference
+  - VerificationFailedEvent: When verification rejected (reasons: provider_rejected, fraud_detected, etc.)
+  - VerificationExpiredEvent: When verification request expires without completion
+  - UserVerifiedHumanStatusChangedEvent: When user gains/loses verified human badge
+  - BotPatternDetectedEvent: Risk score, patterns detected, verification requirement
+  - UserFlaggedForReviewEvent: For manual review queue with priority levels
+- Updated event-schemas/src/index.ts
+  - Export UserEvent types and USER_EVENT_TYPES constant
+  - Added to EVENT_TYPES export for centralized registry
+- TypeScript compilation verified successful
+- Enables integration with VerificationController and manual review queue
+- Merged via PR #546
+
+## Previous Completed (2026-01-18 - Iteration 11)
 
 **Issue #163 (T167) - Implement manual review queue (BotDetector service):**
 - Created BotDetectorService in `services/user-service/src/services/bot-detector.service.ts`
