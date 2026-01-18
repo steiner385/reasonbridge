@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { GetTopicsQueryDto } from './dto/get-topics-query.dto.js';
 import { SearchTopicsQueryDto } from './dto/search-topics-query.dto.js';
 import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-response.dto.js';
+import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
 import { Prisma } from '@unite-discord/db-models';
 
 @Injectable()
@@ -213,6 +214,51 @@ export class TopicsService {
         limit,
         totalPages: Math.ceil(total / limit),
       },
+    };
+  }
+
+  async getCommonGroundAnalysis(
+    topicId: string,
+    version?: number,
+  ): Promise<CommonGroundResponseDto> {
+    // First verify the topic exists
+    const topic = await this.prisma.discussionTopic.findUnique({
+      where: { id: topicId },
+      select: { id: true },
+    });
+
+    if (!topic) {
+      throw new NotFoundException(`Topic with ID ${topicId} not found`);
+    }
+
+    // Fetch the analysis - either specific version or latest
+    const where = version ? { topicId, version } : { topicId };
+    const orderBy = version ? {} : { version: 'desc' as const };
+
+    const analysis = await this.prisma.commonGroundAnalysis.findFirst({
+      where,
+      orderBy,
+    });
+
+    if (!analysis) {
+      throw new NotFoundException(
+        version
+          ? `Common ground analysis version ${version} not found for topic ${topicId}`
+          : `No common ground analysis found for topic ${topicId}`,
+      );
+    }
+
+    // Map database model to DTO
+    return {
+      id: analysis.id,
+      version: analysis.version,
+      agreementZones: analysis.agreementZones as any,
+      misunderstandings: analysis.misunderstandings as any,
+      genuineDisagreements: analysis.genuineDisagreements as any,
+      overallConsensusScore: analysis.overallConsensusScore?.toNumber() ?? 0,
+      participantCountAtGeneration: analysis.participantCountAtGeneration,
+      responseCountAtGeneration: analysis.responseCountAtGeneration,
+      generatedAt: analysis.createdAt,
     };
   }
 }
