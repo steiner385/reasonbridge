@@ -2,14 +2,32 @@
 
 ## Current Status
 
-- Completed issue #178 (T182) - Implement moderation queue management
-- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #179 (T183) - Implement POST /moderation/appeal endpoint
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All moderation service unit tests passing ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 22)
+## Latest Completed (2026-01-18 - Iteration 23)
+
+**Issue #179 (T183) - Implement POST /moderation/appeal:**
+- Added CreateAppealRequest and AppealResponse interfaces (services/moderation-service/src/services/moderation-actions.service.ts:22-36)
+- Implemented createAppeal method in ModerationActionsService with comprehensive validation:
+  - Validates reason is required and between 20-5000 characters
+  - Verifies moderation action exists and is not already reversed
+  - Prevents duplicate appeals for same action by same user (checks existing appeals with status PENDING/UNDER_REVIEW)
+  - Updates moderation action status to APPEALED when appeal is created
+  - Creates appeal record with PENDING status ready for moderator review
+- Added POST /moderation/appeal/:actionId endpoint in ModerationController (services/moderation-service/src/controllers/moderation.controller.ts:259-271)
+  - Validates request body for required reason field
+  - TODO: Extract appellant ID from JWT token when auth is implemented (currently uses 'system')
+- Added mapAppealToResponse helper method for response DTO mapping
+- Build successful with no TypeScript errors
+- All tests passing
+- Merged via PR #564 (commit 3177eae)
+
+## Previous Completed (2026-01-18 - Iteration 22)
 
 **Issue #178 (T182) - Implement moderation queue management:**
 - Created queue configuration module with environment-based AWS SNS/SQS setup (services/moderation-service/src/queue/queue.config.ts:1-73)
