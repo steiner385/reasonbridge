@@ -2,11 +2,25 @@
 
 ## Current Status
 
-- Completed issue #136 (T140) - Create proposition cluster view
-- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- No CI workflows configured yet
+- Completed issue #137 (T141) - Integrate common ground panel in topic detail
+- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #137 (T141) - Integrate common ground panel in topic detail:**
+- Created useCommonGroundAnalysis hook (frontend/src/lib/useCommonGroundAnalysis.ts)
+  - React Query hook for fetching common ground analysis from `/topics/:id/common-ground-analysis`
+  - Follows same pattern as useTopic hook
+  - Enabled only when topicId is provided
+- Updated TopicDetailPage (frontend/src/pages/Topics/TopicDetailPage.tsx)
+  - Integrated CommonGroundSummaryPanel component
+  - Panel displays between main topic card and discussion responses
+  - Conditional rendering based on data availability
+  - Added placeholder callback handlers for viewing agreement zones, misunderstandings, and disagreements
+  - showLastUpdated and showEmptyState enabled
+- TypeScript compilation and build successful
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #519
 
 **Issue #136 (T140) - Create proposition cluster view:**
 - Added PropositionCluster and PropositionClusteringResult types (frontend/src/types/common-ground.ts:263-337)
