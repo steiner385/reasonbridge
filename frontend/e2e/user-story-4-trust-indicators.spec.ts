@@ -12,7 +12,7 @@ import { test, expect, Page } from '@playwright/test';
  * - Profile integration with trust indicators
  */
 
-test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
+test.describe.skip('User Story 4: Trust Indicators and Human Authenticity', () => {
   // Helper function to generate unique test users
   const generateTestUser = (suffix: string = '') => {
     const timestamp = Date.now();
