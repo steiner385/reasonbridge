@@ -5,13 +5,17 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { CommonGroundTriggerService } from '../services/common-ground-trigger.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
 import type { ResponseDto, CitedSourceDto, UserSummaryDto } from './dto/response.dto.js';
 
 @Injectable()
 export class ResponsesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly commonGroundTrigger: CommonGroundTriggerService,
+  ) {}
 
   /**
    * Get all responses for a discussion topic
@@ -157,6 +161,23 @@ export class ResponsesService {
         skipDuplicates: true,
       });
     }
+
+    // Increment topic response count
+    await this.prisma.discussionTopic.update({
+      where: { id: topicId },
+      data: {
+        responseCount: {
+          increment: 1,
+        },
+      },
+    });
+
+    // Check and trigger common ground analysis if needed
+    // This is fire-and-forget - we don't wait for it to complete
+    this.commonGroundTrigger.checkAndTrigger(topicId).catch((error) => {
+      // Error is already logged in the service, but log here too for visibility
+      console.error(`Failed to check/trigger common ground analysis: ${error.message}`);
+    });
 
     // Fetch the complete response with all relations
     const completeResponse = await this.prisma.response.findUnique({
