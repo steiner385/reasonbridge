@@ -122,3 +122,76 @@ export const FLAG_CATEGORIES: Record<FlagCategory, { label: string; description:
     description: 'Another reason not listed above',
   },
 };
+
+/**
+ * Moderation action types
+ */
+export type ModerationTargetType = 'response' | 'user' | 'topic';
+export type ModerationActionType = 'educate' | 'warn' | 'hide' | 'remove' | 'suspend' | 'ban';
+export type ModerationSeverity = 'non_punitive' | 'consequential';
+export type ModerationActionStatus = 'pending' | 'active' | 'appealed' | 'reversed';
+export type AppealStatus = 'pending' | 'under_review' | 'upheld' | 'denied';
+
+/**
+ * Moderation Action
+ */
+export interface ModerationAction {
+  id: string;
+  targetType: ModerationTargetType;
+  targetId: string;
+  actionType: ModerationActionType;
+  severity: ModerationSeverity;
+  reasoning: string;
+  aiRecommended: boolean;
+  aiConfidence?: number;
+  approvedById?: string;
+  approvedAt?: string;
+  status: ModerationActionStatus;
+  createdAt: string;
+  executedAt?: string;
+}
+
+/**
+ * Appeal
+ */
+export interface Appeal {
+  id: string;
+  moderationActionId: string;
+  appellantId: string;
+  reason: string;
+  status: AppealStatus;
+  reviewerId?: string;
+  decisionReasoning?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+/**
+ * Queue Statistics
+ */
+export interface QueueStats {
+  totalPending: number;
+  pendingByType: Record<ModerationActionType, number>;
+  avgReviewTimeMinutes: number;
+  criticalActions: number;
+}
+
+/**
+ * Moderation Action List Response
+ */
+export interface ModerationActionListResponse {
+  data: ModerationAction[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Appeals List Response
+ */
+export interface AppealsListResponse {
+  data: Appeal[];
+  total: number;
+  page: number;
+  pageSize: number;
+}

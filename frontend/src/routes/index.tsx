@@ -8,6 +8,7 @@ import AgreementVisualizationDemoPage from '../pages/Topics/AgreementVisualizati
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
+import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -56,6 +57,10 @@ export const routes: RouteObject[] = [
   {
     path: '/verification',
     element: <VerificationPage />,
+  },
+  {
+    path: '/admin/moderation',
+    element: <ModerationDashboardPage />,
   },
   {
     path: '*',
