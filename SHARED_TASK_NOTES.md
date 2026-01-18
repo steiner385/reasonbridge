@@ -1,23 +1,21 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed issue #109 (T113) - Create fallacy warnings component
-- ~175 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #110 (T114) - Implement feedback dismissal tracking
+- ~174 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
-**Issue #109 (T113) - Create fallacy warnings component:**
-- Created FallacyWarnings component in frontend/src/components/feedback/FallacyWarnings.tsx
-- Displays AI-detected logical fallacies with educational feedback in "curious peer" voice
-- Supports 10 common fallacy types (ad hominem, straw man, false dichotomy, etc.)
-- Severity-based styling: high (red), medium (amber), low (yellow) based on confidence score
-- Expandable details with fallacy definitions and AI reasoning
-- Educational resources integration
-- Compact badge mode and full card mode
-- Configurable minimum confidence threshold (default 0.8)
-- Full accessibility with ARIA labels and keyboard navigation
-- Added FallacySubtype, FallacySeverity types and FallacyWarningsProps interface
-- Playwright test structure in frontend/tests/fallacy-warnings.spec.ts
-- Merged via PR #469
+**Issue #110 (T114) - Implement feedback dismissal tracking:**
+- Added dismissedAt (DateTime) and dismissalReason (String) fields to Feedback model (packages/db-models/prisma/schema.prisma:468-469)
+- Created DismissFeedbackDto for dismissal request validation (services/ai-service/src/feedback/dto/dismiss-feedback.dto.ts)
+- Implemented dismissFeedback() method in FeedbackService (services/ai-service/src/feedback/feedback.service.ts:80-100)
+- Added PATCH /feedback/:id/dismiss endpoint to FeedbackController (services/ai-service/src/feedback/feedback.controller.ts:46-53)
+- Extended Feedback and FeedbackResponse interfaces with dismissal fields (frontend/src/types/feedback.ts:36-37, 54-55, 62-64)
+- Created useFeedbackActions hook for dismissal API integration (frontend/src/hooks/useFeedbackActions.ts)
+- Updated FeedbackDisplayPanel to auto-filter dismissed feedback (frontend/src/components/feedback/FeedbackDisplayPanel.tsx:87)
+- Persistent dismissal tracking in PostgreSQL with optional reason for analytics
+- Type-safe implementation across TypeScript stack
+- Merged via PR #470
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
