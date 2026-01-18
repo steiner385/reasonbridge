@@ -331,13 +331,15 @@ export class ArgumentTranslator {
       (f) => !presentFoundations.includes(f),
     );
 
-    if (missingTargetFoundations.length > 0) {
-      return missingTargetFoundations[0];
+    const firstMissing = missingTargetFoundations[0];
+    if (firstMissing !== undefined) {
+      return firstMissing;
     }
 
     // Fallback: use the target's top foundation
-    if (targetFoundations.length > 0) {
-      return targetFoundations[0];
+    const firstTarget = targetFoundations[0];
+    if (firstTarget !== undefined) {
+      return firstTarget;
     }
 
     // Last resort: use 'fairness' as a universal bridge
@@ -375,12 +377,14 @@ export class ArgumentTranslator {
 
     // If it's a long argument, take the first sentence
     const sentences = claim.split(/[.!?]+/);
-    if (sentences.length > 0 && sentences[0].length > 0) {
-      claim = sentences[0].trim();
+    const firstSentence = sentences[0];
+    if (firstSentence !== undefined && firstSentence.length > 0) {
+      claim = firstSentence.trim();
     }
 
     // Ensure it starts with lowercase (will be preceded by template prefix)
-    return claim.charAt(0).toLowerCase() + claim.slice(1);
+    const firstChar = claim.charAt(0);
+    return firstChar.toLowerCase() + claim.slice(1);
   }
 
   /**
@@ -405,7 +409,8 @@ export class ArgumentTranslator {
     }
 
     // Boost if target foundation is clearly different from present foundations
-    if (presentFoundations.length > 0 && !presentFoundations.includes(targetFoundations[0])) {
+    const firstTargetConf = targetFoundations[0];
+    if (presentFoundations.length > 0 && firstTargetConf !== undefined && !presentFoundations.includes(firstTargetConf)) {
       confidence += 0.1;
     }
 
@@ -445,7 +450,7 @@ export class ArgumentTranslator {
   /**
    * Get educational resources for a moral foundation
    */
-  private getEducationalResources(foundation: MoralFoundation): TranslationResult['educationalResources'] {
+  private getEducationalResources(foundation: MoralFoundation): Array<{ title: string; url: string }> {
     const baseUrl = 'https://moralfoundations.org';
 
     return [
