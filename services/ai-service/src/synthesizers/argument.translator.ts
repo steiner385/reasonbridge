@@ -62,12 +62,10 @@ export interface TranslationResult {
     target: MoralFoundation[];
   };
   /** Educational resources about the moral foundations used */
-  educationalResources?:
-    | Array<{
-        title: string;
-        url: string;
-      }>
-    | undefined;
+  educationalResources?: Array<{
+    title: string;
+    url: string;
+  }>;
 }
 
 /**
@@ -455,7 +453,7 @@ export class ArgumentTranslator {
    */
   private getEducationalResources(
     foundation: MoralFoundation,
-  ): TranslationResult['educationalResources'] {
+  ): Array<{ title: string; url: string }> {
     const baseUrl = 'https://moralfoundations.org';
 
     return [
