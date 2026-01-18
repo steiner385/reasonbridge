@@ -3,7 +3,13 @@ import { Injectable } from '@nestjs/common';
 /**
  * Moral foundation based on Haidt's Moral Foundations Theory
  */
-export type MoralFoundation = 'care' | 'fairness' | 'loyalty' | 'authority' | 'sanctity' | 'liberty';
+export type MoralFoundation =
+  | 'care'
+  | 'fairness'
+  | 'loyalty'
+  | 'authority'
+  | 'sanctity'
+  | 'liberty';
 
 /**
  * Profile indicating which moral foundations a person/group prioritizes
@@ -56,10 +62,12 @@ export interface TranslationResult {
     target: MoralFoundation[];
   };
   /** Educational resources about the moral foundations used */
-  educationalResources?: Array<{
-    title: string;
-    url: string;
-  }>;
+  educationalResources?:
+    | Array<{
+        title: string;
+        url: string;
+      }>
+    | undefined;
 }
 
 /**
@@ -266,11 +274,7 @@ export class ArgumentTranslator {
     );
 
     // Generate reasoning explanation
-    const reasoning = this.generateReasoning(
-      sourceFoundations,
-      targetFoundation,
-      confidenceScore,
-    );
+    const reasoning = this.generateReasoning(sourceFoundations, targetFoundation, confidenceScore);
 
     // Add educational resources
     const educationalResources = this.getEducationalResources(targetFoundation);
@@ -331,15 +335,13 @@ export class ArgumentTranslator {
       (f) => !presentFoundations.includes(f),
     );
 
-    const firstMissing = missingTargetFoundations[0];
-    if (firstMissing !== undefined) {
-      return firstMissing;
+    if (missingTargetFoundations.length > 0) {
+      return missingTargetFoundations[0]!;
     }
 
     // Fallback: use the target's top foundation
-    const firstTarget = targetFoundations[0];
-    if (firstTarget !== undefined) {
-      return firstTarget;
+    if (targetFoundations.length > 0) {
+      return targetFoundations[0]!;
     }
 
     // Last resort: use 'fairness' as a universal bridge
@@ -377,14 +379,12 @@ export class ArgumentTranslator {
 
     // If it's a long argument, take the first sentence
     const sentences = claim.split(/[.!?]+/);
-    const firstSentence = sentences[0];
-    if (firstSentence !== undefined && firstSentence.length > 0) {
-      claim = firstSentence.trim();
+    if (sentences.length > 0 && sentences[0]!.length > 0) {
+      claim = sentences[0]!.trim();
     }
 
     // Ensure it starts with lowercase (will be preceded by template prefix)
-    const firstChar = claim.charAt(0);
-    return firstChar.toLowerCase() + claim.slice(1);
+    return claim.charAt(0).toLowerCase() + claim.slice(1);
   }
 
   /**
@@ -409,8 +409,11 @@ export class ArgumentTranslator {
     }
 
     // Boost if target foundation is clearly different from present foundations
-    const firstTargetConf = targetFoundations[0];
-    if (presentFoundations.length > 0 && firstTargetConf !== undefined && !presentFoundations.includes(firstTargetConf)) {
+    if (
+      presentFoundations.length > 0 &&
+      targetFoundations.length > 0 &&
+      !presentFoundations.includes(targetFoundations[0]!)
+    ) {
       confidence += 0.1;
     }
 
@@ -450,7 +453,9 @@ export class ArgumentTranslator {
   /**
    * Get educational resources for a moral foundation
    */
-  private getEducationalResources(foundation: MoralFoundation): Array<{ title: string; url: string }> {
+  private getEducationalResources(
+    foundation: MoralFoundation,
+  ): TranslationResult['educationalResources'] {
     const baseUrl = 'https://moralfoundations.org';
 
     return [
