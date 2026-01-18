@@ -65,7 +65,9 @@ export class CognitoService {
       }
 
       if (errorObj.name === 'UserNotConfirmedException') {
-        throw new UnauthorizedException('Email not verified. Please check your email for verification link.');
+        throw new UnauthorizedException(
+          'Email not verified. Please check your email for verification link.',
+        );
       }
 
       // Log unexpected errors but don't expose details to user

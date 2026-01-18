@@ -5,6 +5,7 @@ Moderation service for content review and policy enforcement.
 ## Overview
 
 This service provides moderation capabilities for the uniteDiscord platform, including:
+
 - Content review workflows
 - Policy enforcement
 - User and content flagging
@@ -53,14 +54,15 @@ pnpm typecheck
 ## API Endpoints
 
 ### Health Check
+
 - **GET** `/health` - Service health status
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Service port | `3003` |
-| `DATABASE_URL` | PostgreSQL connection string | - |
+| Variable       | Description                  | Default |
+| -------------- | ---------------------------- | ------- |
+| `PORT`         | Service port                 | `3003`  |
+| `DATABASE_URL` | PostgreSQL connection string | -       |
 
 ## Current Implementation Status
 

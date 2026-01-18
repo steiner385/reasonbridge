@@ -34,9 +34,11 @@ test.describe('Browse Topics and View Details', () => {
 
     // Check if either topics are displayed or "No topics found" message
     const noTopicsMessage = page.getByText(/no topics found/i);
-    const topicCards = page.locator('[data-testid="topic-card"]').or(page.locator('article').first());
+    const topicCards = page
+      .locator('[data-testid="topic-card"]')
+      .or(page.locator('article').first());
 
-    const hasTopics = await topicCards.count() > 0;
+    const hasTopics = (await topicCards.count()) > 0;
     const hasNoTopicsMessage = await noTopicsMessage.isVisible().catch(() => false);
 
     // Either topics should be shown or "no topics" message
@@ -84,7 +86,10 @@ test.describe('Browse Topics and View Details', () => {
       await firstTopicLink.click();
 
       // Wait for detail page to load
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Verify detail page components
       // Status badge (ACTIVE, SEEDING, or ARCHIVED)
@@ -114,7 +119,10 @@ test.describe('Browse Topics and View Details', () => {
       await firstTopicLink.click();
 
       // Wait for detail page
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Click back to topics link
       const backLink = page.getByText(/back to topics/i).or(page.locator('a[href="/topics"]'));
@@ -137,7 +145,7 @@ test.describe('Browse Topics and View Details', () => {
     const prevButton = page.getByRole('button', { name: /previous/i });
 
     // If pagination exists, test it
-    const hasNextButton = await nextButton.count() > 0;
+    const hasNextButton = (await nextButton.count()) > 0;
 
     if (hasNextButton) {
       // Previous button should be disabled on page 1
@@ -166,14 +174,18 @@ test.describe('Browse Topics and View Details', () => {
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
     // Look for sort controls
-    const sortControls = page.locator('text=/sort by/i').or(page.locator('[data-testid="sort-select"]'));
+    const sortControls = page
+      .locator('text=/sort by/i')
+      .or(page.locator('[data-testid="sort-select"]'));
 
     // Filters should be present
     await expect(sortControls.first()).toBeVisible();
 
     // Check for common filter options (status, tags, etc.)
     // These might be in dropdowns, so we just verify the filter UI exists
-    const filterContainer = page.locator('.topic-filter-ui').or(page.locator('text=/filter/i').first());
+    const filterContainer = page
+      .locator('.topic-filter-ui')
+      .or(page.locator('text=/filter/i').first());
     await expect(filterContainer).toBeVisible();
   });
 
@@ -182,10 +194,12 @@ test.describe('Browse Topics and View Details', () => {
     const navigationPromise = page.goto('/topics');
 
     // Check for loading indicator
-    const loadingIndicator = page.locator('text=Loading topics...').or(page.locator('.animate-spin'));
+    const loadingIndicator = page
+      .locator('text=Loading topics...')
+      .or(page.locator('.animate-spin'));
 
     // Loading should appear briefly
-    const isVisible = await loadingIndicator.isVisible().catch(() => false);
+    await loadingIndicator.isVisible().catch(() => false);
 
     // Note: Loading might be too fast to catch, so we don't fail if we miss it
     // Just verify the page eventually loads
@@ -209,7 +223,7 @@ test.describe('Browse Topics and View Details', () => {
       const cardContainer = firstCard.locator('..').first();
 
       // Look for topic title (usually in a heading or prominent text)
-      const hasHeading = await cardContainer.locator('h1, h2, h3, h4').count() > 0;
+      await cardContainer.locator('h1, h2, h3, h4').count();
       const hasText = await cardContainer.textContent();
 
       // Card should have some content
@@ -233,7 +247,10 @@ test.describe('Browse Topics and View Details', () => {
       await page.goto(topicUrl);
 
       // Should show topic details (not 404)
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Should have back navigation
       await expect(page.getByText(/back to topics/i)).toBeVisible();

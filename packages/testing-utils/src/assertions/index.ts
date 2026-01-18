@@ -11,7 +11,7 @@ export class AssertionError extends Error {
   constructor(
     message: string,
     public readonly expected: unknown,
-    public readonly actual: unknown
+    public readonly actual: unknown,
   ) {
     super(message);
     this.name = 'AssertionError';
@@ -23,13 +23,13 @@ export class AssertionError extends Error {
  */
 export function assertDefined<T>(
   value: T | null | undefined,
-  message?: string
+  message?: string,
 ): asserts value is T {
   if (value === null || value === undefined) {
     throw new AssertionError(
       message ?? `Expected value to be defined, but got ${value}`,
       'defined value',
-      value
+      value,
     );
   }
 }
@@ -37,15 +37,12 @@ export function assertDefined<T>(
 /**
  * Assert that a value is null or undefined
  */
-export function assertNullish(
-  value: unknown,
-  message?: string
-): asserts value is null | undefined {
+export function assertNullish(value: unknown, message?: string): asserts value is null | undefined {
   if (value !== null && value !== undefined) {
     throw new AssertionError(
       message ?? `Expected value to be null or undefined, but got ${typeof value}`,
       'null or undefined',
-      value
+      value,
     );
   }
 }
@@ -58,7 +55,7 @@ export function assertOk<T, E>(result: Result<T, E>, message?: string): T {
     throw new AssertionError(
       message ?? `Expected Result to be success, but got error: ${String(result.error)}`,
       'successful result',
-      result.error
+      result.error,
     );
   }
   return result.data;
@@ -72,7 +69,7 @@ export function assertErr<T, E>(result: Result<T, E>, message?: string): E {
     throw new AssertionError(
       message ?? `Expected Result to be error, but got success: ${String(result.data)}`,
       'error result',
-      result.data
+      result.data,
     );
   }
   return result.error;
@@ -89,7 +86,7 @@ export function assertDeepEqual<T>(actual: T, expected: T, message?: string): vo
     throw new AssertionError(
       message ?? `Values are not deeply equal:\nExpected: ${expectedJson}\nActual: ${actualJson}`,
       expected,
-      actual
+      actual,
     );
   }
 }
@@ -97,17 +94,13 @@ export function assertDeepEqual<T>(actual: T, expected: T, message?: string): vo
 /**
  * Assert that an array contains a specific item
  */
-export function assertContains<T>(
-  array: readonly T[],
-  item: T,
-  message?: string
-): void {
+export function assertContains<T>(array: readonly T[], item: T, message?: string): void {
   const found = array.some((element) => JSON.stringify(element) === JSON.stringify(item));
   if (!found) {
     throw new AssertionError(
       message ?? `Expected array to contain item: ${JSON.stringify(item)}`,
       item,
-      array
+      array,
     );
   }
 }
@@ -115,16 +108,12 @@ export function assertContains<T>(
 /**
  * Assert that a string matches a pattern
  */
-export function assertMatches(
-  value: string,
-  pattern: RegExp,
-  message?: string
-): void {
+export function assertMatches(value: string, pattern: RegExp, message?: string): void {
   if (!pattern.test(value)) {
     throw new AssertionError(
       message ?? `Expected "${value}" to match pattern ${pattern}`,
       pattern.toString(),
-      value
+      value,
     );
   }
 }
@@ -135,7 +124,7 @@ export function assertMatches(
 export function assertThrows(
   fn: () => unknown,
   expectedError?: string | RegExp | (new (...args: unknown[]) => Error),
-  message?: string
+  message?: string,
 ): Error {
   let thrown: Error | undefined;
 
@@ -149,7 +138,7 @@ export function assertThrows(
     throw new AssertionError(
       message ?? 'Expected function to throw an error',
       'thrown error',
-      'no error'
+      'no error',
     );
   }
 
@@ -166,14 +155,14 @@ export function assertThrows(
 function validateThrownError(
   thrown: Error,
   expectedError: string | RegExp | (new (...args: unknown[]) => Error),
-  message?: string
+  message?: string,
 ): void {
   if (typeof expectedError === 'string') {
     if (!thrown.message.includes(expectedError)) {
       throw new AssertionError(
         message ?? `Expected error message to include "${expectedError}"`,
         expectedError,
-        thrown.message
+        thrown.message,
       );
     }
   } else if (expectedError instanceof RegExp) {
@@ -181,7 +170,7 @@ function validateThrownError(
       throw new AssertionError(
         message ?? `Expected error message to match ${expectedError}`,
         expectedError.toString(),
-        thrown.message
+        thrown.message,
       );
     }
   } else {
@@ -190,7 +179,7 @@ function validateThrownError(
       throw new AssertionError(
         message ?? `Expected error to be instance of ${expectedError.name}`,
         expectedError.name,
-        (thrown as { constructor: { name: string } }).constructor.name
+        (thrown as { constructor: { name: string } }).constructor.name,
       );
     }
   }
@@ -202,7 +191,7 @@ function validateThrownError(
 export async function assertThrowsAsync(
   fn: () => Promise<unknown>,
   expectedError?: string | RegExp | (new (...args: unknown[]) => Error),
-  message?: string
+  message?: string,
 ): Promise<Error> {
   let thrown: Error | undefined;
 
@@ -216,7 +205,7 @@ export async function assertThrowsAsync(
     throw new AssertionError(
       message ?? 'Expected async function to throw an error',
       'thrown error',
-      'no error'
+      'no error',
     );
   }
 
@@ -232,7 +221,7 @@ export async function assertThrowsAsync(
  */
 export async function waitFor(
   condition: () => boolean | Promise<boolean>,
-  options: { timeout?: number; interval?: number; message?: string } = {}
+  options: { timeout?: number; interval?: number; message?: string } = {},
 ): Promise<void> {
   const { timeout = 5000, interval = 50, message } = options;
   const start = Date.now();
@@ -247,6 +236,6 @@ export async function waitFor(
   throw new AssertionError(
     message ?? `Condition not met within ${timeout}ms`,
     'condition to be true',
-    'condition remained false'
+    'condition remained false',
   );
 }

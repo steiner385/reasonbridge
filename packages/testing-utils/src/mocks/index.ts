@@ -23,7 +23,7 @@ export interface MockFunction<TArgs extends unknown[] = unknown[], TReturn = unk
  * Create a mock function for testing
  */
 export function createMockFn<TArgs extends unknown[] = unknown[], TReturn = unknown>(
-  defaultImpl?: (...args: TArgs) => TReturn
+  defaultImpl?: (...args: TArgs) => TReturn,
 ): MockFunction<TArgs, TReturn> {
   const calls: TArgs[] = [];
   const results: Array<{ type: 'return' | 'throw'; value: unknown }> = [];
@@ -83,10 +83,7 @@ export function createMockFn<TArgs extends unknown[] = unknown[], TReturn = unkn
 /**
  * Create a spy on an object method
  */
-export function createSpy<T extends object, K extends keyof T>(
-  obj: T,
-  method: K
-): MockFunction {
+export function createSpy<T extends object, K extends keyof T>(obj: T, method: K): MockFunction {
   const original = obj[method];
   if (typeof original !== 'function') {
     throw new Error(`${String(method)} is not a function`);

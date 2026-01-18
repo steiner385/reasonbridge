@@ -7,7 +7,14 @@ import { VotesModule } from './votes/votes.module.js';
 import { AlignmentsModule } from './alignments/alignments.module.js';
 
 @Module({
-  imports: [PrismaModule, HealthModule, TopicsModule, ResponsesModule, VotesModule, AlignmentsModule],
+  imports: [
+    PrismaModule,
+    HealthModule,
+    TopicsModule,
+    ResponsesModule,
+    VotesModule,
+    AlignmentsModule,
+  ],
   controllers: [],
   providers: [],
 })

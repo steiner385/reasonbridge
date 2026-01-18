@@ -57,7 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       id,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Generate a unique ID if not provided
     const generatedId = React.useId();
@@ -79,7 +79,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     };
 
     // Base input styles
-    const baseStyles = 'rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles =
+      'rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed';
 
     // State-based border and ring styles
     const stateStyles = hasError
@@ -99,10 +100,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700 mb-1.5"
-          >
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1.5">
             {label}
             {required && <span className="text-fallacy-DEFAULT ml-1">*</span>}
           </label>
@@ -123,11 +121,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={inputClassName}
             aria-invalid={hasError}
             aria-describedby={
-              error
-                ? `${inputId}-error`
-                : helperText
-                ? `${inputId}-helper`
-                : undefined
+              error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
             }
             required={required}
             {...props}
@@ -143,26 +137,19 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p
-            id={`${inputId}-error`}
-            className="mt-1.5 text-sm text-fallacy-DEFAULT"
-            role="alert"
-          >
+          <p id={`${inputId}-error`} className="mt-1.5 text-sm text-fallacy-DEFAULT" role="alert">
             {error}
           </p>
         )}
 
         {!error && helperText && (
-          <p
-            id={`${inputId}-helper`}
-            className="mt-1.5 text-sm text-gray-500"
-          >
+          <p id={`${inputId}-helper`} className="mt-1.5 text-sm text-gray-500">
             {helperText}
           </p>
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = 'Input';

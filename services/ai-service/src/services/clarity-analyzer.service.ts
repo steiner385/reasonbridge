@@ -116,7 +116,10 @@ export class ClarityAnalyzerService {
    */
   private createUnsourcedFeedback(matches: string[]): AnalysisResult {
     const confidenceScore = Math.min(0.88, 0.65 + matches.length * 0.08);
-    const examples = [...new Set(matches)].slice(0, 2).map((m) => `"${m}"`).join(', ');
+    const examples = [...new Set(matches)]
+      .slice(0, 2)
+      .map((m) => `"${m}"`)
+      .join(', ');
 
     return {
       type: FeedbackType.UNSOURCED,
@@ -144,7 +147,10 @@ export class ClarityAnalyzerService {
    */
   private createBiasFeedback(matches: string[]): AnalysisResult {
     const confidenceScore = Math.min(0.85, 0.6 + matches.length * 0.08);
-    const examples = [...new Set(matches)].slice(0, 2).map((m) => `"${m}"`).join(', ');
+    const examples = [...new Set(matches)]
+      .slice(0, 2)
+      .map((m) => `"${m}"`)
+      .join(', ');
 
     return {
       type: FeedbackType.BIAS,

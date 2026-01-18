@@ -92,7 +92,7 @@ const Modal: React.FC<ModalProps> = ({
     if (!isOpen || !modalRef.current) return;
 
     const focusableElements = modalRef.current.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     const firstElement = focusableElements[0] as HTMLElement;
     const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
@@ -165,12 +165,7 @@ const Modal: React.FC<ModalProps> = ({
                 className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
                 aria-label="Close modal"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -183,9 +178,7 @@ const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-            {children}
-          </div>
+          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">{children}</div>
 
           {/* Footer */}
           {footer && (
