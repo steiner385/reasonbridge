@@ -46,6 +46,42 @@ export enum ToneSubtype {
 }
 
 /**
+ * Clarity-specific feedback subtypes
+ */
+export enum ClaritySubtype {
+  UNSOURCED_CLAIM = 'unsourced_claim',
+  VAGUE_LANGUAGE = 'vague_language',
+  LOADED_LANGUAGE = 'loaded_language',
+  BIAS_INDICATOR = 'bias_indicator',
+}
+
+/**
+ * Clarity metrics for a response
+ */
+export interface ClarityMetrics {
+  sourcingScore: number; // 0.00-1.00 (1.0 = well-sourced)
+  neutralityScore: number; // 0.00-1.00 (1.0 = neutral)
+  specificityScore: number; // 0.00-1.00 (1.0 = specific)
+  overallClarityScore: number; // 0.00-1.00 (average of above)
+  issuesDetected: {
+    unsourcedClaims: number;
+    biasIndicators: number;
+    vagueStatements: number;
+  };
+}
+
+/**
+ * Props for ClarityScoreDisplay component
+ */
+export interface ClarityScoreDisplayProps {
+  feedback: Feedback[];
+  metrics?: ClarityMetrics;
+  compact?: boolean;
+  onAcknowledge?: (feedbackId: string) => void;
+  onRateHelpful?: (feedbackId: string, rating: HelpfulRating) => void;
+}
+
+/**
  * Props for ToneIndicator component
  */
 export interface ToneIndicatorProps {
