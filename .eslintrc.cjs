@@ -8,13 +8,10 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: './tsconfig.json',
   },
   extends: [
     'airbnb-base',
-    'airbnb-typescript/base',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'prettier',
   ],
   plugins: ['@typescript-eslint'],
@@ -37,6 +34,7 @@ module.exports = {
           '**/test/**',
           '**/__tests__/**',
           '**/vitest.config.ts',
+          '**/vitest.*.config.ts',
           '**/jest.config.ts',
         ],
       },
@@ -69,33 +67,26 @@ module.exports = {
     'dist/',
     'build/',
     'coverage/',
+    'packages/',
+    'services/',
+    'infrastructure/',
     '*.js',
-    '!.eslintrc.js',
+    '!.eslintrc.cjs',
   ],
   overrides: [
-    {
-      // React frontend overrides
-      files: ['frontend/**/*.tsx', 'frontend/**/*.ts'],
-      extends: ['airbnb', 'airbnb-typescript', 'airbnb/hooks', 'prettier'],
-      parserOptions: {
-        project: './frontend/tsconfig.json',
-      },
-      env: {
-        browser: true,
-      },
-      rules: {
-        'react/react-in-jsx-scope': 'off',
-        'react/prop-types': 'off',
-        'react/require-default-props': 'off',
-        'react/jsx-props-no-spreading': 'off',
-      },
-    },
     {
       // Test files
       files: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**', '**/__tests__/**'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         'no-console': 'off',
+      },
+    },
+    {
+      // Vitest config files
+      files: ['**/vitest.config.ts', '**/vitest.*.config.ts'],
+      rules: {
+        'import/no-unresolved': 'off',
       },
     },
   ],

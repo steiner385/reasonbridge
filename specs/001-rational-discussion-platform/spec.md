@@ -198,6 +198,33 @@ A user wants to start a new conversation on a topic not yet covered. They can cr
 - **FR-043**: System MUST provide a "Following" feed showing recent activity from followed contributors
 - **FR-044**: System MUST recommend contributors with different perspectives to follow, not just similar ones, to prevent echo chambers
 
+### Non-Functional Requirements
+
+**Observability & Testing**
+- **NFR-001**: System MUST emit structured event logs with correlation IDs for all significant actions including AI feedback generation, moderation actions, user authentication events, and discussion participation
+- **NFR-002**: System MUST log AI decision metadata (confidence scores, model version, input features) to support test assertions and model quality monitoring
+- **NFR-003**: System MUST support log levels (DEBUG, INFO, WARN, ERROR) configurable per environment to enable verbose logging in test environments
+
+**Performance**
+- **NFR-004**: User-facing API endpoints MUST respond within 200ms at the 95th percentile under normal load
+- **NFR-005**: Real-time AI feedback (bias detection, tone analysis) MUST complete within 500ms per existing AI Architecture specification
+- **NFR-006**: System MUST support 10,000 concurrent users without degradation per SC-014
+
+**Accessibility**
+- **NFR-007**: All user interfaces MUST conform to WCAG 2.2 Level AA success criteria
+- **NFR-008**: System MUST support keyboard-only navigation for all interactive features
+- **NFR-009**: System MUST provide appropriate ARIA labels and roles for dynamic content updates (AI feedback, real-time analysis)
+
+**Reliability & Availability**
+- **NFR-010**: System MUST maintain 99.9% availability (maximum 8.76 hours unplanned downtime per year)
+- **NFR-011**: System MUST gracefully degrade when external dependencies (OAuth providers, fact-check APIs) are unavailable
+- **NFR-012**: System MUST persist user draft responses locally to prevent data loss during unexpected disconnections
+
+**Error Handling**
+- **NFR-013**: All API error responses MUST include a machine-readable error code and a human-friendly message
+- **NFR-014**: Error codes MUST follow a consistent taxonomy (e.g., AUTH_001, VALIDATION_002, RATE_LIMIT_001) to enable precise test assertions
+- **NFR-015**: User-facing error messages MUST be actionable, explaining what went wrong and how to resolve it
+
 ### Key Entities
 
 - **User**: A registered participant; attributes include display name, verification level, trust score (ABI dimensions), topic interests, participation history, moral foundation profile (internal), position fingerprint (internal), topic affinities, followed contributors, followers
@@ -437,6 +464,11 @@ The platform leverages a hybrid AI architecture to balance real-time responsiven
 - Q: How should relationships between topics be handled? → A: Hybrid linking - AI suggests relationships + users can propose/confirm links with relationship types (builds-on, responds-to, contradicts, related); combines scalability with human insight
 - Q: How should user perspectives be represented? → A: Inferred positions - system tracks moral foundation patterns and proposition alignments without explicit identity labels; enables diversity detection without creating tribal identities
 - Q: Should users be able to form or belong to groups? → A: Follow individuals only - no formal groups to prevent tribal dynamics and echo chambers; users can follow individual contributors to track perspectives they value (aligned or productively challenging)
+- Q: How should the platform log system events and AI decisions for testing and debugging? → A: Structured event logging with correlation IDs for all significant actions (AI feedback, moderation, user actions)
+- Q: What should be the target response time for user-facing API endpoints? → A: 200ms p95 - responsive while allowing moderate processing
+- Q: Which accessibility standard should the platform conform to? → A: WCAG 2.2 AA - newest standard with focus appearance and dragging alternatives
+- Q: What availability target should the platform aim for? → A: 99.9% (8.76 hours/year downtime) - standard SaaS availability
+- Q: How should user-facing errors be communicated? → A: Structured error codes with user-friendly messages - testable codes + readable messages
 
 ## Out of Scope (Initial Release)
 

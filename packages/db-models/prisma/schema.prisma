@@ -16,33 +16,34 @@ datasource db {
 
 /// User account with trust scores and verification status
 model User {
-  id                       String   @id @default(uuid()) @db.Uuid
-  email                    String   @unique
-  displayName              String   @map("display_name") @db.VarChar(50)
-  cognitoSub               String   @unique @map("cognito_sub")
-  verificationLevel        VerificationLevel @default(BASIC) @map("verification_level")
-  trustScoreAbility        Decimal  @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
-  trustScoreBenevolence    Decimal  @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
-  trustScoreIntegrity      Decimal  @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
-  moralFoundationProfile   Json?    @map("moral_foundation_profile")
-  positionFingerprint      Json?    @map("position_fingerprint")
-  topicAffinities          Json?    @map("topic_affinities")
-  status                   UserStatus @default(ACTIVE)
-  createdAt                DateTime @default(now()) @map("created_at")
-  updatedAt                DateTime @updatedAt @map("updated_at")
+  id                     String            @id @default(uuid()) @db.Uuid
+  email                  String            @unique
+  displayName            String            @map("display_name") @db.VarChar(50)
+  cognitoSub             String            @unique @map("cognito_sub")
+  verificationLevel      VerificationLevel @default(BASIC) @map("verification_level")
+  trustScoreAbility      Decimal           @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
+  trustScoreBenevolence  Decimal           @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
+  trustScoreIntegrity    Decimal           @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
+  moralFoundationProfile Json?             @map("moral_foundation_profile")
+  positionFingerprint    Json?             @map("position_fingerprint")
+  topicAffinities        Json?             @map("topic_affinities")
+  status                 UserStatus        @default(ACTIVE)
+  createdAt              DateTime          @default(now()) @map("created_at")
+  updatedAt              DateTime          @updatedAt @map("updated_at")
 
   // Relations
-  verificationRecords      VerificationRecord[]
-  following                UserFollow[] @relation("Follower")
-  followers                UserFollow[] @relation("Followed")
-  createdTopics            DiscussionTopic[]
-  responses                Response[]
-  alignments               Alignment[]
-  proposedTopicLinks       TopicLink[] @relation("LinkProposer")
-  createdPropositions      Proposition[]
-  appeals                  Appeal[]
-  moderationApprovals      ModerationAction[] @relation("ModeratorApproval")
-  appealReviews            Appeal[] @relation("AppealReviewer")
+  verificationRecords VerificationRecord[]
+  following           UserFollow[]         @relation("Follower")
+  followers           UserFollow[]         @relation("Followed")
+  createdTopics       DiscussionTopic[]
+  responses           Response[]
+  votes               Vote[]
+  alignments          Alignment[]
+  proposedTopicLinks  TopicLink[]          @relation("LinkProposer")
+  createdPropositions Proposition[]
+  appeals             Appeal[]
+  moderationApprovals ModerationAction[]   @relation("ModeratorApproval")
+  appealReviews       Appeal[]             @relation("AppealReviewer")
 
   @@index([cognitoSub])
   @@index([email])
@@ -68,17 +69,17 @@ enum UserStatus {
 
 /// Tracks user verification records (email, phone, government ID)
 model VerificationRecord {
-  id                String   @id @default(uuid()) @db.Uuid
-  userId            String   @map("user_id") @db.Uuid
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @map("user_id") @db.Uuid
   type              VerificationType
   status            VerificationStatus @default(PENDING)
-  verifiedAt        DateTime? @map("verified_at")
-  expiresAt         DateTime? @map("expires_at")
-  providerReference String?  @map("provider_reference")
-  createdAt         DateTime @default(now()) @map("created_at")
+  verifiedAt        DateTime?          @map("verified_at")
+  expiresAt         DateTime?          @map("expires_at")
+  providerReference String?            @map("provider_reference")
+  createdAt         DateTime           @default(now()) @map("created_at")
 
   // Relations
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type])
   @@index([status])
@@ -103,15 +104,16 @@ enum VerificationStatus {
 }
 
 /// Tracks user follow relationships
+/// Note: Self-follows must be prevented at application level (follower_id != followed_id)
 model UserFollow {
-  id          String   @id @default(uuid()) @db.Uuid
-  followerId  String   @map("follower_id") @db.Uuid
-  followedId  String   @map("followed_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid()) @db.Uuid
+  followerId String   @map("follower_id") @db.Uuid
+  followedId String   @map("followed_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
 
   // Relations
-  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
-  followed    User     @relation("Followed", fields: [followedId], references: [id], onDelete: Cascade)
+  follower User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followed User @relation("Followed", fields: [followedId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followedId])
   @@index([followerId])
@@ -124,30 +126,34 @@ model UserFollow {
 // ============================================================================
 
 /// A discussion topic with tags and propositions
+/// Validation rules enforced at application level:
+/// - Title must be 10-200 characters (schema enforces max 200 via VarChar)
+/// - Requires 2-5 tags (enforced via TopicTag relations)
+/// - Cannot transition to ACTIVE until minimum_diversity_score is met
 model DiscussionTopic {
-  id                      String   @id @default(uuid()) @db.Uuid
-  title                   String   @db.VarChar(200)
-  description             String   @db.Text
-  creatorId               String   @map("creator_id") @db.Uuid
-  status                  TopicStatus @default(SEEDING)
-  evidenceStandards       EvidenceStandard @default(STANDARD) @map("evidence_standards")
-  minimumDiversityScore   Decimal  @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
-  currentDiversityScore   Decimal? @map("current_diversity_score") @db.Decimal(3, 2)
-  participantCount        Int      @default(0) @map("participant_count")
-  responseCount           Int      @default(0) @map("response_count")
-  crossCuttingThemes      String[] @map("cross_cutting_themes")
-  createdAt               DateTime @default(now()) @map("created_at")
-  activatedAt             DateTime? @map("activated_at")
-  archivedAt              DateTime? @map("archived_at")
+  id                    String           @id @default(uuid()) @db.Uuid
+  title                 String           @db.VarChar(200)
+  description           String           @db.Text
+  creatorId             String           @map("creator_id") @db.Uuid
+  status                TopicStatus      @default(SEEDING)
+  evidenceStandards     EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  minimumDiversityScore Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
+  currentDiversityScore Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
+  participantCount      Int              @default(0) @map("participant_count")
+  responseCount         Int              @default(0) @map("response_count")
+  crossCuttingThemes    String[]         @map("cross_cutting_themes")
+  createdAt             DateTime         @default(now()) @map("created_at")
+  activatedAt           DateTime?        @map("activated_at")
+  archivedAt            DateTime?        @map("archived_at")
 
   // Relations
-  creator                 User     @relation(fields: [creatorId], references: [id])
-  tags                    TopicTag[]
-  sourceLinks             TopicLink[] @relation("SourceTopic")
-  targetLinks             TopicLink[] @relation("TargetTopic")
-  propositions            Proposition[]
-  responses               Response[]
-  commonGroundAnalyses    CommonGroundAnalysis[]
+  creator              User                   @relation(fields: [creatorId], references: [id])
+  tags                 TopicTag[]
+  sourceLinks          TopicLink[]            @relation("SourceTopic")
+  targetLinks          TopicLink[]            @relation("TargetTopic")
+  propositions         Proposition[]
+  responses            Response[]
+  commonGroundAnalyses CommonGroundAnalysis[]
 
   @@index([status])
   @@index([creatorId])
@@ -172,6 +178,7 @@ enum EvidenceStandard {
 }
 
 /// Tags for categorizing discussion topics
+/// Validation: Name must be 2-50 characters (max 50 enforced by VarChar, min 2 at application level)
 model Tag {
   id            String   @id @default(uuid()) @db.Uuid
   name          String   @unique @db.VarChar(50)
@@ -182,9 +189,9 @@ model Tag {
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  parentTheme   Tag?     @relation("TagHierarchy", fields: [parentThemeId], references: [id])
-  childThemes   Tag[]    @relation("TagHierarchy")
-  topics        TopicTag[]
+  parentTheme Tag?       @relation("TagHierarchy", fields: [parentThemeId], references: [id])
+  childThemes Tag[]      @relation("TagHierarchy")
+  topics      TopicTag[]
 
   @@index([usageCount(sort: Desc)])
   @@map("tags")
@@ -192,14 +199,14 @@ model Tag {
 
 /// Junction table for topic-tag relationships
 model TopicTag {
-  topicId   String   @map("topic_id") @db.Uuid
-  tagId     String   @map("tag_id") @db.Uuid
+  topicId   String    @map("topic_id") @db.Uuid
+  tagId     String    @map("tag_id") @db.Uuid
   source    TagSource
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   // Relations
-  topic     DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  tag       Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  tag   Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([topicId, tagId])
   @@index([tagId])
@@ -215,22 +222,23 @@ enum TagSource {
 }
 
 /// Links between related discussion topics
+/// Unique constraint prevents duplicate links of same type between same topics
 model TopicLink {
-  id                  String   @id @default(uuid()) @db.Uuid
-  sourceTopicId       String   @map("source_topic_id") @db.Uuid
-  targetTopicId       String   @map("target_topic_id") @db.Uuid
-  relationshipType    TopicRelationshipType @map("relationship_type")
-  linkSource          LinkSource @map("link_source")
-  proposerId          String?  @map("proposer_id") @db.Uuid
-  confirmationStatus  ConfirmationStatus @default(PENDING) @map("confirmation_status")
-  confirmedByCount    Int      @default(0) @map("confirmed_by_count")
-  rejectedByCount     Int      @default(0) @map("rejected_by_count")
-  createdAt           DateTime @default(now()) @map("created_at")
+  id                 String                @id @default(uuid()) @db.Uuid
+  sourceTopicId      String                @map("source_topic_id") @db.Uuid
+  targetTopicId      String                @map("target_topic_id") @db.Uuid
+  relationshipType   TopicRelationshipType @map("relationship_type")
+  linkSource         LinkSource            @map("link_source")
+  proposerId         String?               @map("proposer_id") @db.Uuid
+  confirmationStatus ConfirmationStatus    @default(PENDING) @map("confirmation_status")
+  confirmedByCount   Int                   @default(0) @map("confirmed_by_count")
+  rejectedByCount    Int                   @default(0) @map("rejected_by_count")
+  createdAt          DateTime              @default(now()) @map("created_at")
 
   // Relations
-  sourceTopic         DiscussionTopic @relation("SourceTopic", fields: [sourceTopicId], references: [id], onDelete: Cascade)
-  targetTopic         DiscussionTopic @relation("TargetTopic", fields: [targetTopicId], references: [id], onDelete: Cascade)
-  proposer            User?    @relation("LinkProposer", fields: [proposerId], references: [id])
+  sourceTopic DiscussionTopic @relation("SourceTopic", fields: [sourceTopicId], references: [id], onDelete: Cascade)
+  targetTopic DiscussionTopic @relation("TargetTopic", fields: [targetTopicId], references: [id], onDelete: Cascade)
+  proposer    User?           @relation("LinkProposer", fields: [proposerId], references: [id])
 
   @@unique([sourceTopicId, targetTopicId, relationshipType])
   @@index([sourceTopicId])
@@ -267,27 +275,27 @@ enum ConfirmationStatus {
 
 /// A proposition/claim within a discussion topic
 model Proposition {
-  id                    String   @id @default(uuid()) @db.Uuid
-  topicId               String   @map("topic_id") @db.Uuid
-  statement             String   @db.VarChar(1000)
-  source                PropositionSource
-  creatorId             String?  @map("creator_id") @db.Uuid
-  parentPropositionId   String?  @map("parent_proposition_id") @db.Uuid
-  supportCount          Int      @default(0) @map("support_count")
-  opposeCount           Int      @default(0) @map("oppose_count")
-  nuancedCount          Int      @default(0) @map("nuanced_count")
-  consensusScore        Decimal? @map("consensus_score") @db.Decimal(3, 2)
-  evidencePool          Json?    @map("evidence_pool")
-  status                PropositionStatus @default(ACTIVE)
-  createdAt             DateTime @default(now()) @map("created_at")
+  id                  String            @id @default(uuid()) @db.Uuid
+  topicId             String            @map("topic_id") @db.Uuid
+  statement           String            @db.VarChar(1000)
+  source              PropositionSource
+  creatorId           String?           @map("creator_id") @db.Uuid
+  parentPropositionId String?           @map("parent_proposition_id") @db.Uuid
+  supportCount        Int               @default(0) @map("support_count")
+  opposeCount         Int               @default(0) @map("oppose_count")
+  nuancedCount        Int               @default(0) @map("nuanced_count")
+  consensusScore      Decimal?          @map("consensus_score") @db.Decimal(3, 2)
+  evidencePool        Json?             @map("evidence_pool")
+  status              PropositionStatus @default(ACTIVE)
+  createdAt           DateTime          @default(now()) @map("created_at")
 
   // Relations
-  topic                 DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  creator               User?    @relation(fields: [creatorId], references: [id])
-  parentProposition     Proposition? @relation("PropositionHierarchy", fields: [parentPropositionId], references: [id])
-  childPropositions     Proposition[] @relation("PropositionHierarchy")
-  alignments            Alignment[]
-  responses             ResponseProposition[]
+  topic             DiscussionTopic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  creator           User?                 @relation(fields: [creatorId], references: [id])
+  parentProposition Proposition?          @relation("PropositionHierarchy", fields: [parentPropositionId], references: [id])
+  childPropositions Proposition[]         @relation("PropositionHierarchy")
+  alignments        Alignment[]
+  responses         ResponseProposition[]
 
   @@index([topicId])
   @@index([parentPropositionId])
@@ -312,27 +320,32 @@ enum PropositionStatus {
 
 /// A response/comment in a discussion topic
 model Response {
-  id                    String   @id @default(uuid()) @db.Uuid
-  topicId               String   @map("topic_id") @db.Uuid
-  authorId              String   @map("author_id") @db.Uuid
-  content               String   @db.Text
-  citedSources          Json?    @map("cited_sources")
-  containsOpinion       Boolean  @default(false) @map("contains_opinion")
-  containsFactualClaims Boolean  @default(false) @map("contains_factual_claims")
+  id                    String         @id @default(uuid()) @db.Uuid
+  topicId               String         @map("topic_id") @db.Uuid
+  authorId              String         @map("author_id") @db.Uuid
+  parentId              String?        @map("parent_id") @db.Uuid
+  content               String         @db.Text
+  citedSources          Json?          @map("cited_sources")
+  containsOpinion       Boolean        @default(false) @map("contains_opinion")
+  containsFactualClaims Boolean        @default(false) @map("contains_factual_claims")
   status                ResponseStatus @default(VISIBLE)
-  revisionCount         Int      @default(0) @map("revision_count")
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  revisionCount         Int            @default(0) @map("revision_count")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  topic                 DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  author                User     @relation(fields: [authorId], references: [id])
-  propositions          ResponseProposition[]
-  feedback              Feedback[]
-  factCheckResults      FactCheckResult[]
+  topic            DiscussionTopic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author           User                  @relation(fields: [authorId], references: [id])
+  parent           Response?             @relation("ResponseThreading", fields: [parentId], references: [id], onDelete: Cascade)
+  replies          Response[]            @relation("ResponseThreading")
+  propositions     ResponseProposition[]
+  feedback         Feedback[]
+  factCheckResults FactCheckResult[]
+  votes            Vote[]
 
   @@index([topicId])
   @@index([authorId])
+  @@index([parentId])
   @@index([topicId, createdAt(sort: Desc)])
   @@index([status])
   @@map("responses")
@@ -348,31 +361,57 @@ enum ResponseStatus {
 
 /// Junction table for response-proposition relationships
 model ResponseProposition {
-  responseId      String   @map("response_id") @db.Uuid
-  propositionId   String   @map("proposition_id") @db.Uuid
-  relevanceScore  Decimal? @map("relevance_score") @db.Decimal(3, 2)
+  responseId     String   @map("response_id") @db.Uuid
+  propositionId  String   @map("proposition_id") @db.Uuid
+  relevanceScore Decimal? @map("relevance_score") @db.Decimal(3, 2)
 
   // Relations
-  response        Response    @relation(fields: [responseId], references: [id], onDelete: Cascade)
-  proposition     Proposition @relation(fields: [propositionId], references: [id], onDelete: Cascade)
+  response    Response    @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  proposition Proposition @relation(fields: [propositionId], references: [id], onDelete: Cascade)
 
   @@id([responseId, propositionId])
   @@map("response_propositions")
 }
 
-/// User alignment (support/oppose/nuanced) on a proposition
-model Alignment {
-  id                  String   @id @default(uuid()) @db.Uuid
-  userId              String   @map("user_id") @db.Uuid
-  propositionId       String   @map("proposition_id") @db.Uuid
-  stance              AlignmentStance
-  nuanceExplanation   String?  @map("nuance_explanation") @db.Text
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+/// Vote on a response (upvote/downvote)
+model Vote {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  responseId String   @map("response_id") @db.Uuid
+  voteType   VoteType @map("vote_type")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  proposition         Proposition @relation(fields: [propositionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, responseId])
+  @@index([responseId])
+  @@index([userId])
+  @@map("votes")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+
+  @@map("vote_type")
+}
+
+/// User alignment (support/oppose/nuanced) on a proposition
+model Alignment {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  propositionId     String          @map("proposition_id") @db.Uuid
+  stance            AlignmentStance
+  nuanceExplanation String?         @map("nuance_explanation") @db.Text
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposition Proposition @relation(fields: [propositionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, propositionId])
   @@index([propositionId])
@@ -389,20 +428,20 @@ enum AlignmentStance {
 
 /// AI-generated common ground analysis for a topic
 model CommonGroundAnalysis {
-  id                            String   @id @default(uuid()) @db.Uuid
-  topicId                       String   @map("topic_id") @db.Uuid
-  version                       Int
-  agreementZones                Json     @map("agreement_zones")
-  misunderstandings             Json
-  genuineDisagreements          Json     @map("genuine_disagreements")
-  overallConsensusScore         Decimal? @map("overall_consensus_score") @db.Decimal(3, 2)
-  participantCountAtGeneration  Int      @map("participant_count_at_generation")
-  responseCountAtGeneration     Int      @map("response_count_at_generation")
-  modelVersion                  String   @map("model_version")
-  createdAt                     DateTime @default(now()) @map("created_at")
+  id                           String   @id @default(uuid()) @db.Uuid
+  topicId                      String   @map("topic_id") @db.Uuid
+  version                      Int
+  agreementZones               Json     @map("agreement_zones")
+  misunderstandings            Json
+  genuineDisagreements         Json     @map("genuine_disagreements")
+  overallConsensusScore        Decimal? @map("overall_consensus_score") @db.Decimal(3, 2)
+  participantCountAtGeneration Int      @map("participant_count_at_generation")
+  responseCountAtGeneration    Int      @map("response_count_at_generation")
+  modelVersion                 String   @map("model_version")
+  createdAt                    DateTime @default(now()) @map("created_at")
 
   // Relations
-  topic                         DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@index([topicId])
   @@index([topicId, version(sort: Desc)])
@@ -415,22 +454,24 @@ model CommonGroundAnalysis {
 
 /// AI-generated feedback on a response
 model Feedback {
-  id                    String   @id @default(uuid()) @db.Uuid
-  responseId            String   @map("response_id") @db.Uuid
-  type                  FeedbackType
-  subtype               String?
-  suggestionText        String   @map("suggestion_text") @db.Text
-  reasoning             String   @db.Text
-  confidenceScore       Decimal  @map("confidence_score") @db.Decimal(3, 2)
-  educationalResources  Json?    @map("educational_resources")
-  userAcknowledged      Boolean  @default(false) @map("user_acknowledged")
-  userRevised           Boolean  @default(false) @map("user_revised")
-  userHelpfulRating     HelpfulRating? @map("user_helpful_rating")
-  displayedToUser       Boolean  @map("displayed_to_user")
-  createdAt             DateTime @default(now()) @map("created_at")
+  id                   String         @id @default(uuid()) @db.Uuid
+  responseId           String         @map("response_id") @db.Uuid
+  type                 FeedbackType
+  subtype              String?
+  suggestionText       String         @map("suggestion_text") @db.Text
+  reasoning            String         @db.Text
+  confidenceScore      Decimal        @map("confidence_score") @db.Decimal(3, 2)
+  educationalResources Json?          @map("educational_resources")
+  userAcknowledged     Boolean        @default(false) @map("user_acknowledged")
+  userRevised          Boolean        @default(false) @map("user_revised")
+  userHelpfulRating    HelpfulRating? @map("user_helpful_rating")
+  dismissedAt          DateTime?      @map("dismissed_at")
+  dismissalReason      String?        @map("dismissal_reason")
+  displayedToUser      Boolean        @map("displayed_to_user")
+  createdAt            DateTime       @default(now()) @map("created_at")
 
   // Relations
-  response              Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
   @@index([responseId])
   @@index([type])
@@ -473,7 +514,7 @@ model FactCheckResult {
   expiresAt             DateTime @map("expires_at")
 
   // Relations
-  response              Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
   @@index([responseId])
   @@index([expiresAt])
@@ -486,23 +527,23 @@ model FactCheckResult {
 
 /// Moderation actions taken on content or users
 model ModerationAction {
-  id              String   @id @default(uuid()) @db.Uuid
-  targetType      ModerationTargetType @map("target_type")
-  targetId        String   @map("target_id") @db.Uuid
-  actionType      ModerationActionType @map("action_type")
-  severity        ModerationSeverity
-  reasoning       String   @db.Text
-  aiRecommended   Boolean  @default(false) @map("ai_recommended")
-  aiConfidence    Decimal? @map("ai_confidence") @db.Decimal(3, 2)
-  approvedById    String?  @map("approved_by_id") @db.Uuid
-  approvedAt      DateTime? @map("approved_at")
-  status          ModerationStatus @default(PENDING)
-  createdAt       DateTime @default(now()) @map("created_at")
-  executedAt      DateTime? @map("executed_at")
+  id            String               @id @default(uuid()) @db.Uuid
+  targetType    ModerationTargetType @map("target_type")
+  targetId      String               @map("target_id") @db.Uuid
+  actionType    ModerationActionType @map("action_type")
+  severity      ModerationSeverity
+  reasoning     String               @db.Text
+  aiRecommended Boolean              @default(false) @map("ai_recommended")
+  aiConfidence  Decimal?             @map("ai_confidence") @db.Decimal(3, 2)
+  approvedById  String?              @map("approved_by_id") @db.Uuid
+  approvedAt    DateTime?            @map("approved_at")
+  status        ModerationStatus     @default(PENDING)
+  createdAt     DateTime             @default(now()) @map("created_at")
+  executedAt    DateTime?            @map("executed_at")
 
   // Relations
-  approvedBy      User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
-  appeals         Appeal[]
+  approvedBy User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
+  appeals    Appeal[]
 
   @@index([targetType, targetId])
   @@index([status])
@@ -547,20 +588,20 @@ enum ModerationStatus {
 
 /// Appeals against moderation actions
 model Appeal {
-  id                  String   @id @default(uuid()) @db.Uuid
-  moderationActionId  String   @map("moderation_action_id") @db.Uuid
-  appellantId         String   @map("appellant_id") @db.Uuid
-  reason              String   @db.Text
-  status              AppealStatus @default(PENDING)
-  reviewerId          String?  @map("reviewer_id") @db.Uuid
-  decisionReasoning   String?  @map("decision_reasoning") @db.Text
-  createdAt           DateTime @default(now()) @map("created_at")
-  resolvedAt          DateTime? @map("resolved_at")
+  id                 String       @id @default(uuid()) @db.Uuid
+  moderationActionId String       @map("moderation_action_id") @db.Uuid
+  appellantId        String       @map("appellant_id") @db.Uuid
+  reason             String       @db.Text
+  status             AppealStatus @default(PENDING)
+  reviewerId         String?      @map("reviewer_id") @db.Uuid
+  decisionReasoning  String?      @map("decision_reasoning") @db.Text
+  createdAt          DateTime     @default(now()) @map("created_at")
+  resolvedAt         DateTime?    @map("resolved_at")
 
   // Relations
-  moderationAction    ModerationAction @relation(fields: [moderationActionId], references: [id], onDelete: Cascade)
-  appellant           User     @relation(fields: [appellantId], references: [id])
-  reviewer            User?    @relation("AppealReviewer", fields: [reviewerId], references: [id])
+  moderationAction ModerationAction @relation(fields: [moderationActionId], references: [id], onDelete: Cascade)
+  appellant        User             @relation(fields: [appellantId], references: [id])
+  reviewer         User?            @relation("AppealReviewer", fields: [reviewerId], references: [id])
 
   @@unique([moderationActionId, appellantId])
   @@index([moderationActionId])
