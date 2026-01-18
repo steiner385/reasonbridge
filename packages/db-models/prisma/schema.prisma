@@ -80,8 +80,8 @@ model VerificationRecord {
   createdAt         DateTime           @default(now()) @map("created_at")
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoUpload VideoUpload?
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoUpload  VideoUpload?
 
   @@index([userId, type])
   @@index([status])
