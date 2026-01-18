@@ -48,17 +48,18 @@ jobs:
           # Fetch CSRF crumb from Jenkins (required for POST requests)
           echo "Fetching Jenkins CSRF crumb..."
           CRUMB_RESPONSE=$(curl -sL -u "${JENKINS_USER}:${JENKINS_TOKEN}" \
-            "${JENKINS_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,%22:\",%22//crumb,%22\")" 2>/dev/null)
+            "${JENKINS_URL}/crumbIssuer/api/json" 2>/dev/null)
 
-          # Extract crumb value (format: Jenkins-Crumb:"actual_crumb_value")
-          CRUMB_HEADER=$(echo "$CRUMB_RESPONSE" | grep -oP 'Jenkins-Crumb:"\K[^"]+' || echo "")
+          # Extract crumb value from JSON response
+          CRUMB_VALUE=$(echo "$CRUMB_RESPONSE" | grep -oP '"crumb":"?\K[^"]*' || echo "")
+          CRUMB_HEADER=$(echo "$CRUMB_RESPONSE" | grep -oP '"crumbRequestField":"\K[^"]*' || echo "Jenkins-Crumb")
 
-          if [ -z "$CRUMB_HEADER" ]; then
+          if [ -z "$CRUMB_VALUE" ]; then
             echo "::warning::Could not fetch Jenkins CSRF crumb, attempting trigger without crumb..."
             CRUMB_ARGS=""
           else
             echo "CSRF crumb fetched successfully"
-            CRUMB_ARGS="-H 'Jenkins-Crumb: $CRUMB_HEADER'"
+            CRUMB_ARGS="-H '${CRUMB_HEADER}: ${CRUMB_VALUE}'"
           fi
 
           # Trigger Jenkins build with parameters (using -L to follow redirects)
