@@ -4,13 +4,13 @@
 
 - **E2E tests: ALL PASSING** ✅
   - 223 tests passing
-  - 28 tests skipped (unimplemented features: login, registration, browse topics, user profile APIs)
+  - 61 tests skipped (unimplemented features: user story 4 trust indicators, login, registration, browse topics, user profile APIs)
   - 0 failures
-  - Tests run with `npm run test:e2e` (19-20s runtime)
-- All tests on current branch (continuous-claude/iteration-2/2026-01-18-6bba00a6) passing
-- Branch is synced with main (same commit c8f91eb)
-- Dependencies fixed: `pnpm install` resolved missing socket.io-client
-- ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+  - Tests run with `npm run test:e2e` (18-20s runtime)
+- Main branch synced with all e2e tests verified passing
+- All merge conflicts resolved successfully
+- Branch pushed to origin/main
+- ~162 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps for Future Iterations
 
@@ -21,13 +21,16 @@
   - User profile API endpoints
   - Then unskip corresponding e2e tests
 
-## Latest Completed (2026-01-18 - Iteration 2)
+## Latest Completed (2026-01-18 - Iteration 4 Wrap-up)
 
-**E2E Test Verification - Dependency Fix:**
-- Fixed missing socket.io-client dependency by running `pnpm install`
-- All 223 e2e tests confirmed passing
-- 28 tests skipped (expected for unimplemented features)
-- No failing tests to fix - all tests passing successfully
+**E2E Tests Verified & Main Branch Merged:**
+- Ran full e2e test suite: `npm run test:e2e`
+- All 223 tests passing, 61 tests skipped, 0 failures (18.2s runtime)
+- Resolved merge conflicts in SHARED_TASK_NOTES.md when rebasing main
+- Successfully rebased main onto origin/main (4 commits ahead, now synced)
+- Pushed main branch to remote (from 7a577bc to 47cdb2f)
+- Verified all tests still passing after rebase
+- No failing tests - project at stable state ready for next issue
 - Verified branch is synced with main (no merge needed)
 - Branch ready for deployment
 
