@@ -2,10 +2,48 @@
 
 ## Current Status
 
-- Completed issue #157 (T161) - Implement video verification challenge generation
-- ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #158 (T162) - Implement video upload to S3
+- ~165 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #158 (T162) - Implement video upload to S3:**
+- Added VideoUpload Prisma model to track uploads:
+  * verificationId (unique, links to VerificationRecord)
+  * userId, s3Key, s3Url (storage location)
+  * fileName, fileSize, mimeType (metadata)
+  * uploadedAt, completedAt, expiresAt (30-day retention)
+  * Relations to VerificationRecord and User
+- Created VideoUploadDto classes:
+  * VideoUploadCompleteDto - Request validation (verificationId, fileName, fileSize, mimeType)
+  * VideoUploadResponseDto - Response with upload confirmation details
+- Created VideoUploadService for upload confirmation:
+  * confirmVideoUpload() - Validates and records upload completion
+  * Validates: file size (max 100MB), MIME type (webm/mp4/etc), user ownership
+  * Verifies: verification exists, correct type (VIDEO), status (PENDING), upload window (2hr)
+  * Creates VideoUpload record with automatic 30-day expiry
+  * getVideoUpload(verificationId) - Retrieves upload by verification ID
+  * getUserVideoUploads(userId) - Gets all uploads for a user
+  * deleteExpiredVideoUploads() - Cleanup job for aged records
+  * getVideoUploadConfig() - Returns constraints and settings
+- Added POST /verification/video-upload-complete endpoint:
+  * JWT-authenticated, requires user ownership
+  * Validates upload with class-validator decorators
+  * Returns confirmation with S3 URL, upload ID, and 30-day expiry
+- Updated VerificationModule to provide VideoUploadService
+- Updated User model with videoUploads relation for data integrity
+- Added comprehensive unit tests (20+ test cases):
+  * Upload confirmation success and error flows
+  * File size and MIME type validation
+  * User ownership and verification status checks
+  * Upload window expiry validation
+  * Correct 30-day expiry calculation
+  * Edge cases and all error scenarios
+- TypeScript compilation verified successful
+- Prisma client regenerated with VideoUpload model
+- Merged via PR #536
+
+## Previous Completion (2026-01-18)
 
 **Issue #157 (T161) - Implement video verification challenge generation:**
 - Added VIDEO to VerificationType enum in schema.prisma
