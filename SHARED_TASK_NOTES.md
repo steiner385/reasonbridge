@@ -2,14 +2,34 @@
 
 ## Current Status
 
-- Completed issue #192 (T196) - Create moderation action buttons
-- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- Frontend build successful with new ModerationActionButtons component
+- Completed issue #324 (L0) - Create top-level README.md
+- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- README.md enhanced with comprehensive GitHub best practices sections
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests (131+ passing) - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 34)
+## Latest Completed (2026-01-18 - Iteration 35)
+
+**Issue #324 (L0) - Create top-level README.md:**
+- Enhanced existing README.md with all required GitHub best practices sections
+- Added status badges: license, Node.js version, pnpm version, project version
+- Added comprehensive table of contents for navigation
+- Added Features section highlighting key platform capabilities (tone analysis, common ground, clarity scoring, etc.)
+- Added Configuration section with:
+  - Environment variables setup instructions
+  - Database setup and management commands (Prisma)
+- Added Testing section with all test types (unit, integration, contract, e2e)
+- Added API Documentation section with OpenAPI/GraphQL references
+- Enhanced Contributing guidelines with detailed step-by-step workflow
+- Added Additional Documentation links to frontend and architecture docs
+- Added License and Support sections
+- All sections follow GitHub markdown best practices
+- Renders correctly on GitHub
+- Links to existing documentation are valid
+- Merged via PR #588 (squash merge) to main
+
+## Previous Completed (2026-01-18 - Iteration 34)
 
 **Issue #192 (T196) - Create moderation action buttons:**
 - Created ModerationActionButtons reusable component (frontend/src/components/moderation/ModerationActionButtons.tsx)
