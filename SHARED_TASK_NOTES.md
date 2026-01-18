@@ -2,10 +2,44 @@
 
 ## Current Status
 
-- Completed issue #156 (T160) - Implement POST /verification/request
-- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #157 (T161) - Implement video verification challenge generation
+- ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #157 (T161) - Implement video verification challenge generation:**
+- Added VIDEO to VerificationType enum in schema.prisma
+- Extended VerificationRequestDto with VIDEO type support and challengeType field
+- Extended VerificationResponseDto with video-specific response fields:
+  * challenge details (type, instruction, randomValue/timestamp)
+  * videoUploadUrl (pre-signed S3 URL for secure upload)
+  * videoUploadExpiresAt (1-hour expiry for upload window)
+  * videoMaxFileSize, videoMinDurationSeconds, videoMaxDurationSeconds (configurable constraints)
+- Created VideoVerificationService with methods:
+  * generateChallenge(type) - Creates random challenges:
+    - RANDOM_PHRASE: User speaks randomly selected phrase
+    - RANDOM_GESTURE: User performs randomly selected gesture
+    - TIMESTAMP: User displays current timestamp
+  * generateUploadUrl(userId, verificationId) - Generates pre-signed S3 upload URLs
+  * getVideoConstraints() - Returns configurable video constraints
+- Updated VerificationService to handle VIDEO type:
+  * Validates challengeType requirement for VIDEO requests
+  * Stores challenge type in providerReference field
+  * Generates challenge and pre-signed upload URL in response
+  * Supports extending existing /verification/request endpoint
+- Updated VerificationModule to provide VideoVerificationService and ConfigModule
+- Added comprehensive unit tests (15+ test cases):
+  * Phrase challenge generation with randomness verification
+  * Gesture challenge generation with randomness verification
+  * Timestamp challenge generation with ISO format verification
+  * Upload URL generation and S3 integration
+  * Constraint configuration from ConfigService
+  * Error handling for unknown challenge types
+- TypeScript compilation verified successful
+- Prisma client regenerated with VIDEO enum
+- Merged via PR #535
+
+## Previous Completion (2026-01-18)
 
 **Issue #156 (T160) - Implement POST /verification/request:**
 - Created verification request endpoint for US4 (Human Authenticity)
