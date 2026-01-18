@@ -1,14 +1,39 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useCallback } from 'react';
 import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
+import { useCommonGroundUpdates } from '../../hooks/useCommonGroundUpdates';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { CommonGroundSummaryPanel } from '../../components/common-ground';
+import type { CommonGroundAnalysis } from '../../types/common-ground';
 
 function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: topic, isLoading, error } = useTopic(id);
   const { data: commonGroundAnalysis, isLoading: isLoadingAnalysis } = useCommonGroundAnalysis(id);
+
+  // State to hold the current analysis (from HTTP or WebSocket)
+  const [liveAnalysis, setLiveAnalysis] = useState<CommonGroundAnalysis | null>(
+    commonGroundAnalysis || null
+  );
+
+  // Update live analysis when HTTP data loads
+  if (commonGroundAnalysis && !liveAnalysis) {
+    setLiveAnalysis(commonGroundAnalysis);
+  }
+
+  // WebSocket subscription for real-time updates
+  const handleCommonGroundUpdate = useCallback((analysis: CommonGroundAnalysis, isUpdate: boolean) => {
+    console.log('Common ground update received:', { isUpdate, analysis });
+    setLiveAnalysis(analysis);
+  }, []);
+
+  useCommonGroundUpdates({
+    topicId: id || '',
+    onUpdate: handleCommonGroundUpdate,
+    enabled: !!id,
+  });
 
   if (isLoading) {
     return (
@@ -252,10 +277,10 @@ function TopicDetailPage() {
       </Card>
 
       {/* Common Ground Analysis Section */}
-      {!isLoadingAnalysis && commonGroundAnalysis && (
+      {!isLoadingAnalysis && liveAnalysis && (
         <div className="mb-6">
           <CommonGroundSummaryPanel
-            analysis={commonGroundAnalysis}
+            analysis={liveAnalysis}
             showLastUpdated={true}
             showEmptyState={true}
             onViewAgreementZone={(zoneId) => {
