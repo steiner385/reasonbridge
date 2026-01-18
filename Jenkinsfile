@@ -39,6 +39,10 @@ pipeline {
         disableConcurrentBuilds(abortPrevious: true)
     }
 
+    triggers {
+        githubPush()
+    }
+
     stages {
         stage('Initialize') {
             steps {
