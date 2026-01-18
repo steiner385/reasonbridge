@@ -5,6 +5,7 @@ pipeline {
         NODE_VERSION = '20'
         PNPM_HOME = "${WORKSPACE}/.pnpm-store"
         PATH = "${PNPM_HOME}:${env.PATH}"
+        GITHUB_REPO = 'steiner385/uniteDiscord'
     }
 
     options {
@@ -14,6 +15,21 @@ pipeline {
     }
 
     stages {
+        stage('Notify Start') {
+            steps {
+                script {
+                    // Set GitHub commit status to pending
+                    if (env.CHANGE_ID) {
+                        // This is a PR build
+                        githubNotify context: 'Jenkins CI',
+                                     status: 'PENDING',
+                                     description: 'Build started...',
+                                     credentialsId: 'github-token'
+                    }
+                }
+            }
+        }
+
         stage('Setup') {
             steps {
                 sh '''
@@ -59,7 +75,7 @@ pipeline {
             }
             post {
                 always {
-                    junit 'coverage/junit.xml'
+                    junit allowEmptyResults: true, testResults: 'coverage/junit.xml'
                     publishHTML(target: [
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
@@ -147,11 +163,78 @@ pipeline {
         always {
             cleanWs()
         }
-        failure {
-            echo 'Pipeline failed - check test reports for details'
-        }
         success {
-            echo 'All tests passed successfully'
+            script {
+                echo 'All tests passed successfully'
+                // Update GitHub status on success
+                if (env.CHANGE_ID) {
+                    githubNotify context: 'Jenkins CI',
+                                 status: 'SUCCESS',
+                                 description: 'All checks passed',
+                                 credentialsId: 'github-token'
+                }
+                // Trigger GitHub Actions workflow to update status
+                sh '''
+                    if [ -n "${GITHUB_TOKEN}" ]; then
+                        curl -X POST \
+                            -H "Accept: application/vnd.github+json" \
+                            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                            "https://api.github.com/repos/${GITHUB_REPO}/dispatches" \
+                            -d '{
+                                "event_type": "jenkins-build-result",
+                                "client_payload": {
+                                    "sha": "'${GIT_COMMIT}'",
+                                    "result": "SUCCESS",
+                                    "build_url": "'${BUILD_URL}'",
+                                    "build_number": "'${BUILD_NUMBER}'",
+                                    "pr_number": "'${CHANGE_ID}'"
+                                }
+                            }' || echo "Failed to dispatch GitHub event"
+                    fi
+                '''
+            }
+        }
+        failure {
+            script {
+                echo 'Pipeline failed - check test reports for details'
+                // Update GitHub status on failure
+                if (env.CHANGE_ID) {
+                    githubNotify context: 'Jenkins CI',
+                                 status: 'FAILURE',
+                                 description: 'Build failed - check logs',
+                                 credentialsId: 'github-token'
+                }
+                // Trigger GitHub Actions workflow to update status
+                sh '''
+                    if [ -n "${GITHUB_TOKEN}" ]; then
+                        curl -X POST \
+                            -H "Accept: application/vnd.github+json" \
+                            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                            "https://api.github.com/repos/${GITHUB_REPO}/dispatches" \
+                            -d '{
+                                "event_type": "jenkins-build-result",
+                                "client_payload": {
+                                    "sha": "'${GIT_COMMIT}'",
+                                    "result": "FAILURE",
+                                    "build_url": "'${BUILD_URL}'",
+                                    "build_number": "'${BUILD_NUMBER}'",
+                                    "pr_number": "'${CHANGE_ID}'"
+                                }
+                            }' || echo "Failed to dispatch GitHub event"
+                    fi
+                '''
+            }
+        }
+        unstable {
+            script {
+                echo 'Pipeline unstable - some tests may have failed'
+                if (env.CHANGE_ID) {
+                    githubNotify context: 'Jenkins CI',
+                                 status: 'FAILURE',
+                                 description: 'Build unstable - check logs',
+                                 credentialsId: 'github-token'
+                }
+            }
         }
     }
 }
