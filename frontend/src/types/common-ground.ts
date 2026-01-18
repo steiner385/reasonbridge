@@ -112,3 +112,65 @@ export interface CommonGroundAnalysisResponse {
   status: 'complete' | 'processing' | 'failed';
   error?: string;
 }
+
+/**
+ * Represents a viewpoint in a divergence point
+ */
+export interface DivergenceViewpoint {
+  /**
+   * The position or stance taken by this group
+   */
+  position: string;
+
+  /**
+   * Number of participants holding this viewpoint
+   */
+  participantCount: number;
+
+  /**
+   * Percentage of total participants (0-100)
+   */
+  percentage: number;
+
+  /**
+   * Supporting reasoning for this viewpoint
+   */
+  reasoning: string[];
+}
+
+/**
+ * Represents a point where discussion viewpoints diverge
+ */
+export interface DivergencePoint {
+  /**
+   * The proposition where divergence occurs
+   */
+  proposition: string;
+
+  /**
+   * ID of the proposition (if applicable)
+   */
+  propositionId?: string;
+
+  /**
+   * Different viewpoints at this divergence point
+   */
+  viewpoints: DivergenceViewpoint[];
+
+  /**
+   * Measure of how polarized the divergence is (0.00-1.00)
+   * 0 = no polarization (uniform distribution)
+   * 1 = maximum polarization (binary split)
+   */
+  polarizationScore: number;
+
+  /**
+   * Total number of participants at this divergence point
+   */
+  totalParticipants: number;
+
+  /**
+   * Underlying values driving the divergence (if identified)
+   */
+  underlyingValues?: string[];
+}
