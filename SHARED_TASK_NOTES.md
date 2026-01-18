@@ -2,16 +2,35 @@
 
 ## Current Status
 
-- Completed issue #179 (T183) - Implement POST /moderation/appeal endpoint
-- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #182 (T186 & T187) - User warning system DTOs
+- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All moderation service unit tests passing ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 23)
+## Latest Completed (2026-01-18 - Iteration 24)
 
-**Issue #179 (T183) - Implement POST /moderation/appeal:**
+**Issue #182 (T186 & T187) - User warning system (Create ModerationAction and Appeal DTOs):**
+- Created services/moderation-service/src/dto/moderation-action.dto.ts with full action DTOs
+  * CreateActionRequest, ApproveActionRequest, RejectActionRequest
+  * ModerationActionResponse, ModerationActionDetailResponse
+  * ListActionsResponse, CoolingOffPromptRequest/Response
+  * ModeratorInfo type for approval tracking
+- Created services/moderation-service/src/dto/appeal.dto.ts with appeal DTOs
+  * CreateAppealRequest, ReviewAppealRequest
+  * AppealResponse, PendingAppealResponse, ListAppealResponse
+  * ReviewerInfo type for appeal review tracking
+- Refactored moderation-actions.service.ts to use DTOs with backward compatibility
+- Updated moderation.controller.ts to use DTO types in endpoints
+- Created dto/index.ts for centralized exports
+- User warning action type ('warn') fully supported as NON_PUNITIVE severity
+- TypeScript compilation successful, all types verified
+- Merged via PR #569 (commit 63e7386)
+
+## Previous Completed (2026-01-18 - Iteration 23)
+
+**Issue #179 (T183) - Implement POST /moderation/appeal endpoint:**
 - Added CreateAppealRequest and AppealResponse interfaces (services/moderation-service/src/services/moderation-actions.service.ts:22-36)
 - Implemented createAppeal method in ModerationActionsService with comprehensive validation:
   - Validates reason is required and between 20-5000 characters

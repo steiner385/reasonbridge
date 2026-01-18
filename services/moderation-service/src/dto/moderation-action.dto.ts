@@ -28,6 +28,32 @@ export interface RejectActionRequest {
 }
 
 /**
+ * Request to create a temporary ban
+ */
+export interface CreateTemporaryBanRequest {
+  userId: string;
+  durationDays: number; // 1-365 days
+  reasoning: string;
+}
+
+/**
+ * Response for user ban status
+ */
+export interface UserBanStatusResponse {
+  isBanned: boolean;
+  isTemporaryBan: boolean;
+  expiresAt: string | null;
+  action: ModerationActionResponse | null;
+}
+
+/**
+ * Response for auto-lift operation
+ */
+export interface AutoLiftBansResponse {
+  lifted: number;
+}
+
+/**
  * Response containing details about a moderator who approved an action
  */
 export interface ModeratorInfo {
@@ -53,6 +79,10 @@ export interface ModerationActionResponse {
   status: string;
   createdAt: string;
   executedAt: string | null;
+  isTemporary?: boolean;
+  banDurationDays?: number | null;
+  expiresAt?: string | null;
+  liftedAt?: string | null;
 }
 
 /**

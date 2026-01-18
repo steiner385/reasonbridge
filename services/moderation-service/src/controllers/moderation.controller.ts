@@ -15,6 +15,9 @@ import type {
   ModerationActionDetailResponse,
   ListActionsResponse,
   CoolingOffPromptResponse,
+  CreateTemporaryBanRequest,
+  UserBanStatusResponse,
+  AutoLiftBansResponse,
 } from '../dto/moderation-action.dto.js';
 import type {
   CreateAppealRequest,
@@ -293,5 +296,53 @@ export class ModerationController {
     // TODO: Extract reviewer ID from JWT token when auth is implemented
     const reviewerId = 'system';
     return this.actionsService.reviewAppeal(appealId, reviewerId, request);
+  }
+
+  @Post('bans/temporary')
+  async createTemporaryBan(
+    @Body() request: CreateTemporaryBanRequest,
+  ): Promise<ModerationActionResponse> {
+    if (!request.userId || !request.userId.trim()) {
+      throw new BadRequestException('userId is required');
+    }
+
+    if (!request.durationDays || request.durationDays <= 0) {
+      throw new BadRequestException('durationDays must be greater than 0');
+    }
+
+    if (request.durationDays > 365) {
+      throw new BadRequestException('durationDays cannot exceed 365');
+    }
+
+    if (!request.reasoning || request.reasoning.trim().length === 0) {
+      throw new BadRequestException('reasoning is required');
+    }
+
+    // TODO: Extract moderator ID from JWT token when auth is implemented
+    const moderatorId = 'system';
+    return this.actionsService.createTemporaryBan(
+      request.userId,
+      request.durationDays,
+      request.reasoning,
+      moderatorId,
+    );
+  }
+
+  @Get('bans/user/:userId/status')
+  async getUserBanStatus(
+    @Param('userId') userId: string,
+  ): Promise<UserBanStatusResponse> {
+    if (!userId || !userId.trim()) {
+      throw new BadRequestException('userId is required');
+    }
+
+    return this.actionsService.getUserBanStatus(userId);
+  }
+
+  @Post('bans/auto-lift')
+  async autoLiftExpiredBans(): Promise<AutoLiftBansResponse> {
+    // TODO: Add auth check to ensure only admin/system can call this
+    // This endpoint should typically be called by a scheduled task
+    return this.actionsService.autoLiftExpiredBans();
   }
 }

@@ -666,6 +666,200 @@ export class ModerationActionsService {
       status: action.status.toLowerCase(),
       createdAt: action.createdAt.toISOString(),
       executedAt: action.executedAt?.toISOString() || null,
+      isTemporary: action.isTemporary || undefined,
+      banDurationDays: action.banDurationDays || undefined,
+      expiresAt: action.expiresAt?.toISOString() || undefined,
+      liftedAt: action.liftedAt?.toISOString() || undefined,
+    };
+  }
+
+  /**
+   * Create a temporary ban for a user
+   */
+  async createTemporaryBan(
+    userId: string,
+    durationDays: number,
+    reasoning: string,
+    moderatorId: string,
+  ): Promise<ModerationActionResponse> {
+    if (durationDays <= 0) {
+      throw new BadRequestException(
+        'Ban duration must be greater than 0 days',
+      );
+    }
+
+    if (durationDays > 365) {
+      throw new BadRequestException(
+        'Ban duration cannot exceed 365 days (use permanent ban instead)',
+      );
+    }
+
+    // Calculate expiration time
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + durationDays);
+
+    // Create the temporary ban action
+    const request: CreateActionRequest = {
+      targetType: 'user',
+      targetId: userId,
+      actionType: 'ban',
+      reasoning: reasoning,
+    };
+
+    const severity = this.mapActionToSeverity(request.actionType);
+
+    const action = await this.prisma.moderationAction.create({
+      data: {
+        targetType: this.mapTargetType(request.targetType),
+        targetId: request.targetId,
+        actionType: this.mapActionType(request.actionType),
+        severity,
+        reasoning: request.reasoning,
+        aiRecommended: false,
+        status: 'ACTIVE',
+        approvedById: moderatorId,
+        approvedAt: new Date(),
+        executedAt: new Date(),
+        isTemporary: true,
+        banDurationDays: durationDays,
+        expiresAt: expiresAt,
+      },
+      include: {
+        approvedBy: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
+      },
+    });
+
+    // Publish event
+    try {
+      const event: ModerationActionRequestedEvent = {
+        id: action.id,
+        type: MODERATION_EVENT_TYPES.ACTION_REQUESTED,
+        timestamp: new Date().toISOString(),
+        version: 1,
+        payload: {
+          targetType: 'user' as const,
+          targetId: userId,
+          actionType: 'ban' as const,
+          severity: 'consequential',
+          reasoning: request.reasoning,
+          aiConfidence: 1.0,
+          requestedAt: new Date().toISOString(),
+        },
+        metadata: {
+          source: 'moderation-service',
+          userId: moderatorId,
+        },
+      };
+
+      await this.queueService.publishEvent(event);
+    } catch (error) {
+      console.error('Failed to publish temporary ban event', error);
+    }
+
+    return this.mapModerationActionToResponse(action);
+  }
+
+  /**
+   * Auto-lift expired temporary bans
+   * This should be called periodically by a scheduled task
+   */
+  async autoLiftExpiredBans(): Promise<{ lifted: number }> {
+    const now = new Date();
+
+    // Find all active temporary bans that have expired
+    const expiredBans = await this.prisma.moderationAction.findMany({
+      where: {
+        actionType: 'BAN',
+        status: 'ACTIVE',
+        isTemporary: true,
+        expiresAt: {
+          lte: now,
+        },
+        liftedAt: null,
+      },
+    });
+
+    if (expiredBans.length === 0) {
+      return { lifted: 0 };
+    }
+
+    // Update all expired bans to REVERSED status
+    if (expiredBans.length > 0) {
+      await this.prisma.moderationAction.updateMany({
+        where: {
+          id: {
+            in: expiredBans.map(b => b.id),
+          },
+        },
+        data: {
+          status: 'REVERSED',
+          liftedAt: now,
+          reasoning: `${expiredBans[0]!.reasoning}\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]`,
+        },
+      });
+    }
+
+    return { lifted: expiredBans.length };
+  }
+
+  /**
+   * Get temporary ban status for a user
+   */
+  async getUserBanStatus(userId: string): Promise<{
+    isBanned: boolean;
+    isTemporaryBan: boolean;
+    expiresAt: string | null;
+    action: ModerationActionResponse | null;
+  }> {
+    const activeBan = await this.prisma.moderationAction.findFirst({
+      where: {
+        targetId: userId,
+        targetType: 'USER',
+        actionType: 'BAN',
+        status: 'ACTIVE',
+      },
+      include: {
+        approvedBy: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    if (!activeBan) {
+      return {
+        isBanned: false,
+        isTemporaryBan: false,
+        expiresAt: null,
+        action: null,
+      };
+    }
+
+    // Check if temporary ban has expired
+    if (activeBan.isTemporary && activeBan.expiresAt && activeBan.expiresAt <= new Date()) {
+      return {
+        isBanned: false,
+        isTemporaryBan: true,
+        expiresAt: activeBan.expiresAt.toISOString(),
+        action: null,
+      };
+    }
+
+    return {
+      isBanned: true,
+      isTemporaryBan: activeBan.isTemporary || false,
+      expiresAt: activeBan.expiresAt?.toISOString() || null,
+      action: this.mapModerationActionToResponse(activeBan),
     };
   }
 
