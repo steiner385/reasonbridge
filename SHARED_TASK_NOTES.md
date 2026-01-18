@@ -7,11 +7,9 @@
   - 61 tests skipped (unimplemented features: user story 4 trust indicators, login, registration, browse topics, user profile APIs)
   - 0 failures
   - Tests run with `npm run test:e2e` (17-19s runtime)
-- Successfully merged PR #541 to main
-- Verified merge successful: no test failures after merge
-- All tests verified passing and deployed
-- Completed issue #160 (T164) - TrustScore DTOs for Mayer ABI Model
-- ~163 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Successfully merged PR #543 - Issue #162 (T166) Verification expiry and re-verification
+- Completed issue #162 (T166) - Verification expiry and re-verification
+- ~162 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Next Steps for Future Iterations
 
@@ -22,7 +20,25 @@
   - User profile API endpoints
   - Then unskip corresponding e2e tests
 
-## Latest Completed (2026-01-18 - Iteration 3)
+## Latest Completed (2026-01-18 - Iteration 4)
+
+**Issue #162 (T166) - Implement verification expiry and re-verification:**
+- Added markExpiredVerifications() method to auto-mark PENDING verifications past their 24-hour expiry as EXPIRED
+- Implemented reVerify() method to allow users to request new verification after expiry/rejection
+- Added completeVerification() to mark verification as VERIFIED with timestamp
+- Added isVerified() helper to check if user has verified status for a type
+- Added getVerificationHistory() to retrieve all verification attempts (useful for audit trail)
+- New endpoints:
+  - GET /verification/:verificationId - Check status with auto-expiry detection
+  - GET /verification/user/pending - List pending verifications
+  - GET /verification/user/history - Get all verification attempts (audit trail)
+  - PATCH /verification/:verificationId/complete - Mark verification as verified
+  - POST /verification/:verificationId/re-verify - Request re-verification
+- Re-verification cleanup: Removes old failed attempts while keeping one for audit trail
+- Automatic video upload cleanup for old verification attempts
+- Merged via PR #543
+
+## Previous Completed (2026-01-18 - Iteration 3)
 
 **E2E Tests Verification Complete - PR #541 Merged:**
 - Ran full e2e test suite with `npm run test:e2e`
