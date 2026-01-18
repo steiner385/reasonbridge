@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { FeedbackDisplayPanel } from '../feedback';
 import type { CreateResponseRequest } from '../../types/response';
 import type { FeedbackResponse } from '../../types/feedback';
 import { apiClient } from '../../lib/api';
@@ -334,56 +335,11 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           </p>
         )}
 
-        {feedback.length > 0 && (
-          <div className="space-y-3">
-            {feedback.map((item) => (
-              <div
-                key={item.id}
-                className={`p-4 rounded-lg border-l-4 ${
-                  item.type === 'AFFIRMATION'
-                    ? 'bg-green-50 border-green-500'
-                    : item.type === 'FALLACY'
-                    ? 'bg-red-50 border-red-500'
-                    : item.type === 'INFLAMMATORY'
-                    ? 'bg-orange-50 border-orange-500'
-                    : item.type === 'UNSOURCED'
-                    ? 'bg-yellow-50 border-yellow-500'
-                    : 'bg-blue-50 border-blue-500'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${
-                        item.type === 'AFFIRMATION'
-                          ? 'bg-green-100 text-green-800'
-                          : item.type === 'FALLACY'
-                          ? 'bg-red-100 text-red-800'
-                          : item.type === 'INFLAMMATORY'
-                          ? 'bg-orange-100 text-orange-800'
-                          : item.type === 'UNSOURCED'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-blue-100 text-blue-800'
-                      }`}
-                    >
-                      {item.type}
-                    </span>
-                    {item.subtype && (
-                      <span className="text-xs text-gray-600">({item.subtype})</span>
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {Math.round(item.confidenceScore * 100)}% confident
-                  </span>
-                </div>
-                <p className="text-sm text-gray-800 mb-2">{item.suggestionText}</p>
-                {item.reasoning && (
-                  <p className="text-xs text-gray-600 italic">{item.reasoning}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <FeedbackDisplayPanel
+          feedback={feedback}
+          title=""
+          showEmptyState={false}
+        />
       </div>
 
       {/* Action Buttons */}
