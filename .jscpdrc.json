@@ -1,0 +1,22 @@
+{
+  "threshold": 20,
+  "minLines": 10,
+  "minTokens": 15,
+  "reporters": ["json"],
+  "ignore": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "build",
+    ".next",
+    ".venv",
+    "**/__tests__/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/fixtures/**",
+    "**/mocks/**",
+    "**/*.generated.*"
+  ],
+  "includePattern": ".*\\.(ts|tsx|js|jsx)$",
+  "excludePattern": "node_modules|coverage|\\.(git|idea|node_modules)"
+}

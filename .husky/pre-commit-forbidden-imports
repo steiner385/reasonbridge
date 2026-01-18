@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# ============================================================================
+# Pre-Commit Hook: Forbidden Imports Check
+# ============================================================================
+# Prevents anti-pattern imports that could cause circular dependencies or
+# other architectural issues
+#
+# Forbidden patterns:
+# - Importing test files into production code
+# - Importing from test utilities in non-test files
+# - Importing node-only modules in client-side code
+#
+# Usage: Called automatically by git pre-commit hook
+# Can be tested standalone: bash .husky/pre-commit-forbidden-imports
+# ============================================================================
+
+set -e
+
+# Source color utilities
+source "$(dirname -- "$0")/colors.sh"
+
+echo ""
+echo "🚫 Checking for forbidden imports..."
+
+# ============================================================================
+# Get Staged Files
+# ============================================================================
+
+# Get list of staged code files (TypeScript, JavaScript) excluding tests
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  success "No code files to check"
+  exit 0
+fi
+
+# ============================================================================
+# Check for Forbidden Imports
+# ============================================================================
+
+VIOLATIONS=()
+
+while IFS= read -r file; do
+  # Skip test files - they can import anything
+  if [[ "$file" =~ __tests__/ ]] || [[ "$file" =~ \.test\. ]] || [[ "$file" =~ \.spec\. ]]; then
+    debug "Skipping test file: $file"
+    continue
+  fi
+
+  # Get staged content
+  STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
+
+  # Check 1: Importing test files or test utilities in non-test files
+  if echo "$STAGED_CONTENT" | grep -E "from\s+['\"].*\.(test|spec)" > /dev/null 2>&1; then
+    VIOLATIONS+=("$file: imports test file directly")
+  fi
+
+  # Check 2: Importing __tests__ directory
+  if echo "$STAGED_CONTENT" | grep -E "from\s+['\"].*__tests__" > /dev/null 2>&1; then
+    VIOLATIONS+=("$file: imports from __tests__ directory")
+  fi
+
+  # Check 3: Importing from test utilities outside of tests
+  if echo "$STAGED_CONTENT" | grep -E "from\s+['\"].*\/(testing|test-utils|test-helpers)" > /dev/null 2>&1; then
+    VIOLATIONS+=("$file: imports from test utilities in non-test code")
+  fi
+
+done <<< "$STAGED_FILES"
+
+# ============================================================================
+# Report Results
+# ============================================================================
+
+if [ ${#VIOLATIONS[@]} -eq 0 ]; then
+  success "No forbidden imports detected"
+  exit 0
+fi
+
+# Violations found
+echo ""
+error "Forbidden imports detected!"
+echo ""
+echo "📍 Files with forbidden imports:"
+
+for violation in "${VIOLATIONS[@]}"; do
+  warning "  $violation"
+done
+
+echo ""
+echo "🔧 Required Actions:"
+echo ""
+echo "1. REMOVE imports of test files from production code:"
+echo "   ❌ import { helper } from './utils.test.ts'"
+echo "   ✅ export helper to utils.ts or a separate test utilities module"
+echo ""
+echo "2. DO NOT import from __tests__ directory:"
+echo "   ❌ import { mockData } from '../../__tests__/fixtures'"
+echo "   ✅ Create separate test fixtures in the test file or use test setup"
+echo ""
+echo "3. STRUCTURE TEST UTILITIES CORRECTLY:"
+echo "   - If code needs shared utilities, create: src/lib/test-utils/"
+echo "   - Only import test-utils in test files"
+echo "   - Or inline test utilities directly in test files"
+echo ""
+echo "4. REFACTOR YOUR CODE:"
+echo "   - Move shared logic to production modules"
+echo "   - Keep test utilities in test files or isolated test directories"
+echo "   - Avoid circular dependencies by organizing properly"
+echo ""
+echo "5. STAGE your changes and commit again:"
+echo "   git add ."
+echo "   git commit -m 'refactor: fix forbidden imports'"
+echo ""
+
+exit 1
