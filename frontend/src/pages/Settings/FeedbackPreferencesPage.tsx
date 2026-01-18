@@ -99,7 +99,7 @@ function FeedbackPreferencesPage() {
 
       setSaveMessage('Preferences saved successfully!');
       setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
+    } catch {
       setSaveMessage('Failed to save preferences. Please try again.');
     } finally {
       setIsSaving(false);

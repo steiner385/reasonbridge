@@ -1,20 +1,17 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed issue #116 (T120) - Unit tests: Suggestions generation
+- All lint checks passing
+- Ready for next issue implementation
 - ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
-## Latest Completed (2026-01-18)
-**Issue #116 (T120) - Unit tests: Suggestions generation:**
-- Added comprehensive unit tests for suggestions generation system
-- Created 3 test files with 48 total tests covering:
-  - SuggestionsService orchestration (6 tests)
-  - TagSuggester: category detection, keyword extraction, confidence scoring (22 tests)
-  - TopicLinkSuggester: relationship detection, keyword matching (20 tests)
-- Updated jest.config.js to enable global injection
-- Added jest types to tsconfig.json for TypeScript support
-- All 78 tests passing (30 existing + 48 new)
-- Merged via PR #475
+## Latest Completed (2026-01-17)
+**Lint fixes:**
+- Fixed all ESLint errors and warnings (11 total issues)
+- Removed unused variables and imports across multiple files
+- Fixed React hooks dependencies
+- Added ESLint override for vitest config files to disable import/no-unresolved rule
+- All lint checks now passing cleanly
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations

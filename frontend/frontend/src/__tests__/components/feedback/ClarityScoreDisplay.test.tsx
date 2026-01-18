@@ -1,11 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClarityScoreDisplay } from '../../../components/feedback/ClarityScoreDisplay';
-import { Feedback, FeedbackType, HelpfulRating, ClarityMetrics } from '../../../types/feedback';
+import { Feedback, FeedbackType, ClarityMetrics } from '../../../types/feedback';
 
 describe('ClarityScoreDisplay', () => {
   const mockAcknowledge = jest.fn();
-  const mockRateHelpful = jest.fn();
 
   const unsourcedFeedback: Feedback = {
     id: 'feedback-1',
