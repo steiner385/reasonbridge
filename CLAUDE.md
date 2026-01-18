@@ -55,6 +55,29 @@ Located in `.specify/scripts/bash/`:
 - `update-agent-context.sh` - Update agent-specific context files
 - `check-prerequisites.sh` - Verify required tools are installed
 
+## Git Commit Policy
+
+**IMPORTANT: Pre-commit hooks are mandatory quality gates and MUST NOT be bypassed.**
+
+- **NEVER use `git commit --no-verify` or `git commit -n`** in any agentic coding session or manual commits
+- **NEVER use `git push --no-verify`** to bypass pre-push checks
+- All commits must pass pre-commit hooks to ensure code quality, security, and test health
+- If a pre-commit hook fails:
+  1. Read the error message carefully
+  2. Fix the issue in your code
+  3. Stage the fixed changes
+  4. Commit again
+- **Alternative for full test runs:** Use `FULL_TEST=true git commit -m "message"` if you need comprehensive testing before release
+- **Recommended:** Use `npm run commit` to ensure safe commits (runs git commit with hook verification guaranteed)
+
+Bypassing hooks defeats the purpose of code quality enforcement and can introduce:
+- Leaked secrets and credentials
+- Code duplication issues
+- TypeScript type errors
+- Broken tests
+- Console debugging statements in production code
+- Formatting inconsistencies
+
 ## Active Technologies
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)

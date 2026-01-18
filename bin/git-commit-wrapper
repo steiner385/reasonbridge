@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# ============================================================================
+# Git Commit Wrapper - Prevents bypassing pre-commit hooks
+# ============================================================================
+# This script prevents using --no-verify or -n flags which bypass critical
+# quality gates and security checks.
+#
+# Usage: npm run commit -- [arguments]
+# Examples:
+#   npm run commit -- -m "feat: add new feature"
+#   npm run commit -- -m "fix: resolve issue" --amend
+#
+# For full testing before release:
+#   FULL_TEST=true npm run commit -- -m "message"
+#
+# ============================================================================
+
+set -e
+
+# Check for --no-verify or -n flags
+if [[ "$@" == *"--no-verify"* ]] || [[ "$@" == *"-n"* ]]; then
+  echo ""
+  echo "❌ ERROR: Using --no-verify or -n is not permitted in this repository"
+  echo ""
+  echo "Pre-commit hooks are MANDATORY quality gates that ensure:"
+  echo "  ✓ No secrets are committed (credentials, API keys, tokens)"
+  echo "  ✓ No code duplication issues"
+  echo "  ✓ TypeScript types are valid"
+  echo "  ✓ No console.log statements in production code"
+  echo "  ✓ No forbidden imports or anti-patterns"
+  echo "  ✓ Dependencies are secure (no known vulnerabilities)"
+  echo "  ✓ File sizes are reasonable"
+  echo "  ✓ Code is properly formatted"
+  echo "  ✓ Tests pass for changed code"
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "🔧 What to do instead:"
+  echo ""
+  echo "1. READ the error message from the failing hook"
+  echo "2. FIX the issue in your code"
+  echo "3. STAGE the fixed changes"
+  echo "4. COMMIT again (hooks will pass)"
+  echo ""
+  echo "Example workflow:"
+  echo "  $ git add ."
+  echo "  $ npm run commit -- -m 'feat: add feature'"
+  echo "  ❌ Unit tests failed (example error)"
+  echo "  $ npm test -- --testPathPattern=mytest.test.ts  # debug"
+  echo "  $ git add ."
+  echo "  $ npm run commit -- -m 'feat: add feature'  # try again"
+  echo "  ✅ All checks passed!"
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "⚙️  Advanced options:"
+  echo "  - For FULL test suite (before releases): FULL_TEST=true npm run commit -- -m 'message'"
+  echo "  - To uninstall hooks (emergency only): npx husky uninstall"
+  echo ""
+  exit 1
+fi
+
+# Run the actual commit with all arguments
+exec git commit "$@"
