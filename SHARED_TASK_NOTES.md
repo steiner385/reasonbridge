@@ -2,10 +2,26 @@
 
 ## Current Status
 
-- Completed issue #152 (T156) - E2E: Explore divergence points
-- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #153 (T157) - E2E: View bridging suggestions
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #153 (T157) - E2E: View bridging suggestions:**
+- Created comprehensive E2E test suite: `frontend/e2e/view-bridging-suggestions.spec.ts`
+- 31 test cases covering bridging suggestions visualization and exploration:
+  - Display and rendering: bridging suggestions section, cards, consensus metrics
+  - Common ground areas: green badges, conflict areas as orange badges
+  - Suggestion content: source/target positions, bridging language, reasoning
+  - Confidence levels: high (80%+) green, medium (60-79%) blue, lower (<60%) yellow
+  - Interactivity: view proposition buttons, callbacks, scrolling
+  - Responsive design: mobile (375x667), tablet (768x1024), desktop (1920x1080)
+  - Real-time: WebSocket update handling
+  - Edge cases: empty state, no alignment data, multiple suggestions
+  - State management: loading, error, graceful failures
+  - Integration: visual hierarchy, distinction from other sections
+- All 31 tests passing (4.6s runtime)
+- Merged via PR #531
 
 **Issue #152 (T156) - E2E: Explore divergence points:**
 - Created comprehensive E2E test suite: `frontend/e2e/explore-divergence-points.spec.ts`
