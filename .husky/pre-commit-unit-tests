@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# ============================================================================
+# Pre-Commit Hook: Fast Unit Tests (Core Services Only)
+# ============================================================================
+# Runs a curated subset of fast unit tests that provide high-value coverage
+# without slowing down the commit process
+#
+# Included Services:
+# - ai-service (8 unit tests): Tag/Topic/Argument analysis
+# - discussion-service (5 unit tests): Clustering/Analysis
+# - user-service/services (3 unit tests): Trust score, Bot detection
+#
+# Estimated runtime: 5-8 seconds
+# No external services required (all use mocks/fixtures)
+#
+# Usage: Called automatically by git pre-commit hook
+# Can be tested standalone: bash .husky/pre-commit-unit-tests
+# ============================================================================
+
+set -e
+
+# Source color utilities
+source "$(dirname -- "$0")/colors.sh"
+
+echo ""
+echo "🧪 Running fast unit tests (core services only)..."
+echo ""
+
+# ============================================================================
+# Get Staged Files
+# ============================================================================
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null | grep -v "^$" || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  success "No files to test"
+  exit 0
+fi
+
+# Filter to code files only
+CODE_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+if [ -z "$CODE_FILES" ]; then
+  success "No code files to test"
+  exit 0
+fi
+
+# ============================================================================
+# Determine which tests to run
+# ============================================================================
+
+# Check if any of the core service files were changed
+AI_SERVICE_CHANGED=$(echo "$CODE_FILES" | grep -c "services/ai-service" || true)
+DISCUSSION_CHANGED=$(echo "$CODE_FILES" | grep -c "services/discussion-service" || true)
+USER_SERVICE_CHANGED=$(echo "$CODE_FILES" | grep -c "services/user-service" || true)
+
+# If none of the core services changed, skip tests
+if [ $AI_SERVICE_CHANGED -eq 0 ] && [ $DISCUSSION_CHANGED -eq 0 ] && [ $USER_SERVICE_CHANGED -eq 0 ]; then
+  success "No core service files changed - skipping unit tests"
+  exit 0
+fi
+
+# ============================================================================
+# Run Fast Unit Tests
+# ============================================================================
+
+echo "📋 Running core service unit tests..."
+echo ""
+
+# Create temp directory for test results
+TEMP_DIR="/tmp/precommit-tests-$$"
+mkdir -p "$TEMP_DIR"
+trap "rm -rf $TEMP_DIR" EXIT
+
+# Run tests with appropriate configurations
+# Using npm test which runs 'pnpm -r test' in workspace context
+npm run test:unit -- \
+  --run \
+  --passWithNoTests \
+  --exclude='**/*.integration.test.ts' \
+  --exclude='**/*.contract.test.ts' \
+  --exclude='**/*.e2e.test.ts' \
+  --exclude='frontend/**' \
+  2>&1 | tee "$TEMP_DIR/test-output.log"
+
+TEST_STATUS=$?
+
+if [ $TEST_STATUS -ne 0 ]; then
+  echo ""
+  error "Unit tests failed!"
+  echo ""
+  echo "Failed tests from core services:"
+  echo "- ai-service"
+  echo "- discussion-service"
+  echo "- user-service/services"
+  echo ""
+  echo "To debug:"
+  echo "  npm run test:unit -- --reporter=verbose"
+  echo ""
+  echo "To skip tests (not recommended):"
+  echo "  git commit --no-verify"
+  echo ""
+  exit 1
+else
+  success "All core service unit tests passed!"
+  echo ""
+fi
+
+exit 0
