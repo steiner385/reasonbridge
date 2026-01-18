@@ -4,7 +4,6 @@ import {
   FeedbackType,
   ClarityMetrics,
   ClarityScoreDisplayProps,
-  HelpfulRating,
 } from '../../types/feedback';
 
 /**
