@@ -51,10 +51,18 @@
 - Completed issue #98 (T102) - Feedback analysis logic implementation
 - Completed issue #99 (T103) - Suggestions generation implementation
 - Completed issue #100 (T104) - GET /feedback/:id endpoint
-- ~182 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #102 (T106) - Mock AI responses for testing
+- ~181 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #100 (T104) - GET /feedback/:id endpoint:**
+**Completed Issue #102 (T106) - Mock AI responses for testing:**
+- Created MockAIClient class implementing IAIClient interface in packages/ai-client/src/mocks/
+- Added comprehensive MockScenarios utility with pre-configured testing scenarios
+- Features: configurable responses, delay simulation, error scenarios, custom response generators, token usage estimation
+- Added mocks subpath export to package.json
+- Merged via PR #462
+
+**Previous: Completed Issue #100 (T104) - GET /feedback/:id endpoint:**
 - Added getFeedbackById method to FeedbackService
 - Added GET /feedback/:id endpoint to FeedbackController
 - Proper error handling with NotFoundException
