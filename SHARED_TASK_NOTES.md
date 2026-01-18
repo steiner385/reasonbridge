@@ -1,22 +1,22 @@
 # Shared Task Notes
 
 ## Current Status
-- Completed issue #118 (T122) - E2E: Request and view feedback flow
-- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #119 (T123) - E2E: Apply suggestion flow
+- ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
-**Issue #118 (T122) - E2E: Request and view feedback flow:**
-- Created comprehensive E2E test suite for feedback request/view flow
-- Added 14 E2E tests in `frontend/e2e/request-and-view-feedback.spec.ts`
+**Issue #119 (T123) - E2E: Apply suggestion flow:**
+- Created comprehensive E2E test suite for applying AI suggestions
+- Added 17 E2E tests in `frontend/e2e/apply-suggestion-flow.spec.ts`
 - Tests cover:
-  - Requesting feedback via API with mocked endpoints
-  - Viewing feedback with proper type-based styling
-  - Displaying confidence scores and metadata
-  - Dismissing feedback items
-  - Error handling and edge cases
-  - Multiple feedback types (FALLACY, UNSOURCED, AFFIRMATION, etc.)
+  - Tag suggestions: requesting, applying, and dismissing
+  - Topic link suggestions with 5 relationship types (supports, contradicts, extends, questions, relates_to)
+  - Applying single and multiple suggestions
+  - Error handling for failed applications
+  - State management for applied/dismissed suggestions
+  - Confidence scores, reasoning, and metadata validation
 - API mocking for isolated testing (no live backend required)
-- Merged via PR #477
+- Merged via PR #478
 
 ## Notes
 - pnpm is now installed globally and should be used for workspace operations
