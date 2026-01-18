@@ -38,52 +38,23 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    # Remove any local .npmrc that might point to Verdaccio
-                    rm -f .npmrc
-
-                    # Ensure we use the public npm registry
-                    npm config set registry https://registry.npmjs.org
-
                     # Increase Node.js memory limit for large dependency trees
                     export NODE_OPTIONS="--max-old-space-size=4096"
 
-                    # Install dependencies with retry logic for npm "Exit handler" bug
-                    # See: https://github.com/npm/cli/issues/4028
-                    install_with_retry() {
-                        local max_attempts=3
-                        local attempt=1
+                    # Install pnpm if not already available
+                    if ! command -v pnpm &> /dev/null; then
+                        npm install -g pnpm@latest
+                    fi
 
-                        while [ $attempt -le $max_attempts ]; do
-                            echo "npm install attempt $attempt of $max_attempts"
-
-                            if npm ci --legacy-peer-deps; then
-                                echo "npm ci succeeded on attempt $attempt"
-                                return 0
-                            fi
-
-                            echo "npm ci failed, cleaning cache and retrying..."
-                            npm cache clean --force
-                            rm -rf node_modules
-
-                            if [ $attempt -eq $max_attempts ]; then
-                                echo "All npm ci attempts failed, trying npm install..."
-                                npm install --legacy-peer-deps
-                                return $?
-                            fi
-
-                            attempt=$((attempt + 1))
-                            sleep 5
-                        done
-                    }
-
-                    install_with_retry
+                    # Install dependencies using pnpm (matches local development)
+                    pnpm install --frozen-lockfile
                 '''
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'npm run lint'
+                sh 'pnpm run lint'
             }
         }
 
@@ -95,7 +66,7 @@ pipeline {
                     def testResult = sh(
                         script: '''#!/bin/bash
                             set -o pipefail
-                            npm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
+                            pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
                         ''',
                         returnStatus: true
                     )
@@ -111,7 +82,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'npm run build'
+                sh 'pnpm run build'
             }
         }
     }
