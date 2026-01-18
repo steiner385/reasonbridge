@@ -54,6 +54,31 @@ pipeline {
             }
         }
 
+        stage('Security & Quality Gates') {
+            parallel {
+                stage('Secrets Scan') {
+                    steps {
+                        sh 'bash .husky/pre-commit-secrets-scan'
+                    }
+                }
+                stage('Console Check') {
+                    steps {
+                        sh 'bash .husky/pre-commit-no-console'
+                    }
+                }
+                stage('Forbidden Imports') {
+                    steps {
+                        sh 'bash .husky/pre-commit-forbidden-imports'
+                    }
+                }
+                stage('File Size Check') {
+                    steps {
+                        sh 'bash .husky/pre-commit-file-size'
+                    }
+                }
+            }
+        }
+
         stage('Lint & Type Check') {
             parallel {
                 stage('Lint') {

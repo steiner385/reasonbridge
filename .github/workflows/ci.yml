@@ -18,9 +18,47 @@ env:
   PNPM_VERSION: '9'
 
 jobs:
+  security-checks:
+    name: Security & Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Secrets Scan
+        run: bash .husky/pre-commit-secrets-scan
+        continue-on-error: false
+
+      - name: Check for console statements
+        run: bash .husky/pre-commit-no-console
+        continue-on-error: false
+
+      - name: Check forbidden imports
+        run: bash .husky/pre-commit-forbidden-imports
+        continue-on-error: false
+
+      - name: Check file sizes
+        run: bash .husky/pre-commit-file-size
+        continue-on-error: false
+
+      - name: Code duplication detection
+        run: |
+          npm install -g jscpd
+          bash .husky/pre-commit-duplication-detection
+        continue-on-error: true
+
   build:
     name: Build & Test
     runs-on: ubuntu-latest
+    needs: security-checks
 
     steps:
       - name: Checkout
@@ -82,16 +120,18 @@ jobs:
   build-check:
     name: Build Check
     runs-on: ubuntu-latest
-    needs: build
+    needs: [security-checks, build]
     if: always()
 
     steps:
       - name: Check build status
         run: |
-          if [ "${{ needs.build.result }}" = "success" ]; then
-            echo "Build succeeded"
+          if [ "${{ needs.security-checks.result }}" = "success" ] && [ "${{ needs.build.result }}" = "success" ]; then
+            echo "All checks passed"
             exit 0
           else
-            echo "Build failed"
+            echo "Some checks failed:"
+            echo "  Security checks: ${{ needs.security-checks.result }}"
+            echo "  Build & Test: ${{ needs.build.result }}"
             exit 1
           fi
