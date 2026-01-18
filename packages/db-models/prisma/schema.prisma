@@ -90,6 +90,7 @@ enum VerificationType {
   EMAIL
   PHONE
   GOVERNMENT_ID
+  VIDEO
 
   @@map("verification_type")
 }
