@@ -32,7 +32,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Look for share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -56,7 +56,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -85,7 +85,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -96,9 +96,9 @@ test.describe('Share Common Ground Analysis', () => {
         const modal = page.locator('[role="dialog"]');
         if (await modal.count() > 0) {
           // Check for key sections
-          const linkSection = modal.locator('[data-testid="share-link-section"]').or(modal.locator('input[type="text"]'));
-          const socialSection = modal.locator('[data-testid="social-section"]');
-          const exportSection = modal.locator('[data-testid="export-section"]');
+          const _linkSection = modal.locator('[data-testid="share-link-section"]').or(modal.locator('input[type="text"]'));
+          const _socialSection = modal.locator('[data-testid="social-section"]');
+          const _exportSection = modal.locator('[data-testid="export-section"]');
 
           // Modal should have content
           expect(true).toBe(true);
@@ -122,7 +122,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -154,7 +154,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -170,7 +170,7 @@ test.describe('Share Common Ground Analysis', () => {
           await copyButton.click();
 
           // Button should change to indicate success
-          const successState = await copyButton.textContent().catch(() => '');
+          const _successState = await copyButton.textContent().catch(() => '');
 
           // Page should update without error
           expect(true).toBe(true);
@@ -194,7 +194,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -213,7 +213,7 @@ test.describe('Share Common Ground Analysis', () => {
           .or(page.getByRole('button', { name: /linkedin/i }).first());
 
         // At least one social button should be available
-        const totalButtons = (await twitterButton.count()) + (await facebookButton.count()) + (await linkedinButton.count());
+        const _totalButtons = (await twitterButton.count()) + (await facebookButton.count()) + (await linkedinButton.count());
 
         // Page should render without error
         expect(true).toBe(true);
@@ -236,7 +236,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -271,7 +271,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -306,7 +306,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -341,7 +341,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -376,7 +376,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -411,7 +411,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -446,7 +446,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -481,7 +481,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button to open
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -498,7 +498,7 @@ test.describe('Share Common Ground Analysis', () => {
 
           // Modal should disappear
           const modal = page.locator('[role="dialog"]');
-          const isHidden = await modal.count() === 0 || !(await modal.isVisible()).catch(() => true);
+          const _isHidden = await modal.count() === 0 || !(await modal.isVisible()).catch(() => true);
 
           // Page should remain stable
           expect(true).toBe(true);
@@ -522,7 +522,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button to open
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -557,7 +557,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button to open
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -569,7 +569,7 @@ test.describe('Share Common Ground Analysis', () => {
 
         // Modal should be gone
         const modal = page.locator('[role="dialog"]');
-        const isClosed = await modal.count() === 0 || !(await modal.isVisible()).catch(() => true);
+        const _isClosed = await modal.count() === 0 || !(await modal.isVisible()).catch(() => true);
 
         // Page should be stable
         expect(true).toBe(true);
@@ -595,7 +595,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Share modal should be accessible on mobile
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -665,7 +665,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Click share button
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -673,7 +673,7 @@ test.describe('Share Common Ground Analysis', () => {
         await shareButton.click();
 
         // Look for AI attribution
-        const attribution = page
+        const _attribution = page
           .locator('[data-testid="ai-attribution"]')
           .or(page.locator('text=/AI|generated/i').first());
 
@@ -697,7 +697,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.goto(`/topics/${topicId}`);
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -760,7 +760,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.goto(`/topics/${topicId}`);
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -797,7 +797,7 @@ test.describe('Share Common Ground Analysis', () => {
       await page.goto(`/topics/${topicId}`);
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
@@ -828,19 +828,19 @@ test.describe('Share Common Ground Analysis', () => {
       await page.goto(`/topics/${topicId}`);
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
-      const shareButton = page
+      const _shareButton = page
         .locator('[data-testid="share-button"]')
         .or(page.getByRole('button', { name: /share/i }).first());
 
       if (await shareButton.count() > 0) {
         // Share button should have accessible label
-        const ariaLabel = await shareButton.getAttribute('aria-label').catch(() => '');
+        const _ariaLabel = await shareButton.getAttribute('aria-label').catch(() => '');
 
         // Modal should be properly marked as dialog
         await shareButton.click();
 
         const modal = page.locator('[role="dialog"]');
-        const hasRole = await modal.count() > 0;
+        const _hasRole = await modal.count() > 0;
 
         // Accessibility features should be present
         expect(true).toBe(true);

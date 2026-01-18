@@ -33,7 +33,7 @@ test.describe('View Common Ground Summary', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Common ground summary panel should be visible if analysis exists
-      const summaryPanel = page
+      const _summaryPanel = page
         .locator('[data-testid="common-ground-summary"]')
         .or(page.locator('text=Common Ground').first());
 
@@ -72,7 +72,7 @@ test.describe('View Common Ground Summary', () => {
         .or(page.locator('text=/agreement|consensus|shared/i').first());
 
       // Check if the visualization or related text is present
-      const hasVisualization = await agreementViz.count() > 0;
+      const _hasVisualization = await agreementViz.count() > 0;
 
       // Page should load without errors regardless
       expect(true).toBe(true);
@@ -100,7 +100,7 @@ test.describe('View Common Ground Summary', () => {
         .or(page.locator('text=/shared point|agreement/i').first());
 
       // Check if shared points are displayed
-      const hasSharedPoints = await sharedPointsSection.count() > 0;
+      const _hasSharedPoints = await sharedPointsSection.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -123,12 +123,12 @@ test.describe('View Common Ground Summary', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Look for divergence points section
-      const divergenceSection = page
+      const _divergenceSection = page
         .locator('[data-testid="divergence-points"]')
         .or(page.locator('text=/divergence|disagree/i').first());
 
       // Check if divergence points are displayed
-      const hasDivergence = await divergenceSection.count() > 0;
+      const _hasDivergence = await divergenceSection.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -151,12 +151,12 @@ test.describe('View Common Ground Summary', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Look for misunderstandings section
-      const misunderstandingSection = page
+      const _misunderstandingSection = page
         .locator('[data-testid="misunderstandings"]')
         .or(page.locator('text=/misunderstand/i').first());
 
       // Check if misunderstandings are displayed
-      const hasMisunderstandings = await misunderstandingSection.count() > 0;
+      const _hasMisunderstandings = await misunderstandingSection.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -184,7 +184,7 @@ test.describe('View Common Ground Summary', () => {
         .or(page.locator('text=/%|agreement percentage/i').first());
 
       // Check if consensus score is displayed
-      const hasScore = await consensusScore.count() > 0;
+      const _hasScore = await consensusScore.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -212,7 +212,7 @@ test.describe('View Common Ground Summary', () => {
         .or(page.locator('text=/last updated|updated at/i').first());
 
       // Check if timestamp is displayed
-      const hasTimestamp = await lastUpdated.count() > 0;
+      const _hasTimestamp = await lastUpdated.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -295,7 +295,7 @@ test.describe('View Common Ground Summary', () => {
         .or(page.locator('text=/proposition/i').first());
 
       // Check if proposition information is displayed
-      const hasClusters = await propositionClusters.count() > 0;
+      const _hasClusters = await propositionClusters.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -318,7 +318,7 @@ test.describe('View Common Ground Summary', () => {
       const navigationPromise = page.goto(`/topics/${topicId}`);
 
       // Check for loading indicator in common ground section
-      const loadingIndicator = page
+      const _loadingIndicator = page
         .locator('[data-testid="common-ground-loading"]')
         .or(page.locator('text=/loading.*analysis/i').first());
 
@@ -349,8 +349,8 @@ test.describe('View Common Ground Summary', () => {
       await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
 
       // Get initial consensus score or summary state
-      const summaryPanel = page.locator('[data-testid="common-ground-summary"]').first();
-      const initialText = await summaryPanel.textContent().catch(() => '');
+      const _summaryPanel = page.locator('[data-testid="common-ground-summary"]').first();
+      const _initialText = await summaryPanel.textContent().catch(() => '');
 
       // In a real test with mocked WebSocket data, we would:
       // 1. Trigger a WebSocket message with updated analysis
@@ -381,12 +381,12 @@ test.describe('View Common Ground Summary', () => {
 
       // Page should have error handling for common ground failures
       // Look for error message or fallback content
-      const errorMessage = page
+      const _errorMessage = page
         .locator('[data-testid="common-ground-error"]')
         .or(page.locator('text=/error|failed to load analysis/i').first());
 
       // If error exists, verify it's displayed gracefully
-      const hasError = await errorMessage.count() > 0;
+      const _hasError = await errorMessage.count() > 0;
 
       // Page should remain functional even with errors
       const backButton = page.getByText(/back to topics/i);
@@ -417,7 +417,7 @@ test.describe('View Common Ground Summary', () => {
         .or(page.locator('text=/participants|responses analyzed/i').first());
 
       // Check if metrics are displayed
-      const hasMetrics = await metrics.count() > 0;
+      const _hasMetrics = await metrics.count() > 0;
 
       // Page should render without error
       expect(true).toBe(true);
@@ -442,10 +442,10 @@ test.describe('View Common Ground Summary', () => {
       await page.goto(`/topics/${topicId}`);
 
       // Common ground summary should be visible on mobile
-      const summaryPanel = page.locator('[data-testid="common-ground-summary"]').first();
+      const _summaryPanel = page.locator('[data-testid="common-ground-summary"]').first();
 
       // Page should be scrollable and responsive
-      const isVisible = await page.locator('text=Back to Topics').first().isVisible();
+      const _isVisible = await page.locator('text=Back to Topics').first().isVisible();
       expect(true).toBe(true);
     }
   });
