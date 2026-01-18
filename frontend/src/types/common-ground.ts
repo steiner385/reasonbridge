@@ -335,3 +335,73 @@ export interface PropositionClusteringResult {
    */
   reasoning: string;
 }
+
+/**
+ * Options for sharing common ground analysis
+ */
+export type ShareMethod = 'link' | 'twitter' | 'facebook' | 'linkedin' | 'email' | 'export';
+
+/**
+ * Export format options for common ground analysis
+ */
+export type ExportFormat = 'json' | 'pdf' | 'markdown';
+
+/**
+ * Configuration for sharing common ground analysis
+ */
+export interface ShareConfig {
+  /**
+   * The analysis being shared
+   */
+  analysisId: string;
+
+  /**
+   * Selected share method
+   */
+  method: ShareMethod;
+
+  /**
+   * Optional: export format when method is 'export'
+   */
+  exportFormat?: ExportFormat;
+
+  /**
+   * Optional: custom message to include with share
+   */
+  message?: string;
+
+  /**
+   * Optional: specific sections to include in share
+   */
+  includeSections?: {
+    agreementZones?: boolean;
+    misunderstandings?: boolean;
+    disagreements?: boolean;
+    moralFoundations?: boolean;
+  };
+}
+
+/**
+ * Result of a share operation
+ */
+export interface ShareResult {
+  /**
+   * Whether the share was successful
+   */
+  success: boolean;
+
+  /**
+   * Generated share URL (for link sharing)
+   */
+  url?: string;
+
+  /**
+   * Exported data (for export operations)
+   */
+  data?: string | Blob;
+
+  /**
+   * Error message if share failed
+   */
+  error?: string;
+}
