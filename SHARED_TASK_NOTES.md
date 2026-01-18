@@ -2,18 +2,37 @@
 
 ## Current Status
 
-- Completed issue #324 (L0) - Create top-level README.md
-- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- README.md enhanced with comprehensive GitHub best practices sections
+- Completed issue #193 (T197) - Create appeal submission form (PR #591 awaiting review)
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Appeal submission form fully implemented with types, hook, and component
+- PR #591 created but blocked by:
+  - Needs 1 reviewer approval (branch protection requirement)
+  - CI checks failing due to pre-existing infrastructure issues (lockfile/detect-secrets in other packages)
 - Main branch synced with origin/main
-- Current development branch at main - ready for next issue
-- No failing tests (131+ passing) - project at stable state ready for next issue
+- No failing tests (131+ passing) - project at stable state
 
-## Latest Completed (2026-01-18 - Iteration 35)
+## Latest Completed (2026-01-18 - Iteration 36)
 
-**Issue #324 (L0) - Create top-level README.md:**
-- Enhanced existing README.md with all required GitHub best practices sections
-- Added status badges: license, Node.js version, pnpm version, project version
+**Issue #193 (T197) - Create appeal submission form:**
+- Added CreateAppealRequest and CreateAppealResponse types (frontend/src/types/moderation.ts:199-227)
+- Implemented useSubmitAppeal hook (frontend/src/lib/useSubmitAppeal.ts):
+  - POST /moderation/appeals endpoint integration
+  - Loading, success, error state management
+  - Appeal ID tracking and reset functionality
+- Created AppealSubmissionForm modal component (frontend/src/components/moderation/AppealSubmissionForm.tsx):
+  - Displays moderation action details (type, severity, reasoning)
+  - Collects appeal reason with 10-1000 character validation
+  - Character count display and validation error messaging
+  - Loading states during submission
+  - Success confirmation and error handling
+  - Fully accessible with ARIA attributes
+  - Follows existing UI patterns (Modal, Button components)
+- Updated moderation component exports (frontend/src/components/moderation/index.ts)
+- PR #591 created: awaiting reviewer approval (requires 1 review per branch protection rules)
+- CI check status:
+  - Build Check: FAIL (detect-secrets not found)
+  - Quick Validation: FAIL (pnpm lockfile spec mismatch in unrelated package)
+  - These are pre-existing infrastructure issues, not caused by T197 changes
 - Added comprehensive table of contents for navigation
 - Added Features section highlighting key platform capabilities (tone analysis, common ground, clarity scoring, etc.)
 - Added Configuration section with:
