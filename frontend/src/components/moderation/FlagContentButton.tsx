@@ -74,6 +74,14 @@ const FlagContentButton: React.FC<FlagContentButtonProps> = ({
     </svg>
   );
 
+  const modalProps = {
+    isOpen: isModalOpen,
+    onClose: () => setIsModalOpen(false),
+    contentId,
+    contentType,
+    ...(onSuccess !== undefined && { onSuccess }),
+  };
+
   if (iconOnly) {
     return (
       <>
@@ -86,13 +94,7 @@ const FlagContentButton: React.FC<FlagContentButtonProps> = ({
         >
           {flagIcon}
         </button>
-        <FlagContentModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          contentId={contentId}
-          contentType={contentType}
-          onSuccess={onSuccess}
-        />
+        <FlagContentModal {...modalProps} />
       </>
     );
   }
@@ -109,13 +111,7 @@ const FlagContentButton: React.FC<FlagContentButtonProps> = ({
       >
         Report
       </Button>
-      <FlagContentModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        contentId={contentId}
-        contentType={contentType}
-        onSuccess={onSuccess}
-      />
+      <FlagContentModal {...modalProps} />
     </>
   );
 };
