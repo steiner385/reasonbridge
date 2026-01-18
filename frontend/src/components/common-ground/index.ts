@@ -27,3 +27,6 @@ export type { ShareModalProps } from './ShareModal';
 
 export { default as ShareButton } from './ShareButton';
 export type { ShareButtonProps } from './ShareButton';
+
+export { default as AnalysisProgressIndicator } from './AnalysisProgressIndicator';
+export type { AnalysisProgressIndicatorProps } from './AnalysisProgressIndicator';
