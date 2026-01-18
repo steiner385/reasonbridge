@@ -162,8 +162,8 @@ export class PropositionClustererService {
           matrix[i]![j] = 1.0; // Perfect similarity with self
         } else {
           const similarity = this.calculateSimilarity(
-            propositions[i]?.keywords ?? [],
-            propositions[j]?.keywords ?? [],
+            propositions[i]!.keywords,
+            propositions[j]!.keywords,
           );
           matrix[i]![j] = similarity;
           matrix[j]![i] = similarity; // Symmetric matrix
@@ -320,12 +320,8 @@ export class PropositionClustererService {
 
     for (let i = 0; i < propositionIndices.length; i++) {
       for (let j = i + 1; j < propositionIndices.length; j++) {
-        const idx1 = propositionIndices[i];
-        const idx2 = propositionIndices[j];
-        if (idx1 !== undefined && idx2 !== undefined) {
-          totalSimilarity += similarityMatrix[idx1]?.[idx2] ?? 0;
-          count++;
-        }
+        totalSimilarity += similarityMatrix[propositionIndices[i]!]?.[propositionIndices[j]!] ?? 0;
+        count++;
       }
     }
 
