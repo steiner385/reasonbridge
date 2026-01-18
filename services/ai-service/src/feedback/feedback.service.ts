@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
-import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto } from './dto/index.js';
+import {
+  RequestFeedbackDto,
+  FeedbackResponseDto,
+  DismissFeedbackDto,
+  FeedbackSensitivity,
+} from './dto/index.js';
 import { Prisma } from '@unite-discord/db-models';
 
 /**
@@ -16,7 +21,7 @@ export class FeedbackService {
 
   /**
    * Request AI-generated feedback for a response
-   * @param dto Request containing responseId and content
+   * @param dto Request containing responseId, content, and optional sensitivity level
    * @returns Created feedback record
    */
   async requestFeedback(dto: RequestFeedbackDto): Promise<FeedbackResponseDto> {
@@ -32,6 +37,11 @@ export class FeedbackService {
     // Generate AI feedback using Bedrock
     const aiAnalysis = await this.generateFeedback(dto.content);
 
+    // Apply sensitivity filtering
+    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
+    const minThreshold = this.getConfidenceThreshold(sensitivity);
+    const shouldDisplay = aiAnalysis.confidenceScore >= minThreshold;
+
     // Store feedback in database
     const feedback = await this.prisma.feedback.create({
       data: {
@@ -42,7 +52,7 @@ export class FeedbackService {
         reasoning: aiAnalysis.reasoning,
         confidenceScore: new Prisma.Decimal(aiAnalysis.confidenceScore),
         educationalResources: aiAnalysis.educationalResources ?? null,
-        displayedToUser: true,
+        displayedToUser: shouldDisplay,
         userAcknowledged: false,
         userRevised: false,
       },
@@ -109,6 +119,24 @@ export class FeedbackService {
     // Use the response analyzer to perform comprehensive analysis
     // This analyzes tone, fallacies, and clarity in parallel
     return this.analyzer.analyzeContent(content);
+  }
+
+  /**
+   * Get minimum confidence threshold based on sensitivity level
+   * @param sensitivity The sensitivity level
+   * @returns Minimum confidence threshold (0.0-1.0)
+   */
+  private getConfidenceThreshold(sensitivity: FeedbackSensitivity): number {
+    switch (sensitivity) {
+      case FeedbackSensitivity.LOW:
+        return 0.5; // Show all feedback
+      case FeedbackSensitivity.MEDIUM:
+        return 0.7; // Show moderately confident feedback
+      case FeedbackSensitivity.HIGH:
+        return 0.85; // Show only high-confidence feedback
+      default:
+        return 0.7; // Default to MEDIUM
+    }
   }
 
   /**

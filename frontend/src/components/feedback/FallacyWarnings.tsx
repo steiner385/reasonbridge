@@ -26,17 +26,20 @@ const getFallacyName = (subtype?: string): string => {
 const getFallacyDescription = (subtype?: string): string => {
   const descriptions: Record<string, string> = {
     ad_hominem: 'Attacking the person making the argument rather than the argument itself.',
-    straw_man: 'Misrepresenting someone\'s argument to make it easier to attack.',
+    straw_man: "Misrepresenting someone's argument to make it easier to attack.",
     false_dichotomy: 'Presenting only two options when more exist.',
-    appeal_to_authority: 'Using an authority figure\'s opinion as evidence without proper justification.',
+    appeal_to_authority:
+      "Using an authority figure's opinion as evidence without proper justification.",
     slippery_slope: 'Assuming one event will lead to extreme consequences without evidence.',
     circular_reasoning: 'Using the conclusion as a premise in the argument.',
     hasty_generalization: 'Drawing broad conclusions from limited examples.',
     red_herring: 'Introducing an irrelevant topic to divert attention from the original issue.',
-    tu_quoque: 'Deflecting criticism by pointing to the accuser\'s similar behavior.',
+    tu_quoque: "Deflecting criticism by pointing to the accuser's similar behavior.",
     appeal_to_emotion: 'Using emotional manipulation instead of logical reasoning.',
   };
-  return subtype ? descriptions[subtype] || 'A flaw in reasoning that undermines the logic of an argument.' : 'A flaw in reasoning that undermines the logic of an argument.';
+  return subtype
+    ? descriptions[subtype] || 'A flaw in reasoning that undermines the logic of an argument.'
+    : 'A flaw in reasoning that undermines the logic of an argument.';
 };
 
 /**
@@ -76,13 +79,7 @@ const getSeverityStyles = (severity: FallacySeverity) => {
  * Get icon for severity level
  */
 const getSeverityIcon = (severity: FallacySeverity): React.ReactNode => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
     {severity === 'high' ? (
       <path
         strokeLinecap="round"
@@ -122,10 +119,7 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
   // Filter for FALLACY type feedback with sufficient confidence
   const fallacyFeedback = useMemo(() => {
     return feedback.filter(
-      (f) =>
-        f.type === 'FALLACY' &&
-        f.confidenceScore >= minConfidence &&
-        f.displayedToUser
+      (f) => f.type === 'FALLACY' && f.confidenceScore >= minConfidence && f.displayedToUser,
     );
   }, [feedback, minConfidence]);
 
@@ -149,7 +143,11 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
   // Compact mode - show summary badges
   if (compact) {
     return (
-      <div className={`flex flex-wrap gap-2 ${className}`} role="list" aria-label="Fallacy warnings">
+      <div
+        className={`flex flex-wrap gap-2 ${className}`}
+        role="list"
+        aria-label="Fallacy warnings"
+      >
         {fallacyFeedback.map((item) => {
           const severity = getSeverity(item.confidenceScore);
           const styles = getSeverityStyles(severity);
@@ -163,9 +161,7 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
               onKeyDown={(e) => e.key === 'Enter' && toggleExpanded(item.id)}
               aria-label={`${getFallacyName(item.subtype)} fallacy warning`}
             >
-              <span className={`mr-1 ${styles.icon}`}>
-                {getSeverityIcon(severity)}
-              </span>
+              <span className={`mr-1 ${styles.icon}`}>{getSeverityIcon(severity)}</span>
               <span>{getFallacyName(item.subtype)}</span>
             </div>
           );
@@ -214,11 +210,11 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
               {/* Header */}
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className={styles.icon}>
-                    {getSeverityIcon(severity)}
-                  </span>
+                  <span className={styles.icon}>{getSeverityIcon(severity)}</span>
                   <div>
-                    <span className={`text-sm font-semibold px-2 py-0.5 rounded border ${styles.badge}`}>
+                    <span
+                      className={`text-sm font-semibold px-2 py-0.5 rounded border ${styles.badge}`}
+                    >
                       {getFallacyName(item.subtype)}
                     </span>
                   </div>
@@ -275,9 +271,7 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
                     <h4 className="text-xs font-semibold text-gray-700 mb-1">
                       What is {getFallacyName(item.subtype)}?
                     </h4>
-                    <p className="text-xs text-gray-600">
-                      {getFallacyDescription(item.subtype)}
-                    </p>
+                    <p className="text-xs text-gray-600">{getFallacyDescription(item.subtype)}</p>
                   </div>
 
                   {/* AI Reasoning */}

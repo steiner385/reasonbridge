@@ -61,7 +61,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
   useEffect(() => {
     if (isOpen && response) {
       setContent(response.content);
-      setCitedSources(response.citedSources?.map(s => s.url) || []);
+      setCitedSources(response.citedSources?.map((s) => s.url) || []);
       setContainsOpinion(response.containsOpinion);
       setContainsFactualClaims(response.containsFactualClaims);
       setError(null);
@@ -143,12 +143,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
 
   const footer = (
     <>
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={handleCancel}
-        disabled={isLoading}
-      >
+      <Button type="button" variant="ghost" onClick={handleCancel} disabled={isLoading}>
         Cancel
       </Button>
       <Button
@@ -176,7 +171,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Content */}
         <div>
-          <label htmlFor="edit-response-content" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor="edit-response-content"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Your Response
             <span className="text-fallacy-DEFAULT ml-1">*</span>
           </label>
@@ -202,8 +200,8 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
                 !isValid && characterCount > 0
                   ? 'text-fallacy-DEFAULT'
                   : characterCount >= maxLength * 0.9
-                  ? 'text-secondary-600'
-                  : 'text-gray-500'
+                    ? 'text-secondary-600'
+                    : 'text-gray-500'
               }`}
             >
               {characterCount} / {maxLength} characters
@@ -220,7 +218,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
 
         {/* Cited Sources */}
         <div>
-          <label htmlFor="edit-cited-source" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor="edit-cited-source"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
+          >
             Cited Sources (Optional)
           </label>
           <div className="flex gap-2">
@@ -265,12 +266,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
                     disabled={isLoading}
                     aria-label={`Remove source ${source}`}
                   >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"

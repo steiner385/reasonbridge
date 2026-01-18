@@ -163,7 +163,7 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
   };
 
   const characterCount = reasoning.length;
-  const isValid = !reasoningRequired || (reasoning.trim().length >= minReasoningLength);
+  const isValid = !reasoningRequired || reasoning.trim().length >= minReasoningLength;
 
   return (
     <Modal
@@ -194,11 +194,17 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
     >
       <div className="space-y-4">
         {/* Stance indicator */}
-        <div className={`flex items-center gap-3 p-4 rounded-lg ${stanceInfo.bgColor} ${stanceInfo.borderColor} border-2`}>
+        <div
+          className={`flex items-center gap-3 p-4 rounded-lg ${stanceInfo.bgColor} ${stanceInfo.borderColor} border-2`}
+        >
           <div className={stanceInfo.color}>{stanceInfo.icon}</div>
           <div className="flex-1">
             <p className={`font-semibold ${stanceInfo.color}`}>
-              {stance === 'support' ? 'Supporting' : stance === 'oppose' ? 'Opposing' : 'Nuanced Position'}
+              {stance === 'support'
+                ? 'Supporting'
+                : stance === 'oppose'
+                  ? 'Opposing'
+                  : 'Nuanced Position'}
             </p>
             {propositionText && (
               <p className="text-sm text-gray-600 mt-1 line-clamp-2">{propositionText}</p>
@@ -235,7 +241,9 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
                 </p>
               )}
             </div>
-            <p className={`text-sm ${characterCount >= minReasoningLength ? 'text-gray-500' : 'text-gray-400'}`}>
+            <p
+              className={`text-sm ${characterCount >= minReasoningLength ? 'text-gray-500' : 'text-gray-400'}`}
+            >
               {characterCount} characters
             </p>
           </div>
@@ -243,7 +251,9 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
 
         {/* Helpful tips */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-gray-900 mb-2">Tips for effective reasoning:</h4>
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">
+            Tips for effective reasoning:
+          </h4>
           <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
             <li>Be specific about which aspects you agree or disagree with</li>
             <li>Provide evidence or examples when possible</li>

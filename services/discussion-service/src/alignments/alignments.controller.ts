@@ -44,11 +44,7 @@ export class AlignmentsController {
     @Headers('x-user-id') userId: string,
     @Body() setAlignmentDto: SetAlignmentDto,
   ): Promise<AlignmentDto> {
-    return this.alignmentsService.setAlignment(
-      propositionId,
-      userId,
-      setAlignmentDto,
-    );
+    return this.alignmentsService.setAlignment(propositionId, userId, setAlignmentDto);
   }
 
   /**

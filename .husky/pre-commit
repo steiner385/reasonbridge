@@ -1,0 +1,278 @@
+#!/bin/sh
+
+echo "🚨 Pre-commit checks starting..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if CI or forced full test mode
+if [ "$CI" = "true" ] || [ "$FULL_TEST" = "true" ]; then
+  FULL_TEST_MODE=true
+else
+  FULL_TEST_MODE=false
+fi
+
+# ============================================================================
+# EARLY EXIT: Docs-only commits skip all code checks
+# ============================================================================
+
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR || true)
+CODE_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+if [ -z "$CODE_FILES" ]; then
+  echo ""
+  echo "📚 Docs-only commit detected"
+  echo "✅ Skipping code checks (docs-only commits bypass all checks)"
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "✅ Pre-commit checks passed!"
+  echo ""
+  exit 0
+fi
+
+# ============================================================================
+# PARALLEL EXECUTION: Run independent checks simultaneously
+# ============================================================================
+
+echo ""
+echo "⚡ Running independent security & quality checks in parallel..."
+echo ""
+
+# Create temp directory for log files
+TEMP_DIR="/tmp/precommit-$$"
+mkdir -p "$TEMP_DIR"
+trap "rm -rf $TEMP_DIR" EXIT
+
+# Start all parallel checks in background
+bash .husky/pre-commit-secrets-scan > "$TEMP_DIR/secrets.log" 2>&1 & PID_SECRETS=$!
+bash .husky/pre-commit-duplication-detection > "$TEMP_DIR/dup.log" 2>&1 & PID_DUP=$!
+bash .husky/pre-commit-root-check > "$TEMP_DIR/root.log" 2>&1 & PID_ROOT=$!
+bash .husky/pre-commit-dependencies-audit > "$TEMP_DIR/deps.log" 2>&1 & PID_DEPS=$!
+
+# ESLint only on staged files to avoid blocking on pre-existing codebase errors
+# Get staged files matching code extensions
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx)$' || true)
+if [ -n "$STAGED_FILES" ]; then
+  npx eslint $STAGED_FILES --ext .ts,.tsx,.js,.jsx > "$TEMP_DIR/lint.log" 2>&1 & PID_LINT=$!
+else
+  # No staged code files, skip linting
+  echo "No staged code files to lint" > "$TEMP_DIR/lint.log"
+  PID_LINT=""
+  EXIT_CODE_LINT=0
+fi
+
+# Wait for all and collect exit codes
+wait $PID_SECRETS 2>/dev/null; EXIT_CODE_SECRETS=$?
+wait $PID_DUP 2>/dev/null; EXIT_CODE_DUP=$?
+wait $PID_ROOT 2>/dev/null; EXIT_CODE_ROOT=$?
+wait $PID_DEPS 2>/dev/null; EXIT_CODE_DEPS=$?
+if [ -n "$PID_LINT" ]; then
+  wait $PID_LINT 2>/dev/null; EXIT_CODE_LINT=$?
+fi
+
+# Check parallel results
+PARALLEL_FAILED=0
+FAILED_CHECKS=""
+
+if [ $EXIT_CODE_SECRETS -ne 0 ]; then
+  PARALLEL_FAILED=1
+  FAILED_CHECKS="${FAILED_CHECKS}❌ Secrets Scan
+"
+fi
+
+if [ $EXIT_CODE_DUP -ne 0 ]; then
+  PARALLEL_FAILED=1
+  FAILED_CHECKS="${FAILED_CHECKS}❌ Code Duplication
+"
+fi
+
+if [ $EXIT_CODE_ROOT -ne 0 ]; then
+  PARALLEL_FAILED=1
+  FAILED_CHECKS="${FAILED_CHECKS}❌ Root Directory Check
+"
+fi
+
+if [ $EXIT_CODE_DEPS -ne 0 ]; then
+  PARALLEL_FAILED=1
+  FAILED_CHECKS="${FAILED_CHECKS}❌ Dependency Audit
+"
+fi
+
+if [ $EXIT_CODE_LINT -ne 0 ]; then
+  PARALLEL_FAILED=1
+  FAILED_CHECKS="${FAILED_CHECKS}❌ ESLint
+"
+fi
+
+# Report parallel check results
+if [ $PARALLEL_FAILED -eq 1 ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "❌ Parallel checks failed:"
+  echo "$FAILED_CHECKS"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+
+  # Display detailed output from failed checks
+  [ $EXIT_CODE_SECRETS -ne 0 ] && { echo "📌 Secrets Scan Details:"; cat "$TEMP_DIR/secrets.log"; echo ""; }
+  [ $EXIT_CODE_DUP -ne 0 ] && { echo "📌 Code Duplication Details:"; cat "$TEMP_DIR/dup.log"; echo ""; }
+  [ $EXIT_CODE_ROOT -ne 0 ] && { echo "📌 Root Directory Check Details:"; cat "$TEMP_DIR/root.log"; echo ""; }
+  [ $EXIT_CODE_DEPS -ne 0 ] && { echo "📌 Dependency Audit Details:"; cat "$TEMP_DIR/deps.log"; echo ""; }
+  [ $EXIT_CODE_LINT -ne 0 ] && { echo "📌 ESLint Details:"; cat "$TEMP_DIR/lint.log"; echo ""; }
+
+  echo ""
+  echo "Commit blocked by pre-commit hook."
+  exit 1
+else
+  echo "✅ All parallel checks passed"
+fi
+
+# ============================================================================
+# SEQUENTIAL EXECUTION: Code Quality Checks (TypeScript, Tests)
+# ============================================================================
+
+echo ""
+echo "🧪 Step 1/4: Running TypeScript type checking..."
+
+npx tsc --noEmit > "$TEMP_DIR/tsc.log" 2>&1
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ TypeScript type checking failed!"
+  echo ""
+  cat "$TEMP_DIR/tsc.log"
+  echo ""
+  echo "Commit blocked by pre-commit hook."
+  exit 1
+else
+  echo "✅ TypeScript type checking passed"
+fi
+
+echo ""
+echo "🧪 Step 2/4: Checking for console statements..."
+
+bash .husky/pre-commit-no-console > "$TEMP_DIR/console.log" 2>&1
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Console statement check failed!"
+  echo ""
+  cat "$TEMP_DIR/console.log"
+  echo ""
+  echo "Commit blocked by pre-commit hook."
+  exit 1
+else
+  echo "✅ Console statement check passed"
+fi
+
+echo ""
+echo "🧪 Step 3/4: Checking for forbidden imports..."
+
+bash .husky/pre-commit-forbidden-imports > "$TEMP_DIR/imports.log" 2>&1
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Forbidden imports check failed!"
+  echo ""
+  cat "$TEMP_DIR/imports.log"
+  echo ""
+  echo "Commit blocked by pre-commit hook."
+  exit 1
+else
+  echo "✅ Forbidden imports check passed"
+fi
+
+echo ""
+echo "🧪 Step 4/4: Running unit tests..."
+
+if [ "$FULL_TEST_MODE" = "true" ]; then
+  echo "Running ALL unit tests (CI/FULL_TEST mode)..."
+  npm test -- --passWithNoTests --ci --silent 2>&1 | tee "$TEMP_DIR/test-output.log"
+elif [ -z "$CODE_FILES" ]; then
+  echo "No JavaScript/TypeScript files changed, skipping tests..."
+  echo "✅ Test check passed (no relevant files changed)"
+else
+  echo "Running tests for changed files only..."
+  echo "Changed files:"
+  echo "$CODE_FILES" | sed 's/^/  - /'
+
+  # Build test pattern from changed files
+  TEST_PATTERN=""
+  for file in $CODE_FILES; do
+    # Convert source file to test file pattern
+    BASE_NAME=$(basename "$file" | sed -E 's/\.(ts|tsx|js|jsx)$//')
+    DIR_NAME=$(dirname "$file" | sed 's|^src/|__tests__/unit/|')
+
+    # Check for test files
+    for ext in ts tsx js jsx; do
+      TEST_FILE="${DIR_NAME}/${BASE_NAME}.test.${ext}"
+      if [ -f "$TEST_FILE" ]; then
+        if [ -z "$TEST_PATTERN" ]; then
+          TEST_PATTERN="$TEST_FILE"
+        else
+          TEST_PATTERN="$TEST_PATTERN|$TEST_FILE"
+        fi
+        break
+      fi
+    done
+  done
+
+  if [ -z "$TEST_PATTERN" ]; then
+    echo "No test files found for changed files, skipping test run..."
+    echo "✅ Test check passed (no tests for changed files)"
+  else
+    echo "Running tests matching pattern: $TEST_PATTERN"
+    npm test -- --testNamePattern="" --testPathPattern="($TEST_PATTERN)" --passWithNoTests --ci --silent 2>&1 | tee "$TEMP_DIR/test-output.log"
+
+    # Check test results
+    if grep -q "Test Suites:.*failed" "$TEMP_DIR/test-output.log"; then
+      FAILED=$(grep -oE "Test Suites:.*failed" "$TEMP_DIR/test-output.log" | grep -oE "[0-9]+ failed" | grep -oE "[0-9]+")
+      PASSED=$(grep -oE "Test Suites:.*passed" "$TEMP_DIR/test-output.log" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+")
+      echo ""
+      echo "❌ Unit tests failed! $FAILED test suites failed, $PASSED passed"
+      echo ""
+      echo "Please fix the failing tests before committing."
+      echo "Run 'npm test -- --testPathPattern=\"($TEST_PATTERN)\"' to see detailed test results."
+      echo ""
+      echo "To run ALL tests: FULL_TEST=true git commit ..."
+      echo "To bypass tests (use with caution): git commit -n ..."
+      echo ""
+      echo "Commit blocked by pre-commit hook."
+      exit 1
+    else
+      if grep -q "Test Suites:.*passed" "$TEMP_DIR/test-output.log"; then
+        PASSED=$(grep -oE "Test Suites:.*passed" "$TEMP_DIR/test-output.log" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+")
+        echo "✅ All $PASSED unit test suites passed!"
+      else
+        echo "✅ Test check passed"
+      fi
+    fi
+  fi
+fi
+
+# Skip full test run if we already ran targeted tests
+if [ "$FULL_TEST_MODE" = "false" ] && [ -n "$CODE_FILES" ]; then
+  echo ""
+  echo "ℹ️  Note: Only tests for changed files were run."
+  echo "ℹ️  To run ALL tests: FULL_TEST=true git commit ..."
+fi
+
+# ============================================================================
+# FORMATTING: Lint-staged
+# ============================================================================
+
+echo ""
+echo "🎨 Step 5/5: Running lint-staged for formatting..."
+npx lint-staged
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Lint-staged checks failed!"
+  echo ""
+  echo "Commit blocked by pre-commit hook."
+  exit 1
+fi
+
+# ============================================================================
+# SUCCESS: All checks passed
+# ============================================================================
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ All pre-commit checks passed! Proceeding with commit..."
+echo ""

@@ -8,25 +8,8 @@ This directory contains self-contained Jenkins pipeline configuration for uniteD
 .jenkins/
 ├── Jenkinsfile              # Main CI pipeline
 ├── Jenkinsfile.e2e          # E2E tests pipeline
-├── Jenkinsfile.unit         # Unit tests pipeline
-├── Jenkinsfile.integration  # Integration tests pipeline
-├── Jenkinsfile.nightly      # Nightly build pipeline
 ├── vars/                    # Shared library functions
-│   ├── pipelineHelpers.groovy
-│   ├── pipelineInit.groovy
-│   ├── installDependencies.groovy
-│   ├── runUnitTests.groovy
-│   ├── runIntegrationTests.groovy
-│   ├── runE2ETests.groovy
-│   ├── runLintChecks.groovy
-│   ├── buildProject.groovy
-│   ├── dockerCleanup.groovy
-│   ├── playwrightSetup.groovy
-│   ├── publishReports.groovy
-│   ├── githubStatusReporter.groovy
-│   ├── createGitHubIssue.groovy
-│   ├── analyzeTestFailures.groovy
-│   └── analyzeAllureFailures.groovy
+│   └── withAwsCredentials.groovy
 └── README.md                # This file
 ```
 
@@ -48,21 +31,18 @@ This directory contains self-contained Jenkins pipeline configuration for uniteD
 
 4. Under **Retrieval method**, select **Modern SCM**
 5. Select **Git** and configure:
-   - **Project Repository**: `https://github.com/steiner385/uniteDiscord.git`
+   - **Project Repository**: `https://github.com/steiner385/uniteDiscord.git` (or your enterprise URL)
    - **Credentials**: Select appropriate Git credentials
    - **Library Path**: `.jenkins`
 
 ### Step 2: Configure Pipeline Jobs
 
-Jobs are configured via JCasC in the core Jenkins configuration. The following jobs are created automatically:
+Create Jenkins Pipeline jobs pointing to the Jenkinsfiles in your repository:
 
 | Job Name | Script Path | Description |
 |----------|-------------|-------------|
 | uniteDiscord-ci | `.jenkins/Jenkinsfile` | Main CI pipeline |
-| uniteDiscord-unit | `.jenkins/Jenkinsfile.unit` | Unit tests pipeline |
-| uniteDiscord-integration | `.jenkins/Jenkinsfile.integration` | Integration tests pipeline |
 | uniteDiscord-e2e | `.jenkins/Jenkinsfile.e2e` | E2E tests pipeline |
-| uniteDiscord-nightly | `.jenkins/Jenkinsfile.nightly` | Nightly build pipeline |
 
 ### Step 3: Configure Required Credentials
 
@@ -72,6 +52,9 @@ The following credentials must be configured in Jenkins:
 |---------------|------|-------------|
 | `github-token` | Secret text | GitHub Personal Access Token with `repo` scope |
 | `github-credentials` | Username/Password | GitHub username and PAT |
+| `aws-access-key-id` | Secret text | AWS Access Key ID for Bedrock access |
+| `aws-secret-access-key` | Secret text | AWS Secret Access Key for Bedrock access |
+| `aws-region` | Secret text | AWS Region for Bedrock (default: us-east-1) |
 
 ### Step 4: Configure Jenkins Agents
 
@@ -79,35 +62,49 @@ The pipelines expect agents with these labels:
 
 | Label | Purpose | Executors |
 |-------|---------|-----------|
-| `linux` | General-purpose tasks | 2 |
-| `unit` | Unit test execution | 2 |
-| `integration` | Integration tests | 2 |
+| `any` | General-purpose tasks | 2 |
 | `e2e` | E2E tests (Playwright) | 1 |
 
 ## Shared Library Functions
 
-### Pipeline Helpers
-- `pipelineHelpers.getProjectName()` - Extract project name from job
-- `pipelineHelpers.getWorkspacePath()` - Get persistent workspace path
-- `pipelineHelpers.getServicePorts()` - Get list of service ports
+### AWS Bedrock Integration
 
-### Pipeline Stages
-- `pipelineInit()` - Initialize pipeline (checkout, git info, status)
-- `installDependencies()` - Smart npm install with caching
-- `runUnitTests()` - Execute unit tests with coverage
-- `runIntegrationTests()` - Execute integration tests
-- `runE2ETests()` - Execute E2E tests with Playwright
-- `runLintChecks()` - Run linting and type checks
-- `buildProject()` - Build project and archive artifacts
+The `withAwsCredentials` shared library function provides secure access to AWS Bedrock for AI service tests:
 
-### Utilities
-- `dockerCleanup()` - Clean Docker containers and ports
-- `playwrightSetup()` - Install Playwright browsers
-- `publishReports()` - Publish test reports (JUnit, Allure, Playwright)
-- `githubStatusReporter()` - Report build status to GitHub
-- `createGitHubIssue()` - Create GitHub issues for failures
-- `analyzeTestFailures()` - Analyze Jest test failures
-- `analyzeAllureFailures()` - Analyze Allure test results
+```groovy
+stage('E2E Tests with Bedrock') {
+    steps {
+        script {
+            withAwsCredentials {
+                // AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION are available
+                // BEDROCK_ENABLED=true, BEDROCK_DEFAULT_MODEL are set
+                sh 'npm run test:e2e'
+            }
+        }
+    }
+}
+
+// Verify Bedrock access before running tests
+stage('Verify Bedrock') {
+    steps {
+        script {
+            if (withAwsCredentials.verify()) {
+                echo 'Bedrock access verified!'
+            }
+        }
+    }
+}
+```
+
+Environment variables injected:
+- `AWS_ACCESS_KEY_ID` - AWS access key
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key
+- `AWS_REGION` - AWS region (us-east-1)
+- `BEDROCK_ENABLED` - Set to 'true'
+- `BEDROCK_DEFAULT_MODEL` - Default model ID (Claude 3.5 Haiku)
+- `BEDROCK_MODEL_HAIKU` - Claude 3.5 Haiku model ID
+- `BEDROCK_MODEL_SONNET` - Claude 3.5 Sonnet model ID
+- `BEDROCK_MODEL_OPUS` - Claude Opus 4.5 model ID
 
 ## Required Jenkins Plugins
 
@@ -119,6 +116,24 @@ The pipelines expect agents with these labels:
 - HTML Publisher
 - Timestamper
 
+## Troubleshooting
+
+### Library not found
+Ensure the library is configured in Global Pipeline Libraries with:
+- Name: `unitediscord-lib`
+- Library Path: `.jenkins`
+
+### Agent labels not found
+Create agents with the required labels or modify the Jenkinsfiles to use available labels.
+
+### GitHub status not updating
+Verify the `github-token` credential is configured and has `repo` scope.
+
+### AWS Bedrock errors
+1. Verify AWS credentials are configured in Jenkins
+2. Ensure the IAM user has Bedrock access permissions
+3. Check that the AWS region credential (`aws-region`) is set to `us-east-1`
+
 ## Usage in Jenkinsfiles
 
 To use the shared library functions in your Jenkinsfiles, add this at the top:
@@ -129,21 +144,15 @@ To use the shared library functions in your Jenkinsfiles, add this at the top:
 pipeline {
     agent any
     stages {
-        stage('Init') {
+        stage('Tests with Bedrock') {
             steps {
                 script {
-                    pipelineInit()
+                    withAwsCredentials {
+                        sh 'npm run test:unit'
+                    }
                 }
             }
         }
-        stage('Install') {
-            steps {
-                script {
-                    installDependencies()
-                }
-            }
-        }
-        // ... other stages
     }
 }
 ```

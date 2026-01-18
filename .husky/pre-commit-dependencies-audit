@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# ============================================================================
+# Pre-Commit Hook: Dependency Security Audit
+# ============================================================================
+# Scans dependencies for known security vulnerabilities using npm audit
+# Blocks commits if vulnerabilities are detected
+#
+# Usage: Called automatically by git pre-commit hook
+# Can be tested standalone: bash .husky/pre-commit-dependencies-audit
+# ============================================================================
+
+set -e
+
+# Source color utilities
+source "$(dirname -- "$0")/colors.sh"
+
+echo ""
+echo "🔒 Running dependency security audit..."
+
+# ============================================================================
+# Run npm audit
+# ============================================================================
+
+# Create temp file for audit results
+AUDIT_TEMP="/tmp/npm-audit-$$.json"
+
+# Run npm audit and capture output
+if npm audit --json --production 2>/dev/null > "$AUDIT_TEMP"; then
+  # Parse results
+  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+
+  if [ "$VULNERABILITIES" -eq 0 ]; then
+    success "No security vulnerabilities detected"
+    rm -f "$AUDIT_TEMP"
+    exit 0
+  fi
+else
+  # npm audit failed - extract results from error output
+  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "unknown")
+fi
+
+# ============================================================================
+# Vulnerabilities Found - Report and Block
+# ============================================================================
+
+echo ""
+error "Security vulnerabilities detected in dependencies!"
+echo ""
+
+# Extract vulnerability details
+CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+HIGH=$(jq '.metadata.vulnerabilities.high // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+LOW=$(jq '.metadata.vulnerabilities.low // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+
+echo "📊 Vulnerability Summary:"
+echo "  Critical:  $CRITICAL"
+echo "  High:      $HIGH"
+echo "  Moderate:  $MODERATE"
+echo "  Low:       $LOW"
+echo "  ────────────────────"
+echo "  Total:     $VULNERABILITIES"
+echo ""
+
+echo "🔧 Required Actions:"
+echo ""
+echo "1. REVIEW vulnerabilities in detail:"
+echo "   npm audit"
+echo ""
+echo "2. UPDATE dependencies to patched versions:"
+echo "   npm update"
+echo ""
+echo "3. IF NEEDED, try npm audit fix (may change APIs):"
+echo "   npm audit fix"
+echo ""
+echo "4. IF NO FIX AVAILABLE:"
+echo "   - Consult NPM security advisory"
+echo "   - Wait for package maintainer to release patch"
+echo "   - Document why vulnerability is acceptable (if truly necessary)"
+echo ""
+echo "5. COMMIT your fixes:"
+echo "   git add package.json package-lock.json"
+echo "   git commit -m 'fix: address security vulnerabilities'"
+echo ""
+
+echo "📖 More info: https://docs.npmjs.com/cli/v8/commands/npm-audit"
+echo ""
+
+rm -f "$AUDIT_TEMP"
+exit 1

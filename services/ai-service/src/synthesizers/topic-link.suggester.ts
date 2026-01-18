@@ -55,8 +55,9 @@ export class TopicLinkSuggester {
       return {
         suggestions: [],
         linkSuggestions: [],
-        confidenceScore: 0.50,
-        reasoning: 'Topic link suggestion requires access to existing topics database and semantic similarity analysis. This is a stub implementation pending AI client integration and database queries.',
+        confidenceScore: 0.5,
+        reasoning:
+          'Topic link suggestion requires access to existing topics database and semantic similarity analysis. This is a stub implementation pending AI client integration and database queries.',
       };
     }
 
@@ -64,12 +65,13 @@ export class TopicLinkSuggester {
     const linkSuggestions = this.findRelatedTopics(title, content, currentTopicId, existingTopics);
 
     return {
-      suggestions: linkSuggestions.map(link => link.targetTopicId),
+      suggestions: linkSuggestions.map((link) => link.targetTopicId),
       linkSuggestions,
-      confidenceScore: linkSuggestions.length > 0 ? 0.60 : 0.50,
-      reasoning: linkSuggestions.length > 0
-        ? `Found ${linkSuggestions.length} potential topic link${linkSuggestions.length === 1 ? '' : 's'} based on keyword matching. AI-powered semantic analysis will improve accuracy.`
-        : 'No related topics found using keyword matching. AI-powered semantic analysis pending.',
+      confidenceScore: linkSuggestions.length > 0 ? 0.6 : 0.5,
+      reasoning:
+        linkSuggestions.length > 0
+          ? `Found ${linkSuggestions.length} potential topic link${linkSuggestions.length === 1 ? '' : 's'} based on keyword matching. AI-powered semantic analysis will improve accuracy.`
+          : 'No related topics found using keyword matching. AI-powered semantic analysis pending.',
     };
   }
 
@@ -102,7 +104,7 @@ export class TopicLinkSuggester {
       const topicKeywords = this.extractKeywords(topicText);
 
       // Calculate keyword overlap
-      const overlap = currentKeywords.filter(kw => topicKeywords.includes(kw));
+      const overlap = currentKeywords.filter((kw) => topicKeywords.includes(kw));
 
       if (overlap.length > 0) {
         // Determine relationship type based on language cues
@@ -128,16 +130,57 @@ export class TopicLinkSuggester {
 
     // Stop words to filter out
     const stopWords = new Set([
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-      'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been',
-      'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-      'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these',
-      'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'in',
+      'on',
+      'at',
+      'to',
+      'for',
+      'of',
+      'with',
+      'by',
+      'from',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'being',
+      'have',
+      'has',
+      'had',
+      'do',
+      'does',
+      'did',
+      'will',
+      'would',
+      'could',
+      'should',
+      'may',
+      'might',
+      'can',
+      'this',
+      'that',
+      'these',
+      'those',
+      'i',
+      'you',
+      'he',
+      'she',
+      'it',
+      'we',
+      'they',
     ]);
 
     return words
-      .map(word => word.replace(/[^a-z]/g, ''))
-      .filter(word => word.length > 4 && !stopWords.has(word));
+      .map((word) => word.replace(/[^a-z]/g, ''))
+      .filter((word) => word.length > 4 && !stopWords.has(word));
   }
 
   /**
@@ -146,19 +189,27 @@ export class TopicLinkSuggester {
    */
   private inferRelationshipType(text1: string, text2: string): TopicRelationshipType {
     const supportWords = ['agree', 'support', 'confirm', 'validate', 'prove'];
-    const contradictWords = ['disagree', 'contradict', 'refute', 'oppose', 'challenge', 'however', 'but'];
+    const contradictWords = [
+      'disagree',
+      'contradict',
+      'refute',
+      'oppose',
+      'challenge',
+      'however',
+      'but',
+    ];
     const questionWords = ['question', 'doubt', 'wonder', 'unclear', 'uncertain'];
     const extendWords = ['building', 'expand', 'extend', 'develop', 'further', 'additionally'];
 
     const combinedText = `${text1} ${text2}`;
 
-    if (contradictWords.some(word => combinedText.includes(word))) {
+    if (contradictWords.some((word) => combinedText.includes(word))) {
       return TopicRelationshipType.CONTRADICTS;
-    } else if (questionWords.some(word => combinedText.includes(word))) {
+    } else if (questionWords.some((word) => combinedText.includes(word))) {
       return TopicRelationshipType.QUESTIONS;
-    } else if (extendWords.some(word => combinedText.includes(word))) {
+    } else if (extendWords.some((word) => combinedText.includes(word))) {
       return TopicRelationshipType.EXTENDS;
-    } else if (supportWords.some(word => combinedText.includes(word))) {
+    } else if (supportWords.some((word) => combinedText.includes(word))) {
       return TopicRelationshipType.SUPPORTS;
     }
 

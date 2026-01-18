@@ -35,7 +35,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Check for threaded response structure
       // Look for responses with indentation or threading indicators
@@ -67,7 +70,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for collapse/expand buttons
       // The ThreadedResponseDisplay component shows "Hide X replies" or "Show X replies"
@@ -112,7 +118,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for reply buttons
       const replyButtons = page.getByRole('button', { name: /^reply$/i });
@@ -134,7 +143,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Find and click a reply button
       const replyButton = page.getByRole('button', { name: /^reply$/i }).first();
@@ -145,7 +157,9 @@ test.describe('Thread Navigation and Reply', () => {
 
         // Should open a reply composer
         // Look for textarea or form that appears
-        const replyTextarea = page.locator('textarea[placeholder*="reply"], textarea[placeholder*="response"]');
+        const replyTextarea = page.locator(
+          'textarea[placeholder*="reply"], textarea[placeholder*="response"]',
+        );
         const replyForm = page.locator('form').filter({ has: page.locator('textarea') });
 
         const hasReplyTextarea = (await replyTextarea.count()) > 0;
@@ -161,8 +175,12 @@ test.describe('Thread Navigation and Reply', () => {
           await page.waitForTimeout(300);
 
           // Composer should be closed/hidden
-          const textareaStillVisible = (await replyTextarea.count()) > 0 &&
-            await replyTextarea.first().isVisible().catch(() => false);
+          const textareaStillVisible =
+            (await replyTextarea.count()) > 0 &&
+            (await replyTextarea
+              .first()
+              .isVisible()
+              .catch(() => false));
 
           // After canceling, the textarea should be hidden
           if (textareaStillVisible) {
@@ -181,7 +199,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Find and click a reply button
       const replyButton = page.getByRole('button', { name: /^reply$/i }).first();
@@ -195,16 +216,18 @@ test.describe('Thread Navigation and Reply', () => {
         const replyTextarea = page.locator('textarea').last(); // Use last in case there are multiple
         const hasTextarea = (await replyTextarea.count()) > 0;
 
-        if (hasTextarea && await replyTextarea.isVisible()) {
+        if (hasTextarea && (await replyTextarea.isVisible())) {
           // Fill in reply content
           const replyContent = generateResponseContent('Threaded reply');
           await replyTextarea.fill(replyContent);
 
           // Find and click submit button
-          const submitButton = page.getByRole('button', { name: /post reply|submit|post response/i }).last();
+          const submitButton = page
+            .getByRole('button', { name: /post reply|submit|post response/i })
+            .last();
           const hasSubmitButton = (await submitButton.count()) > 0;
 
-          if (hasSubmitButton && await submitButton.isEnabled()) {
+          if (hasSubmitButton && (await submitButton.isEnabled())) {
             await submitButton.click();
 
             // Wait for submission
@@ -213,8 +236,12 @@ test.describe('Thread Navigation and Reply', () => {
             // Verify the reply appears in the thread
             // Look for the reply content in the page
             const replyText = page.getByText(replyContent, { exact: false });
-            const replyVisible = (await replyText.count()) > 0 &&
-              await replyText.first().isVisible().catch(() => false);
+            const replyVisible =
+              (await replyText.count()) > 0 &&
+              (await replyText
+                .first()
+                .isVisible()
+                .catch(() => false));
 
             // If submission succeeded, the reply should be visible
             if (replyVisible) {
@@ -243,15 +270,19 @@ test.describe('Thread Navigation and Reply', () => {
       if (topicUrl) {
         // Navigate to topic first
         await page.goto(topicUrl);
-        await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+        await page.waitForSelector('text=Loading topic details...', {
+          state: 'hidden',
+          timeout: 10000,
+        });
 
         // Find a response element with an ID or data attribute
         const responseWithId = page.locator('[id^="response-"], [data-response-id]').first();
         const hasResponseId = (await responseWithId.count()) > 0;
 
         if (hasResponseId) {
-          const responseId = await responseWithId.getAttribute('id') ||
-                            await responseWithId.getAttribute('data-response-id');
+          const responseId =
+            (await responseWithId.getAttribute('id')) ||
+            (await responseWithId.getAttribute('data-response-id'));
 
           if (responseId) {
             // Navigate to URL with hash
@@ -259,23 +290,26 @@ test.describe('Thread Navigation and Reply', () => {
             await page.waitForTimeout(500);
 
             // The targeted response should be highlighted or scrolled into view
-            const targetedResponse = page.locator(`#${responseId}, [data-response-id="${responseId}"]`);
+            const targetedResponse = page.locator(
+              `#${responseId}, [data-response-id="${responseId}"]`,
+            );
 
             // Verify it's visible (scrolled into view)
             await expect(targetedResponse).toBeVisible();
 
             // Check if it has highlighting (border, background color, etc.)
             const hasHighlight = await page.evaluate((id) => {
-              const element = document.getElementById(id) ||
-                            document.querySelector(`[data-response-id="${id}"]`);
+              const element =
+                document.getElementById(id) || document.querySelector(`[data-response-id="${id}"]`);
               if (!element) return false;
 
               const styles = window.getComputedStyle(element);
-              const hasColoredBorder = styles.borderColor &&
-                                      styles.borderColor !== 'rgb(0, 0, 0)' &&
-                                      styles.borderColor !== 'rgba(0, 0, 0, 0)';
-              const hasBackground = styles.backgroundColor &&
-                                   styles.backgroundColor !== 'rgba(0, 0, 0, 0)';
+              const hasColoredBorder =
+                styles.borderColor &&
+                styles.borderColor !== 'rgb(0, 0, 0)' &&
+                styles.borderColor !== 'rgba(0, 0, 0, 0)';
+              const hasBackground =
+                styles.backgroundColor && styles.backgroundColor !== 'rgba(0, 0, 0, 0)';
 
               return hasColoredBorder || hasBackground;
             }, responseId);
@@ -300,7 +334,10 @@ test.describe('Thread Navigation and Reply', () => {
     if (topicCount > 0) {
       // Navigate to a topic
       await topicLinks.first().click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Check if there's an empty state message
       const emptyStateMessages = [
@@ -339,7 +376,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Count responses before adding reply
       const responsesBefore = page.locator('[class*="response"], [data-testid*="response"]');
@@ -357,12 +397,14 @@ test.describe('Thread Navigation and Reply', () => {
         const replyTextarea = page.locator('textarea').last();
         const hasTextarea = (await replyTextarea.count()) > 0;
 
-        if (hasTextarea && await replyTextarea.isVisible()) {
+        if (hasTextarea && (await replyTextarea.isVisible())) {
           const replyContent = generateResponseContent('Thread structure test');
           await replyTextarea.fill(replyContent);
 
-          const submitButton = page.getByRole('button', { name: /post reply|submit|post response/i }).last();
-          if ((await submitButton.count()) > 0 && await submitButton.isEnabled()) {
+          const submitButton = page
+            .getByRole('button', { name: /post reply|submit|post response/i })
+            .last();
+          if ((await submitButton.count()) > 0 && (await submitButton.isEnabled())) {
             await submitButton.click();
             await page.waitForTimeout(2000);
 
@@ -395,7 +437,10 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for visual threading indicators
       // The ThreadedResponseDisplay component uses:
@@ -406,7 +451,8 @@ test.describe('Thread Navigation and Reply', () => {
       const hasIndentation = (await indentedElements.count()) > 0;
 
       // Check for visual line indicators
-      const lineIndicators = page.locator('[class*="border"], [class*="bg-gray"]')
+      const lineIndicators = page
+        .locator('[class*="border"], [class*="bg-gray"]')
         .filter({ has: page.locator('[class*="h-"]') });
       const hasLines = (await lineIndicators.count()) > 0;
 
@@ -431,18 +477,25 @@ test.describe('Thread Navigation and Reply', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for deeply nested responses
       // The ThreadedResponseDisplay has maxDepth=5 by default
       // Responses beyond this depth should not increase indentation further
 
-      const deeplyNested = page.locator('[class*="ml-16"], [class*="ml-20"], [style*="margin-left: 16"]');
+      const deeplyNested = page.locator(
+        '[class*="ml-16"], [class*="ml-20"], [style*="margin-left: 16"]',
+      );
       const hasDeepNesting = (await deeplyNested.count()) > 0;
 
       // Check that we don't have excessive nesting beyond reasonable limits
       // ml-20 or higher would indicate depth > 5 (at ml-4 per level)
-      const excessiveNesting = page.locator('[class*="ml-24"], [class*="ml-28"], [style*="margin-left: 24"]');
+      const excessiveNesting = page.locator(
+        '[class*="ml-24"], [class*="ml-28"], [style*="margin-left: 24"]',
+      );
       const hasExcessiveNesting = (await excessiveNesting.count()) > 0;
 
       // Should not have excessive nesting (maxDepth constraint)

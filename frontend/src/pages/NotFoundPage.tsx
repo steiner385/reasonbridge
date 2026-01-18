@@ -4,12 +4,8 @@ function NotFoundPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          404 - Page Not Found
-        </h2>
-        <p className="text-gray-600 mb-6">
-          The page you are looking for does not exist.
-        </p>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">404 - Page Not Found</h2>
+        <p className="text-gray-600 mb-6">The page you are looking for does not exist.</p>
         <nav className="flex gap-4">
           <Link
             to="/"

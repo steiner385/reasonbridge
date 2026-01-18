@@ -17,7 +17,7 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     // TypeScript specific overrides
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'error',
@@ -34,6 +34,7 @@ module.exports = {
           '**/test/**',
           '**/__tests__/**',
           '**/vitest.config.ts',
+          '**/vitest.*.config.ts',
           '**/jest.config.ts',
         ],
       },
@@ -79,6 +80,13 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         'no-console': 'off',
+      },
+    },
+    {
+      // Vitest config files
+      files: ['**/vitest.config.ts', '**/vitest.*.config.ts'],
+      rules: {
+        'import/no-unresolved': 'off',
       },
     },
   ],

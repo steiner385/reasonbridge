@@ -79,7 +79,7 @@ describe('ElastiCacheStack', () => {
       Description: 'Parameter group for Unite Redis cluster',
       Properties: {
         'maxmemory-policy': 'allkeys-lru',
-        'timeout': '300',
+        timeout: '300',
       },
     });
   });

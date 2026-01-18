@@ -144,9 +144,7 @@ function ProfileEditForm({
     <Card variant="default" padding="lg" className={className}>
       <CardHeader>
         <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Update your profile information
-        </p>
+        <p className="mt-2 text-sm text-gray-600">Update your profile information</p>
       </CardHeader>
 
       <CardBody>
