@@ -1,13 +1,17 @@
-import { Controller, Post, Get, Patch, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { FeedbackService } from './feedback.service.js';
-import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto } from './dto/index.js';
+import { FeedbackAnalyticsService } from '../services/feedback-analytics.service.js';
+import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto, FeedbackAnalyticsDto, FeedbackAnalyticsQueryDto } from './dto/index.js';
 
 /**
  * Controller for feedback-related endpoints
  */
 @Controller('feedback')
 export class FeedbackController {
-  constructor(private readonly feedbackService: FeedbackService) {}
+  constructor(
+    private readonly feedbackService: FeedbackService,
+    private readonly analyticsService: FeedbackAnalyticsService,
+  ) {}
 
   /**
    * Request AI-generated feedback for a response
@@ -20,6 +24,19 @@ export class FeedbackController {
   @HttpCode(HttpStatus.CREATED)
   async requestFeedback(@Body() dto: RequestFeedbackDto): Promise<FeedbackResponseDto> {
     return this.feedbackService.requestFeedback(dto);
+  }
+
+  /**
+   * Get feedback effectiveness analytics
+   * GET /feedback/analytics
+   *
+   * @param query Query parameters for filtering (date range, type, etc.)
+   * @returns Analytics data with metrics and insights
+   */
+  @Get('analytics')
+  @HttpCode(HttpStatus.OK)
+  async getAnalytics(@Query() query: FeedbackAnalyticsQueryDto): Promise<FeedbackAnalyticsDto> {
+    return this.analyticsService.getAnalytics(query);
   }
 
   /**

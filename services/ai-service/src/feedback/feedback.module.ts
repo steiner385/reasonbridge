@@ -6,6 +6,7 @@ import { ResponseAnalyzerService } from '../services/response-analyzer.service.j
 import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
 import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
 import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js';
+import { FeedbackAnalyticsService } from '../services/feedback-analytics.service.js';
 
 /**
  * Module for feedback functionality
@@ -15,6 +16,7 @@ import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js'
   controllers: [FeedbackController],
   providers: [
     FeedbackService,
+    FeedbackAnalyticsService,
     ResponseAnalyzerService,
     ToneAnalyzerService,
     FallacyDetectorService,
