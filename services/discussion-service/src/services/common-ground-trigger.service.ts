@@ -124,9 +124,7 @@ export class CommonGroundTriggerService {
     // 1. HTTP POST to ai-service: POST /generate/common-ground
     // 2. Publish event: 'common-ground.trigger-requested'
 
-    this.logger.log(
-      `[PLACEHOLDER] Would trigger common ground analysis for topic ${topicId}`,
-    );
+    this.logger.log(`[PLACEHOLDER] Would trigger common ground analysis for topic ${topicId}`);
     this.logger.log(
       `Next step: Implement HTTP client to call AI service /generate/common-ground endpoint`,
     );
