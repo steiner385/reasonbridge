@@ -2,10 +2,25 @@
 
 ## Current Status
 
-- Completed issue #150 (T154) - Integration tests: Real-time updates (WebSocket)
-- ~157 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #151 (T155) - E2E: View common ground summary
+- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #151 (T155) - E2E: View common ground summary:**
+- Created comprehensive E2E test suite: frontend/e2e/view-common-ground-summary.spec.ts
+- 16 passing test scenarios covering:
+  - Display common ground summary panel on topic detail page
+  - Agreement visualization and consensus scores
+  - Shared points (agreement zones), divergence points, misunderstandings display
+  - Proposition cluster information
+  - Participant metrics and response counts
+  - Loading, error, and empty state handling
+  - Real-time WebSocket update capability
+  - Responsive design on mobile viewports
+  - Smooth scrolling and interaction
+- Fixed Playwright config to use correct dev server port (3000)
+- Merged via PR #529
 
 **Issue #150 (T154) - Integration tests: Real-time updates (WebSocket):**
 - Created comprehensive integration test suite for WebSocket real-time notifications
