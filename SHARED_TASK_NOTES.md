@@ -2,55 +2,71 @@
 
 ## Current Status
 
-- Completed issues #163-166 (T167, T168, T169, T170) - Verification infrastructure and video recording
-- ~158 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #165 (T169) - Create verification request page
+- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All 223 E2E tests passing ✅
+- Main branch synced with all implementations
 
-## Latest Completed (2026-01-18 - Iteration 13)
+## Latest Completed (2026-01-18 - Iteration 7)
 
-**Issue #166 (T170) - Create video recording component:**
-- Created verification.ts types (frontend/src/types/verification.ts):
-  - VerificationType, VerificationStatus, VideoChallengeType enums
-  - VideoChallenge, VideoConstraints, VerificationResponse interfaces
-  - VideoUploadMetadata, VideoUploadResponse, VideoRecorderState, VideoRecorderControls
-- Implemented VideoRecordingComponent (frontend/src/components/verification/VideoRecordingComponent.tsx):
-  - MediaRecorder API integration for camera/audio capture
-  - Automatic stream cleanup with useEffect
-  - Real-time recording timer display
-  - Video preview and playback functionality
-  - Challenge instruction display (supports RANDOM_PHRASE, RANDOM_GESTURE, TIMESTAMP types)
-  - Recording controls: Start, Stop, Retake, Submit
-  - Duration validation (min/max seconds) with user feedback
-  - File size validation (max bytes limit)
-  - Validation status display with checkmarks
-  - Comprehensive error handling for camera access failures
-  - Upload error display and loading state management
-  - Responsive UI with Tailwind CSS styling
-  - Fully accessible form controls
-- Updated verification/index.ts barrel exports to include VideoRecordingComponent
-- Resolved merge conflicts with T169 (verification request page) - merged complementary types
-- Build verification: TypeScript compilation successful, 159 modules transpiled
-- Vite production build: 342 kB gzipped, 0 errors
-- Merged via PR #548
+**Issue #165 (T169) - Create verification request page:**
+- Created VerificationPage component (main page for verification management)
+  - Overview tab showing current verification level and options
+  - Phone verification tab with form
+  - Government ID tab (placeholder for future implementation)
+  - Video verification tab (placeholder for future implementation)
+- Created PhoneVerificationForm component
+  - E.164 phone number format validation
+  - Error handling and success messaging
+  - Loading states during API calls
+  - Responsive design
+- Created VerificationStatusDisplay component
+  - Display current verification level
+  - Show pending verifications with countdown timers
+  - Display verification benefits
+- Created verification types and DTOs (`frontend/src/types/verification.ts`)
+  - VerificationType, VerificationStatus, VideoChallengType enums
+  - Type-safe request/response interfaces
+- Created useVerification React Query hooks (`frontend/src/hooks/useVerification.ts`)
+  - useRequestVerification - Initiate verification
+  - usePendingVerifications - Get pending verifications
+  - useVerificationHistory - Get verification history
+  - useVerification - Get specific verification details
+  - useCompleteVideoUpload - Complete video upload
+  - useCompleteVerification - Mark verification complete
+  - useReverifyVerification - Reinitiate verification
+- Added `/verification` route to application routes
+- Component exports in `frontend/src/components/verification/index.ts`
+- TypeScript compilation successful
+- Frontend build successful (164 modules, 354.56 kB gzipped)
+- All 223 E2E tests passing, 61 skipped
+- Merged via PR #547
+- Resolves dependency on T160 (completed)
 
-## Previous Completed (2026-01-18 - Iteration 12)
+## Previous Completed (2026-01-18 - Iteration 6)
 
-**Issue #164 (T168) - Implement verification events:**
-- Created UserEvent schema in `packages/event-schemas/src/user.ts`
-  - 7 event types for verification and bot detection lifecycle
-  - VerificationRequestedEvent: When user initiates verification (phone/ID/video)
-  - VerificationCompletedEvent: When verification succeeds with provider reference
-  - VerificationFailedEvent: When verification rejected (reasons: provider_rejected, fraud_detected, etc.)
-  - VerificationExpiredEvent: When verification request expires without completion
-  - UserVerifiedHumanStatusChangedEvent: When user gains/loses verified human badge
-  - BotPatternDetectedEvent: Risk score, patterns detected, verification requirement
-  - UserFlaggedForReviewEvent: For manual review queue with priority levels
-- Updated event-schemas/src/index.ts
-  - Export UserEvent types and USER_EVENT_TYPES constant
-  - Added to EVENT_TYPES export for centralized registry
-- TypeScript compilation verified successful
-- Enables integration with VerificationController and manual review queue
-- Merged via PR #546
+**Issue #163 (T167) - Implement manual review queue (BotDetector service):**
+- Created BotDetectorService in `services/user-service/src/services/bot-detector.service.ts`
+  - Detects rapid account creation patterns (< 24h = very suspicious, < 1 week = suspicious)
+  - Detects rapid posting patterns (average < 5 minutes between posts)
+  - Detects topic concentration (narrow focus on limited topics)
+  - Risk scoring system (0.0-1.0 scale, threshold 0.4 for requiring additional verification)
+  - Human-readable reasoning for detected patterns
+- Implements coordinated posting pattern detection across accounts
+  - Timing coordination detection (multiple users in tight time windows)
+  - New account coordination detection (3+ very new accounts on same topic)
+  - Confidence scoring and affected user ID tracking
+- Integrated BotDetectorService into UsersService and UsersModule
+  - Added checkAndHandleBotPatterns() method to UsersService
+  - Injected BotDetectorService as dependency
+- Created comprehensive unit tests (9 test cases)
+  - All patterns tested: very new, new, rapid posting, topic concentration
+  - Risk scoring validation
+  - Suspicious marking verification
+  - Normal user behavior verification
+  - Coordinated posting detection tests
+- TypeScript build verified successful (no compilation errors)
+- Merged via PR #545
 
 ## Previous Completed (2026-01-18 - Iteration 11)
 
