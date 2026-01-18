@@ -80,7 +80,7 @@ export default defineConfig({
     command: process.env.CI ? 'npm run preview' : 'npm run dev',
     url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000, // 2 minutes for CI
+    timeout: 180000, // 3 minutes to allow dev server to start
     stdout: 'ignore',
     stderr: 'pipe',
   },
