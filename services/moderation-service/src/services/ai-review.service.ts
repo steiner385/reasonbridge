@@ -133,13 +133,16 @@ export class AIReviewService {
 
     const total = pending + approved;
     const approvalRate = total > 0 ? approved / total : 0;
+    const avgConfidence = avgConfidenceResult._avg.aiConfidence
+      ? Number(avgConfidenceResult._avg.aiConfidence)
+      : 0;
 
     return {
       totalPending: pending,
       byActionType: Object.fromEntries(
         byActionType.map((item) => [item.actionType, item._count]),
       ),
-      avgConfidence: avgConfidenceResult._avg.aiConfidence ?? 0,
+      avgConfidence,
       approvalRate,
     };
   }
