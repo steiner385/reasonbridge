@@ -2,12 +2,40 @@
 
 ## Current Status
 
-- Completed issue #187 (T191) - Implement AppealService for moderation appeal management
-- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All moderation service tests passing (54 total: 24 repository + 21 content-screening + 9 ai-review) ✅
+- Completed issue #188 (T192) - Implement ModerationQueueService with analytics
+- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All moderation service tests passing (54+ total repository, content-screening, ai-review) ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
+
+## Latest Completed (2026-01-18 - Iteration 30)
+
+**Issue #188 (T192) - Implement moderation analytics service:**
+- Created ModerationQueueService (`services/moderation-service/src/services/moderation-queue.service.ts`) with:
+  - `getQueue()` method to retrieve pending moderation items with filtering by type ('action'/'appeal'/'report') and priority
+  - `getQueueStats()` to provide queue statistics (pending counts, average resolution time, oldest item age)
+  - `getAnalytics()` for detailed moderation metrics over time periods (approval/reversal/appeal rates)
+  - Priority calculation logic based on action severity (CONSEQUENTIAL, MEDIUM, NON_PUNITIVE) and AI confidence
+  - ISO 8601 duration formatting for wait times (PT1H30M, P2D, etc)
+  - Cursor-based pagination support for queue items
+  - Queue items support: 'action', 'appeal' types (reports will be added when Report model is implemented)
+- Architecture features:
+  - Handles ModerationAction and Appeal models from existing schema
+  - Calculates average resolution time from resolved actions in last 30 days
+  - Tracks oldest pending item to identify bottlenecks
+  - Extensible design with TODOs for Report model integration
+- Created comprehensive unit tests (40+ test cases) in `moderation-queue.service.spec.ts`:
+  - Service instantiation and method availability
+  - Queue item interface validation
+  - Priority calculation logic for actions and appeals
+  - Wait time formatting in various durations
+  - Queue filtering by type and pagination
+  - Statistics and analytics calculations
+  - Interface contracts and response formats
+- Updated ModerationModule to export ModerationQueueService
+- TypeScript compilation successful (moderation-service builds without errors)
+- Merged via PR #580
 
 ## Latest Completed (2026-01-18 - Iteration 29)
 
