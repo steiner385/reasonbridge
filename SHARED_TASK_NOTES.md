@@ -2,10 +2,32 @@
 
 ## Current Status
 
-- Completed issue #159 (T163) - E2E tests for User Story 4 trust indicators
-- ~164 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #160 (T164) - TrustScore DTOs for Mayer ABI Model
+- ~163 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #160 (T164) - Create TrustScore DTOs:**
+- Created TrustScoresDto class (services/user-service/src/users/dto/trust-score.dto.ts)
+  * Three Mayer ABI Model dimensions: Ability, Benevolence, Integrity
+  * Each dimension: 0-1 decimal range with class-validator validation
+  * Methods: getOverallScore(), toPercentages(), getTrustLevel(), isTrustworthy()
+- Created TrustScoreUpdateDto for partial trust score updates
+  * All dimensions optional for flexible update operations
+  * Full validation on all optional fields
+- Created TrustScoreResponseDto for API responses
+  * Extends TrustScoresDto with metadata (userId, verificationLevel, timestamps)
+  * Includes computed overall score, trust level, trustworthiness flag
+  * Optional description field for detailed trust reasoning
+- Trust level classification system:
+  * very_high (≥0.8), high (≥0.6), medium (≥0.4), low (≥0.2), very_low (<0.2)
+  * Trustworthiness threshold at 0.6 overall score
+- Full JSDoc documentation with citations to Mayer's Trust Model
+- Matches OpenAPI contract specification for trust endpoints
+- TypeScript compilation verified successful
+- Auto-closed via commit message
+
+## Previous Completion (2026-01-18)
 
 **Issue #159 (T163) - E2E tests for User Story 4 trust indicators:**
 - Created comprehensive E2E test suite: `frontend/e2e/user-story-4-trust-indicators.spec.ts` (560+ lines)
