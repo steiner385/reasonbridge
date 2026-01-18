@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { BedrockService } from '../ai/bedrock.service.js';
+import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
 import { RequestFeedbackDto, FeedbackResponseDto } from './dto/index.js';
-import { FeedbackType, Prisma } from '@unite-discord/db-models';
+import { Prisma } from '@unite-discord/db-models';
 
 /**
  * Service for handling AI-generated feedback on responses
@@ -11,7 +11,7 @@ import { FeedbackType, Prisma } from '@unite-discord/db-models';
 export class FeedbackService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly bedrock: BedrockService,
+    private readonly analyzer: ResponseAnalyzerService,
   ) {}
 
   /**
@@ -52,31 +52,15 @@ export class FeedbackService {
   }
 
   /**
-   * Generate feedback using AI (stub implementation for now)
+   * Generate feedback using comprehensive analysis
+   * Analyzes emotional tone, logical fallacies, and clarity
    * @param content The response content to analyze
    * @returns AI-generated feedback analysis
    */
-  private async generateFeedback(content: string): Promise<{
-    type: FeedbackType;
-    subtype?: string;
-    suggestionText: string;
-    reasoning: string;
-    confidenceScore: number;
-    educationalResources?: any;
-  }> {
-    // For now, use the stub Bedrock service
-    // In the future, this will make actual AI calls to analyze the content
-    await this.bedrock.analyzeContent(content);
-
-    // Stub implementation - returns a generic affirmation
-    // This will be replaced with actual AI analysis in future tasks
-    return {
-      type: FeedbackType.AFFIRMATION,
-      suggestionText: 'Your response contributes to constructive dialogue.',
-      reasoning:
-        'This is a stub implementation. Actual AI analysis will be implemented in future tasks.',
-      confidenceScore: 0.5,
-    };
+  private async generateFeedback(content: string) {
+    // Use the response analyzer to perform comprehensive analysis
+    // This analyzes tone, fallacies, and clarity in parallel
+    return this.analyzer.analyzeContent(content);
   }
 
   /**
