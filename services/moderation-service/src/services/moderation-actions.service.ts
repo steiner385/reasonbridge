@@ -1,5 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { QueueService } from '../queue/queue.service.js';
+import type { ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
+import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
 
 export interface CreateActionRequest {
   targetType: 'response' | 'user' | 'topic';
@@ -47,7 +50,10 @@ export interface ModerationActionDetailResponse extends ModerationActionResponse
  */
 @Injectable()
 export class ModerationActionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly queueService: QueueService,
+  ) {}
 
   /**
    * List moderation actions with optional filters
@@ -114,6 +120,7 @@ export class ModerationActionsService {
 
   /**
    * Create a new moderation action (moderator-initiated)
+   * Publishes event to queue for other services to consume
    */
   async createAction(
     request: CreateActionRequest,
@@ -149,6 +156,34 @@ export class ModerationActionsService {
         },
       },
     });
+
+    // Publish event to queue for other services
+    try {
+      const event: ModerationActionRequestedEvent = {
+        id: action.id,
+        type: MODERATION_EVENT_TYPES.ACTION_REQUESTED,
+        timestamp: new Date().toISOString(),
+        version: 1,
+        payload: {
+          targetType: request.targetType as 'response' | 'user' | 'topic',
+          targetId: request.targetId,
+          actionType: request.actionType as 'educate' | 'warn' | 'hide' | 'remove' | 'suspend' | 'ban',
+          severity: severity === 'NON_PUNITIVE' ? 'non_punitive' : 'consequential',
+          reasoning: request.reasoning,
+          aiConfidence: 1.0, // Moderator-initiated actions have high confidence
+          requestedAt: new Date().toISOString(),
+        },
+        metadata: {
+          source: 'moderation-service',
+          userId: moderatorId,
+        },
+      };
+
+      await this.queueService.publishEvent(event);
+    } catch (error) {
+      // Log error but don't fail the request - moderation action is created
+      console.error('Failed to publish moderation action event', error);
+    }
 
     return this.mapModerationActionToResponse(action);
   }
