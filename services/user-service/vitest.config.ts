@@ -8,6 +8,7 @@ export default defineConfig({
     include: [
       'src/**/*.test.ts',
       'src/**/*.spec.ts',
+      'src/**/*.integration.test.ts',
     ],
     exclude: [
       '**/node_modules/**',
