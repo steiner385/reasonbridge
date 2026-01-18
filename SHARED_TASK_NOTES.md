@@ -2,14 +2,29 @@
 
 ## Current Status
 
-- Completed issue #177 (T181) - Implement moderation action endpoints
-- ~152 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #178 (T182) - Implement moderation queue management
+- ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - All moderation service unit tests passing ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
 
-## Latest Completed (2026-01-18 - Iteration 21)
+## Latest Completed (2026-01-18 - Iteration 22)
+
+**Issue #178 (T182) - Implement moderation queue management:**
+- Created queue configuration module with environment-based AWS SNS/SQS setup (services/moderation-service/src/queue/queue.config.ts:1-73)
+- Implemented QueueService for event publishing and subscription (services/moderation-service/src/queue/queue.service.ts:1-141)
+- Set up NestJS QueueModule with automatic lifecycle management (services/moderation-service/src/queue/queue.module.ts:1-45)
+- Integrated SnsEventPublisher for publishing ModerationActionRequestedEvent events
+- Integrated SqsEventSubscriber for consuming moderation queue messages
+- Set up DeadLetterQueueHandler for processing failed messages
+- Updated AIReviewService to publish events on AI recommendations (services/moderation-service/src/services/ai-review.service.ts:73-100)
+- Updated ModerationActionsService to publish events on action creation (services/moderation-service/src/services/moderation-actions.service.ts:160-186)
+- Extended health check endpoints with queue status monitoring (/health/queue)
+- Fixed TypeScript errors and test injection parameters
+- Merged via PR #563 (commit 50f68df)
+
+## Previous Completed (2026-01-18 - Iteration 21)
 
 **Issue #177 (T181) - Implement moderation action endpoints:**
 - Created ModerationActionsService (services/moderation-service/src/services/moderation-actions.service.ts:1-416)
