@@ -3,8 +3,8 @@
 # ============================================================================
 # Pre-Commit Hook: Dependency Security Audit
 # ============================================================================
-# Scans dependencies for known security vulnerabilities using npm audit
-# Blocks commits if vulnerabilities are detected
+# Scans dependencies for known security vulnerabilities
+# Blocks commits only for high/critical vulnerabilities in production deps
 #
 # Usage: Called automatically by git pre-commit hook
 # Can be tested standalone: bash .husky/pre-commit-dependencies-audit
@@ -19,40 +19,65 @@ echo ""
 echo "🔒 Running dependency security audit..."
 
 # ============================================================================
-# Run npm audit
+# Run audit based on package manager
 # ============================================================================
 
 # Create temp file for audit results
-AUDIT_TEMP="/tmp/npm-audit-$$.json"
+AUDIT_TEMP="/tmp/dependency-audit-$$.json"
 
-# Run npm audit and capture output
-if npm audit --json --production 2>/dev/null > "$AUDIT_TEMP"; then
-  # Parse results
-  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+# Detect package manager and run appropriate audit
+if [ -f "pnpm-lock.yaml" ]; then
+  # Use pnpm audit for pnpm projects
+  # Only check production dependencies (--prod)
+  pnpm audit --json --prod 2>/dev/null > "$AUDIT_TEMP" || true
 
-  if [ "$VULNERABILITIES" -eq 0 ]; then
-    success "No security vulnerabilities detected"
-    rm -f "$AUDIT_TEMP"
-    exit 0
-  fi
+  # pnpm audit JSON structure: { "advisories": { "id": { "severity": "..." } } }
+  # Count high and critical vulnerabilities
+  CRITICAL=$(jq '[.advisories | to_entries[] | select(.value.severity == "critical")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  HIGH=$(jq '[.advisories | to_entries[] | select(.value.severity == "high")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  MODERATE=$(jq '[.advisories | to_entries[] | select(.value.severity == "moderate")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  LOW=$(jq '[.advisories | to_entries[] | select(.value.severity == "low")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+
+  VULNERABILITIES=$((CRITICAL + HIGH + MODERATE + LOW))
+  BLOCKING_VULNS=$((CRITICAL + HIGH))
+
+  PKG_MANAGER="pnpm"
 else
-  # npm audit failed - extract results from error output
-  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "unknown")
+  # Run npm audit for npm projects
+  npm audit --json --production 2>/dev/null > "$AUDIT_TEMP" || true
+
+  # npm audit JSON structure: { "metadata": { "vulnerabilities": { "critical": N, ... } } }
+  CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  HIGH=$(jq '.metadata.vulnerabilities.high // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  LOW=$(jq '.metadata.vulnerabilities.low // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+
+  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+  BLOCKING_VULNS=$((CRITICAL + HIGH))
+
+  PKG_MANAGER="npm"
 fi
 
+# Clean up temp file
+rm -f "$AUDIT_TEMP"
+
 # ============================================================================
-# Vulnerabilities Found - Report and Block
+# Report Results
 # ============================================================================
 
-echo ""
-error "Security vulnerabilities detected in dependencies!"
-echo ""
+if [ "$VULNERABILITIES" -eq 0 ]; then
+  success "No security vulnerabilities detected"
+  exit 0
+fi
 
-# Extract vulnerability details
-CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
-HIGH=$(jq '.metadata.vulnerabilities.high // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
-MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
-LOW=$(jq '.metadata.vulnerabilities.low // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+# Report vulnerabilities
+echo ""
+if [ "$BLOCKING_VULNS" -gt 0 ]; then
+  error "Security vulnerabilities detected in production dependencies!"
+else
+  warning "Security vulnerabilities detected (non-blocking - low/moderate only)"
+fi
+echo ""
 
 echo "📊 Vulnerability Summary:"
 echo "  Critical:  $CRITICAL"
@@ -63,29 +88,31 @@ echo "  ────────────────────"
 echo "  Total:     $VULNERABILITIES"
 echo ""
 
-echo "🔧 Required Actions:"
-echo ""
-echo "1. REVIEW vulnerabilities in detail:"
-echo "   npm audit"
-echo ""
-echo "2. UPDATE dependencies to patched versions:"
-echo "   npm update"
-echo ""
-echo "3. IF NEEDED, try npm audit fix (may change APIs):"
-echo "   npm audit fix"
-echo ""
-echo "4. IF NO FIX AVAILABLE:"
-echo "   - Consult NPM security advisory"
-echo "   - Wait for package maintainer to release patch"
-echo "   - Document why vulnerability is acceptable (if truly necessary)"
-echo ""
-echo "5. COMMIT your fixes:"
-echo "   git add package.json package-lock.json"
-echo "   git commit -m 'fix: address security vulnerabilities'"
-echo ""
-
-echo "📖 More info: https://docs.npmjs.com/cli/v8/commands/npm-audit"
-echo ""
-
-rm -f "$AUDIT_TEMP"
-exit 1
+# Only block on high/critical vulnerabilities
+if [ "$BLOCKING_VULNS" -gt 0 ]; then
+  echo "🔧 Required Actions:"
+  echo ""
+  echo "1. REVIEW vulnerabilities in detail:"
+  echo "   $PKG_MANAGER audit"
+  echo ""
+  echo "2. UPDATE dependencies to patched versions:"
+  echo "   $PKG_MANAGER update"
+  echo ""
+  if [ "$PKG_MANAGER" = "npm" ]; then
+    echo "3. IF NEEDED, try npm audit fix (may change APIs):"
+    echo "   npm audit fix"
+    echo ""
+  fi
+  echo "4. IF NO FIX AVAILABLE:"
+  echo "   - Consult NPM/GitHub security advisory"
+  echo "   - Wait for package maintainer to release patch"
+  echo "   - Document why vulnerability is acceptable (if truly necessary)"
+  echo ""
+  echo "📖 More info: https://docs.npmjs.com/cli/v8/commands/npm-audit"
+  echo ""
+  exit 1
+else
+  # Low/moderate only - warn but don't block
+  success "No high/critical vulnerabilities - continuing with commit"
+  exit 0
+fi

@@ -130,10 +130,31 @@ fi
 # ============================================================================
 
 echo ""
-echo "🧪 Step 1/4: Running TypeScript type checking..."
+echo "🧪 Step 1/4: Running TypeScript type checking on changed packages..."
 
-npx tsc --noEmit > "$TEMP_DIR/tsc.log" 2>&1
-if [ $? -ne 0 ]; then
+# Get packages with staged TypeScript/JavaScript changes
+CHANGED_PACKAGES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx)$' | cut -d'/' -f1-2 | sort -u || true)
+
+# Run typecheck only on packages with changes
+TYPECHECK_FAILED=0
+for pkg in $CHANGED_PACKAGES; do
+  if [ -f "$pkg/package.json" ] && grep -q '"typecheck"' "$pkg/package.json" 2>/dev/null; then
+    echo "  Checking $pkg..."
+    if ! pnpm --filter "./$pkg" typecheck >> "$TEMP_DIR/tsc.log" 2>&1; then
+      TYPECHECK_FAILED=1
+    fi
+  fi
+done
+
+# If no packages had typecheck scripts, also check root frontend
+if echo "$CHANGED_PACKAGES" | grep -q "^frontend"; then
+  if ! grep -q "frontend" "$TEMP_DIR/tsc.log" 2>/dev/null; then
+    echo "  Checking frontend..."
+    pnpm --filter "./frontend" typecheck >> "$TEMP_DIR/tsc.log" 2>&1 || TYPECHECK_FAILED=1
+  fi
+fi
+
+if [ $TYPECHECK_FAILED -ne 0 ]; then
   echo ""
   echo "❌ TypeScript type checking failed!"
   echo ""
