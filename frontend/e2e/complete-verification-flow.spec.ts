@@ -13,8 +13,7 @@ import { test, expect } from '@playwright/test';
  */
 
 // Generate unique test phone number in E.164 format
-// Prefixed with _ as it may be used in future tests
-const _generateTestPhoneNumber = () => {
+const generateTestPhoneNumber = () => {
   const timestamp = Date.now();
   // Use a format like +12025550000 + unique suffix
   const uniqueSuffix = String(timestamp % 10000).padStart(4, '0');
@@ -22,8 +21,7 @@ const _generateTestPhoneNumber = () => {
 };
 
 // Generate unique test user credentials
-// Prefixed with _ as it may be used in future tests
-const _generateTestUser = () => {
+const generateTestUser = () => {
   const timestamp = Date.now();
   return {
     email: `verify-test-${timestamp}@example.com`,
@@ -33,8 +31,10 @@ const _generateTestUser = () => {
 };
 
 test.describe('Complete Verification Flow', () => {
-  test.beforeEach(async () => {
-    // Setup for future tests that may need user state
+  let testUser: ReturnType<typeof generateTestUser>;
+
+  test.beforeEach(async ({ page }) => {
+    testUser = generateTestUser();
   });
 
   test('should navigate to verification page directly', async ({ page }) => {
@@ -124,7 +124,7 @@ test.describe('Complete Verification Flow', () => {
     await page.goto('/verification');
 
     // Page should load without errors
-    const statusCode = (await page.evaluate(() => (window as unknown as { serverStatus?: number }).serverStatus || 200)) || 200;
+    const statusCode = (await page.evaluate(() => (window as any).serverStatus || 200)) || 200;
     expect(statusCode).toBeLessThan(400);
 
     // Should have visible content
