@@ -2,10 +2,28 @@
 
 ## Current Status
 
-- Completed issue #144 (T148) - Create common ground export (PDF/share link)
-- ~161 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #145 (T149) - Unit tests: Common ground algorithm
+- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #145 (T149) - Unit tests: Common ground algorithm:**
+- Created comprehensive unit tests for CommonGroundExportService (services/discussion-service/src/__tests__/common-ground-export.service.test.ts)
+  - 31 tests covering export to PDF, JSON, and Markdown formats
+  - Tests for generateShareLink() with various URL formats (with/without trailing slashes, ports, localhost)
+  - Edge cases: empty sections, long descriptions, zero participants, single-user definitions, special characters
+  - All export format tests verify correct MIME types and filenames
+  - PDF tests verify magic bytes (%PDF signature) and proper buffer generation
+- Created comprehensive unit tests for CommonGroundTriggerService (services/discussion-service/src/__tests__/common-ground-trigger.service.test.ts)
+  - 18 tests covering trigger threshold logic and cache invalidation
+  - Tests for 10+ response delta threshold condition
+  - Tests for 6+ hour time elapsed threshold condition
+  - Tests for first analysis minimum requirements (10 participants AND 10 responses)
+  - Tests for cache key generation and deletion
+  - Edge cases: zero counts, very high counts, special characters in topic IDs, error handling
+- All 49 tests passing
+- Test approach: Simple mock objects without jest.fn() to avoid ESM/Jest global issues
+- Merged via PR #526
 
 **Issue #144 (T148) - Create common ground export (PDF/share link):**
 - Created CommonGroundExportService (services/discussion-service/src/services/common-ground-export.service.ts)
