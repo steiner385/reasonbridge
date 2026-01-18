@@ -10,12 +10,12 @@ import { AIReviewService } from '../ai-review.service.js';
 describe('AIReviewService', () => {
   describe('Service Instantiation', () => {
     it('should be instantiable', () => {
-      const service = new AIReviewService(null as any, null as any);
+      const service = new AIReviewService(null as any, null as any, null as any);
       expect(service).toBeInstanceOf(AIReviewService);
     });
 
     it('should have all required methods', () => {
-      const service = new AIReviewService(null as any, null as any);
+      const service = new AIReviewService(null as any, null as any, null as any);
 
       const methods = [
         'submitAiRecommendation',

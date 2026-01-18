@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { QueueService } from '../queue/queue.service.js';
 import type { ScreeningResult } from './content-screening.service.js';
 import { ContentScreeningService } from './content-screening.service.js';
+import type { ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
+import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
 
 export interface AiRecommendationRequest {
   targetType: 'response' | 'user' | 'topic';
@@ -34,11 +37,13 @@ export class AIReviewService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly screeningService: ContentScreeningService,
+    private readonly queueService: QueueService,
   ) {}
 
   /**
    * Submit an AI-recommended moderation action
    * Creates a PENDING moderation action for human review
+   * Publishes event to queue for other services to consume
    */
   async submitAiRecommendation(
     request: AiRecommendationRequest,
@@ -64,6 +69,35 @@ export class AIReviewService {
         status: 'PENDING', // AI recommendations are always pending human review
       },
     });
+
+    // Publish event to queue for other services
+    try {
+      const event: ModerationActionRequestedEvent = {
+        id: moderationAction.id,
+        type: MODERATION_EVENT_TYPES.ACTION_REQUESTED,
+        timestamp: new Date().toISOString(),
+        version: 1,
+        payload: {
+          targetType: request.targetType as 'response' | 'user' | 'topic',
+          targetId: request.targetId,
+          actionType: request.actionType as 'educate' | 'warn' | 'hide' | 'remove' | 'suspend' | 'ban',
+          severity: severity === 'NON_PUNITIVE' ? 'non_punitive' : 'consequential',
+          reasoning: request.reasoning,
+          aiConfidence: request.confidence,
+          violationContext: request.analysisDetails as any,
+          requestedAt: new Date().toISOString(),
+        },
+        metadata: {
+          source: 'moderation-service',
+          userId: 'system',
+        },
+      };
+
+      await this.queueService.publishEvent(event);
+    } catch (error) {
+      // Log error but don't fail the request - moderation action is created
+      console.error('Failed to publish moderation action event', error);
+    }
 
     return this.mapModerationActionToResponse(moderationAction);
   }
