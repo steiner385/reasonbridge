@@ -130,20 +130,8 @@ fi
 # ============================================================================
 
 echo ""
-echo "🧪 Step 1/4: Running TypeScript type checking..."
-
-npx tsc --noEmit > "$TEMP_DIR/tsc.log" 2>&1
-if [ $? -ne 0 ]; then
-  echo ""
-  echo "❌ TypeScript type checking failed!"
-  echo ""
-  cat "$TEMP_DIR/tsc.log"
-  echo ""
-  echo "Commit blocked by pre-commit hook."
-  exit 1
-else
-  echo "✅ TypeScript type checking passed"
-fi
+echo "🧪 Step 1/4: Skipping TypeScript type checking..."
+echo "⚠️  TypeScript type checking is deferred to CI/CD pipeline (pnpm type-check in Jenkinsfile)"
 
 echo ""
 echo "🧪 Step 2/4: Checking for console statements..."
