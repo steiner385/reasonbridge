@@ -26,18 +26,18 @@ test.describe('UserProfilePage Component', () => {
     await page.goto('/profile/invalid-uuid');
 
     // Should show loading first, then error
-    await expect(
-      page.getByText(/Unable to Load Profile|User Not Found/i)
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Unable to Load Profile|User Not Found/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('should show error for non-existent user', async ({ page }) => {
     // Use a valid UUID format that doesn't exist
     await page.goto('/profile/00000000-0000-0000-0000-000000000000');
 
-    await expect(
-      page.getByText(/Unable to Load Profile|User Not Found/i)
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Unable to Load Profile|User Not Found/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('should render profile page structure', async ({ page }) => {

@@ -28,9 +28,7 @@ export interface MockAIClientConfig {
   /** Whether the client should report as ready */
   readonly isReady?: boolean | undefined;
   /** Custom response generator function */
-  readonly responseGenerator?:
-    | ((request: CompletionRequest) => string)
-    | undefined;
+  readonly responseGenerator?: ((request: CompletionRequest) => string) | undefined;
 }
 
 /**
@@ -100,9 +98,7 @@ export class MockAIClient implements IAIClient {
     const content = this.generateContent(request);
 
     // Calculate mock token usage based on content length
-    const inputTokens = this.estimateTokens(
-      request.messages.map((m) => m.content).join(' ')
-    );
+    const inputTokens = this.estimateTokens(request.messages.map((m) => m.content).join(' '));
     const outputTokens = this.estimateTokens(content);
 
     return {
@@ -122,9 +118,7 @@ export class MockAIClient implements IAIClient {
    * @returns true if configured as ready, false otherwise
    */
   async isReady(): Promise<boolean> {
-    return this.config.isReady !== undefined
-      ? this.config.isReady
-      : DEFAULT_MOCK_CONFIG.isReady;
+    return this.config.isReady !== undefined ? this.config.isReady : DEFAULT_MOCK_CONFIG.isReady;
   }
 
   /**
@@ -206,9 +200,7 @@ export const MockScenarios = {
     new MockAIClient({
       responseGenerator: (req) => {
         const lastMessage = req.messages[req.messages.length - 1];
-        return lastMessage
-          ? `Echo: ${lastMessage.content}`
-          : 'Echo: (no message)';
+        return lastMessage ? `Echo: ${lastMessage.content}` : 'Echo: (no message)';
       },
       stopReason: 'end_turn',
     }),
@@ -218,10 +210,7 @@ export const MockScenarios = {
    */
   authError: () =>
     new MockAIClient({
-      error: new AIClientError(
-        'Mock authentication failed',
-        'AUTHENTICATION_ERROR'
-      ),
+      error: new AIClientError('Mock authentication failed', 'AUTHENTICATION_ERROR'),
     }),
 
   /**
@@ -229,10 +218,7 @@ export const MockScenarios = {
    */
   rateLimitError: () =>
     new MockAIClient({
-      error: new AIClientError(
-        'Mock rate limit exceeded',
-        'RATE_LIMIT_ERROR'
-      ),
+      error: new AIClientError('Mock rate limit exceeded', 'RATE_LIMIT_ERROR'),
     }),
 
   /**
@@ -248,10 +234,7 @@ export const MockScenarios = {
    */
   modelError: () =>
     new MockAIClient({
-      error: new AIClientError(
-        'Mock model error occurred',
-        'MODEL_ERROR'
-      ),
+      error: new AIClientError('Mock model error occurred', 'MODEL_ERROR'),
     }),
 
   /**

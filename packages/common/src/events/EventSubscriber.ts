@@ -62,7 +62,7 @@ export interface ProcessingResult {
  */
 export type EventHandler<TEvent extends BaseEvent = BaseEvent> = (
   event: TEvent,
-  context: EventContext
+  context: EventContext,
 ) => Promise<ProcessingResult | void>;
 
 /**
@@ -126,10 +126,7 @@ export abstract class EventSubscriber {
    * @param eventType - The event type to handle (e.g., 'response.created')
    * @param handler - The handler function to process the event
    */
-  public on<TEvent extends BaseEvent>(
-    eventType: string,
-    handler: EventHandler<TEvent>
-  ): void {
+  public on<TEvent extends BaseEvent>(eventType: string, handler: EventHandler<TEvent>): void {
     const existingHandlers = this.handlers.get(eventType) ?? [];
     existingHandlers.push(handler as EventHandler);
     this.handlers.set(eventType, existingHandlers);
@@ -141,10 +138,7 @@ export abstract class EventSubscriber {
    * @param eventType - The event type
    * @param handler - The handler to remove
    */
-  public off<TEvent extends BaseEvent>(
-    eventType: string,
-    handler: EventHandler<TEvent>
-  ): void {
+  public off<TEvent extends BaseEvent>(eventType: string, handler: EventHandler<TEvent>): void {
     const existingHandlers = this.handlers.get(eventType) ?? [];
     const filtered = existingHandlers.filter((h) => h !== handler);
 
@@ -186,7 +180,7 @@ export abstract class EventSubscriber {
    */
   protected async processEnvelope(
     envelope: EventEnvelope,
-    context: EventContext
+    context: EventContext,
   ): Promise<ProcessingResult> {
     const { event } = envelope;
     const handlers = this.handlers.get(event.type);
@@ -236,10 +230,7 @@ export abstract class EventSubscriber {
    * @param messageId - The message ID to acknowledge
    * @param receiptHandle - Broker-specific receipt handle (e.g., SQS receipt handle)
    */
-  protected abstract acknowledge(
-    messageId: string,
-    receiptHandle?: string
-  ): Promise<void>;
+  protected abstract acknowledge(messageId: string, receiptHandle?: string): Promise<void>;
 
   /**
    * Subclass hook: Perform cleanup during shutdown.
@@ -354,7 +345,9 @@ export class SqsEventSubscriber extends EventSubscriber {
                 sentTimestamp: new Date(parseInt(message.Attributes.SentTimestamp, 10)),
               }),
               ...(message.Attributes?.ApproximateFirstReceiveTimestamp && {
-                firstReceiveTimestamp: new Date(parseInt(message.Attributes.ApproximateFirstReceiveTimestamp, 10)),
+                firstReceiveTimestamp: new Date(
+                  parseInt(message.Attributes.ApproximateFirstReceiveTimestamp, 10),
+                ),
               }),
             };
 
@@ -366,7 +359,12 @@ export class SqsEventSubscriber extends EventSubscriber {
             }
 
             // If processing failed and shouldn't retry, acknowledge to remove from queue
-            if (!result.success && !result.shouldRetry && this.config.autoAck && message.ReceiptHandle) {
+            if (
+              !result.success &&
+              !result.shouldRetry &&
+              this.config.autoAck &&
+              message.ReceiptHandle
+            ) {
               await this.acknowledge(message.MessageId!, message.ReceiptHandle);
             }
 
@@ -415,7 +413,7 @@ export class SqsEventSubscriber extends EventSubscriber {
 
     if (this.inFlightMessages > 0) {
       console.warn(
-        `Shutdown timeout: ${this.inFlightMessages} messages still in flight after ${maxWaitMs}ms`
+        `Shutdown timeout: ${this.inFlightMessages} messages still in flight after ${maxWaitMs}ms`,
       );
     }
   }

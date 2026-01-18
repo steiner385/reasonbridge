@@ -81,5 +81,12 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    {
+      // Vitest config files
+      files: ['vitest.config.ts', 'vitest.*.config.ts'],
+      rules: {
+        'import/no-unresolved': 'off',
+      },
+    },
   ],
 };

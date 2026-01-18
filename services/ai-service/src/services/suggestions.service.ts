@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
-import { TopicLinkSuggester, type TopicLinkSuggestionResult } from '../synthesizers/topic-link.suggester.js';
+import {
+  TopicLinkSuggester,
+  type TopicLinkSuggestionResult,
+} from '../synthesizers/topic-link.suggester.js';
 
 /**
  * Suggestion result from synthesizers

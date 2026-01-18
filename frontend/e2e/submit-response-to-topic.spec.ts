@@ -29,10 +29,17 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for response composer form
-      const responseTextarea = page.locator('#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]').first();
+      const responseTextarea = page
+        .locator(
+          '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
+        )
+        .first();
       await expect(responseTextarea).toBeVisible();
 
       // Check for submit button
@@ -50,10 +57,17 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Find response textarea
-      const responseTextarea = page.locator('#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]').first();
+      const responseTextarea = page
+        .locator(
+          '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
+        )
+        .first();
 
       // Enter text that's too short
       await responseTextarea.fill('Short');
@@ -77,12 +91,19 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       const responseContent = generateResponseContent();
 
       // Fill response textarea
-      const responseTextarea = page.locator('#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]').first();
+      const responseTextarea = page
+        .locator(
+          '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
+        )
+        .first();
       await responseTextarea.fill(responseContent);
 
       // Submit the response
@@ -115,9 +136,16 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
-      const responseTextarea = page.locator('#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]').first();
+      const responseTextarea = page
+        .locator(
+          '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
+        )
+        .first();
 
       // Type some content
       const testContent = 'Test response content';
@@ -138,18 +166,23 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for metadata checkboxes
-      const opinionCheckbox = page.locator('#contains-opinion, input[type="checkbox"]').filter({ hasText: /opinion/i }).or(
-        page.getByLabel(/opinion/i)
-      );
-      const factualCheckbox = page.locator('#contains-factual-claims, input[type="checkbox"]').filter({ hasText: /factual/i }).or(
-        page.getByLabel(/factual/i)
-      );
+      const opinionCheckbox = page
+        .locator('#contains-opinion, input[type="checkbox"]')
+        .filter({ hasText: /opinion/i })
+        .or(page.getByLabel(/opinion/i));
+      const factualCheckbox = page
+        .locator('#contains-factual-claims, input[type="checkbox"]')
+        .filter({ hasText: /factual/i })
+        .or(page.getByLabel(/factual/i));
 
-      const hasOpinionCheckbox = await opinionCheckbox.count() > 0;
-      const hasFactualCheckbox = await factualCheckbox.count() > 0;
+      const hasOpinionCheckbox = (await opinionCheckbox.count()) > 0;
+      const hasFactualCheckbox = (await factualCheckbox.count()) > 0;
 
       if (hasOpinionCheckbox) {
         // Check opinion checkbox
@@ -174,11 +207,16 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Find source input field
-      const sourceInput = page.locator('#cited-source, input[type="url"], input[placeholder*="source"]').first();
-      const hasSourceInput = await sourceInput.count() > 0;
+      const sourceInput = page
+        .locator('#cited-source, input[type="url"], input[placeholder*="source"]')
+        .first();
+      const hasSourceInput = (await sourceInput.count()) > 0;
 
       if (hasSourceInput) {
         // Add a source
@@ -203,10 +241,15 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
-      const sourceInput = page.locator('#cited-source, input[type="url"], input[placeholder*="source"]').first();
-      const hasSourceInput = await sourceInput.count() > 0;
+      const sourceInput = page
+        .locator('#cited-source, input[type="url"], input[placeholder*="source"]')
+        .first();
+      const hasSourceInput = (await sourceInput.count()) > 0;
 
       if (hasSourceInput) {
         // Try to add invalid URL
@@ -237,10 +280,15 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
-      const sourceInput = page.locator('#cited-source, input[type="url"], input[placeholder*="source"]').first();
-      const hasSourceInput = await sourceInput.count() > 0;
+      const sourceInput = page
+        .locator('#cited-source, input[type="url"], input[placeholder*="source"]')
+        .first();
+      const hasSourceInput = (await sourceInput.count()) > 0;
 
       if (hasSourceInput) {
         // Add a source
@@ -253,8 +301,11 @@ test.describe('Submit Response to Topic', () => {
         await expect(page.getByText(testUrl)).toBeVisible();
 
         // Find and click remove button
-        const removeButton = page.locator(`button[aria-label*="Remove"], button`).filter({ hasText: /×|remove/i }).first();
-        const hasRemoveButton = await removeButton.count() > 0;
+        const removeButton = page
+          .locator(`button[aria-label*="Remove"], button`)
+          .filter({ hasText: /×|remove/i })
+          .first();
+        const hasRemoveButton = (await removeButton.count()) > 0;
 
         if (hasRemoveButton) {
           await removeButton.click();
@@ -275,33 +326,44 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       const responseContent = generateResponseContent();
 
       // Fill response textarea
-      const responseTextarea = page.locator('#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]').first();
+      const responseTextarea = page
+        .locator(
+          '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
+        )
+        .first();
       await responseTextarea.fill(responseContent);
 
       // Check metadata checkboxes
-      const opinionCheckbox = page.locator('#contains-opinion, input[type="checkbox"]').filter({ hasText: /opinion/i }).or(
-        page.getByLabel(/opinion/i)
-      );
-      const factualCheckbox = page.locator('#contains-factual-claims, input[type="checkbox"]').filter({ hasText: /factual/i }).or(
-        page.getByLabel(/factual/i)
-      );
+      const opinionCheckbox = page
+        .locator('#contains-opinion, input[type="checkbox"]')
+        .filter({ hasText: /opinion/i })
+        .or(page.getByLabel(/opinion/i));
+      const factualCheckbox = page
+        .locator('#contains-factual-claims, input[type="checkbox"]')
+        .filter({ hasText: /factual/i })
+        .or(page.getByLabel(/factual/i));
 
-      if (await opinionCheckbox.count() > 0) {
+      if ((await opinionCheckbox.count()) > 0) {
         await opinionCheckbox.first().check();
       }
 
-      if (await factualCheckbox.count() > 0) {
+      if ((await factualCheckbox.count()) > 0) {
         await factualCheckbox.first().check();
       }
 
       // Add a source
-      const sourceInput = page.locator('#cited-source, input[type="url"], input[placeholder*="source"]').first();
-      if (await sourceInput.count() > 0) {
+      const sourceInput = page
+        .locator('#cited-source, input[type="url"], input[placeholder*="source"]')
+        .first();
+      if ((await sourceInput.count()) > 0) {
         await sourceInput.fill('https://example.com/evidence');
         const addButton = page.getByRole('button', { name: /add/i }).first();
         await addButton.click();
@@ -329,9 +391,16 @@ test.describe('Submit Response to Topic', () => {
 
     if (linkCount > 0) {
       await firstTopicLink.click();
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
-      const responseTextarea = page.locator('#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]').first();
+      const responseTextarea = page
+        .locator(
+          '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
+        )
+        .first();
       const submitButton = page.getByRole('button', { name: /post response|submit|post reply/i });
 
       // Initially, submit button should be disabled

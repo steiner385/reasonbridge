@@ -64,7 +64,7 @@ export interface EventPublisher {
    */
   publish<TEvent extends BaseEvent>(
     event: TEvent,
-    options?: PublishOptions
+    options?: PublishOptions,
   ): Promise<PublishResult>;
 
   /**
@@ -78,7 +78,7 @@ export interface EventPublisher {
    */
   publishBatch<TEvent extends BaseEvent>(
     events: TEvent[],
-    options?: PublishOptions
+    options?: PublishOptions,
   ): Promise<PublishResult[]>;
 }
 
@@ -149,7 +149,7 @@ export class SnsEventPublisher implements EventPublisher {
 
   async publish<TEvent extends BaseEvent>(
     event: TEvent,
-    options?: PublishOptions
+    options?: PublishOptions,
   ): Promise<PublishResult> {
     const client = await this.getSnsClient();
     const { PublishCommand } = await import('@aws-sdk/client-sns');
@@ -210,7 +210,7 @@ export class SnsEventPublisher implements EventPublisher {
 
   async publishBatch<TEvent extends BaseEvent>(
     events: TEvent[],
-    options?: PublishOptions
+    options?: PublishOptions,
   ): Promise<PublishResult[]> {
     // SNS doesn't have native batch publishing, so publish sequentially
     // For better performance, services should use SQS batch publishing

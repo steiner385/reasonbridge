@@ -62,7 +62,7 @@ export interface DlqMessageMetadata {
 export type DlqMessageHandler = (
   envelope: EventEnvelope,
   metadata: DlqMessageMetadata,
-  context: EventContext
+  context: EventContext,
 ) => Promise<DlqProcessingResult>;
 
 /**
@@ -349,7 +349,7 @@ export class DeadLetterQueueHandler {
         }),
         ...(message.Attributes?.ApproximateFirstReceiveTimestamp && {
           firstReceiveTimestamp: new Date(
-            parseInt(message.Attributes.ApproximateFirstReceiveTimestamp, 10)
+            parseInt(message.Attributes.ApproximateFirstReceiveTimestamp, 10),
           ),
         }),
       };
@@ -377,7 +377,7 @@ export class DeadLetterQueueHandler {
         // Don't delete failed messages - let them retry
         console.error(
           `[${this.config.serviceName}] Failed to process DLQ message ${context.messageId}:`,
-          result.error
+          result.error,
         );
       }
     } catch (error) {
@@ -413,7 +413,7 @@ export class DeadLetterQueueHandler {
    */
   private async requeueMessage(
     envelope: EventEnvelope,
-    metadata: DlqMessageMetadata
+    metadata: DlqMessageMetadata,
   ): Promise<void> {
     const client = await this.getSqsClient();
     const { SendMessageCommand } = await import('@aws-sdk/client-sqs');
@@ -443,7 +443,7 @@ export class DeadLetterQueueHandler {
 
     await client.send(command);
     console.log(
-      `[${this.config.serviceName}] Requeued message ${metadata.eventId} to ${metadata.sourceQueueUrl}`
+      `[${this.config.serviceName}] Requeued message ${metadata.eventId} to ${metadata.sourceQueueUrl}`,
     );
   }
 

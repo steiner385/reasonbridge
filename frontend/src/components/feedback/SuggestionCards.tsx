@@ -84,9 +84,7 @@ const getRelationshipTypeStyles = (relationshipType: string) => {
     },
   };
 
-  return (
-    styles[relationshipType as keyof typeof styles] || styles.relates_to
-  );
+  return styles[relationshipType as keyof typeof styles] || styles.relates_to;
 };
 
 /**
@@ -137,9 +135,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
 
   return (
     <div className={className}>
-      {title && (
-        <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
-      )}
+      {title && <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>}
 
       {/* Confidence and attribution info */}
       <div className="mb-3 flex items-center justify-between text-xs">
@@ -158,9 +154,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                 key={index}
                 className="inline-flex items-center gap-2 bg-primary-50 border border-primary-200 rounded-lg px-3 py-2"
               >
-                <span className="text-sm font-medium text-primary-800">
-                  #{tag}
-                </span>
+                <span className="text-sm font-medium text-primary-800">#{tag}</span>
                 {showActions && (
                   <div className="flex gap-1">
                     {onAccept && (
@@ -215,9 +209,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
 
           {/* Reasoning */}
           {tagSuggestions.reasoning && (
-            <p className="text-xs text-gray-600 italic mt-3">
-              {tagSuggestions.reasoning}
-            </p>
+            <p className="text-xs text-gray-600 italic mt-3">{tagSuggestions.reasoning}</p>
           )}
         </div>
       )}
@@ -235,9 +227,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge}`}
-                    >
+                    <span className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge}`}>
                       <span className="mr-1">{styles.icon}</span>
                       {link.relationshipType.replace('_', ' ').toUpperCase()}
                     </span>

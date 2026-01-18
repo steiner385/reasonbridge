@@ -1,7 +1,4 @@
-import {
-  TopicLinkSuggester,
-  TopicRelationshipType,
-} from '../synthesizers/topic-link.suggester.js';
+import { TopicLinkSuggester, TopicRelationshipType } from '../synthesizers/topic-link.suggester.js';
 
 describe('TopicLinkSuggester', () => {
   let suggester: TopicLinkSuggester;
@@ -16,12 +13,7 @@ describe('TopicLinkSuggester', () => {
 
   describe('suggest', () => {
     it('should return empty suggestions when no existing topics provided', async () => {
-      const result = await suggester.suggest(
-        'topic-123',
-        'Test Topic',
-        'Test content',
-        undefined
-      );
+      const result = await suggester.suggest('topic-123', 'Test Topic', 'Test content', undefined);
 
       expect(result.suggestions).toEqual([]);
       expect(result.linkSuggestions).toEqual([]);
@@ -51,11 +43,11 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Environmental Protection',
         'Discussion about climate and environmental conservation.',
-        existingTopics
+        existingTopics,
       );
 
       expect(result.linkSuggestions.length).toBeGreaterThan(0);
-      expect(result.linkSuggestions[0].targetTopicId).toBe('topic-456');
+      expect(result.linkSuggestions[0]?.targetTopicId).toBe('topic-456');
       expect(result.confidenceScore).toBe(0.6);
     });
 
@@ -77,12 +69,10 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Same Topic',
         'This is the same topic with keywords.',
-        existingTopics
+        existingTopics,
       );
 
-      expect(result.linkSuggestions.every((link) => link.targetTopicId !== 'topic-123')).toBe(
-        true
-      );
+      expect(result.linkSuggestions.every((link) => link.targetTopicId !== 'topic-123')).toBe(true);
     });
 
     it('should limit results to top 3 suggestions', async () => {
@@ -113,7 +103,7 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Software Development',
         'Programming and software engineering practices.',
-        existingTopics
+        existingTopics,
       );
 
       expect(result.linkSuggestions.length).toBeLessThanOrEqual(3);
@@ -132,12 +122,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Main Argument',
         'This argument contradicts earlier claims.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
         const hasContradicts = result.linkSuggestions.some(
-          (link) => link.relationshipType === TopicRelationshipType.CONTRADICTS
+          (link) => link.relationshipType === TopicRelationshipType.CONTRADICTS,
         );
         expect(hasContradicts).toBe(true);
       }
@@ -156,12 +146,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Doubtful Analysis',
         'I wonder if this approach is unclear.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
         const hasQuestions = result.linkSuggestions.some(
-          (link) => link.relationshipType === TopicRelationshipType.QUESTIONS
+          (link) => link.relationshipType === TopicRelationshipType.QUESTIONS,
         );
         expect(hasQuestions).toBe(true);
       }
@@ -180,12 +170,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Extended Analysis',
         'Additionally, we can expand this concept.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
         const hasExtends = result.linkSuggestions.some(
-          (link) => link.relationshipType === TopicRelationshipType.EXTENDS
+          (link) => link.relationshipType === TopicRelationshipType.EXTENDS,
         );
         expect(hasExtends).toBe(true);
       }
@@ -204,12 +194,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Supporting Evidence',
         'I agree with and support this argument.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
         const hasSupports = result.linkSuggestions.some(
-          (link) => link.relationshipType === TopicRelationshipType.SUPPORTS
+          (link) => link.relationshipType === TopicRelationshipType.SUPPORTS,
         );
         expect(hasSupports).toBe(true);
       }
@@ -228,12 +218,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Similar Topic',
         'Similar content without specific markers.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
         const hasRelatesTo = result.linkSuggestions.some(
-          (link) => link.relationshipType === TopicRelationshipType.RELATES_TO
+          (link) => link.relationshipType === TopicRelationshipType.RELATES_TO,
         );
         expect(hasRelatesTo).toBe(true);
       }
@@ -252,12 +242,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Programming Topic',
         'Discussion about software and programming.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
-        expect(result.linkSuggestions[0].reasoning).toContain('Shares');
-        expect(result.linkSuggestions[0].reasoning).toContain('keyword');
+        expect(result.linkSuggestions[0]?.reasoning).toContain('Shares');
+        expect(result.linkSuggestions[0]?.reasoning).toContain('keyword');
       }
     });
 
@@ -274,7 +264,7 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Test',
         'The dog sat on rug.',
-        existingTopics
+        existingTopics,
       );
 
       expect(result.linkSuggestions.length).toBe(0);
@@ -308,12 +298,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Software Topic',
         'Programming and software engineering.',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
         expect(result.suggestions).toEqual(
-          result.linkSuggestions.map((link) => link.targetTopicId)
+          result.linkSuggestions.map((link) => link.targetTopicId),
         );
       }
     });
@@ -331,7 +321,7 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'technology',
         'software programming',
-        existingTopics
+        existingTopics,
       );
 
       expect(result.linkSuggestions.length).toBeGreaterThan(0);
@@ -350,7 +340,7 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Technology!',
         'Software* &programming development%',
-        existingTopics
+        existingTopics,
       );
 
       expect(result.linkSuggestions.length).toBeGreaterThan(0);
@@ -369,12 +359,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Tech Discussion',
         'Software programming development technology engineering systems architecture',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
-        const reasoning = result.linkSuggestions[0].reasoning;
-        const keywordMatches = reasoning.match(/,/g);
+        const reasoning = result.linkSuggestions[0]?.reasoning;
+        const keywordMatches = reasoning?.match(/,/g);
         if (keywordMatches) {
           expect(keywordMatches.length).toBeLessThanOrEqual(2);
         }
@@ -395,12 +385,12 @@ describe('TopicLinkSuggester', () => {
         'topic-123',
         'Tech Topic',
         'programming software development engineering architecture systems design implementation',
-        existingTopics
+        existingTopics,
       );
 
       if (result.linkSuggestions.length > 0) {
-        const reasoning = result.linkSuggestions[0].reasoning;
-        const sharedCount = parseInt(reasoning.match(/Shares (\d+)/)?.[1] || '0');
+        const reasoning = result.linkSuggestions[0]?.reasoning;
+        const sharedCount = parseInt(reasoning?.match(/Shares (\d+)/)?.[1] || '0');
         if (sharedCount > 3) {
           expect(reasoning).toContain('...');
         }

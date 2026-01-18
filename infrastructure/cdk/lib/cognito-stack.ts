@@ -107,11 +107,7 @@ export class CognitoStack extends cdk.Stack {
           authorizationCodeGrant: true,
           implicitCodeGrant: false, // Not recommended for web apps
         },
-        scopes: [
-          cognito.OAuthScope.EMAIL,
-          cognito.OAuthScope.OPENID,
-          cognito.OAuthScope.PROFILE,
-        ],
+        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
         // Callback URLs - configure based on environment
         callbackUrls: [
           'http://localhost:5173/auth/callback', // Local development

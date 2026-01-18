@@ -142,10 +142,7 @@ describe('CognitoStack', () => {
         'http://localhost:5173/auth/callback',
         'https://app.unitediscord.com/auth/callback',
       ]),
-      LogoutURLs: Match.arrayWith([
-        'http://localhost:5173/',
-        'https://app.unitediscord.com/',
-      ]),
+      LogoutURLs: Match.arrayWith(['http://localhost:5173/', 'https://app.unitediscord.com/']),
       // Generate secret
       GenerateSecret: false,
       // Prevent user existence errors - CDK converts false to "LEGACY"

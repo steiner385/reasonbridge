@@ -38,13 +38,13 @@ This directory contains self-contained Jenkins pipeline configuration for uniteD
 2. Click **Add** to create a new library
 3. Configure as follows:
 
-| Setting | Value |
-|---------|-------|
-| **Name** | `unitediscord-lib` |
-| **Default version** | `main` |
-| **Load implicitly** | ❌ (unchecked) |
-| **Allow default version to be overridden** | ✅ (checked) |
-| **Include @Library changes in job recent changes** | ✅ (checked) |
+| Setting                                            | Value              |
+| -------------------------------------------------- | ------------------ |
+| **Name**                                           | `unitediscord-lib` |
+| **Default version**                                | `main`             |
+| **Load implicitly**                                | ❌ (unchecked)     |
+| **Allow default version to be overridden**         | ✅ (checked)       |
+| **Include @Library changes in job recent changes** | ✅ (checked)       |
 
 4. Under **Retrieval method**, select **Modern SCM**
 5. Select **Git** and configure:
@@ -56,42 +56,44 @@ This directory contains self-contained Jenkins pipeline configuration for uniteD
 
 Jobs are configured via JCasC in the core Jenkins configuration. The following jobs are created automatically:
 
-| Job Name | Script Path | Description |
-|----------|-------------|-------------|
-| uniteDiscord-ci | `.jenkins/Jenkinsfile` | Main CI pipeline |
-| uniteDiscord-unit | `.jenkins/Jenkinsfile.unit` | Unit tests pipeline |
+| Job Name                 | Script Path                        | Description                |
+| ------------------------ | ---------------------------------- | -------------------------- |
+| uniteDiscord-ci          | `.jenkins/Jenkinsfile`             | Main CI pipeline           |
+| uniteDiscord-unit        | `.jenkins/Jenkinsfile.unit`        | Unit tests pipeline        |
 | uniteDiscord-integration | `.jenkins/Jenkinsfile.integration` | Integration tests pipeline |
-| uniteDiscord-e2e | `.jenkins/Jenkinsfile.e2e` | E2E tests pipeline |
-| uniteDiscord-nightly | `.jenkins/Jenkinsfile.nightly` | Nightly build pipeline |
+| uniteDiscord-e2e         | `.jenkins/Jenkinsfile.e2e`         | E2E tests pipeline         |
+| uniteDiscord-nightly     | `.jenkins/Jenkinsfile.nightly`     | Nightly build pipeline     |
 
 ### Step 3: Configure Required Credentials
 
 The following credentials must be configured in Jenkins:
 
-| Credential ID | Type | Description |
-|---------------|------|-------------|
-| `github-token` | Secret text | GitHub Personal Access Token with `repo` scope |
-| `github-credentials` | Username/Password | GitHub username and PAT |
+| Credential ID        | Type              | Description                                    |
+| -------------------- | ----------------- | ---------------------------------------------- |
+| `github-token`       | Secret text       | GitHub Personal Access Token with `repo` scope |
+| `github-credentials` | Username/Password | GitHub username and PAT                        |
 
 ### Step 4: Configure Jenkins Agents
 
 The pipelines expect agents with these labels:
 
-| Label | Purpose | Executors |
-|-------|---------|-----------|
-| `linux` | General-purpose tasks | 2 |
-| `unit` | Unit test execution | 2 |
-| `integration` | Integration tests | 2 |
-| `e2e` | E2E tests (Playwright) | 1 |
+| Label         | Purpose                | Executors |
+| ------------- | ---------------------- | --------- |
+| `linux`       | General-purpose tasks  | 2         |
+| `unit`        | Unit test execution    | 2         |
+| `integration` | Integration tests      | 2         |
+| `e2e`         | E2E tests (Playwright) | 1         |
 
 ## Shared Library Functions
 
 ### Pipeline Helpers
+
 - `pipelineHelpers.getProjectName()` - Extract project name from job
 - `pipelineHelpers.getWorkspacePath()` - Get persistent workspace path
 - `pipelineHelpers.getServicePorts()` - Get list of service ports
 
 ### Pipeline Stages
+
 - `pipelineInit()` - Initialize pipeline (checkout, git info, status)
 - `installDependencies()` - Smart npm install with caching
 - `runUnitTests()` - Execute unit tests with coverage
@@ -101,6 +103,7 @@ The pipelines expect agents with these labels:
 - `buildProject()` - Build project and archive artifacts
 
 ### Utilities
+
 - `dockerCleanup()` - Clean Docker containers and ports
 - `playwrightSetup()` - Install Playwright browsers
 - `publishReports()` - Publish test reports (JUnit, Allure, Playwright)
