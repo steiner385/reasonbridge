@@ -45,9 +45,7 @@ export class CommonGroundDetectorService {
     const aiReady = await this.bedrock.isReady();
 
     if (!aiReady) {
-      this.logger.debug(
-        'AI not available, returning pattern-based analysis',
-      );
+      this.logger.debug('AI not available, returning pattern-based analysis');
       return baseResult;
     }
 
@@ -57,9 +55,7 @@ export class CommonGroundDetectorService {
       topicData.propositions,
     );
 
-    const enhancedDisagreements = await this.enhanceDisagreements(
-      baseResult.genuineDisagreements,
-    );
+    const enhancedDisagreements = await this.enhanceDisagreements(baseResult.genuineDisagreements);
 
     return {
       ...baseResult,
@@ -79,9 +75,7 @@ export class CommonGroundDetectorService {
 
     for (const misunderstanding of misunderstandings) {
       // Find the proposition for this misunderstanding
-      const proposition = propositions.find(
-        (p) => p.statement === misunderstanding.topic,
-      );
+      const proposition = propositions.find((p) => p.statement === misunderstanding.topic);
 
       if (!proposition) {
         enhanced.push(misunderstanding);
@@ -125,10 +119,7 @@ export class CommonGroundDetectorService {
           clarification,
         });
       } catch (error) {
-        this.logger.error(
-          'Failed to enhance misunderstanding with AI',
-          error,
-        );
+        this.logger.error('Failed to enhance misunderstanding with AI', error);
         enhanced.push(misunderstanding);
       }
     }
@@ -147,9 +138,7 @@ export class CommonGroundDetectorService {
     for (const disagreement of disagreements) {
       try {
         // Extract all reasoning from viewpoints
-        const allReasoning = disagreement.viewpoints.flatMap(
-          (v) => v.reasoning,
-        );
+        const allReasoning = disagreement.viewpoints.flatMap((v) => v.reasoning);
 
         if (allReasoning.length === 0) {
           enhanced.push(disagreement);

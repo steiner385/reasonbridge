@@ -17,7 +17,13 @@ export interface MisunderstandingDto {
   affectedPropositions: string[];
 }
 
-export type MoralFoundation = 'care' | 'fairness' | 'loyalty' | 'authority' | 'sanctity' | 'liberty';
+export type MoralFoundation =
+  | 'care'
+  | 'fairness'
+  | 'loyalty'
+  | 'authority'
+  | 'sanctity'
+  | 'liberty';
 
 export interface GenuineDisagreementDto {
   description: string;

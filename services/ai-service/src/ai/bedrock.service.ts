@@ -16,8 +16,7 @@ export class BedrockService {
   constructor() {
     // Initialize Bedrock client if credentials are available
     const region = process.env['AWS_REGION'] || 'us-east-1';
-    const modelId =
-      process.env['BEDROCK_MODEL_ID'] || 'anthropic.claude-3-sonnet-20240229-v1:0';
+    const modelId = process.env['BEDROCK_MODEL_ID'] || 'anthropic.claude-3-sonnet-20240229-v1:0';
 
     try {
       const config: AIClientConfig = {
