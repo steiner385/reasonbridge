@@ -183,73 +183,39 @@ echo "🧪 Step 4/4: Running unit tests..."
 if [ "$FULL_TEST_MODE" = "true" ]; then
   echo "Running ALL unit tests (CI/FULL_TEST mode)..."
   npm test -- --passWithNoTests --ci --silent 2>&1 | tee "$TEMP_DIR/test-output.log"
-elif [ -z "$CODE_FILES" ]; then
-  echo "No JavaScript/TypeScript files changed, skipping tests..."
-  echo "✅ Test check passed (no relevant files changed)"
-else
-  echo "Running tests for changed files only..."
-  echo "Changed files:"
-  echo "$CODE_FILES" | sed 's/^/  - /'
-
-  # Build test pattern from changed files
-  TEST_PATTERN=""
-  for file in $CODE_FILES; do
-    # Convert source file to test file pattern
-    BASE_NAME=$(basename "$file" | sed -E 's/\.(ts|tsx|js|jsx)$//')
-    DIR_NAME=$(dirname "$file" | sed 's|^src/|__tests__/unit/|')
-
-    # Check for test files
-    for ext in ts tsx js jsx; do
-      TEST_FILE="${DIR_NAME}/${BASE_NAME}.test.${ext}"
-      if [ -f "$TEST_FILE" ]; then
-        if [ -z "$TEST_PATTERN" ]; then
-          TEST_PATTERN="$TEST_FILE"
-        else
-          TEST_PATTERN="$TEST_PATTERN|$TEST_FILE"
-        fi
-        break
-      fi
-    done
-  done
-
-  if [ -z "$TEST_PATTERN" ]; then
-    echo "No test files found for changed files, skipping test run..."
-    echo "✅ Test check passed (no tests for changed files)"
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Unit tests failed!"
+    echo ""
+    echo "Please fix the failing tests before committing."
+    echo ""
+    echo "Commit blocked by pre-commit hook."
+    exit 1
   else
-    echo "Running tests matching pattern: $TEST_PATTERN"
-    npm test -- --testNamePattern="" --testPathPattern="($TEST_PATTERN)" --passWithNoTests --ci --silent 2>&1 | tee "$TEMP_DIR/test-output.log"
-
-    # Check test results
-    if grep -q "Test Suites:.*failed" "$TEMP_DIR/test-output.log"; then
-      FAILED=$(grep -oE "Test Suites:.*failed" "$TEMP_DIR/test-output.log" | grep -oE "[0-9]+ failed" | grep -oE "[0-9]+")
-      PASSED=$(grep -oE "Test Suites:.*passed" "$TEMP_DIR/test-output.log" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+")
-      echo ""
-      echo "❌ Unit tests failed! $FAILED test suites failed, $PASSED passed"
-      echo ""
-      echo "Please fix the failing tests before committing."
-      echo "Run 'npm test -- --testPathPattern=\"($TEST_PATTERN)\"' to see detailed test results."
-      echo ""
-      echo "To run ALL tests: FULL_TEST=true git commit ..."
-      echo "To bypass tests (use with caution): git commit -n ..."
-      echo ""
-      echo "Commit blocked by pre-commit hook."
-      exit 1
-    else
-      if grep -q "Test Suites:.*passed" "$TEMP_DIR/test-output.log"; then
-        PASSED=$(grep -oE "Test Suites:.*passed" "$TEMP_DIR/test-output.log" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+")
-        echo "✅ All $PASSED unit test suites passed!"
-      else
-        echo "✅ Test check passed"
-      fi
-    fi
+    echo "✅ All unit tests passed!"
   fi
-fi
-
-# Skip full test run if we already ran targeted tests
-if [ "$FULL_TEST_MODE" = "false" ] && [ -n "$CODE_FILES" ]; then
-  echo ""
-  echo "ℹ️  Note: Only tests for changed files were run."
-  echo "ℹ️  To run ALL tests: FULL_TEST=true git commit ..."
+else
+  # Use curated fast unit tests for core services
+  bash .husky/pre-commit-unit-tests > "$TEMP_DIR/unit-tests.log" 2>&1
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Core service unit tests failed!"
+    echo ""
+    cat "$TEMP_DIR/unit-tests.log"
+    echo ""
+    echo "Please fix the failing tests before committing."
+    echo ""
+    echo "To run ALL tests: FULL_TEST=true git commit ..."
+    echo "To bypass tests (use with caution): git commit -n ..."
+    echo ""
+    echo "Commit blocked by pre-commit hook."
+    exit 1
+  else
+    echo "✅ Core service unit tests passed!"
+    echo ""
+    echo "ℹ️  Running fast unit tests for core services only (ai-service, discussion-service, user-service)"
+    echo "ℹ️  To run ALL tests: FULL_TEST=true git commit ..."
+  fi
 fi
 
 # ============================================================================
