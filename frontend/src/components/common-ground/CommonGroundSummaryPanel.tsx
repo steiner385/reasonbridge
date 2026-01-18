@@ -1,4 +1,5 @@
 import type { CommonGroundAnalysis } from '../../types/common-ground';
+import ShareButton from './ShareButton';
 
 export interface CommonGroundSummaryPanelProps {
   /**
@@ -101,12 +102,15 @@ const CommonGroundSummaryPanel = ({
           <h2 className="text-xl font-semibold text-gray-900">
             Common Ground Analysis
           </h2>
-          {showLastUpdated && (
-            <span className="text-xs text-gray-500">
-              Last updated:{' '}
-              {new Date(analysis.lastUpdated).toLocaleString()}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {showLastUpdated && (
+              <span className="text-xs text-gray-500">
+                Last updated:{' '}
+                {new Date(analysis.lastUpdated).toLocaleString()}
+              </span>
+            )}
+            <ShareButton analysis={analysis} variant="outline" size="sm" />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">

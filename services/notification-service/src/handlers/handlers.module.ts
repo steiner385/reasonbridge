@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { GatewaysModule } from '../gateways/gateways.module.js';
 import { CommonGroundNotificationHandler } from './common-ground-notification.handler.js';
 
 /**
  * Module for event handlers
  */
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, GatewaysModule],
   providers: [CommonGroundNotificationHandler],
   exports: [CommonGroundNotificationHandler],
 })

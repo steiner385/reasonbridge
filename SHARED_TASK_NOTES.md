@@ -2,10 +2,350 @@
 
 ## Current Status
 
-- Completed issue #138 (T142) - Create common ground notifications
+- Completed issue #157 (T161) - Implement video verification challenge generation
 - ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #157 (T161) - Implement video verification challenge generation:**
+- Added VIDEO to VerificationType enum in schema.prisma
+- Extended VerificationRequestDto with VIDEO type support and challengeType field
+- Extended VerificationResponseDto with video-specific response fields:
+  * challenge details (type, instruction, randomValue/timestamp)
+  * videoUploadUrl (pre-signed S3 URL for secure upload)
+  * videoUploadExpiresAt (1-hour expiry for upload window)
+  * videoMaxFileSize, videoMinDurationSeconds, videoMaxDurationSeconds (configurable constraints)
+- Created VideoVerificationService with methods:
+  * generateChallenge(type) - Creates random challenges:
+    - RANDOM_PHRASE: User speaks randomly selected phrase
+    - RANDOM_GESTURE: User performs randomly selected gesture
+    - TIMESTAMP: User displays current timestamp
+  * generateUploadUrl(userId, verificationId) - Generates pre-signed S3 upload URLs
+  * getVideoConstraints() - Returns configurable video constraints
+- Updated VerificationService to handle VIDEO type:
+  * Validates challengeType requirement for VIDEO requests
+  * Stores challenge type in providerReference field
+  * Generates challenge and pre-signed upload URL in response
+  * Supports extending existing /verification/request endpoint
+- Updated VerificationModule to provide VideoVerificationService and ConfigModule
+- Added comprehensive unit tests (15+ test cases):
+  * Phrase challenge generation with randomness verification
+  * Gesture challenge generation with randomness verification
+  * Timestamp challenge generation with ISO format verification
+  * Upload URL generation and S3 integration
+  * Constraint configuration from ConfigService
+  * Error handling for unknown challenge types
+- TypeScript compilation verified successful
+- Prisma client regenerated with VIDEO enum
+- Merged via PR #535
+
+## Previous Completion (2026-01-18)
+
+**Issue #156 (T160) - Implement POST /verification/request:**
+- Created verification request endpoint for US4 (Human Authenticity)
+- Implemented VerificationRequestDto with validation (PHONE | GOVERNMENT_ID types)
+- Implemented VerificationResponseDto for type-specific responses
+- Created VerificationService with methods:
+  - requestVerification() - Creates verification records with 24-hour expiry
+  - getPendingVerifications() - Retrieves non-expired verifications
+  - cancelVerification() - Allows users to cancel verification attempts
+- Created VerificationController with POST /verification/request endpoint
+- Supports PHONE verification with E.164 formatted phone numbers
+- Supports GOVERNMENT_ID verification with placeholder session URLs
+- Phone number stored in providerReference for future SMS provider integration
+- Prevents duplicate pending verifications (same type)
+- Added comprehensive unit tests (10 test cases)
+- TypeScript compilation verified successful
+- Merged via PR #534
+
+## Previous Completions (2026-01-18)
+
+**Issue #155 (T159) - Performance test: Common ground calculation at scale:**
+- Created comprehensive performance test suite: `services/discussion-service/src/__tests__/common-ground-performance.test.ts`
+- 11 performance and stress test cases covering:
+  - Scale tests: 50, 100, 200, 500 propositions with performance thresholds
+  - Performance metrics: 50 props (12ms), 100 props (10ms), 200 props (70ms), 500 props (575ms)
+  - Linear scaling verification (not exponential growth)
+  - Memory efficiency measurement (<50MB for 500 propositions)
+  - Consistency tests across multiple runs
+  - Similarity threshold behavior across scales
+  - Stress tests: identical propositions, completely diverse propositions
+  - Variable statement length handling
+- All 11 tests passing (80 total tests pass)
+- Performance characteristics verified:
+  - Scales efficiently with larger datasets
+  - Memory-efficient implementation
+  - Consistent results across runs
+  - Handles edge cases gracefully
+- Merged via PR #533
+
+## Previous Completions (2026-01-18)
+
+**Issue #154 (T158) - E2E: Share common ground:**
+- Created comprehensive E2E test suite: `frontend/e2e/share-common-ground.spec.ts`
+- 25 test cases covering share functionality:
+  - Share button and modal display
+  - Share link generation, display, and copy functionality
+  - Social media sharing (Twitter, Facebook, LinkedIn)
+  - Email sharing with pre-filled content
+  - Export format selector and download functionality
+  - Analysis summary display in modal with metrics
+  - Modal interactions: open, close, backdrop click, escape key
+  - Responsive design: mobile/tablet/desktop viewports
+  - Share link consistency across reopens
+  - AI attribution display
+  - Error handling for empty/missing analysis
+  - Stress testing: rapid open/close cycles
+  - Keyboard navigation and ARIA accessibility
+- All 25 tests passing (4.2s runtime)
+- Merged via PR #532
+
+**Issue #153 (T157) - E2E: View bridging suggestions:**
+- Created comprehensive E2E test suite: `frontend/e2e/view-bridging-suggestions.spec.ts`
+- 31 test cases covering bridging suggestions visualization and exploration:
+  - Display and rendering: bridging suggestions section, cards, consensus metrics
+  - Common ground areas: green badges, conflict areas as orange badges
+  - Suggestion content: source/target positions, bridging language, reasoning
+  - Confidence levels: high (80%+) green, medium (60-79%) blue, lower (<60%) yellow
+  - Interactivity: view proposition buttons, callbacks, scrolling
+  - Responsive design: mobile (375x667), tablet (768x1024), desktop (1920x1080)
+  - Real-time: WebSocket update handling
+  - Edge cases: empty state, no alignment data, multiple suggestions
+  - State management: loading, error, graceful failures
+  - Integration: visual hierarchy, distinction from other sections
+- All 31 tests passing (4.6s runtime)
+- Merged via PR #531
+
+**Issue #152 (T156) - E2E: Explore divergence points:**
+- Created comprehensive E2E test suite: `frontend/e2e/explore-divergence-points.spec.ts`
+- 27 test cases covering divergence point visualization and exploration:
+  - Display and rendering: divergence points section, proposition text, cards
+  - Polarization metrics: scores, color-coded visualization (red/yellow/blue)
+  - Viewpoints: participant counts, percentages, reasoning expansion
+  - Underlying values and disagreement drivers
+  - Interaction: expand/collapse reasoning, click handlers
+  - Responsive design: mobile (375x667), tablet (768x1024), desktop (1920x1080)
+  - Real-time: WebSocket update handling
+  - Edge cases: high polarization (>0.7), moderate (0.4-0.69), no divergence scenarios
+  - State management: loading, error, and empty state handling
+  - Integration: viewpoint distribution thresholds (≥20%), misunderstanding vs divergence
+- All 27 tests passing (4.5s runtime)
+- Merged via PR #530
+
+**Issue #151 (T155) - E2E: View common ground summary:**
+- Created comprehensive E2E test suite: frontend/e2e/view-common-ground-summary.spec.ts
+- 16 passing test scenarios covering:
+  - Display common ground summary panel on topic detail page
+  - Agreement visualization and consensus scores
+  - Shared points (agreement zones), divergence points, misunderstandings display
+  - Proposition cluster information
+  - Participant metrics and response counts
+  - Loading, error, and empty state handling
+  - Real-time WebSocket update capability
+  - Responsive design on mobile viewports
+  - Smooth scrolling and interaction
+- Fixed Playwright config to use correct dev server port (3000)
+- Merged via PR #529
+
+**Issue #150 (T154) - Integration tests: Real-time updates (WebSocket):**
+- Created comprehensive integration test suite for WebSocket real-time notifications
+- Test locations:
+  - Gateway tests: services/notification-service/src/__tests__/integration/notification.gateway.integration.test.ts
+  - Handler tests: services/notification-service/src/__tests__/integration/common-ground-handler.integration.test.ts
+  - Fixtures: services/notification-service/src/__tests__/fixtures/test-data.ts
+- Test results: 42 tests, all passing ✅
+  - NotificationGateway Integration Tests (19 tests):
+    - Event routing to correct Socket.io rooms
+    - Payload transformation and data preservation
+    - Event versioning and version progression
+    - Change reason tracking (threshold_reached, time_elapsed)
+    - Timestamp handling (ISO format)
+    - Multi-event broadcast handling
+    - Complex analysis data preservation
+  - CommonGroundNotificationHandler Integration Tests (23 tests):
+    - Generated event handling with topic fetching
+    - Updated event handling with change tracking
+    - Notification creation and WebSocket emission
+    - Metadata preservation (version, scores, analysis)
+    - Event-driven integration (sequential and concurrent)
+    - Error handling and graceful failures
+    - Topic recipient resolution
+    - Participant count tracking
+- Added test infrastructure:
+  - vitest.config.ts for service-level testing
+  - Test fixtures with realistic event payloads
+  - Test setup utilities
+- Dependencies added:
+  - @nestjs/testing, @types/socket.io, socket.io-client, vitest
+- Build verification: TypeScript compilation successful, all tests passing
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #528
+
+## Previous Completions (2026-01-18)
+
+**Issue #147 (T151) - Unit tests: Divergence identification:**
+- Verified comprehensive unit test suite for DivergencePointService
+- Test location: services/discussion-service/src/__tests__/divergence-point.service.test.ts:309
+- Test results: 8 tests passing with excellent coverage
+  - Statement coverage: 100%
+  - Branch coverage: 91.3%
+  - Function coverage: 100%
+- Tests created as part of T138 (Implement divergence point identification) PR #516
+- Test coverage includes:
+  - Clear divergence point identification (50/50 split)
+  - Multiple divergence points handling
+  - Misunderstanding detection (high nuance filtering)
+  - Minimum significance threshold enforcement
+  - Insufficient participation filtering
+  - Polarization score calculation for various splits
+  - Empty proposition list edge case
+  - Reasoning extraction and display
+- All acceptance criteria met and verified
+
+**Issue #146 (T150) - Unit tests: Proposition clustering:**
+- Verified comprehensive unit test suite for PropositionClustererService
+- Test location: services/discussion-service/src/__tests__/proposition-clusterer.service.test.ts:387
+- Test results: 12 tests passing with 97.11% code coverage
+  - Statement coverage: 97.11%
+  - Branch coverage: 80.55%
+  - Function coverage: 100%
+- Tests created as part of T125 (Implement proposition clustering) PR #485
+- Test coverage includes:
+  - Clustering similar propositions (climate change case)
+  - Handling unrelated propositions
+  - Single proposition edge case
+  - Custom similarity threshold functionality
+  - Cluster cohesion score calculation
+  - Keyword extraction with stop word filtering
+  - Descriptive theme generation
+  - Quality score calculation
+  - Empty propositions array handling
+  - Clustering decision reasoning
+  - Multiple distinct groups clustering
+  - Proposition metadata handling
+- All acceptance criteria met and verified
+
+**Issue #145 (T149) - Unit tests: Common ground algorithm:**
+- Created comprehensive unit tests for CommonGroundExportService (services/discussion-service/src/__tests__/common-ground-export.service.test.ts)
+  - 31 tests covering export to PDF, JSON, and Markdown formats
+  - Tests for generateShareLink() with various URL formats (with/without trailing slashes, ports, localhost)
+  - Edge cases: empty sections, long descriptions, zero participants, single-user definitions, special characters
+  - All export format tests verify correct MIME types and filenames
+  - PDF tests verify magic bytes (%PDF signature) and proper buffer generation
+- Created comprehensive unit tests for CommonGroundTriggerService (services/discussion-service/src/__tests__/common-ground-trigger.service.test.ts)
+  - 18 tests covering trigger threshold logic and cache invalidation
+  - Tests for 10+ response delta threshold condition
+  - Tests for 6+ hour time elapsed threshold condition
+  - Tests for first analysis minimum requirements (10 participants AND 10 responses)
+  - Tests for cache key generation and deletion
+  - Edge cases: zero counts, very high counts, special characters in topic IDs, error handling
+- All 49 tests passing
+- Test approach: Simple mock objects without jest.fn() to avoid ESM/Jest global issues
+- Merged via PR #526
+
+**Issue #144 (T148) - Create common ground export (PDF/share link):**
+- Created CommonGroundExportService (services/discussion-service/src/services/common-ground-export.service.ts)
+  - exportAnalysis() - Supports PDF, JSON, and Markdown formats
+  - exportToPdf() - Professional PDF generation with pdfkit
+  - exportToJson() - JSON serialization
+  - exportToMarkdown() - Formatted markdown export
+  - generateShareLink() - Creates shareable URLs
+- Added API endpoints:
+  - GET /topics/:id/common-ground/export - Download analysis (format query param: pdf/json/markdown)
+  - GET /topics/:id/common-ground/share-link - Get shareable URL
+- PDF features: A4 layout, summary box, sections for agreement zones/misunderstandings/disagreements, page numbering
+- Created ExportCommonGroundQueryDto with validation
+- Dependencies: pdfkit@0.17.2, @types/pdfkit@0.17.4
+- TypeScript compilation and build successful
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #525
+
+**Issue #143 (T147) - Create progress indicator for analysis:**
+- Created AnalysisProgressIndicator component (frontend/src/components/common-ground/AnalysisProgressIndicator.tsx)
+- Features:
+  - 4 states: idle, processing, complete, failed
+  - Animated spinner during processing
+  - Optional progress bar with percentage display
+  - Success checkmark icon when complete
+  - Error state with optional retry button
+  - Configurable size (sm/md/lg)
+  - Accessible with ARIA labels and role attributes
+  - Custom messages support
+- Updated component exports in index.ts
+- TypeScript compilation and build successful
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #524
+
+**Issue #142 (T146) - Create common ground share functionality:**
+- Created ShareModal component (frontend/src/components/common-ground/ShareModal.tsx):
+  - Copy-to-clipboard functionality with visual feedback
+  - Social media sharing (Twitter, Facebook, LinkedIn)
+  - Email sharing with pre-filled subject/body
+  - Export to JSON and Markdown formats (PDF placeholder)
+  - Analysis summary display (participants, zones, consensus)
+  - Markdown export generator with full analysis breakdown
+- Created ShareButton component (frontend/src/components/common-ground/ShareButton.tsx):
+  - Reusable button with customizable variant, size, and label
+  - Manages ShareModal state
+- Integrated ShareButton into CommonGroundSummaryPanel header
+- Added share-related types (frontend/src/types/common-ground.ts):
+  - ShareMethod, ExportFormat, ShareConfig, ShareResult
+- Updated component exports in index.ts
+- TypeScript compilation and build successful
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #523
+
+**Issue #141 (T145) - Create common ground history view:**
+- Created CommonGround types in frontend/src/types/commonGround.ts (MoralFoundation, AgreementZone, Misunderstanding, GenuineDisagreement, CommonGround, CommonGroundHistoryItem)
+- Implemented useCommonGroundHistory hook (frontend/src/lib/useCommonGroundHistory.ts):
+  - useCommonGround(topicId, version?) - Fetches specific version of common ground analysis
+  - useCommonGroundHistory(topicId) - Fetches all versions for history display
+  - Auto-discovers version count and fetches all versions in parallel
+  - Returns versions sorted descending (newest first)
+- Created CommonGroundHistory component (frontend/src/components/common-ground/CommonGroundHistory.tsx):
+  - Timeline view showing evolution of common ground across versions
+  - Latest version badge highlighting
+  - Consensus score display with color coding (green 80%+, blue 60-79%, yellow 40-59%, red <40%)
+  - Participant and response counts per version
+  - Agreement/misunderstanding/disagreement counts with visual indicators
+  - Clickable history items with optional version selection callback
+  - Loading, error, and empty states
+  - Full keyboard accessibility (Enter/Space navigation)
+- Updated common-ground index.ts exports
+- Added e2e test scaffolding (frontend/e2e/common-ground-history.spec.ts)
+- TypeScript compilation and build successful
+- Resolved merge conflict with main (integrated with other common ground components)
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #522
+
+**Issue #140 (T144) - Implement real-time common ground updates (WebSocket):**
+- Implemented real-time WebSocket infrastructure using Socket.io
+- Backend WebSocket Gateway (services/notification-service/src/gateways/notification.gateway.ts):
+  - Handles Socket.io connections on `/notifications` namespace
+  - Topic-specific subscriptions via `subscribe:common-ground` and `unsubscribe:common-ground` events
+  - Room-based broadcasting: `topic:{topicId}:common-ground`
+  - Emits `common-ground:generated` and `common-ground:updated` events to subscribers
+  - CORS configuration for frontend connectivity
+  - Connection/disconnection logging
+- Updated CommonGroundNotificationHandler to broadcast WebSocket events after creating notifications
+- Created GatewaysModule and integrated into AppModule and HandlersModule
+- Frontend useCommonGroundUpdates hook (frontend/src/hooks/useCommonGroundUpdates.ts):
+  - Custom React hook for WebSocket subscription management
+  - Auto-connects to notification service on mount
+  - Subscribes to topic-specific common ground updates
+  - Transforms WebSocket payloads to CommonGroundAnalysis interface
+  - Auto-cleanup on unmount (unsubscribe + disconnect)
+  - Configurable enable/disable support
+  - Comprehensive TypeScript types and JSDoc
+- Integrated hook with TopicDetailPage (frontend/src/pages/Topics/TopicDetailPage.tsx):
+  - Live state management for real-time analysis updates
+  - Instant UI updates when WebSocket events received
+  - Fallback to HTTP data on initial load
+- Added socket.io-client@4.8.3 dependency to frontend
+- TypeScript compilation successful (frontend and backend)
+- Vite build successful (153 modules, 330.93 kB gzipped)
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #521
 
 **Issue #138 (T142) - Create common ground notifications:**
 - Created CommonGroundNotificationHandler (services/notification-service/src/handlers/common-ground-notification.handler.ts)

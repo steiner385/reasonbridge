@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationGateway } from '../gateways/notification.gateway.js';
 import type {
   CommonGroundGeneratedEvent,
   CommonGroundUpdatedEvent,
@@ -12,7 +13,10 @@ import type {
 export class CommonGroundNotificationHandler {
   private readonly logger = new Logger(CommonGroundNotificationHandler.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationGateway: NotificationGateway,
+  ) {}
 
   /**
    * Handle common-ground.generated event
@@ -78,6 +82,9 @@ export class CommonGroundNotificationHandler {
       this.logger.log(
         `Created ${recipientIds.length} notifications for common-ground.generated event`,
       );
+
+      // Emit WebSocket event for real-time delivery
+      this.notificationGateway.emitCommonGroundGenerated(event);
     } catch (error) {
       this.logger.error(
         `Failed to handle common-ground.generated event: ${error instanceof Error ? error.message : String(error)}`,
@@ -145,6 +152,9 @@ export class CommonGroundNotificationHandler {
       this.logger.log(
         `Created ${recipientIds.length} notifications for common-ground.updated event`,
       );
+
+      // Emit WebSocket event for real-time delivery
+      this.notificationGateway.emitCommonGroundUpdated(event);
     } catch (error) {
       this.logger.error(
         `Failed to handle common-ground.updated event: ${error instanceof Error ? error.message : String(error)}`,
@@ -262,7 +272,7 @@ export class CommonGroundNotificationHandler {
     });
     */
 
-    // TODO: Emit WebSocket events for real-time delivery when WebSocket gateway is implemented (see task T200)
+    // WebSocket events are now emitted by calling handler methods (handleCommonGroundGenerated/Updated)
     // TODO: Queue email/push notifications based on user preferences
   }
 }
