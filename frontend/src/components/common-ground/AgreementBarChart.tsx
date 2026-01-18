@@ -75,7 +75,7 @@ const AgreementBarChart = ({
   sortBy = 'original',
 }: AgreementBarChartProps) => {
   // Sort propositions based on sortBy parameter
-  let sortedPropositions = [...propositions];
+  const sortedPropositions = [...propositions];
   if (sortBy === 'agreement-desc') {
     sortedPropositions.sort((a, b) => b.agreementPercentage - a.agreementPercentage);
   } else if (sortBy === 'agreement-asc') {
