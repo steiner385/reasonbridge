@@ -2,6 +2,7 @@ import { PropositionClustererService } from '../services/proposition-clusterer.s
 import type {
   ClusterPropositionsRequest,
   PropositionInput,
+  PropositionCluster,
 } from '../dto/proposition-cluster.dto.js';
 
 describe('PropositionClustererService', () => {
@@ -46,7 +47,7 @@ describe('PropositionClustererService', () => {
       expect(result.method).toBe('pattern-based');
 
       // Should have at least one cluster about climate/emissions
-      const climateCluster = result.clusters.find((c) =>
+      const climateCluster = result.clusters.find((c: PropositionCluster) =>
         c.keywords.some(
           (k: string) => k.includes('climate') || k.includes('carbon') || k.includes('emissions'),
         ),
@@ -56,7 +57,10 @@ describe('PropositionClustererService', () => {
 
       // May or may not cluster healthcare depending on keyword overlap
       // Just verify total coverage
-      const totalClustered = result.clusters.reduce((sum: number, c) => sum + c.size, 0);
+      const totalClustered = result.clusters.reduce(
+        (sum: number, c: PropositionCluster) => sum + c.size,
+        0,
+      );
       expect(totalClustered + result.unclusteredPropositionIds.length).toBe(5);
     });
 
@@ -339,7 +343,10 @@ describe('PropositionClustererService', () => {
       }
 
       // Total clustered + unclustered should equal input
-      const totalClustered = result.clusters.reduce((sum: number, c) => sum + c.size, 0);
+      const totalClustered = result.clusters.reduce(
+        (sum: number, c: PropositionCluster) => sum + c.size,
+        0,
+      );
       const total = totalClustered + result.unclusteredPropositionIds.length;
       expect(total).toBe(6);
     });

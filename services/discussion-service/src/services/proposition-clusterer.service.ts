@@ -158,21 +158,15 @@ export class PropositionClustererService {
 
     for (let i = 0; i < n; i++) {
       for (let j = i; j < n; j++) {
-        const row = matrix[i];
-        if (!row) continue;
-
         if (i === j) {
-          row[j] = 1.0; // Perfect similarity with self
+          matrix[i]![j] = 1.0; // Perfect similarity with self
         } else {
           const similarity = this.calculateSimilarity(
             propositions[i]!.keywords,
             propositions[j]!.keywords,
           );
-          row[j] = similarity;
-          const reverseRow = matrix[j];
-          if (reverseRow) {
-            reverseRow[i] = similarity; // Symmetric matrix
-          }
+          matrix[i]![j] = similarity;
+          matrix[j]![i] = similarity; // Symmetric matrix
         }
       }
     }
@@ -232,13 +226,9 @@ export class PropositionClustererService {
       // Find most similar pair of clusters
       for (let i = 0; i < clusters.length; i++) {
         for (let j = i + 1; j < clusters.length; j++) {
-          const clusterI = clusters[i];
-          const clusterJ = clusters[j];
-          if (!clusterI || !clusterJ) continue;
-
           const similarity = this.calculateClusterSimilarity(
-            clusterI.propositionIndices,
-            clusterJ.propositionIndices,
+            clusters[i]!.propositionIndices,
+            clusters[j]!.propositionIndices,
             similarityMatrix,
           );
 
@@ -330,12 +320,8 @@ export class PropositionClustererService {
 
     for (let i = 0; i < propositionIndices.length; i++) {
       for (let j = i + 1; j < propositionIndices.length; j++) {
-        const iIndex = propositionIndices[i];
-        const jIndex = propositionIndices[j];
-        if (iIndex !== undefined && jIndex !== undefined) {
-          totalSimilarity += similarityMatrix[iIndex]?.[jIndex] ?? 0;
-          count++;
-        }
+        totalSimilarity += similarityMatrix[propositionIndices[i]!]?.[propositionIndices[j]!] ?? 0;
+        count++;
       }
     }
 
