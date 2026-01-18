@@ -10,10 +10,7 @@ export default defineConfig({
       '**/*.contract.test.ts',
       '**/*.pact.test.ts',
     ],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**'],
     testTimeout: 15000,
     reporters: ['default', 'junit'],
     outputFile: {

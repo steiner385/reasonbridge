@@ -93,7 +93,7 @@ function RegistrationForm({
   // Confirm password validation
   const validateConfirmPassword = (
     confirmPassword: string,
-    password: string
+    password: string,
   ): string | undefined => {
     if (!confirmPassword) {
       return 'Please confirm your password';
@@ -124,7 +124,7 @@ function RegistrationForm({
     const passwordError = validatePassword(formData.password);
     const confirmPasswordError = validateConfirmPassword(
       formData.confirmPassword,
-      formData.password
+      formData.password,
     );
     const displayNameError = validateDisplayName(formData.displayName);
 
@@ -139,56 +139,52 @@ function RegistrationForm({
   };
 
   // Handle input change
-  const handleChange = (field: keyof RegistrationFormData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange =
+    (field: keyof RegistrationFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Validate on change if field has been touched
-    if (touched[field]) {
-      let fieldError: string | undefined;
-      switch (field) {
-        case 'email':
-          fieldError = validateEmail(value);
-          break;
-        case 'password':
-          fieldError = validatePassword(value);
-          // Also re-validate confirmPassword if it's been touched
-          if (touched['confirmPassword']) {
-            const confirmError = validateConfirmPassword(
-              formData.confirmPassword,
-              value
-            );
-            setErrors((prev) => {
-              const updated = { ...prev };
-              if (confirmError) {
-                updated.confirmPassword = confirmError;
-              } else {
-                delete updated.confirmPassword;
-              }
-              return updated;
-            });
-          }
-          break;
-        case 'confirmPassword':
-          fieldError = validateConfirmPassword(value, formData.password);
-          break;
-        case 'displayName':
-          fieldError = validateDisplayName(value);
-          break;
-      }
-      setErrors((prev) => {
-        const updated = { ...prev };
-        if (fieldError) {
-          updated[field] = fieldError;
-        } else {
-          delete updated[field];
+      // Validate on change if field has been touched
+      if (touched[field]) {
+        let fieldError: string | undefined;
+        switch (field) {
+          case 'email':
+            fieldError = validateEmail(value);
+            break;
+          case 'password':
+            fieldError = validatePassword(value);
+            // Also re-validate confirmPassword if it's been touched
+            if (touched['confirmPassword']) {
+              const confirmError = validateConfirmPassword(formData.confirmPassword, value);
+              setErrors((prev) => {
+                const updated = { ...prev };
+                if (confirmError) {
+                  updated.confirmPassword = confirmError;
+                } else {
+                  delete updated.confirmPassword;
+                }
+                return updated;
+              });
+            }
+            break;
+          case 'confirmPassword':
+            fieldError = validateConfirmPassword(value, formData.password);
+            break;
+          case 'displayName':
+            fieldError = validateDisplayName(value);
+            break;
         }
-        return updated;
-      });
-    }
-  };
+        setErrors((prev) => {
+          const updated = { ...prev };
+          if (fieldError) {
+            updated[field] = fieldError;
+          } else {
+            delete updated[field];
+          }
+          return updated;
+        });
+      }
+    };
 
   // Handle input blur
   const handleBlur = (field: keyof RegistrationFormData) => () => {
@@ -204,10 +200,7 @@ function RegistrationForm({
         fieldError = validatePassword(formData.password);
         break;
       case 'confirmPassword':
-        fieldError = validateConfirmPassword(
-          formData.confirmPassword,
-          formData.password
-        );
+        fieldError = validateConfirmPassword(formData.confirmPassword, formData.password);
         break;
       case 'displayName':
         fieldError = validateDisplayName(formData.displayName);
@@ -313,7 +306,9 @@ function RegistrationForm({
             value={formData.confirmPassword}
             onChange={handleChange('confirmPassword')}
             onBlur={handleBlur('confirmPassword')}
-            {...(touched['confirmPassword'] && errors.confirmPassword ? { error: errors.confirmPassword } : {})}
+            {...(touched['confirmPassword'] && errors.confirmPassword
+              ? { error: errors.confirmPassword }
+              : {})}
             required
             fullWidth
             placeholder="Re-enter your password"

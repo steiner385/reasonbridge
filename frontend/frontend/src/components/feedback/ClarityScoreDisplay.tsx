@@ -4,7 +4,6 @@ import {
   FeedbackType,
   ClarityMetrics,
   ClarityScoreDisplayProps,
-  HelpfulRating,
 } from '../../types/feedback';
 
 /**
@@ -26,8 +25,8 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
   const clarityFeedback = feedback.filter(
     (f) =>
       (f.type === FeedbackType.UNSOURCED || f.type === FeedbackType.BIAS) &&
-      f.confidenceScore >= 0.80 && // FR-014c: Only display if ≥80% confidence
-      f.displayedToUser
+      f.confidenceScore >= 0.8 && // FR-014c: Only display if ≥80% confidence
+      f.displayedToUser,
   );
 
   // Calculate clarity metrics from feedback if not provided
@@ -54,7 +53,7 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
         vagueStatements: 0, // Placeholder
       },
     };
-  }, [clarityFeedback, metrics]);
+  }, [metrics, clarityFeedback]);
 
   const getScoreColor = (score: number): string => {
     if (score >= 0.8) return 'text-green-600';
@@ -98,9 +97,7 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span className={getScoreColor(score)}>
-          Clarity: {(score * 100).toFixed(0)}%
-        </span>
+        <span className={getScoreColor(score)}>Clarity: {(score * 100).toFixed(0)}%</span>
       </div>
     );
   }
@@ -118,7 +115,9 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
           <p className="text-xs text-gray-500 mt-0.5">AI-powered analysis</p>
         </div>
         <div className="text-right">
-          <div className={`text-3xl font-bold ${getScoreColor(calculatedMetrics.overallClarityScore)}`}>
+          <div
+            className={`text-3xl font-bold ${getScoreColor(calculatedMetrics.overallClarityScore)}`}
+          >
             {(calculatedMetrics.overallClarityScore * 100).toFixed(0)}
           </div>
           <div className="text-xs text-gray-600 mt-0.5">
@@ -133,7 +132,9 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-gray-700">Sourcing</span>
-            <span className={`text-sm font-semibold ${getScoreColor(calculatedMetrics.sourcingScore)}`}>
+            <span
+              className={`text-sm font-semibold ${getScoreColor(calculatedMetrics.sourcingScore)}`}
+            >
               {(calculatedMetrics.sourcingScore * 100).toFixed(0)}%
             </span>
           </div>
@@ -143,8 +144,8 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
                 calculatedMetrics.sourcingScore >= 0.8
                   ? 'bg-green-500'
                   : calculatedMetrics.sourcingScore >= 0.6
-                  ? 'bg-yellow-500'
-                  : 'bg-red-500'
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500'
               }`}
               style={{ width: `${calculatedMetrics.sourcingScore * 100}%` }}
               role="progressbar"
@@ -165,7 +166,9 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-gray-700">Neutrality</span>
-            <span className={`text-sm font-semibold ${getScoreColor(calculatedMetrics.neutralityScore)}`}>
+            <span
+              className={`text-sm font-semibold ${getScoreColor(calculatedMetrics.neutralityScore)}`}
+            >
               {(calculatedMetrics.neutralityScore * 100).toFixed(0)}%
             </span>
           </div>
@@ -175,8 +178,8 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
                 calculatedMetrics.neutralityScore >= 0.8
                   ? 'bg-green-500'
                   : calculatedMetrics.neutralityScore >= 0.6
-                  ? 'bg-yellow-500'
-                  : 'bg-red-500'
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500'
               }`}
               style={{ width: `${calculatedMetrics.neutralityScore * 100}%` }}
               role="progressbar"
@@ -188,7 +191,8 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
           {calculatedMetrics.issuesDetected.biasIndicators > 0 && (
             <p className="text-xs text-gray-600 mt-1">
               {calculatedMetrics.issuesDetected.biasIndicators} bias{' '}
-              {calculatedMetrics.issuesDetected.biasIndicators === 1 ? 'indicator' : 'indicators'} detected
+              {calculatedMetrics.issuesDetected.biasIndicators === 1 ? 'indicator' : 'indicators'}{' '}
+              detected
             </p>
           )}
         </div>
@@ -197,7 +201,9 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-gray-700">Specificity</span>
-            <span className={`text-sm font-semibold ${getScoreColor(calculatedMetrics.specificityScore)}`}>
+            <span
+              className={`text-sm font-semibold ${getScoreColor(calculatedMetrics.specificityScore)}`}
+            >
               {(calculatedMetrics.specificityScore * 100).toFixed(0)}%
             </span>
           </div>
@@ -207,8 +213,8 @@ export const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
                 calculatedMetrics.specificityScore >= 0.8
                   ? 'bg-green-500'
                   : calculatedMetrics.specificityScore >= 0.6
-                  ? 'bg-yellow-500'
-                  : 'bg-red-500'
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500'
               }`}
               style={{ width: `${calculatedMetrics.specificityScore * 100}%` }}
               role="progressbar"
@@ -276,7 +282,9 @@ const FeedbackItem: React.FC<{
     <div className="p-3 bg-gray-50 rounded border border-gray-200 text-sm">
       <div className="flex items-start justify-between mb-1">
         <div className="flex items-center">
-          <span className="mr-2" aria-hidden="true">{getFeedbackIcon(feedback.type)}</span>
+          <span className="mr-2" aria-hidden="true">
+            {getFeedbackIcon(feedback.type)}
+          </span>
           <span className="font-medium text-gray-900">
             {getFeedbackLabel(feedback.type, feedback.subtype)}
           </span>
@@ -292,7 +300,9 @@ const FeedbackItem: React.FC<{
         )}
       </div>
       <p className="text-gray-700 text-xs mb-1">{feedback.suggestionText}</p>
-      <p className="text-gray-500 text-xs">Confidence: {(feedback.confidenceScore * 100).toFixed(0)}%</p>
+      <p className="text-gray-500 text-xs">
+        Confidence: {(feedback.confidenceScore * 100).toFixed(0)}%
+      </p>
     </div>
   );
 };

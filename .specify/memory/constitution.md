@@ -1,11 +1,12 @@
-<!--
-================================================================================
-SYNC IMPACT REPORT
-================================================================================
+# <!--
+
+# SYNC IMPACT REPORT
+
 Version change: 0.0.0 → 1.0.0
 Bump rationale: MAJOR - Initial constitution ratification with 4 core principles
 
 Modified principles:
+
 - [PRINCIPLE_1_NAME] → I. Code Quality
 - [PRINCIPLE_2_NAME] → II. Testing Standards
 - [PRINCIPLE_3_NAME] → III. User Experience Consistency
@@ -13,20 +14,23 @@ Modified principles:
 - [PRINCIPLE_5_NAME] → (removed, not needed)
 
 Added sections:
+
 - Quality Gates (was [SECTION_2_NAME])
 - Development Workflow (was [SECTION_3_NAME])
 - Governance (filled from template)
 
 Removed sections:
+
 - None (template placeholders replaced)
 
 Templates validated:
+
 - ✅ .specify/templates/plan-template.md - Constitution Check section compatible
 - ✅ .specify/templates/spec-template.md - Success criteria align with performance principle
 - ✅ .specify/templates/tasks-template.md - Test-first workflow aligns with Testing Standards
 
-Follow-up TODOs: None
-================================================================================
+# Follow-up TODOs: None
+
 -->
 
 # uniteDiscord Constitution
@@ -102,14 +106,14 @@ The bot MUST meet these performance standards under normal load:
 
 All pull requests MUST pass these gates before merge:
 
-| Gate | Requirement | Enforcement |
-|------|-------------|-------------|
-| Lint | Zero errors and warnings | CI automated |
-| Type Check | Zero TypeScript errors | CI automated |
-| Unit Tests | All pass, coverage threshold met | CI automated |
-| Integration Tests | All pass | CI automated |
-| Code Review | At least 1 approval | GitHub branch protection |
-| Performance | No regression beyond 10% | Manual review for significant changes |
+| Gate              | Requirement                      | Enforcement                           |
+| ----------------- | -------------------------------- | ------------------------------------- |
+| Lint              | Zero errors and warnings         | CI automated                          |
+| Type Check        | Zero TypeScript errors           | CI automated                          |
+| Unit Tests        | All pass, coverage threshold met | CI automated                          |
+| Integration Tests | All pass                         | CI automated                          |
+| Code Review       | At least 1 approval              | GitHub branch protection              |
+| Performance       | No regression beyond 10%         | Manual review for significant changes |
 
 ## Development Workflow
 

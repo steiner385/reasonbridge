@@ -10,8 +10,8 @@ function AboutPage() {
         </p>
         <div className="space-y-4">
           <p className="text-gray-700">
-            Unite Discord is a rational discussion platform designed to foster
-            meaningful dialogue and constructive conversations.
+            Unite Discord is a rational discussion platform designed to foster meaningful dialogue
+            and constructive conversations.
           </p>
           <nav className="flex gap-4">
             <Link

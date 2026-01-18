@@ -42,7 +42,7 @@ const buildResponseTree = (
   responses: Response[],
   parentId: string | null = null,
   depth: number = 0,
-  maxDepth: number = 5
+  maxDepth: number = 5,
 ): ResponseNode[] => {
   const children = responses.filter((r) => r.parentId === parentId);
 
@@ -50,9 +50,7 @@ const buildResponseTree = (
     ...response,
     depth: Math.min(depth, maxDepth),
     children:
-      depth < maxDepth
-        ? buildResponseTree(responses, response.id, depth + 1, maxDepth)
-        : [],
+      depth < maxDepth ? buildResponseTree(responses, response.id, depth + 1, maxDepth) : [],
   }));
 };
 
@@ -94,10 +92,7 @@ const ResponseItem: React.FC<ResponseItemProps> = ({
 
       {/* Horizontal connector */}
       {node.depth > 0 && (
-        <div
-          className="absolute top-8 left-0 w-4 h-px bg-gray-200"
-          style={{ left: '-1rem' }}
-        />
+        <div className="absolute top-8 left-0 w-4 h-px bg-gray-200" style={{ left: '-1rem' }} />
       )}
 
       <div className="mb-4">
@@ -178,7 +173,7 @@ const ThreadedResponseDisplay: React.FC<ThreadedResponseDisplayProps> = ({
   // Build tree structure from flat list
   const responseTree = useMemo(
     () => buildResponseTree(responses, null, 0, maxDepth),
-    [responses, maxDepth]
+    [responses, maxDepth],
   );
 
   // Show empty state if no responses
@@ -186,9 +181,7 @@ const ThreadedResponseDisplay: React.FC<ThreadedResponseDisplayProps> = ({
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 text-lg">No responses yet</p>
-        <p className="text-gray-400 text-sm mt-2">
-          Be the first to share your thoughts!
-        </p>
+        <p className="text-gray-400 text-sm mt-2">Be the first to share your thoughts!</p>
       </div>
     );
   }

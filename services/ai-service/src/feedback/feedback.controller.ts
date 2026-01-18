@@ -1,7 +1,23 @@
-import { Controller, Post, Get, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { FeedbackService } from './feedback.service.js';
 import { FeedbackAnalyticsService } from '../services/feedback-analytics.service.js';
-import { RequestFeedbackDto, FeedbackResponseDto, DismissFeedbackDto, FeedbackAnalyticsDto, FeedbackAnalyticsQueryDto } from './dto/index.js';
+import {
+  RequestFeedbackDto,
+  FeedbackResponseDto,
+  DismissFeedbackDto,
+  FeedbackAnalyticsDto,
+  FeedbackAnalyticsQueryDto,
+} from './dto/index.js';
 
 /**
  * Controller for feedback-related endpoints

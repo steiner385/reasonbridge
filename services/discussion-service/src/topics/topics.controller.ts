@@ -9,16 +9,12 @@ export class TopicsController {
   constructor(private readonly topicsService: TopicsService) {}
 
   @Get()
-  async getTopics(
-    @Query() query: GetTopicsQueryDto,
-  ): Promise<PaginatedTopicsResponseDto> {
+  async getTopics(@Query() query: GetTopicsQueryDto): Promise<PaginatedTopicsResponseDto> {
     return this.topicsService.getTopics(query);
   }
 
   @Get('search')
-  async searchTopics(
-    @Query() query: SearchTopicsQueryDto,
-  ): Promise<PaginatedTopicsResponseDto> {
+  async searchTopics(@Query() query: SearchTopicsQueryDto): Promise<PaginatedTopicsResponseDto> {
     return this.topicsService.searchTopics(query);
   }
 

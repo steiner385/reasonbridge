@@ -161,7 +161,7 @@ describe('TagSuggester', () => {
 
       expect(result.suggestions.length).toBeGreaterThan(1);
       expect(result.suggestions).toEqual(
-        expect.arrayContaining(['politics', 'science', 'technology'])
+        expect.arrayContaining(['politics', 'science', 'technology']),
       );
     });
 

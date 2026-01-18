@@ -43,7 +43,7 @@ export function useSuggestionActions() {
    * Apply a tag suggestion to a topic
    */
   const applyTag = useCallback(async (options: ApplyTagOptions) => {
-    setState(prev => ({ ...prev, isApplying: true, error: null }));
+    setState((prev) => ({ ...prev, isApplying: true, error: null }));
 
     try {
       // TODO: Call backend API to add tag to topic
@@ -52,9 +52,9 @@ export function useSuggestionActions() {
       // await apiClient.post(`/topics/${options.topicId}/tags`, { tag: options.tag, source: 'AI_SUGGESTED' })
 
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         appliedTags: new Set([...prev.appliedTags, options.tag]),
         isApplying: false,
@@ -63,7 +63,7 @@ export function useSuggestionActions() {
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to apply tag';
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: errorMessage,
         isApplying: false,
@@ -77,7 +77,7 @@ export function useSuggestionActions() {
    * Apply a topic link suggestion
    */
   const applyTopicLink = useCallback(async (options: ApplyTopicLinkOptions) => {
-    setState(prev => ({ ...prev, isApplying: true, error: null }));
+    setState((prev) => ({ ...prev, isApplying: true, error: null }));
 
     try {
       // TODO: Call backend API to create topic link
@@ -90,10 +90,10 @@ export function useSuggestionActions() {
       // })
 
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       const linkKey = `${options.link.targetTopicId}-${options.link.relationshipType}`;
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         appliedLinks: new Set([...prev.appliedLinks, linkKey]),
         isApplying: false,
@@ -102,7 +102,7 @@ export function useSuggestionActions() {
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to apply topic link';
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: errorMessage,
         isApplying: false,
@@ -116,7 +116,7 @@ export function useSuggestionActions() {
    * Dismiss a tag suggestion
    */
   const dismissTag = useCallback((tag: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       dismissedTags: new Set([...prev.dismissedTags, tag]),
     }));
@@ -127,7 +127,7 @@ export function useSuggestionActions() {
    */
   const dismissTopicLink = useCallback((link: TopicLink) => {
     const linkKey = `${link.targetTopicId}-${link.relationshipType}`;
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       dismissedLinks: new Set([...prev.dismissedLinks, linkKey]),
     }));
@@ -136,32 +136,44 @@ export function useSuggestionActions() {
   /**
    * Check if a tag has been applied
    */
-  const isTagApplied = useCallback((tag: string) => {
-    return state.appliedTags.has(tag);
-  }, [state.appliedTags]);
+  const isTagApplied = useCallback(
+    (tag: string) => {
+      return state.appliedTags.has(tag);
+    },
+    [state.appliedTags],
+  );
 
   /**
    * Check if a tag has been dismissed
    */
-  const isTagDismissed = useCallback((tag: string) => {
-    return state.dismissedTags.has(tag);
-  }, [state.dismissedTags]);
+  const isTagDismissed = useCallback(
+    (tag: string) => {
+      return state.dismissedTags.has(tag);
+    },
+    [state.dismissedTags],
+  );
 
   /**
    * Check if a topic link has been applied
    */
-  const isTopicLinkApplied = useCallback((link: TopicLink) => {
-    const linkKey = `${link.targetTopicId}-${link.relationshipType}`;
-    return state.appliedLinks.has(linkKey);
-  }, [state.appliedLinks]);
+  const isTopicLinkApplied = useCallback(
+    (link: TopicLink) => {
+      const linkKey = `${link.targetTopicId}-${link.relationshipType}`;
+      return state.appliedLinks.has(linkKey);
+    },
+    [state.appliedLinks],
+  );
 
   /**
    * Check if a topic link has been dismissed
    */
-  const isTopicLinkDismissed = useCallback((link: TopicLink) => {
-    const linkKey = `${link.targetTopicId}-${link.relationshipType}`;
-    return state.dismissedLinks.has(linkKey);
-  }, [state.dismissedLinks]);
+  const isTopicLinkDismissed = useCallback(
+    (link: TopicLink) => {
+      const linkKey = `${link.targetTopicId}-${link.relationshipType}`;
+      return state.dismissedLinks.has(linkKey);
+    },
+    [state.dismissedLinks],
+  );
 
   /**
    * Reset all suggestion states

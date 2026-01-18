@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  FeedbackType,
-  HelpfulRating,
-  ToneIndicatorProps,
-  ToneSubtype,
-} from '../../types/feedback';
+import { FeedbackType, HelpfulRating, ToneIndicatorProps, ToneSubtype } from '../../types/feedback';
 
 /**
  * ToneIndicator - Visualizes tone-related feedback for user responses
@@ -27,7 +22,7 @@ export const ToneIndicator: React.FC<ToneIndicatorProps> = ({
   const [expanded, setExpanded] = useState(false);
 
   // Only display if confidence >= 0.80 (FR-014c)
-  if (feedback.confidenceScore < 0.80) {
+  if (feedback.confidenceScore < 0.8) {
     return null;
   }
 
@@ -133,7 +128,9 @@ export const ToneIndicator: React.FC<ToneIndicatorProps> = ({
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center">
-          <span className="text-lg mr-2" aria-hidden="true">{icon}</span>
+          <span className="text-lg mr-2" aria-hidden="true">
+            {icon}
+          </span>
           <div>
             <h4 className="font-semibold text-sm">{label}</h4>
             <p className="text-xs opacity-70">AI Assistant</p>
@@ -167,10 +164,7 @@ export const ToneIndicator: React.FC<ToneIndicatorProps> = ({
         </button>
 
         {expanded && (
-          <div
-            id={`reasoning-${feedback.id}`}
-            className="mt-2 pt-2 border-t border-current/20"
-          >
+          <div id={`reasoning-${feedback.id}`} className="mt-2 pt-2 border-t border-current/20">
             <p className="text-xs mb-2 opacity-80">{feedback.reasoning}</p>
 
             {/* Educational Resources */}

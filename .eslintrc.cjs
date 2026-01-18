@@ -34,6 +34,7 @@ module.exports = {
           '**/test/**',
           '**/__tests__/**',
           '**/vitest.config.ts',
+          '**/vitest.*.config.ts',
           '**/jest.config.ts',
         ],
       },

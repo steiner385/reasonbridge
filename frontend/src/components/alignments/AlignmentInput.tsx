@@ -247,7 +247,10 @@ const AlignmentInput: React.FC<AlignmentInputProps> = ({
       {/* Nuance Explanation Input */}
       {showNuanceInput && (
         <div className="mt-4 space-y-3">
-          <label htmlFor="nuance-explanation" className={`block font-medium text-gray-700 ${currentSize.text}`}>
+          <label
+            htmlFor="nuance-explanation"
+            className={`block font-medium text-gray-700 ${currentSize.text}`}
+          >
             Explain your nuanced position:
           </label>
           <textarea

@@ -5,6 +5,7 @@ This directory contains initialization scripts and configuration for LocalStack,
 ## Overview
 
 LocalStack is configured via `docker-compose.yml` to emulate the following AWS services:
+
 - **SNS**: Pub/sub notifications for event broadcasting (topics defined in `init-topics.sh`)
 - **SQS**: Message queuing for event consumption (queues defined in `init-queues.sh`)
 - **S3**: Object storage for file uploads
@@ -16,17 +17,17 @@ The `init-topics.sh` script creates all required SNS topics and SNS-to-SQS subsc
 
 ### Event Topics
 
-| Topic Name | Publisher Service(s) | Event Type | Description |
-|------------|---------------------|------------|-------------|
-| `response-created` | Discussion Service | Core Event | New response submitted by user |
-| `response-analyzed` | AI Service | Core Event | Response analysis completed with feedback |
-| `topic-participant-joined` | Discussion Service | Core Event | User joins a discussion topic |
-| `moderation-action-requested` | AI Service | Moderation | AI detects content requiring moderation |
-| `user-trust-updated` | Moderation Service | Moderation | User trust score changed |
-| `common-ground-generated` | AI Service | Analysis | Common ground identified between perspectives |
-| `notification-email` | Any Service | Notification | Email notification requested |
-| `notification-push` | Any Service | Notification | Push notification requested |
-| `system-audit` | Any Service | System | Audit event for compliance logging |
+| Topic Name                    | Publisher Service(s) | Event Type   | Description                                   |
+| ----------------------------- | -------------------- | ------------ | --------------------------------------------- |
+| `response-created`            | Discussion Service   | Core Event   | New response submitted by user                |
+| `response-analyzed`           | AI Service           | Core Event   | Response analysis completed with feedback     |
+| `topic-participant-joined`    | Discussion Service   | Core Event   | User joins a discussion topic                 |
+| `moderation-action-requested` | AI Service           | Moderation   | AI detects content requiring moderation       |
+| `user-trust-updated`          | Moderation Service   | Moderation   | User trust score changed                      |
+| `common-ground-generated`     | AI Service           | Analysis     | Common ground identified between perspectives |
+| `notification-email`          | Any Service          | Notification | Email notification requested                  |
+| `notification-push`           | Any Service          | Notification | Push notification requested                   |
+| `system-audit`                | Any Service          | System       | Audit event for compliance logging            |
 
 ### Topic-to-Queue Subscriptions
 
@@ -34,17 +35,17 @@ SNS-to-SQS subscriptions are **managed by application services at startup** due 
 
 The following subscription mappings should be implemented by services:
 
-| SNS Topic | Subscribed SQS Queue(s) | Consuming Service(s) | Created By |
-|-----------|------------------------|---------------------|------------|
-| `response-created` | `response-analysis-queue` | AI Service | AI Service on startup |
-| `response-analyzed` | `discussion-events-queue` | Discussion Service | Discussion Service on startup |
-| `topic-participant-joined` | `recommendation-queue` | Recommendation Service | Recommendation Service on startup |
-| `moderation-action-requested` | `moderation-queue` | Moderation Service | Moderation Service on startup |
-| `user-trust-updated` | `user-trust-queue` | User Service | User Service on startup |
-| `common-ground-generated` | `common-ground-queue`, `notification-queue` | Discussion Service, Notification Service | Both services on startup |
-| `notification-email` | `email-queue` | Notification Service (email worker) | Notification Service on startup |
-| `notification-push` | `notification-queue` | Notification Service (push worker) | Notification Service on startup |
-| `system-audit` | `audit-log-queue` | Audit Service | Audit Service on startup |
+| SNS Topic                     | Subscribed SQS Queue(s)                     | Consuming Service(s)                     | Created By                        |
+| ----------------------------- | ------------------------------------------- | ---------------------------------------- | --------------------------------- |
+| `response-created`            | `response-analysis-queue`                   | AI Service                               | AI Service on startup             |
+| `response-analyzed`           | `discussion-events-queue`                   | Discussion Service                       | Discussion Service on startup     |
+| `topic-participant-joined`    | `recommendation-queue`                      | Recommendation Service                   | Recommendation Service on startup |
+| `moderation-action-requested` | `moderation-queue`                          | Moderation Service                       | Moderation Service on startup     |
+| `user-trust-updated`          | `user-trust-queue`                          | User Service                             | User Service on startup           |
+| `common-ground-generated`     | `common-ground-queue`, `notification-queue` | Discussion Service, Notification Service | Both services on startup          |
+| `notification-email`          | `email-queue`                               | Notification Service (email worker)      | Notification Service on startup   |
+| `notification-push`           | `notification-queue`                        | Notification Service (push worker)       | Notification Service on startup   |
+| `system-audit`                | `audit-log-queue`                           | Audit Service                            | Audit Service on startup          |
 
 **Implementation Note**: Each service should create its SNS-to-SQS subscriptions during initialization using code similar to:
 
@@ -53,13 +54,14 @@ The following subscription mappings should be implemented by services:
 await snsClient.subscribe({
   TopicArn: 'arn:aws:sns:us-east-1:000000000000:response-created',
   Protocol: 'sqs',
-  Endpoint: 'arn:aws:sqs:us-east-1:000000000000:response-analysis-queue'
+  Endpoint: 'arn:aws:sqs:us-east-1:000000000000:response-analysis-queue',
 });
 ```
 
 ### Pub/Sub Benefits
 
 Using SNS topics with SQS subscribers provides:
+
 - **Fan-out**: Single event can trigger multiple services (e.g., `common-ground-generated` → Discussion + Notification)
 - **Decoupling**: Publishers don't need to know about consumers
 - **Reliability**: Messages persisted in SQS until processed
@@ -72,27 +74,28 @@ The `init-queues.sh` script creates all required SQS queues for the platform's e
 
 ### Event Processing Queues
 
-| Queue Name | Purpose | Visibility Timeout | Max Receive Count |
-|------------|---------|-------------------|-------------------|
-| `response-analysis-queue` | AI service processes `response.created` events for bias detection and feedback | 300s (5min) | 3 |
-| `discussion-events-queue` | Discussion service processes `response.analyzed` events to update feedback | 60s | 3 |
-| `moderation-queue` | Moderation service processes `moderation.action.requested` events | 120s (2min) | 3 |
-| `notification-queue` | Notification service processes notification events (common-ground, etc.) | 60s | 5 |
-| `user-trust-queue` | User service processes `user.trust.updated` events | 30s | 3 |
-| `recommendation-queue` | Recommendation service processes `topic.participant.joined` events | 90s | 3 |
-| `common-ground-queue` | Discussion/Notification services process `common-ground.generated` events | 60s | 3 |
+| Queue Name                | Purpose                                                                        | Visibility Timeout | Max Receive Count |
+| ------------------------- | ------------------------------------------------------------------------------ | ------------------ | ----------------- |
+| `response-analysis-queue` | AI service processes `response.created` events for bias detection and feedback | 300s (5min)        | 3                 |
+| `discussion-events-queue` | Discussion service processes `response.analyzed` events to update feedback     | 60s                | 3                 |
+| `moderation-queue`        | Moderation service processes `moderation.action.requested` events              | 120s (2min)        | 3                 |
+| `notification-queue`      | Notification service processes notification events (common-ground, etc.)       | 60s                | 5                 |
+| `user-trust-queue`        | User service processes `user.trust.updated` events                             | 30s                | 3                 |
+| `recommendation-queue`    | Recommendation service processes `topic.participant.joined` events             | 90s                | 3                 |
+| `common-ground-queue`     | Discussion/Notification services process `common-ground.generated` events      | 60s                | 3                 |
 
 ### Utility Queues
 
-| Queue Name | Purpose | Visibility Timeout | Max Receive Count |
-|------------|---------|-------------------|-------------------|
-| `email-queue` | Async email sending | 60s | 3 |
-| `audit-log-queue` | System audit events | 30s | 5 |
-| `global-dlq` | Global dead letter queue for unroutable messages | 30s | N/A |
+| Queue Name        | Purpose                                          | Visibility Timeout | Max Receive Count |
+| ----------------- | ------------------------------------------------ | ------------------ | ----------------- |
+| `email-queue`     | Async email sending                              | 60s                | 3                 |
+| `audit-log-queue` | System audit events                              | 30s                | 5                 |
+| `global-dlq`      | Global dead letter queue for unroutable messages | 30s                | N/A               |
 
 ### Dead Letter Queues (DLQ)
 
 Each primary queue has an associated DLQ (e.g., `response-analysis-queue-dlq`) that receives messages that fail processing after the max receive count is exceeded. This allows for:
+
 - Failed message inspection and debugging
 - Manual retry or discard decisions
 - Alerting on systematic failures
@@ -236,6 +239,7 @@ Services integrate with these queues using the `packages/common/src/events/` uti
 - **DLQHandler**: Monitors and processes dead letter queue messages
 
 See the following packages for event infrastructure:
+
 - `packages/common/src/events/` - Base event publishing/consuming classes
 - `packages/event-schemas/src/` - Event type definitions
 
