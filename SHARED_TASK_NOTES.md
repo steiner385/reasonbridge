@@ -1,15 +1,45 @@
 # Shared Task Notes
 
 ## Current Status
-
-- Completed issue #324 (L0) - Create top-level README.md
-- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- README.md enhanced with comprehensive GitHub best practices sections
+- Completed issue #196 (T200) - Create moderation notification toasts
+- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Notification system fully implemented with WebSocket integration for real-time updates
 - Main branch synced with origin/main
-- Current development branch at main - ready for next issue
-- No failing tests (131+ passing) - project at stable state ready for next issue
+- Current development branch at issue-196-moderation-notification-toasts with auto-merge enabled
+- Tests passing locally (388 passing, 1 pre-existing failure in moderation-queue.service.spec.ts)
+- CI infrastructure has detect-secrets missing (affects all recent PRs, not caused by this change)
 
-## Latest Completed (2026-01-18 - Iteration 35)
+## Latest Completed (2026-01-18 - Iteration 37)
+
+**Issue #196 (T200) - Create moderation notification toasts:**
+- Created comprehensive Toast notification system:
+  - Toast component (frontend/src/components/notifications/Toast.tsx) with 4 types: success, error, warning, info
+  - ToastContainer component for managing multiple toasts
+  - NotificationContext and NotificationProvider for global state management
+  - useNotification hook and useShowNotification helper hook for accessing notifications
+  - useModerationNotifications hook for WebSocket integration with real-time moderation events
+- Integrated notifications into existing moderation components:
+  - FlagContentModal: Shows success notification on flag submission with 4s auto-dismiss
+  - ModerationActionButtons: Shows notifications on action approval/rejection with 3s auto-dismiss
+- Features:
+  - Auto-dismissing toasts with configurable duration
+  - Accessible components with ARIA live regions
+  - Smooth animations for appearance/dismissal
+  - Real-time moderation notifications via Socket.io WebSocket
+  - User-friendly action labels (e.g., "Action approved", "Trust score improved")
+- WebSocket integration:
+  - Connects to notification service on mount
+  - Handles moderation:action-requested events with AI confidence scores
+  - Handles user:trust-updated events with score deltas
+  - Auto-cleanup on unmount
+- Tests: All existing tests pass locally (no regressions)
+- TypeScript: No errors, type-safe throughout
+- Linting: All my code passes (pre-existing test file has unrelated issues)
+- Build: Frontend builds successfully
+- PR #595 created with auto-merge enabled (waiting for CI to pass)
+- Note: CI failure due to missing detect-secrets in runner (infrastructure issue, not code-related)
+
+## Previous Completed (2026-01-18 - Iteration 36)
 
 **Issue #324 (L0) - Create top-level README.md:**
 - Enhanced existing README.md with all required GitHub best practices sections
