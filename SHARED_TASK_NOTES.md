@@ -2,11 +2,33 @@
 
 ## Current Status
 
-- Completed issue #135 (T139) - Create bridging suggestions section
-- ~169 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #136 (T140) - Create proposition cluster view
+- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 - No CI workflows configured yet
 
 ## Latest Completed (2026-01-18)
+
+**Issue #136 (T140) - Create proposition cluster view:**
+- Added PropositionCluster and PropositionClusteringResult types (frontend/src/types/common-ground.ts:263-337)
+- Created PropositionClusterView component (frontend/src/components/common-ground/PropositionClusterView.tsx)
+  - Overall clustering metrics display (cluster count, total propositions, quality score, confidence)
+  - Quality score visualization (green 70%+, blue 50-69%, yellow <50%)
+  - Clustering method badge (pattern-based/semantic-ai/hybrid)
+  - Cluster cards with:
+    - Theme title and description
+    - Cohesion level badges (strong 80%+, moderate 60-79%, loose <60%)
+    - Keyword tags
+    - Proposition list with agreement percentages
+    - Participant breakdowns (support/oppose/neutral)
+  - Unclustered propositions section for outliers
+  - Interactive callbacks for cluster and proposition clicks
+  - Configurable display options (maxPropositionsPerCluster, showUnclustered, showMetrics, etc.)
+  - Keyboard accessibility and ARIA support
+  - Empty state with helpful message
+- Updated exports in index.ts (frontend/src/components/common-ground/index.ts:19-20)
+- TypeScript compilation and build successful
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #518
 
 **Issue #135 (T139) - Create bridging suggestions section:**
 - Added BridgingSuggestion and BridgingSuggestionsResponse types (frontend/src/types/common-ground.ts:178-261)
