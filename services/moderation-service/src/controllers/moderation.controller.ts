@@ -11,6 +11,8 @@ import type {
   CreateActionRequest,
   ApproveActionRequest,
   RejectActionRequest,
+  CreateAppealRequest,
+  AppealResponse,
   ModerationActionResponse,
   ModerationActionDetailResponse,
 } from '../services/moderation-actions.service.js';
@@ -252,5 +254,19 @@ export class ModerationController {
       request.topicId,
       request.prompt,
     );
+  }
+
+  @Post('actions/:actionId/appeal')
+  async createAppeal(
+    @Param('actionId') actionId: string,
+    @Body() request: CreateAppealRequest,
+  ): Promise<AppealResponse> {
+    if (!request.reason || request.reason.trim().length === 0) {
+      throw new BadRequestException('reason is required');
+    }
+
+    // TODO: Extract appellant ID from JWT token when auth is implemented
+    const appellantId = 'system';
+    return this.actionsService.createAppeal(actionId, appellantId, request);
   }
 }
