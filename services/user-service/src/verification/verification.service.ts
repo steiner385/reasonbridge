@@ -239,4 +239,152 @@ export class VerificationService {
       data: { status: VerificationStatus.REJECTED },
     });
   }
+
+  /**
+   * Check and mark expired verifications as expired
+   * Should be called periodically or when checking verification status
+   *
+   * @param userId - User ID (optional, if provided only checks user's verifications)
+   * @returns Number of verifications marked as expired
+   */
+  async markExpiredVerifications(userId?: string): Promise<number> {
+    const now = new Date();
+
+    const result = await this.prisma.verificationRecord.updateMany({
+      where: {
+        ...(userId && { userId }),
+        status: VerificationStatus.PENDING,
+        expiresAt: {
+          lt: now,
+        },
+      },
+      data: {
+        status: VerificationStatus.EXPIRED,
+      },
+    });
+
+    if (result.count > 0) {
+      this.logger.debug(`Marked ${result.count} verification(s) as expired`);
+    }
+
+    return result.count;
+  }
+
+  /**
+   * Initiate re-verification process
+   * Allows user to request a new verification of the same type
+   * Handles cleanup of previous expired/rejected attempts
+   *
+   * @param userId - User ID
+   * @param verificationType - Type of verification to re-request
+   * @returns VerificationResponseDto for new verification attempt
+   */
+  async reVerify(
+    userId: string,
+    verificationType: string,
+  ): Promise<VerificationResponseDto> {
+    // Mark any expired verifications first
+    await this.markExpiredVerifications(userId);
+
+    // Find old verification attempts to clean up
+    const oldVerifications = await this.prisma.verificationRecord.findMany({
+      where: {
+        userId,
+        type: verificationType as VerificationType,
+        status: {
+          in: [VerificationStatus.EXPIRED, VerificationStatus.REJECTED],
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Delete associated video uploads for cleanup
+    for (const oldVerification of oldVerifications) {
+      if (oldVerification.type === VerificationType.VIDEO) {
+        await this.prisma.videoUpload.deleteMany({
+          where: { verificationId: oldVerification.id },
+        });
+      }
+    }
+
+    // Keep oldest verification for audit trail, delete others
+    if (oldVerifications.length > 1) {
+      const verificationIdsToDelete = oldVerifications.slice(1).map((v) => v.id);
+
+      await this.prisma.verificationRecord.deleteMany({
+        where: {
+          id: {
+            in: verificationIdsToDelete,
+          },
+        },
+      });
+    }
+
+    // Request new verification
+    const request: VerificationRequestDto = {
+      type: verificationType as any,
+    };
+
+    return this.requestVerification(userId, request);
+  }
+
+  /**
+   * Check if user has active/verified status for a verification type
+   *
+   * @param userId - User ID
+   * @param verificationType - Type of verification to check
+   * @returns true if user has verified status for this type
+   */
+  async isVerified(userId: string, verificationType: string): Promise<boolean> {
+    const verification = await this.prisma.verificationRecord.findFirst({
+      where: {
+        userId,
+        type: verificationType as VerificationType,
+        status: VerificationStatus.VERIFIED,
+      },
+    });
+
+    return !!verification;
+  }
+
+  /**
+   * Get verification history for a user
+   *
+   * @param userId - User ID
+   * @returns Array of all verification records
+   */
+  async getVerificationHistory(userId: string) {
+    return this.prisma.verificationRecord.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Complete verification (mark as VERIFIED)
+   * Called after successful verification of identity
+   *
+   * @param verificationId - Verification ID
+   * @param userId - User ID (for authorization)
+   * @returns Updated verification record
+   */
+  async completeVerification(verificationId: string, userId: string) {
+    const verification = await this.getVerification(verificationId);
+
+    if (!verification) {
+      throw new BadRequestException('Verification not found');
+    }
+
+    if (verification.userId !== userId) {
+      throw new BadRequestException('Verification does not belong to this user');
+    }
+
+    return this.prisma.verificationRecord.update({
+      where: { id: verificationId },
+      data: {
+        status: VerificationStatus.VERIFIED,
+        verifiedAt: new Date(),
+      },
+    });
+  }
 }
