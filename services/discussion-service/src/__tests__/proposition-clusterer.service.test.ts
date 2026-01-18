@@ -1,8 +1,8 @@
-import { PropositionClustererService } from '../services/proposition-clusterer.service';
+import { PropositionClustererService } from '../services/proposition-clusterer.service.js';
 import type {
   ClusterPropositionsRequest,
   PropositionInput,
-} from '../dto/proposition-cluster.dto';
+} from '../dto/proposition-cluster.dto.js';
 
 describe('PropositionClustererService', () => {
   let service: PropositionClustererService;
@@ -46,18 +46,17 @@ describe('PropositionClustererService', () => {
       expect(result.method).toBe('pattern-based');
 
       // Should have at least one cluster about climate/emissions
-      const climateCluster = result.clusters.find(
-        (c) =>
-          c.keywords.some(
-            (k) => k.includes('climate') || k.includes('carbon') || k.includes('emissions'),
-          ),
+      const climateCluster = result.clusters.find((c) =>
+        c.keywords.some(
+          (k: string) => k.includes('climate') || k.includes('carbon') || k.includes('emissions'),
+        ),
       );
       expect(climateCluster).toBeDefined();
       expect(climateCluster!.size).toBeGreaterThanOrEqual(2);
 
       // May or may not cluster healthcare depending on keyword overlap
       // Just verify total coverage
-      const totalClustered = result.clusters.reduce((sum, c) => sum + c.size, 0);
+      const totalClustered = result.clusters.reduce((sum: number, c) => sum + c.size, 0);
       expect(totalClustered + result.unclusteredPropositionIds.length).toBe(5);
     });
 
@@ -175,8 +174,7 @@ describe('PropositionClustererService', () => {
         propositions: [
           {
             id: 'prop-1',
-            statement:
-              'Artificial intelligence will transform healthcare diagnostics',
+            statement: 'Artificial intelligence will transform healthcare diagnostics',
           },
           {
             id: 'prop-2',
@@ -190,11 +188,12 @@ describe('PropositionClustererService', () => {
       // Should have at least one cluster with relevant keywords
       if (result.clusters.length > 0) {
         const cluster = result.clusters[0];
-        expect(cluster.keywords.length).toBeGreaterThan(0);
+        expect(cluster).toBeDefined();
+        expect(cluster!.keywords.length).toBeGreaterThan(0);
         // Keywords should not include common stop words
-        expect(cluster.keywords).not.toContain('the');
-        expect(cluster.keywords).not.toContain('is');
-        expect(cluster.keywords).not.toContain('and');
+        expect(cluster!.keywords).not.toContain('the');
+        expect(cluster!.keywords).not.toContain('is');
+        expect(cluster!.keywords).not.toContain('and');
       }
     });
 
@@ -340,7 +339,7 @@ describe('PropositionClustererService', () => {
       }
 
       // Total clustered + unclustered should equal input
-      const totalClustered = result.clusters.reduce((sum, c) => sum + c.size, 0);
+      const totalClustered = result.clusters.reduce((sum: number, c) => sum + c.size, 0);
       const total = totalClustered + result.unclusteredPropositionIds.length;
       expect(total).toBe(6);
     });
@@ -374,7 +373,9 @@ describe('PropositionClustererService', () => {
 
       // Metadata should not break clustering
       expect(result.topicId).toBe('topic-12');
-      expect(result.clusters.length + result.unclusteredPropositionIds.length).toBeLessThanOrEqual(2);
+      expect(result.clusters.length + result.unclusteredPropositionIds.length).toBeLessThanOrEqual(
+        2,
+      );
     });
   });
 });

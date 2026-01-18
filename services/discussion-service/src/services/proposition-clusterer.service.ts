@@ -40,8 +40,7 @@ export class PropositionClustererService {
   async clusterPropositions(
     request: ClusterPropositionsRequest,
   ): Promise<ClusterPropositionsResult> {
-    const similarityThreshold =
-      request.similarityThreshold ?? this.DEFAULT_SIMILARITY_THRESHOLD;
+    const similarityThreshold = request.similarityThreshold ?? this.DEFAULT_SIMILARITY_THRESHOLD;
 
     // Extract keywords from each proposition
     const propositionsWithKeywords = request.propositions.map((prop) => ({
@@ -50,9 +49,7 @@ export class PropositionClustererService {
     }));
 
     // Build similarity matrix
-    const similarityMatrix = this.buildSimilarityMatrix(
-      propositionsWithKeywords,
-    );
+    const similarityMatrix = this.buildSimilarityMatrix(propositionsWithKeywords);
 
     // Perform clustering using hierarchical agglomerative clustering
     const clusters = this.performClustering(
@@ -69,9 +66,7 @@ export class PropositionClustererService {
     );
 
     // Identify unclustered propositions
-    const clusteredIds = new Set(
-      clusters.flatMap((cluster) => cluster.propositionIds),
-    );
+    const clusteredIds = new Set(clusters.flatMap((cluster) => cluster.propositionIds));
     const unclusteredPropositionIds = request.propositions
       .filter((prop) => !clusteredIds.has(prop.id))
       .map((prop) => prop.id);
@@ -82,8 +77,7 @@ export class PropositionClustererService {
       unclusteredPropositionIds,
       qualityScore,
       method: 'pattern-based',
-      confidence:
-        clusters.length > 0 && qualityScore > 0.5 ? 0.7 : 0.5,
+      confidence: clusters.length > 0 && qualityScore > 0.5 ? 0.7 : 0.5,
       reasoning:
         clusters.length > 0
           ? `Identified ${clusters.length} clusters using keyword similarity analysis. AI-powered semantic clustering will improve accuracy in future iterations.`
@@ -164,15 +158,21 @@ export class PropositionClustererService {
 
     for (let i = 0; i < n; i++) {
       for (let j = i; j < n; j++) {
+        const row = matrix[i];
+        if (!row) continue;
+
         if (i === j) {
-          matrix[i][j] = 1.0; // Perfect similarity with self
+          row[j] = 1.0; // Perfect similarity with self
         } else {
           const similarity = this.calculateSimilarity(
-            propositions[i].keywords,
-            propositions[j].keywords,
+            propositions[i]!.keywords,
+            propositions[j]!.keywords,
           );
-          matrix[i][j] = similarity;
-          matrix[j][i] = similarity; // Symmetric matrix
+          row[j] = similarity;
+          const reverseRow = matrix[j];
+          if (reverseRow) {
+            reverseRow[i] = similarity; // Symmetric matrix
+          }
         }
       }
     }
@@ -184,10 +184,7 @@ export class PropositionClustererService {
    * Calculate similarity between two sets of keywords using Jaccard index
    * Jaccard(A, B) = |A ∩ B| / |A ∪ B|
    */
-  private calculateSimilarity(
-    keywords1: string[],
-    keywords2: string[],
-  ): number {
+  private calculateSimilarity(keywords1: string[], keywords2: string[]): number {
     if (keywords1.length === 0 || keywords2.length === 0) {
       return 0;
     }
@@ -235,9 +232,13 @@ export class PropositionClustererService {
       // Find most similar pair of clusters
       for (let i = 0; i < clusters.length; i++) {
         for (let j = i + 1; j < clusters.length; j++) {
+          const clusterI = clusters[i];
+          const clusterJ = clusters[j];
+          if (!clusterI || !clusterJ) continue;
+
           const similarity = this.calculateClusterSimilarity(
-            clusters[i].propositionIndices,
-            clusters[j].propositionIndices,
+            clusterI.propositionIndices,
+            clusterJ.propositionIndices,
             similarityMatrix,
           );
 
@@ -251,12 +252,10 @@ export class PropositionClustererService {
 
       // Merge the most similar clusters
       if (mergeI !== -1 && mergeJ !== -1) {
-        clusters[mergeI].propositionIndices.push(
-          ...clusters[mergeJ].propositionIndices,
-        );
-        clusters[mergeI].keywords = new Set([
-          ...clusters[mergeI].keywords,
-          ...clusters[mergeJ].keywords,
+        clusters[mergeI]!.propositionIndices.push(...clusters[mergeJ]!.propositionIndices);
+        clusters[mergeI]!.keywords = new Set([
+          ...clusters[mergeI]!.keywords,
+          ...clusters[mergeJ]!.keywords,
         ]);
         clusters.splice(mergeJ, 1);
         changed = true;
@@ -267,9 +266,9 @@ export class PropositionClustererService {
     return clusters
       .filter((cluster) => cluster.propositionIndices.length >= this.MIN_CLUSTER_SIZE)
       .map((cluster, idx) => {
-        const clusterProps = cluster.propositionIndices.map(
-          (i) => propositions[i],
-        );
+        const clusterProps = cluster.propositionIndices
+          .map((i) => propositions[i])
+          .filter((p): p is PropositionInput & { keywords: string[] } => p !== undefined);
 
         // Calculate cohesion score (average pairwise similarity)
         const cohesionScore = this.calculateClusterCohesion(
@@ -306,7 +305,7 @@ export class PropositionClustererService {
 
     for (const i of cluster1Indices) {
       for (const j of cluster2Indices) {
-        totalSimilarity += similarityMatrix[i][j];
+        totalSimilarity += similarityMatrix[i]?.[j] ?? 0;
         count++;
       }
     }
@@ -331,9 +330,12 @@ export class PropositionClustererService {
 
     for (let i = 0; i < propositionIndices.length; i++) {
       for (let j = i + 1; j < propositionIndices.length; j++) {
-        totalSimilarity +=
-          similarityMatrix[propositionIndices[i]][propositionIndices[j]];
-        count++;
+        const iIndex = propositionIndices[i];
+        const jIndex = propositionIndices[j];
+        if (iIndex !== undefined && jIndex !== undefined) {
+          totalSimilarity += similarityMatrix[iIndex]?.[jIndex] ?? 0;
+          count++;
+        }
       }
     }
 
@@ -352,10 +354,7 @@ export class PropositionClustererService {
   /**
    * Generate a descriptive theme for the cluster
    */
-  private generateTheme(
-    propositions: PropositionInput[],
-    keywords: string[],
-  ): string {
+  private generateTheme(propositions: PropositionInput[], keywords: string[]): string {
     if (keywords.length === 0) {
       return 'Related propositions';
     }
@@ -381,8 +380,7 @@ export class PropositionClustererService {
     }
 
     // Simple quality metric: average cohesion score weighted by coverage
-    const avgCohesion =
-      clusters.reduce((sum, c) => sum + c.cohesionScore, 0) / clusters.length;
+    const avgCohesion = clusters.reduce((sum, c) => sum + c.cohesionScore, 0) / clusters.length;
 
     const clusteredCount = clusters.reduce((sum, c) => sum + c.size, 0);
     const coverage = clusteredCount / totalPropositions;
