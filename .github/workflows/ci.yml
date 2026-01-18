@@ -33,6 +33,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Setup Python and detect-secrets
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install detect-secrets
+
       - name: Secrets Scan
         run: bash .husky/pre-commit-secrets-scan
         continue-on-error: false
