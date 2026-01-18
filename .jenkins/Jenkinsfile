@@ -41,20 +41,16 @@ pipeline {
                     # Increase Node.js memory limit for large dependency trees
                     export NODE_OPTIONS="--max-old-space-size=4096"
 
-                    # Install pnpm if not already available
-                    if ! command -v pnpm &> /dev/null; then
-                        npm install -g pnpm@latest
-                    fi
-
+                    # Use npx to run pnpm without global installation
                     # Install dependencies using pnpm (matches local development)
-                    pnpm install --frozen-lockfile
+                    npx pnpm@latest install --frozen-lockfile
                 '''
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'pnpm run lint'
+                sh 'npx pnpm run lint'
             }
         }
 
@@ -66,7 +62,7 @@ pipeline {
                     def testResult = sh(
                         script: '''#!/bin/bash
                             set -o pipefail
-                            pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
+                            npx pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
                         ''',
                         returnStatus: true
                     )
@@ -82,7 +78,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'pnpm run build'
+                sh 'npx pnpm run build'
             }
         }
     }
