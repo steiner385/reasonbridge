@@ -2,10 +2,52 @@
 
 ## Current Status
 
-- Completed issue #145 (T149) - Unit tests: Common ground algorithm
-- ~160 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #147 (T151) - Unit tests: Divergence identification
+- ~158 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #147 (T151) - Unit tests: Divergence identification:**
+- Verified comprehensive unit test suite for DivergencePointService
+- Test location: services/discussion-service/src/__tests__/divergence-point.service.test.ts:309
+- Test results: 8 tests passing with excellent coverage
+  - Statement coverage: 100%
+  - Branch coverage: 91.3%
+  - Function coverage: 100%
+- Tests created as part of T138 (Implement divergence point identification) PR #516
+- Test coverage includes:
+  - Clear divergence point identification (50/50 split)
+  - Multiple divergence points handling
+  - Misunderstanding detection (high nuance filtering)
+  - Minimum significance threshold enforcement
+  - Insufficient participation filtering
+  - Polarization score calculation for various splits
+  - Empty proposition list edge case
+  - Reasoning extraction and display
+- All acceptance criteria met and verified
+
+**Issue #146 (T150) - Unit tests: Proposition clustering:**
+- Verified comprehensive unit test suite for PropositionClustererService
+- Test location: services/discussion-service/src/__tests__/proposition-clusterer.service.test.ts:387
+- Test results: 12 tests passing with 97.11% code coverage
+  - Statement coverage: 97.11%
+  - Branch coverage: 80.55%
+  - Function coverage: 100%
+- Tests created as part of T125 (Implement proposition clustering) PR #485
+- Test coverage includes:
+  - Clustering similar propositions (climate change case)
+  - Handling unrelated propositions
+  - Single proposition edge case
+  - Custom similarity threshold functionality
+  - Cluster cohesion score calculation
+  - Keyword extraction with stop word filtering
+  - Descriptive theme generation
+  - Quality score calculation
+  - Empty propositions array handling
+  - Clustering decision reasoning
+  - Multiple distinct groups clustering
+  - Proposition metadata handling
+- All acceptance criteria met and verified
 
 **Issue #145 (T149) - Unit tests: Common ground algorithm:**
 - Created comprehensive unit tests for CommonGroundExportService (services/discussion-service/src/__tests__/common-ground-export.service.test.ts)
