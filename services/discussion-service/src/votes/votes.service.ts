@@ -119,9 +119,15 @@ export class VotesService {
 
     // Initialize summaries for all responses
     for (const responseId of responseIds) {
-      const responseVotes = votes.filter((v: { responseId: string }) => v.responseId === responseId);
-      const upvotes = responseVotes.filter((v: { voteType: string }) => v.voteType === 'UPVOTE').length;
-      const downvotes = responseVotes.filter((v: { voteType: string }) => v.voteType === 'DOWNVOTE').length;
+      const responseVotes = votes.filter(
+        (v: { responseId: string }) => v.responseId === responseId,
+      );
+      const upvotes = responseVotes.filter(
+        (v: { voteType: string }) => v.voteType === 'UPVOTE',
+      ).length;
+      const downvotes = responseVotes.filter(
+        (v: { voteType: string }) => v.voteType === 'DOWNVOTE',
+      ).length;
       const score = upvotes - downvotes;
 
       let userVote: 'UPVOTE' | 'DOWNVOTE' | null = null;

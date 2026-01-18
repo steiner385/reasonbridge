@@ -19,10 +19,7 @@ let prismaInstance: PrismaClient | null = null;
 export function getPrismaClient(): PrismaClient {
   if (!prismaInstance) {
     prismaInstance = new PrismaClient({
-      log:
-        process.env['NODE_ENV'] === 'development'
-          ? ['query', 'error', 'warn']
-          : ['error'],
+      log: process.env['NODE_ENV'] === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
   }
   return prismaInstance;
@@ -42,7 +39,7 @@ export const prisma = getPrismaClient();
  * - Scenarios requiring different logging configuration
  */
 export function createPrismaClient(
-  options?: ConstructorParameters<typeof PrismaClient>[0]
+  options?: ConstructorParameters<typeof PrismaClient>[0],
 ): PrismaClient {
   return new PrismaClient(options);
 }

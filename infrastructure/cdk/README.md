@@ -76,6 +76,7 @@ pnpm destroy --all
 ### EksStack
 
 Creates:
+
 - VPC with public and private subnets across 3 AZs
 - EKS cluster (Kubernetes 1.31)
 - General-purpose node group (t3.medium, 2-10 nodes)
@@ -84,6 +85,7 @@ Creates:
 ### RdsStack
 
 Creates:
+
 - Aurora Serverless v2 PostgreSQL 15.5 cluster
 - Writer instance with auto-scaling (0.5-16 ACUs)
 - Reader instance with auto-scaling (0.5-16 ACUs)
@@ -95,6 +97,7 @@ Creates:
 ### ElastiCacheStack
 
 Creates:
+
 - Redis 7.1 cluster
 - Multi-AZ replication (1 primary + 2 replicas)
 - Automatic failover
@@ -104,6 +107,7 @@ Creates:
 ### BedrockStack
 
 Creates:
+
 - IAM role for Bedrock access
 - Permissions for Claude models
 - Service account integration for EKS
@@ -111,6 +115,7 @@ Creates:
 ### CognitoStack
 
 Creates:
+
 - Cognito User Pool for user authentication
 - User Pool Client for web application OAuth
 - Hosted UI domain for authentication flows
@@ -121,6 +126,7 @@ Creates:
 - Advanced security mode for fraud detection
 
 **Authentication Flow**:
+
 - Email-based sign-in with password
 - Self-registration enabled
 - Email verification required
@@ -129,10 +135,12 @@ Creates:
 - JWT tokens (1-hour access/ID, 30-day refresh)
 
 **Custom Attributes**:
+
 - `displayName` (3-50 chars) - User's public pseudonym
 - `verificationLevel` (basic/enhanced/verified_human) - Verification tier
 
 **Verification Levels**:
+
 - **basic**: Email verified only
 - **enhanced**: Phone verified (SMS MFA)
 - **verified_human**: Third-party ID verification

@@ -26,7 +26,7 @@ describe('SuggestionsService', () => {
     it('should return suggestions from TagSuggester', async () => {
       const result = await service.generateTagSuggestions(
         'Scientific Research',
-        'A study on hypothesis testing and experimental design.'
+        'A study on hypothesis testing and experimental design.',
       );
 
       expect(result).toHaveProperty('suggestions');
@@ -57,7 +57,7 @@ describe('SuggestionsService', () => {
             title: 'Medical Insurance',
             content: 'Discussion about healthcare coverage',
           },
-        ]
+        ],
       );
 
       expect(result).toHaveProperty('suggestions');
@@ -72,7 +72,7 @@ describe('SuggestionsService', () => {
       const result = await service.generateTopicLinkSuggestions(
         'topic-123',
         'Test Topic',
-        'Test content'
+        'Test content',
       );
 
       expect(result).toHaveProperty('suggestions');
@@ -85,7 +85,7 @@ describe('SuggestionsService', () => {
         'topic-123',
         'Test Topic',
         'Test content',
-        []
+        [],
       );
 
       expect(result).toHaveProperty('suggestions');

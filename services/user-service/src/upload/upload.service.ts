@@ -7,11 +7,7 @@ export class UploadService {
 
   constructor(private readonly s3Service: S3Service) {}
 
-  async uploadAvatar(
-    userId: string,
-    file: Buffer,
-    mimeType: string
-  ): Promise<UploadResult> {
+  async uploadAvatar(userId: string, file: Buffer, mimeType: string): Promise<UploadResult> {
     this.logger.log(`Uploading avatar for user ${userId}`);
 
     try {
@@ -23,10 +19,7 @@ export class UploadService {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `Failed to upload avatar for user ${userId}: ${errorMessage}`,
-        errorStack
-      );
+      this.logger.error(`Failed to upload avatar for user ${userId}: ${errorMessage}`, errorStack);
       throw error;
     }
   }

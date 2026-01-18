@@ -114,7 +114,11 @@ export function TopicFilterUI({
             <select
               className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
               value={filters.sortBy || 'createdAt'}
-              onChange={(e) => handleSortChange(e.target.value as 'createdAt' | 'participantCount' | 'responseCount')}
+              onChange={(e) =>
+                handleSortChange(
+                  e.target.value as 'createdAt' | 'participantCount' | 'responseCount',
+                )
+              }
             >
               <option value="createdAt">Newest First</option>
               <option value="participantCount">Most Participants</option>
@@ -137,19 +141,11 @@ export function TopicFilterUI({
                 fullWidth
               />
             </div>
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={handleTagFilter}
-            >
+            <Button size="sm" variant="primary" onClick={handleTagFilter}>
               Apply
             </Button>
             {filters.tag && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleClearTag}
-              >
+              <Button size="sm" variant="outline" onClick={handleClearTag}>
                 Clear Tag
               </Button>
             )}

@@ -119,7 +119,9 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
         <>
           {/* Stacked Bar Chart */}
           <div className="w-full">
-            <div className={`w-full ${currentSize.barHeight} bg-gray-200 rounded-full overflow-hidden flex`}>
+            <div
+              className={`w-full ${currentSize.barHeight} bg-gray-200 rounded-full overflow-hidden flex`}
+            >
               {/* Support segment */}
               {supportCount > 0 && (
                 <div
@@ -184,13 +186,17 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
             <div className={currentSize.spacing}>
               <div className="flex items-center justify-between mb-1">
                 <span className={`${currentSize.text} font-medium text-gray-700`}>Consensus</span>
-                <span className={`${currentSize.text} font-semibold ${getConsensusColor(consensusScore)}`}>
+                <span
+                  className={`${currentSize.text} font-semibold ${getConsensusColor(consensusScore)}`}
+                >
                   {getConsensusDescription(consensusScore)}
                 </span>
               </div>
               <div className="relative w-full">
                 {/* Background track */}
-                <div className={`w-full ${currentSize.barHeight} bg-gray-200 rounded-full overflow-hidden`}>
+                <div
+                  className={`w-full ${currentSize.barHeight} bg-gray-200 rounded-full overflow-hidden`}
+                >
                   {/* Consensus score indicator */}
                   <div
                     className={`${currentSize.barHeight} ${getConsensusBgColor(consensusScore)} transition-all duration-300 rounded-full`}

@@ -23,57 +23,44 @@ export class ElastiCacheStack extends cdk.Stack {
     });
 
     // Create subnet group for ElastiCache
-    const subnetGroup = new elasticache.CfnSubnetGroup(
-      this,
-      'RedisSubnetGroup',
-      {
-        description: 'Subnet group for Unite Redis cluster',
-        subnetIds: props.vpc.selectSubnets({
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        }).subnetIds,
-        cacheSubnetGroupName: 'unite-redis-subnet-group',
-      }
-    );
+    const subnetGroup = new elasticache.CfnSubnetGroup(this, 'RedisSubnetGroup', {
+      description: 'Subnet group for Unite Redis cluster',
+      subnetIds: props.vpc.selectSubnets({
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      }).subnetIds,
+      cacheSubnetGroupName: 'unite-redis-subnet-group',
+    });
 
     // Create parameter group for Redis 7.x
-    const parameterGroup = new elasticache.CfnParameterGroup(
-      this,
-      'RedisParameterGroup',
-      {
-        cacheParameterGroupFamily: 'redis7',
-        description: 'Parameter group for Unite Redis cluster',
-        properties: {
-          'maxmemory-policy': 'allkeys-lru',
-          'timeout': '300',
-        },
-      }
-    );
+    const parameterGroup = new elasticache.CfnParameterGroup(this, 'RedisParameterGroup', {
+      cacheParameterGroupFamily: 'redis7',
+      description: 'Parameter group for Unite Redis cluster',
+      properties: {
+        'maxmemory-policy': 'allkeys-lru',
+        timeout: '300',
+      },
+    });
 
     // Create Redis replication group
-    this.replicationGroup = new elasticache.CfnReplicationGroup(
-      this,
-      'RedisReplicationGroup',
-      {
-        replicationGroupId: props.clusterName || 'unite-discord-redis',
-        replicationGroupDescription:
-          'Redis cluster for Unite Discord platform',
-        engine: 'redis',
-        engineVersion: '7.1',
-        cacheNodeType: 'cache.t3.medium',
-        numNodeGroups: 1,
-        replicasPerNodeGroup: 2,
-        automaticFailoverEnabled: true,
-        multiAzEnabled: true,
-        cacheSubnetGroupName: subnetGroup.cacheSubnetGroupName,
-        securityGroupIds: [this.securityGroup.securityGroupId],
-        cacheParameterGroupName: parameterGroup.ref,
-        atRestEncryptionEnabled: true,
-        transitEncryptionEnabled: true,
-        snapshotRetentionLimit: 7,
-        snapshotWindow: '03:00-05:00',
-        preferredMaintenanceWindow: 'sun:05:00-sun:07:00',
-      }
-    );
+    this.replicationGroup = new elasticache.CfnReplicationGroup(this, 'RedisReplicationGroup', {
+      replicationGroupId: props.clusterName || 'unite-discord-redis',
+      replicationGroupDescription: 'Redis cluster for Unite Discord platform',
+      engine: 'redis',
+      engineVersion: '7.1',
+      cacheNodeType: 'cache.t3.medium',
+      numNodeGroups: 1,
+      replicasPerNodeGroup: 2,
+      automaticFailoverEnabled: true,
+      multiAzEnabled: true,
+      cacheSubnetGroupName: subnetGroup.cacheSubnetGroupName,
+      securityGroupIds: [this.securityGroup.securityGroupId],
+      cacheParameterGroupName: parameterGroup.ref,
+      atRestEncryptionEnabled: true,
+      transitEncryptionEnabled: true,
+      snapshotRetentionLimit: 7,
+      snapshotWindow: '03:00-05:00',
+      preferredMaintenanceWindow: 'sun:05:00-sun:07:00',
+    });
 
     this.replicationGroup.addDependency(subnetGroup);
     this.replicationGroup.addDependency(parameterGroup);

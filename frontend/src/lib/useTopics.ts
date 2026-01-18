@@ -9,10 +9,9 @@ export function useTopics(params?: GetTopicsParams) {
   return useQuery({
     queryKey: ['topics', params],
     queryFn: async () => {
-      const response = await apiClient.get<PaginatedTopicsResponse>(
-        '/topics',
-        { params: params as Record<string, string | number | boolean> }
-      );
+      const response = await apiClient.get<PaginatedTopicsResponse>('/topics', {
+        params: params as Record<string, string | number | boolean>,
+      });
       return response;
     },
   });
