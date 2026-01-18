@@ -61,7 +61,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
       // Find verified user response
       const verifiedResponse = page.locator('[data-testid="response-item"]').first();
-      const badge = verifiedResponse.locator('[data-testid="trust-badge"]');
+      const _badge = verifiedResponse.locator('[data-testid="trust-badge"]');
 
       // Badge should be visible in response view
       await expect(badge).toBeVisible();
@@ -320,7 +320,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
       await page.goto('/settings/verification');
 
       const currentLevel = page.locator('[data-testid="current-verification-level"]');
-      const levelBefore = await currentLevel.textContent();
+      const _levelBefore = await currentLevel.textContent();
 
       // After successful verification (would happen in real flow)
       // Level should update to ENHANCED or VERIFIED_HUMAN
@@ -337,15 +337,15 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
       const caution = page.locator('[data-testid="caution-indicator"]');
 
       // Either badge or indicator should be visible
-      const badgeVisible = await suspiciousBadge.isVisible();
-      const cautionVisible = await caution.isVisible();
+      const _badgeVisible = await suspiciousBadge.isVisible();
+      const _cautionVisible = await caution.isVisible();
       // Note: May not show if account not marked suspicious
     });
 
     test('should show caution indicator on low trust score accounts', async ({ page }) => {
       await page.goto('/profile/low-trust-user-999');
 
-      const lowTrustIndicator = page.locator('[data-testid="low-trust-indicator"], text=/low trust|caution/i');
+      const _lowTrustIndicator = page.locator('[data-testid="low-trust-indicator"], text=/low trust|caution/i');
       // May or may not be visible depending on test user
     });
 
@@ -375,7 +375,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
         await passwordInput.fill(testUser2.password);
 
         // CAPTCHA might appear
-        const captchaFrame = page.locator('[data-testid="captcha"], iframe[src*="recaptcha"], iframe[title*="reCAPTCHA"]');
+        const _captchaFrame = page.locator('[data-testid="captcha"], iframe[src*="recaptcha"], iframe[title*="reCAPTCHA"]');
         // Note: May or may not appear depending on bot detection rules
       }
     });
@@ -411,7 +411,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
         // Each response should show trust badge if user is verified
         for (let i = 0; i < Math.min(count, 3); i++) {
           const response = responses.nth(i);
-          const badge = response.locator('[data-testid="trust-badge"]');
+          const _badge = response.locator('[data-testid="trust-badge"]');
           // Badge presence depends on user verification level
         }
       }
@@ -428,7 +428,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
       if (count > 0) {
         const firstVerifiedResponse = verifiedResponses.first();
         // Should have visual distinction (styling)
-        const classList = await firstVerifiedResponse.getAttribute('class');
+        const _classList = await firstVerifiedResponse.getAttribute('class');
         // May have special class like 'verified-response' or similar
       }
     });
@@ -438,7 +438,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     test('should display verification expiry date if applicable', async ({ page }) => {
       await page.goto('/settings/verification');
 
-      const expiryInfo = page.locator('[data-testid="verification-expiry"], text=/expires|expiry|valid until/i');
+      const _expiryInfo = page.locator('[data-testid="verification-expiry"], text=/expires|expiry|valid until/i');
       // May or may not be visible depending on verification type
     });
 
@@ -447,7 +447,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
       // Skip if no test user available
       await page.goto('/profile/expired-verification-user');
 
-      const reVerifyPrompt = page.locator('[data-testid="reverify-prompt"], text=/reverify|re-verify|expired|update/i');
+      const _reVerifyPrompt = page.locator('[data-testid="reverify-prompt"], text=/reverify|re-verify|expired|update/i');
       // May not show if no expired users in system
     });
 
@@ -508,7 +508,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
         // Each input should have associated label
         const unlabeledInputs = phoneForm.locator('input:not([aria-label]):not([id])');
-        const unlabeledCount = await unlabeledInputs.count();
+        const _unlabeledCount = await unlabeledInputs.count();
         // Note: May have some unlabeled but should have associated labels
       }
     });
