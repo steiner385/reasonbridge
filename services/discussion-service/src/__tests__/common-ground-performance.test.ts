@@ -1,5 +1,8 @@
 import { PropositionClustererService } from '../services/proposition-clusterer.service.js';
-import type { ClusterPropositionsRequest, PropositionInput } from '../dto/proposition-cluster.dto.js';
+import type {
+  ClusterPropositionsRequest,
+  PropositionInput,
+} from '../dto/proposition-cluster.dto.js';
 
 describe('Common Ground Calculation Performance Tests', () => {
   let service: PropositionClustererService;
@@ -186,11 +189,11 @@ describe('Common Ground Calculation Performance Tests', () => {
 
       // Calculate growth rate
       const firstSegmentGrowth =
-        (performanceMetrics[1].duration - performanceMetrics[0].duration) /
-        performanceMetrics[0].duration;
+        (performanceMetrics[1]!.duration - performanceMetrics[0]!.duration) /
+        performanceMetrics[0]!.duration;
       const secondSegmentGrowth =
-        (performanceMetrics[2].duration - performanceMetrics[1].duration) /
-        performanceMetrics[1].duration;
+        (performanceMetrics[2]!.duration - performanceMetrics[1]!.duration) /
+        performanceMetrics[1]!.duration;
 
       // Growth should not be exponential (doubling propositions shouldn't quadruple time)
       // Allow up to 3x growth rate between segments (allowing for variance)
