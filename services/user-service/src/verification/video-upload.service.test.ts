@@ -4,12 +4,27 @@ import { VideoUploadService } from './video-upload.service.js';
 import { VideoUploadCompleteDto } from './dto/video-upload.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ConfigService } from '@nestjs/config';
-import { VerificationType, VerificationStatus } from '@prisma/client';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock Prisma enums for tests
+const VerificationType = {
+  PHONE: 'PHONE',
+  EMAIL: 'EMAIL',
+  GOVERNMENT_ID: 'GOVERNMENT_ID',
+  VIDEO: 'VIDEO',
+} as const;
+
+const VerificationStatus = {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED',
+} as const;
 
 // Mock AWS SDK
-jest.mock('@aws-sdk/client-s3', () => ({
-  S3Client: jest.fn(),
-  HeadObjectCommand: jest.fn(),
+vi.mock('@aws-sdk/client-s3', () => ({
+  S3Client: vi.fn(),
+  HeadObjectCommand: vi.fn(),
 }));
 
 describe('VideoUploadService', () => {
@@ -49,29 +64,28 @@ describe('VideoUploadService', () => {
     createdAt: new Date(),
   };
 
+  const mockConfig: Record<string, unknown> = {
+    AWS_REGION: 'us-east-1',
+    S3_VIDEO_VERIFICATION_BUCKET: 'test-bucket',
+    AWS_ACCESS_KEY_ID: 'test-key',
+    AWS_SECRET_ACCESS_KEY: 'test-secret',
+    VIDEO_MAX_FILE_SIZE: 100 * 1024 * 1024,
+    VIDEO_UPLOAD_RETENTION_DAYS: 30,
+  };
+
   const mockConfigService = {
-    get: jest.fn((key: string) => {
-      const config: Record<string, any> = {
-        AWS_REGION: 'us-east-1',
-        S3_VIDEO_VERIFICATION_BUCKET: 'test-bucket',
-        AWS_ACCESS_KEY_ID: 'test-key',
-        AWS_SECRET_ACCESS_KEY: 'test-secret',
-        VIDEO_MAX_FILE_SIZE: 100 * 1024 * 1024,
-        VIDEO_UPLOAD_RETENTION_DAYS: 30,
-      };
-      return config[key];
-    }),
+    get: <T>(key: string): T | undefined => mockConfig[key] as T | undefined,
   };
 
   const mockPrismaService = {
     verificationRecord: {
-      findUnique: jest.fn(),
+      findUnique: vi.fn(),
     },
     videoUpload: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      deleteMany: jest.fn(),
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      deleteMany: vi.fn(),
     },
   };
 
@@ -93,7 +107,7 @@ describe('VideoUploadService', () => {
     service = module.get<VideoUploadService>(VideoUploadService);
     prismaService = module.get<PrismaService>(PrismaService);
     configService = module.get<ConfigService>(ConfigService);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('confirmVideoUpload', () => {
@@ -208,7 +222,7 @@ describe('VideoUploadService', () => {
       const validMimeTypes = ['video/webm', 'video/mp4', 'video/x-msvideo'];
 
       for (const mimeType of validMimeTypes) {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
           mockVerificationRecord,
         );

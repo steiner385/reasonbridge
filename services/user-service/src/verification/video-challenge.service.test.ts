@@ -2,35 +2,35 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { VideoVerificationService } from './video-challenge.service.js';
 import { ConfigService } from '@nestjs/config';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock AWS SDK
-jest.mock('@aws-sdk/client-s3', () => ({
-  S3Client: jest.fn(),
-  PutObjectCommand: jest.fn(),
+vi.mock('@aws-sdk/client-s3', () => ({
+  S3Client: vi.fn(),
+  PutObjectCommand: vi.fn(),
 }));
 
-jest.mock('@aws-sdk/s3-request-presigner', () => ({
-  getSignedUrl: jest.fn(),
+vi.mock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: vi.fn(),
 }));
 
 describe('VideoVerificationService', () => {
   let service: VideoVerificationService;
-  let configService: ConfigService;
+  let _configService: ConfigService;
+
+  const mockConfig: Record<string, unknown> = {
+    AWS_REGION: 'us-east-1',
+    S3_VIDEO_VERIFICATION_BUCKET: 'test-bucket',
+    AWS_ACCESS_KEY_ID: 'test-key',
+    AWS_SECRET_ACCESS_KEY: 'test-secret',
+    VIDEO_MAX_FILE_SIZE: 100 * 1024 * 1024, // 100MB
+    VIDEO_MIN_DURATION_SECONDS: 3,
+    VIDEO_MAX_DURATION_SECONDS: 30,
+    VIDEO_UPLOAD_URL_EXPIRES_IN: 3600,
+  };
 
   const mockConfigService = {
-    get: jest.fn((key: string) => {
-      const config: Record<string, any> = {
-        AWS_REGION: 'us-east-1',
-        S3_VIDEO_VERIFICATION_BUCKET: 'test-bucket',
-        AWS_ACCESS_KEY_ID: 'test-key',
-        AWS_SECRET_ACCESS_KEY: 'test-secret',
-        VIDEO_MAX_FILE_SIZE: 100 * 1024 * 1024, // 100MB
-        VIDEO_MIN_DURATION_SECONDS: 3,
-        VIDEO_MAX_DURATION_SECONDS: 30,
-        VIDEO_UPLOAD_URL_EXPIRES_IN: 3600,
-      };
-      return config[key];
-    }),
+    get: <T>(key: string): T | undefined => mockConfig[key] as T | undefined,
   };
 
   beforeEach(async () => {
@@ -45,7 +45,7 @@ describe('VideoVerificationService', () => {
     }).compile();
 
     service = module.get<VideoVerificationService>(VideoVerificationService);
-    configService = module.get<ConfigService>(ConfigService);
+    _configService = module.get<ConfigService>(ConfigService);
   });
 
   describe('generateChallenge', () => {
@@ -186,7 +186,7 @@ describe('VideoVerificationService', () => {
           {
             provide: ConfigService,
             useValue: {
-              get: jest.fn(() => undefined),
+              get: () => undefined,
             },
           },
         ],

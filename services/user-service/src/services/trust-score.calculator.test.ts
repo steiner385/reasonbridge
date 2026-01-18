@@ -1,8 +1,39 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TrustScoreCalculator } from './trust-score.calculator.js';
-import type { User } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library.js';
 import { TrustScoreUpdateDto } from '../users/dto/trust-score.dto.js';
+
+// Mock the Prisma Decimal class for tests
+class MockDecimal {
+  private value: number;
+  constructor(value: string | number) {
+    this.value = typeof value === 'string' ? parseFloat(value) : value;
+  }
+  toNumber(): number {
+    return this.value;
+  }
+  toString(): string {
+    return this.value.toString();
+  }
+}
+const Decimal = MockDecimal;
+
+// Mock User type for tests
+type User = {
+  id: string;
+  email: string;
+  displayName: string;
+  cognitoSub: string;
+  verificationLevel: string;
+  trustScoreAbility: MockDecimal;
+  trustScoreBenevolence: MockDecimal;
+  trustScoreIntegrity: MockDecimal;
+  moralFoundationProfile: string | null;
+  positionFingerprint: string | null;
+  topicAffinities: string | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 describe('TrustScoreCalculator', () => {
   let calculator: TrustScoreCalculator;

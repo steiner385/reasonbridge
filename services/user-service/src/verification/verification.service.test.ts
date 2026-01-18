@@ -3,7 +3,22 @@ import { BadRequestException } from '@nestjs/common';
 import { VerificationService } from './verification.service.js';
 import { VerificationRequestDto } from './dto/verification-request.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { VerificationType, VerificationStatus } from '@prisma/client';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock Prisma enums for tests
+const VerificationType = {
+  PHONE: 'PHONE',
+  EMAIL: 'EMAIL',
+  GOVERNMENT_ID: 'GOVERNMENT_ID',
+  VIDEO: 'VIDEO',
+} as const;
+
+const VerificationStatus = {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED',
+} as const;
 
 describe('VerificationService', () => {
   let service: VerificationService;
@@ -22,11 +37,11 @@ describe('VerificationService', () => {
 
   const mockPrismaService = {
     verificationRecord: {
-      findFirst: jest.fn(),
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
     },
   };
 
@@ -43,7 +58,7 @@ describe('VerificationService', () => {
 
     service = module.get<VerificationService>(VerificationService);
     prismaService = module.get<PrismaService>(PrismaService);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('requestVerification', () => {
