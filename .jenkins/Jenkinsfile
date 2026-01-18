@@ -41,9 +41,13 @@ pipeline {
                     # Increase Node.js memory limit for large dependency trees
                     export NODE_OPTIONS="--max-old-space-size=4096"
 
+                    # Temporarily rename .npmrc (contains pnpm-specific configs that break npm/npx)
+                    mv .npmrc .npmrc.pnpm 2>/dev/null || true
+
                     # Use npx to run pnpm without global installation
-                    # Install dependencies using pnpm (matches local development)
-                    npx pnpm@latest install --frozen-lockfile
+                    # Restore .npmrc and install dependencies using pnpm (matches local development)
+                    mv .npmrc.pnpm .npmrc 2>/dev/null || true
+                    npx --yes pnpm@latest install --frozen-lockfile
                 '''
             }
         }
