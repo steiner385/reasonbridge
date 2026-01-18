@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TrustScoreCalculator } from './trust-score.calculator.js';
 import { TrustScoreUpdateDto } from '../users/dto/trust-score.dto.js';

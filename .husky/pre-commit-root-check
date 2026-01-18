@@ -75,6 +75,7 @@ ALLOWED_FILES=(
   "^turbo\\.json$"              # Turbo config
   "^nx\\.json$"                 # NX config
   "^pnpm-workspace\\.yaml$"     # PNPM workspace
+  "^pnpm-lock\\.yaml$"          # PNPM lockfile
   "^lerna\\.json$"              # Lerna config
   "^index\\.html$"              # Vite HTML template entry point
   "^CLAUDE\\.md$"               # Claude Code instructions

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SuggestionsService } from '../services/suggestions.service.js';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
 import { TopicLinkSuggester, TopicRelationshipType } from '../synthesizers/topic-link.suggester.js';

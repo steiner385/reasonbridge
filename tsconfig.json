@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020"],
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "composite": true,
+    "incremental": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
+  },
+  "references": [
+    { "path": "./packages/db-models" },
+    { "path": "./packages/event-schemas" },
+    { "path": "./packages/shared" },
+    { "path": "./services/ai-service" },
+    { "path": "./services/api-gateway" },
+    { "path": "./services/discussion-service" },
+    { "path": "./services/fact-check-service" },
+    { "path": "./services/moderation-service" },
+    { "path": "./services/notification-service" },
+    { "path": "./services/recommendation-service" },
+    { "path": "./services/user-service" },
+    { "path": "./frontend" }
+  ],
+  "files": [],
+  "include": [],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+}

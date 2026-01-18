@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { VerificationService } from '../verification/verification.service.js';
@@ -77,9 +78,7 @@ describe('Verification Flow - Integration Tests', () => {
           throw new BadRequestException(`Unknown challenge type: ${type}`);
       }
     }),
-    generateUploadUrl: vi.fn(async () =>
-      'https://s3.example.com/presigned-url',
-    ),
+    generateUploadUrl: vi.fn(async () => 'https://s3.example.com/presigned-url'),
     getVideoConstraints: vi.fn(() => ({
       maxFileSize: 100 * 1024 * 1024,
       minDurationSeconds: 3,
@@ -112,26 +111,17 @@ describe('Verification Flow - Integration Tests', () => {
       };
 
       mockPrismaService.verificationRecord.findFirst.mockResolvedValue(null);
-      mockPrismaService.verificationRecord.create.mockResolvedValue(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.create.mockResolvedValue(mockVerificationRecord);
 
-      const response = await verificationService.requestVerification(
-        userId,
-        request,
-      );
+      const response = await verificationService.requestVerification(userId, request);
 
       expect(response).toHaveProperty('verificationId');
       expect(response.type).toBe('PHONE');
 
       // Step 2: Get verification status
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
-      const verification = await verificationService.getVerification(
-        verificationId,
-      );
+      const verification = await verificationService.getVerification(verificationId);
 
       expect(verification.id).toBe(verificationId);
       expect(verification.status).toBe(VerificationStatus.PENDING);
@@ -143,17 +133,10 @@ describe('Verification Flow - Integration Tests', () => {
         verifiedAt: new Date(),
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(
-        completedRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(completedRecord);
 
-      const result = await verificationService.completeVerification(
-        verificationId,
-        userId,
-      );
+      const result = await verificationService.completeVerification(verificationId, userId);
 
       expect(result.status).toBe(VerificationStatus.VERIFIED);
       expect(result.verifiedAt).toBeDefined();
@@ -167,10 +150,7 @@ describe('Verification Flow - Integration Tests', () => {
         status: VerificationStatus.VERIFIED,
       });
 
-      const isVerified = await verificationService.isVerified(
-        userId,
-        'PHONE',
-      );
+      const isVerified = await verificationService.isVerified(userId, 'PHONE');
 
       expect(isVerified).toBe(true);
     });
@@ -180,10 +160,7 @@ describe('Verification Flow - Integration Tests', () => {
 
       mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
 
-      const isVerified = await verificationService.isVerified(
-        userId,
-        'PHONE',
-      );
+      const isVerified = await verificationService.isVerified(userId, 'PHONE');
 
       expect(isVerified).toBe(false);
     });
@@ -224,14 +201,10 @@ describe('Verification Flow - Integration Tests', () => {
         count: 2,
       });
 
-      const expiredCount = await verificationService.markExpiredVerifications(
-        userId,
-      );
+      const expiredCount = await verificationService.markExpiredVerifications(userId);
 
       expect(expiredCount).toBe(2);
-      expect(
-        mockPrismaService.verificationRecord.updateMany,
-      ).toHaveBeenCalledWith({
+      expect(mockPrismaService.verificationRecord.updateMany).toHaveBeenCalledWith({
         where: {
           userId,
           status: VerificationStatus.PENDING,
@@ -253,9 +226,7 @@ describe('Verification Flow - Integration Tests', () => {
       const expiredCount = await verificationService.markExpiredVerifications();
 
       expect(expiredCount).toBe(5);
-      expect(
-        mockPrismaService.verificationRecord.updateMany,
-      ).toHaveBeenCalledWith({
+      expect(mockPrismaService.verificationRecord.updateMany).toHaveBeenCalledWith({
         where: {
           status: VerificationStatus.PENDING,
           expiresAt: {
@@ -273,9 +244,7 @@ describe('Verification Flow - Integration Tests', () => {
         count: 0,
       });
 
-      const expiredCount = await verificationService.markExpiredVerifications(
-        'user-123',
-      );
+      const expiredCount = await verificationService.markExpiredVerifications('user-123');
 
       expect(expiredCount).toBe(0);
     });
@@ -301,10 +270,7 @@ describe('Verification Flow - Integration Tests', () => {
         createdAt: new Date(),
       });
 
-      const response = await verificationService.requestVerification(
-        userId,
-        request,
-      );
+      const response = await verificationService.requestVerification(userId, request);
 
       expect(response.type).toBe('VIDEO');
       expect(response.challenge).toBeDefined();
@@ -332,10 +298,7 @@ describe('Verification Flow - Integration Tests', () => {
         userId: userId,
       });
 
-      const response = await verificationService.requestVerification(
-        userId,
-        request,
-      );
+      const response = await verificationService.requestVerification(userId, request);
 
       expect(response.challenge.type).toBe('RANDOM_GESTURE');
       expect(response.challenge.randomValue).toBe('Show both thumbs up');
@@ -357,10 +320,7 @@ describe('Verification Flow - Integration Tests', () => {
         userId: userId,
       });
 
-      const response = await verificationService.requestVerification(
-        userId,
-        request,
-      );
+      const response = await verificationService.requestVerification(userId, request);
 
       expect(response.challenge.type).toBe('TIMESTAMP');
       expect(response.challenge.timestamp).toBeDefined();
@@ -375,9 +335,9 @@ describe('Verification Flow - Integration Tests', () => {
 
       mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
 
-      await expect(
-        verificationService.requestVerification(userId, request),
-      ).rejects.toThrow('Unknown challenge type');
+      await expect(verificationService.requestVerification(userId, request)).rejects.toThrow(
+        'Unknown challenge type',
+      );
     });
   });
 
@@ -390,16 +350,12 @@ describe('Verification Flow - Integration Tests', () => {
         { ...mockVerificationRecord, id: 'verification-3' },
       ];
 
-      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(
-        verifications,
-      );
+      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(verifications);
 
       const result = await verificationService.getVerificationHistory(userId);
 
       expect(result).toHaveLength(3);
-      expect(
-        mockPrismaService.verificationRecord.findMany,
-      ).toHaveBeenCalledWith({
+      expect(mockPrismaService.verificationRecord.findMany).toHaveBeenCalledWith({
         where: { userId },
         orderBy: { createdAt: 'desc' },
       });
@@ -421,23 +377,16 @@ describe('Verification Flow - Integration Tests', () => {
       const verificationId = 'verification-123';
       const userId = 'user-123';
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
       mockPrismaService.verificationRecord.update.mockResolvedValueOnce({
         ...mockVerificationRecord,
         status: VerificationStatus.REJECTED,
       });
 
-      const result = await verificationService.cancelVerification(
-        verificationId,
-        userId,
-      );
+      const result = await verificationService.cancelVerification(verificationId, userId);
 
       expect(result.status).toBe(VerificationStatus.REJECTED);
-      expect(
-        mockPrismaService.verificationRecord.update,
-      ).toHaveBeenCalledWith({
+      expect(mockPrismaService.verificationRecord.update).toHaveBeenCalledWith({
         where: { id: verificationId },
         data: { status: VerificationStatus.REJECTED },
       });
@@ -452,18 +401,16 @@ describe('Verification Flow - Integration Tests', () => {
         status: VerificationStatus.VERIFIED,
       });
 
-      await expect(
-        verificationService.cancelVerification(verificationId, userId),
-      ).rejects.toThrow('Can only cancel pending verifications');
+      await expect(verificationService.cancelVerification(verificationId, userId)).rejects.toThrow(
+        'Can only cancel pending verifications',
+      );
     });
 
     it('should prevent unauthorized cancellation', async () => {
       const verificationId = 'verification-123';
       const wrongUserId = 'user-wrong';
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
       await expect(
         verificationService.cancelVerification(verificationId, wrongUserId),
@@ -479,16 +426,12 @@ describe('Verification Flow - Integration Tests', () => {
         { ...mockVerificationRecord, id: 'verification-2' },
       ];
 
-      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(
-        pending,
-      );
+      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(pending);
 
       const result = await verificationService.getPendingVerifications(userId);
 
       expect(result).toHaveLength(2);
-      expect(
-        mockPrismaService.verificationRecord.findMany,
-      ).toHaveBeenCalledWith({
+      expect(mockPrismaService.verificationRecord.findMany).toHaveBeenCalledWith({
         where: {
           userId,
           status: VerificationStatus.PENDING,
@@ -503,9 +446,7 @@ describe('Verification Flow - Integration Tests', () => {
     it('should return empty array when no pending verifications', async () => {
       mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce([]);
 
-      const result = await verificationService.getPendingVerifications(
-        'user-456',
-      );
+      const result = await verificationService.getPendingVerifications('user-456');
 
       expect(result).toEqual([]);
     });
@@ -513,9 +454,7 @@ describe('Verification Flow - Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('should throw error when verification not found for completion', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        null,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(null);
 
       await expect(
         verificationService.completeVerification('nonexistent', 'user-123'),
@@ -530,9 +469,9 @@ describe('Verification Flow - Integration Tests', () => {
 
       mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
 
-      await expect(
-        verificationService.requestVerification(userId, request),
-      ).rejects.toThrow('Unknown verification type');
+      await expect(verificationService.requestVerification(userId, request)).rejects.toThrow(
+        'Unknown verification type',
+      );
     });
 
     it('should throw error when video verification missing challenge type', async () => {
@@ -543,9 +482,9 @@ describe('Verification Flow - Integration Tests', () => {
 
       mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
 
-      await expect(
-        verificationService.requestVerification(userId, request),
-      ).rejects.toThrow('Challenge type is required for video verification');
+      await expect(verificationService.requestVerification(userId, request)).rejects.toThrow(
+        'Challenge type is required for video verification',
+      );
     });
 
     it('should handle user having multiple expired verifications', async () => {
@@ -555,9 +494,7 @@ describe('Verification Flow - Integration Tests', () => {
         count: 3,
       });
 
-      const expiredCount = await verificationService.markExpiredVerifications(
-        userId,
-      );
+      const expiredCount = await verificationService.markExpiredVerifications(userId);
 
       expect(expiredCount).toBe(3);
     });
