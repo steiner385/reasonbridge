@@ -2,16 +2,32 @@
 
 ## Current Status
 
-- Completed issue #173 (T177) - Create E2E: Complete verification flow
-- ~155 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All 240 E2E tests passing ✅ (17 new verification tests + 223 existing)
-- All 25 unit tests for trust score calculator passing ✅
-- Main branch synced with origin/main (commit 1deefcc)
+- Completed issue #175 (T179) - Implement automated content screening
+- ~154 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All 21 content screening unit tests passing ✅
+- Main branch synced with origin/main (commit 75a85f4)
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
-- 61 tests skipped (unimplemented features: login, registration, browse topics, user story 4 integration)
 
-## Latest Completed (2026-01-18 - Iteration 18)
+## Latest Completed (2026-01-18 - Iteration 19)
+
+**Issue #175 (T179) - Implement automated content screening:**
+- Created ContentScreeningService (services/moderation-service/src/services/content-screening.service.ts:1-384)
+- Comprehensive multi-dimensional content analysis:
+  - Tone analysis: Detects inflammatory language and ad hominem attacks
+  - Fallacy detection: Identifies 6 types of logical fallacies
+  - Claim extraction: Finds factual assertions requiring verification
+  - System 1/System 2 response pattern analysis: Emotional vs logical thinking
+  - Risk scoring algorithm: Combines all dimensions (0-1 scale)
+- Created ModerationController with POST /moderation/screen endpoint
+- Smart recommendations based on risk score and content characteristics
+- Comprehensive unit test suite: 21 tests, all passing ✅
+  - Tests cover all screening dimensions
+  - Edge cases and recommendation logic verified
+- Merged via PR #558 (commit 75a85f4)
+- Resolves T179 and closes issue #175
+
+## Previous Completed (2026-01-18 - Iteration 18)
 
 **Issue #173 (T177) - E2E: Complete verification flow:**
 - Created comprehensive E2E test suite: `frontend/e2e/complete-verification-flow.spec.ts`
