@@ -49,13 +49,18 @@ pipeline {
                     # Ensure we use the public npm registry
                     npm config set registry https://registry.npmjs.org
 
-                    # Install pnpm if not available
-                    if ! command -v pnpm &> /dev/null; then
-                        npm install -g pnpm@9
-                    fi
+                    # Enable pnpm via corepack (built into Node.js 20+)
+                    # This avoids global npm install permission issues
+                    corepack enable || true
+                    corepack prepare pnpm@9 --activate || npm install -g pnpm@9 || true
 
-                    # Install dependencies
-                    pnpm install --frozen-lockfile || pnpm install
+                    # Fallback: use npx if pnpm still not available
+                    if ! command -v pnpm &> /dev/null; then
+                        echo "Using npx pnpm as fallback..."
+                        npx pnpm@9 install --frozen-lockfile || npx pnpm@9 install
+                    else
+                        pnpm install --frozen-lockfile || pnpm install
+                    fi
                 '''
             }
         }
@@ -83,7 +88,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Starting test infrastructure..."
-                    docker compose -f docker-compose.test.yml up -d --wait || docker compose -f docker-compose.test.yml up -d
+                    docker-compose -f docker-compose.test.yml up -d --wait || docker-compose -f docker-compose.test.yml up -d
 
                     # Wait for services to be ready
                     echo "Waiting for PostgreSQL..."
@@ -169,7 +174,7 @@ pipeline {
             // Stop test infrastructure
             sh '''
                 echo "Stopping test infrastructure..."
-                docker compose -f docker-compose.test.yml down -v || true
+                docker-compose -f docker-compose.test.yml down -v || true
             '''
         }
         success {
