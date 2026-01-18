@@ -10,6 +10,7 @@ import type { BaseEvent } from './base.js';
 export const AI_EVENT_TYPES = {
   RESPONSE_ANALYZED: 'response.analyzed',
   COMMON_GROUND_GENERATED: 'common-ground.generated',
+  COMMON_GROUND_UPDATED: 'common-ground.updated',
 } as const;
 
 /**
@@ -148,6 +149,68 @@ export interface CommonGroundGeneratedEvent
 }
 
 /**
+ * Payload for common-ground.updated event
+ * Published when a new version of common ground analysis is generated for a topic
+ */
+export interface CommonGroundUpdatedPayload {
+  /** Topic that was analyzed */
+  topicId: string;
+  /** Previous version number */
+  previousVersion: number;
+  /** New version number */
+  newVersion: number;
+  /** Previous analysis data */
+  previousAnalysis: {
+    agreementZones: AgreementZone[];
+    misunderstandings: Misunderstanding[];
+    genuineDisagreements: GenuineDisagreement[];
+    overallConsensusScore?: number;
+  };
+  /** New analysis data */
+  newAnalysis: {
+    agreementZones: AgreementZone[];
+    misunderstandings: Misunderstanding[];
+    genuineDisagreements: GenuineDisagreement[];
+    overallConsensusScore?: number;
+  };
+  /** Summary of what changed */
+  changes: {
+    /** Number of new agreement zones found */
+    newAgreementZones: number;
+    /** Number of agreement zones removed */
+    removedAgreementZones: number;
+    /** Number of new misunderstandings identified */
+    newMisunderstandings: number;
+    /** Number of misunderstandings resolved */
+    resolvedMisunderstandings: number;
+    /** Number of new disagreements identified */
+    newDisagreements: number;
+    /** Change in overall consensus score */
+    consensusScoreChange?: number;
+  };
+  /** Reason for the update */
+  reason: 'response_threshold' | 'time_threshold' | 'manual_trigger';
+  /** Participant count at time of update */
+  participantCountAtUpdate: number;
+  /** Response count at time of update */
+  responseCountAtUpdate: number;
+  /** Response count since last version */
+  newResponsesSinceLastVersion: number;
+  /** Model version used */
+  modelVersion: string;
+  /** When update was generated */
+  updatedAt: string;
+}
+
+/**
+ * Event published when a new version of common ground analysis is generated
+ */
+export interface CommonGroundUpdatedEvent
+  extends BaseEvent<typeof AI_EVENT_TYPES.COMMON_GROUND_UPDATED, CommonGroundUpdatedPayload> {
+  type: typeof AI_EVENT_TYPES.COMMON_GROUND_UPDATED;
+}
+
+/**
  * Union type of all AI service events
  */
-export type AIEvent = ResponseAnalyzedEvent | CommonGroundGeneratedEvent;
+export type AIEvent = ResponseAnalyzedEvent | CommonGroundGeneratedEvent | CommonGroundUpdatedEvent;
