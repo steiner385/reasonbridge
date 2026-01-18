@@ -465,6 +465,8 @@ model Feedback {
   userAcknowledged     Boolean        @default(false) @map("user_acknowledged")
   userRevised          Boolean        @default(false) @map("user_revised")
   userHelpfulRating    HelpfulRating? @map("user_helpful_rating")
+  dismissedAt          DateTime?      @map("dismissed_at")
+  dismissalReason      String?        @map("dismissal_reason")
   displayedToUser      Boolean        @map("displayed_to_user")
   createdAt            DateTime       @default(now()) @map("created_at")
 

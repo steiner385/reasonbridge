@@ -83,13 +83,16 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
   showEmptyState = false,
   emptyStateMessage = 'No feedback available',
 }) => {
+  // Filter out dismissed feedback (where dismissedAt is set)
+  const activeFeedback = feedback.filter(item => !item.dismissedAt);
+
   // Early return if no feedback and empty state is not shown
-  if (feedback.length === 0 && !showEmptyState) {
+  if (activeFeedback.length === 0 && !showEmptyState) {
     return null;
   }
 
   // Empty state
-  if (feedback.length === 0 && showEmptyState) {
+  if (activeFeedback.length === 0 && showEmptyState) {
     return (
       <div className={`text-center py-8 ${className}`}>
         <p className="text-sm text-gray-500">{emptyStateMessage}</p>
@@ -103,7 +106,7 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
         <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
       )}
       <div className="space-y-3">
-        {feedback.map((item) => {
+        {activeFeedback.map((item) => {
           const styles = getFeedbackStyles(item.type);
 
           return (
