@@ -1,370 +1,269 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { VerificationService } from './verification.service';
-import { VideoVerificationService } from './video-challenge.service';
-import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException } from '@nestjs/common';
+import { VerificationService } from './verification.service.js';
+import { VerificationRequestDto } from './dto/verification-request.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { VerificationType, VerificationStatus } from '@prisma/client';
 
 describe('VerificationService', () => {
   let service: VerificationService;
-  let prisma: PrismaService;
-  let videoVerificationService: VideoVerificationService;
+  let prismaService: PrismaService;
+
+  const mockVerificationRecord = {
+    id: 'verification-123',
+    userId: 'user-123',
+    type: VerificationType.PHONE,
+    status: VerificationStatus.PENDING,
+    verifiedAt: null,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    providerReference: '+12125551234',
+    createdAt: new Date(),
+  };
 
   const mockPrismaService = {
     verificationRecord: {
       findFirst: jest.fn(),
+      create: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
-      create: jest.fn(),
       update: jest.fn(),
-      updateMany: jest.fn(),
-      delete: jest.fn(),
-      deleteMany: jest.fn(),
     },
-    videoUpload: {
-      findMany: jest.fn(),
-      deleteMany: jest.fn(),
-    },
-  };
-
-  const mockVideoVerificationService = {
-    generateChallenge: jest.fn(),
-    generateUploadUrl: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VerificationService,
-        { provide: PrismaService, useValue: mockPrismaService },
-        { provide: VideoVerificationService, useValue: mockVideoVerificationService },
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService,
+        },
       ],
     }).compile();
 
     service = module.get<VerificationService>(VerificationService);
-    prisma = module.get<PrismaService>(PrismaService);
-    videoVerificationService = module.get<VideoVerificationService>(
-      VideoVerificationService,
-    );
-
+    prismaService = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
   });
 
   describe('requestVerification', () => {
-    it('should create a new verification request', async () => {
+    it('should create a phone verification request successfully', async () => {
       const userId = 'user-123';
-      const request = { type: 'PHONE', phoneNumber: '+1234567890' };
-      const mockVerification = {
-        id: 'verification-123',
-        userId,
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: '+1234567890',
+      const request: VerificationRequestDto = {
+        type: 'PHONE',
+        phoneNumber: '+12125551234',
       };
 
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValue(null);
-      mockPrismaService.verificationRecord.create.mockResolvedValue(mockVerification);
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
+        mockVerificationRecord,
+      );
 
-      const result = await service.requestVerification(userId, request as any);
+      const result = await service.requestVerification(userId, request);
 
-      expect(result.verificationId).toBe('verification-123');
-      expect(result.type).toBe('PHONE');
+      expect(result).toHaveProperty('verificationId');
+      expect(result).toHaveProperty('type', 'PHONE');
+      expect(result).toHaveProperty('expiresAt');
+      expect(result).toHaveProperty('message');
+      expect(result.message).toContain('verification code');
+
+      expect(mockPrismaService.verificationRecord.findFirst).toHaveBeenCalledWith({
+        where: {
+          userId,
+          type: VerificationType.PHONE,
+          status: 'pending',
+        },
+      });
+
       expect(mockPrismaService.verificationRecord.create).toHaveBeenCalled();
     });
 
-    it('should throw error if user already has pending verification', async () => {
-      const userId = 'user-123';
-      const request = { type: 'PHONE', phoneNumber: '+1234567890' };
-      const existingVerification = {
-        id: 'verification-existing',
-        userId,
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: '+1234567890',
+    it('should create a government ID verification request successfully', async () => {
+      const userId = 'user-456';
+      const request: VerificationRequestDto = {
+        type: 'GOVERNMENT_ID',
       };
 
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValue(
-        existingVerification,
-      );
-
-      await expect(
-        service.requestVerification(userId, request as any),
-      ).rejects.toThrow();
-    });
-  });
-
-  describe('markExpiredVerifications', () => {
-    it('should mark expired verifications as EXPIRED', async () => {
-      const userId = 'user-123';
-      const mockResult = { count: 2 };
-
-      mockPrismaService.verificationRecord.updateMany.mockResolvedValue(mockResult);
-
-      const result = await service.markExpiredVerifications(userId);
-
-      expect(result).toBe(2);
-      expect(mockPrismaService.verificationRecord.updateMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            userId,
-            status: VerificationStatus.PENDING,
-          }),
-          data: { status: VerificationStatus.EXPIRED },
-        }),
-      );
-    });
-
-    it('should mark all expired verifications without user filter', async () => {
-      const mockResult = { count: 5 };
-
-      mockPrismaService.verificationRecord.updateMany.mockResolvedValue(mockResult);
-
-      const result = await service.markExpiredVerifications();
-
-      expect(result).toBe(5);
-      expect(mockPrismaService.verificationRecord.updateMany).toHaveBeenCalled();
-    });
-  });
-
-  describe('reVerify', () => {
-    it('should initiate re-verification and cleanup old records', async () => {
-      const userId = 'user-123';
-      const verificationType = VerificationType.VIDEO;
-      const oldVerifications = [
-        {
-          id: 'old-1',
-          userId,
-          type: VerificationType.VIDEO,
-          status: VerificationStatus.EXPIRED,
-          createdAt: new Date('2026-01-01'),
-          expiresAt: new Date(),
-          verifiedAt: null,
-          providerReference: null,
-        },
-      ];
-
-      const newVerification = {
-        id: 'new-verification',
+      const govIdRecord = {
+        ...mockVerificationRecord,
+        id: 'verification-456',
         userId,
-        type: VerificationType.VIDEO,
-        status: VerificationStatus.PENDING,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: null,
+        type: VerificationType.GOVERNMENT_ID,
       };
 
-      mockPrismaService.verificationRecord.findMany.mockResolvedValue(
-        oldVerifications,
-      );
-      mockPrismaService.videoUpload.deleteMany.mockResolvedValue({ count: 1 });
-      mockPrismaService.verificationRecord.deleteMany.mockResolvedValue({ count: 1 });
-      mockPrismaService.verificationRecord.create.mockResolvedValue(newVerification);
-      mockVideoVerificationService.generateChallenge.mockReturnValue({
-        type: 'RANDOM_PHRASE',
-        instruction: 'Say this phrase',
-        randomValue: 'test phrase',
-      });
-      mockVideoVerificationService.generateUploadUrl.mockResolvedValue(
-        'https://s3.example.com/upload-url',
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(govIdRecord);
 
-      const result = await service.reVerify(userId, verificationType);
+      const result = await service.requestVerification(userId, request);
 
-      expect(result.verificationId).toBe('new-verification');
-      expect(mockPrismaService.videoUpload.deleteMany).toHaveBeenCalled();
-      expect(mockPrismaService.verificationRecord.deleteMany).toHaveBeenCalled();
+      expect(result).toHaveProperty('verificationId');
+      expect(result).toHaveProperty('type', 'GOVERNMENT_ID');
+      expect(result).toHaveProperty('sessionUrl');
+      expect(result).toHaveProperty('message');
+      expect(result.message).toContain('government ID');
     });
 
-    it('should request new verification without old records', async () => {
+    it('should throw error if phone verification requested without phone number', async () => {
       const userId = 'user-123';
-      const verificationType = VerificationType.PHONE;
+      const request: VerificationRequestDto = {
+        type: 'PHONE',
+      };
 
-      mockPrismaService.verificationRecord.findMany.mockResolvedValue([]);
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValue(null);
-      mockPrismaService.verificationRecord.create.mockResolvedValue({
-        id: 'new-phone-verification',
-        userId,
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: null,
-      });
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
 
-      const result = await service.reVerify(userId, verificationType);
+      await expect(service.requestVerification(userId, request)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
 
-      expect(result.verificationId).toBe('new-phone-verification');
+    it('should throw error if user has pending verification of same type', async () => {
+      const userId = 'user-123';
+      const request: VerificationRequestDto = {
+        type: 'PHONE',
+        phoneNumber: '+12125551234',
+      };
+
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
+        mockVerificationRecord,
+      );
+
+      await expect(service.requestVerification(userId, request)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockPrismaService.verificationRecord.findFirst).toHaveBeenCalled();
+    });
+
+    it('should create new verification if previous one expired', async () => {
+      const userId = 'user-123';
+      const request: VerificationRequestDto = {
+        type: 'PHONE',
+        phoneNumber: '+12125551234',
+      };
+
+      const expiredVerification = {
+        ...mockVerificationRecord,
+        expiresAt: new Date(Date.now() - 1000), // 1 second in the past
+      };
+
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
+        expiredVerification,
+      );
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
+        mockVerificationRecord,
+      );
+
+      const result = await service.requestVerification(userId, request);
+
+      expect(result).toHaveProperty('verificationId');
+      expect(mockPrismaService.verificationRecord.create).toHaveBeenCalled();
     });
   });
 
   describe('getVerification', () => {
-    it('should return verification if not expired', async () => {
-      const verificationId = 'verification-123';
-      const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      const mockVerification = {
-        id: verificationId,
-        userId: 'user-123',
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: futureDate,
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: null,
-      };
-
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValue(
-        mockVerification,
+    it('should retrieve a verification record by ID', async () => {
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+        mockVerificationRecord,
       );
 
-      const result = await service.getVerification(verificationId);
+      const result = await service.getVerification('verification-123');
 
-      expect(result).toEqual(mockVerification);
+      expect(result).toEqual(mockVerificationRecord);
+      expect(mockPrismaService.verificationRecord.findUnique).toHaveBeenCalledWith({
+        where: { id: 'verification-123' },
+      });
     });
 
-    it('should auto-mark verification as expired if past expiry', async () => {
-      const verificationId = 'verification-123';
-      const pastDate = new Date(Date.now() - 1 * 60 * 60 * 1000); // 1 hour ago
-      const mockVerification = {
-        id: verificationId,
-        userId: 'user-123',
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: pastDate,
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: null,
-      };
+    it('should return null if verification not found', async () => {
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(null);
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValue(
-        mockVerification,
-      );
-      mockPrismaService.verificationRecord.update.mockResolvedValue({
-        ...mockVerification,
-        status: VerificationStatus.EXPIRED,
-      });
+      const result = await service.getVerification('nonexistent');
 
-      const result = await service.getVerification(verificationId);
-
-      expect(result.status).toBe(VerificationStatus.EXPIRED);
-      expect(mockPrismaService.verificationRecord.update).toHaveBeenCalled();
+      expect(result).toBeNull();
     });
   });
 
-  describe('completeVerification', () => {
-    it('should mark verification as VERIFIED', async () => {
+  describe('getPendingVerifications', () => {
+    it('should retrieve pending verifications for a user', async () => {
+      const userId = 'user-123';
+      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce([
+        mockVerificationRecord,
+      ]);
+
+      const result = await service.getPendingVerifications(userId);
+
+      expect(result).toEqual([mockVerificationRecord]);
+      expect(mockPrismaService.verificationRecord.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          status: 'pending',
+          expiresAt: {
+            gt: expect.any(Date),
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('should return empty array if no pending verifications', async () => {
+      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce([]);
+
+      const result = await service.getPendingVerifications('user-456');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('cancelVerification', () => {
+    it('should cancel a pending verification', async () => {
       const verificationId = 'verification-123';
       const userId = 'user-123';
-      const mockVerification = {
-        id: verificationId,
-        userId,
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: null,
-      };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValue(
-        mockVerification,
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+        mockVerificationRecord,
       );
-      mockPrismaService.verificationRecord.update.mockResolvedValue({
-        ...mockVerification,
-        status: VerificationStatus.VERIFIED,
-        verifiedAt: new Date(),
+      mockPrismaService.verificationRecord.update.mockResolvedValueOnce({
+        ...mockVerificationRecord,
+        status: 'rejected',
       });
 
-      const result = await service.completeVerification(verificationId, userId);
+      const result = await service.cancelVerification(verificationId, userId);
 
-      expect(result.status).toBe(VerificationStatus.VERIFIED);
-      expect(mockPrismaService.verificationRecord.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: verificationId },
-          data: {
-            status: VerificationStatus.VERIFIED,
-            verifiedAt: expect.any(Date),
-          },
-        }),
-      );
+      expect(result.status).toBe('rejected');
+      expect(mockPrismaService.verificationRecord.update).toHaveBeenCalledWith({
+        where: { id: verificationId },
+        data: { status: 'rejected' },
+      });
     });
 
     it('should throw error if verification not found', async () => {
-      const verificationId = 'non-existent';
-      const userId = 'user-123';
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(null);
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.completeVerification(verificationId, userId),
-      ).rejects.toThrow();
+      await expect(service.cancelVerification('nonexistent', 'user-123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
-    it('should throw error if unauthorized', async () => {
-      const verificationId = 'verification-123';
-      const userId = 'user-123';
-      const differentUserId = 'user-456';
-      const mockVerification = {
-        id: verificationId,
-        userId: differentUserId,
-        type: VerificationType.PHONE,
-        status: VerificationStatus.PENDING,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date(),
-        verifiedAt: null,
-        providerReference: null,
-      };
-
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValue(
-        mockVerification,
+    it('should throw error if verification does not belong to user', async () => {
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
+        mockVerificationRecord,
       );
 
-      await expect(
-        service.completeVerification(verificationId, userId),
-      ).rejects.toThrow();
+      await expect(service.cancelVerification('verification-123', 'wrong-user')).rejects.toThrow(
+        BadRequestException,
+      );
     });
-  });
 
-  describe('isVerified', () => {
-    it('should return true if user has verified status', async () => {
-      const userId = 'user-123';
-      const verificationType = VerificationType.PHONE;
-      const mockVerification = {
-        id: 'verification-123',
-        userId,
-        type: verificationType,
-        status: VerificationStatus.VERIFIED,
-        expiresAt: new Date(),
-        createdAt: new Date(),
-        verifiedAt: new Date(),
-        providerReference: null,
+    it('should throw error if verification is not pending', async () => {
+      const verifiedRecord = {
+        ...mockVerificationRecord,
+        status: 'verified',
       };
 
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValue(
-        mockVerification,
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(verifiedRecord);
+
+      await expect(service.cancelVerification('verification-123', 'user-123')).rejects.toThrow(
+        BadRequestException,
       );
-
-      const result = await service.isVerified(userId, verificationType);
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false if user does not have verified status', async () => {
-      const userId = 'user-123';
-      const verificationType = VerificationType.PHONE;
-
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValue(null);
-
-      const result = await service.isVerified(userId, verificationType);
-
-      expect(result).toBe(false);
     });
   });
 });

@@ -5,12 +5,7 @@
 /**
  * Type of feedback provided by the AI
  */
-export type FeedbackType =
-  | 'FALLACY'
-  | 'INFLAMMATORY'
-  | 'UNSOURCED'
-  | 'BIAS'
-  | 'AFFIRMATION';
+export type FeedbackType = 'FALLACY' | 'INFLAMMATORY' | 'UNSOURCED' | 'BIAS' | 'AFFIRMATION';
 
 /**
  * Request to generate feedback for a response

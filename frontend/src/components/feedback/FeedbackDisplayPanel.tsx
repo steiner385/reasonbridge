@@ -84,7 +84,7 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
   emptyStateMessage = 'No feedback available',
 }) => {
   // Filter out dismissed feedback (where dismissedAt is set)
-  const activeFeedback = feedback.filter(item => !item.dismissedAt);
+  const activeFeedback = feedback.filter((item) => !item.dismissedAt);
 
   // Early return if no feedback and empty state is not shown
   if (activeFeedback.length === 0 && !showEmptyState) {
@@ -102,9 +102,7 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
 
   return (
     <div className={className}>
-      {title && (
-        <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
-      )}
+      {title && <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>}
       <div className="space-y-3">
         {activeFeedback.map((item) => {
           const styles = getFeedbackStyles(item.type);
@@ -118,14 +116,10 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge}`}
-                  >
+                  <span className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge}`}>
                     {item.type}
                   </span>
-                  {item.subtype && (
-                    <span className="text-xs text-gray-600">({item.subtype})</span>
-                  )}
+                  {item.subtype && <span className="text-xs text-gray-600">({item.subtype})</span>}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">
@@ -158,9 +152,7 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
 
               <p className="text-sm text-gray-800 mb-2">{item.suggestionText}</p>
 
-              {item.reasoning && (
-                <p className="text-xs text-gray-600 italic">{item.reasoning}</p>
-              )}
+              {item.reasoning && <p className="text-xs text-gray-600 italic">{item.reasoning}</p>}
 
               {item.educationalResources && (
                 <div className="mt-3 pt-3 border-t border-gray-200">

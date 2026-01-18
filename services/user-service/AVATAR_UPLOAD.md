@@ -9,6 +9,7 @@ This feature implements S3-based avatar upload functionality for the user servic
 ### S3Service (`src/services/s3.service.ts`)
 
 Core service for S3 operations:
+
 - Upload avatars to S3
 - Delete avatars from S3
 - Generate signed URLs for private access
@@ -18,6 +19,7 @@ Core service for S3 operations:
 ### UploadService (`src/upload/upload.service.ts`)
 
 Business logic layer for upload operations:
+
 - Validates upload requests
 - Delegates to S3Service
 - Handles errors and logging
@@ -25,6 +27,7 @@ Business logic layer for upload operations:
 ### UploadController (`src/upload/upload.controller.ts`)
 
 REST API endpoints:
+
 - `POST /upload/avatar/:userId` - Upload avatar
 - `DELETE /upload/avatar/:key` - Delete avatar
 
@@ -54,6 +57,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "success": true,

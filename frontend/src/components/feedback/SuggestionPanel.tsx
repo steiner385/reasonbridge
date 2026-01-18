@@ -113,7 +113,7 @@ const SuggestionPanel: React.FC<SuggestionPanelProps> = ({
         }
       }
     },
-    [topicId, applyTag, applyTopicLink, onApplied]
+    [topicId, applyTag, applyTopicLink, onApplied],
   );
 
   /**
@@ -133,7 +133,7 @@ const SuggestionPanel: React.FC<SuggestionPanelProps> = ({
         onDismissed(suggestion);
       }
     },
-    [dismissTag, dismissTopicLink, onDismissed]
+    [dismissTag, dismissTopicLink, onDismissed],
   );
 
   // Filter out applied and dismissed tag suggestions
@@ -141,20 +141,21 @@ const SuggestionPanel: React.FC<SuggestionPanelProps> = ({
     ? {
         ...tagSuggestions,
         suggestions: tagSuggestions.suggestions.filter(
-          tag => !isTagApplied(tag) && !isTagDismissed(tag)
+          (tag) => !isTagApplied(tag) && !isTagDismissed(tag),
         ),
       }
     : undefined;
 
   // Filter out applied and dismissed topic link suggestions
-  const filteredTopicLinkSuggestions: TopicLinkSuggestionsResponse | undefined = topicLinkSuggestions
-    ? {
-        ...topicLinkSuggestions,
-        linkSuggestions: topicLinkSuggestions.linkSuggestions.filter(
-          link => !isTopicLinkApplied(link) && !isTopicLinkDismissed(link)
-        ),
-      }
-    : undefined;
+  const filteredTopicLinkSuggestions: TopicLinkSuggestionsResponse | undefined =
+    topicLinkSuggestions
+      ? {
+          ...topicLinkSuggestions,
+          linkSuggestions: topicLinkSuggestions.linkSuggestions.filter(
+            (link) => !isTopicLinkApplied(link) && !isTopicLinkDismissed(link),
+          ),
+        }
+      : undefined;
 
   return (
     <div className={className}>
@@ -176,7 +177,9 @@ const SuggestionPanel: React.FC<SuggestionPanelProps> = ({
       <SuggestionCards
         type={type}
         {...(filteredTagSuggestions && { tagSuggestions: filteredTagSuggestions })}
-        {...(filteredTopicLinkSuggestions && { topicLinkSuggestions: filteredTopicLinkSuggestions })}
+        {...(filteredTopicLinkSuggestions && {
+          topicLinkSuggestions: filteredTopicLinkSuggestions,
+        })}
         {...(title && { title })}
         onAccept={handleAccept}
         onDismiss={handleDismiss}

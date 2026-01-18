@@ -15,10 +15,7 @@ export default {
       },
     ],
   },
-  collectCoverageFrom: [
-    'lib/**/*.ts',
-    '!lib/**/*.d.ts',
-  ],
+  collectCoverageFrom: ['lib/**/*.ts', '!lib/**/*.d.ts'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
 };

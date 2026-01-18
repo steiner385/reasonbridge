@@ -35,12 +35,7 @@ interface FormErrors {
   password?: string;
 }
 
-function LoginForm({
-  onSubmit,
-  isLoading = false,
-  error,
-  className = '',
-}: LoginFormProps) {
+function LoginForm({ onSubmit, isLoading = false, error, className = '' }: LoginFormProps) {
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -83,9 +78,7 @@ function LoginForm({
   };
 
   // Handle input change
-  const handleChange = (field: keyof LoginFormData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (field: keyof LoginFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFormData((prev) => ({ ...prev, [field]: value }));
 

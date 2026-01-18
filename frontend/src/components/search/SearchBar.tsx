@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 
-export interface SearchBarProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
+export interface SearchBarProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
   /**
    * Callback function triggered when search is submitted
    */
@@ -62,7 +63,7 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
       className = '',
       ...props
     },
-    ref
+    ref,
   ) => {
     const [query, setQuery] = useState<string>(initialValue);
 
@@ -95,7 +96,7 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
           onSearch(query);
         }
       },
-      [query, onSearch]
+      [query, onSearch],
     );
 
     // Handle input change
@@ -107,7 +108,7 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
           onChange(value);
         }
       },
-      [onChange]
+      [onChange],
     );
 
     // Handle clear
@@ -128,11 +129,12 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
           handleSearch();
         }
       },
-      [handleSearch]
+      [handleSearch],
     );
 
     // Base input styles
-    const baseStyles = 'rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-500 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles =
+      'rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-500 focus:ring-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed';
 
     // Width styles
     const widthStyles = fullWidth ? 'w-full' : '';
@@ -264,7 +266,7 @@ const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
         )}
       </form>
     );
-  }
+  },
 );
 
 SearchBar.displayName = 'SearchBar';

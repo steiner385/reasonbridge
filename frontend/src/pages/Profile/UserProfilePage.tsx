@@ -27,11 +27,11 @@ function UserProfilePage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Unable to Load Profile
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Profile</h2>
               <p className="text-gray-600 mb-4">
-                {error instanceof Error ? error.message : 'An error occurred while loading this profile.'}
+                {error instanceof Error
+                  ? error.message
+                  : 'An error occurred while loading this profile.'}
               </p>
               <Link to="/">
                 <Button variant="primary">Go to Home</Button>
@@ -49,12 +49,8 @@ function UserProfilePage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                User Not Found
-              </h2>
-              <p className="text-gray-600 mb-4">
-                The user you're looking for doesn't exist.
-              </p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">User Not Found</h2>
+              <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
               <Link to="/">
                 <Button variant="primary">Go to Home</Button>
               </Link>
@@ -89,9 +85,7 @@ function UserProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Verification Level</p>
-                <p className="text-lg text-gray-900">
-                  {user.verificationLevel.replace('_', ' ')}
-                </p>
+                <p className="text-lg text-gray-900">{user.verificationLevel.replace('_', ' ')}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Member Since</p>

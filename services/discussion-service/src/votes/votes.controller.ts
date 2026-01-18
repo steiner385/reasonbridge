@@ -33,11 +33,7 @@ export class VotesController {
     @Headers('x-user-id') userId: string,
     @Body() createVoteDto: CreateVoteDto,
   ): Promise<VoteDto | { message: string }> {
-    const vote = await this.votesService.voteOnResponse(
-      responseId,
-      userId,
-      createVoteDto,
-    );
+    const vote = await this.votesService.voteOnResponse(responseId, userId, createVoteDto);
 
     if (vote === null) {
       return { message: 'Vote removed' };

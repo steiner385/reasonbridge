@@ -61,7 +61,10 @@ export interface ModerationActionRequestedPayload {
  * Event published when AI requests a moderation action
  */
 export interface ModerationActionRequestedEvent
-  extends BaseEvent<typeof MODERATION_EVENT_TYPES.ACTION_REQUESTED, ModerationActionRequestedPayload> {
+  extends BaseEvent<
+    typeof MODERATION_EVENT_TYPES.ACTION_REQUESTED,
+    ModerationActionRequestedPayload
+  > {
   type: typeof MODERATION_EVENT_TYPES.ACTION_REQUESTED;
 }
 
@@ -89,7 +92,11 @@ export interface UserTrustUpdatedPayload {
   /** New trust scores */
   newScores: TrustScores;
   /** Reason for the update */
-  reason: 'moderation_action' | 'positive_contribution' | 'appeal_upheld' | 'periodic_recalculation';
+  reason:
+    | 'moderation_action'
+    | 'positive_contribution'
+    | 'appeal_upheld'
+    | 'periodic_recalculation';
   /** ID of the related moderation action (if applicable) */
   moderationActionId?: string;
   /** When the update occurred */

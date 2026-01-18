@@ -26,6 +26,8 @@ pipeline {
         stage('Initialize') {
             steps {
                 checkout scm
+                // Remove stale test directories that may exist from previous builds
+                sh 'rm -rf frontend/frontend || true'
                 script {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
@@ -36,52 +38,29 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    # Remove any local .npmrc that might point to Verdaccio
-                    rm -f .npmrc
-
-                    # Ensure we use the public npm registry
-                    npm config set registry https://registry.npmjs.org
-
                     # Increase Node.js memory limit for large dependency trees
                     export NODE_OPTIONS="--max-old-space-size=4096"
 
-                    # Install dependencies with retry logic for npm "Exit handler" bug
-                    # See: https://github.com/npm/cli/issues/4028
-                    install_with_retry() {
-                        local max_attempts=3
-                        local attempt=1
+                    # Remove .npmrc (contains pnpm-specific configs that break npm/npx)
+                    # It's not needed for CI since we use --frozen-lockfile
+                    rm -f .npmrc
 
-                        while [ $attempt -le $max_attempts ]; do
-                            echo "npm install attempt $attempt of $max_attempts"
-
-                            if npm ci --legacy-peer-deps; then
-                                echo "npm ci succeeded on attempt $attempt"
-                                return 0
-                            fi
-
-                            echo "npm ci failed, cleaning cache and retrying..."
-                            npm cache clean --force
-                            rm -rf node_modules
-
-                            if [ $attempt -eq $max_attempts ]; then
-                                echo "All npm ci attempts failed, trying npm install..."
-                                npm install --legacy-peer-deps
-                                return $?
-                            fi
-
-                            attempt=$((attempt + 1))
-                            sleep 5
-                        done
-                    }
-
-                    install_with_retry
+                    # Use npx to run pnpm without global installation
+                    # Install dependencies using pnpm (matches local development)
+                    npx --yes pnpm@latest install --frozen-lockfile
                 '''
+            }
+        }
+
+        stage('Build Packages') {
+            steps {
+                sh 'npx pnpm --filter "./packages/*" -r run build'
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'npm run lint'
+                sh 'npx pnpm run lint'
             }
         }
 
@@ -93,7 +72,7 @@ pipeline {
                     def testResult = sh(
                         script: '''#!/bin/bash
                             set -o pipefail
-                            npm run test:unit -- --json --outputFile=test-results.json 2>&1 | tee test-output.log
+                            npx pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
                         ''',
                         returnStatus: true
                     )
@@ -109,7 +88,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'npm run build'
+                sh 'npx pnpm run build'
             }
         }
     }

@@ -68,7 +68,7 @@ enum UserStatus {
   @@map("user_status")
 }
 
-/// Tracks user verification records (email, phone, government ID)
+/// Tracks user verification records (email, phone, government ID, video)
 model VerificationRecord {
   id                String             @id @default(uuid()) @db.Uuid
   userId            String             @map("user_id") @db.Uuid
@@ -81,11 +81,36 @@ model VerificationRecord {
 
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoUploads VideoUpload[]
+  videoUpload  VideoUpload?
 
   @@index([userId, type])
   @@index([status])
   @@map("verification_records")
+}
+
+/// Tracks video uploads for video verification
+model VideoUpload {
+  id              String   @id @default(uuid()) @db.Uuid
+  verificationId  String   @unique @map("verification_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  s3Key           String   @map("s3_key")
+  s3Url           String   @map("s3_url")
+  fileName        String   @map("file_name")
+  fileSize        Int      @map("file_size")
+  mimeType        String   @map("mime_type")
+  uploadedAt      DateTime @default(now()) @map("uploaded_at")
+  completedAt     DateTime? @map("completed_at")
+  expiresAt       DateTime @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  verification VerificationRecord @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([verificationId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("video_uploads")
 }
 
 enum VerificationType {
@@ -104,31 +129,6 @@ enum VerificationStatus {
   EXPIRED
 
   @@map("verification_status")
-}
-
-/// Tracks video uploads for video verification
-model VideoUpload {
-  id              String    @id @default(uuid()) @db.Uuid
-  verificationId  String    @map("verification_id") @db.Uuid
-  userId          String    @map("user_id") @db.Uuid
-  s3Key           String    @map("s3_key")
-  s3Url           String    @map("s3_url")
-  fileName        String    @map("file_name")
-  fileSize        Int       @map("file_size")
-  mimeType        String    @map("mime_type")
-  uploadedAt      DateTime  @default(now()) @map("uploaded_at")
-  completedAt     DateTime? @map("completed_at")
-  expiresAt       DateTime  @map("expires_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-
-  // Relations
-  verification VerificationRecord @relation(fields: [verificationId], references: [id], onDelete: Cascade)
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([verificationId])
-  @@index([userId])
-  @@index([expiresAt])
-  @@map("video_uploads")
 }
 
 /// Tracks user follow relationships
