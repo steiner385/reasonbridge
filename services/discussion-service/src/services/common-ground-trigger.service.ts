@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -17,7 +19,10 @@ export class CommonGroundTriggerService {
   private readonly RESPONSE_DELTA_THRESHOLD = 10;
   private readonly TIME_THRESHOLD_HOURS = 6;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   /**
    * Check if common ground analysis should be triggered for a topic
@@ -116,18 +121,21 @@ export class CommonGroundTriggerService {
    * 1. Make an HTTP call to the AI service's /generate/common-ground endpoint
    * 2. Publish an event to trigger the AI service
    *
-   * For now, we'll just log that the trigger would happen.
+   * For now, we'll just log that the trigger would happen and invalidate cache.
    */
   private async triggerAnalysis(topicId: string): Promise<void> {
     // TODO: Implement actual trigger mechanism
     // Options:
-    // 1. HTTP POST to ai-service: POST /generate/common-ground
+    // 1. HTTP POST to ai-service: POST /generate/common-ground endpoint
     // 2. Publish event: 'common-ground.trigger-requested'
 
     this.logger.log(`[PLACEHOLDER] Would trigger common ground analysis for topic ${topicId}`);
     this.logger.log(
       `Next step: Implement HTTP client to call AI service /generate/common-ground endpoint`,
     );
+
+    // Invalidate cache since new analysis will be generated
+    await this.invalidateCommonGroundCache(topicId);
 
     // Future implementation would look like:
     // const propositions = await this.fetchPropositions(topicId);
@@ -137,5 +145,16 @@ export class CommonGroundTriggerService {
     //   propositions,
     //   responses,
     // });
+  }
+
+  /**
+   * Invalidate common ground cache for a specific topic
+   * Called when new analysis is generated or will be generated
+   */
+  async invalidateCommonGroundCache(topicId: string): Promise<void> {
+    const latestKey = `common-ground:topic:${topicId}:latest`;
+    await this.cacheManager.del(latestKey);
+    this.logger.debug(`Invalidated cache for topic ${topicId}`);
+    // Note: Versioned caches remain valid as analysis versions are immutable
   }
 }
