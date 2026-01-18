@@ -92,19 +92,13 @@ export class CommonGroundSynthesizer {
     const agreementZones = this.identifyAgreementZones(topicData.propositions);
 
     // Identify potential misunderstandings (high nuanced responses)
-    const misunderstandings = this.identifyMisunderstandings(
-      topicData.propositions
-    );
+    const misunderstandings = this.identifyMisunderstandings(topicData.propositions);
 
     // Identify genuine disagreements (balanced oppose/support with low nuance)
-    const genuineDisagreements = this.identifyGenuineDisagreements(
-      topicData.propositions
-    );
+    const genuineDisagreements = this.identifyGenuineDisagreements(topicData.propositions);
 
     // Calculate overall consensus score
-    const overallConsensusScore = this.calculateOverallConsensus(
-      topicData.propositions
-    );
+    const overallConsensusScore = this.calculateOverallConsensus(topicData.propositions);
 
     return {
       agreementZones,
@@ -117,14 +111,11 @@ export class CommonGroundSynthesizer {
   /**
    * Identify propositions with high agreement
    */
-  private identifyAgreementZones(
-    propositions: PropositionWithAlignments[]
-  ): AgreementZone[] {
+  private identifyAgreementZones(propositions: PropositionWithAlignments[]): AgreementZone[] {
     const agreementZones: AgreementZone[] = [];
 
     for (const prop of propositions) {
-      const totalAlignments =
-        prop.supportCount + prop.opposeCount + prop.nuancedCount;
+      const totalAlignments = prop.supportCount + prop.opposeCount + prop.nuancedCount;
 
       // Skip propositions without sufficient participation
       if (totalAlignments < 3) {
@@ -137,11 +128,7 @@ export class CommonGroundSynthesizer {
       if (agreementPercentage >= this.AGREEMENT_THRESHOLD * 100) {
         // Extract supporting evidence from nuanced explanations
         const supportingEvidence = prop.alignments
-          .filter(
-            (a) =>
-              (a.stance === 'SUPPORT' || a.stance === 'NUANCED') &&
-              a.nuanceExplanation
-          )
+          .filter((a) => (a.stance === 'SUPPORT' || a.stance === 'NUANCED') && a.nuanceExplanation)
           .map((a) => a.nuanceExplanation!)
           .slice(0, 3); // Take top 3 evidence points
 
@@ -155,22 +142,17 @@ export class CommonGroundSynthesizer {
     }
 
     // Sort by agreement percentage (highest first)
-    return agreementZones.sort(
-      (a, b) => b.agreementPercentage - a.agreementPercentage
-    );
+    return agreementZones.sort((a, b) => b.agreementPercentage - a.agreementPercentage);
   }
 
   /**
    * Identify potential misunderstandings based on nuanced responses
    */
-  private identifyMisunderstandings(
-    propositions: PropositionWithAlignments[]
-  ): Misunderstanding[] {
+  private identifyMisunderstandings(propositions: PropositionWithAlignments[]): Misunderstanding[] {
     const misunderstandings: Misunderstanding[] = [];
 
     for (const prop of propositions) {
-      const totalAlignments =
-        prop.supportCount + prop.opposeCount + prop.nuancedCount;
+      const totalAlignments = prop.supportCount + prop.opposeCount + prop.nuancedCount;
 
       // Skip propositions without sufficient participation
       if (totalAlignments < 3) {
@@ -202,25 +184,25 @@ export class CommonGroundSynthesizer {
    * Group alignments into distinct interpretations
    */
   private groupInterpretations(
-    alignments: PropositionWithAlignments['alignments']
+    alignments: PropositionWithAlignments['alignments'],
   ): Misunderstanding['interpretations'] {
     const nuancedAlignments = alignments.filter(
-      (a) => a.stance === 'NUANCED' && a.nuanceExplanation
+      (a) => a.stance === 'NUANCED' && a.nuanceExplanation,
     );
 
     // For pattern-based implementation, group by stance
     // AI enhancement will use semantic clustering
     const supportNuanced = nuancedAlignments.filter((a) =>
-      a.nuanceExplanation?.toLowerCase().includes('support')
+      a.nuanceExplanation?.toLowerCase().includes('support'),
     );
     const opposeNuanced = nuancedAlignments.filter((a) =>
-      a.nuanceExplanation?.toLowerCase().includes('oppose')
+      a.nuanceExplanation?.toLowerCase().includes('oppose'),
     );
     const contextNuanced = nuancedAlignments.filter(
       (a) =>
         a.nuanceExplanation &&
         !a.nuanceExplanation.toLowerCase().includes('support') &&
-        !a.nuanceExplanation.toLowerCase().includes('oppose')
+        !a.nuanceExplanation.toLowerCase().includes('oppose'),
     );
 
     const interpretations: Misunderstanding['interpretations'] = [];
@@ -253,13 +235,12 @@ export class CommonGroundSynthesizer {
    * Identify genuine disagreements (not based on misunderstanding)
    */
   private identifyGenuineDisagreements(
-    propositions: PropositionWithAlignments[]
+    propositions: PropositionWithAlignments[],
   ): GenuineDisagreement[] {
     const genuineDisagreements: GenuineDisagreement[] = [];
 
     for (const prop of propositions) {
-      const totalAlignments =
-        prop.supportCount + prop.opposeCount + prop.nuancedCount;
+      const totalAlignments = prop.supportCount + prop.opposeCount + prop.nuancedCount;
 
       // Skip propositions without sufficient participation
       if (totalAlignments < 3) {
@@ -324,12 +305,10 @@ export class CommonGroundSynthesizer {
    *
    * @returns Consensus score (0.00-1.00) or null if insufficient data
    */
-  private calculateOverallConsensus(
-    propositions: PropositionWithAlignments[]
-  ): number | null {
+  private calculateOverallConsensus(propositions: PropositionWithAlignments[]): number | null {
     // Filter propositions with alignment data
     const propositionsWithData = propositions.filter(
-      (p) => p.supportCount + p.opposeCount + p.nuancedCount >= 3
+      (p) => p.supportCount + p.opposeCount + p.nuancedCount >= 3,
     );
 
     if (propositionsWithData.length === 0) {
@@ -348,10 +327,8 @@ export class CommonGroundSynthesizer {
         score = Number(prop.consensusScore);
       } else {
         // Calculate consensus score: normalized agreement
-        const totalAlignments =
-          prop.supportCount + prop.opposeCount + prop.nuancedCount;
-        const agreementRatio =
-          (prop.supportCount - prop.opposeCount) / totalAlignments;
+        const totalAlignments = prop.supportCount + prop.opposeCount + prop.nuancedCount;
+        const agreementRatio = (prop.supportCount - prop.opposeCount) / totalAlignments;
         // Normalize to 0.00-1.00 range
         score = (agreementRatio + 1) / 2;
       }

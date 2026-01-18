@@ -338,19 +338,21 @@ test.describe('Request and View Feedback Flow', () => {
     });
 
     // Verify all expected properties are present
-    feedbackData.forEach((item: {
-      id: string;
-      responseId: string;
-      type: string;
-      displayedToUser: boolean;
-      createdAt: string;
-    }) => {
-      expect(item.id).toBeDefined();
-      expect(item.responseId).toBe('response-123');
-      expect(item.type).toBeDefined();
-      expect(item.displayedToUser).toBe(true);
-      expect(item.createdAt).toBeDefined();
-    });
+    feedbackData.forEach(
+      (item: {
+        id: string;
+        responseId: string;
+        type: string;
+        displayedToUser: boolean;
+        createdAt: string;
+      }) => {
+        expect(item.id).toBeDefined();
+        expect(item.responseId).toBe('response-123');
+        expect(item.type).toBeDefined();
+        expect(item.displayedToUser).toBe(true);
+        expect(item.createdAt).toBeDefined();
+      },
+    );
   });
 });
 
@@ -384,7 +386,9 @@ test.describe('Feedback Display Panel Integration', () => {
     });
 
     // Verify initial state has no dismissed items
-    const dismissedItems = feedbackData.filter((item: { dismissedAt?: string }) => item.dismissedAt);
+    const dismissedItems = feedbackData.filter(
+      (item: { dismissedAt?: string }) => item.dismissedAt,
+    );
     expect(dismissedItems.length).toBe(0);
   });
 
@@ -405,7 +409,9 @@ test.describe('Feedback Display Panel Integration', () => {
     });
 
     // Verify we have multiple feedback types
-    const uniqueTypes = Array.from(new Set(feedbackData.map((item: { type: string }) => item.type)));
+    const uniqueTypes = Array.from(
+      new Set(feedbackData.map((item: { type: string }) => item.type)),
+    );
     expect(uniqueTypes.length).toBeGreaterThan(1);
 
     // Verify each type is one of the expected values
