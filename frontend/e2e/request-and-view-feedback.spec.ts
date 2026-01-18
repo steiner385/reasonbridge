@@ -405,7 +405,7 @@ test.describe('Feedback Display Panel Integration', () => {
     });
 
     // Verify we have multiple feedback types
-    const uniqueTypes = [...new Set(feedbackData.map((item: { type: string }) => item.type))];
+    const uniqueTypes = Array.from(new Set(feedbackData.map((item: { type: string }) => item.type)));
     expect(uniqueTypes.length).toBeGreaterThan(1);
 
     // Verify each type is one of the expected values
