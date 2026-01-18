@@ -10,23 +10,13 @@
 
 ## Latest Completed (2026-01-17)
 
-**Issue #127 (T131) - Implement common ground caching:**
-- Added Redis-backed caching infrastructure via CacheModule (services/discussion-service/src/cache/cache.module.ts)
-- Implemented cache-aside pattern in TopicsService.getCommonGroundAnalysis()
-  - Cache keys: `common-ground:topic:{topicId}:latest` and `common-ground:topic:{topicId}:v{version}`
-  - 1-hour TTL (3600 seconds)
-  - Reduces DB queries from 2 to 0 on cache hit
-- Added cache invalidation in CommonGroundTriggerService when new analysis triggered
-- Dependencies: @nestjs/cache-manager, cache-manager, cache-manager-redis-store, redis
-- Performance improvement: 50-200ms savings per request (estimated)
-- Merged via PR #498
-
-**Test Suite Verification (Iteration 11):**
+**Test & Build Verification (Iteration 12):**
 - Verified all 143 unit tests passing (123 ai-service, 20 discussion-service)
-- Resolved merge conflict in SHARED_TASK_NOTES.md between iteration 10 docs and T131 caching work
-- Successfully merged documentation update via PR #499
-- No failing tests found
-- All systems green
+- Fixed build failure in discussion-service caused by missing cache dependencies in node_modules
+- Ran `pnpm install` to resolve missing packages (@nestjs/cache-manager, cache-manager, cache-manager-redis-store)
+- Confirmed all builds passing across workspace (14 services/packages)
+- No merge conflicts or pending PRs
+- All systems green and ready for next issue
 
 ## Notes
 
