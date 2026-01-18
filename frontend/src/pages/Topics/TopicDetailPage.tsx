@@ -1,11 +1,14 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTopic } from '../../lib/useTopic';
+import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { CommonGroundSummaryPanel } from '../../components/common-ground';
 
 function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: topic, isLoading, error } = useTopic(id);
+  const { data: commonGroundAnalysis, isLoading: isLoadingAnalysis } = useCommonGroundAnalysis(id);
 
   if (isLoading) {
     return (
@@ -247,6 +250,29 @@ function TopicDetailPage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Common Ground Analysis Section */}
+      {!isLoadingAnalysis && commonGroundAnalysis && (
+        <div className="mb-6">
+          <CommonGroundSummaryPanel
+            analysis={commonGroundAnalysis}
+            showLastUpdated={true}
+            showEmptyState={true}
+            onViewAgreementZone={(zoneId) => {
+              console.log('View agreement zone:', zoneId);
+              // Future: Navigate to detailed view or open modal
+            }}
+            onViewMisunderstanding={(misunderstandingId) => {
+              console.log('View misunderstanding:', misunderstandingId);
+              // Future: Navigate to detailed view or open modal
+            }}
+            onViewDisagreement={(disagreementId) => {
+              console.log('View disagreement:', disagreementId);
+              // Future: Navigate to detailed view or open modal
+            }}
+          />
+        </div>
+      )}
 
       {/* Placeholder for future content sections */}
       <div className="grid grid-cols-1 gap-6">
