@@ -2,12 +2,25 @@
 
 ## Current Status
 
-- Completed issue #188 (T192) - Implement ModerationQueueService with analytics
-- ~167 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- All moderation service tests passing (54+ total repository, content-screening, ai-review) ✅
+- Completed issue #189 (T193) - Create flag content button/modal
+- ~170 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- All tests passing (131 user-service, 97 discussion-service) ✅
 - Main branch synced with origin/main
 - Current development branch at main - ready for next issue
 - No failing tests - project at stable state ready for next issue
+
+## Latest Completed (2026-01-18 - Iteration 31)
+
+**Issue #189 (T193) - Create flag content button/modal:**
+- Created moderation types (frontend/src/types/moderation.ts) with FlagContentRequest/Response interfaces
+- Implemented FlagContentButton component (frontend/src/components/moderation/FlagContentButton.tsx)
+- Implemented FlagContentModal component (frontend/src/components/moderation/FlagContentModal.tsx) with form validation
+- Added useFlagContent hook (frontend/src/lib/useFlagContent.ts) for POST /moderation/flag API integration
+- Integrated flag button into ThreadedResponseDisplay (frontend/src/components/responses/ThreadedResponseDisplay.tsx)
+- Features: categorized flags (inappropriate, spam, misinformation, harassment, hate-speech, violence, copyright, privacy, other)
+- Form validation, anonymity option, loading states, success feedback
+- Fully typed TypeScript, accessible ARIA labels
+- Merged via PR #581
 
 ## Latest Completed (2026-01-18 - Iteration 30)
 
