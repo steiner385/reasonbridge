@@ -488,4 +488,59 @@ describe('CommonGroundSynthesizer', () => {
       expect(result.agreementZones[0]?.supportingEvidence).toContain('Evidence point 1');
     });
   });
+
+  describe('calculateAgreementPercentage', () => {
+    it('should return null when there are no alignments', () => {
+      const result = synthesizer.calculateAgreementPercentage(0, 0, 0);
+      expect(result).toBeNull();
+    });
+
+    it('should calculate 100% agreement when all participants support', () => {
+      const result = synthesizer.calculateAgreementPercentage(10, 0, 0);
+      expect(result).toBe(100);
+    });
+
+    it('should calculate 0% agreement when all participants oppose', () => {
+      const result = synthesizer.calculateAgreementPercentage(0, 10, 0);
+      expect(result).toBe(0);
+    });
+
+    it('should calculate 50% agreement with equal support and opposition', () => {
+      const result = synthesizer.calculateAgreementPercentage(5, 5, 0);
+      expect(result).toBe(50);
+    });
+
+    it('should include nuanced responses in total when calculating percentage', () => {
+      // 6 support out of 12 total = 50%
+      const result = synthesizer.calculateAgreementPercentage(6, 3, 3);
+      expect(result).toBe(50);
+    });
+
+    it('should round agreement percentage to nearest integer', () => {
+      // 2 support out of 3 total = 66.666... % -> 67%
+      const result = synthesizer.calculateAgreementPercentage(2, 1, 0);
+      expect(result).toBe(67);
+    });
+
+    it('should calculate 90% agreement correctly', () => {
+      const result = synthesizer.calculateAgreementPercentage(9, 1, 0);
+      expect(result).toBe(90);
+    });
+
+    it('should calculate 70% agreement correctly (threshold value)', () => {
+      const result = synthesizer.calculateAgreementPercentage(7, 3, 0);
+      expect(result).toBe(70);
+    });
+
+    it('should handle large numbers correctly', () => {
+      const result = synthesizer.calculateAgreementPercentage(700, 200, 100);
+      expect(result).toBe(70);
+    });
+
+    it('should calculate agreement with high nuanced count', () => {
+      // 3 support out of 13 total = 23.077% -> 23%
+      const result = synthesizer.calculateAgreementPercentage(3, 2, 8);
+      expect(result).toBe(23);
+    });
+  });
 });
