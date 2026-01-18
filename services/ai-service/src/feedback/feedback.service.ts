@@ -52,6 +52,24 @@ export class FeedbackService {
   }
 
   /**
+   * Get feedback by ID
+   * @param id Feedback UUID
+   * @returns Feedback record
+   * @throws NotFoundException if feedback not found
+   */
+  async getFeedbackById(id: string): Promise<FeedbackResponseDto> {
+    const feedback = await this.prisma.feedback.findUnique({
+      where: { id },
+    });
+
+    if (!feedback) {
+      throw new NotFoundException(`Feedback with ID ${id} not found`);
+    }
+
+    return this.mapToResponseDto(feedback);
+  }
+
+  /**
    * Generate feedback using comprehensive analysis
    * Analyzes emotional tone, logical fallacies, and clarity
    * @param content The response content to analyze

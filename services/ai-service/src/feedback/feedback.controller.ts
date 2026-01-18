@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { FeedbackService } from './feedback.service.js';
 import { RequestFeedbackDto, FeedbackResponseDto } from './dto/index.js';
 
@@ -20,5 +20,18 @@ export class FeedbackController {
   @HttpCode(HttpStatus.CREATED)
   async requestFeedback(@Body() dto: RequestFeedbackDto): Promise<FeedbackResponseDto> {
     return this.feedbackService.requestFeedback(dto);
+  }
+
+  /**
+   * Get feedback by ID
+   * GET /feedback/:id
+   *
+   * @param id Feedback UUID
+   * @returns Feedback record
+   */
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getFeedback(@Param('id') id: string): Promise<FeedbackResponseDto> {
+    return this.feedbackService.getFeedbackById(id);
   }
 }
