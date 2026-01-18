@@ -2,10 +2,33 @@
 
 ## Current Status
 
-- Completed issue #140 (T144) - Implement real-time common ground updates (WebSocket)
-- ~165 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #141 (T145) - Create common ground history view
+- ~164 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #141 (T145) - Create common ground history view:**
+- Created CommonGround types in frontend/src/types/commonGround.ts (MoralFoundation, AgreementZone, Misunderstanding, GenuineDisagreement, CommonGround, CommonGroundHistoryItem)
+- Implemented useCommonGroundHistory hook (frontend/src/lib/useCommonGroundHistory.ts):
+  - useCommonGround(topicId, version?) - Fetches specific version of common ground analysis
+  - useCommonGroundHistory(topicId) - Fetches all versions for history display
+  - Auto-discovers version count and fetches all versions in parallel
+  - Returns versions sorted descending (newest first)
+- Created CommonGroundHistory component (frontend/src/components/common-ground/CommonGroundHistory.tsx):
+  - Timeline view showing evolution of common ground across versions
+  - Latest version badge highlighting
+  - Consensus score display with color coding (green 80%+, blue 60-79%, yellow 40-59%, red <40%)
+  - Participant and response counts per version
+  - Agreement/misunderstanding/disagreement counts with visual indicators
+  - Clickable history items with optional version selection callback
+  - Loading, error, and empty states
+  - Full keyboard accessibility (Enter/Space navigation)
+- Updated common-ground index.ts exports
+- Added e2e test scaffolding (frontend/e2e/common-ground-history.spec.ts)
+- TypeScript compilation and build successful
+- Resolved merge conflict with main (integrated with other common ground components)
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #522
 
 **Issue #140 (T144) - Implement real-time common ground updates (WebSocket):**
 - Implemented real-time WebSocket infrastructure using Socket.io
