@@ -4,6 +4,7 @@ import AboutPage from '../pages/AboutPage';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
+import { FeedbackPreferencesPage } from '../pages/Settings';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -36,6 +37,10 @@ export const routes: RouteObject[] = [
   {
     path: '/profile/:id',
     element: <UserProfilePage />,
+  },
+  {
+    path: '/settings/feedback',
+    element: <FeedbackPreferencesPage />,
   },
   {
     path: '*',
