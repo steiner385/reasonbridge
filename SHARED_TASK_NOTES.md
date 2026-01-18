@@ -2,29 +2,16 @@
 
 ## Current Status
 
-- Completed issue #124 (T128) - Implement common ground refresh trigger
+- All lint, format, and type checks passing on main
+- Ready for next issue
 - ~161 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
 
-**Issue #124 (T128) - Implement common ground refresh trigger:**
-
-- Created CommonGroundTriggerService with threshold-based trigger logic (services/discussion-service/src/services/common-ground-trigger.service.ts:143)
-- Updated ResponsesService to increment topic response count and call trigger (services/discussion-service/src/responses/responses.service.ts:165-180)
-- Trigger conditions:
-  - Response delta ≥ 10 new responses since last analysis
-  - Time elapsed ≥ 6 hours since last analysis
-  - First analysis requires ≥ 10 participants
-- Fire-and-forget trigger check (doesn't block response creation)
-- Placeholder for AI service integration (HTTP client setup needed)
-- Merged via PR #492
-
-**Issue #123 (T127) - Implement GET /topics/:id/common-ground endpoint:**
-
-- Created CommonGroundResponseDto and related DTOs matching OpenAPI spec (services/discussion-service/src/topics/dto/common-ground-response.dto.ts:38)
-- Implemented TopicsService.getCommonGroundAnalysis() to fetch analysis from database (services/discussion-service/src/topics/topics.service.ts:220-263)
-- Added GET /topics/:id/common-ground endpoint to TopicsController (services/discussion-service/src/topics/topics.controller.ts:32-38)
-- Merged via PR #491
+**Lint/Format Fixes:**
+- Fixed Prettier formatting issues across 4 files
+- All lint checks, format checks, and type checks now pass
+- PR #493 merged (3 files from T127), additional fix pushed directly to main
 
 ## Notes
 
