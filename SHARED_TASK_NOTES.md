@@ -2,10 +2,26 @@
 
 ## Current Status
 
-- Completed issue #151 (T155) - E2E: View common ground summary
+- Completed issue #152 (T156) - E2E: Explore divergence points
 - ~171 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #152 (T156) - E2E: Explore divergence points:**
+- Created comprehensive E2E test suite: `frontend/e2e/explore-divergence-points.spec.ts`
+- 27 test cases covering divergence point visualization and exploration:
+  - Display and rendering: divergence points section, proposition text, cards
+  - Polarization metrics: scores, color-coded visualization (red/yellow/blue)
+  - Viewpoints: participant counts, percentages, reasoning expansion
+  - Underlying values and disagreement drivers
+  - Interaction: expand/collapse reasoning, click handlers
+  - Responsive design: mobile (375x667), tablet (768x1024), desktop (1920x1080)
+  - Real-time: WebSocket update handling
+  - Edge cases: high polarization (>0.7), moderate (0.4-0.69), no divergence scenarios
+  - State management: loading, error, and empty state handling
+  - Integration: viewpoint distribution thresholds (≥20%), misunderstanding vs divergence
+- All 27 tests passing (4.5s runtime)
+- Merged via PR #530
 
 **Issue #151 (T155) - E2E: View common ground summary:**
 - Created comprehensive E2E test suite: frontend/e2e/view-common-ground-summary.spec.ts
