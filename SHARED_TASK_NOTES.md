@@ -50,10 +50,18 @@
 - Completed issue #97 (T101) - POST /feedback/request endpoint
 - Completed issue #98 (T102) - Feedback analysis logic implementation
 - Completed issue #99 (T103) - Suggestions generation implementation
-- ~183 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #100 (T104) - GET /feedback/:id endpoint
+- ~182 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Iteration Summary (2026-01-17)
-**Completed Issue #99 (T103) - Suggestions generation:**
+**Completed Issue #100 (T104) - GET /feedback/:id endpoint:**
+- Added getFeedbackById method to FeedbackService
+- Added GET /feedback/:id endpoint to FeedbackController
+- Proper error handling with NotFoundException
+- Reuses existing FeedbackResponseDto for consistent responses
+- Merged via PR #461
+
+**Previous: Completed Issue #99 (T103) - Suggestions generation:**
 - Created SuggestionsService orchestrator for tag and topic-link suggestions
 - Created TagSuggester synthesizer with category detection and keyword extraction
 - Created TopicLinkSuggester with relationship type detection (supports/contradicts/extends/questions/relates_to)
