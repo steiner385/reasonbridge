@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import { CommonGroundDetectorService } from '../services/common-ground-detector.service.js';
 import { CommonGroundSynthesizer } from '../common-ground/common-ground.synthesizer.js';
 import { BedrockService } from '../ai/bedrock.service.js';
@@ -7,18 +6,26 @@ import type { TopicData } from '../common-ground/common-ground.synthesizer.js';
 describe('CommonGroundDetectorService', () => {
   let service: CommonGroundDetectorService;
   let synthesizer: CommonGroundSynthesizer;
-  let bedrock: BedrockService;
+  let mockBedrock: any;
 
   beforeEach(() => {
     synthesizer = new CommonGroundSynthesizer();
-    bedrock = new BedrockService();
-    service = new CommonGroundDetectorService(synthesizer, bedrock);
+
+    // Create mock bedrock service
+    mockBedrock = {
+      isReady: async () => false,
+      clusterTexts: async () => [],
+      generateClarification: async () => '',
+      identifyValues: async () => [],
+    };
+
+    service = new CommonGroundDetectorService(synthesizer, mockBedrock as BedrockService);
   });
 
   describe('detectCommonGround - AI not available', () => {
     it('should fall back to pattern-based analysis when AI is not ready', async () => {
       // Mock AI as not ready
-      vi.spyOn(bedrock, 'isReady').mockResolvedValue(false);
+      mockBedrock.isReady = async () => false;
 
       const topicData: TopicData = {
         topicId: 'topic-1',
@@ -61,10 +68,10 @@ describe('CommonGroundDetectorService', () => {
   describe('detectCommonGround - AI available', () => {
     it('should use AI to enhance misunderstanding detection with semantic clustering', async () => {
       // Mock AI as ready
-      vi.spyOn(bedrock, 'isReady').mockResolvedValue(true);
+      mockBedrock.isReady = async () => true;
 
       // Mock clustering response
-      vi.spyOn(bedrock, 'clusterTexts').mockResolvedValue([
+      mockBedrock.clusterTexts = async () => [
         {
           theme: 'Free speech with hate speech exceptions',
           members: [
@@ -79,14 +86,11 @@ describe('CommonGroundDetectorService', () => {
             'Different platforms need different rules',
           ],
         },
-      ]);
+      ];
 
       // Mock clarification generation
-      vi
-        .spyOn(bedrock, 'generateClarification')
-        .mockResolvedValue(
-          'Participants have different interpretations of "absolute": some see it as unrestricted except for hate speech, while others interpret it as context-dependent based on platform norms.',
-        );
+      mockBedrock.generateClarification = async () =>
+        'Participants have different interpretations of "absolute": some see it as unrestricted except for hate speech, while others interpret it as context-dependent based on platform norms.';
 
       const topicData: TopicData = {
         topicId: 'topic-1',
@@ -152,16 +156,14 @@ describe('CommonGroundDetectorService', () => {
 
     it('should use AI to identify underlying values in disagreements', async () => {
       // Mock AI as ready
-      vi.spyOn(bedrock, 'isReady').mockResolvedValue(true);
+      mockBedrock.isReady = async () => true;
 
       // Mock value identification
-      vi
-        .spyOn(bedrock, 'identifyValues')
-        .mockResolvedValue([
-          'Individual liberty and autonomy',
-          'Community welfare and collective good',
-          'Fairness and equal treatment',
-        ]);
+      mockBedrock.identifyValues = async () => [
+        'Individual liberty and autonomy',
+        'Community welfare and collective good',
+        'Fairness and equal treatment',
+      ];
 
       const topicData: TopicData = {
         topicId: 'topic-1',
@@ -220,10 +222,12 @@ describe('CommonGroundDetectorService', () => {
 
     it('should gracefully handle AI errors and fall back to pattern-based results', async () => {
       // Mock AI as ready
-      vi.spyOn(bedrock, 'isReady').mockResolvedValue(true);
+      mockBedrock.isReady = async () => true;
 
       // Mock clustering to throw an error
-      vi.spyOn(bedrock, 'clusterTexts').mockRejectedValue(new Error('AI service error'));
+      mockBedrock.clusterTexts = async () => {
+        throw new Error('AI service error');
+      };
 
       const topicData: TopicData = {
         topicId: 'topic-1',
@@ -295,7 +299,7 @@ describe('CommonGroundDetectorService', () => {
     });
 
     it('should handle propositions without nuanced explanations', async () => {
-      vi.spyOn(bedrock, 'isReady').mockResolvedValue(true);
+      mockBedrock.isReady = async () => true;
 
       const topicData: TopicData = {
         topicId: 'topic-1',
