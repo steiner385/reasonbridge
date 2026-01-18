@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, Get, BadRequestException, Param, Query } from '@nestjs/common';
 import type { ScreeningResult } from '../services/content-screening.service.js';
 import { ContentScreeningService } from '../services/content-screening.service.js';
 import type {
@@ -6,6 +6,14 @@ import type {
   AiRecommendationResponse,
 } from '../services/ai-review.service.js';
 import { AIReviewService } from '../services/ai-review.service.js';
+import { ModerationActionsService } from '../services/moderation-actions.service.js';
+import type {
+  CreateActionRequest,
+  ApproveActionRequest,
+  RejectActionRequest,
+  ModerationActionResponse,
+  ModerationActionDetailResponse,
+} from '../services/moderation-actions.service.js';
 
 export interface ScreenContentRequest {
   contentId: string;
@@ -22,6 +30,7 @@ export class ModerationController {
   constructor(
     private readonly screeningService: ContentScreeningService,
     private readonly aiReviewService: AIReviewService,
+    private readonly actionsService: ModerationActionsService,
   ) {}
 
   @Post('screen')
@@ -116,5 +125,132 @@ export class ModerationController {
     approvalRate: number;
   }> {
     return this.aiReviewService.getRecommendationStats();
+  }
+
+  @Get('actions')
+  async listActions(
+    @Query('targetType') targetType?: string,
+    @Query('status') status?: string,
+    @Query('severity') severity?: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<{
+    actions: ModerationActionResponse[];
+    nextCursor: string | null;
+    totalCount: number;
+  }> {
+    const targetTypeEnum = targetType?.toUpperCase() as
+      | 'RESPONSE'
+      | 'USER'
+      | 'TOPIC'
+      | undefined;
+    const statusEnum = status?.toUpperCase() as
+      | 'PENDING'
+      | 'ACTIVE'
+      | 'APPEALED'
+      | 'REVERSED'
+      | undefined;
+    const severityEnum = severity?.toUpperCase() as
+      | 'NON_PUNITIVE'
+      | 'CONSEQUENTIAL'
+      | undefined;
+
+    return this.actionsService.listActions(
+      targetTypeEnum,
+      statusEnum,
+      severityEnum,
+      limit,
+      cursor,
+    );
+  }
+
+  @Post('actions')
+  async createAction(
+    @Body() request: CreateActionRequest,
+  ): Promise<ModerationActionResponse> {
+    if (!request.targetType || !request.targetId || !request.actionType) {
+      throw new BadRequestException(
+        'targetType, targetId, and actionType are required',
+      );
+    }
+
+    if (!request.reasoning || request.reasoning.trim().length === 0) {
+      throw new BadRequestException('reasoning is required');
+    }
+
+    // TODO: Extract moderator ID from JWT token when auth is implemented
+    const moderatorId = 'system';
+
+    return this.actionsService.createAction(request, moderatorId);
+  }
+
+  @Get('actions/:actionId')
+  async getAction(
+    @Param('actionId') actionId: string,
+  ): Promise<ModerationActionDetailResponse> {
+    return this.actionsService.getAction(actionId);
+  }
+
+  @Post('actions/:actionId/approve')
+  async approveAction(
+    @Param('actionId') actionId: string,
+    @Body() request?: ApproveActionRequest,
+  ): Promise<ModerationActionResponse> {
+    // TODO: Extract moderator ID from JWT token when auth is implemented
+    const moderatorId = 'system';
+    return this.actionsService.approveAction(actionId, moderatorId, request);
+  }
+
+  @Post('actions/:actionId/reject')
+  async rejectAction(
+    @Param('actionId') actionId: string,
+    @Body() request: RejectActionRequest,
+  ): Promise<void> {
+    if (!request.reason || request.reason.trim().length === 0) {
+      throw new BadRequestException('reason is required');
+    }
+
+    return this.actionsService.rejectAction(actionId, request);
+  }
+
+  @Get('users/:userId/actions')
+  async getUserActions(
+    @Param('userId') userId: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<{
+    actions: ModerationActionResponse[];
+    nextCursor: string | null;
+    totalCount: number;
+  }> {
+    return this.actionsService.getUserActions(userId, limit, cursor);
+  }
+
+  @Post('interventions/cooling-off')
+  async sendCoolingOffPrompt(
+    @Body()
+    request: {
+      userIds: string[];
+      topicId: string;
+      prompt: string;
+    },
+  ): Promise<{ sent: number }> {
+    if (!request.userIds || request.userIds.length === 0) {
+      throw new BadRequestException('userIds array is required');
+    }
+
+    if (!request.topicId) {
+      throw new BadRequestException('topicId is required');
+    }
+
+    if (!request.prompt || request.prompt.trim().length === 0) {
+      throw new BadRequestException('prompt is required');
+    }
+
+    return this.actionsService.sendCoolingOffPrompt(
+      request.userIds,
+      request.topicId,
+      request.prompt,
+    );
   }
 }
