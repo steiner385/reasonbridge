@@ -2,10 +2,39 @@
 
 ## Current Status
 
-- Completed issue #138 (T142) - Create common ground notifications
-- ~166 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
+- Completed issue #140 (T144) - Implement real-time common ground updates (WebSocket)
+- ~165 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
 
 ## Latest Completed (2026-01-18)
+
+**Issue #140 (T144) - Implement real-time common ground updates (WebSocket):**
+- Implemented real-time WebSocket infrastructure using Socket.io
+- Backend WebSocket Gateway (services/notification-service/src/gateways/notification.gateway.ts):
+  - Handles Socket.io connections on `/notifications` namespace
+  - Topic-specific subscriptions via `subscribe:common-ground` and `unsubscribe:common-ground` events
+  - Room-based broadcasting: `topic:{topicId}:common-ground`
+  - Emits `common-ground:generated` and `common-ground:updated` events to subscribers
+  - CORS configuration for frontend connectivity
+  - Connection/disconnection logging
+- Updated CommonGroundNotificationHandler to broadcast WebSocket events after creating notifications
+- Created GatewaysModule and integrated into AppModule and HandlersModule
+- Frontend useCommonGroundUpdates hook (frontend/src/hooks/useCommonGroundUpdates.ts):
+  - Custom React hook for WebSocket subscription management
+  - Auto-connects to notification service on mount
+  - Subscribes to topic-specific common ground updates
+  - Transforms WebSocket payloads to CommonGroundAnalysis interface
+  - Auto-cleanup on unmount (unsubscribe + disconnect)
+  - Configurable enable/disable support
+  - Comprehensive TypeScript types and JSDoc
+- Integrated hook with TopicDetailPage (frontend/src/pages/Topics/TopicDetailPage.tsx):
+  - Live state management for real-time analysis updates
+  - Instant UI updates when WebSocket events received
+  - Fallback to HTTP data on initial load
+- Added socket.io-client@4.8.3 dependency to frontend
+- TypeScript compilation successful (frontend and backend)
+- Vite build successful (153 modules, 330.93 kB gzipped)
+- Addresses User Story 3 (US3) - Common Ground Analysis
+- Merged via PR #521
 
 **Issue #138 (T142) - Create common ground notifications:**
 - Created CommonGroundNotificationHandler (services/notification-service/src/handlers/common-ground-notification.handler.ts)
