@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { ModerationQueueView } from '../../components/moderation';
 import {
   getModerationActions,
   getAppeals,
@@ -35,7 +36,7 @@ export default function ModerationDashboardPage() {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'actions' | 'appeals'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'actions' | 'appeals' | 'queue'>('overview');
   const [actionFilter, setActionFilter] = useState<ModerationActionStatus | 'all'>('pending');
   const [approvingActionId, setApprovingActionId] = useState<string | null>(null);
   const [rejectingActionId, setRejectingActionId] = useState<string | null>(null);
@@ -209,6 +210,16 @@ export default function ModerationDashboardPage() {
           }`}
         >
           Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('queue')}
+          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            activeTab === 'queue'
+              ? 'border-primary-500 text-primary-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Queue
         </button>
         <button
           onClick={() => setActiveTab('actions')}
@@ -401,6 +412,13 @@ export default function ModerationDashboardPage() {
               </Card>
             </>
           ) : null}
+        </div>
+      )}
+
+      {/* Queue Tab */}
+      {activeTab === 'queue' && (
+        <div>
+          <ModerationQueueView initialStatus="pending" />
         </div>
       )}
 
