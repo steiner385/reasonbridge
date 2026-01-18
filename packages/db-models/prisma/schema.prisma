@@ -569,6 +569,12 @@ model ModerationAction {
   createdAt     DateTime             @default(now()) @map("created_at")
   executedAt    DateTime?            @map("executed_at")
 
+  // Temporary ban fields
+  isTemporary   Boolean?             @default(false) @map("is_temporary")
+  banDurationDays Int?               @map("ban_duration_days")
+  expiresAt     DateTime?            @map("expires_at")
+  liftedAt      DateTime?            @map("lifted_at")
+
   // Relations
   approvedBy User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
   appeals    Appeal[]
@@ -576,6 +582,7 @@ model ModerationAction {
   @@index([targetType, targetId])
   @@index([status])
   @@index([severity])
+  @@index([expiresAt]) // For finding expired bans
   @@map("moderation_actions")
 }
 
