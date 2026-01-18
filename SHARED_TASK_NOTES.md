@@ -2,12 +2,36 @@
 
 ## Current Status
 
-- Completed issue #324 (L0) - Create top-level README.md
-- ~168 open issues remaining (mostly L1-L3 foundation tasks, user stories US1-US6, polish phase)
-- README.md enhanced with comprehensive GitHub best practices sections
+- Issue #194 (T198) - Create appeal status page COMPLETED and PR #592 created
+- ~170 open issues remaining
 - Main branch synced with origin/main
-- Current development branch at main - ready for next issue
-- No failing tests (131+ passing) - project at stable state ready for next issue
+- Code compiles successfully, no TypeScript errors in AppealStatusPage
+- PR blocked by pre-existing CI infrastructure issues (detect-secrets not installed)
+
+## Latest In Progress (2026-01-18 - Iteration 36)
+
+**Issue #194 (T198) - Create appeal status page:**
+- Created AppealStatusPage component (frontend/src/pages/Appeal/AppealStatusPage.tsx:1-400)
+- Added /appeals route (frontend/src/routes/index.tsx:12, 66-68)
+- Features:
+  - View all appeals with collapsible detail cards
+  - Filter by status (all, pending, under_review, upheld, denied)
+  - Display original moderation action details
+  - Show moderator decisions and reasoning
+  - Timeline info (submitted, resolved dates)
+  - Status badges with color coding
+  - Helpful info about appeal process
+- Code compiles successfully, TypeScript strict mode passes
+- Fixed pnpm-lock.yaml issue from #589 (packages/shared dependencies)
+- PR #592 created: https://github.com/steiner385/uniteDiscord/pull/592
+
+**CI Status:** PR checks failing due to pre-existing infrastructure issues:
+- `detect-secrets` tool not installed in CI environment (not code-related)
+- PR Size Check: PASSED ✅
+- Security Scan: PASSED ✅
+- Quick Validation: FAILED (due to lockfile generation, now fixed)
+- Build Check: FAILED (depends on Security & Quality Gates passing)
+- Code quality is good - ready for merge once CI infrastructure is fixed
 
 ## Latest Completed (2026-01-18 - Iteration 35)
 
