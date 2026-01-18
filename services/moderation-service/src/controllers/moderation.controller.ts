@@ -15,6 +15,8 @@ import type {
   AppealResponse,
   ModerationActionResponse,
   ModerationActionDetailResponse,
+  ReviewAppealRequest,
+  PendingAppealResponse,
 } from '../services/moderation-actions.service.js';
 
 export interface ScreenContentRequest {
@@ -268,5 +270,35 @@ export class ModerationController {
     // TODO: Extract appellant ID from JWT token when auth is implemented
     const appellantId = 'system';
     return this.actionsService.createAppeal(actionId, appellantId, request);
+  }
+
+  @Get('appeals/pending')
+  async getPendingAppeals(
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<{
+    appeals: PendingAppealResponse[];
+    nextCursor: string | null;
+    totalCount: number;
+  }> {
+    return this.actionsService.getPendingAppeals(limit, cursor);
+  }
+
+  @Post('appeals/:appealId/review')
+  async reviewAppeal(
+    @Param('appealId') appealId: string,
+    @Body() request: ReviewAppealRequest,
+  ): Promise<AppealResponse> {
+    if (!request.decision || !['upheld', 'denied'].includes(request.decision)) {
+      throw new BadRequestException('decision must be either "upheld" or "denied"');
+    }
+
+    if (!request.reasoning || request.reasoning.trim().length === 0) {
+      throw new BadRequestException('reasoning is required');
+    }
+
+    // TODO: Extract reviewer ID from JWT token when auth is implemented
+    const reviewerId = 'system';
+    return this.actionsService.reviewAppeal(appealId, reviewerId, request);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
-import type { ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
+import type { UserTrustUpdatedEvent, ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
 import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
 
 export interface CreateActionRequest {
@@ -33,6 +33,15 @@ export interface AppealResponse {
   decisionReasoning: string | null;
   createdAt: string;
   resolvedAt: string | null;
+}
+
+export interface ReviewAppealRequest {
+  decision: 'upheld' | 'denied';
+  reasoning: string;
+}
+
+export interface PendingAppealResponse extends AppealResponse {
+  moderationAction?: ModerationActionResponse | undefined;
 }
 
 export interface ModerationActionResponse {
@@ -467,6 +476,164 @@ export class ModerationActionsService {
     });
 
     return this.mapAppealToResponse(appeal);
+  }
+
+  /**
+   * Get pending appeals for review
+   */
+  async getPendingAppeals(
+    limit: number = 20,
+    cursor?: string,
+  ): Promise<{
+    appeals: PendingAppealResponse[];
+    nextCursor: string | null;
+    totalCount: number;
+  }> {
+    const where = {
+      status: 'PENDING' as const,
+    };
+
+    const totalCount = await this.prisma.appeal.count({ where });
+
+    const findManyArgs = {
+      where,
+      include: {
+        moderationAction: {
+          include: {
+            approvedBy: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' as const },
+      take: limit,
+      skip: cursor ? 1 : 0,
+      ...(cursor && { cursor: { id: cursor } }),
+    };
+
+    const appeals = await this.prisma.appeal.findMany(findManyArgs);
+
+    const nextCursor =
+      appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
+
+    return {
+      appeals: appeals.map((appeal) => ({
+        ...this.mapAppealToResponse(appeal),
+        moderationAction: appeal.moderationAction
+          ? this.mapModerationActionToResponse(appeal.moderationAction)
+          : undefined,
+      })),
+      nextCursor,
+      totalCount,
+    };
+  }
+
+  /**
+   * Review and decide on an appeal
+   */
+  async reviewAppeal(
+    appealId: string,
+    reviewerId: string,
+    request: ReviewAppealRequest,
+  ): Promise<AppealResponse> {
+    if (!request.reasoning || request.reasoning.trim().length === 0) {
+      throw new BadRequestException('reasoning is required');
+    }
+
+    if (request.reasoning.length < 20) {
+      throw new BadRequestException(
+        'Appeal decision reasoning must be at least 20 characters long',
+      );
+    }
+
+    if (request.reasoning.length > 2000) {
+      throw new BadRequestException(
+        'Appeal decision reasoning cannot exceed 2000 characters',
+      );
+    }
+
+    const appeal = await this.prisma.appeal.findUnique({
+      where: { id: appealId },
+      include: {
+        moderationAction: true,
+      },
+    });
+
+    if (!appeal) {
+      throw new NotFoundException(`Appeal ${appealId} not found`);
+    }
+
+    if (appeal.status !== 'PENDING') {
+      throw new BadRequestException(
+        `Appeal must be in PENDING status to review, current status: ${appeal.status}`,
+      );
+    }
+
+    const newStatus =
+      request.decision === 'upheld' ? 'UPHELD' : 'DENIED';
+
+    // Update the appeal with the decision
+    const updatedAppeal = await this.prisma.appeal.update({
+      where: { id: appealId },
+      data: {
+        status: newStatus,
+        reviewerId: reviewerId,
+        decisionReasoning: request.reasoning,
+        resolvedAt: new Date(),
+      },
+    });
+
+    // If appeal is upheld, reverse the moderation action
+    if (request.decision === 'upheld' && appeal.moderationAction) {
+      await this.prisma.moderationAction.update({
+        where: { id: appeal.moderationAction.id },
+        data: {
+          status: 'REVERSED',
+          reasoning: `${appeal.moderationAction.reasoning}\n\n[APPEAL UPHELD: ${request.reasoning}]`,
+        },
+      });
+
+      // Publish appeal upheld event
+      try {
+        const event: UserTrustUpdatedEvent = {
+          id: appealId,
+          type: MODERATION_EVENT_TYPES.USER_TRUST_UPDATED,
+          timestamp: new Date().toISOString(),
+          version: 1,
+          payload: {
+            userId: appeal.appellantId,
+            previousScores: {
+              ability: 0,
+              benevolence: 0,
+              integrity: 0,
+            },
+            newScores: {
+              ability: 0,
+              benevolence: 0,
+              integrity: 0,
+            },
+            reason: 'appeal_upheld',
+            moderationActionId: appeal.moderationAction.id,
+            updatedAt: new Date().toISOString(),
+          },
+          metadata: {
+            source: 'moderation-service',
+            userId: reviewerId,
+          },
+        };
+
+        await this.queueService.publishEvent(event);
+      } catch (error) {
+        // Log error but don't fail the request - appeal is still decided
+        console.error('Failed to publish appeal upheld event', error);
+      }
+    }
+
+    return this.mapAppealToResponse(updatedAppeal);
   }
 
   /**
