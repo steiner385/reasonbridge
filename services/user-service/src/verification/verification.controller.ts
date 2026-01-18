@@ -1,4 +1,15 @@
-import { Controller, Post, Body, UseGuards, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Logger,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { VerificationService } from './verification.service.js';
@@ -101,5 +112,115 @@ export class VerificationController {
       `Video upload confirmation from user ${userId}: verification=${dto.verificationId}`,
     );
     return this.videoUploadService.confirmVideoUpload(userId, dto);
+  }
+
+  /**
+   * GET /verification/:verificationId
+   * Get verification status
+   * Automatically marks as expired if past expiry time
+   *
+   * @param verificationId - Verification ID
+   * @param userId - Authenticated user ID
+   * @returns Verification record with current status
+   */
+  @Get(':verificationId')
+  async getVerificationStatus(
+    @Param('verificationId') verificationId: string,
+    @CurrentUser() userId: string,
+  ) {
+    this.logger.debug(`User ${userId} checking verification status for ${verificationId}`);
+
+    const verification = await this.verificationService.getVerification(verificationId);
+
+    if (!verification || verification.userId !== userId) {
+      throw new Error('Verification not found or unauthorized');
+    }
+
+    return {
+      id: verification.id,
+      type: verification.type,
+      status: verification.status,
+      createdAt: verification.createdAt,
+      expiresAt: verification.expiresAt,
+      verifiedAt: verification.verifiedAt,
+      isExpired: verification.expiresAt && verification.expiresAt < new Date(),
+    };
+  }
+
+  /**
+   * GET /verification/user/pending
+   * Get pending verifications for authenticated user
+   * Useful for checking if user has any active verification attempts
+   *
+   * @param userId - Authenticated user ID
+   * @returns Array of pending verification records
+   */
+  @Get('user/pending')
+  async getPendingVerifications(@CurrentUser() userId: string) {
+    this.logger.debug(`Fetching pending verifications for user ${userId}`);
+    return this.verificationService.getPendingVerifications(userId);
+  }
+
+  /**
+   * PATCH /verification/:verificationId/complete
+   * Mark verification as complete/verified
+   * Called after successful identity verification
+   *
+   * @param verificationId - Verification ID
+   * @param userId - Authenticated user ID
+   * @returns Updated verification record
+   */
+  @Patch(':verificationId/complete')
+  async completeVerification(
+    @Param('verificationId') verificationId: string,
+    @CurrentUser() userId: string,
+  ) {
+    this.logger.debug(`Completing verification ${verificationId} for user ${userId}`);
+    return this.verificationService.completeVerification(verificationId, userId);
+  }
+
+  /**
+   * POST /verification/:verificationId/re-verify
+   * Initiate re-verification process
+   * Allows user to request a new verification if previous one expired/failed
+   * Cleans up old expired verification attempts
+   *
+   * @param verificationId - Original verification ID
+   * @param userId - Authenticated user ID
+   * @returns New VerificationResponseDto
+   */
+  @Post(':verificationId/re-verify')
+  @HttpCode(HttpStatus.CREATED)
+  async reVerify(
+    @Param('verificationId') verificationId: string,
+    @CurrentUser() userId: string,
+  ) {
+    this.logger.debug(`User ${userId} initiating re-verification for ${verificationId}`);
+
+    // Get original verification to determine type
+    const originalVerification = await this.verificationService.getVerification(
+      verificationId,
+    );
+
+    if (!originalVerification || originalVerification.userId !== userId) {
+      throw new Error('Verification not found or unauthorized');
+    }
+
+    // Re-request verification of the same type
+    return this.verificationService.reVerify(userId, originalVerification.type);
+  }
+
+  /**
+   * GET /verification/user/history
+   * Get verification history for authenticated user
+   * Shows all verification attempts (pending, verified, expired, rejected)
+   *
+   * @param userId - Authenticated user ID
+   * @returns Array of verification records
+   */
+  @Get('user/history')
+  async getVerificationHistory(@CurrentUser() userId: string) {
+    this.logger.debug(`Fetching verification history for user ${userId}`);
+    return this.verificationService.getVerificationHistory(userId);
   }
 }
