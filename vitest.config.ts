@@ -59,6 +59,8 @@ export default defineConfig({
       // Frontend component tests - run with separate frontend/vitest.config.ts using jsdom
       'frontend/src/components/**/*.spec.tsx',
       'frontend/src/components/**/*.test.tsx',
+      // Frontend component test - requires separate vitest config with React testing setup
+      '**/moderation/__tests__/ModerationActionButtons.spec.tsx',
       // CI: Prisma client runtime resolution issues - TODO: fix Prisma ESM bundling
       // These tests pass locally but fail in CI due to pnpm workspace symlink handling
       '**/trust-score.calculator.test.ts',
