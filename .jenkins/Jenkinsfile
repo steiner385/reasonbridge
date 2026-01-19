@@ -67,11 +67,30 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                // Inject AWS credentials for Bedrock AI service tests via shared library
+                // Run tests with JSON output for intelligent failure analysis
                 script {
-                    withAwsCredentials {
-                        // Run tests with JSON output for intelligent failure analysis
-                        // Use pipefail to capture Jest's exit code, not tee's
+                    // Try to inject AWS credentials if available, otherwise run without them
+                    try {
+                        withAwsCredentials {
+                            // Run tests with AWS Bedrock credentials available for AI service tests
+                            // Use pipefail to capture Jest's exit code, not tee's
+                            def testResult = sh(
+                                script: '''#!/bin/bash
+                                    set -o pipefail
+                                    npx pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
+                                ''',
+                                returnStatus: true
+                            )
+                            env.TEST_EXIT_CODE = testResult.toString()
+                            env.TEST_RESULTS_FILE = 'test-results.json'
+
+                            if (testResult != 0) {
+                                error("Unit tests failed with exit code ${testResult}")
+                            }
+                        }
+                    } catch (Exception e) {
+                        // AWS credentials not configured, run tests without Bedrock
+                        echo "WARNING: AWS credentials not available, running tests without Bedrock: ${e.message}"
                         def testResult = sh(
                             script: '''#!/bin/bash
                                 set -o pipefail
