@@ -39,6 +39,8 @@ pipeline {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
                 echo "Building commit: ${env.GIT_COMMIT_SHORT}"
+                // Report pending status to GitHub for branch protection
+                githubNotify context: 'Jenkins CI', status: 'PENDING', description: 'Build in progress'
             }
         }
 
@@ -126,9 +128,11 @@ pipeline {
     post {
         success {
             echo 'Build succeeded!'
+            githubNotify context: 'Jenkins CI', status: 'SUCCESS', description: 'All checks passed'
         }
         failure {
             echo 'Build failed!'
+            githubNotify context: 'Jenkins CI', status: 'FAILURE', description: 'Build or tests failed'
         }
     }
 }
