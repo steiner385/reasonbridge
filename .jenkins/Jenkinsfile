@@ -106,14 +106,6 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'coverage/junit.xml'
-                    publishHTML(target: [
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'coverage',
-                        reportFiles: 'index.html',
-                        reportName: 'Unit Test Coverage'
-                    ])
                 }
             }
         }
@@ -176,14 +168,6 @@ pipeline {
             post {
                 always {
                     sh 'docker-compose down -v || true'
-                    publishHTML(target: [
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'frontend/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright E2E Report'
-                    ])
                 }
             }
         }
