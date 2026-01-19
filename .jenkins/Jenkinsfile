@@ -49,35 +49,39 @@ pipeline {
         CI = 'true'
         NODE_ENV = 'test'
         PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        BRANCH_NAME = "${params.ref ? params.ref.replaceAll('refs/heads/', '') : 'main'}"
+        // Note: 'ref' and 'after' come from Generic Webhook Trigger as env vars, not params
     }
 
     stages {
         stage('Initialize') {
             steps {
                 script {
-                    // Determine which branch/commit to checkout
-                    def checkoutBranch = env.BRANCH_NAME ?: 'main'
-                    def checkoutCommit = params.after ?: ''
+                    // Generic Webhook Trigger provides 'ref' and 'after' as env vars
+                    def webhookRef = env.ref ?: ''
+                    def webhookCommit = env.after ?: ''
+
+                    // Extract branch name from ref (refs/heads/main -> main)
+                    def checkoutBranch = webhookRef ? webhookRef.replaceAll('refs/heads/', '') : 'main'
 
                     echo "Building branch: ${checkoutBranch}"
-                    if (checkoutCommit) {
-                        echo "Commit SHA: ${checkoutCommit}"
+                    if (webhookCommit) {
+                        echo "Commit SHA: ${webhookCommit}"
                     }
 
                     // Checkout the specific branch/commit
                     checkout([
                         $class: 'GitSCM',
-                        branches: [[name: checkoutCommit ?: "*/${checkoutBranch}"]],
+                        branches: [[name: webhookCommit ?: "*/${checkoutBranch}"]],
                         userRemoteConfigs: [[
                             url: 'https://github.com/steiner385/uniteDiscord.git',
                             credentialsId: 'github-credentials'
                         ]]
                     ])
 
-                    // Extract git info
+                    // Extract git info and set for GitHub status reporting
                     env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.BRANCH_NAME = checkoutBranch
 
                     echo "Building commit: ${env.GIT_COMMIT_SHORT}"
                 }
