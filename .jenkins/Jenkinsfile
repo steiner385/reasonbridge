@@ -135,11 +135,13 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 sh '''
+                    export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
                     # Helper function to handle both docker compose (v2) and docker-compose (v1)
                     docker_compose() {
                         if command -v docker-compose &> /dev/null; then
                             docker-compose "$@"
-                        elif docker compose version &> /dev/null; then
+                        elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
                             docker compose "$@"
                         else
                             echo "ERROR: Neither docker-compose nor docker compose found" >&2
@@ -161,10 +163,12 @@ pipeline {
                 always {
                     junit allowEmptyResults: true, testResults: 'coverage/integration-junit.xml'
                     sh '''
+                        export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
                         docker_compose() {
                             if command -v docker-compose &> /dev/null; then
                                 docker-compose "$@"
-                            elif docker compose version &> /dev/null; then
+                            elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
                                 docker compose "$@"
                             else
                                 echo "ERROR: Neither docker-compose nor docker compose found" >&2
@@ -198,11 +202,13 @@ pipeline {
             }
             steps {
                 sh '''
+                    export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
                     # Helper function to handle both docker compose (v2) and docker-compose (v1)
                     docker_compose() {
                         if command -v docker-compose &> /dev/null; then
                             docker-compose "$@"
-                        elif docker compose version &> /dev/null; then
+                        elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
                             docker compose "$@"
                         else
                             echo "ERROR: Neither docker-compose nor docker compose found" >&2
@@ -226,10 +232,12 @@ pipeline {
             post {
                 always {
                     sh '''
+                        export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
                         docker_compose() {
                             if command -v docker-compose &> /dev/null; then
                                 docker-compose "$@"
-                            elif docker compose version &> /dev/null; then
+                            elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
                                 docker compose "$@"
                             else
                                 echo "ERROR: Neither docker-compose nor docker compose found" >&2
