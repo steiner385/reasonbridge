@@ -67,22 +67,19 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                // Run tests with JSON output for intelligent failure analysis
                 script {
                     // Try to inject AWS credentials if available, otherwise run without them
                     try {
                         withAwsCredentials {
                             // Run tests with AWS Bedrock credentials available for AI service tests
-                            // Use pipefail to capture Jest's exit code, not tee's
                             def testResult = sh(
                                 script: '''#!/bin/bash
                                     set -o pipefail
-                                    npx pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
+                                    npx pnpm run test:unit -- --coverage 2>&1 | tee test-output.log
                                 ''',
                                 returnStatus: true
                             )
-                            env.TEST_EXIT_CODE = testResult.toString()
-                            env.TEST_RESULTS_FILE = 'test-results.json'
+                            env.UNIT_TEST_EXIT_CODE = testResult.toString()
 
                             if (testResult != 0) {
                                 error("Unit tests failed with exit code ${testResult}")
@@ -94,17 +91,99 @@ pipeline {
                         def testResult = sh(
                             script: '''#!/bin/bash
                                 set -o pipefail
-                                npx pnpm run test:unit -- --reporter=json --outputFile=test-results.json 2>&1 | tee test-output.log
+                                npx pnpm run test:unit -- --coverage 2>&1 | tee test-output.log
                             ''',
                             returnStatus: true
                         )
-                        env.TEST_EXIT_CODE = testResult.toString()
-                        env.TEST_RESULTS_FILE = 'test-results.json'
+                        env.UNIT_TEST_EXIT_CODE = testResult.toString()
 
                         if (testResult != 0) {
                             error("Unit tests failed with exit code ${testResult}")
                         }
                     }
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'coverage/junit.xml'
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Unit Test Coverage'
+                    ])
+                }
+            }
+        }
+
+        stage('Integration Tests') {
+            steps {
+                sh '''
+                    # Start test infrastructure
+                    docker-compose -f docker-compose.test.yml up -d
+
+                    # Wait for services to be ready
+                    sleep 10
+
+                    # Run integration tests
+                    npx pnpm run test:integration
+                '''
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'coverage/integration-junit.xml'
+                    sh 'docker-compose -f docker-compose.test.yml down -v || true'
+                }
+            }
+        }
+
+        stage('Contract Tests') {
+            steps {
+                sh 'npx pnpm run test:contract'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'coverage/contract-junit.xml'
+                }
+            }
+        }
+
+        stage('E2E Tests') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'develop'
+                    changeRequest target: 'main'
+                }
+            }
+            steps {
+                sh '''
+                    # Install Playwright browsers
+                    npx playwright install --with-deps
+
+                    # Start the full stack
+                    docker-compose up -d
+
+                    # Wait for services
+                    sleep 15
+
+                    # Run E2E tests
+                    npx pnpm --filter frontend run test:e2e
+                '''
+            }
+            post {
+                always {
+                    sh 'docker-compose down -v || true'
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'frontend/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright E2E Report'
+                    ])
                 }
             }
         }
@@ -118,14 +197,41 @@ pipeline {
 
     post {
         always {
-            // Publish Allure test reports if results exist
+            // Publish Allure reports from all test suites
             script {
-                if (fileExists('allure-results')) {
+                def allureResults = []
+
+                // Check for unit test results
+                if (fileExists('allure-results') && sh(script: 'test -n "$(ls -A allure-results 2>/dev/null)"', returnStatus: true) == 0) {
+                    allureResults.add([path: 'allure-results'])
+                    echo 'Unit test Allure results found'
+                }
+
+                // Check for integration test results
+                if (fileExists('allure-results/integration') && sh(script: 'test -n "$(ls -A allure-results/integration 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'Integration test Allure results found'
+                }
+
+                // Check for contract test results
+                if (fileExists('allure-results/contract') && sh(script: 'test -n "$(ls -A allure-results/contract 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'Contract test Allure results found'
+                }
+
+                // Check for e2e test results
+                if (fileExists('allure-results/e2e') && sh(script: 'test -n "$(ls -A allure-results/e2e 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'E2E test Allure results found'
+                }
+
+                // Publish all results together
+                if (allureResults.size() > 0) {
                     allure([
                         includeProperties: false,
                         jdk: '',
-                        results: [[path: 'allure-results']]
+                        results: allureResults
                     ])
+                    echo "Allure report published successfully with ${allureResults.size()} result(s)"
+                } else {
+                    echo 'No Allure results found to publish'
                 }
             }
         }
@@ -133,19 +239,23 @@ pipeline {
             echo 'Build succeeded!'
         }
         failure {
-            echo 'Build failed!'
+            echo 'Build failed! Analyzing failures and creating GitHub issues...'
             script {
-                if (env.TEST_RESULTS_FILE && fileExists(env.TEST_RESULTS_FILE)) {
-                    // Analyze test failures and create grouped GitHub issues
-                    echo 'Analyzing test failures...'
-                    analyzeTestFailures(
-                        testResultsFile: env.TEST_RESULTS_FILE,
-                        maxIssues: 10
-                    )
+                // Analyze Allure failures and create automated GitHub issues
+                if (fileExists('allure-results') && sh(script: 'test -n "$(ls -A allure-results 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'Found Allure results, analyzing test failures...'
+                    try {
+                        analyzeAllureFailures(
+                            allureResultsDir: 'allure-results',
+                            maxIssues: 10,
+                            testType: 'Test'
+                        )
+                    } catch (Exception e) {
+                        echo "WARNING: Could not analyze Allure failures: ${e.message}"
+                    }
+                } else {
+                    echo 'No Allure results found for analysis'
                 }
-                // NOTE: No fallback to generic issue creation
-                // Infrastructure failures should be investigated and fixed,
-                // not automatically tracked as GitHub issues
             }
         }
     }
