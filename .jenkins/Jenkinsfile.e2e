@@ -4,7 +4,6 @@
  * Runs Playwright E2E tests with browser support
  */
 
-@Library('unitediscord-lib@main') _
 
 pipeline {
     agent {
