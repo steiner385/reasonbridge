@@ -4,6 +4,19 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Vitest 2.x: Configure dependency handling for proper module resolution
+    server: {
+      deps: {
+        // External: Let Node.js handle these natively instead of Vite transformation
+        external: [/^@prisma\/client/],
+        // Inline: Transform workspace packages through Vite
+        inline: [/^@unite-discord\//],
+      },
+    },
+    // Vite resolve configuration for module aliases
+    alias: {
+      '@prisma/client': '@prisma/client',
+    },
     include: [
       'packages/**/src/**/*.test.ts',
       'packages/**/src/**/*.spec.ts',
