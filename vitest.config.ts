@@ -1,33 +1,44 @@
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+import path from 'path';
 
 export default defineConfig({
+  // Vite configuration for module resolution
   resolve: {
     alias: {
-      // Workspace packages - resolve to source for better test experience
-      '@unite-discord/common': resolve(__dirname, 'packages/common/src'),
-      '@unite-discord/shared': resolve(__dirname, 'packages/shared/src'),
-      '@unite-discord/db-models': resolve(__dirname, 'packages/db-models/src'),
-      '@unite-discord/event-schemas': resolve(__dirname, 'packages/event-schemas/src'),
-      '@unite-discord/ai-client': resolve(__dirname, 'packages/ai-client/src'),
-      '@unite-discord/testing-utils': resolve(__dirname, 'packages/testing-utils/src'),
+      // Explicit aliases for workspace packages
+      '@unite-discord/common': path.resolve(__dirname, 'packages/common/dist/index.js'),
+      '@unite-discord/shared': path.resolve(__dirname, 'packages/shared/dist/index.js'),
+      '@unite-discord/db-models': path.resolve(__dirname, 'packages/db-models/dist/index.js'),
+      '@unite-discord/event-schemas': path.resolve(
+        __dirname,
+        'packages/event-schemas/dist/index.js',
+      ),
+      '@unite-discord/ai-client': path.resolve(__dirname, 'packages/ai-client/dist/index.js'),
+      '@unite-discord/testing-utils': path.resolve(__dirname, 'packages/testing-utils/dist/index.js'),
+      // Prisma client alias - let Node resolve it from node_modules
+      '@prisma/client': path.resolve(__dirname, 'node_modules/@prisma/client'),
     },
+  },
+  optimizeDeps: {
+    include: ['@prisma/client'],
+  },
+  ssr: {
+    // Don't externalize these packages - bundle them
+    noExternal: [/^@unite-discord\//, '@prisma/client'],
   },
   test: {
     globals: true,
     environment: 'node',
-    // Vitest 2.x: Configure dependency handling for proper module resolution
+    // Vitest 2.x: Inline dependencies for proper module resolution in pnpm workspaces
     server: {
       deps: {
-        // External: Let Node.js handle these natively instead of Vite transformation
-        external: [/^@prisma\/client/],
-        // Inline: Transform workspace packages through Vite
-        inline: [/^@unite-discord\//],
+        inline: [
+          // Workspace packages
+          /^@unite-discord\//,
+          // Prisma client - needs inlining for proper ESM resolution
+          '@prisma/client',
+        ],
       },
-    },
-    // Vite resolve configuration for module aliases
-    alias: {
-      '@prisma/client': '@prisma/client',
     },
     include: [
       'packages/**/src/**/*.test.ts',
