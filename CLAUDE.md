@@ -78,6 +78,36 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - Console debugging statements in production code
 - Formatting inconsistencies
 
+## Jenkins CI/CD
+
+**Jenkins Server:** `http://localhost:8080` (local development)
+
+**Infrastructure:**
+- Master + 8 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
+- Start/stop: `cd /home/tony/jenkins/docker-compose && docker compose up -d` / `docker compose down`
+- Environment: GitHub credentials and agent secrets in `.env`
+
+**Key Job:** `unitediscord-ci` - Automatically triggered on all branch pushes via GitHub webhook
+- Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
+- No manual triggering needed - commits trigger builds automatically
+
+**Pipeline Stages:**
+1. Initialize - Checkout code
+2. Install Dependencies - pnpm install with frozen lockfile
+3. Build Packages - Compile shared packages
+4. Lint - ESLint and formatting checks
+5. Unit Tests - vitest with coverage thresholds
+6. Integration Tests - vitest + Docker services (postgres, redis, localstack)
+7. Contract Tests - API contract validation
+8. E2E Tests - Playwright browser automation (main/develop only)
+9. Build - Production artifact generation
+
+**Debugging:**
+- Check console output: `echo $UNIT_TEST_EXIT_CODE` for test exit codes
+- View build logs: Jenkins UI → unitediscord-ci → Build Console
+- Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
+- Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
+
 ## Active Technologies
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)
