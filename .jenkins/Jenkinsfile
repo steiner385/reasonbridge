@@ -172,9 +172,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Generate SBOM') {
+            steps {
+                generateSbom()
+            }
+        }
     }
 
     post {
+        always {
+            // Clean workspace after build to free disk space
+            cleanWs(
+                cleanWhenNotBuilt: false,
+                deleteDirs: true,
+                disableDeferredWipeout: true,
+                notFailBuild: true
+            )
+        }
         success {
             echo 'Build succeeded!'
             githubStatusReporter(
