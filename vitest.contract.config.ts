@@ -12,7 +12,7 @@ export default defineConfig({
     ],
     exclude: ['**/node_modules/**', '**/dist/**'],
     testTimeout: 15000,
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', 'allure'],
     outputFile: {
       junit: './coverage/contract-junit.xml',
     },

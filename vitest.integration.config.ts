@@ -22,7 +22,7 @@ export default defineConfig({
         singleFork: true,
       },
     },
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', 'allure'],
     outputFile: {
       junit: './coverage/integration-junit.xml',
     },
