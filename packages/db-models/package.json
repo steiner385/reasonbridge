@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "prisma": "6.3.1",
-    "typescript": "5.7.3"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@unite-discord/common": "workspace:*"
