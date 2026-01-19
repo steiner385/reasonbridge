@@ -1,0 +1,48 @@
+# Jenkins Job Configuration for uniteDiscord-ci
+# This file documents the job configuration. Apply via Jenkins UI or JCasC plugin.
+#
+# To apply this configuration:
+# 1. If using JCasC plugin: Add this to your Jenkins configuration
+# 2. If using UI: Use these settings when creating/updating the job
+
+jobs:
+  - script: >
+      pipelineJob('uniteDiscord-ci') {
+        description('uniteDiscord CI Pipeline - runs full CI workflow (lint, unit tests, build)')
+
+        properties {
+          githubProjectUrl('https://github.com/steiner385/uniteDiscord')
+
+          pipelineTriggers {
+            triggers {
+              githubPush()
+            }
+          }
+
+          buildDiscarder {
+            logRotator {
+              numToKeepStr('30')
+            }
+          }
+
+          disableConcurrentBuilds {
+            abortPrevious(true)
+          }
+        }
+
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/steiner385/uniteDiscord.git')
+                  credentials('github-credentials')
+                }
+                branches('**')  // Build ALL branches for webhook triggers
+              }
+            }
+            scriptPath('.jenkins/Jenkinsfile')
+            lightweight(false)
+          }
+        }
+      }

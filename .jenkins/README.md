@@ -44,6 +44,15 @@ Create Jenkins Pipeline jobs pointing to the Jenkinsfiles in your repository:
 | uniteDiscord-ci | `.jenkins/Jenkinsfile` | Main CI pipeline |
 | uniteDiscord-e2e | `.jenkins/Jenkinsfile.e2e` | E2E tests pipeline |
 
+**IMPORTANT: Branch Configuration**
+
+For the `uniteDiscord-ci` job, configure the Git SCM to build **ALL branches** (`**`) instead of just `*/main`. This ensures:
+- Webhook triggers work for feature branches and PRs
+- GitHub branch protection can require CI to pass before merging
+- Status checks are reported for all commits
+
+See `.jenkins/jobs/uniteDiscord-ci.yaml` for the full job configuration as code.
+
 ### Step 3: Configure Required Credentials
 
 The following credentials must be configured in Jenkins:

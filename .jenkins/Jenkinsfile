@@ -1,6 +1,22 @@
 #!/usr/bin/env groovy
 /**
  * Main CI Pipeline for uniteDiscord
+ *
+ * This pipeline uses composable shared library functions from .jenkins/vars/
+ * that auto-detect the package manager (pnpm, yarn, npm) and provide
+ * consistent GitHub status reporting.
+ *
+ * Pipeline Stages:
+ *   1. Initialize - Checkout, extract git info, report pending status
+ *   2. Install Dependencies - Auto-detect package manager, install deps
+ *   3. Build Packages - Build shared packages in monorepo
+ *   4. Lint - Run ESLint and format checks
+ *   5. Unit Tests - Run vitest with coverage
+ *   6. Build - Build production artifacts
+ *
+ * Status Reporting:
+ *   - Reports 'Jenkins CI' context to GitHub for branch protection
+ *   - Individual stages can report their own contexts (e.g., 'jenkins/lint')
  */
 
 @Library('unitediscord-lib@main') _
@@ -26,88 +42,62 @@ pipeline {
         CI = 'true'
         NODE_ENV = 'test'
         PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        // AWS Bedrock configuration is injected via withAwsCredentials shared library
     }
 
     stages {
         stage('Initialize') {
             steps {
-                checkout scm
-                // Remove stale test directories that may exist from previous builds
+                // Use shared library for initialization
+                pipelineInit(
+                    statusContext: 'Jenkins CI',
+                    statusDescription: 'Build in progress'
+                )
+                // Clean up stale test directories
                 sh 'rm -rf frontend/frontend || true'
-                script {
-                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                }
-                echo "Building commit: ${env.GIT_COMMIT_SHORT}"
-                // Report pending status to GitHub for branch protection
-                githubNotify context: 'Jenkins CI', status: 'PENDING', description: 'Build in progress'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                    # Increase Node.js memory limit for large dependency trees
-                    export NODE_OPTIONS="--max-old-space-size=4096"
-
-                    # Remove .npmrc (contains pnpm-specific configs that break npm/npx)
-                    # It's not needed for CI since we use --frozen-lockfile
-                    rm -f .npmrc
-
-                    # Use npx to run pnpm without global installation
-                    # Install dependencies using pnpm (matches local development)
-                    npx --yes pnpm@latest install --frozen-lockfile
-                '''
+                // Auto-detects pnpm from pnpm-lock.yaml
+                installDependencies()
             }
         }
 
         stage('Build Packages') {
             steps {
-                sh 'npx pnpm --filter "./packages/*" -r run build'
+                script {
+                    def pm = pipelineHelpers.getPackageManager()
+                    // Build shared packages in monorepo
+                    sh "${pm.filter} \"./packages/*\" -r run build"
+                }
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'npx pnpm run lint'
+                // Uses auto-detected package manager
+                runLintChecks(
+                    skipTypeCheck: true,  // Type checking done during build
+                    skipCheckout: true,   // Already checked out
+                    statusContext: 'jenkins/lint'
+                )
             }
         }
 
         stage('Unit Tests') {
             steps {
                 script {
-                    // Try to inject AWS credentials if available, otherwise run without them
+                    def pm = pipelineHelpers.getPackageManager()
+
+                    // Try to inject AWS credentials if available
                     try {
                         withAwsCredentials {
-                            // Run tests with AWS Bedrock credentials available for AI service tests
-                            def testResult = sh(
-                                script: '''#!/bin/bash
-                                    set -o pipefail
-                                    npx pnpm run test:unit -- --coverage 2>&1 | tee test-output.log
-                                ''',
-                                returnStatus: true
-                            )
-                            env.UNIT_TEST_EXIT_CODE = testResult.toString()
-
-                            if (testResult != 0) {
-                                error("Unit tests failed with exit code ${testResult}")
-                            }
+                            sh "${pm.run} test:unit -- --coverage"
                         }
                     } catch (Exception e) {
-                        // AWS credentials not configured, run tests without Bedrock
-                        echo "WARNING: AWS credentials not available, running tests without Bedrock: ${e.message}"
-                        def testResult = sh(
-                            script: '''#!/bin/bash
-                                set -o pipefail
-                                npx pnpm run test:unit -- --coverage 2>&1 | tee test-output.log
-                            ''',
-                            returnStatus: true
-                        )
-                        env.UNIT_TEST_EXIT_CODE = testResult.toString()
-
-                        if (testResult != 0) {
-                            error("Unit tests failed with exit code ${testResult}")
-                        }
+                        echo "WARNING: AWS credentials not available: ${e.message}"
+                        sh "${pm.run} test:unit -- --coverage"
                     }
                 }
             }
@@ -120,7 +110,8 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'npx pnpm run build'
+                // Uses auto-detected package manager
+                buildProject(skipCheckout: true)
             }
         }
     }
@@ -128,11 +119,19 @@ pipeline {
     post {
         success {
             echo 'Build succeeded!'
-            githubNotify context: 'Jenkins CI', status: 'SUCCESS', description: 'All checks passed'
+            githubStatusReporter(
+                status: 'success',
+                context: 'Jenkins CI',
+                description: 'All checks passed'
+            )
         }
         failure {
             echo 'Build failed!'
-            githubNotify context: 'Jenkins CI', status: 'FAILURE', description: 'Build or tests failed'
+            githubStatusReporter(
+                status: 'failure',
+                context: 'Jenkins CI',
+                description: 'Build or tests failed'
+            )
         }
     }
 }
