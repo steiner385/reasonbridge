@@ -29,7 +29,7 @@
     "// === WORKSPACE COMMANDS ===": "",
     "build": "echo 'Build requires pnpm workspaces - skipping in npm context' && exit 0",
     "test": "pnpm -r test",
-    "test:unit": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --passWithNoTests && pnpm --filter frontend test",
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage --passWithNoTests",
     "test:integration": "vitest run --config vitest.integration.config.ts --passWithNoTests",
