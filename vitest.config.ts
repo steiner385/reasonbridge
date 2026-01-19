@@ -21,13 +21,13 @@ export default defineConfig({
       '**/*.contract.test.ts',
       '**/*.e2e.test.ts',
       // Frontend component test - requires separate vitest config with React testing setup
-      'frontend/src/components/moderation/__tests__/ModerationActionButtons.spec.tsx',
+      '**/moderation/__tests__/ModerationActionButtons.spec.tsx',
       // Prisma module resolution issues in user-service
-      'services/user-service/src/services/trust-score.calculator.test.ts',
-      'services/user-service/src/verification/verification.service.test.ts',
-      'services/user-service/src/verification/video-upload.service.test.ts',
+      '**/trust-score.calculator.test.ts',
+      '**/verification.service.test.ts',
+      '**/video-upload.service.test.ts',
       // AI service mock issues in moderation-service
-      'services/moderation-service/src/services/__tests__/ai-review.service.spec.ts',
+      '**/ai-review.service.spec.ts',
     ],
     coverage: {
       provider: 'v8',
