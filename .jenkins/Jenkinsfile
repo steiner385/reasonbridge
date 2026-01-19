@@ -139,18 +139,17 @@ pipeline {
 
                     # Helper function to handle both docker compose (v2) and docker-compose (v1)
                     docker_compose() {
-                        # Try docker-compose (v1) first
-                        if command -v docker-compose &> /dev/null; then
-                            docker-compose "$@"
-                        # Try docker compose (v2) with space
-                        elif [ -x /usr/bin/docker ] && /usr/bin/docker compose version &> /dev/null; then
-                            /usr/bin/docker compose "$@"
-                        # Try docker compose via PATH
-                        elif docker compose version &> /dev/null; then
-                            docker compose "$@"
-                        # Final fallback error
+                        # Try docker compose (v2 with space) first via full path
+                        if /usr/bin/docker compose "$@" 2>/dev/null; then
+                            return 0
+                        # Try docker-compose (v1) if v2 fails
+                        elif docker-compose "$@" 2>/dev/null; then
+                            return 0
+                        # Try docker compose (v2) via PATH if full path didn't work
+                        elif docker compose "$@" 2>/dev/null; then
+                            return 0
                         else
-                            echo "ERROR: Neither docker-compose nor docker compose found" >&2
+                            echo "ERROR: docker compose command failed" >&2
                             return 127
                         fi
                     }
@@ -214,18 +213,17 @@ pipeline {
 
                     # Helper function to handle both docker compose (v2) and docker-compose (v1)
                     docker_compose() {
-                        # Try docker-compose (v1) first
-                        if command -v docker-compose &> /dev/null; then
-                            docker-compose "$@"
-                        # Try docker compose (v2) with space
-                        elif [ -x /usr/bin/docker ] && /usr/bin/docker compose version &> /dev/null; then
-                            /usr/bin/docker compose "$@"
-                        # Try docker compose via PATH
-                        elif docker compose version &> /dev/null; then
-                            docker compose "$@"
-                        # Final fallback error
+                        # Try docker compose (v2 with space) first via full path
+                        if /usr/bin/docker compose "$@" 2>/dev/null; then
+                            return 0
+                        # Try docker-compose (v1) if v2 fails
+                        elif docker-compose "$@" 2>/dev/null; then
+                            return 0
+                        # Try docker compose (v2) via PATH if full path didn't work
+                        elif docker compose "$@" 2>/dev/null; then
+                            return 0
                         else
-                            echo "ERROR: Neither docker-compose nor docker compose found" >&2
+                            echo "ERROR: docker compose command failed" >&2
                             return 127
                         fi
                     }
