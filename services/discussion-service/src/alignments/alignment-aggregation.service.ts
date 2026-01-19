@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { Prisma } from '@prisma/client';
 import type { AlignmentStance } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
+
+// Use Prisma.Decimal for proper module resolution across all environments
+type Decimal = Prisma.Decimal;
 
 @Injectable()
 export class AlignmentAggregationService {
@@ -74,7 +77,7 @@ export class AlignmentAggregationService {
 
     // Round to 2 decimal places and convert to Decimal
     const roundedScore = Math.round(normalizedScore * 100) / 100;
-    return new Decimal(roundedScore);
+    return new Prisma.Decimal(roundedScore);
   }
 
   /**
