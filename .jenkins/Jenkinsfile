@@ -2,21 +2,18 @@
 /**
  * Main CI Pipeline for uniteDiscord
  *
- * This pipeline uses composable shared library functions from .jenkins/vars/
- * that auto-detect the package manager (pnpm, yarn, npm) and provide
- * consistent GitHub status reporting.
+ * This pipeline uses:
+ * - Generic Webhook Trigger Plugin for branch-specific builds
+ * - Composable shared library functions from .jenkins/vars/
+ * - Auto-detect package manager (pnpm, yarn, npm)
  *
- * Pipeline Stages:
- *   1. Initialize - Checkout, extract git info, report pending status
- *   2. Install Dependencies - Auto-detect package manager, install deps
- *   3. Build Packages - Build shared packages in monorepo
- *   4. Lint - Run ESLint and format checks
- *   5. Unit Tests - Run vitest with coverage
- *   6. Build - Build production artifacts
+ * Webhook Setup:
+ *   GitHub webhook URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
+ *   Content type: application/json
+ *   Events: Push events, Pull request events
  *
  * Status Reporting:
- *   - Reports 'Jenkins CI' context to GitHub for branch protection
- *   - Individual stages can report their own contexts (e.g., 'jenkins/lint')
+ *   Reports 'Jenkins CI' context to GitHub for branch protection
  */
 
 @Library('unitediscord-lib@main') _
@@ -32,8 +29,23 @@ pipeline {
     }
 
     triggers {
-        // Automatically trigger builds when GitHub sends webhook on push/merge to any branch
-        githubPush()
+        // Generic Webhook Trigger - extracts branch from webhook payload
+        GenericTrigger(
+            genericVariables: [
+                [key: 'ref', value: '$.ref'],
+                [key: 'after', value: '$.after'],
+                [key: 'repository_name', value: '$.repository.name'],
+                [key: 'pusher_name', value: '$.pusher.name', defaultValue: 'unknown']
+            ],
+            causeString: 'Triggered by push to $ref by $pusher_name',
+            token: 'uniteDiscord-ci',
+            printContributedVariables: true,
+            printPostContent: false,
+            silentResponse: false,
+            // Allow all branches (no filter) - builds any push
+            regexpFilterText: '$repository_name',
+            regexpFilterExpression: '^uniteDiscord$'
+        )
     }
 
     environment {
@@ -42,16 +54,47 @@ pipeline {
         CI = 'true'
         NODE_ENV = 'test'
         PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        // Extract branch name from ref (refs/heads/main -> main)
+        BRANCH_NAME = "${params.ref ? params.ref.replaceAll('refs/heads/', '') : 'main'}"
     }
 
     stages {
         stage('Initialize') {
             steps {
-                // Use shared library for initialization
-                pipelineInit(
-                    statusContext: 'Jenkins CI',
-                    statusDescription: 'Build in progress'
+                script {
+                    // Determine which branch/commit to checkout
+                    def checkoutBranch = env.BRANCH_NAME ?: 'main'
+                    def checkoutCommit = params.after ?: ''
+
+                    echo "Building branch: ${checkoutBranch}"
+                    if (checkoutCommit) {
+                        echo "Commit SHA: ${checkoutCommit}"
+                    }
+
+                    // Checkout the specific branch/commit
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: checkoutCommit ?: "*/${checkoutBranch}"]],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/steiner385/uniteDiscord.git',
+                            credentialsId: 'github-credentials'
+                        ]]
+                    ])
+
+                    // Extract git info
+                    env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    echo "Building commit: ${env.GIT_COMMIT_SHORT}"
+                }
+
+                // Report pending status to GitHub
+                githubStatusReporter(
+                    status: 'pending',
+                    context: 'Jenkins CI',
+                    description: 'Build in progress'
                 )
+
                 // Clean up stale test directories
                 sh 'rm -rf frontend/frontend || true'
             }
@@ -76,12 +119,10 @@ pipeline {
 
         stage('Lint') {
             steps {
-                // Uses auto-detected package manager
-                runLintChecks(
-                    skipTypeCheck: true,  // Type checking done during build
-                    skipCheckout: true,   // Already checked out
-                    statusContext: 'jenkins/lint'
-                )
+                script {
+                    def pm = pipelineHelpers.getPackageManager()
+                    sh "${pm.run} lint"
+                }
             }
         }
 
@@ -110,8 +151,10 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Uses auto-detected package manager
-                buildProject(skipCheckout: true)
+                script {
+                    def pm = pipelineHelpers.getPackageManager()
+                    sh "${pm.run} build"
+                }
             }
         }
     }

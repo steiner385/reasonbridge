@@ -1,6 +1,9 @@
 # Jenkins Job Configuration for uniteDiscord-ci
 # This file documents the job configuration. Apply via Jenkins UI or JCasC plugin.
 #
+# IMPORTANT: This pipeline uses the Generic Webhook Trigger Plugin
+# GitHub webhook URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
+#
 # To apply this configuration:
 # 1. If using JCasC plugin: Add this to your Jenkins configuration
 # 2. If using UI: Use these settings when creating/updating the job
@@ -13,12 +16,6 @@ jobs:
         properties {
           githubProjectUrl('https://github.com/steiner385/uniteDiscord')
 
-          pipelineTriggers {
-            triggers {
-              githubPush()
-            }
-          }
-
           buildDiscarder {
             logRotator {
               numToKeepStr('30')
@@ -30,6 +27,9 @@ jobs:
           }
         }
 
+        // Triggers are defined in Jenkinsfile using GenericTrigger
+        // The pipeline extracts branch/commit from webhook payload
+
         definition {
           cpsScm {
             scm {
@@ -38,7 +38,8 @@ jobs:
                   url('https://github.com/steiner385/uniteDiscord.git')
                   credentials('github-credentials')
                 }
-                branches('**')  // Build ALL branches for webhook triggers
+                // Branch is determined dynamically from webhook payload
+                branches('*/main')
               }
             }
             scriptPath('.jenkins/Jenkinsfile')
