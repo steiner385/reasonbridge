@@ -81,6 +81,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 ## Jenkins CI/CD
 
 **Jenkins Server:** `http://jenkins.uniteDiscord.org`
+**Credentials:** Stored in `~/.jenkins-cli.yaml`
 
 **Infrastructure:**
 - Master + 8 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
