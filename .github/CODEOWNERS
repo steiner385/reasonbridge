@@ -1,0 +1,18 @@
+# CODEOWNERS file for uniteDiscord
+# These owners will be requested for review when PRs modify matching paths
+
+# Default owner for everything
+* @steiner385
+
+# CI/CD configuration
+/.jenkins/ @steiner385
+/.github/ @steiner385
+
+# Package configurations
+/packages/ @steiner385
+
+# Frontend
+/frontend/ @steiner385
+
+# Core infrastructure
+/prisma/ @steiner385
