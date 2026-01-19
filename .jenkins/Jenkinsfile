@@ -1,180 +1,24 @@
 #!/usr/bin/env groovy
 /**
- * Main CI Pipeline for uniteDiscord
+ * CI Pipeline for uniteDiscord
  *
- * This pipeline uses:
- * - Generic Webhook Trigger Plugin for branch-specific builds
- * - Composable shared library functions from .jenkins/vars/
- * - Auto-detect package manager (pnpm, yarn, npm)
+ * This is a thin loader that delegates to the shared library.
+ * All pipeline logic lives in: https://github.com/steiner385/unitediscord-jenkins-lib
+ *
+ * This decoupling allows CI infrastructure changes without being blocked
+ * by application-level branch protection rules.
  *
  * Webhook Setup:
- *   GitHub webhook URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
+ *   URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
  *   Content type: application/json
  *   Events: Push events, Pull request events
- *
- * Status Reporting:
- *   Reports 'Jenkins CI' context to GitHub for branch protection
  */
 
 @Library('unitediscord-lib@main') _
 
-pipeline {
-    agent any
-
-    options {
-        timestamps()
-        buildDiscarder(logRotator(numToKeepStr: '30'))
-        timeout(time: 60, unit: 'MINUTES')
-        disableConcurrentBuilds(abortPrevious: true)
-    }
-
-    triggers {
-        // Generic Webhook Trigger - extracts branch from webhook payload
-        GenericTrigger(
-            genericVariables: [
-                [key: 'ref', value: '$.ref'],
-                [key: 'after', value: '$.after'],
-                [key: 'repository_name', value: '$.repository.name'],
-                [key: 'pusher_name', value: '$.pusher.name', defaultValue: 'unknown']
-            ],
-            causeString: 'Triggered by push to $ref by $pusher_name',
-            token: 'uniteDiscord-ci',
-            printContributedVariables: true,
-            printPostContent: false,
-            silentResponse: false,
-            // Allow all branches (no filter) - builds any push
-            regexpFilterText: '$repository_name',
-            regexpFilterExpression: '^uniteDiscord$'
-        )
-    }
-
-    environment {
-        GITHUB_OWNER = 'steiner385'
-        GITHUB_REPO = 'uniteDiscord'
-        CI = 'true'
-        NODE_ENV = 'test'
-        PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        // Extract branch name from ref (refs/heads/main -> main)
-        BRANCH_NAME = "${params.ref ? params.ref.replaceAll('refs/heads/', '') : 'main'}"
-    }
-
-    stages {
-        stage('Initialize') {
-            steps {
-                script {
-                    // Determine which branch/commit to checkout
-                    def checkoutBranch = env.BRANCH_NAME ?: 'main'
-                    def checkoutCommit = params.after ?: ''
-
-                    echo "Building branch: ${checkoutBranch}"
-                    if (checkoutCommit) {
-                        echo "Commit SHA: ${checkoutCommit}"
-                    }
-
-                    // Checkout the specific branch/commit
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: checkoutCommit ?: "*/${checkoutBranch}"]],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/steiner385/uniteDiscord.git',
-                            credentialsId: 'github-credentials'
-                        ]]
-                    ])
-
-                    // Extract git info
-                    env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-
-                    echo "Building commit: ${env.GIT_COMMIT_SHORT}"
-                }
-
-                // Report pending status to GitHub
-                githubStatusReporter(
-                    status: 'pending',
-                    context: 'Jenkins CI',
-                    description: 'Build in progress'
-                )
-
-                // Clean up stale test directories
-                sh 'rm -rf frontend/frontend || true'
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                // Auto-detects pnpm from pnpm-lock.yaml
-                installDependencies()
-            }
-        }
-
-        stage('Build Packages') {
-            steps {
-                script {
-                    def pm = pipelineHelpers.getPackageManager()
-                    // Build shared packages in monorepo
-                    sh "${pm.filter} \"./packages/*\" -r run build"
-                }
-            }
-        }
-
-        stage('Lint') {
-            steps {
-                script {
-                    def pm = pipelineHelpers.getPackageManager()
-                    sh "${pm.run} lint"
-                }
-            }
-        }
-
-        stage('Unit Tests') {
-            steps {
-                script {
-                    def pm = pipelineHelpers.getPackageManager()
-
-                    // Try to inject AWS credentials if available
-                    try {
-                        withAwsCredentials {
-                            sh "${pm.run} test:unit -- --coverage"
-                        }
-                    } catch (Exception e) {
-                        echo "WARNING: AWS credentials not available: ${e.message}"
-                        sh "${pm.run} test:unit -- --coverage"
-                    }
-                }
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: 'coverage/junit.xml'
-                }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                script {
-                    def pm = pipelineHelpers.getPackageManager()
-                    sh "${pm.run} build"
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build succeeded!'
-            githubStatusReporter(
-                status: 'success',
-                context: 'Jenkins CI',
-                description: 'All checks passed'
-            )
-        }
-        failure {
-            echo 'Build failed!'
-            githubStatusReporter(
-                status: 'failure',
-                context: 'Jenkins CI',
-                description: 'Build or tests failed'
-            )
-        }
-    }
-}
+standardPipeline(
+    githubOwner: 'steiner385',
+    githubRepo: 'uniteDiscord',
+    webhookToken: 'uniteDiscord-ci',
+    statusContext: 'Jenkins CI'
+)
