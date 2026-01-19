@@ -28,10 +28,16 @@ pipeline {
     triggers {
         GenericTrigger(
             genericVariables: [
+                // Push event variables
                 [key: 'ref', value: '$.ref'],
                 [key: 'after', value: '$.after'],
-                [key: 'repository_name', value: '$.repository.name'],
-                [key: 'pusher_name', value: '$.pusher.name', defaultValue: 'unknown']
+                [key: 'pusher_name', value: '$.pusher.name', defaultValue: 'unknown'],
+                // Pull request event variables
+                [key: 'pr_head_ref', value: '$.pull_request.head.ref'],
+                [key: 'pr_head_sha', value: '$.pull_request.head.sha'],
+                [key: 'pr_action', value: '$.action'],
+                // Common
+                [key: 'repository_name', value: '$.repository.name']
             ],
             causeString: 'Triggered by push to $ref by $pusher_name',
             token: 'uniteDiscord-ci',
@@ -57,8 +63,10 @@ pipeline {
             steps {
                 script {
                     // Generic Webhook Trigger provides 'ref' and 'after' as env vars
-                    def webhookRef = env.ref ?: ''
-                    def webhookCommit = env.after ?: ''
+                    // For push events: $.ref and $.after
+                    // For pull_request events: need $.pull_request.head.ref and $.pull_request.head.sha
+                    def webhookRef = env.ref ?: env.pr_head_ref ?: ''
+                    def webhookCommit = env.after ?: env.pr_head_sha ?: ''
 
                     // Extract branch name from ref (refs/heads/main -> main)
                     def checkoutBranch = webhookRef ? webhookRef.replaceAll('refs/heads/', '') : 'main'
@@ -66,11 +74,11 @@ pipeline {
                     echo "Building branch: ${checkoutBranch}"
                     echo "Commit SHA from webhook: ${webhookCommit ?: 'not provided'}"
 
-                    // Set GIT_COMMIT early from webhook so we can report status
-                    // (before checkout, in case checkout fails)
+                    // Use STATUS_COMMIT_SHA instead of GIT_COMMIT because Jenkins pre-sets
+                    // GIT_COMMIT during lightweight checkout (to fetch Jenkinsfile) and we
+                    // cannot reliably override it. STATUS_COMMIT_SHA is our custom variable.
                     if (webhookCommit) {
-                        env.GIT_COMMIT = webhookCommit
-                        env.GIT_COMMIT_SHORT = webhookCommit.take(7)
+                        env.STATUS_COMMIT_SHA = webhookCommit
                     }
                     env.BRANCH_NAME = checkoutBranch
                 }
@@ -83,24 +91,25 @@ pipeline {
                 )
 
                 script {
-                    def webhookCommit = env.after ?: ''
+                    def checkoutCommit = env.STATUS_COMMIT_SHA ?: ''
                     def checkoutBranch = env.BRANCH_NAME ?: 'main'
 
                     // Checkout the specific branch/commit
                     checkout([
                         $class: 'GitSCM',
-                        branches: [[name: webhookCommit ?: "*/${checkoutBranch}"]],
+                        branches: [[name: checkoutCommit ?: "*/${checkoutBranch}"]],
                         userRemoteConfigs: [[
                             url: 'https://github.com/steiner385/uniteDiscord.git',
                             credentialsId: 'github-credentials'
                         ]]
                     ])
 
-                    // Update GIT_COMMIT from actual checkout (more accurate)
-                    env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    // If STATUS_COMMIT_SHA wasn't set from webhook, set it from checkout
+                    if (!env.STATUS_COMMIT_SHA) {
+                        env.STATUS_COMMIT_SHA = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    }
 
-                    echo "Building commit: ${env.GIT_COMMIT_SHORT}"
+                    echo "Building commit: ${env.STATUS_COMMIT_SHA?.take(7)}"
                 }
 
                 // Clean up stale test directories
