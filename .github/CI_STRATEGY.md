@@ -1,14 +1,23 @@
-# CI/CD Strategy - Jenkins Consolidation
+# CI/CD Strategy - Jenkins with GitHub Webhooks
 
 ## Overview
 
-All CI/CD operations have been consolidated into **self-hosted Jenkins** as the single source of truth. GitHub Actions is used only for Jenkins coordination and status reporting.
+All CI/CD operations run on **self-hosted Jenkins**, triggered directly via **GitHub webhooks**. No GitHub Actions are required for triggering builds.
 
 ## Architecture
 
+```
+┌─────────────────┐     ┌─────────────────┐
+│  GitHub Repo    │────▶│    Jenkins      │
+│  (Push/Merge)   │     │  (Full CI)      │
+│                 │◀────│                 │
+└─────────────────┘     └─────────────────┘
+     Webhook              Status Update
+```
+
 ### Self-Hosted Jenkins (Primary CI)
 - **Job**: `unitediscord-ci`
-- **Runs on**: Self-hosted runners
+- **Trigger**: GitHub webhooks on push/merge to **any branch**
 - **Responsible for**:
   - Security scanning (secrets, duplication, file sizes)
   - Code quality (linting, type checking)
@@ -16,38 +25,38 @@ All CI/CD operations have been consolidated into **self-hosted Jenkins** as the 
   - Testing (unit, integration, contract, E2E)
   - Build verification
 
-### GitHub Actions (Jenkins Coordination Only)
-1. **jenkins-trigger.yml**
-   - Triggers Jenkins job on push/PR
-   - Monitors Jenkins build progress
-   - Fails if Jenkins job fails
+### GitHub Webhooks
+- Configured in GitHub repository settings
+- Sends push events to Jenkins webhook endpoint
+- Triggers builds for all branches automatically
 
-2. **jenkins-status.yml**
-   - Reports Jenkins results back to GitHub
-   - Sets commit status checks based on Jenkins outcome
-   - Enables branch protection to require Jenkins checks
+### GitHub Actions (Optional Status Sync)
+- **jenkins-status.yml** (optional)
+  - Reports Jenkins results back to GitHub commit status
+  - Enables branch protection to require Jenkins checks
 
 ## Benefits
 
 ✅ Single source of truth for CI/CD (Jenkins)
-✅ No GitHub Actions runner costs
+✅ Direct webhook triggering (no GitHub Actions middleman)
+✅ Builds triggered for ALL branches automatically
 ✅ Self-hosted runners for sensitive operations
 ✅ Consistent environment across all builds
 ✅ Full control over CI/CD pipeline
-✅ Reduced GitHub Actions API usage
+✅ Minimal GitHub Actions usage
 
 ## For Developers
 
-When you push or create a PR:
+When you push or merge to any branch:
 
-1. **GitHub Actions triggers Jenkins** (via jenkins-trigger.yml)
+1. **GitHub sends webhook to Jenkins** (automatic)
 2. **Jenkins runs full CI pipeline**:
    - Security checks
    - Build compilation
    - All test suites
    - Production build
-3. **Jenkins status reported to GitHub** (via jenkins-status.yml)
-4. **PR/commit shows Jenkins result** as required check
+3. **Jenkins updates GitHub commit status** (if configured)
+4. **PR/commit shows Jenkins result** as status check
 
 ## Jenkins Pipeline Stages
 

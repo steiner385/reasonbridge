@@ -13,9 +13,9 @@
     "start": "node dist/main.js",
     "start:dev": "tsx watch src/main.ts",
     "start:prod": "node dist/main.js",
-    "test": "vitest --run",
+    "test": "vitest",
     "test:watch": "vitest",
-    "test:integration": "vitest --run src/__tests__/integration"
+    "test:integration": "vitest run src/__tests__/integration"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
