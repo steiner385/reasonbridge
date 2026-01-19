@@ -15,21 +15,13 @@
 
 @Library('unitediscord-lib@main') _
 
-// Get pipeline configuration from shared library
-def cfg = standardPipeline.config(
-    githubOwner: 'steiner385',
-    githubRepo: 'uniteDiscord',
-    webhookToken: 'uniteDiscord-ci',
-    statusContext: 'Jenkins CI'
-)
-
 pipeline {
     agent any
 
     options {
         timestamps()
         buildDiscarder(logRotator(numToKeepStr: '30'))
-        timeout(time: cfg.timeoutMinutes, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         disableConcurrentBuilds(abortPrevious: true)
     }
 
@@ -42,7 +34,7 @@ pipeline {
                 [key: 'pusher_name', value: '$.pusher.name', defaultValue: 'unknown']
             ],
             causeString: 'Triggered by push to $ref by $pusher_name',
-            token: cfg.webhookToken,
+            token: 'uniteDiscord-ci',
             printContributedVariables: true,
             printPostContent: false,
             silentResponse: false,
@@ -52,8 +44,8 @@ pipeline {
     }
 
     environment {
-        GITHUB_OWNER = "${cfg.githubOwner}"
-        GITHUB_REPO = "${cfg.githubRepo}"
+        GITHUB_OWNER = 'steiner385'
+        GITHUB_REPO = 'uniteDiscord'
         CI = 'true'
         NODE_ENV = 'test'
         PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -64,11 +56,40 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    standardPipeline.initializeCheckout(cfg)
+                    // Determine which branch/commit to checkout
+                    def checkoutBranch = env.BRANCH_NAME ?: 'main'
+                    def checkoutCommit = params.after ?: ''
+
+                    echo "Building branch: ${checkoutBranch}"
+                    if (checkoutCommit) {
+                        echo "Commit SHA: ${checkoutCommit}"
+                    }
+
+                    // Checkout the specific branch/commit
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: checkoutCommit ?: "*/${checkoutBranch}"]],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/steiner385/uniteDiscord.git',
+                            credentialsId: 'github-credentials'
+                        ]]
+                    ])
+
+                    // Extract git info
+                    env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    echo "Building commit: ${env.GIT_COMMIT_SHORT}"
                 }
-                script {
-                    standardPipeline.reportPending(cfg.statusContext)
-                }
+
+                // Report pending status to GitHub
+                githubStatusReporter(
+                    status: 'pending',
+                    context: 'Jenkins CI',
+                    description: 'Build in progress'
+                )
+
+                // Clean up stale test directories
                 sh 'rm -rf frontend/frontend || true'
             }
         }
@@ -80,34 +101,35 @@ pipeline {
         }
 
         stage('Build Packages') {
-            when {
-                expression { return cfg.buildPackages }
-            }
             steps {
                 script {
-                    standardPipeline.buildPackages()
+                    def pm = pipelineHelpers.getPackageManager()
+                    sh "${pm.filter} \"./packages/*\" -r run build"
                 }
             }
         }
 
         stage('Lint') {
-            when {
-                expression { return cfg.runLint }
-            }
             steps {
                 script {
-                    standardPipeline.runLint()
+                    def pm = pipelineHelpers.getPackageManager()
+                    sh "${pm.run} lint"
                 }
             }
         }
 
         stage('Unit Tests') {
-            when {
-                expression { return cfg.runUnitTests }
-            }
             steps {
                 script {
-                    standardPipeline.runUnitTests()
+                    def pm = pipelineHelpers.getPackageManager()
+                    try {
+                        withAwsCredentials {
+                            sh "${pm.run} test:unit -- --coverage"
+                        }
+                    } catch (Exception e) {
+                        echo "WARNING: AWS credentials not available: ${e.message}"
+                        sh "${pm.run} test:unit -- --coverage"
+                    }
                 }
             }
             post {
@@ -118,12 +140,10 @@ pipeline {
         }
 
         stage('Build') {
-            when {
-                expression { return cfg.runBuild }
-            }
             steps {
                 script {
-                    standardPipeline.runBuild()
+                    def pm = pipelineHelpers.getPackageManager()
+                    sh "${pm.run} build"
                 }
             }
         }
@@ -132,15 +152,19 @@ pipeline {
     post {
         success {
             echo 'Build succeeded!'
-            script {
-                standardPipeline.reportSuccess(cfg.statusContext)
-            }
+            githubStatusReporter(
+                status: 'success',
+                context: 'Jenkins CI',
+                description: 'All checks passed'
+            )
         }
         failure {
             echo 'Build failed!'
-            script {
-                standardPipeline.reportFailure(cfg.statusContext)
-            }
+            githubStatusReporter(
+                status: 'failure',
+                context: 'Jenkins CI',
+                description: 'Build or tests failed'
+            )
         }
     }
 }
