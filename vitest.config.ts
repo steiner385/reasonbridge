@@ -30,6 +30,7 @@ export default defineConfig({
       'services/moderation-service/src/services/__tests__/ai-review.service.spec.ts',
       'services/user-service/src/verification/verification.service.test.ts',
       'services/user-service/src/services/bot-detector.service.spec.ts',
+      'services/user-service/src/services/trust-score.calculator.test.ts',
       'frontend/src/components/moderation/__tests__/ModerationActionButtons.spec.tsx',
     ],
     coverage: {
