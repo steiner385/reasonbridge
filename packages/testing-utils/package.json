@@ -36,7 +36,7 @@
     "@unite-discord/common": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "20.17.12",
+    "@types/node": "25.0.9",
     "typescript": "5.7.3"
   },
   "peerDependencies": {
