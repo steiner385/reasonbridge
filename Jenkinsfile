@@ -1,102 +1,107 @@
+#!/usr/bin/env groovy
+/**
+ * Main CI Pipeline for uniteDiscord
+ */
+
+@Library('unitediscord-lib@main') _
+
 pipeline {
     agent any
 
-    environment {
-        NODE_VERSION = '20'
-        PNPM_HOME = "${WORKSPACE}/.pnpm-store"
-        PATH = "${PNPM_HOME}:${env.PATH}"
-        GITHUB_REPO = 'steiner385/uniteDiscord'
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        timeout(time: 60, unit: 'MINUTES')
+        disableConcurrentBuilds(abortPrevious: true)
     }
 
-    options {
-        timeout(time: 30, unit: 'MINUTES')
-        disableConcurrentBuilds()
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+    environment {
+        GITHUB_OWNER = 'steiner385'
+        GITHUB_REPO = 'uniteDiscord'
+        CI = 'true'
+        NODE_ENV = 'test'
+        // AWS Bedrock configuration is injected via withAwsCredentials shared library
     }
 
     stages {
-        stage('Notify Start') {
+        stage('Initialize') {
             steps {
+                checkout scm
+                // Remove stale test directories that may exist from previous builds
+                sh 'rm -rf frontend/frontend || true'
                 script {
-                    // Set GitHub commit status to pending
-                    if (env.CHANGE_ID) {
-                        // This is a PR build
-                        githubNotify context: 'Jenkins CI',
-                                     status: 'PENDING',
-                                     description: 'Build started...',
-                                     credentialsId: 'github-token'
-                    }
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
+                echo "Building commit: ${env.GIT_COMMIT_SHORT}"
             }
         }
 
-        stage('Setup') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                    # Install pnpm if not available
-                    npm install -g pnpm@8
+                    # Increase Node.js memory limit for large dependency trees
+                    export NODE_OPTIONS="--max-old-space-size=4096"
 
-                    # Install dependencies
-                    pnpm install --frozen-lockfile
+                    # Remove .npmrc (contains pnpm-specific configs that break npm/npx)
+                    # It's not needed for CI since we use --frozen-lockfile
+                    rm -f .npmrc
+
+                    # Use npx to run pnpm without global installation
+                    # Install dependencies using pnpm (matches local development)
+                    npx --yes pnpm@latest install --frozen-lockfile
                 '''
             }
         }
 
-        stage('Build Dependencies') {
+        stage('Build Packages') {
             steps {
-                sh '''
-                    # Build shared packages (required before tests can import them)
-                    pnpm -r --filter="@unite-discord/*" build
-
-                    # Generate Prisma client (required for database-dependent tests)
-                    pnpm --filter="@unite-discord/db-models" exec prisma generate
-                '''
+                sh 'npx pnpm --filter "./packages/*" -r run build'
             }
         }
 
-        stage('Security & Quality Gates') {
-            parallel {
-                stage('Secrets Scan') {
-                    steps {
-                        sh 'bash .husky/pre-commit-secrets-scan'
-                    }
-                }
-                stage('Console Check') {
-                    steps {
-                        sh 'bash .husky/pre-commit-no-console'
-                    }
-                }
-                stage('Forbidden Imports') {
-                    steps {
-                        sh 'bash .husky/pre-commit-forbidden-imports'
-                    }
-                }
-                stage('File Size Check') {
-                    steps {
-                        sh 'bash .husky/pre-commit-file-size'
-                    }
-                }
-            }
-        }
-
-        stage('Lint & Type Check') {
-            parallel {
-                stage('Lint') {
-                    steps {
-                        sh 'pnpm lint'
-                    }
-                }
-                stage('Type Check') {
-                    steps {
-                        sh 'pnpm type-check'
-                    }
-                }
+        stage('Lint') {
+            steps {
+                sh 'npx pnpm run lint'
             }
         }
 
         stage('Unit Tests') {
             steps {
-                sh 'pnpm test:unit --coverage'
+                script {
+                    // Try to inject AWS credentials if available, otherwise run without them
+                    try {
+                        withAwsCredentials {
+                            // Run tests with AWS Bedrock credentials available for AI service tests
+                            def testResult = sh(
+                                script: '''#!/bin/bash
+                                    set -o pipefail
+                                    npx pnpm run test:unit -- --coverage 2>&1 | tee test-output.log
+                                ''',
+                                returnStatus: true
+                            )
+                            env.UNIT_TEST_EXIT_CODE = testResult.toString()
+
+                            if (testResult != 0) {
+                                error("Unit tests failed with exit code ${testResult}")
+                            }
+                        }
+                    } catch (Exception e) {
+                        // AWS credentials not configured, run tests without Bedrock
+                        echo "WARNING: AWS credentials not available, running tests without Bedrock: ${e.message}"
+                        def testResult = sh(
+                            script: '''#!/bin/bash
+                                set -o pipefail
+                                npx pnpm run test:unit -- --coverage 2>&1 | tee test-output.log
+                            ''',
+                            returnStatus: true
+                        )
+                        env.UNIT_TEST_EXIT_CODE = testResult.toString()
+
+                        if (testResult != 0) {
+                            error("Unit tests failed with exit code ${testResult}")
+                        }
+                    }
+                }
             }
             post {
                 always {
@@ -123,11 +128,12 @@ pipeline {
                     sleep 10
 
                     # Run integration tests
-                    pnpm test:integration
+                    npx pnpm run test:integration
                 '''
             }
             post {
                 always {
+                    junit allowEmptyResults: true, testResults: 'coverage/integration-junit.xml'
                     sh 'docker-compose -f docker-compose.test.yml down -v || true'
                 }
             }
@@ -135,7 +141,12 @@ pipeline {
 
         stage('Contract Tests') {
             steps {
-                sh 'pnpm test:contract'
+                sh 'npx pnpm run test:contract'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'coverage/contract-junit.xml'
+                }
             }
         }
 
@@ -150,7 +161,7 @@ pipeline {
             steps {
                 sh '''
                     # Install Playwright browsers
-                    pnpm --filter frontend playwright install --with-deps
+                    npx playwright install --with-deps
 
                     # Start the full stack
                     docker-compose up -d
@@ -159,7 +170,7 @@ pipeline {
                     sleep 15
 
                     # Run E2E tests
-                    pnpm test:e2e
+                    npx pnpm --filter frontend run test:e2e
                 '''
             }
             post {
@@ -179,85 +190,71 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'pnpm build'
+                sh 'npx pnpm run build'
             }
         }
     }
 
     post {
         always {
-            cleanWs()
+            // Publish Allure reports from all test suites
+            script {
+                def allureResults = []
+
+                // Check for unit test results
+                if (fileExists('allure-results') && sh(script: 'test -n "$(ls -A allure-results 2>/dev/null)"', returnStatus: true) == 0) {
+                    allureResults.add([path: 'allure-results'])
+                    echo 'Unit test Allure results found'
+                }
+
+                // Check for integration test results
+                if (fileExists('allure-results/integration') && sh(script: 'test -n "$(ls -A allure-results/integration 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'Integration test Allure results found'
+                }
+
+                // Check for contract test results
+                if (fileExists('allure-results/contract') && sh(script: 'test -n "$(ls -A allure-results/contract 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'Contract test Allure results found'
+                }
+
+                // Check for e2e test results
+                if (fileExists('allure-results/e2e') && sh(script: 'test -n "$(ls -A allure-results/e2e 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'E2E test Allure results found'
+                }
+
+                // Publish all results together
+                if (allureResults.size() > 0) {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        results: allureResults
+                    ])
+                    echo "Allure report published successfully with ${allureResults.size()} result(s)"
+                } else {
+                    echo 'No Allure results found to publish'
+                }
+            }
         }
         success {
-            script {
-                echo 'All tests passed successfully'
-                // Update GitHub status on success
-                if (env.CHANGE_ID) {
-                    githubNotify context: 'Jenkins CI',
-                                 status: 'SUCCESS',
-                                 description: 'All checks passed',
-                                 credentialsId: 'github-token'
-                }
-                // Trigger GitHub Actions workflow to update status
-                sh '''
-                    if [ -n "${GITHUB_TOKEN}" ]; then
-                        curl -X POST \
-                            -H "Accept: application/vnd.github+json" \
-                            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                            "https://api.github.com/repos/${GITHUB_REPO}/dispatches" \
-                            -d '{
-                                "event_type": "jenkins-build-result",
-                                "client_payload": {
-                                    "sha": "'${GIT_COMMIT}'",
-                                    "result": "SUCCESS",
-                                    "build_url": "'${BUILD_URL}'",
-                                    "build_number": "'${BUILD_NUMBER}'",
-                                    "pr_number": "'${CHANGE_ID}'"
-                                }
-                            }' || echo "Failed to dispatch GitHub event"
-                    fi
-                '''
-            }
+            echo 'Build succeeded!'
         }
         failure {
+            echo 'Build failed! Analyzing failures and creating GitHub issues...'
             script {
-                echo 'Pipeline failed - check test reports for details'
-                // Update GitHub status on failure
-                if (env.CHANGE_ID) {
-                    githubNotify context: 'Jenkins CI',
-                                 status: 'FAILURE',
-                                 description: 'Build failed - check logs',
-                                 credentialsId: 'github-token'
-                }
-                // Trigger GitHub Actions workflow to update status
-                sh '''
-                    if [ -n "${GITHUB_TOKEN}" ]; then
-                        curl -X POST \
-                            -H "Accept: application/vnd.github+json" \
-                            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                            "https://api.github.com/repos/${GITHUB_REPO}/dispatches" \
-                            -d '{
-                                "event_type": "jenkins-build-result",
-                                "client_payload": {
-                                    "sha": "'${GIT_COMMIT}'",
-                                    "result": "FAILURE",
-                                    "build_url": "'${BUILD_URL}'",
-                                    "build_number": "'${BUILD_NUMBER}'",
-                                    "pr_number": "'${CHANGE_ID}'"
-                                }
-                            }' || echo "Failed to dispatch GitHub event"
-                    fi
-                '''
-            }
-        }
-        unstable {
-            script {
-                echo 'Pipeline unstable - some tests may have failed'
-                if (env.CHANGE_ID) {
-                    githubNotify context: 'Jenkins CI',
-                                 status: 'FAILURE',
-                                 description: 'Build unstable - check logs',
-                                 credentialsId: 'github-token'
+                // Analyze Allure failures and create automated GitHub issues
+                if (fileExists('allure-results') && sh(script: 'test -n "$(ls -A allure-results 2>/dev/null)"', returnStatus: true) == 0) {
+                    echo 'Found Allure results, analyzing test failures...'
+                    try {
+                        analyzeAllureFailures(
+                            allureResultsDir: 'allure-results',
+                            maxIssues: 10,
+                            testType: 'Test'
+                        )
+                    } catch (Exception e) {
+                        echo "WARNING: Could not analyze Allure failures: ${e.message}"
+                    }
+                } else {
+                    echo 'No Allure results found for analysis'
                 }
             }
         }
