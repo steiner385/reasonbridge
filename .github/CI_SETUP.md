@@ -1,49 +1,32 @@
 # CI/CD Setup Guide
 
-This project uses a hybrid CI/CD approach with **Jenkins** as the primary CI server and **GitHub Actions** for quick PR validation and status monitoring.
+This project uses **Jenkins** as the primary CI server, triggered directly via **GitHub webhooks**. Builds run for all branches on every push or merge.
 
 ## Architecture Overview
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  GitHub Repo    │────▶│  GitHub Actions │────▶│    Jenkins      │
-│  (Push/PR)      │     │  (Quick checks) │     │  (Full CI)      │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-         ▲                       │                       │
-         │                       │                       │
-         └───────────────────────┴───────────────────────┘
-                        Status Updates
+┌─────────────────┐                    ┌─────────────────┐
+│  GitHub Repo    │───── Webhook ─────▶│    Jenkins      │
+│  (Push/Merge)   │                    │  (Full CI)      │
+│                 │◀── Status Update ──│                 │
+└─────────────────┘                    └─────────────────┘
 ```
 
-## GitHub Actions Workflows
+## Trigger Configuration
 
-### 1. `ci.yml` - Main CI Workflow
-- **Trigger**: Push to `main`, PRs to `main`/`develop`
-- **Purpose**: Full build and test pipeline in GitHub Actions
-- **Jobs**:
-  - Install dependencies
-  - Build shared packages
-  - Run linting
-  - Run type checking
-  - Execute all tests
+### GitHub Webhook → Jenkins
+- **Events**: Push, Pull Request
+- **Branches**: ALL branches (any push triggers a build)
+- **Endpoint**: `https://your-jenkins.com/github-webhook/`
 
-### 2. `pr-checks.yml` - PR Validation
-- **Trigger**: PRs to `main`/`develop`
-- **Purpose**: Quick PR validation before Jenkins builds
-- **Jobs**:
-  - Lint check
-  - Format check
-  - PR size analysis (adds labels: `size/S`, `size/M`, `size/L`, `size/XL`)
-  - Security scan (dependency audit, secrets detection)
+The Jenkinsfile includes `githubPush()` trigger which automatically responds to GitHub webhook events.
 
-### 3. `jenkins-trigger.yml` - Jenkins Integration
-- **Trigger**: Push to `main`/`develop`, PRs
-- **Purpose**: Trigger Jenkins builds via API
-- **Requirements**: See [Jenkins Configuration](#jenkins-configuration)
+## GitHub Actions Workflows (Optional)
 
-### 4. `jenkins-status.yml` - Status Sync
+### `jenkins-status.yml` - Status Sync
 - **Trigger**: `repository_dispatch` from Jenkins
 - **Purpose**: Update GitHub commit status from Jenkins build results
+- **Note**: This is optional - Jenkins can update status directly via GitHub API
 
 ## Jenkins Configuration
 
@@ -73,21 +56,15 @@ Configure these in Jenkins or as credentials:
    - **Content type**: `application/json`
    - **Events**: Push, Pull Request
 
-## GitHub Secrets Configuration
+## GitHub Secrets Configuration (Optional)
 
-Add these secrets to your GitHub repository:
+These secrets are only needed if using GitHub Actions for status reporting:
 
 | Secret | Description | Required For |
 |--------|-------------|--------------|
-| `JENKINS_URL` | Jenkins server URL | `jenkins-trigger.yml` |
-| `JENKINS_USER` | Jenkins username | `jenkins-trigger.yml` |
-| `JENKINS_TOKEN` | Jenkins API token | `jenkins-trigger.yml` |
-| `CODECOV_TOKEN` | Codecov upload token | `ci.yml` (optional) |
+| `CODECOV_TOKEN` | Codecov upload token | Coverage reporting (optional) |
 
-### Setting up Secrets
-1. Go to repository **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret**
-3. Add each secret with its value
+**Note**: Jenkins triggers via webhook - no GitHub secrets required for build triggering.
 
 ## Build Pipeline Stages
 
@@ -110,11 +87,9 @@ Setup → Build Dependencies → Lint & Type Check → Unit Tests → Integratio
 
 ## Status Checks
 
-PRs require these status checks to pass:
+PRs require this status check to pass:
 
-1. **Jenkins CI** - Full CI pipeline
-2. **Quick Validation** - Lint and format checks
-3. **Security Scan** - Dependency audit
+1. **Jenkins CI** - Full CI pipeline (includes linting, type checking, all tests, build)
 
 ## Troubleshooting
 

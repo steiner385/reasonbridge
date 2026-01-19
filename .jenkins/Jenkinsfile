@@ -15,6 +15,11 @@ pipeline {
         disableConcurrentBuilds(abortPrevious: true)
     }
 
+    triggers {
+        // Automatically trigger builds when GitHub sends webhook on push/merge to any branch
+        githubPush()
+    }
+
     environment {
         GITHUB_OWNER = 'steiner385'
         GITHUB_REPO = 'uniteDiscord'
