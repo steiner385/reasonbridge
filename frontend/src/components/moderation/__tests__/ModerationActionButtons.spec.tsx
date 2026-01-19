@@ -4,9 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-// @ts-expect-error - test library not configured for this project
 import { render, screen, waitFor } from '@testing-library/react';
-// @ts-expect-error - test library not configured for this project
 import userEvent from '@testing-library/user-event';
 import ModerationActionButtons from '../ModerationActionButtons';
 import type { ModerationAction } from '../../../types/moderation';
@@ -142,10 +140,8 @@ describe('ModerationActionButtons', () => {
       const approveButton = screen.getByText('Approve');
       await userEvent.click(approveButton);
 
-      const rejectButton = screen.getByText('Rejecting...' as any)
-        ? screen.queryByText('Reject')
-        : screen.getByText('Reject');
-
+      // During approval, the Reject button should be disabled
+      const rejectButton = screen.queryByText('Reject');
       if (rejectButton) {
         expect(rejectButton).toBeDisabled();
       }

@@ -9,10 +9,6 @@ export default defineConfig({
       'packages/**/src/**/*.spec.ts',
       'services/**/src/**/*.test.ts',
       'services/**/src/**/*.spec.ts',
-      'frontend/src/**/*.test.ts',
-      'frontend/src/**/*.test.tsx',
-      'frontend/src/**/*.spec.ts',
-      'frontend/src/**/*.spec.tsx',
     ],
     exclude: [
       '**/node_modules/**',
@@ -20,6 +16,7 @@ export default defineConfig({
       '**/*.integration.test.ts',
       '**/*.contract.test.ts',
       '**/*.e2e.test.ts',
+      'frontend/**', // Frontend tests use their own vitest config with jsdom
     ],
     coverage: {
       provider: 'v8',
