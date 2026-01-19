@@ -100,9 +100,10 @@ export default defineConfig({
         statements: 55,
       },
     },
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', 'allure'],
     outputFile: {
       junit: './coverage/junit.xml',
+      allure: './allure-results/unit',
     },
     // Handle pnpm workspace symlinks and Prisma client resolution
     deps: {
