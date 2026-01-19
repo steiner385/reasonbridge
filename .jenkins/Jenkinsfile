@@ -1,19 +1,16 @@
 #!/usr/bin/env groovy
 /**
- * Main CI Pipeline for uniteDiscord
+ * CI Pipeline for uniteDiscord
  *
- * This pipeline uses:
- * - Generic Webhook Trigger Plugin for branch-specific builds
- * - Composable shared library functions from .jenkins/vars/
- * - Auto-detect package manager (pnpm, yarn, npm)
+ * Pipeline structure stays here (required by Jenkins Declarative syntax).
+ * Stage implementations are in the shared library for reusability.
+ *
+ * Shared library: https://github.com/steiner385/unitediscord-jenkins-lib
  *
  * Webhook Setup:
- *   GitHub webhook URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
+ *   URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
  *   Content type: application/json
  *   Events: Push events, Pull request events
- *
- * Status Reporting:
- *   Reports 'Jenkins CI' context to GitHub for branch protection
  */
 
 @Library('unitediscord-lib@main') _
@@ -29,7 +26,6 @@ pipeline {
     }
 
     triggers {
-        // Generic Webhook Trigger - extracts branch from webhook payload
         GenericTrigger(
             genericVariables: [
                 [key: 'ref', value: '$.ref'],
@@ -42,7 +38,6 @@ pipeline {
             printContributedVariables: true,
             printPostContent: false,
             silentResponse: false,
-            // Allow all branches (no filter) - builds any push
             regexpFilterText: '$repository_name',
             regexpFilterExpression: '^uniteDiscord$'
         )
@@ -54,7 +49,6 @@ pipeline {
         CI = 'true'
         NODE_ENV = 'test'
         PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        // Extract branch name from ref (refs/heads/main -> main)
         BRANCH_NAME = "${params.ref ? params.ref.replaceAll('refs/heads/', '') : 'main'}"
     }
 
@@ -102,7 +96,6 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Auto-detects pnpm from pnpm-lock.yaml
                 installDependencies()
             }
         }
@@ -111,7 +104,6 @@ pipeline {
             steps {
                 script {
                     def pm = pipelineHelpers.getPackageManager()
-                    // Build shared packages in monorepo
                     sh "${pm.filter} \"./packages/*\" -r run build"
                 }
             }
@@ -130,8 +122,6 @@ pipeline {
             steps {
                 script {
                     def pm = pipelineHelpers.getPackageManager()
-
-                    // Try to inject AWS credentials if available
                     try {
                         withAwsCredentials {
                             sh "${pm.run} test:unit -- --coverage"
