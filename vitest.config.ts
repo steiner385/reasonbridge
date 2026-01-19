@@ -16,16 +16,18 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Vitest 2.x: Inline dependencies for proper module resolution in pnpm workspaces
+    // Vitest 2.x: Configure dependency handling for proper module resolution
     server: {
       deps: {
-        inline: [
-          // Workspace packages
-          /^@unite-discord\//,
-          // Prisma client - needs inlining for proper ESM resolution
-          '@prisma/client',
-        ],
+        // External: Let Node.js handle these natively instead of Vite transformation
+        external: [/^@prisma\/client/],
+        // Inline: Transform workspace packages through Vite
+        inline: [/^@unite-discord\//],
       },
+    },
+    // Vite resolve configuration for module aliases
+    alias: {
+      '@prisma/client': '@prisma/client',
     },
     include: [
       'packages/**/src/**/*.test.ts',
