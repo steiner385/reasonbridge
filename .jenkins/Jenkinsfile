@@ -64,9 +64,27 @@ pipeline {
                     def checkoutBranch = webhookRef ? webhookRef.replaceAll('refs/heads/', '') : 'main'
 
                     echo "Building branch: ${checkoutBranch}"
+                    echo "Commit SHA from webhook: ${webhookCommit ?: 'not provided'}"
+
+                    // Set GIT_COMMIT early from webhook so we can report status
+                    // (before checkout, in case checkout fails)
                     if (webhookCommit) {
-                        echo "Commit SHA: ${webhookCommit}"
+                        env.GIT_COMMIT = webhookCommit
+                        env.GIT_COMMIT_SHORT = webhookCommit.take(7)
                     }
+                    env.BRANCH_NAME = checkoutBranch
+                }
+
+                // Report pending status BEFORE checkout (so failures are visible)
+                githubStatusReporter(
+                    status: 'pending',
+                    context: 'Jenkins CI',
+                    description: 'Build in progress'
+                )
+
+                script {
+                    def webhookCommit = env.after ?: ''
+                    def checkoutBranch = env.BRANCH_NAME ?: 'main'
 
                     // Checkout the specific branch/commit
                     checkout([
@@ -78,20 +96,12 @@ pipeline {
                         ]]
                     ])
 
-                    // Extract git info and set for GitHub status reporting
+                    // Update GIT_COMMIT from actual checkout (more accurate)
                     env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.BRANCH_NAME = checkoutBranch
 
                     echo "Building commit: ${env.GIT_COMMIT_SHORT}"
                 }
-
-                // Report pending status to GitHub
-                githubStatusReporter(
-                    status: 'pending',
-                    context: 'Jenkins CI',
-                    description: 'Build in progress'
-                )
 
                 // Clean up stale test directories
                 sh 'rm -rf frontend/frontend || true'
