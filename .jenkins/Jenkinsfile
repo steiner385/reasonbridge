@@ -139,10 +139,16 @@ pipeline {
 
                     # Helper function to handle both docker compose (v2) and docker-compose (v1)
                     docker_compose() {
+                        # Try docker-compose (v1) first
                         if command -v docker-compose &> /dev/null; then
                             docker-compose "$@"
-                        elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
+                        # Try docker compose (v2) with space
+                        elif [ -x /usr/bin/docker ] && /usr/bin/docker compose version &> /dev/null; then
+                            /usr/bin/docker compose "$@"
+                        # Try docker compose via PATH
+                        elif docker compose version &> /dev/null; then
                             docker compose "$@"
+                        # Final fallback error
                         else
                             echo "ERROR: Neither docker-compose nor docker compose found" >&2
                             return 127
@@ -168,7 +174,9 @@ pipeline {
                         docker_compose() {
                             if command -v docker-compose &> /dev/null; then
                                 docker-compose "$@"
-                            elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
+                            elif [ -x /usr/bin/docker ] && /usr/bin/docker compose version &> /dev/null; then
+                                /usr/bin/docker compose "$@"
+                            elif docker compose version &> /dev/null; then
                                 docker compose "$@"
                             else
                                 echo "ERROR: Neither docker-compose nor docker compose found" >&2
@@ -206,10 +214,16 @@ pipeline {
 
                     # Helper function to handle both docker compose (v2) and docker-compose (v1)
                     docker_compose() {
+                        # Try docker-compose (v1) first
                         if command -v docker-compose &> /dev/null; then
                             docker-compose "$@"
-                        elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
+                        # Try docker compose (v2) with space
+                        elif [ -x /usr/bin/docker ] && /usr/bin/docker compose version &> /dev/null; then
+                            /usr/bin/docker compose "$@"
+                        # Try docker compose via PATH
+                        elif docker compose version &> /dev/null; then
                             docker compose "$@"
+                        # Final fallback error
                         else
                             echo "ERROR: Neither docker-compose nor docker compose found" >&2
                             return 127
@@ -237,7 +251,9 @@ pipeline {
                         docker_compose() {
                             if command -v docker-compose &> /dev/null; then
                                 docker-compose "$@"
-                            elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
+                            elif [ -x /usr/bin/docker ] && /usr/bin/docker compose version &> /dev/null; then
+                                /usr/bin/docker compose "$@"
+                            elif docker compose version &> /dev/null; then
                                 docker compose "$@"
                             else
                                 echo "ERROR: Neither docker-compose nor docker compose found" >&2
