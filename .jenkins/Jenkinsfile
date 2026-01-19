@@ -119,7 +119,7 @@ pipeline {
             steps {
                 sh '''
                     # Start test infrastructure
-                    docker-compose -f docker-compose.test.yml up -d
+                    docker compose -f docker-compose.test.yml up -d
 
                     # Wait for services to be ready
                     sleep 10
@@ -131,7 +131,7 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'coverage/integration-junit.xml'
-                    sh 'docker-compose -f docker-compose.test.yml down -v || true'
+                    sh 'docker compose -f docker-compose.test.yml down -v || true'
                 }
             }
         }
@@ -161,7 +161,7 @@ pipeline {
                     npx playwright install --with-deps
 
                     # Start the full stack
-                    docker-compose up -d
+                    docker compose up -d
 
                     # Wait for services
                     sleep 15
@@ -172,7 +172,7 @@ pipeline {
             }
             post {
                 always {
-                    sh 'docker-compose down -v || true'
+                    sh 'docker compose down -v || true'
                 }
             }
         }
