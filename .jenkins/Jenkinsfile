@@ -25,6 +25,7 @@ pipeline {
         GITHUB_REPO = 'uniteDiscord'
         CI = 'true'
         NODE_ENV = 'test'
+        PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         // AWS Bedrock configuration is injected via withAwsCredentials shared library
     }
 
