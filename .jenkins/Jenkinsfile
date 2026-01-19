@@ -10,7 +10,7 @@
  * Webhook Setup:
  *   URL: https://jenkins.kindash.com/generic-webhook-trigger/invoke?token=uniteDiscord-ci
  *   Content type: application/json
- *   Events: Push events, Pull request events
+ *   Events: Push events only (pull_request events are filtered out to prevent duplicates)
  */
 
 @Library('unitediscord-lib@main') _
@@ -44,8 +44,10 @@ pipeline {
             printContributedVariables: true,
             printPostContent: false,
             silentResponse: false,
-            regexpFilterText: '$repository_name',
-            regexpFilterExpression: '^uniteDiscord$'
+            // Filter to only trigger on push events (which have ref), not pull_request events
+            // This prevents duplicate builds when PR is merged (which sends both events)
+            regexpFilterText: '$ref',
+            regexpFilterExpression: 'refs/heads/.*'
         )
     }
 
