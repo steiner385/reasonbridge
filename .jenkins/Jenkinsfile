@@ -39,6 +39,22 @@ pipeline {
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
                 echo "Building commit: ${env.GIT_COMMIT_SHORT}"
+                // Setup docker compose helper for both v1 and v2 compatibility
+                sh '''
+                    # Create a helper function that handles both docker compose (v2) and docker-compose (v1)
+                    # This ensures robustness across different Docker installations
+                    if ! command -v docker-compose &> /dev/null && command -v docker &> /dev/null; then
+                        # docker-compose not found but docker is available
+                        # Create an alias in shell profile if docker compose command works
+                        if docker compose version &> /dev/null; then
+                            echo "Docker v2 detected (docker compose available)"
+                        else
+                            echo "WARNING: Neither 'docker-compose' nor 'docker compose' appears to be fully functional"
+                        fi
+                    elif command -v docker-compose &> /dev/null; then
+                        echo "Docker v1 detected (docker-compose available)"
+                    fi
+                '''
             }
         }
 
@@ -119,8 +135,20 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 sh '''
+                    # Helper function to handle both docker compose (v2) and docker-compose (v1)
+                    docker_compose() {
+                        if command -v docker-compose &> /dev/null; then
+                            docker-compose "$@"
+                        elif docker compose version &> /dev/null; then
+                            docker compose "$@"
+                        else
+                            echo "ERROR: Neither docker-compose nor docker compose found" >&2
+                            return 127
+                        fi
+                    }
+
                     # Start test infrastructure
-                    docker compose -f docker-compose.test.yml up -d
+                    docker_compose -f docker-compose.test.yml up -d
 
                     # Wait for services to be ready
                     sleep 10
@@ -132,7 +160,19 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'coverage/integration-junit.xml'
-                    sh 'docker compose -f docker-compose.test.yml down -v || true'
+                    sh '''
+                        docker_compose() {
+                            if command -v docker-compose &> /dev/null; then
+                                docker-compose "$@"
+                            elif docker compose version &> /dev/null; then
+                                docker compose "$@"
+                            else
+                                echo "ERROR: Neither docker-compose nor docker compose found" >&2
+                                return 127
+                            fi
+                        }
+                        docker_compose -f docker-compose.test.yml down -v || true
+                    '''
                 }
             }
         }
@@ -158,11 +198,23 @@ pipeline {
             }
             steps {
                 sh '''
+                    # Helper function to handle both docker compose (v2) and docker-compose (v1)
+                    docker_compose() {
+                        if command -v docker-compose &> /dev/null; then
+                            docker-compose "$@"
+                        elif docker compose version &> /dev/null; then
+                            docker compose "$@"
+                        else
+                            echo "ERROR: Neither docker-compose nor docker compose found" >&2
+                            return 127
+                        fi
+                    }
+
                     # Install Playwright browsers
                     npx playwright install --with-deps
 
                     # Start the full stack
-                    docker compose up -d
+                    docker_compose up -d
 
                     # Wait for services
                     sleep 15
@@ -173,7 +225,19 @@ pipeline {
             }
             post {
                 always {
-                    sh 'docker compose down -v || true'
+                    sh '''
+                        docker_compose() {
+                            if command -v docker-compose &> /dev/null; then
+                                docker-compose "$@"
+                            elif docker compose version &> /dev/null; then
+                                docker compose "$@"
+                            else
+                                echo "ERROR: Neither docker-compose nor docker compose found" >&2
+                                return 127
+                            fi
+                        }
+                        docker_compose down -v || true
+                    '''
                 }
             }
         }
