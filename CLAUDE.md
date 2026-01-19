@@ -80,12 +80,12 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 ## Jenkins CI/CD
 
-**Jenkins Server:** `http://localhost:8080` (local development)
+**Jenkins Server:** `http://jenkins.uniteDiscord.org`
 
 **Infrastructure:**
 - Master + 8 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
 - Start/stop: `cd /home/tony/jenkins/docker-compose && docker compose up -d` / `docker compose down`
-- Environment: GitHub credentials and agent secrets in `.env`
+- Agent secrets configured in Docker Compose `.env`
 
 **Key Job:** `unitediscord-ci` - Automatically triggered on all branch pushes via GitHub webhook
 - Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
