@@ -47,7 +47,7 @@ export default defineConfig({
       'frontend/src/components/**/*.spec.tsx',
       'frontend/src/components/**/*.test.tsx',
       // CI: class-validator resolution issues in pnpm workspace
-      '**/suggestions.controller.test.ts',
+      // '**/suggestions.controller.test.ts',
       // CI: Prisma client + class-validator resolution issues in discussion-service
       '**/alignment-aggregation.service.test.ts',
       '**/alignments.controller.test.ts',
