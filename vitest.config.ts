@@ -68,7 +68,7 @@ export default defineConfig({
       '**/video-upload.service.test.ts',
       '**/verification.controller.test.ts',
       // CI: class-validator resolution issues in pnpm workspace
-      '**/suggestions.controller.test.ts',
+      // '**/suggestions.controller.test.ts',
       // CI: Prisma client + class-validator resolution issues in discussion-service
       '**/alignment-aggregation.service.test.ts',
       '**/alignments.controller.test.ts',
