@@ -43,7 +43,7 @@ export default defineConfig({
       '**/*.integration.test.ts',
       '**/*.contract.test.ts',
       '**/*.e2e.test.ts',
-      // Frontend component tests - require separate vitest config with React testing setup
+      // Frontend component tests - run with separate frontend/vitest.config.ts using jsdom
       'frontend/src/components/**/*.spec.tsx',
       'frontend/src/components/**/*.test.tsx',
       // CI: Prisma client runtime resolution issues - TODO: fix Prisma ESM bundling

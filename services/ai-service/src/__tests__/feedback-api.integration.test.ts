@@ -1,12 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { FeedbackService } from '../feedback/feedback.service.js';
 import { FeedbackAnalyticsService } from '../services/feedback-analytics.service.js';
-import { PrismaService } from '../prisma/prisma.service.js';
 import { FeedbackSensitivity } from '../feedback/dto/request-feedback.dto.js';
-import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
-import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
-import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
-import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js';
 
 /**
  * Integration tests for the Feedback API flow
@@ -16,6 +10,7 @@ describe('Feedback API Integration Tests', () => {
   let feedbackService: FeedbackService;
   let analyticsService: FeedbackAnalyticsService;
   let mockPrisma: any;
+  let mockResponseAnalyzer: any;
 
   // Test data
   const mockResponseId = '550e8400-e29b-41d4-a716-446655440000';
@@ -54,7 +49,7 @@ describe('Feedback API Integration Tests', () => {
     createdAt: new Date(),
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Create mock Prisma with proper mock functions
     mockPrisma = {
       response: {
@@ -71,23 +66,20 @@ describe('Feedback API Integration Tests', () => {
       },
     };
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        FeedbackService,
-        FeedbackAnalyticsService,
-        ResponseAnalyzerService,
-        ToneAnalyzerService,
-        FallacyDetectorService,
-        ClarityAnalyzerService,
-        {
-          provide: PrismaService,
-          useValue: mockPrisma,
-        },
-      ],
-    }).compile();
+    // Create mock analyzer service
+    mockResponseAnalyzer = {
+      analyzeContent: async () => ({
+        type: 'INFLAMMATORY',
+        subtype: 'personal_attack',
+        suggestionText: 'Consider rephrasing to focus on ideas rather than individuals.',
+        reasoning: 'The response contains language that may be perceived as attacking.',
+        confidenceScore: 0.85,
+      }),
+    };
 
-    feedbackService = module.get<FeedbackService>(FeedbackService);
-    analyticsService = module.get<FeedbackAnalyticsService>(FeedbackAnalyticsService);
+    // Directly instantiate services with mocked dependencies (bypass NestJS TestingModule)
+    feedbackService = new FeedbackService(mockPrisma as any, mockResponseAnalyzer);
+    analyticsService = new FeedbackAnalyticsService(mockPrisma as any);
   });
 
   describe('POST /feedback/request', () => {
