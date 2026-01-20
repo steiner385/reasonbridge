@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ResponsesService } from '../responses.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
@@ -68,12 +69,12 @@ describe('ResponsesService', () => {
 
   describe('getResponsesForTopic', () => {
     it('should retrieve all responses for a topic', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
       const responses = [
         mockResponse,
         { ...mockResponse, id: 'response-2', content: 'Another response' },
       ];
-      vi.mocked(prismaService.response.findMany).mockResolvedValue(responses as any);
+      prismaService.response.findMany.mockResolvedValue(responses as any);
 
       const result = await service.getResponsesForTopic('topic-1');
 
@@ -83,8 +84,8 @@ describe('ResponsesService', () => {
     });
 
     it('should return empty array when topic has no responses', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.findMany).mockResolvedValue([] as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.findMany.mockResolvedValue([] as any);
 
       const result = await service.getResponsesForTopic('topic-1');
 
@@ -92,13 +93,13 @@ describe('ResponsesService', () => {
     });
 
     it('should throw NotFoundException when topic does not exist', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(null);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(null);
 
       await expect(service.getResponsesForTopic('non-existent')).rejects.toThrow(NotFoundException);
     });
 
     it('should order responses by creation time (oldest first)', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
       const newerResponse = {
         ...mockResponse,
         id: 'response-new',
@@ -109,10 +110,7 @@ describe('ResponsesService', () => {
         id: 'response-old',
         createdAt: new Date('2026-01-10'),
       };
-      vi.mocked(prismaService.response.findMany).mockResolvedValue([
-        olderResponse,
-        newerResponse,
-      ] as any);
+      prismaService.response.findMany.mockResolvedValue([olderResponse, newerResponse] as any);
 
       const result = await service.getResponsesForTopic('topic-1');
 
@@ -129,10 +127,10 @@ describe('ResponsesService', () => {
     };
 
     it('should create a new response', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.discussionTopic.update).mockResolvedValue(mockTopic as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
+      prismaService.discussionTopic.update.mockResolvedValue(mockTopic as any);
 
       const result = await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -165,7 +163,7 @@ describe('ResponsesService', () => {
     });
 
     it('should throw NotFoundException when topic does not exist', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(null);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(null);
 
       await expect(service.createResponse('non-existent', 'user-1', validDto)).rejects.toThrow(
         NotFoundException,
@@ -174,7 +172,7 @@ describe('ResponsesService', () => {
 
     it('should throw BadRequestException when adding to archived topic', async () => {
       const archivedTopic = { ...mockTopic, status: 'ARCHIVED' };
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(archivedTopic as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(archivedTopic as any);
 
       await expect(service.createResponse('topic-1', 'user-1', validDto)).rejects.toThrow(
         new BadRequestException('Cannot add responses to archived topics'),
@@ -187,15 +185,15 @@ describe('ResponsesService', () => {
         parentId: 'response-parent',
       };
 
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
       // First call for parent validation, second for full response fetch
-      vi.mocked(prismaService.response.findUnique)
+      prismaService.response.findUnique
         .mockResolvedValueOnce({
           id: 'response-parent',
           topicId: 'topic-1',
         } as any)
         .mockResolvedValueOnce(mockResponse as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue(mockResponse as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
 
       const result = await service.createResponse('topic-1', 'user-1', dtoWithParent);
 
@@ -208,8 +206,8 @@ describe('ResponsesService', () => {
         parentId: 'non-existent-parent',
       };
 
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(null);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.findUnique.mockResolvedValue(null);
 
       await expect(service.createResponse('topic-1', 'user-1', dtoWithParent)).rejects.toThrow(
         NotFoundException,
@@ -222,8 +220,8 @@ describe('ResponsesService', () => {
         parentId: 'response-other-topic',
       };
 
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue({
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.findUnique.mockResolvedValue({
         id: 'response-other-topic',
         topicId: 'topic-2', // Different topic
       } as any);
@@ -239,15 +237,15 @@ describe('ResponsesService', () => {
         citedSources: ['https://example.com', 'https://another.com'],
       };
 
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue({
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue({
         ...mockResponse,
         citedSources: [
           { url: 'https://example.com', title: null },
           { url: 'https://another.com', title: null },
         ],
       } as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue({
+      prismaService.response.findUnique.mockResolvedValue({
         ...mockResponse,
         citedSources: [
           { url: 'https://example.com', title: null },
@@ -266,9 +264,9 @@ describe('ResponsesService', () => {
         propositionIds: ['prop-1', 'prop-2'],
       };
 
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(mockResponse as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
 
       await service.createResponse('topic-1', 'user-1', dtoWithPropositions);
 
@@ -282,10 +280,10 @@ describe('ResponsesService', () => {
     });
 
     it('should increment topic response count', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.discussionTopic.update).mockResolvedValue(mockTopic as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
+      prismaService.discussionTopic.update.mockResolvedValue(mockTopic as any);
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -300,9 +298,9 @@ describe('ResponsesService', () => {
     });
 
     it('should trigger common ground analysis', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(mockResponse as any);
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -310,10 +308,10 @@ describe('ResponsesService', () => {
     });
 
     it('should handle common ground trigger errors gracefully', async () => {
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue(mockResponse as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(mockResponse as any);
-      vi.mocked(commonGroundTrigger.checkAndTrigger).mockRejectedValue(new Error('Trigger failed'));
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
+      commonGroundTrigger.checkAndTrigger.mockRejectedValue(new Error('Trigger failed'));
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -331,17 +329,17 @@ describe('ResponsesService', () => {
         containsOpinion: false,
       };
 
-      vi.mocked(prismaService.discussionTopic.findUnique).mockResolvedValue(mockTopic as any);
-      vi.mocked(prismaService.response.create).mockResolvedValue({
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue({
         ...mockResponse,
         content: 'This is a response with leading/trailing whitespace.',
       } as any);
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
 
       await service.createResponse('topic-1', 'user-1', dtoWithWhitespace);
 
       expect(prismaService.response.create).toHaveBeenCalled();
-      const createCall = vi.mocked(prismaService.response.create).mock.calls[0];
+      const createCall = prismaService.response.create.mock.calls[0];
       expect(createCall[0].data.content).toMatch(/^\S.*\S$/);
     });
   });
@@ -361,8 +359,8 @@ describe('ResponsesService', () => {
         ...responseWithTopic,
         content: updateDto.content,
       };
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(responseWithTopic as any);
-      vi.mocked(prismaService.response.update).mockResolvedValue(updatedResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(responseWithTopic as any);
+      prismaService.response.update.mockResolvedValue(updatedResponse as any);
 
       const result = await service.updateResponse('response-1', 'user-1', updateDto);
 
@@ -370,7 +368,7 @@ describe('ResponsesService', () => {
     });
 
     it('should throw ForbiddenException if user is not the author', async () => {
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(responseWithTopic as any);
+      prismaService.response.findUnique.mockResolvedValue(responseWithTopic as any);
 
       // Try to update with different user
       await expect(
@@ -379,7 +377,7 @@ describe('ResponsesService', () => {
     });
 
     it('should throw NotFoundException if response does not exist', async () => {
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(null);
+      prismaService.response.findUnique.mockResolvedValue(null);
 
       await expect(service.updateResponse('non-existent', 'user-1', updateDto)).rejects.toThrow(
         NotFoundException,
@@ -387,8 +385,8 @@ describe('ResponsesService', () => {
     });
 
     it('should increment revision count', async () => {
-      vi.mocked(prismaService.response.findUnique).mockResolvedValue(responseWithTopic as any);
-      vi.mocked(prismaService.response.update).mockResolvedValue({
+      prismaService.response.findUnique.mockResolvedValue(responseWithTopic as any);
+      prismaService.response.update.mockResolvedValue({
         ...responseWithTopic,
         revisionCount: 1,
         content: updateDto.content,
@@ -397,7 +395,7 @@ describe('ResponsesService', () => {
       await service.updateResponse('response-1', 'user-1', updateDto);
 
       expect(prismaService.response.update).toHaveBeenCalled();
-      const updateCall = vi.mocked(prismaService.response.update).mock.calls[0];
+      const updateCall = prismaService.response.update.mock.calls[0];
       expect(updateCall[0].data.revisionCount).toBeDefined();
     });
   });
