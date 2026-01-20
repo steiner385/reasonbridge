@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Decimal } from '@prisma/client/runtime/library.js';
+import { Prisma } from '@prisma/client';
 import type { User } from '@prisma/client';
+
+// Use Prisma.Decimal for proper module resolution across all environments
+type Decimal = Prisma.Decimal;
 import { TrustScoreUpdateDto, TrustScoresDto } from '../users/dto/trust-score.dto.js';
 
 /**
@@ -197,6 +200,6 @@ export class TrustScoreCalculator {
   numberToDecimal(value: number): Decimal {
     // Round to 2 decimal places for storage precision
     const rounded = Math.round(value * 100) / 100;
-    return new Decimal(rounded);
+    return new Prisma.Decimal(rounded);
   }
 }

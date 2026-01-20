@@ -3,6 +3,7 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
+  // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
   const port = process.env['PORT'] || 3000;

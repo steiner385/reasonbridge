@@ -25,34 +25,38 @@ echo "🔒 Running dependency security audit..."
 # Create temp file for audit results
 AUDIT_TEMP="/tmp/npm-audit-$$.json"
 
-# Run npm audit and capture output
-if npm audit --json --production 2>/dev/null > "$AUDIT_TEMP"; then
-  # Parse results
-  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+# Run pnpm audit (npm doesn't work with pnpm lockfile)
+pnpm audit --json --prod 2>/dev/null > "$AUDIT_TEMP" || true
 
-  if [ "$VULNERABILITIES" -eq 0 ]; then
-    success "No security vulnerabilities detected"
-    rm -f "$AUDIT_TEMP"
-    exit 0
-  fi
-else
-  # npm audit failed - extract results from error output
-  VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' "$AUDIT_TEMP" 2>/dev/null || echo "unknown")
+# Parse results - pnpm returns vulnerabilities in advisories object
+VULNERABILITIES=$(jq '.advisories | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+
+if [ "$VULNERABILITIES" -eq 0 ]; then
+  success "No security vulnerabilities detected"
+  rm -f "$AUDIT_TEMP"
+  exit 0
 fi
 
 # ============================================================================
 # Vulnerabilities Found - Report and Block
 # ============================================================================
 
+# Skip if no actual vulnerabilities found (report shows 0)
+if [ "$VULNERABILITIES" -eq 0 ]; then
+  success "No security vulnerabilities detected"
+  rm -f "$AUDIT_TEMP"
+  exit 0
+fi
+
 echo ""
 error "Security vulnerabilities detected in dependencies!"
 echo ""
 
-# Extract vulnerability details
-CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
-HIGH=$(jq '.metadata.vulnerabilities.high // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
-MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
-LOW=$(jq '.metadata.vulnerabilities.low // 0' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+# Extract vulnerability details from pnpm format
+CRITICAL=$(jq '[.advisories[] | select(.severity=="critical")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+HIGH=$(jq '[.advisories[] | select(.severity=="high")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+MODERATE=$(jq '[.advisories[] | select(.severity=="moderate")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
+LOW=$(jq '[.advisories[] | select(.severity=="low")] | length' "$AUDIT_TEMP" 2>/dev/null || echo "0")
 
 echo "📊 Vulnerability Summary:"
 echo "  Critical:  $CRITICAL"

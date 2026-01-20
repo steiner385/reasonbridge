@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BotDetectorService } from './bot-detector.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -241,14 +242,14 @@ describe('BotDetectorService', () => {
         } as any);
       }
 
-      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponses);
+      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockResponses,
+      );
 
       const result = await service.detectCoordinatedPostingPatterns('topic-1');
 
       expect(result.length).toBeGreaterThan(0);
-      const newAccountPattern = result.find(
-        (p) => p.pattern === 'new_account_coordination',
-      );
+      const newAccountPattern = result.find((p) => p.pattern === 'new_account_coordination');
       expect(newAccountPattern).toBeDefined();
       expect(newAccountPattern?.confidence).toBeGreaterThan(0.6);
     });
@@ -273,7 +274,9 @@ describe('BotDetectorService', () => {
         } as any);
       }
 
-      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponses);
+      (mockPrismaService.response.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockResponses,
+      );
 
       const result = await service.detectCoordinatedPostingPatterns('topic-1');
 

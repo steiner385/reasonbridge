@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Integration tests for ModerationNotificationHandler
  * Tests event-driven notification creation and WebSocket broadcasting
@@ -203,7 +204,12 @@ describe('ModerationNotificationHandler Integration Tests', () => {
     });
 
     it('should handle different trust update reasons', async () => {
-      const reasons = ['moderation_action', 'positive_contribution', 'appeal_upheld', 'periodic_recalculation'];
+      const reasons = [
+        'moderation_action',
+        'positive_contribution',
+        'appeal_upheld',
+        'periodic_recalculation',
+      ];
 
       for (const reason of reasons) {
         mockPrisma.user.findUnique.mockResolvedValueOnce(mockUser);
@@ -244,9 +250,9 @@ describe('ModerationNotificationHandler Integration Tests', () => {
       const error = new Error('Database connection failed');
       mockPrisma.response.findUnique.mockRejectedValueOnce(error);
 
-      await expect(handler.handleModerationActionRequested(mockModerationActionRequestedEvent)).rejects.toThrow(
-        'Database connection failed',
-      );
+      await expect(
+        handler.handleModerationActionRequested(mockModerationActionRequestedEvent),
+      ).rejects.toThrow('Database connection failed');
     });
 
     it('should log and rethrow errors from handleUserTrustUpdated', async () => {

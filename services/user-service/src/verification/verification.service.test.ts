@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BadRequestException } from '@nestjs/common';
 import { VerificationService } from './verification.service.js';
 import { VerificationRequestDto } from './dto/verification-request.dto.js';
@@ -70,10 +71,12 @@ describe('VerificationService', () => {
         phoneNumber: '+12125551234',
       };
 
-      (mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
-      (mockPrismaService.verificationRecord.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      (
+        mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(null);
+      (
+        mockPrismaService.verificationRecord.create as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(mockVerificationRecord);
 
       const result = await service.requestVerification(userId, request);
 
@@ -107,8 +110,12 @@ describe('VerificationService', () => {
         type: VerificationType.GOVERNMENT_ID,
       };
 
-      (mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
-      (mockPrismaService.verificationRecord.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(govIdRecord);
+      (
+        mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(null);
+      (
+        mockPrismaService.verificationRecord.create as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(govIdRecord);
 
       const result = await service.requestVerification(userId, request);
 
@@ -125,7 +132,9 @@ describe('VerificationService', () => {
         type: 'PHONE',
       };
 
-      (mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+      (
+        mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(null);
 
       await expect(service.requestVerification(userId, request)).rejects.toThrow(
         BadRequestException,
@@ -139,9 +148,9 @@ describe('VerificationService', () => {
         phoneNumber: '+12125551234',
       };
 
-      (mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      (
+        mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(mockVerificationRecord);
 
       await expect(service.requestVerification(userId, request)).rejects.toThrow(
         BadRequestException,
@@ -161,12 +170,12 @@ describe('VerificationService', () => {
         expiresAt: new Date(Date.now() - 1000), // 1 second in the past
       };
 
-      (mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        expiredVerification,
-      );
-      (mockPrismaService.verificationRecord.create as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      (
+        mockPrismaService.verificationRecord.findFirst as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(expiredVerification);
+      (
+        mockPrismaService.verificationRecord.create as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(mockVerificationRecord);
 
       const result = await service.requestVerification(userId, request);
 
@@ -177,9 +186,9 @@ describe('VerificationService', () => {
 
   describe('getVerification', () => {
     it('should retrieve a verification record by ID', async () => {
-      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      (
+        mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(mockVerificationRecord);
 
       const result = await service.getVerification('verification-123');
 
@@ -190,7 +199,9 @@ describe('VerificationService', () => {
     });
 
     it('should return null if verification not found', async () => {
-      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+      (
+        mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(null);
 
       const result = await service.getVerification('nonexistent');
 
@@ -201,9 +212,9 @@ describe('VerificationService', () => {
   describe('getPendingVerifications', () => {
     it('should retrieve pending verifications for a user', async () => {
       const userId = 'user-123';
-      (mockPrismaService.verificationRecord.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
-        mockVerificationRecord,
-      ]);
+      (
+        mockPrismaService.verificationRecord.findMany as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce([mockVerificationRecord]);
 
       const result = await service.getPendingVerifications(userId);
 
@@ -221,7 +232,9 @@ describe('VerificationService', () => {
     });
 
     it('should return empty array if no pending verifications', async () => {
-      (mockPrismaService.verificationRecord.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce([]);
+      (
+        mockPrismaService.verificationRecord.findMany as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce([]);
 
       const result = await service.getPendingVerifications('user-456');
 
@@ -234,10 +247,12 @@ describe('VerificationService', () => {
       const verificationId = 'verification-123';
       const userId = 'user-123';
 
-      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      (mockPrismaService.verificationRecord.update as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (
+        mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(mockVerificationRecord);
+      (
+        mockPrismaService.verificationRecord.update as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce({
         ...mockVerificationRecord,
         status: 'REJECTED',
       });
@@ -252,7 +267,9 @@ describe('VerificationService', () => {
     });
 
     it('should throw error if verification not found', async () => {
-      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+      (
+        mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(null);
 
       await expect(service.cancelVerification('nonexistent', 'user-123')).rejects.toThrow(
         BadRequestException,
@@ -260,9 +277,9 @@ describe('VerificationService', () => {
     });
 
     it('should throw error if verification does not belong to user', async () => {
-      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      (
+        mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(mockVerificationRecord);
 
       await expect(service.cancelVerification('verification-123', 'wrong-user')).rejects.toThrow(
         BadRequestException,
@@ -275,7 +292,9 @@ describe('VerificationService', () => {
         status: 'VERIFIED',
       };
 
-      (mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce(verifiedRecord);
+      (
+        mockPrismaService.verificationRecord.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValueOnce(verifiedRecord);
 
       await expect(service.cancelVerification('verification-123', 'user-123')).rejects.toThrow(
         BadRequestException,

@@ -47,6 +47,12 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip main.ts files - startup messages are allowed
+  if [[ "$file" =~ /main\.ts$ ]]; then
+    debug "Skipping main.ts file: $file"
+    continue
+  fi
+
   # Get staged content and check for problematic console statements
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 

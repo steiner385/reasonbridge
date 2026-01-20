@@ -149,6 +149,7 @@ export interface ModerationAction {
   status: ModerationActionStatus;
   createdAt: string;
   executedAt?: string;
+  expiresAt?: string;
 }
 
 /**
@@ -194,4 +195,34 @@ export interface AppealsListResponse {
   total: number;
   page: number;
   pageSize: number;
+}
+
+/**
+ * Appeal submission request
+ */
+export interface CreateAppealRequest {
+  /**
+   * ID of the moderation action being appealed
+   */
+  moderationActionId: string;
+
+  /**
+   * Reason for appealing the moderation action
+   */
+  reason: string;
+}
+
+/**
+ * Appeal submission response
+ */
+export interface CreateAppealResponse {
+  /**
+   * The created appeal
+   */
+  appeal: Appeal;
+
+  /**
+   * Confirmation message
+   */
+  message: string;
 }
