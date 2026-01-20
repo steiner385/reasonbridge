@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
  */
 
 // Generate unique test phone number in E.164 format
-const generateTestPhoneNumber = () => {
+const _generateTestPhoneNumber = () => {
   const timestamp = Date.now();
   // Use a format like +12025550000 + unique suffix
   const uniqueSuffix = String(timestamp % 10000).padStart(4, '0');
@@ -31,10 +31,11 @@ const generateTestUser = () => {
 };
 
 test.describe('Complete Verification Flow', () => {
-  let testUser: ReturnType<typeof generateTestUser>;
+  let _testUser: ReturnType<typeof generateTestUser>;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   test.beforeEach(async ({ page }) => {
-    testUser = generateTestUser();
+    _testUser = generateTestUser();
   });
 
   test('should navigate to verification page directly', async ({ page }) => {
@@ -88,7 +89,7 @@ test.describe('Complete Verification Flow', () => {
 
     // Error message might also contain buttons (like retry button)
     const errorText = page.getByText(/error|failed/i);
-    const hasError = await errorText.count() > 0;
+    const hasError = (await errorText.count()) > 0;
 
     // Should have at least some buttons (navigation or options) OR should show an error
     expect(buttonCount > 0 || hasError).toBeTruthy();
@@ -124,6 +125,7 @@ test.describe('Complete Verification Flow', () => {
     await page.goto('/verification');
 
     // Page should load without errors
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statusCode = (await page.evaluate(() => (window as any).serverStatus || 200)) || 200;
     expect(statusCode).toBeLessThan(400);
 
@@ -246,7 +248,9 @@ test.describe('Complete Verification Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should have a main content area
-    const contentAreas = page.locator('main, [role="main"], [class*="content"], [class*="container"]');
+    const contentAreas = page.locator(
+      'main, [role="main"], [class*="content"], [class*="container"]',
+    );
     const count = await contentAreas.count();
 
     // Should have at least one content area
