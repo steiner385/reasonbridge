@@ -4,7 +4,20 @@ import { VerificationService } from '../verification.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import type { VideoVerificationService } from '../video-challenge.service.js';
 import type { VerificationRequestDto } from '../dto/verification-request.dto.js';
-import { VerificationType, VerificationStatus } from '@prisma/client';
+
+// Inline type definitions to avoid Prisma import issues in Vitest
+enum VerificationType {
+  PHONE = 'PHONE',
+  GOVERNMENT_ID = 'GOVERNMENT_ID',
+  VIDEO = 'VIDEO',
+}
+
+enum VerificationStatus {
+  PENDING = 'PENDING',
+  VERIFIED = 'VERIFIED',
+  EXPIRED = 'EXPIRED',
+  FAILED = 'FAILED',
+}
 
 describe('VerificationService', () => {
   let service: VerificationService;
