@@ -15,6 +15,7 @@ import {
   rejectModerationAction,
 } from '../../lib/moderation-api';
 import type { ModerationAction } from '../../types/moderation';
+import { useShowNotification } from '../../hooks/useNotification';
 
 export interface ModerationActionButtonsProps {
   /**
@@ -74,6 +75,7 @@ export default function ModerationActionButtons({
   const [error, setError] = useState<string | null>(null);
   const [rejectReasoning, setRejectReasoning] = useState('');
   const [showReasoningInput, setShowReasoningInput] = useState(false);
+  const notify = useShowNotification();
 
   const isProcessing = processingAction !== null;
 
@@ -83,10 +85,12 @@ export default function ModerationActionButtons({
       setError(null);
       setProcessingAction('approve');
       const updatedAction = await approveModerationAction(action.id);
+      notify.success('Action approved', `Moderation action approved successfully`, 3000);
       onApprove?.(updatedAction);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to approve action';
       setError(errorMessage);
+      notify.error('Approval failed', errorMessage);
       onError?.(errorMessage);
     } finally {
       setProcessingAction(null);
@@ -99,12 +103,14 @@ export default function ModerationActionButtons({
       setError(null);
       setProcessingAction('reject');
       const updatedAction = await rejectModerationAction(action.id);
+      notify.success('Action rejected', `Moderation action rejected successfully`, 3000);
       setRejectReasoning('');
       setShowReasoningInput(false);
       onReject?.(updatedAction);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to reject action';
       setError(errorMessage);
+      notify.error('Rejection failed', errorMessage);
       onError?.(errorMessage);
     } finally {
       setProcessingAction(null);
