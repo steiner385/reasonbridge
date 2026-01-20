@@ -92,8 +92,10 @@ export default defineConfig({
       // CI: Prisma client resolution issues in discussion-service
       '**/common-ground-trigger.service.test.ts',
       '**/responses.service.test.ts',
+      '**/responses.service.unit.test.ts',
       '**/responses.controller.test.ts',
       '**/content-moderation.service.test.ts',
+      '**/content-moderation.service.spec.ts',
       // CI: Prisma client resolution issues in moderation-service
       '**/moderation.controller.test.ts',
       '**/moderation-queue.service.spec.ts',
@@ -106,6 +108,7 @@ export default defineConfig({
       '**/common-ground-notification.handler.test.ts',
       '**/moderation-notification.handler.test.ts',
       // CI: Prisma client resolution issues in user-service
+      '**/bot-detector.service.spec.ts',
       '**/users.controller.test.ts',
       '**/users.service.test.ts',
     ],
