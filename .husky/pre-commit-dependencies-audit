@@ -41,6 +41,13 @@ fi
 # Vulnerabilities Found - Report and Block
 # ============================================================================
 
+# Skip if no actual vulnerabilities found (report shows 0)
+if [ "$VULNERABILITIES" -eq 0 ]; then
+  success "No security vulnerabilities detected"
+  rm -f "$AUDIT_TEMP"
+  exit 0
+fi
+
 echo ""
 error "Security vulnerabilities detected in dependencies!"
 echo ""
