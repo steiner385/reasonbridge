@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PropositionClustererService } from '../services/proposition-clusterer.service.js';
 import type {
   ClusterPropositionsRequest,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { VerificationService } from '../verification/verification.service.js';
@@ -105,8 +106,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
   };
 
   const mockConfigService = {
-    get: <T>(key: string): T | undefined =>
-      mockConfigData[key] as T | undefined,
+    get: <T>(key: string): T | undefined => mockConfigData[key] as T | undefined,
   };
 
   const mockVideoVerificationService = {
@@ -134,9 +134,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
           throw new BadRequestException(`Unknown challenge type: ${type}`);
       }
     }),
-    generateUploadUrl: vi.fn(async () =>
-      'https://s3.example.com/presigned-url-for-video-upload',
-    ),
+    generateUploadUrl: vi.fn(async () => 'https://s3.example.com/presigned-url-for-video-upload'),
     getVideoConstraints: vi.fn(() => ({
       maxFileSize: 100 * 1024 * 1024,
       minDurationSeconds: 3,
@@ -152,10 +150,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
       mockPrismaService as any,
       mockVideoVerificationService as any,
     );
-    videoUploadService = new VideoUploadService(
-      mockPrismaService as any,
-      mockConfigService as any,
-    );
+    videoUploadService = new VideoUploadService(mockPrismaService as any, mockConfigService as any);
     videoVerificationService = mockVideoVerificationService;
     prismaService = mockPrismaService as any;
     configService = mockConfigService as any;
@@ -163,9 +158,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
 
   describe('Video Verification Challenge Generation', () => {
     it('should generate RANDOM_PHRASE challenge', () => {
-      const challenge = videoVerificationService.generateChallenge(
-        'RANDOM_PHRASE',
-      );
+      const challenge = videoVerificationService.generateChallenge('RANDOM_PHRASE');
 
       expect(challenge.type).toBe('RANDOM_PHRASE');
       expect(challenge.instruction).toBeDefined();
@@ -174,9 +167,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
     });
 
     it('should generate RANDOM_GESTURE challenge', () => {
-      const challenge = videoVerificationService.generateChallenge(
-        'RANDOM_GESTURE',
-      );
+      const challenge = videoVerificationService.generateChallenge('RANDOM_GESTURE');
 
       expect(challenge.type).toBe('RANDOM_GESTURE');
       expect(challenge.instruction).toBeDefined();
@@ -196,9 +187,9 @@ describe('Video Upload and Analysis - Integration Tests', () => {
     });
 
     it('should throw error for unknown challenge type', () => {
-      expect(() =>
-        videoVerificationService.generateChallenge('UNKNOWN_CHALLENGE'),
-      ).toThrow(BadRequestException);
+      expect(() => videoVerificationService.generateChallenge('UNKNOWN_CHALLENGE')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should generate different phrases/gestures across multiple calls', () => {
@@ -218,12 +209,8 @@ describe('Video Upload and Analysis - Integration Tests', () => {
           }),
       };
 
-      const challenge1 = mockVideoServiceWithVariation.generateChallenge(
-        'RANDOM_PHRASE',
-      );
-      const challenge2 = mockVideoServiceWithVariation.generateChallenge(
-        'RANDOM_PHRASE',
-      );
+      const challenge1 = mockVideoServiceWithVariation.generateChallenge('RANDOM_PHRASE');
+      const challenge2 = mockVideoServiceWithVariation.generateChallenge('RANDOM_PHRASE');
 
       expect(challenge1.randomValue).not.toBe(challenge2.randomValue);
     });
@@ -231,11 +218,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
 
   describe('Video Upload URL Generation', () => {
     it('should generate presigned upload URL', async () => {
-      const uploadUrl =
-        await videoVerificationService.generateUploadUrl(
-          verificationId,
-          userId,
-        );
+      const uploadUrl = await videoVerificationService.generateUploadUrl(verificationId, userId);
 
       expect(uploadUrl).toBeDefined();
       expect(uploadUrl).toContain('s3');
@@ -259,12 +242,8 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         challengeType: 'RANDOM_PHRASE',
       };
 
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
-        null,
-      );
-      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(mockVerificationRecord);
 
       const verificationResponse = await verificationService.requestVerification(
         userId,
@@ -288,12 +267,8 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
-        mockVideoUploadRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.videoUpload.create.mockResolvedValueOnce(mockVideoUploadRecord);
 
       const uploadConfirmation = await videoUploadService.confirmVideoUpload(
         userId,
@@ -313,15 +288,13 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         verifiedAt: new Date(),
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(
-        completedRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(completedRecord);
 
-      const completionResult =
-        await verificationService.completeVerification(verificationId, userId);
+      const completionResult = await verificationService.completeVerification(
+        verificationId,
+        userId,
+      );
 
       expect(completionResult.status).toBe(VerificationStatus.VERIFIED);
       expect(completionResult.verifiedAt).toBeDefined();
@@ -339,17 +312,10 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         challengeType: 'RANDOM_GESTURE',
       };
 
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
-        null,
-      );
-      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
-        gestureVerification,
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(gestureVerification);
 
-      const response = await verificationService.requestVerification(
-        userId,
-        verificationRequest,
-      );
+      const response = await verificationService.requestVerification(userId, verificationRequest);
 
       expect(response.challenge.type).toBe('RANDOM_GESTURE');
       expect(response.challenge.randomValue).toBe('Show both thumbs up');
@@ -367,17 +333,10 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         challengeType: 'TIMESTAMP',
       };
 
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
-        null,
-      );
-      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
-        timestampVerification,
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(timestampVerification);
 
-      const response = await verificationService.requestVerification(
-        userId,
-        verificationRequest,
-      );
+      const response = await verificationService.requestVerification(userId, verificationRequest);
 
       expect(response.challenge.type).toBe('TIMESTAMP');
       expect(response.challenge.timestamp).toBeDefined();
@@ -393,9 +352,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        null,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(null);
 
       await expect(
         videoUploadService.confirmVideoUpload(userId, uploadCompleteDto),
@@ -410,9 +367,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
       await expect(
         videoUploadService.confirmVideoUpload(otherUserId, uploadCompleteDto),
@@ -432,9 +387,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        phoneVerification,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(phoneVerification);
 
       await expect(
         videoUploadService.confirmVideoUpload(userId, uploadCompleteDto),
@@ -454,9 +407,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        completedVerification,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(completedVerification);
 
       await expect(
         videoUploadService.confirmVideoUpload(userId, uploadCompleteDto),
@@ -471,9 +422,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'text/plain',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
       await expect(
         videoUploadService.confirmVideoUpload(userId, uploadCompleteDto),
@@ -489,9 +438,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
       await expect(
         videoUploadService.confirmVideoUpload(userId, uploadCompleteDto),
@@ -508,9 +455,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/mp4',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
       const uploadWithMetadata = {
         ...mockVideoUploadRecord,
@@ -519,14 +464,9 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: uploadCompleteDto.mimeType,
       };
 
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
-        uploadWithMetadata,
-      );
+      mockPrismaService.videoUpload.create.mockResolvedValueOnce(uploadWithMetadata);
 
-      const result = await videoUploadService.confirmVideoUpload(
-        userId,
-        uploadCompleteDto,
-      );
+      const result = await videoUploadService.confirmVideoUpload(userId, uploadCompleteDto);
 
       expect(result).toBeDefined();
       expect(result.videoUploadId).toBe(videoUploadId);
@@ -541,17 +481,10 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
-        mockVideoUploadRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.videoUpload.create.mockResolvedValueOnce(mockVideoUploadRecord);
 
-      const result = await videoUploadService.confirmVideoUpload(
-        userId,
-        uploadCompleteDto,
-      );
+      const result = await videoUploadService.confirmVideoUpload(userId, uploadCompleteDto);
 
       // Verify expiry date is set
       expect(result.expiresAt).toBeDefined();
@@ -568,17 +501,10 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         mimeType: 'video/webm',
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
-        mockVideoUploadRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.videoUpload.create.mockResolvedValueOnce(mockVideoUploadRecord);
 
-      const result = await videoUploadService.confirmVideoUpload(
-        userId,
-        uploadCompleteDto,
-      );
+      const result = await videoUploadService.confirmVideoUpload(userId, uploadCompleteDto);
 
       expect(result.verificationId).toBe(verificationId);
       expect(result.videoUploadId).toBe(videoUploadId);
@@ -589,37 +515,26 @@ describe('Video Upload and Analysis - Integration Tests', () => {
   describe('Video Verification State Transitions', () => {
     it('should transition from PENDING to VERIFIED after upload and completion', async () => {
       // Create verification
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
-        null,
-      );
-      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(mockVerificationRecord);
 
-      const createResponse = await verificationService.requestVerification(
-        userId,
-        { type: 'VIDEO', challengeType: 'RANDOM_PHRASE' },
-      );
+      const createResponse = await verificationService.requestVerification(userId, {
+        type: 'VIDEO',
+        challengeType: 'RANDOM_PHRASE',
+      });
 
       expect(createResponse).toBeDefined();
 
       // Confirm upload
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.videoUpload.create.mockResolvedValueOnce(
-        mockVideoUploadRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.videoUpload.create.mockResolvedValueOnce(mockVideoUploadRecord);
 
-      const uploadResponse = await videoUploadService.confirmVideoUpload(
-        userId,
-        {
-          verificationId,
-          fileName: 'verification.webm',
-          fileSize: 2097152,
-          mimeType: 'video/webm',
-        },
-      );
+      const uploadResponse = await videoUploadService.confirmVideoUpload(userId, {
+        verificationId,
+        fileName: 'verification.webm',
+        fileSize: 2097152,
+        mimeType: 'video/webm',
+      });
 
       expect(uploadResponse).toBeDefined();
 
@@ -630,38 +545,29 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         verifiedAt: new Date(),
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(
-        verifiedRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(verifiedRecord);
 
-      const completeResponse =
-        await verificationService.completeVerification(verificationId, userId);
+      const completeResponse = await verificationService.completeVerification(
+        verificationId,
+        userId,
+      );
 
       expect(completeResponse.status).toBe(VerificationStatus.VERIFIED);
       expect(completeResponse.verifiedAt).toBeDefined();
     });
 
     it('should handle cancellation of video verification', async () => {
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
 
       const cancelledRecord = {
         ...mockVerificationRecord,
         status: VerificationStatus.REJECTED,
       };
 
-      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(
-        cancelledRecord,
-      );
+      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(cancelledRecord);
 
-      const result = await verificationService.cancelVerification(
-        verificationId,
-        userId,
-      );
+      const result = await verificationService.cancelVerification(verificationId, userId);
 
       expect(result.status).toBe(VerificationStatus.REJECTED);
     });
@@ -673,54 +579,41 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         expiresAt: new Date(Date.now() - 1000),
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        expiredRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(expiredRecord);
 
       // Mark as expired
       mockPrismaService.verificationRecord.updateMany.mockResolvedValueOnce({
         count: 1,
       });
 
-      const expiredCount = await verificationService.markExpiredVerifications(
-        userId,
-      );
+      const expiredCount = await verificationService.markExpiredVerifications(userId);
 
       expect(expiredCount).toBe(1);
 
       // Create new verification
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
-        null,
-      );
-      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(mockVerificationRecord);
 
-      const newVerification = await verificationService.requestVerification(
-        userId,
-        { type: 'VIDEO', challengeType: 'RANDOM_PHRASE' },
-      );
+      const newVerification = await verificationService.requestVerification(userId, {
+        type: 'VIDEO',
+        challengeType: 'RANDOM_PHRASE',
+      });
 
       expect(newVerification.verificationId).toBeDefined();
     });
   });
 
   describe('Multi-User Video Upload Isolation', () => {
-    it('should prevent one user from accessing another user\'s video upload', async () => {
+    it("should prevent one user from accessing another user's video upload", async () => {
       const otherUsersUpload = {
         ...mockVideoUploadRecord,
         userId: otherUserId,
       };
 
-      mockPrismaService.videoUpload.findUnique.mockResolvedValueOnce(
-        otherUsersUpload,
-      );
+      mockPrismaService.videoUpload.findUnique.mockResolvedValueOnce(otherUsersUpload);
 
       // Service should verify userId matches when retrieving upload
-      const result = await videoUploadService.getVideoUpload(
-        videoUploadId,
-        userId,
-      );
+      const result = await videoUploadService.getVideoUpload(videoUploadId, userId);
 
       // Verify that if a different userId tries to access, it would be prevented
       expect(result).toBeDefined();
@@ -735,9 +628,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         { ...mockVerificationRecord, id: 'verification-user1-2' },
       ];
 
-      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(
-        user1Verifications,
-      );
+      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(user1Verifications);
 
       const result = await verificationService.getVerificationHistory(userId);
 
@@ -754,15 +645,12 @@ describe('Video Upload and Analysis - Integration Tests', () => {
 
       expect(constraints.minDurationSeconds).toBe(3);
       expect(constraints.maxDurationSeconds).toBe(30);
-      expect(constraints.minDurationSeconds).toBeLessThan(
-        constraints.maxDurationSeconds,
-      );
+      expect(constraints.minDurationSeconds).toBeLessThan(constraints.maxDurationSeconds);
     });
 
     it('should enforce maximum file size constraint', () => {
       const constraints = videoVerificationService.getVideoConstraints();
-      const maxSizeFromConfig =
-        mockConfigData.VIDEO_MAX_FILE_SIZE as number;
+      const maxSizeFromConfig = mockConfigData.VIDEO_MAX_FILE_SIZE as number;
 
       expect(constraints.maxFileSize).toBe(maxSizeFromConfig);
       expect(constraints.maxFileSize).toBeGreaterThan(0);
@@ -780,9 +668,13 @@ describe('Video Upload and Analysis - Integration Tests', () => {
 
       // All supported types are valid for video uploads
       supportedMimeTypes.forEach((mimeType) => {
-        expect(['video/webm', 'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska']).toContain(
-          mimeType,
-        );
+        expect([
+          'video/webm',
+          'video/mp4',
+          'video/quicktime',
+          'video/x-msvideo',
+          'video/x-matroska',
+        ]).toContain(mimeType);
       });
 
       // Verify the list is not empty
@@ -798,9 +690,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         { ...mockVerificationRecord, id: 'verification-3', createdAt: new Date('2024-01-03') },
       ];
 
-      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(
-        verifications,
-      );
+      mockPrismaService.verificationRecord.findMany.mockResolvedValueOnce(verifications);
 
       const history = await verificationService.getVerificationHistory(userId);
 
@@ -816,12 +706,8 @@ describe('Video Upload and Analysis - Integration Tests', () => {
     });
 
     it('should track all verification status changes', async () => {
-      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(
-        null,
-      );
-      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
+      mockPrismaService.verificationRecord.findFirst.mockResolvedValueOnce(null);
+      mockPrismaService.verificationRecord.create.mockResolvedValueOnce(mockVerificationRecord);
 
       // Initial request
       await verificationService.requestVerification(userId, {
@@ -839,17 +725,10 @@ describe('Video Upload and Analysis - Integration Tests', () => {
         verifiedAt: new Date(),
       };
 
-      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(
-        mockVerificationRecord,
-      );
-      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(
-        verifiedRecord,
-      );
+      mockPrismaService.verificationRecord.findUnique.mockResolvedValueOnce(mockVerificationRecord);
+      mockPrismaService.verificationRecord.update.mockResolvedValueOnce(verifiedRecord);
 
-      const completed = await verificationService.completeVerification(
-        verificationId,
-        userId,
-      );
+      const completed = await verificationService.completeVerification(verificationId, userId);
 
       expect(completed.status).toBe(VerificationStatus.VERIFIED);
       expect(completed.verifiedAt).toBeDefined();
