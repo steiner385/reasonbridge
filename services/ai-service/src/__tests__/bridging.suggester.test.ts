@@ -62,12 +62,12 @@ describe('BridgingSuggester', () => {
       const result = await suggester.suggest('topic-1');
 
       expect(result.suggestions.length).toBe(1);
-      expect(result.suggestions[0].propositionId).toBe('prop-1');
-      expect(result.suggestions[0].sourcePosition).toBe('SUPPORT');
-      expect(result.suggestions[0].targetPosition).toBe('OPPOSE');
-      expect(result.suggestions[0].bridgingLanguage).toBeTruthy();
-      expect(result.suggestions[0].commonGround).toBeTruthy();
-      expect(result.suggestions[0].confidenceScore).toBeGreaterThan(0);
+      expect(result.suggestions[0]!.propositionId).toBe('prop-1');
+      expect(result.suggestions[0]!.sourcePosition).toBe('SUPPORT');
+      expect(result.suggestions[0]!.targetPosition).toBe('OPPOSE');
+      expect(result.suggestions[0]!.bridgingLanguage).toBeTruthy();
+      expect(result.suggestions[0]!.commonGround).toBeTruthy();
+      expect(result.suggestions[0]!.confidenceScore).toBeGreaterThan(0);
       expect(result.overallConsensusScore).toBe(0.6);
       expect(result.conflictAreas.length).toBe(1);
     });
@@ -140,9 +140,9 @@ describe('BridgingSuggester', () => {
 
       expect(result.suggestions.length).toBe(1);
       // With nuanced views, target position should be NUANCED
-      expect(result.suggestions[0].targetPosition).toBe('NUANCED');
+      expect(result.suggestions[0]!.targetPosition).toBe('NUANCED');
       // Higher confidence when nuanced views are present
-      expect(result.suggestions[0].confidenceScore).toBeGreaterThan(0.5);
+      expect(result.suggestions[0]!.confidenceScore).toBeGreaterThan(0.5);
     });
 
     it('should calculate higher confidence with more alignments', async () => {
@@ -168,7 +168,7 @@ describe('BridgingSuggester', () => {
       const result = await suggester.suggest('topic-1');
 
       // Confidence should be higher with more alignments (10 > 5)
-      expect(result.suggestions[0].confidenceScore).toBeGreaterThanOrEqual(0.6);
+      expect(result.suggestions[0]!.confidenceScore).toBeGreaterThanOrEqual(0.6);
     });
 
     it('should handle multiple propositions with different consensus levels', async () => {
@@ -260,8 +260,8 @@ describe('BridgingSuggester', () => {
 
       expect(result.suggestions.length).toBe(1);
       // When opposition is larger, source should be OPPOSE, target SUPPORT
-      expect(result.suggestions[0].sourcePosition).toBe('OPPOSE');
-      expect(result.suggestions[0].targetPosition).toBe('SUPPORT');
+      expect(result.suggestions[0]!.sourcePosition).toBe('OPPOSE');
+      expect(result.suggestions[0]!.targetPosition).toBe('SUPPORT');
     });
 
     it('should handle propositions with null consensus scores', async () => {
@@ -343,8 +343,8 @@ describe('BridgingSuggester', () => {
       expect(result.confidenceScore).toBeLessThanOrEqual(1.0);
 
       // Suggestion confidence should also be in valid range
-      expect(result.suggestions[0].confidenceScore).toBeGreaterThanOrEqual(0);
-      expect(result.suggestions[0].confidenceScore).toBeLessThanOrEqual(1.0);
+      expect(result.suggestions[0]!.confidenceScore).toBeGreaterThanOrEqual(0);
+      expect(result.suggestions[0]!.confidenceScore).toBeLessThanOrEqual(1.0);
     });
 
     it('should generate bridging language for suggestions', async () => {
@@ -365,11 +365,11 @@ describe('BridgingSuggester', () => {
 
       const result = await suggester.suggest('topic-1');
 
-      expect(result.suggestions[0].bridgingLanguage).toBeTruthy();
-      expect(result.suggestions[0].bridgingLanguage.length).toBeGreaterThan(0);
+      expect(result.suggestions[0]!.bridgingLanguage).toBeTruthy();
+      expect(result.suggestions[0]!.bridgingLanguage.length).toBeGreaterThan(0);
       // Bridging language should reference the proposition or positions
       // Check for any of the key terms used in bridging phrases
-      const bridgingLanguageLower = result.suggestions[0].bridgingLanguage.toLowerCase();
+      const bridgingLanguageLower = result.suggestions[0]!.bridgingLanguage.toLowerCase();
       expect(
         bridgingLanguageLower.includes('view') ||
           bridgingLanguageLower.includes('perspective') ||
@@ -400,8 +400,8 @@ describe('BridgingSuggester', () => {
 
       const result = await suggester.suggest('topic-1');
 
-      expect(result.suggestions[0].commonGround).toBeTruthy();
-      expect(result.suggestions[0].commonGround.length).toBeGreaterThan(0);
+      expect(result.suggestions[0]!.commonGround).toBeTruthy();
+      expect(result.suggestions[0]!.commonGround.length).toBeGreaterThan(0);
     });
 
     it('should provide reasoning for each suggestion', async () => {
@@ -422,9 +422,9 @@ describe('BridgingSuggester', () => {
 
       const result = await suggester.suggest('topic-1');
 
-      expect(result.suggestions[0].reasoning).toBeTruthy();
-      expect(result.suggestions[0].reasoning).toContain('supporters');
-      expect(result.suggestions[0].reasoning).toContain('opponents');
+      expect(result.suggestions[0]!.reasoning).toBeTruthy();
+      expect(result.suggestions[0]!.reasoning).toContain('supporters');
+      expect(result.suggestions[0]!.reasoning).toContain('opponents');
     });
 
     it('should calculate higher overall confidence with more propositions', async () => {
@@ -486,7 +486,7 @@ describe('BridgingSuggester', () => {
       const result = await suggester.suggest('topic-1');
 
       // Conflict areas should truncate long statements
-      expect(result.conflictAreas[0].length).toBeLessThanOrEqual(100);
+      expect(result.conflictAreas[0]!.length).toBeLessThanOrEqual(100);
     });
 
     it('should generate appropriate reasoning based on consensus level', async () => {
