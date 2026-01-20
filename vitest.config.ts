@@ -70,11 +70,11 @@ export default defineConfig({
       // CI: class-validator resolution issues in pnpm workspace
       // '**/suggestions.controller.test.ts',
       // CI: Prisma client + class-validator resolution issues in discussion-service
-      '**/alignment-aggregation.service.test.ts',
-      '**/alignments.controller.test.ts',
-      '**/alignments.service.test.ts',
-      '**/topics.controller.test.ts',
-      '**/votes.controller.test.ts',
+      // '**/alignment-aggregation.service.test.ts',
+      // '**/alignments.controller.test.ts',
+      // '**/alignments.service.test.ts',
+      // '**/topics.controller.test.ts',
+      // '**/votes.controller.test.ts',
     ],
     coverage: {
       provider: 'v8',
