@@ -1,6 +1,18 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      // Workspace packages - resolve to source for better test experience
+      '@unite-discord/common': resolve(__dirname, 'packages/common/src'),
+      '@unite-discord/shared': resolve(__dirname, 'packages/shared/src'),
+      '@unite-discord/db-models': resolve(__dirname, 'packages/db-models/src'),
+      '@unite-discord/event-schemas': resolve(__dirname, 'packages/event-schemas/src'),
+      '@unite-discord/ai-client': resolve(__dirname, 'packages/ai-client/src'),
+      '@unite-discord/testing-utils': resolve(__dirname, 'packages/testing-utils/src'),
+    },
+  },
   test: {
     globals: true,
     environment: 'node',
@@ -47,6 +59,16 @@ export default defineConfig({
     reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',
+    },
+    // Handle pnpm workspace symlinks and Prisma client resolution
+    deps: {
+      inline: ['@prisma/client', /^@unite-discord\/.*/],
+    },
+    // Server config for Vite's dev server handling
+    server: {
+      deps: {
+        inline: ['@prisma/client'],
+      },
     },
   },
 });
