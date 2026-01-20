@@ -52,16 +52,11 @@ export default defineConfig({
       '**/verification.service.test.ts',
       '**/video-upload.service.test.ts',
       '**/verification.controller.test.ts',
-      // CI: class-validator resolution issues in pnpm workspace
+      // CI: class-validator resolution issues in pnpm workspace (feedback and suggestions services)
       '**/feedback.controller.test.ts',
       '**/feedback.service.test.ts',
       '**/feedback-analytics.service.test.ts',
       '**/suggestions.controller.test.ts',
-      '**/topics.controller.test.ts',
-      '**/votes.controller.test.ts',
-      '**/alignment-aggregation.service.test.ts',
-      '**/alignments.controller.test.ts',
-      '**/alignments.service.test.ts',
     ],
     coverage: {
       provider: 'v8',
@@ -91,12 +86,6 @@ export default defineConfig({
     // Handle pnpm workspace symlinks and Prisma client resolution
     deps: {
       inline: ['@prisma/client', /^@unite-discord\/.*/],
-    },
-    // Server config for Vite's dev server handling
-    server: {
-      deps: {
-        inline: ['@prisma/client'],
-      },
     },
   },
 });

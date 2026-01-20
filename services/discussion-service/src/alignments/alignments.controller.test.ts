@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import { AlignmentsController } from './alignments.controller.js';
 
 const createMockAlignmentsService = () => ({
