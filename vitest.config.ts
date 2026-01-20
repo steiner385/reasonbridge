@@ -46,12 +46,6 @@ export default defineConfig({
       // Frontend component tests - require separate vitest config with React testing setup
       'frontend/src/components/**/*.spec.tsx',
       'frontend/src/components/**/*.test.tsx',
-      // CI: Prisma client runtime resolution issues - TODO: fix Prisma ESM bundling
-      // These tests pass locally but fail in CI due to pnpm workspace symlink handling
-      '**/trust-score.calculator.test.ts',
-      '**/verification.service.test.ts',
-      '**/video-upload.service.test.ts',
-      '**/verification.controller.test.ts',
       // CI: class-validator resolution issues in pnpm workspace
       '**/feedback.controller.test.ts',
       '**/feedback.service.test.ts',
