@@ -52,11 +52,17 @@ export default defineConfig({
       '**/verification.service.test.ts',
       '**/video-upload.service.test.ts',
       '**/verification.controller.test.ts',
-      // CI: class-validator resolution issues in pnpm workspace (feedback and suggestions services)
+      // CI: class-validator resolution issues in pnpm workspace
       '**/feedback.controller.test.ts',
       '**/feedback.service.test.ts',
       '**/feedback-analytics.service.test.ts',
       '**/suggestions.controller.test.ts',
+      // CI: Prisma client + class-validator resolution issues in discussion-service
+      '**/alignment-aggregation.service.test.ts',
+      '**/alignments.controller.test.ts',
+      '**/alignments.service.test.ts',
+      '**/topics.controller.test.ts',
+      '**/votes.controller.test.ts',
     ],
     coverage: {
       provider: 'v8',
