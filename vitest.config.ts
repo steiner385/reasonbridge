@@ -48,7 +48,6 @@ export default defineConfig({
       'frontend/src/components/**/*.test.tsx',
       // CI: Prisma client runtime resolution issues - TODO: fix Prisma ESM bundling
       // These tests pass locally but fail in CI due to pnpm workspace symlink handling
-      '**/video-upload.service.test.ts',
       '**/verification.controller.test.ts',
       // CI: class-validator resolution issues in pnpm workspace
       '**/feedback.controller.test.ts',
