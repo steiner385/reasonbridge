@@ -35,6 +35,7 @@ module.exports = {
           '**/__tests__/**',
           '**/vitest.config.ts',
           '**/vitest.*.config.ts',
+          '**/vitest.workspace.ts',
           '**/jest.config.ts',
         ],
       },
@@ -84,7 +85,7 @@ module.exports = {
     },
     {
       // Vitest config files
-      files: ['**/vitest.config.ts', '**/vitest.*.config.ts'],
+      files: ['**/vitest.config.ts', '**/vitest.*.config.ts', '**/vitest.workspace.ts'],
       rules: {
         'import/no-unresolved': 'off',
       },
