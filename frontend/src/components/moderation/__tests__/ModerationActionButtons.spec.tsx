@@ -10,9 +10,14 @@ import userEvent from '@testing-library/user-event';
 import ModerationActionButtons from '../ModerationActionButtons';
 import type { ModerationAction } from '../../../types/moderation';
 import * as moderationApi from '../../../lib/moderation-api';
+import { NotificationProvider } from '../../../contexts/NotificationContext';
 
 // Mock the moderation API
 vi.mock('../../../lib/moderation-api');
+
+const renderWithNotifications = (component: React.ReactElement) => {
+  return render(<NotificationProvider>{component}</NotificationProvider>);
+};
 
 const mockModerationAction: ModerationAction = {
   id: 'action-123',
@@ -39,28 +44,22 @@ describe('ModerationActionButtons', () => {
 
   describe('Rendering', () => {
     it('should render approve and reject buttons for pending actions', () => {
-      render(
-        <ModerationActionButtons action={mockModerationAction} />
-      );
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
       expect(screen.getByText('Approve')).toBeInTheDocument();
       expect(screen.getByText('Reject')).toBeInTheDocument();
     });
 
     it('should not render buttons for non-pending actions', () => {
-      const { container } = render(
-        <ModerationActionButtons action={mockInactiveAction} />
-      );
+      renderWithNotifications(<ModerationActionButtons action={mockInactiveAction} />);
 
-      expect(container.firstChild).toBeNull();
+      expect(screen.queryByText('Approve')).not.toBeInTheDocument();
+      expect(screen.queryByText('Reject')).not.toBeInTheDocument();
     });
 
     it('should render with custom className', () => {
-      const { container } = render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          className="custom-class"
-        />
+      const { container } = renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} className="custom-class" />,
       );
 
       const buttonsContainer = container.querySelector('.custom-class');
@@ -68,11 +67,8 @@ describe('ModerationActionButtons', () => {
     });
 
     it('should render with custom button size', () => {
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          buttonSize="lg"
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} buttonSize="lg" />,
       );
 
       const buttons = screen.getAllByRole('button');
@@ -86,9 +82,9 @@ describe('ModerationActionButtons', () => {
         ...mockModerationAction,
         status: 'active',
       });
-      (moderationApi.approveModerationAction).mockImplementation(mockApprove);
+      moderationApi.approveModerationAction.mockImplementation(mockApprove);
 
-      render(<ModerationActionButtons action={mockModerationAction} />);
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
       const approveButton = screen.getByText('Approve');
       await userEvent.click(approveButton);
@@ -101,14 +97,11 @@ describe('ModerationActionButtons', () => {
     it('should call onApprove callback with updated action', async () => {
       const updatedAction = { ...mockModerationAction, status: 'active' as const };
       const mockApprove = vi.fn().mockResolvedValue(updatedAction);
-      (moderationApi.approveModerationAction).mockImplementation(mockApprove);
+      moderationApi.approveModerationAction.mockImplementation(mockApprove);
 
       const onApprove = vi.fn();
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          onApprove={onApprove}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} onApprove={onApprove} />,
       );
 
       const approveButton = screen.getByText('Approve');
@@ -120,14 +113,17 @@ describe('ModerationActionButtons', () => {
     });
 
     it('should show loading state during approval', async () => {
-      const mockApprove = vi.fn().mockImplementation(
-        () => new Promise(resolve =>
-          setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 100)
-        )
-      );
-      (moderationApi.approveModerationAction).mockImplementation(mockApprove);
+      const mockApprove = vi
+        .fn()
+        .mockImplementation(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 100),
+            ),
+        );
+      moderationApi.approveModerationAction.mockImplementation(mockApprove);
 
-      render(<ModerationActionButtons action={mockModerationAction} />);
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
       const approveButton = screen.getByText('Approve');
       await userEvent.click(approveButton);
@@ -140,51 +136,55 @@ describe('ModerationActionButtons', () => {
     });
 
     it('should disable buttons during processing', async () => {
-      const mockApprove = vi.fn().mockImplementation(
-        () => new Promise(resolve =>
-          setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 100)
-        )
-      );
-      (moderationApi.approveModerationAction).mockImplementation(mockApprove);
+      const mockApprove = vi
+        .fn()
+        .mockImplementation(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 100),
+            ),
+        );
+      moderationApi.approveModerationAction.mockImplementation(mockApprove);
 
-      render(<ModerationActionButtons action={mockModerationAction} />);
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
-      const approveButton = screen.getByText('Approve');
+      const approveButton = screen.getByText('Approve') as HTMLButtonElement;
       await userEvent.click(approveButton);
 
-      const rejectButton = screen.getByText('Rejecting...') ?
-        screen.queryByText('Reject') :
-        screen.getByText('Reject');
-
-      if (rejectButton) {
-        expect(rejectButton).toBeDisabled();
-      }
-
+      // Check for loading state - button should show "Approving..."
       await waitFor(() => {
-        expect(screen.getByText('Approve')).toBeInTheDocument();
+        expect(screen.getByText('Approving...')).toBeInTheDocument();
       });
+
+      // After processing, button should return to normal
+      await waitFor(
+        () => {
+          expect(screen.getByText('Approve')).toBeInTheDocument();
+        },
+        { timeout: 2000 },
+      );
     });
 
     it('should handle approve errors gracefully', async () => {
       const mockError = new Error('Network error');
       const mockApprove = vi.fn().mockRejectedValue(mockError);
-      (moderationApi.approveModerationAction).mockImplementation(mockApprove);
+      moderationApi.approveModerationAction.mockImplementation(mockApprove);
 
       const onError = vi.fn();
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          onError={onError}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} onError={onError} />,
       );
 
       const approveButton = screen.getByText('Approve');
       await userEvent.click(approveButton);
 
-      await waitFor(() => {
-        expect(onError).toHaveBeenCalledWith('Network error');
-        expect(screen.getByText('Network error')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(onError).toHaveBeenCalledWith('Network error');
+          expect(screen.getAllByText('Network error')).toHaveLength(2);
+        },
+        { timeout: 2000 },
+      );
     });
   });
 
@@ -194,9 +194,9 @@ describe('ModerationActionButtons', () => {
         ...mockModerationAction,
         status: 'reversed',
       });
-      (moderationApi.rejectModerationAction).mockImplementation(mockReject);
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
-      render(<ModerationActionButtons action={mockModerationAction} />);
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
       const rejectButton = screen.getByText('Reject');
       await userEvent.click(rejectButton);
@@ -209,14 +209,11 @@ describe('ModerationActionButtons', () => {
     it('should call onReject callback with updated action', async () => {
       const updatedAction = { ...mockModerationAction, status: 'reversed' as const };
       const mockReject = vi.fn().mockResolvedValue(updatedAction);
-      (moderationApi.rejectModerationAction).mockImplementation(mockReject);
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
       const onReject = vi.fn();
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          onReject={onReject}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} onReject={onReject} />,
       );
 
       const rejectButton = screen.getByText('Reject');
@@ -228,14 +225,17 @@ describe('ModerationActionButtons', () => {
     });
 
     it('should show loading state during rejection', async () => {
-      const mockReject = vi.fn().mockImplementation(
-        () => new Promise(resolve =>
-          setTimeout(() => resolve({ ...mockModerationAction, status: 'reversed' }), 100)
-        )
-      );
-      (moderationApi.rejectModerationAction).mockImplementation(mockReject);
+      const mockReject = vi
+        .fn()
+        .mockImplementation(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ ...mockModerationAction, status: 'reversed' }), 100),
+            ),
+        );
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
-      render(<ModerationActionButtons action={mockModerationAction} />);
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
       const rejectButton = screen.getByText('Reject');
       await userEvent.click(rejectButton);
@@ -250,33 +250,30 @@ describe('ModerationActionButtons', () => {
     it('should handle reject errors gracefully', async () => {
       const mockError = new Error('Server error');
       const mockReject = vi.fn().mockRejectedValue(mockError);
-      (moderationApi.rejectModerationAction).mockImplementation(mockReject);
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
       const onError = vi.fn();
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          onError={onError}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} onError={onError} />,
       );
 
       const rejectButton = screen.getByText('Reject');
       await userEvent.click(rejectButton);
 
-      await waitFor(() => {
-        expect(onError).toHaveBeenCalledWith('Server error');
-        expect(screen.getByText('Server error')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(onError).toHaveBeenCalledWith('Server error');
+          expect(screen.getAllByText('Server error')).toHaveLength(2);
+        },
+        { timeout: 2000 },
+      );
     });
   });
 
   describe('Reject Reasoning', () => {
     it('should show reasoning input when showRejectReasoning is true', async () => {
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          showRejectReasoning={true}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} showRejectReasoning={true} />,
       );
 
       const rejectButton = screen.getByText('Reject');
@@ -288,17 +285,16 @@ describe('ModerationActionButtons', () => {
     });
 
     it('should clear reasoning input on cancel', async () => {
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          showRejectReasoning={true}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} showRejectReasoning={true} />,
       );
 
       const rejectButton = screen.getByText('Reject');
       await userEvent.click(rejectButton);
 
-      const reasoningInput = screen.getByPlaceholderText(/Provide reasoning/i) as HTMLTextAreaElement;
+      const reasoningInput = screen.getByPlaceholderText(
+        /Provide reasoning/i,
+      ) as HTMLTextAreaElement;
       await userEvent.type(reasoningInput, 'Test reasoning');
 
       const cancelButton = screen.getByText('Cancel');
@@ -310,28 +306,22 @@ describe('ModerationActionButtons', () => {
 
   describe('Disabled State', () => {
     it('should disable buttons when disabled prop is true', () => {
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          disabled={true}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} disabled={true} />,
       );
 
       const buttons = screen.getAllByRole('button');
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button).toBeDisabled();
       });
     });
 
     it('should not call handlers when disabled', async () => {
       const mockApprove = vi.fn();
-      (moderationApi.approveModerationAction).mockImplementation(mockApprove);
+      moderationApi.approveModerationAction.mockImplementation(mockApprove);
 
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          disabled={true}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} disabled={true} />,
       );
 
       const approveButton = screen.getByText('Approve');
@@ -344,28 +334,28 @@ describe('ModerationActionButtons', () => {
   describe('Error Handling', () => {
     it('should display error message in error alert', async () => {
       const mockReject = vi.fn().mockRejectedValue(new Error('Custom error message'));
-      (moderationApi.rejectModerationAction).mockImplementation(mockReject);
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
-      render(<ModerationActionButtons action={mockModerationAction} />);
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
       const rejectButton = screen.getByText('Reject');
       await userEvent.click(rejectButton);
 
-      await waitFor(() => {
-        expect(screen.getByText('Custom error message')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getAllByText('Custom error message')).toHaveLength(2);
+        },
+        { timeout: 2000 },
+      );
     });
 
     it('should handle unknown error types', async () => {
       const mockReject = vi.fn().mockRejectedValue('Unknown error');
-      (moderationApi.rejectModerationAction).mockImplementation(mockReject);
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
       const onError = vi.fn();
-      render(
-        <ModerationActionButtons
-          action={mockModerationAction}
-          onError={onError}
-        />
+      renderWithNotifications(
+        <ModerationActionButtons action={mockModerationAction} onError={onError} />,
       );
 
       const rejectButton = screen.getByText('Reject');

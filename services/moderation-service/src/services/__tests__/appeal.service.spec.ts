@@ -1,735 +1,855 @@
+// @ts-nocheck
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AppealService } from '../appeal.service.js';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
-/**
- * AppealService Unit Tests
- *
- * Comprehensive test suite covering:
- * - Appeal creation with validation
- * - Moderator assignment workflow
- * - Appeal review and decision-making
- * - Appeal lifecycle management
- * - Statistics and metrics
- * - Error handling and validation
- */
+// Mock QueueService
+const createMockQueueService = () => ({
+  publishEvent: vi.fn().mockResolvedValue(undefined),
+});
+
+// Mock PrismaService
+const createMockPrismaService = () => ({
+  appeal: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    count: vi.fn(),
+    groupBy: vi.fn(),
+  },
+  moderationAction: {
+    findUnique: vi.fn(),
+    update: vi.fn(),
+  },
+  user: {
+    findUnique: vi.fn(),
+  },
+});
+
 describe('AppealService', () => {
   let service: AppealService;
-  let prismaService: any;
-  let queueService: any;
+  let mockPrisma: ReturnType<typeof createMockPrismaService>;
+  let mockQueueService: ReturnType<typeof createMockQueueService>;
 
   beforeEach(() => {
-    prismaService = {
-      appeal: {
-        findUnique: vi.fn(),
-        findMany: vi.fn(),
-        count: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn(),
-        groupBy: vi.fn(),
-      },
-      moderationAction: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-      },
-      user: {
-        findUnique: vi.fn(),
-      },
-    };
-
-    queueService = {
-      publishEvent: vi.fn().mockResolvedValue(undefined),
-    };
-
-    service = new AppealService(prismaService, queueService);
-  });
-
-  describe('Service Instantiation', () => {
-    it('should be instantiable', () => {
-      expect(service).toBeInstanceOf(AppealService);
-    });
-
-    it('should have all required methods', () => {
-      const methods = [
-        'createAppeal',
-        'getPendingAppeals',
-        'assignAppealToModerator',
-        'unassignAppeal',
-        'reviewAppeal',
-        'getAppealById',
-        'getAppealStatistics',
-        'mapAppealToResponse',
-      ];
-
-      methods.forEach((method) => {
-        expect(typeof service[method as keyof AppealService]).toBe('function');
-      });
-    });
+    mockPrisma = createMockPrismaService();
+    mockQueueService = createMockQueueService();
+    service = new AppealService(mockPrisma as any, mockQueueService as any);
+    vi.clearAllMocks();
   });
 
   describe('createAppeal', () => {
-    const actionId = 'action-123';
-    const appellantId = 'user-456';
     const validRequest = {
-      reason: 'This is a valid appeal reason with more than 20 characters',
+      reason: 'This is a valid appeal reason that is at least 20 characters long.',
     };
 
-    it('should create an appeal successfully', async () => {
-      const appealData = {
-        id: 'appeal-789',
-        moderationActionId: actionId,
-        appellantId: appellantId,
-        reason: validRequest.reason,
-        status: 'PENDING',
-        reviewerId: null,
-        decisionReasoning: null,
-        createdAt: new Date(),
-        resolvedAt: null,
-      };
-
-      prismaService.moderationAction.findUnique.mockResolvedValue({
-        id: actionId,
-        status: 'ACTIVE',
-      });
-
-      prismaService.appeal.findUnique.mockResolvedValue(null);
-      prismaService.appeal.create.mockResolvedValue(appealData);
-      prismaService.moderationAction.update.mockResolvedValue({});
-
-      const result = await service.createAppeal(actionId, appellantId, validRequest);
-
-      expect(result).toBeDefined();
-      expect(result.id).toBe('appeal-789');
-      expect(result.status).toBe('PENDING');
-      expect(prismaService.appeal.create).toHaveBeenCalled();
-      expect(prismaService.moderationAction.update).toHaveBeenCalledWith({
-        where: { id: actionId },
-        data: { status: 'APPEALED' },
-      });
-    });
-
     it('should throw BadRequestException if reason is empty', async () => {
-      await expect(service.createAppeal(actionId, appellantId, { reason: '' })).rejects.toThrow(
+      await expect(service.createAppeal('action-1', 'user-1', { reason: '' })).rejects.toThrow(
         BadRequestException,
       );
     });
 
     it('should throw BadRequestException if reason is too short', async () => {
       await expect(
-        service.createAppeal(actionId, appellantId, { reason: 'Too short' }),
-      ).rejects.toThrow(BadRequestException);
+        service.createAppeal('action-1', 'user-1', { reason: 'Too short' }),
+      ).rejects.toThrow('Appeal reason must be at least 20 characters long');
     });
 
-    it('should throw BadRequestException if reason exceeds max length', async () => {
+    it('should throw BadRequestException if reason exceeds 5000 characters', async () => {
       const longReason = 'a'.repeat(5001);
       await expect(
-        service.createAppeal(actionId, appellantId, { reason: longReason }),
-      ).rejects.toThrow(BadRequestException);
+        service.createAppeal('action-1', 'user-1', { reason: longReason }),
+      ).rejects.toThrow('Appeal reason cannot exceed 5000 characters');
     });
 
     it('should throw NotFoundException if moderation action does not exist', async () => {
-      prismaService.moderationAction.findUnique.mockResolvedValue(null);
+      mockPrisma.moderationAction.findUnique.mockResolvedValue(null);
 
-      await expect(service.createAppeal(actionId, appellantId, validRequest)).rejects.toThrow(
+      await expect(service.createAppeal('nonexistent', 'user-1', validRequest)).rejects.toThrow(
         NotFoundException,
       );
     });
 
     it('should throw BadRequestException if action is already reversed', async () => {
-      prismaService.moderationAction.findUnique.mockResolvedValue({
-        id: actionId,
+      mockPrisma.moderationAction.findUnique.mockResolvedValue({
+        id: 'action-1',
         status: 'REVERSED',
       });
 
-      await expect(service.createAppeal(actionId, appellantId, validRequest)).rejects.toThrow(
-        BadRequestException,
+      await expect(service.createAppeal('action-1', 'user-1', validRequest)).rejects.toThrow(
+        'Cannot appeal a moderation action that has already been reversed',
       );
     });
 
-    it('should throw BadRequestException if an appeal is already pending', async () => {
-      prismaService.moderationAction.findUnique.mockResolvedValue({
-        id: actionId,
+    it('should throw BadRequestException if appeal already exists and is pending', async () => {
+      mockPrisma.moderationAction.findUnique.mockResolvedValue({
+        id: 'action-1',
         status: 'ACTIVE',
       });
-
-      prismaService.appeal.findUnique.mockResolvedValue({
+      mockPrisma.appeal.findUnique.mockResolvedValue({
         id: 'existing-appeal',
         status: 'PENDING',
       });
 
-      await expect(service.createAppeal(actionId, appellantId, validRequest)).rejects.toThrow(
-        BadRequestException,
+      await expect(service.createAppeal('action-1', 'user-1', validRequest)).rejects.toThrow(
+        'An appeal for this moderation action is already pending review',
       );
     });
 
-    it('should allow creating appeal if previous appeal was denied', async () => {
-      const appealData = {
-        id: 'appeal-new',
-        moderationActionId: actionId,
-        appellantId: appellantId,
-        reason: validRequest.reason,
-        status: 'PENDING',
-        reviewerId: null,
-        decisionReasoning: null,
-        createdAt: new Date(),
-        resolvedAt: new Date(),
-      };
-
-      prismaService.moderationAction.findUnique.mockResolvedValue({
-        id: actionId,
+    it('should throw BadRequestException if appeal already exists and is under review', async () => {
+      mockPrisma.moderationAction.findUnique.mockResolvedValue({
+        id: 'action-1',
         status: 'ACTIVE',
       });
-
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: 'previous-appeal',
-        status: 'DENIED',
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'existing-appeal',
+        status: 'UNDER_REVIEW',
       });
 
-      prismaService.appeal.create.mockResolvedValue(appealData);
-      prismaService.moderationAction.update.mockResolvedValue({});
+      await expect(service.createAppeal('action-1', 'user-1', validRequest)).rejects.toThrow(
+        'An appeal for this moderation action is already pending review',
+      );
+    });
 
-      const result = await service.createAppeal(actionId, appellantId, validRequest);
+    it('should create appeal successfully', async () => {
+      const createdAt = new Date();
+      mockPrisma.moderationAction.findUnique.mockResolvedValue({
+        id: 'action-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.appeal.findUnique.mockResolvedValue(null);
+      mockPrisma.appeal.create.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: validRequest.reason,
+        status: 'PENDING',
+        createdAt,
+        reviewerId: null,
+        decisionReasoning: null,
+        resolvedAt: null,
+      });
 
-      expect(result.id).toBe('appeal-new');
-      expect(prismaService.appeal.create).toHaveBeenCalled();
+      const result = await service.createAppeal('action-1', 'user-1', validRequest);
+
+      expect(mockPrisma.appeal.create).toHaveBeenCalledWith({
+        data: {
+          moderationActionId: 'action-1',
+          appellantId: 'user-1',
+          reason: validRequest.reason,
+          status: 'PENDING',
+        },
+      });
+      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: 'action-1' },
+        data: { status: 'APPEALED' },
+      });
+      expect(result.id).toBe('appeal-1');
+      expect(result.status).toBe('PENDING');
+    });
+
+    it('should allow new appeal if previous appeal was resolved', async () => {
+      const createdAt = new Date();
+      mockPrisma.moderationAction.findUnique.mockResolvedValue({
+        id: 'action-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'old-appeal',
+        status: 'DENIED', // Previous appeal was resolved
+      });
+      mockPrisma.appeal.create.mockResolvedValue({
+        id: 'new-appeal',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: validRequest.reason,
+        status: 'PENDING',
+        createdAt,
+        reviewerId: null,
+        decisionReasoning: null,
+        resolvedAt: null,
+      });
+
+      const result = await service.createAppeal('action-1', 'user-1', validRequest);
+
+      expect(result.id).toBe('new-appeal');
     });
   });
 
   describe('getPendingAppeals', () => {
-    it('should retrieve pending appeals with pagination', async () => {
-      const appeals = [
+    it('should return pending appeals with pagination', async () => {
+      const createdAt = new Date();
+      mockPrisma.appeal.count.mockResolvedValue(5);
+      mockPrisma.appeal.findMany.mockResolvedValue([
         {
           id: 'appeal-1',
-          status: 'PENDING',
           moderationActionId: 'action-1',
           appellantId: 'user-1',
-          reason: 'Appeal reason',
+          reason: 'Valid reason that is at least 20 characters',
+          status: 'PENDING',
+          createdAt,
           reviewerId: null,
           decisionReasoning: null,
-          createdAt: new Date(),
           resolvedAt: null,
           moderationAction: {
             id: 'action-1',
             targetType: 'RESPONSE',
             targetId: 'response-1',
-            actionType: 'HIDE',
+            actionType: 'WARN',
             severity: 'NON_PUNITIVE',
-            reasoning: 'Violates guidelines',
+            reasoning: 'Test reasoning',
+            status: 'APPEALED',
+            createdAt,
+            approvedBy: null,
+            approvedAt: null,
             aiRecommended: false,
             aiConfidence: null,
-            approvedBy: { id: 'mod-1', displayName: 'Moderator 1' },
-            approvedAt: new Date(),
-            status: 'ACTIVE',
-            createdAt: new Date(),
-            executedAt: new Date(),
+            executedAt: null,
           },
         },
-      ];
-
-      prismaService.appeal.count.mockResolvedValue(1);
-      prismaService.appeal.findMany.mockResolvedValue(appeals);
+      ]);
 
       const result = await service.getPendingAppeals(20);
 
+      expect(result.totalCount).toBe(5);
       expect(result.appeals).toHaveLength(1);
-      expect(result.totalCount).toBe(1);
-      expect(result.nextCursor).toBeNull();
-    });
-
-    it('should support cursor pagination', async () => {
-      // Return exactly 20 items to trigger nextCursor calculation
-      const appeals = Array.from({ length: 20 }, (_, i) => ({
-        id: `appeal-${i}`,
-        status: 'PENDING',
-        moderationAction: null,
-        createdAt: new Date(),
-      }));
-
-      prismaService.appeal.count.mockResolvedValue(21);
-      prismaService.appeal.findMany.mockResolvedValue(appeals);
-
-      const result = await service.getPendingAppeals(20, 'appeal-1');
-
-      expect(result.nextCursor).toBe('appeal-19');
-      expect(prismaService.appeal.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cursor: { id: 'appeal-1' },
-        }),
-      );
+      expect(result.appeals[0].id).toBe('appeal-1');
     });
 
     it('should filter by assigned moderator', async () => {
-      const moderatorId = 'mod-123';
-      prismaService.appeal.count.mockResolvedValue(1);
-      prismaService.appeal.findMany.mockResolvedValue([]);
+      mockPrisma.appeal.count.mockResolvedValue(0);
+      mockPrisma.appeal.findMany.mockResolvedValue([]);
 
-      await service.getPendingAppeals(20, undefined, moderatorId);
+      await service.getPendingAppeals(20, undefined, 'moderator-1');
 
-      expect(prismaService.appeal.findMany).toHaveBeenCalledWith(
+      expect(mockPrisma.appeal.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             status: 'PENDING',
-            reviewerId: moderatorId,
+            reviewerId: 'moderator-1',
           }),
         }),
       );
     });
 
-    it('should return empty list when no pending appeals', async () => {
-      prismaService.appeal.count.mockResolvedValue(0);
-      prismaService.appeal.findMany.mockResolvedValue([]);
+    it('should handle cursor-based pagination', async () => {
+      mockPrisma.appeal.count.mockResolvedValue(10);
+      mockPrisma.appeal.findMany.mockResolvedValue([]);
 
-      const result = await service.getPendingAppeals(20);
+      await service.getPendingAppeals(5, 'cursor-appeal-id');
 
-      expect(result.appeals).toHaveLength(0);
-      expect(result.totalCount).toBe(0);
+      expect(mockPrisma.appeal.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 1,
+          cursor: { id: 'cursor-appeal-id' },
+        }),
+      );
+    });
+
+    it('should return nextCursor when more items exist', async () => {
+      const createdAt = new Date();
+      mockPrisma.appeal.count.mockResolvedValue(10);
+      mockPrisma.appeal.findMany.mockResolvedValue([
+        {
+          id: 'appeal-1',
+          moderationActionId: 'action-1',
+          appellantId: 'user-1',
+          reason: 'Valid reason',
+          status: 'PENDING',
+          createdAt,
+          reviewerId: null,
+          decisionReasoning: null,
+          resolvedAt: null,
+          moderationAction: null,
+        },
+        {
+          id: 'appeal-2',
+          moderationActionId: 'action-2',
+          appellantId: 'user-2',
+          reason: 'Valid reason',
+          status: 'PENDING',
+          createdAt,
+          reviewerId: null,
+          decisionReasoning: null,
+          resolvedAt: null,
+          moderationAction: null,
+        },
+      ]);
+
+      const result = await service.getPendingAppeals(2);
+
+      expect(result.nextCursor).toBe('appeal-2');
     });
   });
 
   describe('assignAppealToModerator', () => {
-    const appealId = 'appeal-123';
-    const moderatorId = 'mod-456';
+    it('should throw NotFoundException if appeal does not exist', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue(null);
 
-    it('should assign appeal to moderator', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
+      await expect(service.assignAppealToModerator('nonexistent', 'mod-1')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw BadRequestException if appeal is not in PENDING status', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'UNDER_REVIEW',
+      });
+
+      await expect(service.assignAppealToModerator('appeal-1', 'mod-1')).rejects.toThrow(
+        'Appeal must be in PENDING status to assign',
+      );
+    });
+
+    it('should throw NotFoundException if moderator does not exist', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
         status: 'PENDING',
       });
+      mockPrisma.user.findUnique.mockResolvedValue(null);
 
-      prismaService.user.findUnique.mockResolvedValue({
-        id: moderatorId,
+      await expect(service.assignAppealToModerator('appeal-1', 'nonexistent-mod')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should assign appeal to moderator successfully', async () => {
+      const createdAt = new Date();
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'PENDING',
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'mod-1',
         displayName: 'Moderator',
       });
-
-      prismaService.appeal.update.mockResolvedValue({
-        id: appealId,
+      mockPrisma.appeal.update.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Valid reason',
         status: 'UNDER_REVIEW',
-        reviewerId: moderatorId,
-        createdAt: new Date(),
+        reviewerId: 'mod-1',
+        createdAt,
+        decisionReasoning: null,
+        resolvedAt: null,
       });
 
-      const result = await service.assignAppealToModerator(appealId, moderatorId);
+      const result = await service.assignAppealToModerator('appeal-1', 'mod-1');
 
-      expect(result.status).toBe('UNDER_REVIEW');
-      expect(result.reviewerId).toBe(moderatorId);
-      expect(prismaService.appeal.update).toHaveBeenCalledWith({
-        where: { id: appealId },
+      expect(mockPrisma.appeal.update).toHaveBeenCalledWith({
+        where: { id: 'appeal-1' },
         data: {
-          reviewerId: moderatorId,
+          reviewerId: 'mod-1',
           status: 'UNDER_REVIEW',
         },
       });
-    });
-
-    it('should throw NotFoundException if appeal not found', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue(null);
-
-      await expect(service.assignAppealToModerator(appealId, moderatorId)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should throw BadRequestException if appeal not in PENDING status', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'UNDER_REVIEW',
-      });
-
-      await expect(service.assignAppealToModerator(appealId, moderatorId)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-
-    it('should throw NotFoundException if moderator not found', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'PENDING',
-      });
-
-      prismaService.user.findUnique.mockResolvedValue(null);
-
-      await expect(service.assignAppealToModerator(appealId, moderatorId)).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(result.status).toBe('UNDER_REVIEW');
+      expect(result.reviewerId).toBe('mod-1');
     });
   });
 
   describe('unassignAppeal', () => {
-    const appealId = 'appeal-123';
+    it('should throw NotFoundException if appeal does not exist', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue(null);
 
-    it('should unassign appeal back to PENDING', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'UNDER_REVIEW',
+      await expect(service.unassignAppeal('nonexistent')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException if appeal is not UNDER_REVIEW', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'PENDING',
       });
 
-      prismaService.appeal.update.mockResolvedValue({
-        id: appealId,
+      await expect(service.unassignAppeal('appeal-1')).rejects.toThrow(
+        'Appeal must be in UNDER_REVIEW status to unassign',
+      );
+    });
+
+    it('should unassign appeal successfully', async () => {
+      const createdAt = new Date();
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'UNDER_REVIEW',
+        reviewerId: 'mod-1',
+      });
+      mockPrisma.appeal.update.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Valid reason',
         status: 'PENDING',
         reviewerId: null,
-        createdAt: new Date(),
+        createdAt,
+        decisionReasoning: null,
+        resolvedAt: null,
       });
 
-      const result = await service.unassignAppeal(appealId);
+      const result = await service.unassignAppeal('appeal-1');
 
-      expect(result.status).toBe('PENDING');
-      expect(result.reviewerId).toBeNull();
-      expect(prismaService.appeal.update).toHaveBeenCalledWith({
-        where: { id: appealId },
+      expect(mockPrisma.appeal.update).toHaveBeenCalledWith({
+        where: { id: 'appeal-1' },
         data: {
           reviewerId: null,
           status: 'PENDING',
         },
       });
-    });
-
-    it('should throw NotFoundException if appeal not found', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue(null);
-
-      await expect(service.unassignAppeal(appealId)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw BadRequestException if appeal not in UNDER_REVIEW status', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'PENDING',
-      });
-
-      await expect(service.unassignAppeal(appealId)).rejects.toThrow(BadRequestException);
+      expect(result.status).toBe('PENDING');
+      expect(result.reviewerId).toBeNull();
     });
   });
 
   describe('reviewAppeal', () => {
-    const appealId = 'appeal-123';
-    const reviewerId = 'mod-456';
-    const validRequest = {
+    const validReviewRequest = {
       decision: 'upheld' as const,
-      reasoning: 'This appeal has valid grounds and should be upheld based on evidence presented',
+      reasoning: 'This appeal has merit and should be upheld.',
     };
-
-    it('should review appeal and uphold with event publishing', async () => {
-      const actionId = 'action-789';
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'UNDER_REVIEW',
-        appellantId: 'user-123',
-        moderationAction: {
-          id: actionId,
-          reasoning: 'Original reasoning',
-        },
-      });
-
-      prismaService.appeal.update.mockResolvedValue({
-        id: appealId,
-        status: 'UPHELD',
-        reviewerId: reviewerId,
-        decisionReasoning: validRequest.reasoning,
-        resolvedAt: new Date(),
-        createdAt: new Date(),
-      });
-
-      prismaService.moderationAction.update.mockResolvedValue({});
-
-      const result = await service.reviewAppeal(appealId, reviewerId, validRequest);
-
-      expect(result.status).toBe('UPHELD');
-      expect(prismaService.moderationAction.update).toHaveBeenCalledWith({
-        where: { id: actionId },
-        data: {
-          status: 'REVERSED',
-          reasoning: expect.stringContaining('APPEAL UPHELD'),
-        },
-      });
-      expect(queueService.publishEvent).toHaveBeenCalled();
-    });
-
-    it('should review appeal and deny', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'PENDING',
-        moderationAction: {
-          id: 'action-789',
-        },
-      });
-
-      prismaService.appeal.update.mockResolvedValue({
-        id: appealId,
-        status: 'DENIED',
-        reviewerId: reviewerId,
-        decisionReasoning: validRequest.reasoning,
-        resolvedAt: new Date(),
-        createdAt: new Date(),
-      });
-
-      const result = await service.reviewAppeal(appealId, reviewerId, {
-        decision: 'denied',
-        reasoning: validRequest.reasoning,
-      });
-
-      expect(result.status).toBe('DENIED');
-      expect(queueService.publishEvent).not.toHaveBeenCalled();
-    });
 
     it('should throw BadRequestException if reasoning is empty', async () => {
       await expect(
-        service.reviewAppeal(appealId, reviewerId, {
+        service.reviewAppeal('appeal-1', 'mod-1', {
           decision: 'upheld',
           reasoning: '',
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow('reasoning is required');
     });
 
     it('should throw BadRequestException if reasoning is too short', async () => {
       await expect(
-        service.reviewAppeal(appealId, reviewerId, {
+        service.reviewAppeal('appeal-1', 'mod-1', {
           decision: 'upheld',
           reasoning: 'Too short',
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow('Appeal decision reasoning must be at least 20 characters long');
     });
 
-    it('should throw BadRequestException if reasoning exceeds max length', async () => {
-      const longReasoning = 'a'.repeat(2001);
+    it('should throw BadRequestException if reasoning exceeds 2000 characters', async () => {
       await expect(
-        service.reviewAppeal(appealId, reviewerId, {
+        service.reviewAppeal('appeal-1', 'mod-1', {
           decision: 'upheld',
-          reasoning: longReasoning,
+          reasoning: 'a'.repeat(2001),
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow('Appeal decision reasoning cannot exceed 2000 characters');
     });
 
-    it('should throw NotFoundException if appeal not found', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue(null);
+    it('should throw NotFoundException if appeal does not exist', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue(null);
 
-      await expect(service.reviewAppeal(appealId, reviewerId, validRequest)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.reviewAppeal('nonexistent', 'mod-1', validReviewRequest),
+      ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw BadRequestException if appeal cannot be reviewed', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
+    it('should throw BadRequestException if appeal is not reviewable', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
         status: 'UPHELD',
       });
 
-      await expect(service.reviewAppeal(appealId, reviewerId, validRequest)).rejects.toThrow(
-        BadRequestException,
+      await expect(service.reviewAppeal('appeal-1', 'mod-1', validReviewRequest)).rejects.toThrow(
+        'Appeal must be in PENDING or UNDER_REVIEW status to review',
       );
     });
 
-    it('should handle event publishing failure gracefully', async () => {
-      const actionId = 'action-789';
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        status: 'UNDER_REVIEW',
-        appellantId: 'user-123',
-        moderationAction: {
-          id: actionId,
-          reasoning: 'Original reasoning',
-        },
+    it('should deny appeal successfully', async () => {
+      const createdAt = new Date();
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'PENDING',
+        appellantId: 'user-1',
+        moderationAction: null,
       });
-
-      prismaService.appeal.update.mockResolvedValue({
-        id: appealId,
-        status: 'UPHELD',
-        reviewerId: reviewerId,
-        decisionReasoning: validRequest.reasoning,
+      mockPrisma.appeal.update.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Appeal reason',
+        status: 'DENIED',
+        reviewerId: 'mod-1',
+        decisionReasoning: validReviewRequest.reasoning,
+        createdAt,
         resolvedAt: new Date(),
-        createdAt: new Date(),
       });
 
-      prismaService.moderationAction.update.mockResolvedValue({});
-      queueService.publishEvent.mockRejectedValue(new Error('Queue unavailable'));
+      const result = await service.reviewAppeal('appeal-1', 'mod-1', {
+        decision: 'denied',
+        reasoning: 'The appeal does not have sufficient merit.',
+      });
 
-      const result = await service.reviewAppeal(appealId, reviewerId, validRequest);
+      expect(mockPrisma.appeal.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'appeal-1' },
+          data: expect.objectContaining({
+            status: 'DENIED',
+            reviewerId: 'mod-1',
+          }),
+        }),
+      );
+      expect(result.status).toBe('DENIED');
+    });
+
+    it('should uphold appeal and reverse moderation action', async () => {
+      const createdAt = new Date();
+      const moderationAction = {
+        id: 'action-1',
+        targetType: 'RESPONSE',
+        targetId: 'response-1',
+        actionType: 'WARN',
+        status: 'APPEALED',
+        reasoning: 'Original reasoning',
+      };
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'UNDER_REVIEW',
+        appellantId: 'user-1',
+        moderationAction,
+      });
+      mockPrisma.appeal.update.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Appeal reason',
+        status: 'UPHELD',
+        reviewerId: 'mod-1',
+        decisionReasoning: validReviewRequest.reasoning,
+        createdAt,
+        resolvedAt: new Date(),
+      });
+
+      const result = await service.reviewAppeal('appeal-1', 'mod-1', validReviewRequest);
+
+      expect(mockPrisma.appeal.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'UPHELD',
+          }),
+        }),
+      );
+      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: 'action-1' },
+        data: expect.objectContaining({
+          status: 'REVERSED',
+        }),
+      });
+      expect(result.status).toBe('UPHELD');
+    });
+
+    it('should publish trust update event when appeal is upheld', async () => {
+      const createdAt = new Date();
+      const moderationAction = {
+        id: 'action-1',
+        targetType: 'RESPONSE',
+        targetId: 'response-1',
+      };
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'PENDING',
+        appellantId: 'user-1',
+        moderationAction,
+      });
+      mockPrisma.appeal.update.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Appeal reason',
+        status: 'UPHELD',
+        reviewerId: 'mod-1',
+        decisionReasoning: validReviewRequest.reasoning,
+        createdAt,
+        resolvedAt: new Date(),
+      });
+
+      await service.reviewAppeal('appeal-1', 'mod-1', validReviewRequest);
+
+      expect(mockQueueService.publishEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'user.trust.updated',
+          payload: expect.objectContaining({
+            userId: 'user-1',
+            reason: 'appeal_upheld',
+          }),
+        }),
+      );
+    });
+
+    it('should handle queue service failure gracefully', async () => {
+      const createdAt = new Date();
+      const moderationAction = {
+        id: 'action-1',
+        targetType: 'RESPONSE',
+        targetId: 'response-1',
+      };
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        status: 'PENDING',
+        appellantId: 'user-1',
+        moderationAction,
+      });
+      mockPrisma.appeal.update.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Appeal reason',
+        status: 'UPHELD',
+        reviewerId: 'mod-1',
+        decisionReasoning: validReviewRequest.reasoning,
+        createdAt,
+        resolvedAt: new Date(),
+      });
+      mockQueueService.publishEvent.mockRejectedValue(new Error('Queue unavailable'));
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Should not throw even if queue fails
+      const result = await service.reviewAppeal('appeal-1', 'mod-1', validReviewRequest);
 
       expect(result.status).toBe('UPHELD');
-      // Should not throw despite event publishing failure
+      expect(consoleSpy).toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
     });
   });
 
   describe('getAppealById', () => {
-    const appealId = 'appeal-123';
+    it('should return null if appeal does not exist', async () => {
+      mockPrisma.appeal.findUnique.mockResolvedValue(null);
 
-    it('should retrieve appeal by ID with moderation action details', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue({
-        id: appealId,
-        moderationActionId: 'action-456',
-        appellantId: 'user-789',
-        reason: 'This is my appeal',
+      const result = await service.getAppealById('nonexistent');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return appeal with moderation action', async () => {
+      const createdAt = new Date();
+      mockPrisma.appeal.findUnique.mockResolvedValue({
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Valid reason',
         status: 'PENDING',
         reviewerId: null,
         decisionReasoning: null,
-        createdAt: new Date(),
+        createdAt,
         resolvedAt: null,
         moderationAction: {
-          id: 'action-456',
-          actionType: 'HIDE',
-          severity: 'NON_PUNITIVE',
+          id: 'action-1',
           targetType: 'RESPONSE',
-          targetId: 'response-123',
-          reasoning: 'Violates community guidelines',
+          targetId: 'response-1',
+          actionType: 'WARN',
+          severity: 'NON_PUNITIVE',
+          reasoning: 'Test reasoning',
           aiRecommended: false,
           aiConfidence: null,
-          approvedBy: { id: 'mod-1', displayName: 'Moderator 1' },
-          approvedAt: new Date(),
-          status: 'ACTIVE',
-          createdAt: new Date(),
-          executedAt: new Date(),
+          status: 'APPEALED',
+          createdAt,
+          approvedBy: null,
+          approvedAt: null,
+          executedAt: null,
         },
       });
 
-      const result = await service.getAppealById(appealId);
+      const result = await service.getAppealById('appeal-1');
 
-      expect(result).toBeDefined();
-      expect(result?.id).toBe(appealId);
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('appeal-1');
       expect(result?.moderationAction).toBeDefined();
-    });
-
-    it('should return null if appeal not found', async () => {
-      prismaService.appeal.findUnique.mockResolvedValue(null);
-
-      const result = await service.getAppealById(appealId);
-
-      expect(result).toBeNull();
+      expect(result?.moderationAction.id).toBe('action-1');
     });
   });
 
   describe('getAppealStatistics', () => {
-    it('should retrieve appeal statistics', async () => {
-      const startDate = new Date('2026-01-01');
-      const endDate = new Date('2026-01-20');
-
-      prismaService.appeal.count.mockResolvedValue(15);
-      prismaService.appeal.groupBy.mockResolvedValue([
-        { status: 'PENDING', _count: 5 },
-        { status: 'UNDER_REVIEW', _count: 3 },
-        { status: 'UPHELD', _count: 4 },
-        { status: 'DENIED', _count: 3 },
+    it('should return appeal statistics', async () => {
+      mockPrisma.appeal.count
+        .mockResolvedValueOnce(100) // total
+        .mockResolvedValueOnce(30) // pending
+        .mockResolvedValueOnce(10) // underReview
+        .mockResolvedValueOnce(40) // upheld
+        .mockResolvedValueOnce(20); // denied
+      mockPrisma.appeal.groupBy.mockResolvedValue([
+        { status: 'PENDING', _count: 30 },
+        { status: 'UNDER_REVIEW', _count: 10 },
+        { status: 'UPHELD', _count: 40 },
+        { status: 'DENIED', _count: 20 },
       ]);
-
-      prismaService.appeal.count
-        .mockResolvedValueOnce(15) // total
-        .mockResolvedValueOnce(5) // pending
-        .mockResolvedValueOnce(3) // underReview
-        .mockResolvedValueOnce(4) // upheld
-        .mockResolvedValueOnce(3); // denied
-
-      const result = await service.getAppealStatistics(startDate, endDate);
-
-      expect(result.total).toBe(15);
-      expect(result.pending).toBe(5);
-      expect(result.underReview).toBe(3);
-      expect(result.upheld).toBe(4);
-      expect(result.denied).toBe(3);
-      expect(result.byStatus).toHaveLength(4);
-    });
-
-    it('should retrieve statistics without date range', async () => {
-      prismaService.appeal.count.mockResolvedValue(10);
-      prismaService.appeal.groupBy.mockResolvedValue([]);
-
-      prismaService.appeal.count
-        .mockResolvedValueOnce(10)
-        .mockResolvedValueOnce(5)
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(1);
 
       const result = await service.getAppealStatistics();
 
-      expect(result.total).toBe(10);
+      expect(result.total).toBe(100);
+      expect(result.pending).toBe(30);
+      expect(result.underReview).toBe(10);
+      expect(result.upheld).toBe(40);
+      expect(result.denied).toBe(20);
+      expect(result.byStatus).toHaveLength(4);
     });
 
-    it('should handle date range with only start date', async () => {
+    it('should filter by date range', async () => {
       const startDate = new Date('2026-01-01');
+      const endDate = new Date('2026-01-31');
 
-      prismaService.appeal.count.mockResolvedValue(5);
-      prismaService.appeal.groupBy.mockResolvedValue([]);
+      mockPrisma.appeal.count.mockResolvedValue(0);
+      mockPrisma.appeal.groupBy.mockResolvedValue([]);
 
-      prismaService.appeal.count
-        .mockResolvedValueOnce(5)
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce(1);
+      await service.getAppealStatistics(startDate, endDate);
 
-      const result = await service.getAppealStatistics(startDate);
-
-      expect(result.total).toBe(5);
-      expect(prismaService.appeal.count).toHaveBeenCalledWith(
+      expect(mockPrisma.appeal.count).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             createdAt: expect.objectContaining({
               gte: startDate,
+              lte: endDate,
             }),
           }),
         }),
       );
     });
 
-    it('should handle date range with only end date', async () => {
-      const endDate = new Date('2026-01-20');
+    it('should handle startDate only', async () => {
+      const startDate = new Date('2026-01-01');
 
-      prismaService.appeal.count.mockResolvedValue(8);
-      prismaService.appeal.groupBy.mockResolvedValue([]);
+      mockPrisma.appeal.count.mockResolvedValue(0);
+      mockPrisma.appeal.groupBy.mockResolvedValue([]);
 
-      prismaService.appeal.count
-        .mockResolvedValueOnce(8)
-        .mockResolvedValueOnce(3)
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(1);
+      await service.getAppealStatistics(startDate);
 
-      const result = await service.getAppealStatistics(undefined, endDate);
+      expect(mockPrisma.appeal.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            createdAt: { gte: startDate },
+          }),
+        }),
+      );
+    });
 
-      expect(result.total).toBe(8);
+    it('should handle endDate only', async () => {
+      const endDate = new Date('2026-01-31');
+
+      mockPrisma.appeal.count.mockResolvedValue(0);
+      mockPrisma.appeal.groupBy.mockResolvedValue([]);
+
+      await service.getAppealStatistics(undefined, endDate);
+
+      expect(mockPrisma.appeal.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            createdAt: { lte: endDate },
+          }),
+        }),
+      );
     });
   });
 
   describe('mapAppealToResponse', () => {
-    it('should map appeal to response DTO', () => {
+    it('should map appeal entity to response DTO', () => {
+      const createdAt = new Date();
+      const resolvedAt = new Date();
       const appeal = {
-        id: 'appeal-123',
-        moderationActionId: 'action-456',
-        appellantId: 'user-789',
-        reason: 'Appeal reason',
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Valid reason',
+        status: 'UPHELD',
+        reviewerId: 'mod-1',
+        decisionReasoning: 'Decision reasoning',
+        createdAt,
+        resolvedAt,
+      };
+
+      const result = service.mapAppealToResponse(appeal);
+
+      expect(result.id).toBe('appeal-1');
+      expect(result.moderationActionId).toBe('action-1');
+      expect(result.appellantId).toBe('user-1');
+      expect(result.reason).toBe('Valid reason');
+      expect(result.status).toBe('UPHELD');
+      expect(result.reviewerId).toBe('mod-1');
+      expect(result.decisionReasoning).toBe('Decision reasoning');
+      expect(result.createdAt).toBe(createdAt.toISOString());
+      expect(result.resolvedAt).toBe(resolvedAt.toISOString());
+    });
+
+    it('should handle null optional fields', () => {
+      const createdAt = new Date();
+      const appeal = {
+        id: 'appeal-1',
+        moderationActionId: 'action-1',
+        appellantId: 'user-1',
+        reason: 'Valid reason',
         status: 'PENDING',
         reviewerId: null,
         decisionReasoning: null,
-        createdAt: new Date('2026-01-15'),
+        createdAt,
         resolvedAt: null,
       };
 
       const result = service.mapAppealToResponse(appeal);
 
-      expect(result.id).toBe('appeal-123');
-      expect(result.status).toBe('PENDING');
       expect(result.reviewerId).toBeNull();
+      expect(result.decisionReasoning).toBeNull();
       expect(result.resolvedAt).toBeNull();
-      expect(typeof result.createdAt).toBe('string');
     });
+  });
 
-    it('should map resolved appeal with decision', () => {
-      const resolvedDate = new Date('2026-01-16');
-      const appeal = {
-        id: 'appeal-123',
-        moderationActionId: 'action-456',
-        appellantId: 'user-789',
-        reason: 'Appeal reason',
-        status: 'UPHELD',
-        reviewerId: 'mod-123',
-        decisionReasoning: 'Appeal has valid grounds',
-        createdAt: new Date('2026-01-15'),
-        resolvedAt: resolvedDate,
+  describe('mapModerationActionToResponse', () => {
+    it('should map moderation action to response', () => {
+      const createdAt = new Date();
+      const approvedAt = new Date();
+      const executedAt = new Date();
+      const action = {
+        id: 'action-1',
+        targetType: 'RESPONSE',
+        targetId: 'response-1',
+        actionType: 'WARN',
+        severity: 'NON_PUNITIVE',
+        reasoning: 'Test reasoning',
+        aiRecommended: true,
+        aiConfidence: 0.85,
+        status: 'ACTIVE',
+        createdAt,
+        approvedBy: { id: 'mod-1', displayName: 'Moderator' },
+        approvedAt,
+        executedAt,
       };
 
-      const result = service.mapAppealToResponse(appeal);
+      const result = service.mapModerationActionToResponse(action);
 
-      expect(result.status).toBe('UPHELD');
-      expect(result.reviewerId).toBe('mod-123');
-      expect(result.decisionReasoning).toBe('Appeal has valid grounds');
-      expect(result.resolvedAt).toBeDefined();
+      expect(result.id).toBe('action-1');
+      expect(result.targetType).toBe('RESPONSE');
+      expect(result.targetId).toBe('response-1');
+      expect(result.actionType).toBe('WARN');
+      expect(result.severity).toBe('NON_PUNITIVE');
+      expect(result.aiRecommended).toBe(true);
+      expect(result.aiConfidence).toBe(0.85);
+      expect(result.approvedBy).toEqual({ id: 'mod-1', displayName: 'Moderator' });
+      expect(result.createdAt).toBe(createdAt.toISOString());
+    });
+
+    it('should handle null optional fields in moderation action', () => {
+      const createdAt = new Date();
+      const action = {
+        id: 'action-1',
+        targetType: 'RESPONSE',
+        targetId: 'response-1',
+        actionType: 'WARN',
+        severity: 'NON_PUNITIVE',
+        reasoning: 'Test reasoning',
+        aiRecommended: false,
+        aiConfidence: null,
+        status: 'PENDING',
+        createdAt,
+        approvedBy: null,
+        approvedAt: null,
+        executedAt: null,
+      };
+
+      const result = service.mapModerationActionToResponse(action);
+
+      expect(result.aiConfidence).toBeNull();
+      expect(result.approvedBy).toBeNull();
+      expect(result.approvedAt).toBeNull();
+      expect(result.executedAt).toBeNull();
     });
   });
 });

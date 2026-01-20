@@ -79,7 +79,7 @@ ALLOWED_FILES=(
   "^lerna\\.json$"              # Lerna config
   "^index\\.html$"              # Vite HTML template entry point
   "^CLAUDE\\.md$"               # Claude Code instructions
-  "^SHARED_TASK_NOTES\\.md$"    # Project task and iteration tracking
+  "^SHARED_TASK_NOTES\\.md$"    # Shared task notes
 )
 
 # ============================================================================
