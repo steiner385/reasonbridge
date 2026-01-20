@@ -14,7 +14,10 @@ export default defineConfig({
         'packages/event-schemas/dist/index.js',
       ),
       '@unite-discord/ai-client': path.resolve(__dirname, 'packages/ai-client/dist/index.js'),
-      '@unite-discord/testing-utils': path.resolve(__dirname, 'packages/testing-utils/dist/index.js'),
+      '@unite-discord/testing-utils': path.resolve(
+        __dirname,
+        'packages/testing-utils/dist/index.js',
+      ),
       // Prisma client alias - let Node resolve it from node_modules
       '@prisma/client': path.resolve(__dirname, 'node_modules/@prisma/client'),
     },
@@ -97,10 +100,9 @@ export default defineConfig({
         statements: 55,
       },
     },
-    reporters: ['default', 'junit', 'allure'],
+    reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',
-      allure: './allure-results/unit',
     },
     // Handle pnpm workspace symlinks and Prisma client resolution
     deps: {
