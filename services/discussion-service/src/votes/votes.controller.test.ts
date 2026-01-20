@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import { VotesController } from './votes.controller.js';
 
 const createMockVotesService = () => ({

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import { TopicsController } from './topics.controller.js';
 
 const createMockTopicsService = () => ({
