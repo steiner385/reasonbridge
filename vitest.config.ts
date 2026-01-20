@@ -64,39 +64,9 @@ export default defineConfig({
       'frontend/src/components/**/*.test.tsx',
       // Frontend component test - requires separate vitest config with React testing setup
       '**/moderation/__tests__/ModerationActionButtons.spec.tsx',
-      // CI: Prisma client runtime resolution issues - TODO: fix Prisma ESM bundling
-      // These tests pass locally but fail in CI due to pnpm workspace symlink handling
-      '**/trust-score.calculator.test.ts',
-      '**/verification.service.test.ts',
-      '**/video-upload.service.test.ts',
-      '**/verification.controller.test.ts',
-      // CI: class-validator resolution issues in pnpm workspace
-      '**/suggestions.controller.test.ts',
-      '**/feedback.controller.test.ts',
-      '**/feedback.service.test.ts',
-      '**/feedback-analytics.service.test.ts',
-      // CI: Prisma client + class-validator resolution issues in discussion-service
-      '**/alignment-aggregation.service.test.ts',
-      '**/alignments.controller.test.ts',
-      '**/alignments.service.test.ts',
-      '**/topics.controller.test.ts',
-      '**/topics.service.test.ts',
-      '**/votes.controller.test.ts',
-      '**/votes.service.test.ts',
-      // CI: Prisma client resolution issues in ai-service
-      '**/ai-feedback-analysis.test.ts',
-      '**/clarity-analyzer.service.test.ts',
-      '**/fallacy-detector.service.test.ts',
-      '**/response-analyzer.service.test.ts',
-      '**/tone-analyzer.service.test.ts',
-      // CI: Prisma client resolution issues in discussion-service
-      '**/common-ground-trigger.service.test.ts',
-      '**/responses.service.test.ts',
-      '**/responses.service.unit.test.ts',
-      '**/responses.controller.test.ts',
-      '**/content-moderation.service.test.ts',
+      // Discussion service content-moderation tests - failing due to undefined mocks
       '**/content-moderation.service.spec.ts',
-      // CI: Prisma client resolution issues in moderation-service
+      // Moderation service tests - module resolution issues and failing tests
       '**/moderation.controller.test.ts',
       '**/moderation-queue.service.spec.ts',
       '**/moderation-action.repository.spec.ts',
@@ -104,13 +74,6 @@ export default defineConfig({
       '**/appeal.service.spec.ts',
       '**/moderation-actions.service.spec.ts',
       '**/moderation-actions.service.unit.test.ts',
-      // CI: Prisma client resolution issues in notification-service
-      '**/common-ground-notification.handler.test.ts',
-      '**/moderation-notification.handler.test.ts',
-      // CI: Prisma client resolution issues in user-service
-      '**/bot-detector.service.spec.ts',
-      '**/users.controller.test.ts',
-      '**/users.service.test.ts',
     ],
     coverage: {
       provider: 'v8',
