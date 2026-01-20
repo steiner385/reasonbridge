@@ -76,8 +76,6 @@ trap "rm -rf $TEMP_DIR" EXIT
 # Run tests with appropriate configurations
 # Using npm test which runs 'pnpm -r test' in workspace context
 npm run test:unit -- \
-  --run \
-  --passWithNoTests \
   --exclude='**/*.integration.test.ts' \
   --exclude='**/*.contract.test.ts' \
   --exclude='**/*.e2e.test.ts' \
