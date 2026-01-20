@@ -13,10 +13,9 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       reportsDirectory: '../coverage/frontend',
     },
-    reporters: ['default', 'junit', 'allure'],
+    reporters: ['default', 'junit'],
     outputFile: {
       junit: '../coverage/junit.xml',
-      allure: '../allure-results/frontend',
     },
   },
 });
