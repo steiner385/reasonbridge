@@ -39,13 +39,7 @@ export default defineConfig({
       'services/**/tests/integration/**/*.test.ts',
       '**/*.integration.test.ts',
     ],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      // CI: Disable problematic integration tests by default
-      // Re-enable systematically after verifying they work
-      'services/ai-service/src/__tests__/feedback-api.integration.test.ts',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**'],
     testTimeout: 30000,
     hookTimeout: 30000,
     pool: 'forks',
