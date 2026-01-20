@@ -64,10 +64,7 @@ function AppealDetailCard({
 }) {
   return (
     <Card className="mb-4">
-      <CardHeader
-        className="cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={onToggle}
-      >
+      <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={onToggle}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
             <div>
@@ -118,7 +115,9 @@ function AppealDetailCard({
                   <div>
                     <div className="text-sm text-gray-600">Severity</div>
                     <p className="text-gray-900 capitalize">
-                      {moderationAction.severity === 'non_punitive' ? 'Non-Punitive' : 'Consequential'}
+                      {moderationAction.severity === 'non_punitive'
+                        ? 'Non-Punitive'
+                        : 'Consequential'}
                     </p>
                   </div>
                   <div>
@@ -129,7 +128,8 @@ function AppealDetailCard({
                     <div className="text-sm text-gray-600">AI Recommended</div>
                     <p className="text-gray-900">
                       {moderationAction.aiRecommended ? 'Yes' : 'No'}
-                      {moderationAction.aiConfidence && ` (${(moderationAction.aiConfidence * 100).toFixed(0)}% confidence)`}
+                      {moderationAction.aiConfidence &&
+                        ` (${(moderationAction.aiConfidence * 100).toFixed(0)}% confidence)`}
                     </p>
                   </div>
                 </div>
@@ -137,27 +137,31 @@ function AppealDetailCard({
             )}
 
             {/* Decision (if resolved) */}
-            {appeal.status !== 'pending' && appeal.status !== 'under_review' && appeal.decisionReasoning && (
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Moderator Decision</h3>
-                <div
-                  className={`p-4 rounded-lg ${
-                    appeal.status === 'upheld' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-                  }`}
-                >
-                  <div className="mb-2">
-                    <div className="text-sm text-gray-600">Decision</div>
-                    <p className="text-gray-900 font-semibold capitalize">
-                      {appeal.status === 'upheld' ? 'Original action upheld' : 'Appeal denied'}
-                    </p>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Reasoning</div>
-                    <p className="text-gray-900">{appeal.decisionReasoning}</p>
+            {appeal.status !== 'pending' &&
+              appeal.status !== 'under_review' &&
+              appeal.decisionReasoning && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Moderator Decision</h3>
+                  <div
+                    className={`p-4 rounded-lg ${
+                      appeal.status === 'upheld'
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    <div className="mb-2">
+                      <div className="text-sm text-gray-600">Decision</div>
+                      <p className="text-gray-900 font-semibold capitalize">
+                        {appeal.status === 'upheld' ? 'Original action upheld' : 'Appeal denied'}
+                      </p>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">Reasoning</div>
+                      <p className="text-gray-900">{appeal.decisionReasoning}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Status Message */}
             {(appeal.status === 'pending' || appeal.status === 'under_review') && (
@@ -184,7 +188,7 @@ export default function AppealStatusPage() {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [appealDetails, setAppealDetails] = useState<Map<string, ModerationAction>>(new Map());
   const [expandedAppealId, setExpandedAppealId] = useState<string | null>(
-    searchParams.get('appeal')
+    searchParams.get('appeal'),
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,9 +201,7 @@ export default function AppealStatusPage() {
         setLoading(true);
         setError(null);
 
-        const response = await getAppeals(
-          filterStatus === 'all' ? {} : { status: filterStatus }
-        );
+        const response = await getAppeals(filterStatus === 'all' ? {} : { status: filterStatus });
         setAppeals(response.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load appeals');
@@ -222,7 +224,7 @@ export default function AppealStatusPage() {
       try {
         const action = await getModerationAction(appeal.moderationActionId);
         setAppealDetails((prev) => new Map(prev).set(expandedAppealId, action));
-      } catch (err) {
+      } catch {
         // Silently fail - details not critical
       }
     };
@@ -243,9 +245,7 @@ export default function AppealStatusPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Appeal Status</h1>
-        <p className="text-gray-600">
-          Track the status of your appeals against moderation actions
-        </p>
+        <p className="text-gray-600">Track the status of your appeals against moderation actions</p>
       </div>
 
       {error && (
@@ -323,8 +323,8 @@ export default function AppealStatusPage() {
             • <strong>Denied:</strong> Your appeal has been reviewed and the decision has been made
           </p>
           <p className="mt-4">
-            You will receive a notification when your appeal has been reviewed. If you have questions,
-            please contact our support team.
+            You will receive a notification when your appeal has been reviewed. If you have
+            questions, please contact our support team.
           </p>
         </CardBody>
       </Card>
