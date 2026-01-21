@@ -15,7 +15,7 @@ const createMockExportService = () => ({
 });
 
 const createMockResponse = () => ({
-  setHeader: vi.fn(),
+  header: vi.fn().mockReturnThis(),
   send: vi.fn(),
 });
 
@@ -127,8 +127,8 @@ describe('TopicsController', () => {
 
       expect(mockTopicsService.getCommonGroundAnalysis).toHaveBeenCalledWith('topic-1', undefined);
       expect(mockExportService.exportAnalysis).toHaveBeenCalledWith(analysis, 'pdf');
-      expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
-      expect(mockRes.setHeader).toHaveBeenCalledWith(
+      expect(mockRes.header).toHaveBeenCalledWith('Content-Type', 'application/pdf');
+      expect(mockRes.header).toHaveBeenCalledWith(
         'Content-Disposition',
         'attachment; filename="common-ground-analysis.pdf"',
       );
@@ -165,7 +165,7 @@ describe('TopicsController', () => {
       await controller.exportCommonGroundAnalysis('topic-1', { format: 'json' }, mockRes as any);
 
       expect(mockExportService.exportAnalysis).toHaveBeenCalledWith(analysis, 'json');
-      expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockRes.header).toHaveBeenCalledWith('Content-Type', 'application/json');
       expect(mockRes.send).toHaveBeenCalledWith(exportResult.data);
     });
 
