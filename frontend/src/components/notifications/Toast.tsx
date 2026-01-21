@@ -61,15 +61,7 @@ const textStyles: Record<ToastType, { title: string; message: string }> = {
   },
 };
 
-export function Toast({
-  id,
-  type,
-  title,
-  message,
-  duration = 5000,
-  action,
-  onClose,
-}: ToastProps) {
+export function Toast({ id, type, title, message, duration = 5000, action, onClose }: ToastProps) {
   const styles = typeStyles[type];
   const textColor = textStyles[type];
 
@@ -78,6 +70,7 @@ export function Toast({
       const timer = setTimeout(() => onClose(id), duration);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [id, duration, onClose]);
 
   return (

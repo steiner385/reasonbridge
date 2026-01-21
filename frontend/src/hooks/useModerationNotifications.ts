@@ -35,8 +35,8 @@ export function useModerationNotifications() {
       const notificationServiceUrl =
         import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || 'http://localhost:3003';
 
-      socket = io(notificationServiceUrl, {
-        namespace: '/notifications',
+      // Socket.io namespaces are part of the URL, not an option
+      socket = io(`${notificationServiceUrl}/notifications`, {
         reconnectionDelay: 1000,
         reconnection: true,
         reconnectionAttempts: 5,
@@ -45,12 +45,11 @@ export function useModerationNotifications() {
 
       // Connection handlers
       socket.on('connect', () => {
-        console.debug('[ModerationNotifications] Connected to notification service');
         notification.info('Connected to notifications', 'You will receive real-time updates');
       });
 
       socket.on('disconnect', () => {
-        console.debug('[ModerationNotifications] Disconnected from notification service');
+        // Silently handle disconnection
       });
 
       socket.on('connect_error', (error: Error) => {
@@ -77,13 +76,13 @@ export function useModerationNotifications() {
         const confidence = data.aiConfidence ? Math.round(data.aiConfidence * 100) : 0;
         notification.info(
           `AI Recommendation: ${actionLabel} ${targetLabel}`,
-          `Confidence: ${confidence}% • ${data.reasoning}`
+          `Confidence: ${confidence}% • ${data.reasoning}`,
         );
       } else {
         const severityLabel = data.severity === 'consequential' ? 'Consequential' : 'Non-punitive';
         notification.warning(
           `Moderation Action: ${actionLabel} ${targetLabel}`,
-          `${severityLabel} • ${data.reasoning}`
+          `${severityLabel} • ${data.reasoning}`,
         );
       }
     };
@@ -95,12 +94,12 @@ export function useModerationNotifications() {
       if (data.delta > 0) {
         notification.success(
           'Trust Score Improved',
-          `Your trust score ${changeText} (reason: ${data.reason})`
+          `Your trust score ${changeText} (reason: ${data.reason})`,
         );
       } else {
         notification.warning(
           'Trust Score Changed',
-          `Your trust score ${changeText} (reason: ${data.reason})`
+          `Your trust score ${changeText} (reason: ${data.reason})`,
         );
       }
     };
