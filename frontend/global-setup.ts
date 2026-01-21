@@ -5,11 +5,21 @@ import { chromium, FullConfig } from '@playwright/test';
  *
  * When running in Docker E2E mode, this waits for the frontend to be ready
  * before tests start, preventing ERR_CONNECTION_REFUSED errors.
+ *
+ * Set SKIP_GLOBAL_SETUP_WAIT=true to skip the wait (useful when CI pipeline
+ * handles the wait externally).
  */
 async function globalSetup(config: FullConfig) {
   // Only wait for frontend in E2E Docker mode
   if (!process.env.E2E_DOCKER) {
     console.log('Skipping frontend health check (not in E2E_DOCKER mode)');
+    return;
+  }
+
+  // Skip if CI pipeline is handling the wait
+  if (process.env.SKIP_GLOBAL_SETUP_WAIT === 'true') {
+    console.log('Skipping frontend health check (SKIP_GLOBAL_SETUP_WAIT=true)');
+    console.log('CI pipeline will verify frontend accessibility before tests');
     return;
   }
 
