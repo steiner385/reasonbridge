@@ -32,7 +32,7 @@ export default defineConfig({
     baseURL:
       process.env.PLAYWRIGHT_BASE_URL ||
       (process.env.E2E_DOCKER
-        ? 'http://localhost:8080' // Containerized frontend for E2E tests
+        ? `http://localhost:${process.env.E2E_FRONTEND_PORT || '8080'}` // Containerized frontend for E2E tests (configurable port)
         : process.env.CI
           ? 'http://localhost:4173' // Vite preview for CI
           : 'http://localhost:3000'), // Dev server for local development
