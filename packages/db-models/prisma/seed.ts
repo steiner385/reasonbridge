@@ -8,97 +8,124 @@ async function main() {
   // Create test users
   console.log('Creating test users...');
   const testUser1 = await prisma.user.upsert({
-    where: { cognito_sub: 'test-user-1' },
+    where: { cognitoSub: 'test-user-1' },
     update: {},
     create: {
-      cognito_sub: 'test-user-1',
-      display_name: 'Test User 1',
-      trust_scores: { ability: 75, benevolence: 80, integrity: 85 },
-      verification_level: 'BASIC',
+      email: 'testuser1@example.com',
+      cognitoSub: 'test-user-1',
+      displayName: 'Test User 1',
+      trustScoreAbility: 0.75,
+      trustScoreBenevolence: 0.8,
+      trustScoreIntegrity: 0.85,
+      verificationLevel: 'BASIC',
     },
   });
 
   const testUser2 = await prisma.user.upsert({
-    where: { cognito_sub: 'test-user-2' },
+    where: { cognitoSub: 'test-user-2' },
     update: {},
     create: {
-      cognito_sub: 'test-user-2',
-      display_name: 'Verified User',
-      trust_scores: { ability: 90, benevolence: 92, integrity: 88 },
-      verification_level: 'VERIFIED_HUMAN',
+      email: 'verifieduser@example.com',
+      cognitoSub: 'test-user-2',
+      displayName: 'Verified User',
+      trustScoreAbility: 0.9,
+      trustScoreBenevolence: 0.92,
+      trustScoreIntegrity: 0.88,
+      verificationLevel: 'VERIFIED_HUMAN',
     },
   });
 
-  console.log(`✅ Created users: ${testUser1.display_name}, ${testUser2.display_name}`);
+  console.log(`✅ Created users: ${testUser1.displayName}, ${testUser2.displayName}`);
 
-  // Create test topics
+  // Create test topics (check if they exist first by title since we can't use custom IDs)
   console.log('Creating test topics...');
-  const topic1 = await prisma.discussionTopic.upsert({
-    where: { id: 'test-topic-1' },
-    update: {},
-    create: {
-      id: 'test-topic-1',
-      title: 'Should renewable energy be prioritized over fossil fuels?',
-      description:
-        'Discuss the transition to renewable energy sources and their impact on the environment and economy.',
-      created_by_id: testUser1.id,
-    },
+  const existingTopic1 = await prisma.discussionTopic.findFirst({
+    where: { title: 'Should renewable energy be prioritized over fossil fuels?' },
   });
+  const topic1 =
+    existingTopic1 ||
+    (await prisma.discussionTopic.create({
+      data: {
+        title: 'Should renewable energy be prioritized over fossil fuels?',
+        description:
+          'Discuss the transition to renewable energy sources and their impact on the environment and economy.',
+        creatorId: testUser1.id,
+        crossCuttingThemes: [],
+      },
+    }));
 
-  const topic2 = await prisma.discussionTopic.upsert({
-    where: { id: 'test-topic-2' },
-    update: {},
-    create: {
-      id: 'test-topic-2',
-      title: 'Universal Basic Income: Viable or Unsustainable?',
-      description:
-        'Explore the feasibility and potential impact of implementing universal basic income policies.',
-      created_by_id: testUser2.id,
-    },
+  const existingTopic2 = await prisma.discussionTopic.findFirst({
+    where: { title: 'Universal Basic Income: Viable or Unsustainable?' },
   });
+  const topic2 =
+    existingTopic2 ||
+    (await prisma.discussionTopic.create({
+      data: {
+        title: 'Universal Basic Income: Viable or Unsustainable?',
+        description:
+          'Explore the feasibility and potential impact of implementing universal basic income policies.',
+        creatorId: testUser2.id,
+        crossCuttingThemes: [],
+      },
+    }));
 
-  const topic3 = await prisma.discussionTopic.upsert({
-    where: { id: 'test-topic-3' },
-    update: {},
-    create: {
-      id: 'test-topic-3',
-      title: 'Remote Work: The Future of Employment?',
-      description:
-        'Debate the long-term effects of remote work on productivity, work-life balance, and urban development.',
-      created_by_id: testUser1.id,
-    },
+  const existingTopic3 = await prisma.discussionTopic.findFirst({
+    where: { title: 'Remote Work: The Future of Employment?' },
   });
+  const topic3 =
+    existingTopic3 ||
+    (await prisma.discussionTopic.create({
+      data: {
+        title: 'Remote Work: The Future of Employment?',
+        description:
+          'Debate the long-term effects of remote work on productivity, work-life balance, and urban development.',
+        creatorId: testUser1.id,
+        crossCuttingThemes: [],
+      },
+    }));
 
   console.log(`✅ Created topics: "${topic1.title}", "${topic2.title}", "${topic3.title}"`);
 
   // Create some test responses
   console.log('Creating test responses...');
-  const response1 = await prisma.response.upsert({
-    where: { id: 'test-response-1' },
-    update: {},
-    create: {
-      id: 'test-response-1',
-      topic_id: topic1.id,
-      user_id: testUser2.id,
-      content:
-        'Renewable energy is crucial for reducing carbon emissions and combating climate change. The initial investment costs are offset by long-term savings and environmental benefits.',
-      metadata: { is_ai_assisted: false, cited_sources: [] },
+  const existingResponse1 = await prisma.response.findFirst({
+    where: {
+      topicId: topic1.id,
+      authorId: testUser2.id,
+      content: { startsWith: 'Renewable energy is crucial' },
     },
   });
+  const response1 =
+    existingResponse1 ||
+    (await prisma.response.create({
+      data: {
+        topicId: topic1.id,
+        authorId: testUser2.id,
+        content:
+          'Renewable energy is crucial for reducing carbon emissions and combating climate change. The initial investment costs are offset by long-term savings and environmental benefits.',
+        citedSources: [],
+      },
+    }));
 
-  const response2 = await prisma.response.upsert({
-    where: { id: 'test-response-2' },
-    update: {},
-    create: {
-      id: 'test-response-2',
-      topic_id: topic1.id,
-      user_id: testUser1.id,
-      parent_id: response1.id,
-      content:
-        'While I agree on the environmental benefits, we need to consider the economic transition costs and job displacement in fossil fuel industries. A gradual transition with retraining programs would be more sustainable.',
-      metadata: { is_ai_assisted: false, cited_sources: [] },
+  const existingResponse2 = await prisma.response.findFirst({
+    where: {
+      topicId: topic1.id,
+      authorId: testUser1.id,
+      parentId: response1.id,
     },
   });
+  const response2 =
+    existingResponse2 ||
+    (await prisma.response.create({
+      data: {
+        topicId: topic1.id,
+        authorId: testUser1.id,
+        parentId: response1.id,
+        content:
+          'While I agree on the environmental benefits, we need to consider the economic transition costs and job displacement in fossil fuel industries. A gradual transition with retraining programs would be more sustainable.',
+        citedSources: [],
+      },
+    }));
 
   console.log(`✅ Created ${2} test responses`);
 

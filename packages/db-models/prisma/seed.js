@@ -35,7 +35,7 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created users: ${testUser1.display_name}, ${testUser2.display_name}`);
+  console.log(`✅ Created users: ${testUser1.displayName}, ${testUser2.displayName}`);
 
   // Create test topics (check if they exist first by title since we can't use custom IDs)
   console.log('Creating test topics...');
