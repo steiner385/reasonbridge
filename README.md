@@ -44,6 +44,7 @@ After cloning the repository, run the setup script:
 ```
 
 This will:
+
 1. Verify Node.js and pnpm are installed
 2. Install all dependencies (`pnpm install`)
 3. Configure git hooks (husky) for code quality enforcement
@@ -92,6 +93,7 @@ cp .env.example .env
 ```
 
 Key configuration areas:
+
 - **Application** - Node environment, logging level
 - **Discord Bot** - Token, client ID, guild ID
 - **Database** - PostgreSQL connection details
@@ -144,6 +146,12 @@ pnpm test:watch
 pnpm test:coverage
 ```
 
+### Testing Infrastructure
+
+The project uses Vitest for unit and integration testing with Prisma mocking to allow tests to run without database dependencies. Each service has its own `vitest.config.ts` file that excludes problematic tests that require database connections until proper mocking is implemented.
+
+Services use a local test setup file (e.g., `src/test-setup.ts`) that creates comprehensive Prisma client mocks, allowing unit tests to run in isolation without external dependencies.
+
 ## Git Hooks
 
 This project uses [husky](https://typicode.github.io/husky/) for git hooks:
@@ -184,11 +192,13 @@ Each feature specification includes detailed API contracts in the `contracts/` s
 We welcome contributions! Please follow these guidelines:
 
 1. **Create a feature branch** from `main`
+
    ```bash
    git checkout -b feat/description-of-feature
    ```
 
 2. **Make your changes** and write tests
+
    ```bash
    pnpm lint:fix            # Fix linting issues
    pnpm format              # Format code
@@ -196,11 +206,13 @@ We welcome contributions! Please follow these guidelines:
    ```
 
 3. **Commit with clear messages**
+
    ```bash
    git commit -m "feat: description of changes"
    ```
 
 4. **Push and create a Pull Request**
+
    ```bash
    git push origin feat/description-of-feature
    ```
@@ -225,4 +237,5 @@ For questions or issues:
 - Open a [GitHub Issue](https://github.com/steiner385/uniteDiscord/issues)
 - Check existing [discussions](https://github.com/steiner385/uniteDiscord/discussions)
 - Review project [specifications](./specs/)
+
 # Webhook test

@@ -1,0 +1,280 @@
+/// <reference types="vitest" />
+
+import { vi } from 'vitest';
+
+// Define a generic Prisma-like type to avoid direct import issues
+type MockPrismaClient = {
+  $connect: () => Promise<void>;
+  $disconnect: () => Promise<void>;
+  $transaction: (fn: any) => Promise<any>;
+  $executeRaw: (query: any) => Promise<number>;
+  $queryRaw: (query: any) => Promise<any>;
+  $executeRawUnsafe: (query: any) => Promise<number>;
+  $queryRawUnsafe: (query: any) => Promise<any>;
+  // Add model properties with their typical methods
+  [key: string]: any;
+};
+
+/**
+ * Creates a mock Prisma client for unit testing
+ * This allows unit tests to run without connecting to a database
+ */
+const createMockPrisma = (): MockPrismaClient => {
+  return {
+    // Mock all Prisma client methods
+    $connect: vi.fn().mockResolvedValue(undefined),
+    $disconnect: vi.fn().mockResolvedValue(undefined),
+    $transaction: vi.fn().mockResolvedValue(undefined),
+    $executeRaw: vi.fn().mockResolvedValue(undefined),
+    $queryRaw: vi.fn().mockResolvedValue(undefined),
+    $executeRawUnsafe: vi.fn().mockResolvedValue(undefined),
+    $queryRawUnsafe: vi.fn().mockResolvedValue(undefined),
+
+    // Mock all model-specific methods
+    // Add more models as they're used in the application
+    user: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    discussionTopic: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    response: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    responseProposition: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    proposition: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    alignment: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    vote: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    moderationAction: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    verification: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    trustScore: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    feedback: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    suggestion: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+    notification: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      findFirst: vi.fn(),
+      findFirstOrThrow: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
+      count: vi.fn(),
+    },
+  } as MockPrismaClient;
+};
+
+// Mock Prisma globally to avoid database connections in unit tests
+vi.mock('@unite-discord/db-models', async () => {
+  const actual = await vi.importActual('@unite-discord/db-models');
+  const mockPrisma = createMockPrisma();
+  return {
+    ...actual,
+    PrismaClient: class MockPrismaClient {
+      constructor() {
+        return mockPrisma;
+      }
+    },
+  };
+});
+
+// Mock other external dependencies that might cause issues
+vi.mock('@aws-sdk/client-bedrock-runtime', () => ({
+  BedrockRuntimeClient: vi.fn(),
+}));
+
+vi.mock('pdfkit', () => ({
+  default: vi.fn(),
+}));
