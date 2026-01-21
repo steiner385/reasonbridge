@@ -11,6 +11,7 @@ WORKDIR /app
 
 # Copy workspace configuration
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc* ./
 
 # Copy all package.json files to install dependencies
 COPY packages/*/package.json ./packages/
