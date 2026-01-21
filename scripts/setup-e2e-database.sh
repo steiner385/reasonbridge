@@ -8,7 +8,7 @@ set -e
 echo "🔧 Setting up E2E database..."
 
 # Database connection details for E2E environment
-E2E_DATABASE_URL="postgresql://unite_test:unite_test@localhost:5433/unite_test"
+E2E_DATABASE_URL="postgresql://unite_test:unite_test@localhost:5434/unite_test"
 
 # Check if E2E postgres container is running
 if ! docker ps | grep -q "unite-postgres-e2e"; then
