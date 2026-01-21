@@ -22,7 +22,7 @@ test.describe('ProfilePage Component', () => {
 });
 
 test.describe('UserProfilePage Component', () => {
-  test.skip('should show error for invalid user ID', async ({ page }) => {
+  test('should show error for invalid user ID', async ({ page }) => {
     await page.goto('/profile/invalid-uuid');
 
     // Should show loading first, then error
@@ -31,7 +31,7 @@ test.describe('UserProfilePage Component', () => {
     });
   });
 
-  test.skip('should show error for non-existent user', async ({ page }) => {
+  test('should show error for non-existent user', async ({ page }) => {
     // Use a valid UUID format that doesn't exist
     await page.goto('/profile/00000000-0000-0000-0000-000000000000');
 

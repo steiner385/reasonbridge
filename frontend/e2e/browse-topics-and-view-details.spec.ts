@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Browse Topics and View Details', () => {
-  test.skip('should load and display the topics list page', async ({ page }) => {
+  test('should load and display the topics list page', async ({ page }) => {
     await page.goto('/topics');
 
     // Check for page heading
@@ -45,7 +45,7 @@ test.describe('Browse Topics and View Details', () => {
     expect(hasTopics || hasNoTopicsMessage).toBeTruthy();
   });
 
-  test.skip('should navigate to topic detail page when clicking on a topic', async ({ page }) => {
+  test('should navigate to topic detail page when clicking on a topic', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading to complete
@@ -189,7 +189,7 @@ test.describe('Browse Topics and View Details', () => {
     await expect(filterContainer).toBeVisible();
   });
 
-  test.skip('should show loading state while fetching topics', async ({ page }) => {
+  test('should show loading state while fetching topics', async ({ page }) => {
     // Start navigation but don't wait
     const navigationPromise = page.goto('/topics');
 
