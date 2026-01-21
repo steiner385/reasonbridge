@@ -33,8 +33,15 @@ RUN pnpm --filter "./packages/*" -r --workspace-concurrency=1 run build
 # Build frontend
 RUN cd frontend && pnpm run build
 
+# Verify dist folder was created and has content
+RUN ls -la /app/frontend/dist && \
+    test -f /app/frontend/dist/index.html || (echo "ERROR: frontend/dist/index.html not found!" && exit 1)
+
 # Stage 2: Serve with nginx
 FROM nginx:1.27-alpine
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 # Copy built frontend from builder
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html

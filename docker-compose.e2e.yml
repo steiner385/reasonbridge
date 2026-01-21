@@ -268,8 +268,15 @@ services:
       VITE_NOTIFICATION_SERVICE_URL: http://notification-service:3005
     ports:
       - '9080:80'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:80']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_started
     networks:
       - unite-e2e
 
