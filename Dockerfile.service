@@ -27,9 +27,9 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 
 # Clean any stale build artifacts from packages and services only
-RUN find ./packages -name "*.tsbuildinfo" -delete 2>/dev/null || true && \
-    find ./packages -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true && \
-    find ./services -name "*.tsbuildinfo" -delete 2>/dev/null || true && \
+RUN find ./packages -name "*.tsbuildinfo" -delete 2>/dev/null && \
+    find ./packages -name "dist" -type d -exec rm -rf {} + 2>/dev/null && \
+    find ./services -name "*.tsbuildinfo" -delete 2>/dev/null && \
     find ./services -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
 
 # Build packages first (sequentially to ensure db-models completes before services need it)
