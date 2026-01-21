@@ -19,12 +19,32 @@ export function useShowNotification() {
 
   return {
     success: (title: string, message?: string, duration?: number) =>
-      addNotification({ type: 'success', title, message, duration }),
+      addNotification({
+        type: 'success',
+        title,
+        ...(message !== undefined && { message }),
+        ...(duration !== undefined && { duration }),
+      }),
     error: (title: string, message?: string, duration?: number) =>
-      addNotification({ type: 'error', title, message, duration }),
+      addNotification({
+        type: 'error',
+        title,
+        ...(message !== undefined && { message }),
+        ...(duration !== undefined && { duration }),
+      }),
     warning: (title: string, message?: string, duration?: number) =>
-      addNotification({ type: 'warning', title, message, duration }),
+      addNotification({
+        type: 'warning',
+        title,
+        ...(message !== undefined && { message }),
+        ...(duration !== undefined && { duration }),
+      }),
     info: (title: string, message?: string, duration?: number) =>
-      addNotification({ type: 'info', title, message, duration }),
+      addNotification({
+        type: 'info',
+        title,
+        ...(message !== undefined && { message }),
+        ...(duration !== undefined && { duration }),
+      }),
   };
 }
