@@ -241,7 +241,8 @@ describe('ModerationActionButtons', () => {
       const rejectButton = screen.getByText('Reject');
       await userEvent.click(rejectButton);
 
-      expect(screen.getByText('Rejecting...')).toBeInTheDocument();
+      // Wait for React to re-render with loading state
+      expect(await screen.findByText('Rejecting...')).toBeInTheDocument();
 
       await waitFor(() => {
         expect(screen.getByText('Reject')).toBeInTheDocument();
