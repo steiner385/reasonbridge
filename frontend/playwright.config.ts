@@ -31,7 +31,11 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL:
       process.env.PLAYWRIGHT_BASE_URL ||
-      (process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000'),
+      (process.env.E2E_DOCKER
+        ? 'http://localhost:8080' // Containerized frontend for E2E tests
+        : process.env.CI
+          ? 'http://localhost:4173' // Vite preview for CI
+          : 'http://localhost:3000'), // Dev server for local development
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -83,12 +87,14 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: process.env.CI ? 'npm run preview' : 'npm run dev',
-    url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 180000, // 3 minutes to allow dev server to start
-    stdout: 'ignore',
-    stderr: 'pipe',
-  },
+  webServer: process.env.E2E_DOCKER
+    ? undefined // Don't start dev server when using Docker Compose
+    : {
+        command: process.env.CI ? 'npm run preview' : 'npm run dev',
+        url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 180000, // 3 minutes to allow dev server to start
+        stdout: 'ignore',
+        stderr: 'pipe',
+      },
 });

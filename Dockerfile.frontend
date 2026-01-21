@@ -1,0 +1,44 @@
+# Multi-stage Dockerfile for React frontend
+# Builds the frontend and serves it with nginx
+
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy workspace configuration
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc* ./
+
+# Copy package.json files
+COPY packages/*/package.json ./packages/
+COPY frontend/package.json ./frontend/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY packages ./packages
+COPY frontend ./frontend
+
+# Build shared packages first
+RUN pnpm --filter "./packages/*" -r run build
+
+# Build frontend
+RUN cd frontend && pnpm run build
+
+# Stage 2: Serve with nginx
+FROM nginx:alpine
+
+# Copy built frontend from builder
+COPY --from=builder /app/frontend/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf 2>/dev/null || echo "server { listen 80; root /usr/share/nginx/html; index index.html; location / { try_files \$uri \$uri/ /index.html; } }" > /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
