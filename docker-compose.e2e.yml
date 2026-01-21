@@ -104,6 +104,10 @@ services:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      # Cognito configuration for E2E testing (mock values)
+      COGNITO_USER_POOL_ID: us-east-1_test123
+      COGNITO_CLIENT_ID: test_client_id
+      COGNITO_REGION: us-east-1
     ports:
       - '3001:3001'
     depends_on:
