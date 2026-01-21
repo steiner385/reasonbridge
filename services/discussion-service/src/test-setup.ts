@@ -275,6 +275,80 @@ vi.mock('@aws-sdk/client-bedrock-runtime', () => ({
   BedrockRuntimeClient: vi.fn(),
 }));
 
-vi.mock('pdfkit', () => ({
-  default: vi.fn(),
-}));
+vi.mock('pdfkit', () => {
+  class MockPDFDocument {
+    private eventHandlers: Map<string, Array<(...args: any[]) => void>> = new Map();
+    public page = { width: 595, height: 842 }; // A4 dimensions
+    public x = 0;
+    public y = 0;
+
+    // EventEmitter interface
+    on(event: string, handler: (...args: any[]) => void) {
+      if (!this.eventHandlers.has(event)) {
+        this.eventHandlers.set(event, []);
+      }
+      this.eventHandlers.get(event)!.push(handler);
+      return this;
+    }
+
+    emit(event: string, ...args: any[]) {
+      const handlers = this.eventHandlers.get(event);
+      if (handlers) {
+        handlers.forEach((handler) => handler(...args));
+      }
+      return this;
+    }
+
+    // PDF generation methods (chainable)
+    fontSize(size: number) {
+      return this;
+    }
+    font(name: string) {
+      return this;
+    }
+    text(text: string, x?: number | any, y?: number, options?: any) {
+      return this;
+    }
+    moveDown(lines?: number) {
+      this.y += (lines || 1) * 12;
+      return this;
+    }
+    rect(x: number, y: number, width: number, height: number) {
+      return this;
+    }
+    stroke() {
+      return this;
+    }
+    fillColor(color: string) {
+      return this;
+    }
+
+    bufferedPageRange() {
+      return { start: 0, count: 1 };
+    }
+
+    switchToPage(pageNumber: number) {
+      return this;
+    }
+
+    end() {
+      // Simulate async PDF generation with proper event flow
+      setTimeout(() => {
+        const pdfHeader = Buffer.from('%PDF-1.4\n');
+        // Generate realistic PDF body content (>1000 bytes)
+        const pdfBody = Buffer.from('Mock PDF content\n'.repeat(100));
+        const pdfTrailer = Buffer.from('%%EOF\n');
+
+        this.emit('data', pdfHeader);
+        this.emit('data', pdfBody);
+        this.emit('data', pdfTrailer);
+        this.emit('end');
+      }, 0);
+      return this;
+    }
+  }
+
+  return {
+    default: MockPDFDocument,
+  };
+});
