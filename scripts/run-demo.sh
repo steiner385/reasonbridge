@@ -59,15 +59,13 @@ docker compose -f docker-compose.e2e.yml exec -T postgres sh -c "
     echo 'Postgres is ready'
 "
 
-# Copy db-models into discussion-service container and run migrations there
-docker cp packages/db-models unite-discussion-service-e2e:/app/ 2>/dev/null || echo "Could not copy db-models - may not be built yet"
-
-# Run migrations and seed data
+# Run migrations and seed data from db-models package already in the container
+# Note: db-models is already present at /app/packages/db-models via Dockerfile.service
 docker compose -f docker-compose.e2e.yml exec -T discussion-service sh -c "
-    cd /app/db-models 2>/dev/null || cd /app/packages/db-models 2>/dev/null || echo 'db-models not found in expected locations' && exit 1
-    DATABASE_URL='postgresql://unite_test:unite_test@postgres:5432/unite_test' npx prisma migrate deploy 2>/dev/null || echo 'Migration may have already run'
-    DATABASE_URL='postgresql://unite_test:unite_test@postgres:5432/unite_test' node prisma/seed.js 2>/dev/null || echo 'Seeding may have already run'
-" 2>/dev/null || echo "⚠️  Could not run migrations/seed (this may be expected in demo mode)"
+    cd /app/packages/db-models || { echo 'ERROR: db-models not found at /app/packages/db-models'; exit 1; }
+    DATABASE_URL='postgresql://unite_test:unite_test@postgres:5432/unite_test' npx prisma migrate deploy
+    DATABASE_URL='postgresql://unite_test:unite_test@postgres:5432/unite_test' node prisma/seed.js
+" || echo "⚠️  Could not run migrations/seed - check that Docker containers are running"
 
 echo ""
 echo "📊 Application Status:"
