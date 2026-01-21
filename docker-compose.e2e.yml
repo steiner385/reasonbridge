@@ -1,0 +1,274 @@
+version: '3.8'
+
+# E2E Testing Environment
+# Complete stack with infrastructure, all backend services, and frontend
+# Mimics production deployment for realistic end-to-end testing
+
+services:
+  # ============================================================================
+  # Infrastructure Services
+  # ============================================================================
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: unite-postgres-e2e
+    environment:
+      POSTGRES_USER: unite_test
+      POSTGRES_PASSWORD: unite_test
+      POSTGRES_DB: unite_test
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U unite_test -d unite_test']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - unite-e2e
+
+  redis:
+    image: redis:7-alpine
+    container_name: unite-redis-e2e
+    ports:
+      - '6380:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unite-e2e
+
+  localstack:
+    image: localstack/localstack:3.0
+    container_name: unite-localstack-e2e
+    environment:
+      SERVICES: s3,sqs,sns
+      DEBUG: 0
+      DATA_DIR: ''
+    ports:
+      - '4567:4566'
+    networks:
+      - unite-e2e
+
+  # ============================================================================
+  # Backend Microservices
+  # ============================================================================
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-api-gateway-e2e
+    command: ['node', 'services/api-gateway/dist/main.js']
+    environment:
+      PORT: 3000
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      USER_SERVICE_URL: http://user-service:3001
+      DISCUSSION_SERVICE_URL: http://discussion-service:3007
+      AI_SERVICE_URL: http://ai-service:3002
+      MODERATION_SERVICE_URL: http://moderation-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:3004
+      FACT_CHECK_SERVICE_URL: http://fact-check-service:3006
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      discussion-service:
+        condition: service_started
+    networks:
+      - unite-e2e
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-user-service-e2e
+    command: ['node', 'services/user-service/dist/main.js']
+    environment:
+      PORT: 3001
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AWS_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unite-e2e
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-ai-service-e2e
+    command: ['node', 'services/ai-service/dist/main.js']
+    environment:
+      PORT: 3002
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AWS_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - '3002:3002'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unite-e2e
+
+  discussion-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-discussion-service-e2e
+    command: ['node', 'services/discussion-service/dist/main.js']
+    environment:
+      PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3007:3007'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unite-e2e
+
+  moderation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-moderation-service-e2e
+    command: ['node', 'services/moderation-service/dist/main.js']
+    environment:
+      PORT: 3003
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:3002
+    ports:
+      - '3003:3003'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    networks:
+      - unite-e2e
+
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-recommendation-service-e2e
+    command: ['node', 'services/recommendation-service/dist/main.js']
+    environment:
+      PORT: 3004
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3004:3004'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unite-e2e
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-notification-service-e2e
+    command: ['node', 'services/notification-service/dist/main.js']
+    environment:
+      PORT: 3005
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3005:3005'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unite-e2e
+
+  fact-check-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    container_name: unite-fact-check-service-e2e
+    command: ['node', 'services/fact-check-service/dist/main.js']
+    environment:
+      PORT: 3006
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:3002
+    ports:
+      - '3006:3006'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    networks:
+      - unite-e2e
+
+  # ============================================================================
+  # Frontend
+  # ============================================================================
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: unite-frontend-e2e
+    environment:
+      VITE_API_GATEWAY_URL: http://api-gateway:3000
+      VITE_NOTIFICATION_SERVICE_URL: http://notification-service:3005
+    ports:
+      - '8080:80'
+    depends_on:
+      - api-gateway
+    networks:
+      - unite-e2e
+
+networks:
+  unite-e2e:
+    driver: bridge

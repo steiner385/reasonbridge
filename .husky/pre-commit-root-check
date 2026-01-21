@@ -69,7 +69,7 @@ ALLOWED_FILES=(
   "^eslint.*\\.config\\..*$"    # ESLint configs
   "^\\.eslintrc.*$"             # ESLint rc files
   "^docker-compose.*\\.yml$"    # Docker compose
-  "^Dockerfile$"                # Dockerfile
+  "^Dockerfile.*$"              # Dockerfile and variants (Dockerfile.frontend, Dockerfile.service, etc.)
   "^docker-compose$"            # docker-compose executable
   "^\\.editorconfig$"           # EditorConfig
   "^Makefile$"                  # Makefile
