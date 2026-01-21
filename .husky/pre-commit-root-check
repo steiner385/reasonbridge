@@ -61,6 +61,7 @@ ALLOWED_FILES=(
   "^package.*\\.yaml$"          # package.yaml
   "^tsconfig.*\\.json$"         # TypeScript configs
   "^vite.*\\.config\\..*$"      # Vite configs
+  "^vitest\\.workspace\\.ts$"   # Vitest workspace config
   "^jest.*\\.config\\..*$"      # Jest configs
   "^webpack.*\\.config\\..*$"   # Webpack configs
   "^playwright.*\\.config\\..*$" # Playwright configs

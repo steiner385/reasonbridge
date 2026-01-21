@@ -1,34 +1,39 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ContentModerationService } from '../content-moderation.service.js';
+import { PrismaService } from '../../../prisma/prisma.service.js';
 
 describe('ContentModerationService', () => {
   let service: ContentModerationService;
-  let mockPrisma: any;
-  let lastUpdateCall: any;
-  let lastFindManyCall: any;
+  let prisma: PrismaService;
 
-  beforeEach(() => {
-    lastUpdateCall = null;
-    lastFindManyCall = null;
+  const mockPrisma = {
+    response: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
+    },
+    discussionTopic: {
+      findUnique: vi.fn(),
+    },
+  };
 
-    mockPrisma = {
-      response: {
-        findUnique: async (_args: any) => null,
-        update: async (args: any) => {
-          lastUpdateCall = args;
-          return { id: args.where.id, status: args.data.status };
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ContentModerationService,
+        {
+          provide: PrismaService,
+          useValue: mockPrisma,
         },
-        findMany: async (args: any) => {
-          lastFindManyCall = args;
-          return [];
-        },
-      },
-      discussionTopic: {
-        findUnique: async (_args: any) => null,
-      },
-    };
+      ],
+    }).compile();
 
-    service = new ContentModerationService(mockPrisma);
+    service = module.get<ContentModerationService>(ContentModerationService);
+    prisma = module.get<PrismaService>(PrismaService);
+
+    vi.clearAllMocks();
   });
 
   describe('hideResponse', () => {
@@ -37,11 +42,16 @@ describe('ContentModerationService', () => {
       const moderatorId = 'mod-123';
       const reason = 'Violates community guidelines';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'VISIBLE',
         authorId: 'user-123',
         topicId: 'topic-123',
+      });
+
+      mockPrisma.response.update.mockResolvedValue({
+        id: responseId,
+        status: 'HIDDEN',
       });
 
       const result = await service.hideResponse(responseId, moderatorId, {
@@ -55,7 +65,7 @@ describe('ContentModerationService', () => {
       expect(result.moderatorId).toBe(moderatorId);
       expect(result.reason).toBe(reason);
       expect(result.appealable).toBe(true);
-      expect(lastUpdateCall).toEqual({
+      expect(mockPrisma.response.update).toHaveBeenCalledWith({
         where: { id: responseId },
         data: { status: 'HIDDEN' },
       });
@@ -66,7 +76,7 @@ describe('ContentModerationService', () => {
       const moderatorId = 'mod-123';
       const reason = 'Violates community guidelines';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'HIDDEN',
         authorId: 'user-123',
@@ -79,14 +89,14 @@ describe('ContentModerationService', () => {
       });
 
       expect(result.responseId).toBe(responseId);
-      expect(lastUpdateCall).toBe(null);
+      expect(mockPrisma.response.update).not.toHaveBeenCalled();
     });
 
     it('should throw when hiding removed response', async () => {
       const responseId = 'response-123';
       const moderatorId = 'mod-123';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'REMOVED',
         authorId: 'user-123',
@@ -105,7 +115,7 @@ describe('ContentModerationService', () => {
       const responseId = 'nonexistent';
       const moderatorId = 'mod-123';
 
-      mockPrisma.response.findUnique = async () => null;
+      mockPrisma.response.findUnique.mockResolvedValue(null);
 
       await expect(
         service.hideResponse(responseId, moderatorId, {
@@ -134,11 +144,16 @@ describe('ContentModerationService', () => {
       const moderatorId = 'mod-123';
       const reason = 'Spam content';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'VISIBLE',
         authorId: 'user-123',
         topicId: 'topic-123',
+      });
+
+      mockPrisma.response.update.mockResolvedValue({
+        id: responseId,
+        status: 'REMOVED',
       });
 
       const result = await service.removeResponse(responseId, moderatorId, {
@@ -152,7 +167,7 @@ describe('ContentModerationService', () => {
       expect(result.moderatorId).toBe(moderatorId);
       expect(result.reason).toBe(reason);
       expect(result.appealable).toBe(false);
-      expect(lastUpdateCall).toEqual({
+      expect(mockPrisma.response.update).toHaveBeenCalledWith({
         where: { id: responseId },
         data: { status: 'REMOVED' },
       });
@@ -163,11 +178,16 @@ describe('ContentModerationService', () => {
       const moderatorId = 'mod-123';
       const reason = 'Escalated removal';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'HIDDEN',
         authorId: 'user-123',
         topicId: 'topic-123',
+      });
+
+      mockPrisma.response.update.mockResolvedValue({
+        id: responseId,
+        status: 'REMOVED',
       });
 
       const result = await service.removeResponse(responseId, moderatorId, {
@@ -176,11 +196,15 @@ describe('ContentModerationService', () => {
       });
 
       expect(result.newStatus).toBe('removed');
-      expect(lastUpdateCall).not.toBe(null);
+      expect(mockPrisma.response.update).toHaveBeenCalled();
     });
 
     it('should throw when response not found', async () => {
-      mockPrisma.response.findUnique = async () => null;
+      expect(mockPrisma.response.update).toHaveBeenCalled();
+    });
+
+    it('should throw when response not found', async () => {
+      mockPrisma.response.findUnique.mockResolvedValue(null);
 
       await expect(
         service.removeResponse('nonexistent', 'mod-123', {
@@ -206,10 +230,15 @@ describe('ContentModerationService', () => {
       const moderatorId = 'mod-123';
       const reason = 'Restored on appeal';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'HIDDEN',
         authorId: 'user-123',
+      });
+
+      mockPrisma.response.update.mockResolvedValue({
+        id: responseId,
+        status: 'VISIBLE',
       });
 
       const result = await service.restoreResponse(responseId, moderatorId, reason);
@@ -217,14 +246,14 @@ describe('ContentModerationService', () => {
       expect(result.responseId).toBe(responseId);
       expect(result.moderatorId).toBe(moderatorId);
       expect(result.reason).toBe(reason);
-      expect(lastUpdateCall).toEqual({
+      expect(mockPrisma.response.update).toHaveBeenCalledWith({
         where: { id: responseId },
         data: { status: 'VISIBLE' },
       });
     });
 
     it('should throw when response is not hidden', async () => {
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: 'response-123',
         status: 'VISIBLE',
         authorId: 'user-123',
@@ -236,7 +265,7 @@ describe('ContentModerationService', () => {
     });
 
     it('should throw when response not found', async () => {
-      mockPrisma.response.findUnique = async () => null;
+      mockPrisma.response.findUnique.mockResolvedValue(null);
 
       await expect(service.restoreResponse('nonexistent', 'mod-123', 'test')).rejects.toThrow(
         NotFoundException,
@@ -249,7 +278,7 @@ describe('ContentModerationService', () => {
       const responseId = 'response-123';
       const now = new Date();
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'VISIBLE',
         authorId: 'user-123',
@@ -270,7 +299,7 @@ describe('ContentModerationService', () => {
     it('should return moderation status for hidden response', async () => {
       const responseId = 'response-123';
 
-      mockPrisma.response.findUnique = async () => ({
+      mockPrisma.response.findUnique.mockResolvedValue({
         id: responseId,
         status: 'HIDDEN',
         authorId: 'user-123',
@@ -287,7 +316,7 @@ describe('ContentModerationService', () => {
     });
 
     it('should throw when response not found', async () => {
-      mockPrisma.response.findUnique = async () => null;
+      mockPrisma.response.findUnique.mockResolvedValue(null);
 
       await expect(service.getResponseModerationStatus('nonexistent')).rejects.toThrow(
         NotFoundException,
@@ -299,33 +328,30 @@ describe('ContentModerationService', () => {
     it('should return hidden responses for a topic', async () => {
       const topicId = 'topic-123';
 
-      mockPrisma.discussionTopic.findUnique = async () => ({ id: topicId });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: topicId });
 
-      mockPrisma.response.findMany = async (args: any) => {
-        lastFindManyCall = args;
-        return [
-          {
-            id: 'response-1',
-            status: 'HIDDEN',
-            authorId: 'user-1',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: 'response-2',
-            status: 'HIDDEN',
-            authorId: 'user-2',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ];
-      };
+      mockPrisma.response.findMany.mockResolvedValue([
+        {
+          id: 'response-1',
+          status: 'HIDDEN',
+          authorId: 'user-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'response-2',
+          status: 'HIDDEN',
+          authorId: 'user-2',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
 
       const result = await service.getResponsesByStatus(topicId, 'HIDDEN');
 
       expect(result).toHaveLength(2);
       expect(result[0]!.status).toBe('HIDDEN');
-      expect(lastFindManyCall).toEqual({
+      expect(mockPrisma.response.findMany).toHaveBeenCalledWith({
         where: { topicId, status: 'HIDDEN' },
         select: {
           id: true,
@@ -339,7 +365,7 @@ describe('ContentModerationService', () => {
     });
 
     it('should throw when topic not found', async () => {
-      mockPrisma.discussionTopic.findUnique = async () => null;
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(null);
 
       await expect(service.getResponsesByStatus('nonexistent', 'VISIBLE')).rejects.toThrow(
         NotFoundException,

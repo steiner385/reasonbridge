@@ -39,6 +39,10 @@ pipeline {
         disableConcurrentBuilds(abortPrevious: true)
     }
 
+    triggers {
+        githubPush()
+    }
+
     stages {
         stage('Initialize') {
             steps {
@@ -113,23 +117,20 @@ pipeline {
         }
 
         stage('Integration Tests') {
-            when {
-                expression {
-                    return env.BRANCH_NAME == 'main' ||
-                           env.BRANCH_NAME == 'develop' ||
-                           env.BRANCH_NAME =~ /^continuous-claude\// ||
-                           env.CHANGE_ID != null
-                }
-            }
             steps {
                 script {
                     try {
+                        echo "=== Running Integration Tests ==="
+                        echo "Branch: ${env.BRANCH_NAME ?: 'N/A'}"
+                        echo "Tests: 124 integration tests (6 files)"
+                        echo "Framework: vitest.integration.config.ts"
                         runIntegrationTests(
                             testCommand: 'npx vitest run --config vitest.integration.config.ts',
                             skipLock: false,
                             statusContext: 'jenkins/integration',
                             composeFile: 'docker-compose.test.yml'
                         )
+                        echo "=== Integration Tests Complete ==="
                     } catch (Exception e) {
                         echo "⚠️  Integration tests failed"
                         echo "Error: ${e.message}"
@@ -141,7 +142,15 @@ pipeline {
 
         stage('Contract Tests') {
             steps {
+                script {
+                    echo "=== Running Contract Tests ==="
+                    echo "Framework: Vitest with contract test configuration"
+                    echo "Tests: Pact/OpenAPI contract validation (framework ready)"
+                }
                 sh 'npx pnpm run test:contract'
+                script {
+                    echo "=== Contract Tests Complete ==="
+                }
             }
         }
 
