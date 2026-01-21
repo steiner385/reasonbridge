@@ -452,9 +452,15 @@ importers:
       '@prisma/client':
         specifier: 6.3.1
         version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
+      '@unite-discord/common':
+        specifier: workspace:*
+        version: link:../../packages/common
       '@unite-discord/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@unite-discord/event-schemas':
+        specifier: workspace:*
+        version: link:../../packages/event-schemas
       fastify:
         specifier: ^4.25.2
         version: 4.29.1
@@ -504,6 +510,9 @@ importers:
       '@unite-discord/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@unite-discord/event-schemas':
+        specifier: workspace:*
+        version: link:../../packages/event-schemas
       fastify:
         specifier: ^4.25.2
         version: 4.29.1

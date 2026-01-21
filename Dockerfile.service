@@ -24,11 +24,25 @@ RUN pnpm install --frozen-lockfile
 # Copy all source code
 COPY . .
 
-# Build shared packages first
-RUN pnpm --filter "./packages/*" -r run build
+# Re-run install to ensure workspace is consistent after copying source
+RUN pnpm install --frozen-lockfile
 
-# Build all services
-RUN pnpm --filter "./services/*" -r run build
+# Clean any stale build artifacts from packages and services only
+RUN find ./packages -name "*.tsbuildinfo" -delete 2>/dev/null || true && \
+    find ./packages -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find ./services -name "*.tsbuildinfo" -delete 2>/dev/null || true && \
+    find ./services -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Build packages first (sequentially to ensure db-models completes before services need it)
+RUN pnpm -r --workspace-concurrency=1 --filter="./packages/*" run build
+
+# Debug: Check if db-models dist exists and is accessible
+RUN ls -la packages/db-models/ && \
+    ls -la packages/db-models/dist/ && \
+    cat packages/db-models/dist/index.d.ts | head -20
+
+# Build services (can be parallel since all package dependencies are ready)
+RUN pnpm -r --filter="./services/*" run build
 
 # Stage 2: Runtime image for a specific service
 FROM node:20-alpine AS runtime

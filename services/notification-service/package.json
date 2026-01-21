@@ -24,6 +24,7 @@
     "@nestjs/platform-socket.io": "^10.3.0",
     "@nestjs/websockets": "^10.3.0",
     "@unite-discord/db-models": "workspace:*",
+    "@unite-discord/event-schemas": "workspace:*",
     "fastify": "^4.25.2",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
