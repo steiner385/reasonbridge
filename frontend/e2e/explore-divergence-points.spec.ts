@@ -216,12 +216,12 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
         const viewpoints = firstCard.locator('[data-testid="viewpoint-item"]');
-        const _viewpointCount = await viewpoints.count();
+        const viewpointCount = await viewpoints.count();
 
         if (viewpointCount > 0) {
           // Viewpoint should have percentage display
@@ -254,12 +254,12 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
         const viewpoints = firstCard.locator('[data-testid="viewpoint-item"]');
-        const _viewpointCount = await viewpoints.count();
+        const viewpointCount = await viewpoints.count();
 
         if (viewpointCount > 0) {
           // Look for expand/collapse button
@@ -298,10 +298,10 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
 
         // Check for color coding classes or attributes
         // High: red/danger, Medium: yellow/warning, Low: blue/info
@@ -333,10 +333,10 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
 
         // Check for underlying values section
         const _underlyingValues = firstCard.locator('[data-testid="underlying-values"]');
@@ -366,7 +366,7 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
         // Check for high polarization card
@@ -425,7 +425,7 @@ test.describe('Explore Divergence Points', () => {
       });
 
       // Look for divergence points section
-      const _divergenceSection = page.locator('[data-testid="divergence-points"]');
+      const divergenceSection = page.locator('[data-testid="divergence-points"]');
       const hasSection = (await divergenceSection.count()) > 0;
 
       if (hasSection) {
@@ -459,11 +459,11 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
         // Check if card is clickable
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
         const _isClickable = await firstCard.evaluate((el) => {
           return el.style.cursor === 'pointer' || el.getAttribute('role') === 'button';
         });
@@ -493,7 +493,7 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
         // Each card can have different numbers of viewpoints
