@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
@@ -9,8 +15,18 @@ export interface CreateUserData {
   cognitoSub: string;
 }
 
+/**
+ * Validates that a string is a valid UUID v4 format
+ */
+function isValidUUID(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+}
+
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly botDetector: BotDetectorService,
@@ -71,8 +87,25 @@ export class UsersService {
    * Find a user by their ID
    * @param id - The user's UUID
    * @returns User object or null if not found
+   * @throws BadRequestException if id is not a valid UUID
+   * @throws NotFoundException if user is not found
    */
   async findById(id: string) {
+    // Validate UUID format before querying to prevent Prisma errors
+    if (!isValidUUID(id)) {
+      this.logger.error(
+        `Invalid UUID passed to findById: "${id}" (length: ${id.length}, ` +
+          `type: ${typeof id}, charCodes: [${id
+            .substring(0, 20)
+            .split('')
+            .map((c) => c.charCodeAt(0))
+            .join(', ')}])`,
+      );
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${id.substring(0, 50)}${id.length > 50 ? '...' : ''}"`,
+      );
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
