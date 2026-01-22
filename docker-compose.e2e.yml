@@ -1,5 +1,3 @@
-version: '3.8'
-
 # E2E Testing Environment
 # Complete stack with infrastructure, all backend services, and frontend
 # Mimics production deployment for realistic end-to-end testing
@@ -11,7 +9,7 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    container_name: unite-postgres-e2e
+    # Note: container_name removed to allow parallel builds with different COMPOSE_PROJECT_NAME
     environment:
       POSTGRES_USER: unite_test
       POSTGRES_PASSWORD: unite_test
@@ -30,7 +28,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: unite-redis-e2e
     ports:
       - '6381:6379'
     healthcheck:
@@ -43,7 +40,6 @@ services:
 
   localstack:
     image: localstack/localstack:3.0
-    container_name: unite-localstack-e2e
     environment:
       SERVICES: s3,sqs,sns
       DEBUG: 0
@@ -67,7 +63,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-api-gateway-e2e
     command: ['node', 'services/api-gateway/dist/main.js']
     environment:
       PORT: 3000
@@ -99,7 +94,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-user-service-e2e
     command: ['node', 'services/user-service/dist/main.js']
     environment:
       PORT: 3001
@@ -133,7 +127,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-ai-service-e2e
     command: ['node', 'services/ai-service/dist/main.js']
     environment:
       PORT: 3002
@@ -160,7 +153,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-discussion-service-e2e
     command: ['node', 'services/discussion-service/dist/main.js']
     environment:
       PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
@@ -181,7 +173,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-moderation-service-e2e
     command: ['node', 'services/moderation-service/dist/main.js']
     environment:
       PORT: 3003
@@ -205,7 +196,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-recommendation-service-e2e
     command: ['node', 'services/recommendation-service/dist/main.js']
     environment:
       PORT: 3004
@@ -226,7 +216,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-notification-service-e2e
     command: ['node', 'services/notification-service/dist/main.js']
     environment:
       PORT: 3005
@@ -247,7 +236,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-fact-check-service-e2e
     command: ['node', 'services/fact-check-service/dist/main.js']
     environment:
       PORT: 3006
@@ -275,7 +263,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: unite-frontend-e2e
     environment:
       VITE_API_GATEWAY_URL: http://api-gateway:3000
       VITE_NOTIFICATION_SERVICE_URL: http://notification-service:3005
