@@ -16,41 +16,67 @@ import { test, expect, Page } from '@playwright/test';
 // Check if running in E2E Docker environment with backend
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
-// Test user credentials (from seed data)
-const TEST_USER = {
-  email: 'testuser1@example.com',
-  password: 'TestPassword123!',
+// Generate unique test user credentials for each test run
+const generateTestUser = () => {
+  const timestamp = Date.now();
+  return {
+    email: `trust-test-${timestamp}@example.com`,
+    displayName: `TrustTestUser${timestamp}`,
+    password: 'SecurePassword123!',
+  };
 };
 
 test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
   // Skip all tests if not in E2E Docker mode (requires backend)
   test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
 
-  // Helper to login and navigate to own profile
-  const loginAndGoToProfile = async (page: Page) => {
-    // Login first
-    await page.goto('/login');
+  // Helper to register a new user, login, and navigate to profile
+  const registerLoginAndGoToProfile = async (page: Page) => {
+    const testUser = generateTestUser();
+
+    // Step 1: Register a new user
+    await page.goto('/register');
     await page.waitForLoadState('networkidle');
 
     const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
-    const loginButton = page.getByRole('button', { name: /sign in|log in|login/i });
+    const displayNameInput = page.getByLabel(/display name/i);
+    const passwordInput = page.getByLabel(/^password/i).first();
+    const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
-    await emailInput.fill(TEST_USER.email);
-    await passwordInput.fill(TEST_USER.password);
-    await loginButton.click();
+    await emailInput.fill(testUser.email);
+    await displayNameInput.fill(testUser.displayName);
+    await passwordInput.fill(testUser.password);
+    await confirmPasswordInput.fill(testUser.password);
 
-    // Wait for login to complete
-    await page.waitForURL(/\/(topics|profile|$)/, { timeout: 10000 });
+    const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
+    await registerButton.click();
 
-    // Navigate to profile
+    // Wait for registration to complete - redirects to login or dashboard
+    await page.waitForURL(/\/(login|dashboard|home|profile|topics|$)/, { timeout: 15000 });
+
+    // Step 2: If redirected to login, perform login
+    const currentUrl = page.url();
+    if (currentUrl.includes('/login')) {
+      const loginEmailInput = page.getByLabel(/email/i);
+      const loginPasswordInput = page.getByLabel(/^password/i).first();
+      const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+
+      await loginEmailInput.fill(testUser.email);
+      await loginPasswordInput.fill(testUser.password);
+      await loginButton.click();
+
+      // Wait for login to complete - navigates to home page (/)
+      await page.waitForURL(/^http:\/\/[^/]+\/?$/, { timeout: 10000 });
+    }
+
+    // Step 3: Navigate to profile page
     await page.goto('/profile');
     await page.waitForLoadState('networkidle');
   };
 
   test.describe('TrustBadge Component Display', () => {
     test('should display verification level on user profiles', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       // Verify verification level is displayed
       const verificationLevel = page.locator('[data-testid="verification-level"]');
@@ -61,7 +87,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display verified human badge only for verified users', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       // Check verification level
       const verificationLevel = page.locator('[data-testid="verification-level"]');
@@ -84,7 +110,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('TrustScoreDisplay Component', () => {
     test('should display three trust score metrics on user profile', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       // Check for Mayer ABI three factors
       const abilityScore = page.locator('[data-testid="trust-score-ability"]');
@@ -97,7 +123,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display trust scores as percentages (0-100)', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       const scoreDisplay = page.locator('[data-testid="trust-score-display"]');
       await expect(scoreDisplay).toBeVisible({ timeout: 10000 });
@@ -108,7 +134,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display all three trust dimensions with labels', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       // Check for dimension labels
       const abilityLabel = page.locator('text=Ability');
@@ -155,7 +181,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('ProfilePage Integration with Trust Indicators', () => {
     test('should display user profile with trust information', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       // Check page structure - should have profile header
       const profileHeader = page.locator('h1');
@@ -167,7 +193,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display member since date', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       // Should show member since date
       const memberSince = page.locator('text=Member Since');
@@ -177,7 +203,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('Accessibility of Trust Indicators', () => {
     test('trust score display should have accessible content', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       const scoreDisplay = page.locator('[data-testid="trust-score-display"]');
       await expect(scoreDisplay).toBeVisible({ timeout: 10000 });
@@ -189,7 +215,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('verification badge should have accessible title when visible', async ({ page }) => {
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       const trustBadge = page.locator('[data-testid="trust-badge"]');
       if (await trustBadge.isVisible()) {
@@ -204,7 +230,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
   test.describe('Cross-browser Trust Indicator Consistency', () => {
     test('trust scores should render correctly on mobile viewport', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       const scoreDisplay = page.locator('[data-testid="trust-score-display"]');
       await expect(scoreDisplay).toBeVisible({ timeout: 10000 });
@@ -217,7 +243,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
     test('trust scores should render correctly on tablet viewport', async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 1024 });
-      await loginAndGoToProfile(page);
+      await registerLoginAndGoToProfile(page);
 
       const scoreDisplay = page.locator('[data-testid="trust-score-display"]');
       await expect(scoreDisplay).toBeVisible({ timeout: 10000 });
