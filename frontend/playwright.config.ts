@@ -23,7 +23,7 @@ export default defineConfig({
   workers: process.env.CI ? 4 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['list'],
     ['junit', { outputFile: '../coverage/e2e-junit.xml' }],
     ['json', { outputFile: '../allure-results/e2e-results.json' }],
@@ -42,8 +42,11 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
 
-    /* Take screenshot on failure */
-    screenshot: 'only-on-failure',
+    /* Screenshot strategy:
+     * - CI: Capture final state of all tests for visual verification
+     * - Local: Only capture on failure to reduce noise
+     */
+    screenshot: process.env.CI ? 'on' : 'only-on-failure',
 
     /* Capture video on first retry */
     video: 'retain-on-failure',
