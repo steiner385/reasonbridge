@@ -1,6 +1,10 @@
 # E2E Testing Environment
 # Complete stack with infrastructure, all backend services, and frontend
 # Mimics production deployment for realistic end-to-end testing
+#
+# Note: Explicit image names are set for all built services to enable Docker
+# layer caching across builds with different COMPOSE_PROJECT_NAME values.
+# Without explicit image names, each unique project name would rebuild all images.
 
 services:
   # ============================================================================
@@ -63,6 +67,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/api-gateway:latest
     command: ['node', 'services/api-gateway/dist/main.js']
     environment:
       PORT: 3000
@@ -94,6 +99,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/user-service:latest
     command: ['node', 'services/user-service/dist/main.js']
     environment:
       PORT: 3001
@@ -127,6 +133,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/ai-service:latest
     command: ['node', 'services/ai-service/dist/main.js']
     environment:
       PORT: 3002
@@ -153,6 +160,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/discussion-service:latest
     command: ['node', 'services/discussion-service/dist/main.js']
     environment:
       PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
@@ -173,6 +181,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/moderation-service:latest
     command: ['node', 'services/moderation-service/dist/main.js']
     environment:
       PORT: 3003
@@ -196,6 +205,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/recommendation-service:latest
     command: ['node', 'services/recommendation-service/dist/main.js']
     environment:
       PORT: 3004
@@ -216,6 +226,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/notification-service:latest
     command: ['node', 'services/notification-service/dist/main.js']
     environment:
       PORT: 3005
@@ -236,6 +247,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
+    image: unitediscord-e2e/fact-check-service:latest
     command: ['node', 'services/fact-check-service/dist/main.js']
     environment:
       PORT: 3006
@@ -263,6 +275,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+    image: unitediscord-e2e/frontend:latest
     environment:
       VITE_API_GATEWAY_URL: http://api-gateway:3000
       VITE_NOTIFICATION_SERVICE_URL: http://notification-service:3005
