@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import {
   CommonGroundSummaryPanel,
   BridgingSuggestionsSection,
+  ShareButton,
 } from '../../components/common-ground';
 import ResponseComposer from '../../components/responses/ResponseComposer';
 import { apiClient } from '../../lib/api';
@@ -319,9 +320,7 @@ function TopicDetailPage() {
             <Button variant="primary" size="lg">
               Join Discussion
             </Button>
-            <Button variant="outline" size="lg">
-              Share
-            </Button>
+            {liveAnalysis && <ShareButton analysis={liveAnalysis} />}
           </div>
         </CardBody>
       </Card>

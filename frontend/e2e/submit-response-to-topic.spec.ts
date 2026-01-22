@@ -152,7 +152,9 @@ test.describe('Submit Response to Topic', () => {
       await responseTextarea.fill(testContent);
 
       // Check for character count display
-      const characterCount = page.locator('text=/\\d+.*\\/.*\\d+.*character/i, #character-count');
+      const characterCount = page
+        .locator('text=/\\d+.*\\/.*\\d+.*character/i')
+        .or(page.locator('#character-count'));
       await expect(characterCount.first()).toBeVisible();
     }
   });
