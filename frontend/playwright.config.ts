@@ -19,8 +19,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Use limited parallelization on CI for memory-constrained environments (4GB container) */
-  workers: process.env.CI ? 2 : undefined,
+  /* Serialize tests in CI to prevent OOM - single worker uses less peak memory */
+  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
