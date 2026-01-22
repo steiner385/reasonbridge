@@ -9,6 +9,8 @@
  *   - This stub: Lives in main uniteDiscord repo (rarely changes)
  *   - Real pipeline: Lives in unitediscord-jenkins-lib repo (frequently updated)
  *   - Jenkins scans: Main repo branches, finds this stub, loads real pipeline from jenkins-lib
+ *
+ * Note: jenkins-lib updated with fixed container cleanup (grep instead of broken docker name filter)
  */
 
 // Load the shared library and execute the real pipeline
