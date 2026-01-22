@@ -53,6 +53,18 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip seed files - console output is needed for database seeding status
+  if [[ "$file" =~ seed\.(js|ts)$ ]] || [[ "$file" =~ /seeds/ ]]; then
+    debug "Skipping seed file: $file"
+    continue
+  fi
+
+  # Skip Playwright setup files - console output needed for CI/CD visibility
+  if [[ "$file" =~ global-setup\.(js|ts)$ ]] || [[ "$file" =~ global-teardown\.(js|ts)$ ]]; then
+    debug "Skipping Playwright setup file: $file"
+    continue
+  fi
+
   # Get staged content and check for problematic console statements
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 

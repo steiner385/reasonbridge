@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy workspace configuration
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY .npmrc* ./
+COPY tsconfig.base.json ./
 
 # Copy package.json files
 COPY packages/*/package.json ./packages/
@@ -24,20 +24,38 @@ RUN pnpm install --frozen-lockfile
 COPY packages ./packages
 COPY frontend ./frontend
 
-# Build shared packages first
-RUN pnpm --filter "./packages/*" -r run build
+# Re-run install to ensure workspace is consistent after copying source
+RUN pnpm install --frozen-lockfile
+
+# Build shared packages first (sequentially to ensure db-models completes)
+RUN pnpm --filter "./packages/*" -r --workspace-concurrency=1 run build
 
 # Build frontend
 RUN cd frontend && pnpm run build
 
+# Verify dist folder was created and has content
+RUN ls -la /app/frontend/dist && \
+    test -f /app/frontend/dist/index.html || (echo "ERROR: frontend/dist/index.html not found!" && exit 1)
+
 # Stage 2: Serve with nginx
-FROM nginx:alpine
+FROM nginx:1.27-alpine
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 # Copy built frontend from builder
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf 2>/dev/null || echo "server { listen 80; root /usr/share/nginx/html; index index.html; location / { try_files \$uri \$uri/ /index.html; } }" > /etc/nginx/conf.d/default.conf
+# Create default nginx configuration for SPA
+RUN echo 'server { \
+    listen 80; \
+    server_name _; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 

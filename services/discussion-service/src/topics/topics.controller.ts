@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Param, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import type { FastifyReply as Response } from 'fastify';
 import { TopicsService } from './topics.service.js';
 import { GetTopicsQueryDto } from './dto/get-topics-query.dto.js';
 import { SearchTopicsQueryDto } from './dto/search-topics-query.dto.js';
@@ -49,17 +49,11 @@ export class TopicsController {
     const analysis = await this.topicsService.getCommonGroundAnalysis(id, query.version);
 
     // Export in the requested format
-    const exportResult = await this.exportService.exportAnalysis(
-      analysis,
-      query.format || 'pdf',
-    );
+    const exportResult = await this.exportService.exportAnalysis(analysis, query.format || 'pdf');
 
     // Set response headers
-    res.setHeader('Content-Type', exportResult.mimeType);
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${exportResult.filename}"`,
-    );
+    res.header('Content-Type', exportResult.mimeType);
+    res.header('Content-Disposition', `attachment; filename="${exportResult.filename}"`);
 
     // Send the data
     if (Buffer.isBuffer(exportResult.data)) {

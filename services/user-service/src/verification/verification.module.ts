@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from '../auth/auth.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { VerificationController } from './verification.controller.js';
 import { VerificationService } from './verification.service.js';
@@ -13,7 +14,7 @@ import { VideoUploadService } from './video-upload.service.js';
  * Includes video challenge generation and upload handling
  */
 @Module({
-  imports: [PrismaModule, ConfigModule],
+  imports: [PrismaModule, ConfigModule, AuthModule],
   controllers: [VerificationController],
   providers: [VerificationService, VideoVerificationService, VideoUploadService],
   exports: [VerificationService, VideoVerificationService, VideoUploadService],
