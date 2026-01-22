@@ -69,9 +69,18 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
       await page.waitForURL(/^http:\/\/[^/]+\/?$/, { timeout: 10000 });
     }
 
-    // Step 3: Navigate to profile page
+    // Step 3: Navigate to profile page and wait for user data to load
     await page.goto('/profile');
     await page.waitForLoadState('networkidle');
+
+    // Wait for the profile page to finish loading user data
+    // The "My Profile" heading indicates authenticated user profile is loaded
+    const profileHeading = page.getByRole('heading', { name: /my profile/i });
+    await expect(profileHeading).toBeVisible({ timeout: 15000 });
+
+    // Also ensure API call has completed by waiting for trust score display
+    const trustScoreDisplay = page.locator('[data-testid="trust-score-display"]');
+    await expect(trustScoreDisplay).toBeVisible({ timeout: 10000 });
   };
 
   test.describe('TrustBadge Component Display', () => {
