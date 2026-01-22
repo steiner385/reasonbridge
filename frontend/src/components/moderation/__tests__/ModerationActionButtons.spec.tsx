@@ -153,9 +153,8 @@ describe('ModerationActionButtons', () => {
       await userEvent.click(approveButton);
 
       // Check for loading state - button should show "Approving..."
-      await waitFor(() => {
-        expect(screen.getByText('Approving...')).toBeInTheDocument();
-      });
+      // Wait for React to re-render with loading state
+      expect(await screen.findByText('Approving...')).toBeInTheDocument();
 
       // After processing, button should return to normal
       await waitFor(
