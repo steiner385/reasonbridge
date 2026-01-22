@@ -134,19 +134,19 @@ test.describe('User Registration and Login Flow', () => {
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
-  test.skip('should validate password requirements during registration', async ({ page }) => {
+  test('should validate password requirements during registration', async ({ page }) => {
     const testUser = generateTestUser();
 
     await page.goto('/register');
 
     const emailInput = page.getByLabel(/email/i);
-    const usernameInput = page.getByLabel(/username/i);
-    const passwordInput = page.getByLabel(/^password$/i);
+    const displayNameInput = page.getByLabel(/display name/i);
+    const passwordInput = page.getByLabel(/^password/i).first();
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
     // Fill form with weak password
     await emailInput.fill(testUser.email);
-    await usernameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.username);
     await passwordInput.fill('weak');
     await confirmPasswordInput.fill('weak');
 
@@ -154,23 +154,23 @@ test.describe('User Registration and Login Flow', () => {
     await confirmPasswordInput.blur();
 
     // Should show password requirement error
-    const passwordError = page.getByText(/password must be at least|password is too short/i);
+    const passwordError = page.getByText(/password must be at least/i);
     await expect(passwordError).toBeVisible();
   });
 
-  test.skip('should validate password confirmation match', async ({ page }) => {
+  test('should validate password confirmation match', async ({ page }) => {
     const testUser = generateTestUser();
 
     await page.goto('/register');
 
     const emailInput = page.getByLabel(/email/i);
-    const usernameInput = page.getByLabel(/username/i);
-    const passwordInput = page.getByLabel(/^password$/i);
+    const displayNameInput = page.getByLabel(/display name/i);
+    const passwordInput = page.getByLabel(/^password/i).first();
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
     // Fill form with mismatched passwords
     await emailInput.fill(testUser.email);
-    await usernameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.username);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill('DifferentPassword123!');
 
@@ -178,7 +178,7 @@ test.describe('User Registration and Login Flow', () => {
     await confirmPasswordInput.blur();
 
     // Should show password mismatch error
-    const mismatchError = page.getByText(/passwords do not match|passwords must match/i);
+    const mismatchError = page.getByText(/passwords do not match/i);
     await expect(mismatchError).toBeVisible();
   });
 
@@ -200,30 +200,30 @@ test.describe('User Registration and Login Flow', () => {
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
-  test.skip('should navigate between login and registration pages', async ({ page }) => {
+  test('should navigate between login and registration pages', async ({ page }) => {
     // Start at login page
     await page.goto('/login');
 
     // Find and click "Create account" link
-    const createAccountLink = page.getByRole('link', { name: /create one|sign up|register/i });
+    const createAccountLink = page.getByRole('link', { name: /create one/i });
     await expect(createAccountLink).toBeVisible();
     await createAccountLink.click();
 
     // Should navigate to registration page
     await expect(page).toHaveURL(/\/register/);
     const registrationHeading = page.getByRole('heading', {
-      name: /sign up|register|create account/i,
+      name: /create account/i,
     });
     await expect(registrationHeading).toBeVisible();
 
     // Find and click "Already have account" link
-    const loginLink = page.getByRole('link', { name: /sign in|log in|already have/i });
+    const loginLink = page.getByRole('link', { name: /sign in/i });
     await expect(loginLink).toBeVisible();
     await loginLink.click();
 
     // Should navigate back to login page
     await expect(page).toHaveURL(/\/login/);
-    const loginHeading = page.getByRole('heading', { name: /sign in|log in/i });
+    const loginHeading = page.getByRole('heading', { name: /sign in/i });
     await expect(loginHeading).toBeVisible();
   });
 });
