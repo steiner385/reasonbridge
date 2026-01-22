@@ -19,8 +19,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Use limited parallelization on CI for faster execution while avoiding resource exhaustion */
-  workers: process.env.CI ? 4 : undefined,
+  /* Use limited parallelization on CI for memory-constrained environments (4GB container) */
+  workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
@@ -43,10 +43,9 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     /* Screenshot strategy:
-     * - CI: Capture final state of all tests for visual verification
-     * - Local: Only capture on failure to reduce noise
+     * - Capture only on failure to reduce memory usage in CI
      */
-    screenshot: process.env.CI ? 'on' : 'only-on-failure',
+    screenshot: 'only-on-failure',
 
     /* Capture video on first retry */
     video: 'retain-on-failure',
