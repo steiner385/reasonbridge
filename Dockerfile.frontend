@@ -30,8 +30,17 @@ RUN pnpm install --frozen-lockfile
 # Build shared packages first (sequentially to ensure db-models completes)
 RUN pnpm --filter "./packages/*" -r --workspace-concurrency=1 run build
 
-# Build frontend
-RUN cd frontend && pnpm run build
+# Accept build-time environment variables for Vite
+ARG VITE_API_BASE_URL
+ARG VITE_API_GATEWAY_URL
+ARG VITE_NOTIFICATION_SERVICE_URL
+
+# Build frontend with environment variables
+RUN cd frontend && \
+    VITE_API_BASE_URL=${VITE_API_BASE_URL} \
+    VITE_API_GATEWAY_URL=${VITE_API_GATEWAY_URL} \
+    VITE_NOTIFICATION_SERVICE_URL=${VITE_NOTIFICATION_SERVICE_URL} \
+    pnpm run build
 
 # Verify dist folder was created and has content
 RUN ls -la /app/frontend/dist && \
