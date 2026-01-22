@@ -53,8 +53,6 @@ function TopicDetailPage() {
       try {
         await apiClient.post(`/topics/${id}/responses`, request);
         // Future: Refresh response list, show success message
-      } catch (error) {
-        throw error;
       } finally {
         setIsSubmittingResponse(false);
       }
