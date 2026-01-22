@@ -107,7 +107,7 @@ test.describe('Browse Topics and View Details', () => {
 
       // Stats sections (Participants, Responses, etc.)
       await expect(page.getByText(/participants/i)).toBeVisible();
-      await expect(page.getByText(/responses/i)).toBeVisible();
+      await expect(page.locator('[data-testid="response-count"]')).toBeVisible();
 
       // Action buttons
       await expect(page.getByRole('button', { name: /join discussion/i })).toBeVisible();

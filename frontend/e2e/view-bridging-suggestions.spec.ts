@@ -137,7 +137,7 @@ test.describe('View Bridging Suggestions', () => {
       });
 
       // Look for conflict areas
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
@@ -174,11 +174,11 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
         // Each card should have readable content
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
         const content = await firstCard.textContent();
 
         expect(content).toBeTruthy();
@@ -206,10 +206,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have position badges
         const positionBadges = firstCard.locator('[data-testid="position-badge"]');
@@ -242,10 +242,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have bridging language (likely in quotes)
         const bridgingText = firstCard.locator('[data-testid="bridging-language"]');
@@ -276,10 +276,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have common ground section
         const _commonGroundText = firstCard.locator('[data-testid="common-ground-text"]');
@@ -309,14 +309,14 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have confidence badge
         const confidenceBadge = firstCard.locator('[data-testid="confidence-badge"]');
-        const _hasBadge = (await confidenceBadge.count()) > 0;
+        const hasBadge = (await confidenceBadge.count()) > 0;
 
         if (hasBadge) {
           // Badge should have color class (green/blue/yellow)
@@ -346,10 +346,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have confidence percentage
         const confidenceScore = firstCard.locator('[data-testid="confidence-score"]');
@@ -453,10 +453,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for view proposition button
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
         const viewButton = firstCard.locator('[data-testid="view-proposition-button"]');
 
         if ((await viewButton.count()) > 0) {
@@ -486,10 +486,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have reasoning section
         const _reasoning = firstCard.locator('[data-testid="suggestion-reasoning"]');
@@ -518,7 +518,7 @@ test.describe('View Bridging Suggestions', () => {
       });
 
       // Look for bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
@@ -548,7 +548,7 @@ test.describe('View Bridging Suggestions', () => {
       });
 
       // Look for bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
@@ -581,7 +581,7 @@ test.describe('View Bridging Suggestions', () => {
       });
 
       // Look for bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
@@ -717,7 +717,7 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for multiple suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 1) {
         // Multiple cards should be scrollable
@@ -803,7 +803,7 @@ test.describe('View Bridging Suggestions', () => {
       });
 
       // Scroll to bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const hasSuggestions = (await suggestionsSection.count()) > 0;
 
       if (hasSuggestions) {
@@ -834,7 +834,7 @@ test.describe('View Bridging Suggestions', () => {
       });
 
       // Get initial suggestions state
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const _initialContent = await suggestionsSection.textContent().catch(() => '');
 
       // In a real test with mocked WebSocket, we would:
@@ -867,7 +867,7 @@ test.describe('View Bridging Suggestions', () => {
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       // If maxSuggestions is set, should show count indicator
       const _countIndicator = page.locator('[data-testid="suggestion-count-indicator"]');

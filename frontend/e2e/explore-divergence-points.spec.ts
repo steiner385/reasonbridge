@@ -521,7 +521,7 @@ test.describe('Explore Divergence Points', () => {
       });
 
       // Get initial divergence points state
-      const _divergenceSection = page.locator('[data-testid="divergence-points"]');
+      const divergenceSection = page.locator('[data-testid="divergence-points"]');
       const _initialContent = await divergenceSection.textContent().catch(() => '');
 
       // In a real test with mocked WebSocket, we would:
@@ -632,10 +632,10 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
         const scoreText = await firstCard
           .locator('[data-testid="polarization-score"]')
           .textContent();
@@ -723,8 +723,8 @@ test.describe('Explore Divergence Points', () => {
       });
 
       // Scroll to divergence section
-      const _divergenceSection = page.locator('[data-testid="divergence-points"]');
-      const _hasDivergence = (await divergenceSection.count()) > 0;
+      const divergenceSection = page.locator('[data-testid="divergence-points"]');
+      const hasDivergence = (await divergenceSection.count()) > 0;
 
       if (hasDivergence) {
         // Scroll to element
@@ -780,7 +780,7 @@ test.describe('Explore Divergence Points', () => {
       });
 
       // Look for divergence section with participant metrics
-      const _divergenceSection = page.locator('[data-testid="divergence-points"]');
+      const divergenceSection = page.locator('[data-testid="divergence-points"]');
       const hasSection = (await divergenceSection.count()) > 0;
 
       if (hasSection) {
@@ -812,7 +812,7 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for multiple divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       // If multiple cards exist, verify list is scrollable
       if (cardCount > 1) {
@@ -845,10 +845,10 @@ test.describe('Explore Divergence Points', () => {
 
       // Look for divergence point cards
       const divergenceCards = page.locator('[data-testid="divergence-point-card"]');
-      const _cardCount = await divergenceCards.count();
+      const cardCount = await divergenceCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = divergenceCards.first();
+        const firstCard = divergenceCards.first();
         const viewpoints = firstCard.locator('[data-testid="viewpoint-item"]');
         const _viewpointCount = await viewpoints.count();
 
