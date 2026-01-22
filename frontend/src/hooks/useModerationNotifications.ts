@@ -32,11 +32,12 @@ export function useModerationNotifications() {
     let socket: Socket | null = null;
 
     const connectSocket = () => {
-      const notificationServiceUrl =
-        import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || 'http://localhost:3003';
+      // Use same-origin for WebSocket (nginx proxies /socket.io/)
+      const notificationServiceUrl = import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || '';
 
       // Socket.io namespaces are part of the URL, not an option
       socket = io(`${notificationServiceUrl}/notifications`, {
+        path: '/socket.io',
         reconnectionDelay: 1000,
         reconnection: true,
         reconnectionAttempts: 5,
