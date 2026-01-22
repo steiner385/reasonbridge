@@ -71,6 +71,7 @@ module.exports = {
     'packages/',
     'services/',
     'infrastructure/',
+    'frontend/', // Uses ESLint 9 flat config - linted separately
     '*.js',
     '!.eslintrc.cjs',
   ],
