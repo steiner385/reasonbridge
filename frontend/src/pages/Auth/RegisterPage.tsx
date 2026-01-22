@@ -2,6 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { RegistrationFormData } from '../../components/auth/RegistrationForm';
 import RegistrationForm from '../../components/auth/RegistrationForm';
+import { apiClient, ApiError } from '../../lib/api';
+
+interface RegisterResponse {
+  userId: string;
+  email: string;
+  displayName: string;
+  message: string;
+  requiresEmailVerification: boolean;
+}
 
 /**
  * Registration page that renders the RegistrationForm component
@@ -17,17 +26,34 @@ function RegisterPage() {
     setError(undefined);
 
     try {
-      // TODO: Replace with actual API call to user-service
-      // For now, simulate registration
+      await apiClient.post<RegisterResponse>('/auth/register', {
+        email: data.email,
+        password: data.password,
+        displayName: data.displayName,
+      });
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // TODO: Handle email verification flow
-      // For now, redirect to login on success
-      navigate('/login');
+      // Registration successful - redirect to login
+      // User will need to verify email before logging in
+      navigate('/login', {
+        state: {
+          message: 'Registration successful! Please check your email to verify your account.',
+        },
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account. Please try again.');
+      if (err instanceof ApiError) {
+        // Handle specific API errors
+        if (err.status === 409) {
+          setError('An account with this email already exists.');
+        } else if (err.status === 400) {
+          setError('Invalid registration data. Please check your input.');
+        } else {
+          setError(err.message || 'Failed to create account. Please try again.');
+        }
+      } else {
+        setError(
+          err instanceof Error ? err.message : 'Failed to create account. Please try again.',
+        );
+      }
     } finally {
       setIsLoading(false);
     }

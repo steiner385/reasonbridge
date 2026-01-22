@@ -20,8 +20,14 @@ const generateTestUser = () => {
   };
 };
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe('User Registration and Login Flow', () => {
-  test.skip('should complete full registration and login flow', async ({ page }) => {
+  // Skip backend-dependent tests when not in E2E Docker mode
+  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
+  test('should complete full registration and login flow', async ({ page }) => {
     const testUser = generateTestUser();
 
     // Step 1: Navigate to registration page
@@ -35,12 +41,12 @@ test.describe('User Registration and Login Flow', () => {
 
     // Step 2: Fill out registration form
     const emailInput = page.getByLabel(/email/i);
-    const usernameInput = page.getByLabel(/username/i);
-    const passwordInput = page.getByLabel(/^password$/i);
+    const displayNameInput = page.getByLabel(/display name/i);
+    const passwordInput = page.getByLabel(/^password/i).first();
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
     await emailInput.fill(testUser.email);
-    await usernameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.username);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill(testUser.password);
 
@@ -61,7 +67,7 @@ test.describe('User Registration and Login Flow', () => {
       await test.step('Login with newly created credentials', async () => {
         // Fill login form
         const loginEmailInput = page.getByLabel(/email/i);
-        const loginPasswordInput = page.getByLabel(/^password$/i);
+        const loginPasswordInput = page.getByLabel(/^password/i).first();
 
         await loginEmailInput.fill(testUser.email);
         await loginPasswordInput.fill(testUser.password);
@@ -70,46 +76,32 @@ test.describe('User Registration and Login Flow', () => {
         const loginButton = page.getByRole('button', { name: /sign in|log in/i });
         await loginButton.click();
 
-        // Wait for successful login redirect
-        await page.waitForURL(/\/(dashboard|home|profile)/, { timeout: 10000 });
+        // Wait for successful login redirect (navigates to / which is the home page)
+        await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 10000 });
       });
     }
 
     // Step 6: Verify successful authentication
-    // Check for authenticated state indicators
-    // This could be a user menu, profile link, or logout button
-    const authenticatedIndicators = [
-      page.getByRole('button', { name: /log out|sign out/i }),
-      page.getByRole('link', { name: /profile|account/i }),
-      page.getByText(new RegExp(testUser.username, 'i')),
-    ];
-
-    // At least one indicator should be visible
-    let foundIndicator = false;
-    for (const indicator of authenticatedIndicators) {
-      const count = await indicator.count();
-      if (count > 0 && (await indicator.first().isVisible())) {
-        foundIndicator = true;
-        break;
-      }
-    }
-
-    expect(foundIndicator).toBeTruthy();
+    // The login was successful if we reached the home page (/)
+    // Check that auth token was stored in localStorage
+    const authToken = await page.evaluate(() => localStorage.getItem('auth_token'));
+    expect(authToken).toBeTruthy();
+    expect(authToken!.length).toBeGreaterThan(0);
   });
 
-  test.skip('should prevent registration with existing email', async ({ page }) => {
+  test('should prevent registration with existing email', async ({ page }) => {
     const testUser = generateTestUser();
 
     // First registration
     await page.goto('/register');
 
     const emailInput = page.getByLabel(/email/i);
-    const usernameInput = page.getByLabel(/username/i);
-    const passwordInput = page.getByLabel(/^password$/i);
+    const displayNameInput = page.getByLabel(/display name/i);
+    const passwordInput = page.getByLabel(/^password/i).first();
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
     await emailInput.fill(testUser.email);
-    await usernameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.username);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill(testUser.password);
 
@@ -122,15 +114,24 @@ test.describe('User Registration and Login Flow', () => {
     // Attempt second registration with same email
     await page.goto('/register');
 
-    await emailInput.fill(testUser.email);
-    await usernameInput.fill(`different${testUser.username}`);
-    await passwordInput.fill(testUser.password);
-    await confirmPasswordInput.fill(testUser.password);
+    // Re-query form elements on new page
+    const emailInput2 = page.getByLabel(/email/i);
+    const displayNameInput2 = page.getByLabel(/display name/i);
+    const passwordInput2 = page.getByLabel(/^password/i).first();
+    const confirmPasswordInput2 = page.getByLabel(/confirm password/i);
+    const registerButton2 = page.getByRole('button', { name: /sign up|register|create account/i });
 
-    await registerButton.click();
+    await emailInput2.fill(testUser.email);
+    await displayNameInput2.fill(`different${testUser.username}`);
+    await passwordInput2.fill(testUser.password);
+    await confirmPasswordInput2.fill(testUser.password);
+
+    await registerButton2.click();
 
     // Should show error message about existing email
-    const errorMessage = page.getByText(/email already exists|email is already registered/i);
+    const errorMessage = page.getByText(
+      /email already exists|account with this email already exists/i,
+    );
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
@@ -182,11 +183,11 @@ test.describe('User Registration and Login Flow', () => {
     await expect(mismatchError).toBeVisible();
   });
 
-  test.skip('should show error for invalid login credentials', async ({ page }) => {
+  test('should show error for invalid login credentials', async ({ page }) => {
     await page.goto('/login');
 
     const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/^password$/i);
+    const passwordInput = page.getByLabel(/^password/i).first();
 
     // Attempt login with non-existent credentials
     await emailInput.fill('nonexistent@example.com');
@@ -196,7 +197,9 @@ test.describe('User Registration and Login Flow', () => {
     await loginButton.click();
 
     // Should show authentication error
-    const errorMessage = page.getByText(/invalid credentials|incorrect email or password/i);
+    const errorMessage = page.getByText(
+      /invalid email or password|invalid credentials|incorrect email or password/i,
+    );
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
