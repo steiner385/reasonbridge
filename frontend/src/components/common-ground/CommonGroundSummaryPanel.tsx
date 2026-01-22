@@ -95,18 +95,15 @@ const CommonGroundSummaryPanel = ({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${className}`} data-testid="common-ground-summary">
       {/* Header with Overall Consensus */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Common Ground Analysis
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900">Common Ground Analysis</h2>
           <div className="flex items-center gap-3">
             {showLastUpdated && (
               <span className="text-xs text-gray-500">
-                Last updated:{' '}
-                {new Date(analysis.lastUpdated).toLocaleString()}
+                Last updated: {new Date(analysis.lastUpdated).toLocaleString()}
               </span>
             )}
             <ShareButton analysis={analysis} variant="outline" size="sm" />
@@ -116,9 +113,7 @@ const CommonGroundSummaryPanel = ({
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">
-                Overall Consensus
-              </span>
+              <span className="text-sm font-medium text-gray-700">Overall Consensus</span>
               <span className="text-sm font-semibold text-gray-900">
                 {analysis.overallConsensusScore}%
               </span>
@@ -135,9 +130,7 @@ const CommonGroundSummaryPanel = ({
             </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">
-              {analysis.participantCount}
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{analysis.participantCount}</div>
             <div className="text-xs text-gray-500">Participants</div>
           </div>
         </div>
@@ -145,7 +138,10 @@ const CommonGroundSummaryPanel = ({
 
       {/* Agreement Zones */}
       {analysis.agreementZones.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          data-testid="agreement-zone"
+        >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Agreement Zones ({analysis.agreementZones.length})
           </h3>
@@ -161,14 +157,12 @@ const CommonGroundSummaryPanel = ({
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <h4 className={`font-medium ${styles.text}`}>
-                        {zone.title}
-                      </h4>
-                      <p className="text-sm text-gray-700 mt-1">
-                        {zone.description}
-                      </p>
+                      <h4 className={`font-medium ${styles.text}`}>{zone.title}</h4>
+                      <p className="text-sm text-gray-700 mt-1">{zone.description}</p>
                     </div>
-                    <span className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge} ml-2`}>
+                    <span
+                      className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge} ml-2`}
+                    >
                       {zone.consensusLevel.toUpperCase()}
                     </span>
                   </div>
@@ -214,7 +208,10 @@ const CommonGroundSummaryPanel = ({
 
       {/* Misunderstandings */}
       {analysis.misunderstandings.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          data-testid="misunderstandings"
+        >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Identified Misunderstandings ({analysis.misunderstandings.length})
           </h3>
@@ -231,9 +228,7 @@ const CommonGroundSummaryPanel = ({
                     <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-purple-100 text-purple-800">
                       TERM CONFUSION
                     </span>
-                    <h4 className="font-medium text-purple-900 mt-2">
-                      "{misunderstanding.term}"
-                    </h4>
+                    <h4 className="font-medium text-purple-900 mt-2">"{misunderstanding.term}"</h4>
                   </div>
                 </div>
 
@@ -277,7 +272,10 @@ const CommonGroundSummaryPanel = ({
 
       {/* Genuine Disagreements */}
       {analysis.disagreements.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          data-testid="divergence-points"
+        >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Genuine Disagreements ({analysis.disagreements.length})
           </h3>
@@ -288,28 +286,21 @@ const CommonGroundSummaryPanel = ({
                 className="p-4 rounded-lg border-l-4 bg-blue-50 border-blue-500"
                 role="article"
                 aria-label={`Disagreement about: ${disagreement.topic}`}
+                data-testid="divergence-point-card"
               >
                 <div className="mb-2">
                   <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-800">
                     VALUE DIFFERENCE
                   </span>
-                  <h4 className="font-medium text-blue-900 mt-2">
-                    {disagreement.topic}
-                  </h4>
-                  <p className="text-sm text-gray-700 mt-1">
-                    {disagreement.description}
-                  </p>
+                  <h4 className="font-medium text-blue-900 mt-2">{disagreement.topic}</h4>
+                  <p className="text-sm text-gray-700 mt-1">{disagreement.description}</p>
                 </div>
 
                 <div className="mt-3 space-y-2">
-                  <p className="text-sm text-gray-700 font-medium">
-                    Different positions:
-                  </p>
+                  <p className="text-sm text-gray-700 font-medium">Different positions:</p>
                   {disagreement.positions.map((position, idx) => (
                     <div key={idx} className="text-sm bg-white rounded p-3">
-                      <p className="font-medium text-gray-800 mb-1">
-                        {position.stance}
-                      </p>
+                      <p className="font-medium text-gray-800 mb-1">{position.stance}</p>
                       <p className="text-gray-700 mb-2">{position.reasoning}</p>
                       {(position.underlyingValue || position.underlyingAssumption) && (
                         <div className="text-xs text-gray-600 space-y-1">
@@ -376,12 +367,10 @@ const CommonGroundSummaryPanel = ({
               />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">
-            No Analysis Available
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">No Analysis Available</h3>
           <p className="text-sm text-gray-500">
-            Common ground analysis will appear here once the discussion has enough
-            participants and content to analyze.
+            Common ground analysis will appear here once the discussion has enough participants and
+            content to analyze.
           </p>
         </div>
       )}

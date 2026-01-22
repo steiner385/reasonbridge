@@ -74,9 +74,7 @@ const BridgingSuggestionsSection = ({
 }: BridgingSuggestionsSectionProps) => {
   const hasSuggestions = suggestions.suggestions.length > 0;
   const displayedSuggestions =
-    maxSuggestions > 0
-      ? suggestions.suggestions.slice(0, maxSuggestions)
-      : suggestions.suggestions;
+    maxSuggestions > 0 ? suggestions.suggestions.slice(0, maxSuggestions) : suggestions.suggestions;
 
   if (!hasSuggestions && !showEmptyState) {
     return null;
@@ -85,24 +83,20 @@ const BridgingSuggestionsSection = ({
   const consensusPercentage = Math.round(suggestions.overallConsensusScore * 100);
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${className}`} data-testid="bridging-suggestions">
       {/* Header with Overall Analysis */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Bridging Suggestions
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Bridging Suggestions</h2>
 
         {/* Overall Consensus Score */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
-              Overall Consensus
-            </span>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-medium text-gray-700">Overall Consensus</span>
+            <span className="text-sm font-semibold text-gray-900" data-testid="overall-consensus">
               {consensusPercentage}%
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
+          <div className="w-full bg-gray-200 rounded-full h-3" data-testid="consensus-progress">
             <div
               className="bg-blue-600 h-3 rounded-full transition-all duration-300"
               style={{ width: `${consensusPercentage}%` }}
@@ -116,24 +110,21 @@ const BridgingSuggestionsSection = ({
 
         {/* Analysis Reasoning */}
         {suggestions.reasoning && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {suggestions.reasoning}
-            </p>
+          <div className="mt-4 p-3 bg-gray-50 rounded-md" data-testid="analysis-reasoning">
+            <p className="text-sm text-gray-700 leading-relaxed">{suggestions.reasoning}</p>
           </div>
         )}
 
         {/* Common Ground Areas */}
         {suggestions.commonGroundAreas.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Areas of Agreement
-            </h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Areas of Agreement</h4>
             <div className="flex flex-wrap gap-2">
               {suggestions.commonGroundAreas.map((area, idx) => (
                 <span
                   key={idx}
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  data-testid="common-ground-badge"
                 >
                   {area}
                 </span>
@@ -145,14 +136,13 @@ const BridgingSuggestionsSection = ({
         {/* Conflict Areas */}
         {suggestions.conflictAreas.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Areas of Disagreement
-            </h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Areas of Disagreement</h4>
             <div className="flex flex-wrap gap-2">
               {suggestions.conflictAreas.map((area, idx) => (
                 <span
                   key={idx}
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                  data-testid="conflict-area-badge"
                 >
                   {area}
                 </span>
@@ -169,7 +159,8 @@ const BridgingSuggestionsSection = ({
             Suggested Bridges ({displayedSuggestions.length}
             {maxSuggestions > 0 && suggestions.suggestions.length > maxSuggestions
               ? ` of ${suggestions.suggestions.length}`
-              : ''})
+              : ''}
+            )
           </h3>
           <div className="space-y-4">
             {displayedSuggestions.map((suggestion, idx) => {
@@ -180,10 +171,14 @@ const BridgingSuggestionsSection = ({
                   className="p-4 rounded-lg border-l-4 bg-indigo-50 border-indigo-500"
                   role="article"
                   aria-label={`Bridging suggestion from ${suggestion.sourcePosition} to ${suggestion.targetPosition}`}
+                  data-testid="bridging-suggestion-card"
                 >
                   {/* Positions */}
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-indigo-100 text-indigo-800">
+                    <span
+                      className="inline-block text-xs font-semibold px-2 py-1 rounded bg-indigo-100 text-indigo-800"
+                      data-testid="position-badge"
+                    >
                       {suggestion.sourcePosition}
                     </span>
                     <svg
@@ -199,18 +194,22 @@ const BridgingSuggestionsSection = ({
                         d="M17 8l4 4m0 0l-4 4m4-4H3"
                       />
                     </svg>
-                    <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-indigo-100 text-indigo-800">
+                    <span
+                      className="inline-block text-xs font-semibold px-2 py-1 rounded bg-indigo-100 text-indigo-800"
+                      data-testid="position-badge"
+                    >
                       {suggestion.targetPosition}
                     </span>
                     <span
                       className={`ml-auto text-xs font-semibold px-2 py-1 rounded ${confidenceStyles.badge}`}
+                      data-testid={`confidence-${suggestion.confidenceScore >= 0.8 ? 'high' : suggestion.confidenceScore >= 0.6 ? 'medium' : 'low'}`}
                     >
                       {confidenceStyles.text}
                     </span>
                   </div>
 
                   {/* Bridging Language */}
-                  <div className="mb-3">
+                  <div className="mb-3" data-testid="bridging-language">
                     <h4 className="text-sm font-medium text-gray-700 mb-1">
                       Suggested Bridging Language:
                     </h4>
@@ -220,29 +219,26 @@ const BridgingSuggestionsSection = ({
                   </div>
 
                   {/* Common Ground */}
-                  <div className="mb-3">
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">
-                      Common Ground:
-                    </h4>
+                  <div className="mb-3" data-testid="common-ground-text">
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Common Ground:</h4>
                     <p className="text-sm text-gray-800 leading-relaxed">
                       {suggestion.commonGround}
                     </p>
                   </div>
 
                   {/* Reasoning */}
-                  <div className="mb-3">
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">
-                      Why This Helps:
-                    </h4>
-                    <p className="text-sm text-gray-800 leading-relaxed">
-                      {suggestion.reasoning}
-                    </p>
+                  <div className="mb-3" data-testid="suggestion-reasoning">
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Why This Helps:</h4>
+                    <p className="text-sm text-gray-800 leading-relaxed">{suggestion.reasoning}</p>
                   </div>
 
                   {/* Confidence indicator */}
-                  <div className="mt-3 pt-3 border-t border-indigo-200">
+                  <div
+                    className="mt-3 pt-3 border-t border-indigo-200"
+                    data-testid="confidence-badge"
+                  >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-600">
+                      <span className="text-xs text-gray-600" data-testid="confidence-score">
                         Confidence Score: {Math.round(suggestion.confidenceScore * 100)}%
                       </span>
                       {onViewSuggestion && (
@@ -250,6 +246,7 @@ const BridgingSuggestionsSection = ({
                           type="button"
                           onClick={() => onViewSuggestion(suggestion.propositionId)}
                           className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          data-testid="view-proposition-button"
                         >
                           View Proposition →
                         </button>
@@ -274,7 +271,10 @@ const BridgingSuggestionsSection = ({
 
       {/* Empty State */}
       {!hasSuggestions && showEmptyState && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+        <div
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center"
+          data-testid="empty-state"
+        >
           <div className="text-gray-400 mb-3">
             <svg
               className="mx-auto h-12 w-12"
@@ -294,18 +294,16 @@ const BridgingSuggestionsSection = ({
             No Bridging Suggestions Available
           </h3>
           <p className="text-sm text-gray-500">
-            Bridging suggestions will appear here once the discussion has enough
-            diverse viewpoints to analyze.
+            Bridging suggestions will appear here once the discussion has enough diverse viewpoints
+            to analyze.
           </p>
         </div>
       )}
 
       {/* AI Attribution */}
       {showAttribution && hasSuggestions && (
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            {suggestions.attribution}
-          </p>
+        <div className="text-center" data-testid="ai-attribution">
+          <p className="text-xs text-gray-500">{suggestions.attribution}</p>
         </div>
       )}
     </div>

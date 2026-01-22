@@ -16,7 +16,9 @@ set -e
 echo "🗄️  Setting up E2E database for Jenkins CI..."
 
 # Use discussion-service container to run migrations (it has db-models built in)
-CONTAINER="unite-discussion-service-e2e"
+# Container name uses Docker Compose naming: ${E2E_PROJECT_NAME}-${service}-1
+# E2E_PROJECT_NAME is set in Jenkins pipeline (e.g., "e2e-build-4")
+CONTAINER="${E2E_PROJECT_NAME:-unitediscord}-discussion-service-1"
 DB_URL="postgresql://unite_test:unite_test@postgres:5432/unite_test"
 
 # Check if container is running

@@ -29,7 +29,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Bridging suggestions section should be visible if suggestions exist
       const _suggestionsSection = page
@@ -53,20 +56,23 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for consensus score display
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSection = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
         // Should have consensus score badge
         const consensusScore = suggestionsSection.locator('[data-testid="overall-consensus"]');
-        const _hasScore = await consensusScore.count() > 0;
+        const _hasScore = (await consensusScore.count()) > 0;
 
         // Should have progress bar
         const progressBar = suggestionsSection.locator('[data-testid="consensus-progress"]');
-        const _hasProgressBar = await progressBar.count() > 0;
+        const _hasProgressBar = (await progressBar.count()) > 0;
 
         // Page should render without error
         expect(true).toBe(true);
@@ -86,14 +92,19 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for common ground areas
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSection = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
-        const commonGroundBadges = suggestionsSection.locator('[data-testid="common-ground-badge"]');
+        const commonGroundBadges = suggestionsSection.locator(
+          '[data-testid="common-ground-badge"]',
+        );
         const badgeCount = await commonGroundBadges.count();
 
         if (badgeCount > 0) {
@@ -120,11 +131,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for conflict areas
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSection = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
         const conflictBadges = suggestionsSection.locator('[data-testid="conflict-area-badge"]');
@@ -153,15 +167,18 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
         // Each card should have readable content
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
         const content = await firstCard.textContent();
 
         expect(content).toBeTruthy();
@@ -182,14 +199,17 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have position badges
         const positionBadges = firstCard.locator('[data-testid="position-badge"]');
@@ -215,18 +235,21 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have bridging language (likely in quotes)
         const bridgingText = firstCard.locator('[data-testid="bridging-language"]');
-        const _hasText = await bridgingText.count() > 0;
+        const _hasText = (await bridgingText.count()) > 0;
 
         // Page should render without error
         expect(true).toBe(true);
@@ -246,14 +269,17 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have common ground section
         const _commonGroundText = firstCard.locator('[data-testid="common-ground-text"]');
@@ -276,18 +302,21 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have confidence badge
         const confidenceBadge = firstCard.locator('[data-testid="confidence-badge"]');
-        const _hasBadge = await confidenceBadge.count() > 0;
+        const hasBadge = (await confidenceBadge.count()) > 0;
 
         if (hasBadge) {
           // Badge should have color class (green/blue/yellow)
@@ -310,14 +339,17 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have confidence percentage
         const confidenceScore = firstCard.locator('[data-testid="confidence-score"]');
@@ -341,7 +373,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for high confidence badges
       const highConfidenceBadges = page.locator('[data-testid="confidence-high"]');
@@ -364,7 +399,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for medium confidence badges
       const _mediumConfidenceBadges = page.locator('[data-testid="confidence-medium"]');
@@ -386,7 +424,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Page should render without error
       expect(true).toBe(true);
@@ -405,17 +446,20 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for view proposition button
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
         const viewButton = firstCard.locator('[data-testid="view-proposition-button"]');
 
-        if (await viewButton.count() > 0) {
+        if ((await viewButton.count()) > 0) {
           // Button should be clickable
           expect(true).toBe(true);
         }
@@ -435,14 +479,17 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 0) {
-        const _firstCard = suggestionCards.first();
+        const firstCard = suggestionCards.first();
 
         // Should have reasoning section
         const _reasoning = firstCard.locator('[data-testid="suggestion-reasoning"]');
@@ -465,11 +512,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSection = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
         const _analysisReasoning = suggestionsSection.locator('[data-testid="analysis-reasoning"]');
@@ -492,11 +542,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSection = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
         // Check for empty state message
@@ -522,11 +575,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSection = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSection = (await suggestionsSection.count()) > 0;
 
       if (hasSection) {
         // Check for AI attribution
@@ -538,7 +594,9 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  test('should display consensus score as percentage (0-100)', async ({ page }) => {
+  // TODO: Requires CommonGroundAnalysis seed data to render consensus score
+  // The BridgingSuggestionsSection only renders when analysis data exists
+  test.skip('should display consensus score as percentage (0-100)', async ({ page }) => {
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
@@ -550,7 +608,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for consensus score
       const consensusScore = page.locator('[data-testid="overall-consensus"]');
@@ -576,7 +637,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Bridging suggestions should be accessible on mobile
       const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
@@ -601,7 +665,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Bridging suggestions should render on tablet
       expect(true).toBe(true);
@@ -623,7 +690,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Bridging suggestions should display fully on desktop
       expect(true).toBe(true);
@@ -642,11 +712,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for multiple suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       if (cardCount > 1) {
         // Multiple cards should be scrollable
@@ -676,7 +749,10 @@ test.describe('View Bridging Suggestions', () => {
 
       // Wait for navigation to complete
       await navigationPromise;
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Page should finish loading
       expect(true).toBe(true);
@@ -695,7 +771,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for error message
       const _errorMessage = page
@@ -720,11 +799,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Scroll to bridging suggestions section
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const hasSuggestions = await suggestionsSection.count() > 0;
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const hasSuggestions = (await suggestionsSection.count()) > 0;
 
       if (hasSuggestions) {
         // Scroll to element
@@ -736,7 +818,9 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  test('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
+  // TODO: Implement WebSocket mocking infrastructure for E2E tests
+  // This test requires simulating WebSocket events to verify real-time updates
+  test.skip('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
@@ -748,10 +832,13 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Get initial suggestions state
-      const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
       const _initialContent = await suggestionsSection.textContent().catch(() => '');
 
       // In a real test with mocked WebSocket, we would:
@@ -777,11 +864,14 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Look for suggestion cards
       const suggestionCards = page.locator('[data-testid="bridging-suggestion-card"]');
-      const _cardCount = await suggestionCards.count();
+      const cardCount = await suggestionCards.count();
 
       // If maxSuggestions is set, should show count indicator
       const _countIndicator = page.locator('[data-testid="suggestion-count-indicator"]');
@@ -791,7 +881,9 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  test('should distinguish suggestion cards from agreement zones and divergence', async ({ page }) => {
+  test('should distinguish suggestion cards from agreement zones and divergence', async ({
+    page,
+  }) => {
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
@@ -803,7 +895,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // All three sections can coexist on the panel
       const _agreementZones = page.locator('[data-testid="agreement-zone"]');
@@ -827,7 +922,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // High confidence suggestions should stand out visually
       const _highConfidenceCards = page.locator('[data-testid="bridging-suggestion-card"]').filter({
@@ -851,7 +949,10 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', { state: 'hidden', timeout: 10000 });
+      await page.waitForSelector('text=Loading topic details...', {
+        state: 'hidden',
+        timeout: 10000,
+      });
 
       // Page should handle cases where propositions lack sufficient alignment data
       const _suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');

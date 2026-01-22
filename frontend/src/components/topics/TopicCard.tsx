@@ -46,6 +46,7 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
       clickable={!!onClick}
       className={className}
       onClick={onClick}
+      data-testid="topic-card"
     >
       <CardHeader title={topic.title}>
         <div className="flex items-center gap-2 mt-1">

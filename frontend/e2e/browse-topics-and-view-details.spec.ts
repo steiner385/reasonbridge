@@ -10,9 +10,18 @@ import { test, expect } from '@playwright/test';
  * - Navigating back to the topics list
  */
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe('Browse Topics and View Details', () => {
+  // Skip backend-dependent tests when not in E2E Docker mode
+  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
   test('should load and display the topics list page', async ({ page }) => {
     await page.goto('/topics');
+
+    // Wait for page to finish loading
+    await page.waitForLoadState('networkidle');
 
     // Check for page heading
     const heading = page.getByRole('heading', { name: /discussion topics/i });
@@ -26,7 +35,7 @@ test.describe('Browse Topics and View Details', () => {
     await expect(filterSection.or(page.locator('text=Sort by').first())).toBeVisible();
   });
 
-  test.skip('should display topic cards when topics are available', async ({ page }) => {
+  test('should display topic cards when topics are available', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading to complete (spinner disappears)
@@ -72,7 +81,7 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should display topic details correctly', async ({ page }) => {
+  test('should display topic details correctly', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading
@@ -98,14 +107,14 @@ test.describe('Browse Topics and View Details', () => {
 
       // Stats sections (Participants, Responses, etc.)
       await expect(page.getByText(/participants/i)).toBeVisible();
-      await expect(page.getByText(/responses/i)).toBeVisible();
+      await expect(page.locator('[data-testid="response-count"]')).toBeVisible();
 
       // Action buttons
       await expect(page.getByRole('button', { name: /join discussion/i })).toBeVisible();
     }
   });
 
-  test.skip('should navigate back to topics list from detail page', async ({ page }) => {
+  test('should navigate back to topics list from detail page', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading
@@ -134,7 +143,7 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should handle pagination on topics list', async ({ page }) => {
+  test('should handle pagination on topics list', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading
@@ -167,7 +176,7 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should display topic filters and allow filtering', async ({ page }) => {
+  test('should display topic filters and allow filtering', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading
@@ -207,7 +216,7 @@ test.describe('Browse Topics and View Details', () => {
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
   });
 
-  test.skip('should display topic card information', async ({ page }) => {
+  test('should display topic card information', async ({ page }) => {
     await page.goto('/topics');
 
     // Wait for loading
@@ -231,7 +240,7 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should handle direct navigation to topic detail page', async ({ page }) => {
+  test('should handle direct navigation to topic detail page', async ({ page }) => {
     // First, get a valid topic ID from the topics list
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });

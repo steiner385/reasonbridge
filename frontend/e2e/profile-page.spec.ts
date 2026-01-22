@@ -4,6 +4,9 @@
 
 import { test, expect } from '@playwright/test';
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe('ProfilePage Component', () => {
   test('should show login prompt when not authenticated', async ({ page }) => {
     await page.goto('/profile');
@@ -21,7 +24,10 @@ test.describe('ProfilePage Component', () => {
   });
 });
 
-test.describe('UserProfilePage Component', () => {
+test.describe('UserProfilePage Component - API Error Handling', () => {
+  // Skip backend-dependent tests when not in E2E Docker mode
+  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
   test('should show error for invalid user ID', async ({ page }) => {
     await page.goto('/profile/invalid-uuid');
 
@@ -39,7 +45,9 @@ test.describe('UserProfilePage Component', () => {
       timeout: 10000,
     });
   });
+});
 
+test.describe('UserProfilePage Component - Basic Structure', () => {
   test('should render profile page structure', async ({ page }) => {
     await page.goto('/profile');
 

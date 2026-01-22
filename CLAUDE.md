@@ -108,6 +108,34 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
 - Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
 
+## Playwright E2E Testing
+
+**IMPORTANT: NEVER use `npx playwright test --debug` or `--headed` flags.**
+- These flags require interactive input (clicking, keyboard input) which disrupts autonomous workflows
+- Debug mode opens a browser GUI that blocks execution until manual interaction
+- Always run Playwright in headless mode for CI and agentic sessions
+
+**Correct usage:**
+```bash
+# Run all E2E tests
+npx playwright test
+
+# Run specific test file
+npx playwright test frontend/e2e/login-form.spec.ts
+
+# Run with verbose output (safe for automation)
+npx playwright test --reporter=list
+
+# Generate HTML report after run
+npx playwright show-report
+```
+
+**For debugging test failures:**
+- Use `console.log()` statements in tests (remove before committing)
+- Check Playwright HTML reports: `npx playwright show-report`
+- Use `page.screenshot()` to capture state at specific points
+- Review trace files if `trace: 'on-first-retry'` is configured
+
 ## Active Technologies
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)

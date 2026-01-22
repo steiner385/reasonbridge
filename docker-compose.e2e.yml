@@ -1,8 +1,10 @@
-version: '3.8'
-
 # E2E Testing Environment
 # Complete stack with infrastructure, all backend services, and frontend
 # Mimics production deployment for realistic end-to-end testing
+#
+# Note: Explicit image names are set for all built services to enable Docker
+# layer caching across builds with different COMPOSE_PROJECT_NAME values.
+# Without explicit image names, each unique project name would rebuild all images.
 
 services:
   # ============================================================================
@@ -11,7 +13,7 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    container_name: unite-postgres-e2e
+    # Note: container_name removed to allow parallel builds with different COMPOSE_PROJECT_NAME
     environment:
       POSTGRES_USER: unite_test
       POSTGRES_PASSWORD: unite_test
@@ -30,7 +32,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: unite-redis-e2e
     ports:
       - '6381:6379'
     healthcheck:
@@ -43,7 +44,6 @@ services:
 
   localstack:
     image: localstack/localstack:3.0
-    container_name: unite-localstack-e2e
     environment:
       SERVICES: s3,sqs,sns
       DEBUG: 0
@@ -67,7 +67,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-api-gateway-e2e
+    image: unitediscord-e2e/api-gateway:latest
     command: ['node', 'services/api-gateway/dist/main.js']
     environment:
       PORT: 3000
@@ -99,7 +99,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-user-service-e2e
+    image: unitediscord-e2e/user-service:latest
     command: ['node', 'services/user-service/dist/main.js']
     environment:
       PORT: 3001
@@ -110,7 +110,10 @@ services:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
-      # Cognito configuration for E2E testing (mock values)
+      # Use mock authentication for E2E testing (no real Cognito needed)
+      AUTH_MOCK: 'true'
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      # Cognito configuration (fallback, not used when AUTH_MOCK=true)
       COGNITO_USER_POOL_ID: us-east-1_test123
       COGNITO_CLIENT_ID: test_client_id
       COGNITO_REGION: us-east-1
@@ -130,7 +133,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-ai-service-e2e
+    image: unitediscord-e2e/ai-service:latest
     command: ['node', 'services/ai-service/dist/main.js']
     environment:
       PORT: 3002
@@ -157,7 +160,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-discussion-service-e2e
+    image: unitediscord-e2e/discussion-service:latest
     command: ['node', 'services/discussion-service/dist/main.js']
     environment:
       PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
@@ -178,7 +181,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-moderation-service-e2e
+    image: unitediscord-e2e/moderation-service:latest
     command: ['node', 'services/moderation-service/dist/main.js']
     environment:
       PORT: 3003
@@ -202,7 +205,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-recommendation-service-e2e
+    image: unitediscord-e2e/recommendation-service:latest
     command: ['node', 'services/recommendation-service/dist/main.js']
     environment:
       PORT: 3004
@@ -223,7 +226,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-notification-service-e2e
+    image: unitediscord-e2e/notification-service:latest
     command: ['node', 'services/notification-service/dist/main.js']
     environment:
       PORT: 3005
@@ -244,7 +247,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    container_name: unite-fact-check-service-e2e
+    image: unitediscord-e2e/fact-check-service:latest
     command: ['node', 'services/fact-check-service/dist/main.js']
     environment:
       PORT: 3006
@@ -272,8 +275,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: unite-frontend-e2e
+      args:
+        VITE_API_BASE_URL: http://api-gateway:3000
+        VITE_API_GATEWAY_URL: http://api-gateway:3000
+        VITE_NOTIFICATION_SERVICE_URL: http://notification-service:3005
+    image: unitediscord-e2e/frontend:latest
     environment:
+      VITE_API_BASE_URL: http://api-gateway:3000
       VITE_API_GATEWAY_URL: http://api-gateway:3000
       VITE_NOTIFICATION_SERVICE_URL: http://notification-service:3005
     ports:
