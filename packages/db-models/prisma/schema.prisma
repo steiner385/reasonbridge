@@ -79,12 +79,19 @@ model VerificationRecord {
   providerReference String?            @map("provider_reference")
   createdAt         DateTime           @default(now()) @map("created_at")
 
+  // OTP-specific fields
+  otpCode           String?            @map("otp_code")
+  otpExpiresAt      DateTime?          @map("otp_expires_at")
+  otpAttempts       Int                @default(0) @map("otp_attempts")
+  phoneNumber       String?            @map("phone_number")
+
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   videoUpload  VideoUpload?
 
   @@index([userId, type])
   @@index([status])
+  @@index([phoneNumber])
   @@map("verification_records")
 }
 
