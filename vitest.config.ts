@@ -1,8 +1,5 @@
 import { defineConfig } from 'vitest/config';
 import path from 'path';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
 
 export default defineConfig({
   // Vite configuration for module resolution
@@ -35,7 +32,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: [require.resolve('allure-vitest/setup')],
     // Vitest 2.x: Inline dependencies for proper module resolution in pnpm workspaces
     server: {
       deps: {
@@ -100,7 +96,7 @@ export default defineConfig({
         statements: 55,
       },
     },
-    reporters: ['default', 'junit', ['allure-vitest/reporter', { resultsDir: './allure-results' }]],
+    reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',
     },
