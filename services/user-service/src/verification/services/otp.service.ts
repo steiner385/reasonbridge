@@ -4,6 +4,8 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class OtpService {
+  private readonly SALT_ROUNDS = 10;
+
   /**
    * Generate a 6-digit numeric OTP code
    * Uses cryptographically secure random number generation
@@ -18,10 +20,14 @@ export class OtpService {
    * Hash an OTP code using bcrypt
    * @param code - The 6-digit OTP code to hash
    * @returns Promise resolving to bcrypt hash
+   * @throws Error if hashing fails
    */
   async hashOtp(code: string): Promise<string> {
-    const saltRounds = 10;
-    return bcrypt.hash(code, saltRounds);
+    try {
+      return await bcrypt.hash(code, this.SALT_ROUNDS);
+    } catch (error) {
+      throw new Error(`Failed to hash OTP: ${error.message}`);
+    }
   }
 
   /**
@@ -34,6 +40,12 @@ export class OtpService {
     if (!code || !hashedCode) {
       return false;
     }
-    return bcrypt.compare(code, hashedCode);
+
+    try {
+      return await bcrypt.compare(code, hashedCode);
+    } catch (error) {
+      // bcrypt.compare throws on malformed hash - treat as invalid
+      return false;
+    }
   }
 }

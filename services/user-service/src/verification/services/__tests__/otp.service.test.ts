@@ -81,5 +81,38 @@ describe('OtpService', () => {
 
       expect(isValid).toBe(false);
     });
+
+    it('should return false for empty hashedCode', async () => {
+      const otpService = new OtpService();
+
+      const isValid = await otpService.validateOtp('123456', '');
+
+      expect(isValid).toBe(false);
+    });
+
+    it('should return false for null code', async () => {
+      const otpService = new OtpService();
+      const hashedCode = await otpService.hashOtp('123456');
+
+      const isValid = await otpService.validateOtp(null as any, hashedCode);
+
+      expect(isValid).toBe(false);
+    });
+
+    it('should return false for null hashedCode', async () => {
+      const otpService = new OtpService();
+
+      const isValid = await otpService.validateOtp('123456', null as any);
+
+      expect(isValid).toBe(false);
+    });
+
+    it('should return false for malformed hash', async () => {
+      const otpService = new OtpService();
+
+      const isValid = await otpService.validateOtp('123456', 'not-a-bcrypt-hash');
+
+      expect(isValid).toBe(false);
+    });
   });
 });
