@@ -6,7 +6,10 @@ async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter();
 
   // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter);
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
+    // Only log errors in test mode to prevent memory leaks from verbose logging
+    logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
+  });
 
   // Enable CORS for frontend requests
   app.enableCors({
