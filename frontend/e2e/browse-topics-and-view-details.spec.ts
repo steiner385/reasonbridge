@@ -106,7 +106,7 @@ test.describe('Browse Topics and View Details', () => {
       await expect(statusBadge).toBeVisible();
 
       // Stats sections (Participants, Responses, etc.)
-      await expect(page.getByText(/participants/i)).toBeVisible();
+      await expect(page.locator('[data-testid="participant-count"]')).toBeVisible();
       await expect(page.locator('[data-testid="response-count"]')).toBeVisible();
 
       // Action buttons

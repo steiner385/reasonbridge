@@ -193,7 +193,7 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
       await registerLoginAndGoToProfile(page);
 
       // Check page structure - should have profile header
-      const profileHeader = page.locator('h1');
+      const profileHeader = page.getByRole('heading', { name: /my profile/i });
       await expect(profileHeader).toBeVisible({ timeout: 10000 });
 
       // Should include trust elements
