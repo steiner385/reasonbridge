@@ -18,23 +18,33 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private readonly jwksClient: jwksClient.JwksClient;
-  private readonly userPoolId: string;
+  private readonly jwksClient?: jwksClient.JwksClient;
+  private readonly userPoolId?: string;
   private readonly region: string;
+  private readonly useMockAuth: boolean;
+  private readonly jwtSecret?: string;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
     this.region = this.configService.get<string>('AWS_REGION', 'us-east-1');
-    this.userPoolId = this.configService.getOrThrow<string>('COGNITO_USER_POOL_ID');
+    this.useMockAuth =
+      this.configService.get<string>('AUTH_MOCK') === 'true' ||
+      this.configService.get<string>('NODE_ENV') === 'test';
 
-    // Initialize JWKS client to fetch Cognito public keys
-    this.jwksClient = jwksClient.default({
-      jwksUri: `https://cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}/.well-known/jwks.json`,
-      cache: true,
-      cacheMaxAge: 86400000, // 24 hours in milliseconds
-    });
+    if (this.useMockAuth) {
+      // Mock mode - use simple JWT secret
+      this.jwtSecret = this.configService.get<string>('JWT_SECRET', 'mock-jwt-secret-for-testing');
+    } else {
+      // Production mode - use Cognito JWKS
+      this.userPoolId = this.configService.getOrThrow<string>('COGNITO_USER_POOL_ID');
+      this.jwksClient = jwksClient.default({
+        jwksUri: `https://cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}/.well-known/jwks.json`,
+        cache: true,
+        cacheMaxAge: 86400000, // 24 hours in milliseconds
+      });
+    }
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,25 +56,33 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      // Decode token to get the kid (key ID)
-      const decodedToken = this.jwtService.decode(token, { complete: true }) as {
-        header: { kid: string };
-        payload: JwtPayload;
-      };
+      let payload: JwtPayload;
 
-      if (!decodedToken || !decodedToken.header.kid) {
-        throw new UnauthorizedException('Invalid token format');
+      if (this.useMockAuth) {
+        // Mock mode - verify with simple JWT secret
+        payload = this.jwtService.verify<JwtPayload>(token, {
+          secret: this.jwtSecret,
+          algorithms: ['HS256'],
+        });
+      } else {
+        // Production mode - verify with Cognito JWKS
+        const decodedToken = this.jwtService.decode(token, { complete: true }) as {
+          header: { kid: string };
+          payload: JwtPayload;
+        };
+
+        if (!decodedToken || !decodedToken.header.kid) {
+          throw new UnauthorizedException('Invalid token format');
+        }
+
+        const key = await this.jwksClient!.getSigningKey(decodedToken.header.kid);
+        const signingKey = key.getPublicKey();
+
+        payload = this.jwtService.verify<JwtPayload>(token, {
+          publicKey: signingKey,
+          algorithms: ['RS256'],
+        });
       }
-
-      // Get the signing key from Cognito JWKS
-      const key = await this.jwksClient.getSigningKey(decodedToken.header.kid);
-      const signingKey = key.getPublicKey();
-
-      // Verify the token with the public key
-      const payload = this.jwtService.verify<JwtPayload>(token, {
-        publicKey: signingKey,
-        algorithms: ['RS256'],
-      });
 
       // Attach the payload to the request object for use in controllers
       request.user = payload;
@@ -76,7 +94,6 @@ export class JwtAuthGuard implements CanActivate {
       }
 
       // Log for debugging but don't expose details
-      console.error('JWT verification error:', error);
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
