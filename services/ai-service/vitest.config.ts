@@ -24,9 +24,10 @@ export default defineConfig({
       '**/feedback-analytics.service.test.ts',
       '**/suggestions.controller.test.ts',
     ],
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', 'allure-vitest'],
     outputFile: {
       junit: './coverage/junit.xml',
+      'allure-vitest': '../../allure-results',
     },
   },
 });

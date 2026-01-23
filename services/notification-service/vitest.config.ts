@@ -32,6 +32,11 @@ export default defineConfig({
         statements: 70,
       },
     },
+    reporters: ['default', 'junit', 'allure-vitest'],
+    outputFile: {
+      junit: './coverage/junit.xml',
+      'allure-vitest': '../../allure-results',
+    },
   },
   resolve: {
     alias: {

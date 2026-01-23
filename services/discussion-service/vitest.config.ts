@@ -12,9 +12,10 @@ export default defineConfig({
     ],
     setupFiles: ['./src/test-setup.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', 'allure-vitest'],
     outputFile: {
       junit: './coverage/junit.xml',
+      'allure-vitest': '../../allure-results',
     },
   },
 });

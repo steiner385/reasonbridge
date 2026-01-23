@@ -24,6 +24,11 @@ export default defineConfig({
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: ['node_modules/**', 'dist/**', '**/*.d.ts', '**/*.test.ts', '**/*.spec.ts'],
     },
+    reporters: ['default', 'junit', 'allure-vitest'],
+    outputFile: {
+      junit: './coverage/junit.xml',
+      'allure-vitest': '../../allure-results',
+    },
   },
   resolve: {
     alias: {
