@@ -79,8 +79,8 @@ model VerificationRecord {
   providerReference String?            @map("provider_reference")
   createdAt         DateTime           @default(now()) @map("created_at")
 
-  // OTP-specific fields
-  otpCode           String?            @map("otp_code")
+  // OTP-specific fields (otpCode stores bcrypt-hashed values, never plaintext)
+  otpCode           String?            @map("otp_code")      // bcrypt-hashed OTP (never store plaintext)
   otpExpiresAt      DateTime?          @map("otp_expires_at")
   otpAttempts       Int                @default(0) @map("otp_attempts")
   phoneNumber       String?            @map("phone_number")

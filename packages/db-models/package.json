@@ -24,6 +24,9 @@
     "clean": "rm -rf dist .tsbuildinfo",
     "typecheck": "tsc --noEmit",
     "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -36,7 +39,9 @@
   },
   "devDependencies": {
     "prisma": "6.3.1",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
   },
   "peerDependencies": {
     "@unite-discord/common": "workspace:*"
