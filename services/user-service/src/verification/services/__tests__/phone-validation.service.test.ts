@@ -11,7 +11,7 @@ describe('PhoneValidationService', () => {
   describe('validatePhoneNumber', () => {
     it('should accept valid E.164 format', () => {
       const validPhones = [
-        '+15551234567', // US
+        '+14155552671', // US
         '+442071234567', // UK
         '+33123456789', // France
         '+81312345678', // Japan
@@ -41,10 +41,10 @@ describe('PhoneValidationService', () => {
     });
 
     it('should normalize phone numbers to E.164', () => {
-      const result = service.validatePhoneNumber('+1 (555) 123-4567');
+      const result = service.validatePhoneNumber('+1 (415) 555-2671');
 
       expect(result.isValid).toBe(true);
-      expect(result.e164).toBe('+15551234567');
+      expect(result.e164).toBe('+14155552671');
     });
   });
 });

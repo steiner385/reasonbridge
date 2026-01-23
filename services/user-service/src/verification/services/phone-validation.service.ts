@@ -23,16 +23,16 @@ export class PhoneValidationService {
     }
 
     try {
-      // Parse and normalize to E.164
-      const parsed = parsePhoneNumber(phoneNumber);
-
-      // Check if the parsed number is possible (correct length, etc.)
-      if (!parsed.isPossible()) {
+      // Check if valid phone number
+      if (!isValidPhoneNumber(phoneNumber)) {
         return {
           isValid: false,
           error: 'Invalid phone number format',
         };
       }
+
+      // Parse and normalize to E.164
+      const parsed = parsePhoneNumber(phoneNumber);
 
       return {
         isValid: true,
