@@ -74,7 +74,13 @@ export class ApiClient {
    * Build URL with query parameters
    */
   private buildURL(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = new URL(endpoint, this.baseURL);
+    // Handle relative baseURL by using window.location.origin
+    // Docker E2E env uses VITE_API_BASE_URL=/api (relative), but URL() needs absolute base
+    const base = this.baseURL.startsWith('http')
+      ? this.baseURL
+      : `${window.location.origin}${this.baseURL}`;
+
+    const url = new URL(endpoint, base);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
