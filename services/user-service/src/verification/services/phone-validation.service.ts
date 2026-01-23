@@ -1,36 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 
+export interface PhoneValidationResult {
+  isValid: boolean;
+  e164?: string;
+  error?: string;
+}
+
 @Injectable()
 export class PhoneValidationService {
   /**
-   * Validate if a phone number is in valid E.164 format
-   * E.164 format: +[country code][subscriber number]
-   * Example: +15551234567
-   *
-   * @param phoneNumber - Phone number to validate
-   * @returns true if valid E.164 format, false otherwise
+   * Validate and normalize phone number to E.164 format
+   * @param phoneNumber - Phone number in any format
+   * @returns Validation result with normalized E.164 format if valid
    */
-  validateE164(phoneNumber: string): boolean {
-    if (!phoneNumber) {
-      return false;
+  validatePhoneNumber(phoneNumber: string): PhoneValidationResult {
+    if (!phoneNumber || phoneNumber.trim() === '') {
+      return {
+        isValid: false,
+        error: 'Phone number is required',
+      };
     }
 
-    // E.164 must start with +
-    if (!phoneNumber.startsWith('+')) {
-      return false;
-    }
-
-    // E.164 can only contain + and digits
-    if (!/^\+\d+$/.test(phoneNumber)) {
-      return false;
-    }
-
-    // Use libphonenumber-js to validate the number
     try {
-      return isValidPhoneNumber(phoneNumber);
+      // Parse and normalize to E.164
+      const parsed = parsePhoneNumber(phoneNumber);
+
+      // Check if the parsed number is possible (correct length, etc.)
+      if (!parsed.isPossible()) {
+        return {
+          isValid: false,
+          error: 'Invalid phone number format',
+        };
+      }
+
+      return {
+        isValid: true,
+        e164: parsed.format('E.164'),
+      };
     } catch (error) {
-      return false;
+      return {
+        isValid: false,
+        error: 'Failed to parse phone number',
+      };
     }
   }
 }

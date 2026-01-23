@@ -1,62 +1,50 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { PhoneValidationService } from '../phone-validation.service';
 
 describe('PhoneValidationService', () => {
-  describe('validateE164', () => {
-    it('should return true for valid US E.164 phone number', () => {
-      const service = new PhoneValidationService();
+  let service: PhoneValidationService;
 
-      const isValid = service.validateE164('+12025550123');
+  beforeEach(() => {
+    service = new PhoneValidationService();
+  });
 
-      expect(isValid).toBe(true);
+  describe('validatePhoneNumber', () => {
+    it('should accept valid E.164 format', () => {
+      const validPhones = [
+        '+15551234567', // US
+        '+442071234567', // UK
+        '+33123456789', // France
+        '+81312345678', // Japan
+      ];
+
+      validPhones.forEach((phone) => {
+        const result = service.validatePhoneNumber(phone);
+        expect(result.isValid).toBe(true);
+        expect(result.e164).toBe(phone);
+      });
     });
 
-    it('should return true for valid UK E.164 phone number', () => {
-      const service = new PhoneValidationService();
+    it('should reject invalid formats', () => {
+      const invalidPhones = [
+        '5551234567', // Missing country code
+        '555-123-4567', // Not E.164
+        '+1555', // Too short
+        'invalid', // Not a number
+        '', // Empty
+      ];
 
-      const isValid = service.validateE164('+442071234567');
-
-      expect(isValid).toBe(true);
+      invalidPhones.forEach((phone) => {
+        const result = service.validatePhoneNumber(phone);
+        expect(result.isValid).toBe(false);
+        expect(result.error).toBeDefined();
+      });
     });
 
-    it('should return false for phone number without + prefix', () => {
-      const service = new PhoneValidationService();
+    it('should normalize phone numbers to E.164', () => {
+      const result = service.validatePhoneNumber('+1 (555) 123-4567');
 
-      const isValid = service.validateE164('15551234567');
-
-      expect(isValid).toBe(false);
-    });
-
-    it('should return false for phone number with invalid country code', () => {
-      const service = new PhoneValidationService();
-
-      const isValid = service.validateE164('+0001234567');
-
-      expect(isValid).toBe(false);
-    });
-
-    it('should return false for empty string', () => {
-      const service = new PhoneValidationService();
-
-      const isValid = service.validateE164('');
-
-      expect(isValid).toBe(false);
-    });
-
-    it('should return false for non-numeric characters', () => {
-      const service = new PhoneValidationService();
-
-      const isValid = service.validateE164('+1 (555) 123-4567');
-
-      expect(isValid).toBe(false);
-    });
-
-    it('should return false for null input', () => {
-      const service = new PhoneValidationService();
-
-      const isValid = service.validateE164(null as any);
-
-      expect(isValid).toBe(false);
+      expect(result.isValid).toBe(true);
+      expect(result.e164).toBe('+15551234567');
     });
   });
 });
