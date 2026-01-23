@@ -1,5 +1,8 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 /**
  * Integration Tests Configuration
@@ -32,6 +35,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    setupFiles: [require.resolve('allure-vitest/setup')],
     // Load test environment variables
     envFile: '.env.test',
     include: [
@@ -48,7 +52,7 @@ export default defineConfig({
         singleFork: true,
       },
     },
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', ['allure-vitest/reporter', { resultsDir: './allure-results' }]],
     outputFile: {
       junit: './coverage/integration-junit.xml',
     },
