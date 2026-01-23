@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller.js';
 import { CognitoService } from './cognito.service.js';
@@ -35,7 +35,7 @@ const authServiceProvider = {
  */
 const jwtAuthGuardProvider = {
   provide: JwtAuthGuard,
-  useFactory: (jwtService: any, configService: ConfigService) => {
+  useFactory: (jwtService: JwtService, configService: ConfigService) => {
     const useMock =
       configService.get<string>('AUTH_MOCK') === 'true' ||
       configService.get<string>('NODE_ENV') === 'test';
@@ -46,7 +46,7 @@ const jwtAuthGuardProvider = {
 
     return new JwtAuthGuard(jwtService, configService);
   },
-  inject: [JwtModule, ConfigService],
+  inject: [JwtService, ConfigService],
 };
 
 @Module({
