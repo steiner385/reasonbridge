@@ -34,119 +34,28 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
   const registerLoginAndGoToProfile = async (page: Page) => {
     const testUser = generateTestUser();
 
-    // ============================================================
-    // DEBUG: Setup console and error listeners
-    // ============================================================
-    console.log('DEBUG: Setting up browser console/error listeners');
-
-    page.on('console', (msg) => {
-      const type = msg.type();
-      const text = msg.text();
-      console.log(`BROWSER [${type}]: ${text}`);
-    });
-
-    page.on('pageerror', (err) => {
-      console.error('PAGE ERROR:', err.message);
-      console.error('Stack:', err.stack);
-    });
-
-    // Monitor network requests to see if registration API call happens
-    const apiCalls: string[] = [];
-    page.on('request', (request) => {
-      const url = request.url();
-      if (url.includes('/api/') || url.includes('/auth/')) {
-        const method = request.method();
-        console.log(`API REQUEST: ${method} ${url}`);
-        apiCalls.push(`${method} ${url}`);
-      }
-    });
-
-    page.on('response', (response) => {
-      const url = response.url();
-      if (url.includes('/api/') || url.includes('/auth/')) {
-        const status = response.status();
-        console.log(`API RESPONSE: ${status} ${url}`);
-      }
-    });
-
     // Step 1: Register a new user
-    console.log('DEBUG: Navigating to /register');
     await page.goto('/register');
     await page.waitForLoadState('networkidle');
-    console.log('DEBUG: Registration page loaded, current URL:', page.url());
 
     const emailInput = page.getByLabel(/email/i);
     const displayNameInput = page.getByLabel(/display name/i);
     const passwordInput = page.getByLabel(/^password/i).first();
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
-    console.log('DEBUG: Filling registration form with:', {
-      email: testUser.email,
-      displayName: testUser.displayName,
-    });
-
     await emailInput.fill(testUser.email);
     await displayNameInput.fill(testUser.displayName);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill(testUser.password);
 
-    console.log('DEBUG: Form filled, looking for register button...');
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
-
-    // Verify button exists and is enabled
-    await expect(registerButton).toBeVisible();
-    const isEnabled = await registerButton.isEnabled();
-    console.log('DEBUG: Register button visible:', await registerButton.isVisible());
-    console.log('DEBUG: Register button enabled:', isEnabled);
-    console.log('DEBUG: Register button text:', await registerButton.textContent());
-
-    console.log('DEBUG: About to click register button...');
-    console.log('DEBUG: Current URL before click:', page.url());
-    console.log('DEBUG: API calls so far:', apiCalls);
-
     await registerButton.click();
 
-    console.log('DEBUG: Register button clicked!');
-    console.log('DEBUG: Current URL immediately after click:', page.url());
-
-    // Wait a moment to see if any API calls were triggered
-    await page.waitForTimeout(1000);
-    console.log('DEBUG: URL after 1 second:', page.url());
-    console.log('DEBUG: API calls after button click:', apiCalls);
-
     // Wait for registration to complete - redirects to login or dashboard
-    console.log(
-      'DEBUG: Waiting for navigation to /login, /dashboard, /home, /profile, or /topics...',
-    );
-
-    try {
-      await page.waitForURL(/\/(login|dashboard|home|profile|topics|$)/, { timeout: 15000 });
-      console.log('DEBUG: Navigation completed!');
-      console.log('DEBUG: Final URL after registration:', page.url());
-      console.log('DEBUG: Total API calls made:', apiCalls);
-    } catch (error) {
-      console.error('DEBUG: Navigation timeout! Still on URL:', page.url());
-      console.error('DEBUG: API calls that were made:', apiCalls);
-
-      // Check if there's an error message visible on the page
-      const pageText = await page.textContent('body');
-      console.error('DEBUG: Page body text:', pageText?.substring(0, 500));
-
-      // Check if the button is still visible (meaning form didn't submit)
-      const buttonStillVisible = await registerButton.isVisible();
-      console.error('DEBUG: Register button still visible?', buttonStillVisible);
-
-      // Take a screenshot for debugging
-      await page.screenshot({ path: 'debug-registration-timeout.png', fullPage: true });
-      console.error('DEBUG: Screenshot saved to debug-registration-timeout.png');
-
-      throw error;
-    }
+    await page.waitForURL(/\/(login|dashboard|home|profile|topics|$)/, { timeout: 15000 });
 
     // Step 2: If redirected to login, perform login
     const currentUrl = page.url();
-    console.log('DEBUG: Checking if redirected to login page...');
-    console.log('DEBUG: Current URL includes /login?', currentUrl.includes('/login'));
     if (currentUrl.includes('/login')) {
       const loginEmailInput = page.getByLabel(/email/i);
       const loginPasswordInput = page.getByLabel(/^password/i).first();
