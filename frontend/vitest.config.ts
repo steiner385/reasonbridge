@@ -1,12 +1,15 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['allure-vitest/setup', './src/setupTests.ts'],
+    setupFiles: [require.resolve('allure-vitest/setup'), './src/setupTests.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
