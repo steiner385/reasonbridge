@@ -47,4 +47,30 @@ describe('PhoneValidationService', () => {
       expect(result.e164).toBe('+14155552671');
     });
   });
+
+  describe('maskPhoneNumber', () => {
+    it('should mask US phone number', () => {
+      const result = service.maskPhoneNumber('+14155552671');
+
+      expect(result).toBe('+1 (***) ***-2671');
+    });
+
+    it('should mask UK phone number', () => {
+      const result = service.maskPhoneNumber('+442071234567');
+
+      expect(result).toBe('+44 (**) ****-4567');
+    });
+
+    it('should return masked format for invalid number', () => {
+      const result = service.maskPhoneNumber('invalid');
+
+      expect(result).toBe('***');
+    });
+
+    it('should handle empty string', () => {
+      const result = service.maskPhoneNumber('');
+
+      expect(result).toBe('***');
+    });
+  });
 });
