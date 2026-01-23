@@ -1,14 +1,10 @@
 import { defineConfig } from 'vitest/config';
 import path from 'path';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: [require.resolve('allure-vitest/setup')],
     include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     exclude: [
       '**/node_modules/**',
@@ -41,11 +37,7 @@ export default defineConfig({
         statements: 80,
       },
     },
-    reporters: [
-      'default',
-      'junit',
-      ['allure-vitest/reporter', { resultsDir: '../../allure-results' }],
-    ],
+    reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',
     },
