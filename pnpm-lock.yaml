@@ -144,6 +144,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 2.1.9
         version: 2.1.9(vitest@2.1.9)
+      allure-playwright:
+        specifier: ^3.0.0
+        version: 3.4.5(@playwright/test@1.57.0)
       autoprefixer:
         specifier: 10.4.23
         version: 10.4.23(postcss@8.5.6)
