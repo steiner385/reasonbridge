@@ -6,17 +6,16 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/setupTests.ts'],
+    setupFiles: ['allure-vitest/setup', './src/setupTests.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       reportsDirectory: '../coverage/frontend',
     },
-    reporters: ['default', 'junit', 'allure-vitest/reporter'],
+    reporters: ['default', 'junit', ['allure-vitest/reporter', { resultsDir: './allure-results' }]],
     outputFile: {
       junit: '../coverage/junit.xml',
-      'allure-vitest/reporter': './allure-results',
     },
   },
 });

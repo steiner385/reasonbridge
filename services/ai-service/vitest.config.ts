@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    setupFiles: ['allure-vitest/setup'],
     include: [
       'src/**/*.test.ts',
       'src/**/*.spec.ts',
@@ -24,10 +25,13 @@ export default defineConfig({
       '**/feedback-analytics.service.test.ts',
       '**/suggestions.controller.test.ts',
     ],
-    reporters: ['default', 'junit', 'allure-vitest/reporter'],
+    reporters: [
+      'default',
+      'junit',
+      ['allure-vitest/reporter', { resultsDir: '../../allure-results' }],
+    ],
     outputFile: {
       junit: './coverage/junit.xml',
-      'allure-vitest/reporter': '../../allure-results',
     },
   },
 });

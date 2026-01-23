@@ -32,6 +32,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    setupFiles: ['allure-vitest/setup'],
     // Load test environment variables
     envFile: '.env.test',
     include: [
@@ -48,10 +49,9 @@ export default defineConfig({
         singleFork: true,
       },
     },
-    reporters: ['default', 'junit', 'allure-vitest/reporter'],
+    reporters: ['default', 'junit', ['allure-vitest/reporter', { resultsDir: './allure-results' }]],
     outputFile: {
       junit: './coverage/integration-junit.xml',
-      'allure-vitest/reporter': './allure-results',
     },
   },
 });

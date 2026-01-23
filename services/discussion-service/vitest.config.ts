@@ -10,12 +10,15 @@ export default defineConfig({
       'src/__tests__/**/*.test.ts',
       'src/__tests__/**/*.spec.ts',
     ],
-    setupFiles: ['./src/test-setup.ts'],
+    setupFiles: ['allure-vitest/setup', './src/test-setup.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
-    reporters: ['default', 'junit', 'allure-vitest/reporter'],
+    reporters: [
+      'default',
+      'junit',
+      ['allure-vitest/reporter', { resultsDir: '../../allure-results' }],
+    ],
     outputFile: {
       junit: './coverage/junit.xml',
-      'allure-vitest/reporter': '../../allure-results',
     },
   },
 });

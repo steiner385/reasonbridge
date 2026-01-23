@@ -32,6 +32,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    setupFiles: ['allure-vitest/setup'],
     // Vitest 2.x: Inline dependencies for proper module resolution in pnpm workspaces
     server: {
       deps: {
@@ -96,10 +97,9 @@ export default defineConfig({
         statements: 55,
       },
     },
-    reporters: ['default', 'junit', 'allure-vitest/reporter'],
+    reporters: ['default', 'junit', ['allure-vitest/reporter', { resultsDir: './allure-results' }]],
     outputFile: {
       junit: './coverage/junit.xml',
-      'allure-vitest/reporter': './allure-results',
     },
     // Handle pnpm workspace symlinks and Prisma client resolution
     deps: {

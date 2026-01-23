@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    setupFiles: ['allure-vitest/setup'],
     include: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/**/*.integration.test.ts'],
     exclude: [
       '**/node_modules/**',
@@ -24,10 +25,13 @@ export default defineConfig({
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: ['node_modules/**', 'dist/**', '**/*.d.ts', '**/*.test.ts', '**/*.spec.ts'],
     },
-    reporters: ['default', 'junit', 'allure-vitest/reporter'],
+    reporters: [
+      'default',
+      'junit',
+      ['allure-vitest/reporter', { resultsDir: '../../allure-results' }],
+    ],
     outputFile: {
       junit: './coverage/junit.xml',
-      'allure-vitest/reporter': '../../allure-results',
     },
   },
   resolve: {
