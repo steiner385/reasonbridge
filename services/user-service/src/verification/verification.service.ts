@@ -456,12 +456,11 @@ export class VerificationService {
         userId,
         type: VerificationType.PHONE,
         status: VerificationStatus.PENDING,
+        phoneNumber: normalizedPhone,
+        otpCode: hashedOtp,
+        otpExpiresAt: expiresAt,
+        otpAttempts: 0,
         expiresAt,
-        providerReference: normalizedPhone,
-        metadata: {
-          hashedOtp,
-          attempts: 0,
-        },
       },
     });
 
@@ -521,8 +520,7 @@ export class VerificationService {
     }
 
     // Check attempt limit
-    const metadata = verification.metadata as any;
-    const attempts = metadata.attempts || 0;
+    const attempts = verification.otpAttempts;
 
     if (attempts >= this.MAX_OTP_ATTEMPTS) {
       await this.prisma.verificationRecord.update({
@@ -535,7 +533,10 @@ export class VerificationService {
     }
 
     // Validate OTP
-    const hashedOtp = metadata.hashedOtp;
+    const hashedOtp = verification.otpCode;
+    if (!hashedOtp) {
+      throw new BadRequestException('No OTP code found for this verification');
+    }
     const isValid = await this.otpService.validateOtp(request.code, hashedOtp);
 
     if (!isValid) {
@@ -543,10 +544,7 @@ export class VerificationService {
       await this.prisma.verificationRecord.update({
         where: { id: verification.id },
         data: {
-          metadata: {
-            ...metadata,
-            attempts: attempts + 1,
-          },
+          otpAttempts: attempts + 1,
         },
       });
 
@@ -565,15 +563,13 @@ export class VerificationService {
       },
     });
 
-    // Update user with verified phone and trust score boost
-    const phoneNumber = verification.providerReference!;
-    await this.prisma.user.update({
+    // Update user with trust score boost and verification level
+    const phoneNumber = verification.phoneNumber!;
+    const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
-        phoneNumber,
-        phoneVerified: true,
         verificationLevel: 'ENHANCED',
-        integrityScore: {
+        trustScoreIntegrity: {
           increment: 0.1, // +0.10 boost for phone verification
         },
       },
@@ -587,7 +583,7 @@ export class VerificationService {
       success: true,
       message: 'Phone number verified successfully',
       verificationLevel: 'ENHANCED',
-      integrityBoost: 0.1,
+      trustScoreIntegrity: Number(user.trustScoreIntegrity),
     };
   }
 }
