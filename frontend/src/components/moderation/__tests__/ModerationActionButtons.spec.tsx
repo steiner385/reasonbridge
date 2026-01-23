@@ -118,7 +118,7 @@ describe('ModerationActionButtons', () => {
         .mockImplementation(
           () =>
             new Promise((resolve) =>
-              setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 100),
+              setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 300),
             ),
         );
       moderationApi.approveModerationAction.mockImplementation(mockApprove);
@@ -142,7 +142,7 @@ describe('ModerationActionButtons', () => {
         .mockImplementation(
           () =>
             new Promise((resolve) =>
-              setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 100),
+              setTimeout(() => resolve({ ...mockModerationAction, status: 'active' }), 300),
             ),
         );
       moderationApi.approveModerationAction.mockImplementation(mockApprove);
@@ -155,6 +155,9 @@ describe('ModerationActionButtons', () => {
       // Check for loading state - button should show "Approving..."
       // Wait for React to re-render with loading state
       expect(await screen.findByText('Approving...')).toBeInTheDocument();
+
+      // Verify button is actually disabled during processing
+      expect(approveButton).toBeDisabled();
 
       // After processing, button should return to normal
       await waitFor(
@@ -230,7 +233,7 @@ describe('ModerationActionButtons', () => {
         .mockImplementation(
           () =>
             new Promise((resolve) =>
-              setTimeout(() => resolve({ ...mockModerationAction, status: 'reversed' }), 100),
+              setTimeout(() => resolve({ ...mockModerationAction, status: 'reversed' }), 300),
             ),
         );
       moderationApi.rejectModerationAction.mockImplementation(mockReject);
