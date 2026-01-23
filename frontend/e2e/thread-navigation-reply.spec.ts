@@ -339,6 +339,9 @@ test.describe('Thread Navigation and Reply', () => {
         timeout: 10000,
       });
 
+      // Wait for response composer to ensure page has fully loaded
+      await page.waitForSelector('text=Share Your Perspective', { timeout: 5000 });
+
       // Check if there's an empty state message
       const emptyStateMessages = [
         page.getByText(/no responses yet/i),
