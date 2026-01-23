@@ -98,10 +98,11 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - Jenkins loads the library directly from `main`, so branches/PRs just add unnecessary overhead
 - The library contains reusable pipeline steps in `vars/` directory
 
-**Key Job:** `unitediscord-ci` - Automatically triggered on all branch pushes via GitHub webhook
+**Key Job:** `uniteDiscord-multibranch` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
 
 - Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
 - No manual triggering needed - commits trigger builds automatically
+- **NOTE:** Job name is `uniteDiscord-multibranch`, NOT `unitediscord-ci`
 
 **Pipeline Stages:**
 
@@ -118,7 +119,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 **Debugging:**
 
 - Check console output: `echo $UNIT_TEST_EXIT_CODE` for test exit codes
-- View build logs: Jenkins UI → unitediscord-ci → Build Console
+- View build logs: Jenkins UI → uniteDiscord-multibranch → [branch-name] → Build Console
 - Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
 - Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
 
