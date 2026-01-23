@@ -60,6 +60,9 @@ export class JwtAuthGuard implements CanActivate {
 
       if (this.useMockAuth) {
         // Mock mode - verify with simple JWT secret
+        if (!this.jwtSecret) {
+          throw new UnauthorizedException('JWT secret not configured for mock auth');
+        }
         payload = this.jwtService.verify<JwtPayload>(token, {
           secret: this.jwtSecret,
           algorithms: ['HS256'],
