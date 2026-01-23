@@ -20,6 +20,8 @@ model User {
   email                  String            @unique
   displayName            String            @map("display_name") @db.VarChar(50)
   cognitoSub             String            @unique @map("cognito_sub")
+  phoneNumber            String?           @map("phone_number")
+  phoneVerified          Boolean           @default(false) @map("phone_verified")
   verificationLevel      VerificationLevel @default(BASIC) @map("verification_level")
   trustScoreAbility      Decimal           @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
   trustScoreBenevolence  Decimal           @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
@@ -49,6 +51,7 @@ model User {
   @@index([cognitoSub])
   @@index([email])
   @@index([displayName])
+  @@index([phoneNumber])
   @@map("users")
 }
 
