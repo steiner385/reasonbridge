@@ -5,6 +5,12 @@ import { VerificationResponseDto } from './dto/verification-response.dto.js';
 import { VideoVerificationService } from './video-challenge.service.js';
 import { randomUUID } from 'crypto';
 import { VerificationType, VerificationStatus } from '@prisma/client';
+import { OtpService } from './services/otp.service.js';
+import { PhoneValidationService } from './services/phone-validation.service.js';
+import {
+  PhoneVerificationRequestDto,
+  PhoneVerificationVerifyDto,
+} from './dto/phone-verification.dto.js';
 
 /**
  * Verification Service
@@ -17,10 +23,14 @@ export class VerificationService {
 
   // Verification request expiry duration (in hours)
   private readonly VERIFICATION_EXPIRY_HOURS = 24;
+  private readonly OTP_EXPIRY_MINUTES = 5;
+  private readonly MAX_OTP_ATTEMPTS = 3;
 
   constructor(
     private prisma: PrismaService,
     private videoVerificationService: VideoVerificationService,
+    private otpService: OtpService,
+    private phoneValidationService: PhoneValidationService,
   ) {}
 
   /**
@@ -71,10 +81,11 @@ export class VerificationService {
 
       if (existingVerification) {
         // Check if it's still valid
-        if (existingVerification.expiresAt && new Date(existingVerification.expiresAt) > new Date()) {
-          this.logger.warn(
-            `User ${userId} already has pending ${request.type} verification`,
-          );
+        if (
+          existingVerification.expiresAt &&
+          new Date(existingVerification.expiresAt) > new Date()
+        ) {
+          this.logger.warn(`User ${userId} already has pending ${request.type} verification`);
           throw new BadRequestException(
             `A ${request.type} verification is already in progress. Please complete or wait for it to expire.`,
           );
@@ -153,9 +164,7 @@ export class VerificationService {
         throw new BadRequestException('Challenge type is required for video verification');
       }
 
-      const challenge = this.videoVerificationService.generateChallenge(
-        request.challengeType,
-      );
+      const challenge = this.videoVerificationService.generateChallenge(request.challengeType);
       const uploadUrl = await this.videoVerificationService.generateUploadUrl(
         verification.userId,
         verification.id,
@@ -279,10 +288,7 @@ export class VerificationService {
    * @param verificationType - Type of verification to re-request
    * @returns VerificationResponseDto for new verification attempt
    */
-  async reVerify(
-    userId: string,
-    verificationType: string,
-  ): Promise<VerificationResponseDto> {
+  async reVerify(userId: string, verificationType: string): Promise<VerificationResponseDto> {
     // Mark any expired verifications first
     await this.markExpiredVerifications(userId);
 
@@ -386,5 +392,202 @@ export class VerificationService {
         verifiedAt: new Date(),
       },
     });
+  }
+
+  /**
+   * Request phone number verification with OTP
+   * Validates phone number format, checks for duplicates, generates and sends OTP
+   *
+   * @param userId - User requesting phone verification
+   * @param request - Phone verification request with phone number
+   * @returns Verification record with masked phone number and expiry
+   * @throws BadRequestException if phone is invalid or already verified by another user
+   */
+  async requestPhoneVerification(userId: string, request: PhoneVerificationRequestDto) {
+    // Validate phone number format and normalize to E.164
+    const validation = this.phoneValidationService.validatePhoneNumber(request.phoneNumber);
+    if (!validation.isValid) {
+      throw new BadRequestException(validation.error || 'Invalid phone number');
+    }
+
+    const normalizedPhone = validation.e164!;
+
+    // Check if this phone is already verified by another user
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        phoneNumber: normalizedPhone,
+        phoneVerified: true,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('This phone number is already verified by another user');
+    }
+
+    // Check for existing pending verification for this user
+    const existingVerification = await this.prisma.verificationRecord.findFirst({
+      where: {
+        userId,
+        type: VerificationType.PHONE,
+        status: VerificationStatus.PENDING,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (existingVerification) {
+      throw new BadRequestException(
+        'A phone verification is already in progress. Please complete or wait for it to expire.',
+      );
+    }
+
+    // Generate OTP
+    const otpCode = this.otpService.generateOtp();
+    const hashedOtp = await this.otpService.hashOtp(otpCode);
+
+    // Create verification record
+    const verificationId = randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + this.OTP_EXPIRY_MINUTES);
+
+    const verification = await this.prisma.verificationRecord.create({
+      data: {
+        id: verificationId,
+        userId,
+        type: VerificationType.PHONE,
+        status: VerificationStatus.PENDING,
+        expiresAt,
+        providerReference: normalizedPhone,
+        metadata: {
+          hashedOtp,
+          attempts: 0,
+        },
+      },
+    });
+
+    // TODO: In production, integrate with SMS provider (Twilio, AWS SNS, etc.)
+    // For now, log the OTP to console for development/testing
+    this.logger.log(
+      `[DEV MODE] OTP for ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}: ${otpCode}`,
+    );
+    this.logger.log(`OTP expires at: ${expiresAt.toISOString()}`);
+
+    return {
+      verificationId: verification.id,
+      phoneNumber: this.phoneValidationService.maskPhoneNumber(normalizedPhone),
+      expiresAt: verification.expiresAt.toISOString(),
+      message: `A 6-digit verification code has been sent to ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}`,
+    };
+  }
+
+  /**
+   * Verify phone OTP code and update user trust score
+   * Validates OTP, checks expiry and attempt limits, updates user to ENHANCED level
+   *
+   * @param userId - User verifying their phone
+   * @param request - Verification request with verification ID and OTP code
+   * @returns Success confirmation with updated trust level
+   * @throws BadRequestException if verification fails (invalid code, expired, max attempts)
+   */
+  async verifyPhoneOTP(userId: string, request: PhoneVerificationVerifyDto) {
+    // Find verification record
+    const verification = await this.prisma.verificationRecord.findUnique({
+      where: { id: request.verificationId },
+    });
+
+    if (!verification) {
+      throw new BadRequestException('Verification not found');
+    }
+
+    if (verification.userId !== userId) {
+      throw new BadRequestException('Verification does not belong to this user');
+    }
+
+    if (verification.type !== VerificationType.PHONE) {
+      throw new BadRequestException('Not a phone verification');
+    }
+
+    if (verification.status !== VerificationStatus.PENDING) {
+      throw new BadRequestException(`Verification is ${verification.status.toLowerCase()}`);
+    }
+
+    // Check if expired
+    if (verification.expiresAt && new Date() > verification.expiresAt) {
+      await this.prisma.verificationRecord.update({
+        where: { id: verification.id },
+        data: { status: VerificationStatus.EXPIRED },
+      });
+      throw new BadRequestException('Verification code has expired');
+    }
+
+    // Check attempt limit
+    const metadata = verification.metadata as any;
+    const attempts = metadata.attempts || 0;
+
+    if (attempts >= this.MAX_OTP_ATTEMPTS) {
+      await this.prisma.verificationRecord.update({
+        where: { id: verification.id },
+        data: { status: VerificationStatus.REJECTED },
+      });
+      throw new BadRequestException(
+        'Maximum verification attempts exceeded. Please request a new code.',
+      );
+    }
+
+    // Validate OTP
+    const hashedOtp = metadata.hashedOtp;
+    const isValid = await this.otpService.validateOtp(request.code, hashedOtp);
+
+    if (!isValid) {
+      // Increment attempt counter
+      await this.prisma.verificationRecord.update({
+        where: { id: verification.id },
+        data: {
+          metadata: {
+            ...metadata,
+            attempts: attempts + 1,
+          },
+        },
+      });
+
+      const remainingAttempts = this.MAX_OTP_ATTEMPTS - attempts - 1;
+      throw new BadRequestException(
+        `Invalid verification code. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`,
+      );
+    }
+
+    // OTP is valid - update verification record
+    await this.prisma.verificationRecord.update({
+      where: { id: verification.id },
+      data: {
+        status: VerificationStatus.VERIFIED,
+        verifiedAt: new Date(),
+      },
+    });
+
+    // Update user with verified phone and trust score boost
+    const phoneNumber = verification.providerReference!;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        phoneNumber,
+        phoneVerified: true,
+        verificationLevel: 'ENHANCED',
+        integrityScore: {
+          increment: 0.1, // +0.10 boost for phone verification
+        },
+      },
+    });
+
+    this.logger.log(
+      `User ${userId} successfully verified phone ${this.phoneValidationService.maskPhoneNumber(phoneNumber)}`,
+    );
+
+    return {
+      success: true,
+      message: 'Phone number verified successfully',
+      verificationLevel: 'ENHANCED',
+      integrityBoost: 0.1,
+    };
   }
 }
