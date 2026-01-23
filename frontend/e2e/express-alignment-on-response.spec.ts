@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, ConsoleMessage } from '@playwright/test';
 
 /**
  * E2E test suite for expressing alignment on propositions extracted from responses
@@ -15,7 +15,13 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Express Alignment on Response', () => {
+  // Track console listener for cleanup to prevent memory leaks
+  let consoleMessages: string[] = [];
+  let consoleListener: ((msg: ConsoleMessage) => void) | null = null;
+
   test.beforeEach(async ({ page }) => {
+    // Reset console messages for each test
+    consoleMessages = [];
     // This test file provides comprehensive E2E coverage for alignment on propositions
     // linked to responses. The current implementation includes placeholder tests
     // that will be updated as the PropositionAlignmentView component is integrated
@@ -23,11 +29,19 @@ test.describe('Express Alignment on Response', () => {
     await page.goto('/');
   });
 
+  test.afterEach(async ({ page }) => {
+    // Clean up console listener to prevent memory leaks
+    if (consoleListener) {
+      page.off('console', consoleListener);
+      consoleListener = null;
+    }
+  });
+
   test('should export PropositionAlignmentView component', async ({ page }) => {
     // Verify the component is available in the bundle
     // This is a basic check that the component compiles and exports correctly
-    const consoleMessages: string[] = [];
-    page.on('console', (msg) => consoleMessages.push(msg.text()));
+    consoleListener = (msg: ConsoleMessage) => consoleMessages.push(msg.text());
+    page.on('console', consoleListener);
 
     // Execute a check in the browser context
     const componentExists = await page.evaluate(() => {
