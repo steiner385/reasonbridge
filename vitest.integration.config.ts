@@ -48,10 +48,10 @@ export default defineConfig({
         singleFork: true,
       },
     },
-    reporters: ['default', 'junit', 'allure-vitest'],
+    reporters: ['default', 'junit', 'allure-vitest/reporter'],
     outputFile: {
       junit: './coverage/integration-junit.xml',
-      'allure-vitest': './allure-results',
+      'allure-vitest/reporter': './allure-results',
     },
   },
 });
