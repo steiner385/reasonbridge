@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, Matches, IsUUID, Length } from 'class-validator';
 export class PhoneVerificationRequestDto {
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\+\d{10,15}$/, {
+  @Matches(/^\+[1-9]\d{1,14}$/, {
     message: 'Phone number must be in E.164 format (+[country][number])',
   })
   phoneNumber: string;
