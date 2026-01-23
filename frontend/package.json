@@ -20,9 +20,11 @@
   },
   "dependencies": {
     "@tanstack/react-query": "5.90.18",
+    "libphonenumber-js": "^1.12.35",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-phone-number-input": "^3.4.14",
     "react-router-dom": "7.12.0",
     "socket.io-client": "4.8.3"
   },
@@ -30,7 +32,6 @@
     "@eslint/js": "^9.18.0",
     "@playwright/test": "1.57.0",
     "@tailwindcss/forms": "0.5.11",
-    "allure-playwright": "^3.0.0",
     "@tailwindcss/typography": "0.5.19",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -42,6 +43,7 @@
     "@typescript-eslint/parser": "^8.21.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "2.1.9",
+    "allure-playwright": "^3.0.0",
     "autoprefixer": "10.4.23",
     "eslint": "^9.18.0",
     "eslint-import-resolver-typescript": "^3.7.0",
