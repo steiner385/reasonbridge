@@ -33,7 +33,7 @@ const authServiceProvider = {
     ConfigModule,
     JwtModule.register({
       // JWT verification is done using Cognito's public keys (or mock secret in test mode)
-      // No secret needed as we verify against JWKS
+      // JwtAuthGuard handles both production (RS256/JWKS) and test (HS256/secret) modes
       signOptions: { algorithm: 'RS256' },
     }),
     forwardRef(() => UsersModule),

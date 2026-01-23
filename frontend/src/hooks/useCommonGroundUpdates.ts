@@ -90,7 +90,6 @@ interface UseCommonGroundUpdatesReturn {
  * const { isConnected } = useCommonGroundUpdates({
  *   topicId: '123',
  *   onUpdate: (analysis, isUpdate) => {
- *     console.log('Common ground updated:', analysis);
  *     setAnalysis(analysis);
  *   },
  * });
@@ -131,12 +130,12 @@ export function useCommonGroundUpdates({
       return;
     }
 
-    // Get WebSocket URL from environment or use default
-    const wsUrl =
-      import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || 'http://localhost:3003';
+    // Use same-origin for WebSocket (nginx proxies /socket.io/)
+    const wsUrl = import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || '';
 
     // Create Socket.io connection
     const socket = io(`${wsUrl}/notifications`, {
+      path: '/socket.io',
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -148,7 +147,6 @@ export function useCommonGroundUpdates({
 
     // Handle connection
     socket.on('connect', () => {
-      console.log('[useCommonGroundUpdates] Connected to WebSocket server');
       isConnectedRef.current = true;
 
       // Subscribe to common ground updates for this topic
@@ -156,29 +154,24 @@ export function useCommonGroundUpdates({
     });
 
     // Handle subscription confirmation
-    socket.on('subscription:confirmed', (data: { type: string; topicId: string; room: string }) => {
-      console.log('[useCommonGroundUpdates] Subscription confirmed:', data);
+    socket.on('subscription:confirmed', () => {
+      // Subscription confirmed
     });
 
     // Handle common ground generated event
     socket.on('common-ground:generated', (payload: CommonGroundGeneratedPayload) => {
-      console.log('[useCommonGroundUpdates] Common ground generated:', payload);
-
       const analysis = transformPayload(payload, payload.version);
       onUpdate(analysis, false);
     });
 
     // Handle common ground updated event
     socket.on('common-ground:updated', (payload: CommonGroundUpdatedPayload) => {
-      console.log('[useCommonGroundUpdates] Common ground updated:', payload);
-
       const analysis = transformPayload(payload, payload.newVersion);
       onUpdate(analysis, true);
     });
 
     // Handle disconnection
-    socket.on('disconnect', (reason) => {
-      console.log('[useCommonGroundUpdates] Disconnected from WebSocket server:', reason);
+    socket.on('disconnect', () => {
       isConnectedRef.current = false;
     });
 
@@ -198,8 +191,6 @@ export function useCommonGroundUpdates({
         socketRef.current.disconnect();
         socketRef.current = null;
         isConnectedRef.current = false;
-
-        console.log('[useCommonGroundUpdates] Cleanup: Disconnected from WebSocket server');
       }
     };
   }, [topicId, enabled, onUpdate, transformPayload]);

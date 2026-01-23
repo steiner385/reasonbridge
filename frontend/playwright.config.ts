@@ -17,10 +17,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Use limited parallelization on CI for faster execution while avoiding resource exhaustion */
-  workers: process.env.CI ? 4 : undefined,
+  /* Retry disabled to prevent crash from accumulated timeout failures */
+  retries: 0,
+  /* Serialize tests in CI to prevent OOM - single worker uses less peak memory */
+  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
@@ -43,10 +43,9 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     /* Screenshot strategy:
-     * - CI: Capture final state of all tests for visual verification
-     * - Local: Only capture on failure to reduce noise
+     * - Capture only on failure to reduce memory usage in CI
      */
-    screenshot: process.env.CI ? 'on' : 'only-on-failure',
+    screenshot: 'only-on-failure',
 
     /* Capture video on first retry */
     video: 'retain-on-failure',

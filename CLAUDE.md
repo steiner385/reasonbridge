@@ -58,6 +58,7 @@ Located in `.specify/scripts/bash/`:
 ## Git Commit Policy
 
 **IMPORTANT: Pre-commit hooks are mandatory quality gates and MUST NOT be bypassed.**
+
 - **NEVER use `git commit --no-verify` or `git commit -n`** in any agentic coding session or manual commits
 - **NEVER use `git push --no-verify`** to bypass pre-push checks
 - All commits must pass pre-commit hooks to ensure code quality, security, and test health
@@ -70,6 +71,7 @@ Located in `.specify/scripts/bash/`:
 - **Recommended:** Use `npm run commit` to ensure safe commits (runs git commit with hook verification guaranteed)
 
 Bypassing hooks defeats the purpose of code quality enforcement and can introduce:
+
 - Leaked secrets and credentials
 - Code duplication issues
 - TypeScript type errors
@@ -83,15 +85,27 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 **Credentials:** Stored in `~/.jenkins-cli.yaml`
 
 **Infrastructure:**
+
 - Master + 8 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
 - Start/stop: `cd /home/tony/jenkins/docker-compose && docker compose up -d` / `docker compose down`
 - Agent secrets configured in Docker Compose `.env`
 
-**Key Job:** `unitediscord-ci` - Automatically triggered on all branch pushes via GitHub webhook
+**Jenkins Shared Library:**
+
+- Repository: `github.com/steiner385/unitediscord-jenkins-lib`
+- Local clone: `/tmp/unitediscord-jenkins-lib`
+- **IMPORTANT:** Push changes directly to `main` branch - no PRs needed
+- Jenkins loads the library directly from `main`, so branches/PRs just add unnecessary overhead
+- The library contains reusable pipeline steps in `vars/` directory
+
+**Key Job:** `uniteDiscord-multibranch` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
+
 - Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
 - No manual triggering needed - commits trigger builds automatically
+- **NOTE:** Job name is `uniteDiscord-multibranch`, NOT `unitediscord-ci`
 
 **Pipeline Stages:**
+
 1. Initialize - Checkout code
 2. Install Dependencies - pnpm install with frozen lockfile
 3. Build Packages - Compile shared packages
@@ -103,19 +117,22 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 9. Build - Production artifact generation
 
 **Debugging:**
+
 - Check console output: `echo $UNIT_TEST_EXIT_CODE` for test exit codes
-- View build logs: Jenkins UI → unitediscord-ci → Build Console
+- View build logs: Jenkins UI → uniteDiscord-multibranch → [branch-name] → Build Console
 - Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
 - Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
 
 ## Playwright E2E Testing
 
 **IMPORTANT: NEVER use `npx playwright test --debug` or `--headed` flags.**
+
 - These flags require interactive input (clicking, keyboard input) which disrupts autonomous workflows
 - Debug mode opens a browser GUI that blocks execution until manual interaction
 - Always run Playwright in headless mode for CI and agentic sessions
 
 **Correct usage:**
+
 ```bash
 # Run all E2E tests
 npx playwright test
@@ -131,6 +148,7 @@ npx playwright show-report
 ```
 
 **For debugging test failures:**
+
 - Use `console.log()` statements in tests (remove before committing)
 - Check Playwright HTML reports: `npx playwright show-report`
 - Use `page.screenshot()` to capture state at specific points

@@ -211,7 +211,7 @@ function TopicDetailPage() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4" data-testid="participant-count">
               <div className="flex items-center gap-2 text-gray-600 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -356,6 +356,33 @@ function TopicDetailPage() {
               // Future: Navigate to proposition detail or open modal
             }}
           />
+        </div>
+      )}
+
+      {/* Responses Section */}
+      {topic.responseCount === 0 && (
+        <div className="mb-6">
+          <Card variant="default" padding="lg">
+            <div className="text-center py-8">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              <h3 className="mt-4 text-lg font-semibold text-gray-900">No responses yet</h3>
+              <p className="mt-2 text-gray-600">
+                Be the first to share your perspective on this topic.
+              </p>
+            </div>
+          </Card>
         </div>
       )}
 
