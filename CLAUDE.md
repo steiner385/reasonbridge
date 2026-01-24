@@ -123,6 +123,36 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
 - Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
 
+## GitHub Branch Protection
+
+**CRITICAL: Branch protection configuration must match actual Jenkins status checks.**
+
+**Required Status Checks for `main` branch:**
+```json
+{
+  "contexts": ["continuous-integration/jenkins/pr-merge"],
+  "strict": true
+}
+```
+
+**Why this configuration:**
+- Jenkins GitHub Branch Source plugin automatically posts `continuous-integration/jenkins/pr-merge` for PR builds
+- Our manual `githubStatusReporter` posts `jenkins/ci` but runs AFTER merge (too late for protection)
+- Strict mode ensures PRs are up-to-date with base branch before merging
+- This prevents auto-merge from bypassing CI validation
+
+**Verification:**
+```bash
+gh api repos/steiner385/uniteDiscord/branches/main/protection/required_status_checks
+```
+
+**NEVER modify branch protection without:**
+1. Verifying the new status check context actually exists in Jenkins builds
+2. Testing with a dummy PR that auto-merge correctly waits for all checks
+3. Documenting the change and reason in this file
+
+**Incident Reference:** 2026-01-24 - PR #668 merged with failing test because protection required `jenkins/ci` but Jenkins reported `continuous-integration/jenkins/pr-merge`. See `/tmp/branch-protection-fix-summary.md` for full RCCA.
+
 ## Playwright E2E Testing
 
 **IMPORTANT: NEVER use `npx playwright test --debug` or `--headed` flags.**
