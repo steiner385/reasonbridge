@@ -116,7 +116,7 @@ describe('PhoneVerificationModal', () => {
     const verifyButton = screen.getByRole('button', { name: /verify code/i });
     await user.click(verifyButton);
 
-    expect(screen.getByText(/please enter the complete 6-digit code/i)).toBeInTheDocument();
+    expect(await screen.findByText(/please enter the complete 6-digit code/i)).toBeInTheDocument();
     expect(api.verifyPhoneOTP).not.toHaveBeenCalled();
   });
 
