@@ -4,7 +4,113 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a new Discord-related project using a specification-driven development workflow called "speckit". The project is in early stages with no source code yet - only the speckit tooling is set up.
+uniteDiscord is a **Rational Discussion Platform** built with modern web technologies. The application provides tools for structured debates, claim validation, bias detection, and common ground discovery.
+
+**Stack**: React 18 + TypeScript 5 + Vite (frontend), Node.js 20 LTS (runtime), pnpm (package manager)
+
+**Purpose**: Enable constructive discourse through AI-powered analysis, structured argumentation, and evidence-based discussions.
+
+## Architecture
+
+### Frontend Structure
+
+The application uses a component-based architecture with React 18:
+
+```
+src/
+├── components/          # Reusable React components
+│   ├── alignments/      # Moral Foundation Theory alignment displays
+│   ├── auth/            # Authentication (Login, Register, PasswordReset)
+│   ├── common-ground/   # Common ground detection and visualization
+│   ├── feedback/        # AI feedback display and analysis
+│   ├── moderation/      # Content moderation and appeals
+│   ├── notifications/   # Real-time notification system
+│   ├── profile/         # User profile management
+│   ├── propositions/    # Argument propositions and structure
+│   ├── responses/       # Response threading and management
+│   ├── search/          # Search UI and filters
+│   ├── topics/          # Discussion topic management
+│   ├── ui/              # Base UI primitives (Button, Modal, etc.)
+│   ├── users/           # User lists and displays
+│   └── verification/    # Phone/email verification flows
+├── contexts/            # React Context providers (Auth, Theme, etc.)
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions and API client
+├── pages/               # Top-level route pages
+│   ├── Admin/           # Admin dashboard
+│   ├── Appeal/          # Moderation appeals
+│   ├── Auth/            # Auth flows
+│   ├── Profile/         # User profiles
+│   ├── Settings/        # User settings
+│   ├── Topics/          # Topic pages
+│   └── Verification/    # Verification flows
+├── routes/              # React Router configuration
+├── test/                # Test utilities and mocks
+└── types/               # TypeScript type definitions
+```
+
+### Technology Decisions
+
+**Frontend Framework**: React 18
+- Reason: Mature ecosystem, concurrent rendering, strong TypeScript support
+- Hooks-based architecture for state management
+
+**Build Tool**: Vite
+- Reason: Fast HMR, ESM-native, excellent dev experience
+- Configuration: `vite.config.ts`
+
+**Language**: TypeScript 5.x
+- Reason: Type safety, IDE support, refactoring confidence
+- Strict mode enabled for maximum safety
+
+**Package Manager**: pnpm 9.x
+- Reason: Fast, disk-efficient, workspace support
+- Lockfile: `pnpm-lock.yaml` (always use frozen lockfile in CI)
+
+**Styling**: Tailwind CSS 3.x
+- Reason: Utility-first, consistent design system, small bundle
+- Configuration: `tailwind.config.js`
+
+**Testing**:
+- Unit/Integration: Vitest 2.x (fast, ESM-native, Vite integration)
+- E2E: Playwright 1.40+ (cross-browser, reliable, great DX)
+- Coverage: @vitest/coverage-v8
+
+**Code Quality**:
+- ESLint 8.x (Airbnb config + TypeScript rules)
+- Prettier 3.x (formatting)
+- Husky 9.x (Git hooks)
+- lint-staged (staged file linting)
+
+**CI/CD**: Jenkins (multibranch pipeline)
+- Comprehensive test stages (lint, unit, integration, contract, E2E)
+- Branch protection via required status checks
+- Allure reporting for test results
+
+### Development Workflow
+
+1. **Local Development**:
+   ```bash
+   pnpm install          # Install dependencies
+   pnpm dev              # Start dev server (http://localhost:5173)
+   pnpm test:unit:watch  # Watch mode for tests
+   ```
+
+2. **Code Quality**:
+   ```bash
+   pnpm lint             # Check linting
+   pnpm format:check     # Check formatting
+   pnpm typecheck        # TypeScript validation
+   pnpm test:unit        # Run unit tests
+   pnpm test:e2e         # Run E2E tests
+   ```
+
+3. **Pre-commit Hooks**: Automatically run on `git commit`
+   - Secrets scanning
+   - Code duplication detection
+   - Console statement detection
+   - Forbidden imports check
+   - Linting and formatting (via lint-staged)
 
 ## Speckit Workflow
 
@@ -200,6 +306,90 @@ npx playwright show-report
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)
 
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: `pnpm install` fails with "lockfile is out of date"
+**Solution**: Run `pnpm install --no-frozen-lockfile` locally, commit updated `pnpm-lock.yaml`
+
+**Issue**: TypeScript errors about missing types
+**Solution**:
+- Check `node_modules/@types` directories exist
+- Run `pnpm install` to refresh types
+- Restart TypeScript server in IDE
+
+**Issue**: Pre-commit hooks fail
+**Solution**:
+- **NEVER bypass with `--no-verify`**
+- Read the error message carefully
+- Fix the reported issue (e.g., remove console.log, fix formatting)
+- Stage fixes and commit again
+- For full test run: `FULL_TEST=true git commit -m "message"`
+
+**Issue**: Vite dev server won't start
+**Solution**:
+- Check port 5173 is not already in use: `lsof -i :5173`
+- Clear Vite cache: `rm -rf node_modules/.vite`
+- Restart with `pnpm dev`
+
+**Issue**: Tests fail with "Cannot find module"
+**Solution**:
+- Ensure all test files have `.spec.ts` or `.test.ts` extension
+- Check import paths use correct relative paths
+- Verify `vitest.config.ts` has correct `resolve.alias` settings
+
+**Issue**: E2E tests timeout
+**Solution**:
+- Ensure headless mode (never use `--debug` or `--headed` in CI)
+- Check `playwright.config.ts` timeout settings
+- Verify test selectors are stable (use `data-testid` attributes)
+- Review Playwright HTML reports: `npx playwright show-report`
+
+**Issue**: Jenkins build fails but passes locally
+**Solution**:
+- Check Jenkins console logs for specific errors
+- Verify environment variables are set correctly
+- Ensure Docker services (postgres, redis) are running in Jenkins
+- Test with frozen lockfile: `pnpm install --frozen-lockfile`
+
+**Issue**: PR cannot merge - status checks pending
+**Solution**:
+- Wait for all Jenkins pipeline stages to complete
+- Required checks: `jenkins/lint`, `jenkins/unit-tests`, `jenkins/integration`, `continuous-integration/jenkins/pr-merge`
+- If checks fail, fix issues and push new commits
+- PR must be up-to-date with base branch (strict mode)
+
+### Debugging Workflow
+
+1. **Identify the Error**:
+   - Read error message completely
+   - Check file and line number
+   - Review recent changes
+
+2. **Reproduce Locally**:
+   - Pull latest changes
+   - Install dependencies
+   - Run the failing command locally
+
+3. **Fix and Verify**:
+   - Make minimal fix
+   - Run tests to verify fix
+   - Ensure no regressions
+
+4. **Commit and Push**:
+   - Commit with clear message
+   - Push to trigger CI
+   - Verify CI passes
+
+### Getting Help
+
+- **Jenkins Logs**: Jenkins UI → uniteDiscord-multibranch → [branch] → Build Console
+- **CI Setup Guide**: `.github/CI_SETUP.md`
+- **Systematic Debugging Plan**: `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md`
+- **Local Reproduction**: Run pipeline stages from `.jenkins/Jenkinsfile` locally
+
 ## Recent Changes
 
 - 001-rational-discussion-platform: Added TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend)
+- 2026-01-24: Updated CLAUDE.md with implemented architecture (issue #431)
