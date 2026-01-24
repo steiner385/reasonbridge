@@ -323,6 +323,12 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
    - **Result**: All 14 tests now resolve correct baseURL for navigation
 
+3. **Port Already Allocated (E2E Start Failure)** - Fixed 2026-01-24 16:27 UTC:
+   - PR #672 build #2: Docker Compose failed with `Bind for 0.0.0.0:3004 failed: port is already allocated`
+   - **Root cause**: Crashed/killed containers leave processes holding E2E ports; aggressive cleanup only removed containers by name, not port-based processes
+   - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
+   - **Result**: Port conflicts resolved, environment starts cleanly
+
 ## Active Technologies
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)
