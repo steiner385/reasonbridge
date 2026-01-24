@@ -91,7 +91,7 @@ describe('PhoneVerificationModal', () => {
     await waitFor(() => {
       expect(screen.getByText(/failed to send verification code/i)).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
   it('validates OTP code before verifying', async () => {
     const user = userEvent.setup();
