@@ -127,31 +127,43 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 **CRITICAL: Branch protection configuration must match actual Jenkins status checks.**
 
-**Required Status Checks for `main` branch:**
+**Required Status Checks for `main` branch (Defense-in-Depth):**
 ```json
 {
-  "contexts": ["continuous-integration/jenkins/pr-merge"],
+  "contexts": [
+    "continuous-integration/jenkins/pr-merge",  // Automatic (Jenkins plugin)
+    "jenkins/lint",                             // Code quality
+    "jenkins/unit-tests",                       // Unit tests
+    "jenkins/integration"                       // Integration tests
+  ],
   "strict": true
 }
 ```
 
 **Why this configuration:**
-- Jenkins GitHub Branch Source plugin automatically posts `continuous-integration/jenkins/pr-merge` for PR builds
-- Our manual `githubStatusReporter` posts `jenkins/ci` but runs AFTER merge (too late for protection)
-- Strict mode ensures PRs are up-to-date with base branch before merging
-- This prevents auto-merge from bypassing CI validation
+- **Comprehensive validation**: Requires lint, unit tests, AND integration tests before merge
+- **Pre-merge checks**: All required checks post BEFORE merge (not after like `jenkins/ci`)
+- **Strict mode**: Ensures PRs are up-to-date with base branch
+- **Defense-in-depth**: Multiple layers prevent broken code from merging
+
+**Status Check Sources:**
+- `continuous-integration/jenkins/pr-merge` - Automatic from Jenkins GitHub Branch Source plugin
+- `jenkins/lint` - Posted by `runLintChecks()` helper
+- `jenkins/unit-tests` - Posted by `runUnitTests()` helper
+- `jenkins/integration` - Posted by `runIntegrationTests()` helper
 
 **Verification:**
 ```bash
-gh api repos/steiner385/uniteDiscord/branches/main/protection/required_status_checks
+gh api repos/steiner385/uniteDiscord/branches/main/protection/required_status_checks --jq '.contexts'
 ```
 
 **NEVER modify branch protection without:**
 1. Verifying the new status check context actually exists in Jenkins builds
-2. Testing with a dummy PR that auto-merge correctly waits for all checks
-3. Documenting the change and reason in this file
+2. Ensuring the check posts BEFORE merge (not in post-success/failure blocks)
+3. Testing with a dummy PR that auto-merge correctly waits for all checks
+4. Documenting the change and reason in this file
 
-**Incident Reference:** 2026-01-24 - PR #668 merged with failing test because protection required `jenkins/ci` but Jenkins reported `continuous-integration/jenkins/pr-merge`. See `/tmp/branch-protection-fix-summary.md` for full RCCA.
+**Incident Reference:** 2026-01-24 - PR #668 merged with failing test because protection required `jenkins/ci` (posts after merge) but not the actual pre-merge checks. Comprehensive protection now prevents this. See `/tmp/branch-protection-final-config.md` for full details.
 
 ## Playwright E2E Testing
 
