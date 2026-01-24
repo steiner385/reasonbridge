@@ -5,10 +5,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/**/*.integration.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      // Integration tests - require DATABASE_URL and run in separate stage
+      '**/*.integration.test.ts',
       // Flaky test - detectCoordinatedPostingPatterns assertion fails
       '**/bot-detector.service.spec.ts',
       // CI: Prisma client module resolution issues
