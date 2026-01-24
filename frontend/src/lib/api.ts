@@ -269,3 +269,44 @@ export class ApiClient {
  * Default API client instance
  */
 export const apiClient = new ApiClient();
+
+/**
+ * Phone verification API response types
+ */
+export interface PhoneVerificationRequestResponse {
+  verificationId: string;
+  expiresAt: string;
+  message: string;
+}
+
+export interface PhoneVerificationVerifyResponse {
+  success: boolean;
+  message: string;
+  verificationId: string;
+}
+
+/**
+ * Request phone number verification
+ * Sends a 6-digit OTP code to the provided phone number
+ */
+export async function requestPhoneVerification(
+  phoneNumber: string,
+): Promise<PhoneVerificationRequestResponse> {
+  return apiClient.post<PhoneVerificationRequestResponse>('/verification/phone/request', {
+    phoneNumber,
+  });
+}
+
+/**
+ * Verify phone number with OTP code
+ * Validates the code and marks verification as complete
+ */
+export async function verifyPhoneOTP(
+  verificationId: string,
+  code: string,
+): Promise<PhoneVerificationVerifyResponse> {
+  return apiClient.post<PhoneVerificationVerifyResponse>('/verification/phone/verify', {
+    verificationId,
+    code,
+  });
+}

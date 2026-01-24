@@ -6,6 +6,8 @@ import { VerificationController } from './verification.controller.js';
 import { VerificationService } from './verification.service.js';
 import { VideoVerificationService } from './video-challenge.service.js';
 import { VideoUploadService } from './video-upload.service.js';
+import { OtpService } from './services/otp.service.js';
+import { PhoneValidationService } from './services/phone-validation.service.js';
 
 /**
  * Verification Module
@@ -16,7 +18,13 @@ import { VideoUploadService } from './video-upload.service.js';
 @Module({
   imports: [PrismaModule, ConfigModule, AuthModule],
   controllers: [VerificationController],
-  providers: [VerificationService, VideoVerificationService, VideoUploadService],
+  providers: [
+    VerificationService,
+    VideoVerificationService,
+    VideoUploadService,
+    OtpService,
+    PhoneValidationService,
+  ],
   exports: [VerificationService, VideoVerificationService, VideoUploadService],
 })
 export class VerificationModule {}

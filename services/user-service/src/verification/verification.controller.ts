@@ -17,6 +17,10 @@ import { VideoUploadService } from './video-upload.service.js';
 import { VerificationRequestDto } from './dto/verification-request.dto.js';
 import { VerificationResponseDto } from './dto/verification-response.dto.js';
 import { VideoUploadCompleteDto } from './dto/video-upload.dto.js';
+import {
+  PhoneVerificationRequestDto,
+  PhoneVerificationVerifyDto,
+} from './dto/phone-verification.dto.js';
 
 /**
  * Verification Controller
@@ -71,6 +75,74 @@ export class VerificationController {
   }
 
   /**
+   * POST /verification/phone/request
+   * Initiates phone number verification for the authenticated user
+   *
+   * Sends a 6-digit OTP code to the provided phone number via SMS
+   * Code expires in 10 minutes
+   *
+   * @param userId - Authenticated user ID (from JWT token)
+   * @param dto - Phone verification request with phone number
+   * @returns Verification details with verificationId and expiry time
+   *
+   * @example
+   * // Request phone verification
+   * POST /verification/phone/request
+   * {
+   *   "phoneNumber": "+12125551234"
+   * }
+   *
+   * // Response
+   * {
+   *   "verificationId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+   *   "expiresAt": "2026-01-23T15:30:00.000Z",
+   *   "message": "Verification code sent to +12125551234"
+   * }
+   */
+  @Post('phone/request')
+  async requestPhoneVerification(
+    @CurrentUser() userId: string,
+    @Body() dto: PhoneVerificationRequestDto,
+  ) {
+    this.logger.debug(`Phone verification request from user ${userId}: phone=${dto.phoneNumber}`);
+    return this.verificationService.requestPhoneVerification(userId, dto);
+  }
+
+  /**
+   * POST /verification/phone/verify
+   * Verifies the OTP code sent to the user's phone number
+   *
+   * Validates the 6-digit code against the verification record
+   * Marks verification as complete if code is valid and not expired
+   *
+   * @param userId - Authenticated user ID (from JWT token)
+   * @param dto - Verification details with verificationId and code
+   * @returns Success response with verification status
+   *
+   * @example
+   * // Verify phone OTP
+   * POST /verification/phone/verify
+   * {
+   *   "verificationId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+   *   "code": "123456"
+   * }
+   *
+   * // Success Response
+   * {
+   *   "success": true,
+   *   "message": "Phone number verified successfully",
+   *   "verificationId": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+   * }
+   */
+  @Post('phone/verify')
+  async verifyPhoneOTP(@CurrentUser() userId: string, @Body() dto: PhoneVerificationVerifyDto) {
+    this.logger.debug(
+      `Phone verification attempt from user ${userId}: verification=${dto.verificationId}`,
+    );
+    return this.verificationService.verifyPhoneOTP(userId, dto);
+  }
+
+  /**
    * POST /verification/video-upload-complete
    * Confirms video upload completion for video verification
    *
@@ -104,10 +176,7 @@ export class VerificationController {
    * }
    */
   @Post('video-upload-complete')
-  async confirmVideoUpload(
-    @CurrentUser() userId: string,
-    @Body() dto: VideoUploadCompleteDto,
-  ) {
+  async confirmVideoUpload(@CurrentUser() userId: string, @Body() dto: VideoUploadCompleteDto) {
     this.logger.debug(
       `Video upload confirmation from user ${userId}: verification=${dto.verificationId}`,
     );
@@ -191,16 +260,11 @@ export class VerificationController {
    */
   @Post(':verificationId/re-verify')
   @HttpCode(HttpStatus.CREATED)
-  async reVerify(
-    @Param('verificationId') verificationId: string,
-    @CurrentUser() userId: string,
-  ) {
+  async reVerify(@Param('verificationId') verificationId: string, @CurrentUser() userId: string) {
     this.logger.debug(`User ${userId} initiating re-verification for ${verificationId}`);
 
     // Get original verification to determine type
-    const originalVerification = await this.verificationService.getVerification(
-      verificationId,
-    );
+    const originalVerification = await this.verificationService.getVerification(verificationId);
 
     if (!originalVerification || originalVerification.userId !== userId) {
       throw new Error('Verification not found or unauthorized');
