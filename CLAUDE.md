@@ -309,11 +309,19 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 - **Pre-installed**: @playwright/test, Chromium browser binaries (~400MB), system dependencies
 - **Benefits**: Eliminates browser downloads, prevents OOM kills (exit code 137), faster startup
 
-**Historical Issue** (Fixed 2026-01-24):
-- Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
-- **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
-- **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
-- **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
+**Historical Issues:**
+
+1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
+   - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
+   - **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
+   - **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
+   - **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
+
+2. **DNS Resolution (net::ERR_NAME_NOT_RESOLVED)** - Fixed 2026-01-24 16:05 UTC:
+   - PR #672 build #1: 14 tests in view-common-ground-summary.spec.ts failed with `net::ERR_NAME_NOT_RESOLVED at http://frontend/topics`
+   - **Root cause**: PLAYWRIGHT_BASE_URL environment variable not passed correctly to docker exec process
+   - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
+   - **Result**: All 14 tests now resolve correct baseURL for navigation
 
 ## Active Technologies
 
