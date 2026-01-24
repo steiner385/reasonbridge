@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState, KeyboardEvent, ClipboardEvent } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import type { KeyboardEvent, ClipboardEvent } from 'react';
 
 interface OTPInputProps {
   value: string;
