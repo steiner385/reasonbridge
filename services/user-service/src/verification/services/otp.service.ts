@@ -26,7 +26,8 @@ export class OtpService {
     try {
       return await bcrypt.hash(code, this.SALT_ROUNDS);
     } catch (error) {
-      throw new Error(`Failed to hash OTP: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to hash OTP: ${message}`);
     }
   }
 

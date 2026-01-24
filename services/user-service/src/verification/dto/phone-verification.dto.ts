@@ -6,13 +6,13 @@ export class PhoneVerificationRequestDto {
   @Matches(/^\+[1-9]\d{1,14}$/, {
     message: 'Phone number must be in E.164 format (+[country][number])',
   })
-  phoneNumber: string;
+  phoneNumber!: string;
 }
 
 export class PhoneVerificationVerifyDto {
   @IsUUID()
   @IsNotEmpty()
-  verificationId: string;
+  verificationId!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -20,5 +20,5 @@ export class PhoneVerificationVerifyDto {
   @Matches(/^\d{6}$/, {
     message: 'Code must be exactly 6 digits',
   })
-  code: string;
+  code!: string;
 }

@@ -474,7 +474,7 @@ export class VerificationService {
     return {
       verificationId: verification.id,
       phoneNumber: this.phoneValidationService.maskPhoneNumber(normalizedPhone),
-      expiresAt: verification.expiresAt.toISOString(),
+      expiresAt: expiresAt.toISOString(),
       message: `A 6-digit verification code has been sent to ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}`,
     };
   }
