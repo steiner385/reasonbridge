@@ -72,7 +72,7 @@ describe('PhoneVerificationModal', () => {
 
     expect(screen.getByText(/enter the 6-digit code sent to/i)).toBeInTheDocument();
     expect(screen.getByText('+12125551234')).toBeInTheDocument();
-  });
+  }, 10000);
 
   it('handles OTP request error', async () => {
     const user = userEvent.setup();

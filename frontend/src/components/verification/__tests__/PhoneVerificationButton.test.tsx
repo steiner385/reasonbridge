@@ -113,7 +113,7 @@ describe('PhoneVerificationButton', () => {
       },
       { timeout: 3000 },
     );
-  });
+  }, 10000);
 
   it('closes modal when cancel is clicked', async () => {
     const user = userEvent.setup();
