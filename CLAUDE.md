@@ -329,6 +329,12 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
    - **Result**: Port conflicts resolved, environment starts cleanly
 
+4. **Host OOM Killer (Exit Code 137 Despite Low Container Memory)** - Fixed 2026-01-24 19:30 UTC:
+   - PR #672 build #4: E2E tests crashed with exit code 137 (OOM) after only 2 tests, despite container showing 486MB/4GB (11.89%) usage
+   - **Root cause**: Host system memory pressure causing Linux OOM killer to terminate Docker containers; E2E environment (7 Node.js services + postgres + redis + localstack + nginx + Playwright) consumed ~2.5-3GB unbounded, competing with other Jenkins builds
+   - **Solution**: Added explicit memory limits to all docker-compose.e2e.yml services (postgres: 256m, redis: 128m, localstack: 512m, each Node.js service: 256m, nginx: 64m) to prevent bloat and ensure predictable resource usage (~3GB total + 4GB Playwright = 7GB max)
+   - **Result**: Services cannot exceed limits, host OOM pressure eliminated, predictable memory footprint
+
 ## Active Technologies
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)
