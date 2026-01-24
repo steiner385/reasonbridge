@@ -69,4 +69,19 @@ export class TopicsProxyController {
 
     res.status(response.status).send(response.data);
   }
+
+  @Get(':id/bridging-suggestions')
+  async getBridgingSuggestions(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToAiService({
+      method: 'GET',
+      path: `/suggest/bridging-suggestions/${id}`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
 }
