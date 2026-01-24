@@ -154,10 +154,12 @@ describe('ModerationActionButtons', () => {
 
       // Check for loading state - button should show "Approving..."
       // Wait for React to re-render with loading state
-      expect(await screen.findByText('Approving...')).toBeInTheDocument();
+      const approvingButton = await screen.findByText('Approving...');
+      expect(approvingButton).toBeInTheDocument();
 
       // Verify button is actually disabled during processing
-      expect(approveButton).toBeDisabled();
+      // Query the button again after re-render to avoid stale reference
+      expect(approvingButton).toBeDisabled();
 
       // After processing, button should return to normal
       await waitFor(
