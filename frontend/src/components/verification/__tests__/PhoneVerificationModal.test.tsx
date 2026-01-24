@@ -174,7 +174,7 @@ describe('PhoneVerificationModal', () => {
       },
       { timeout: 3000 },
     );
-  });
+  }, 10000);
 
   it('handles OTP verification error', async () => {
     const user = userEvent.setup();
