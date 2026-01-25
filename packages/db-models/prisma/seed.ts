@@ -90,7 +90,7 @@ async function main() {
   console.log('Creating test responses...');
   const existingResponse1 = await prisma.response.findFirst({
     where: {
-      topicId: topic1.id,
+      topicId: topic3.id,
       authorId: testUser2.id,
       content: { startsWith: 'Renewable energy is crucial' },
     },
@@ -99,7 +99,7 @@ async function main() {
     existingResponse1 ||
     (await prisma.response.create({
       data: {
-        topicId: topic1.id,
+        topicId: topic3.id,
         authorId: testUser2.id,
         content:
           'Renewable energy is crucial for reducing carbon emissions and combating climate change. The initial investment costs are offset by long-term savings and environmental benefits.',
@@ -109,7 +109,7 @@ async function main() {
 
   const existingResponse2 = await prisma.response.findFirst({
     where: {
-      topicId: topic1.id,
+      topicId: topic3.id,
       authorId: testUser1.id,
       parentId: response1.id,
     },
@@ -118,7 +118,7 @@ async function main() {
     existingResponse2 ||
     (await prisma.response.create({
       data: {
-        topicId: topic1.id,
+        topicId: topic3.id,
         authorId: testUser1.id,
         parentId: response1.id,
         content:
@@ -129,23 +129,21 @@ async function main() {
 
   console.log(`✅ Created ${2} test responses`);
 
-  // Create propositions for renewable energy topic
+  // Create propositions for remote work topic (topic3 - appears first in API due to DESC sort)
   console.log('Creating test propositions...');
 
   // Find or create propositions using findFirst + create pattern (no unique constraint exists)
   let prop1 = await prisma.proposition.findFirst({
     where: {
-      topicId: topic1.id,
-      statement:
-        'Climate change poses an existential threat requiring immediate renewable energy transition',
+      topicId: topic3.id,
+      statement: 'Remote work significantly improves work-life balance',
     },
   });
   if (!prop1) {
     prop1 = await prisma.proposition.create({
       data: {
-        topicId: topic1.id,
-        statement:
-          'Climate change poses an existential threat requiring immediate renewable energy transition',
+        topicId: topic3.id,
+        statement: 'Remote work significantly improves work-life balance',
         source: 'AI_IDENTIFIED',
         supportCount: 8,
         opposeCount: 1,
@@ -158,17 +156,15 @@ async function main() {
 
   let prop2 = await prisma.proposition.findFirst({
     where: {
-      topicId: topic1.id,
-      statement:
-        'Renewable energy technologies can completely replace fossil fuels within 20 years',
+      topicId: topic3.id,
+      statement: 'Remote work increases overall productivity for most workers',
     },
   });
   if (!prop2) {
     prop2 = await prisma.proposition.create({
       data: {
-        topicId: topic1.id,
-        statement:
-          'Renewable energy technologies can completely replace fossil fuels within 20 years',
+        topicId: topic3.id,
+        statement: 'Remote work increases overall productivity for most workers',
         source: 'AI_IDENTIFIED',
         supportCount: 5,
         opposeCount: 4,
@@ -181,15 +177,15 @@ async function main() {
 
   let prop3 = await prisma.proposition.findFirst({
     where: {
-      topicId: topic1.id,
-      statement: 'Economic costs of renewable energy transition outweigh environmental benefits',
+      topicId: topic3.id,
+      statement: 'Remote work harms company culture and team collaboration',
     },
   });
   if (!prop3) {
     prop3 = await prisma.proposition.create({
       data: {
-        topicId: topic1.id,
-        statement: 'Economic costs of renewable energy transition outweigh environmental benefits',
+        topicId: topic3.id,
+        statement: 'Remote work harms company culture and team collaboration',
         source: 'AI_IDENTIFIED',
         supportCount: 3,
         opposeCount: 6,
@@ -200,7 +196,7 @@ async function main() {
     });
   }
 
-  console.log(`✅ Created propositions for topic: ${topic1.title}`);
+  console.log(`✅ Created propositions for topic: ${topic3.title}`);
 
   // Create alignments
   console.log('Creating test alignments...');
@@ -246,47 +242,47 @@ async function main() {
   console.log('Creating common ground analysis...');
   const agreementZones = [
     {
-      proposition: 'Climate change requires action',
+      proposition: 'Remote work offers flexibility benefits',
       agreementPercentage: 80,
-      supportingEvidence: ['Scientific consensus', 'Observable impacts'],
+      supportingEvidence: ['Survey data', 'Employee satisfaction reports'],
       participantCount: 10,
     },
   ];
 
   const misunderstandings = [
     {
-      topic: 'Renewable energy costs',
+      topic: 'Productivity metrics',
       interpretations: [
-        { interpretation: 'Initial capital costs', participantCount: 5 },
-        { interpretation: 'Long-term operating costs', participantCount: 5 },
+        { interpretation: 'Hours logged', participantCount: 5 },
+        { interpretation: 'Output quality', participantCount: 5 },
       ],
-      clarification: 'Distinguish between upfront investment and lifetime expenses',
+      clarification: 'Distinguish between time-based and results-based productivity measures',
     },
   ];
 
   const genuineDisagreements = [
     {
-      proposition: 'Economic transition timeline',
+      proposition: 'Optimal work arrangement',
       viewpoints: [
         {
-          position: 'Immediate transition',
+          position: 'Fully remote',
           participantCount: 4,
-          reasoning: ['Climate urgency', 'Tech readiness'],
+          reasoning: ['Flexibility', 'Cost savings'],
         },
         {
-          position: 'Gradual transition',
+          position: 'Hybrid model',
           participantCount: 6,
-          reasoning: ['Economic stability', 'Job retraining'],
+          reasoning: ['Team bonding', 'Work-life separation'],
         },
       ],
-      underlyingValues: ['Environmental protection', 'Economic security'],
+      underlyingValues: ['Individual autonomy', 'Team collaboration'],
     },
   ];
 
   // Check if analysis exists first (no unique constraint)
   const existingAnalysis = await prisma.commonGroundAnalysis.findFirst({
     where: {
-      topicId: topic1.id,
+      topicId: topic3.id,
       version: 1,
     },
   });
@@ -294,11 +290,11 @@ async function main() {
   if (!existingAnalysis) {
     await prisma.commonGroundAnalysis.create({
       data: {
-        topicId: topic1.id,
+        topicId: topic3.id,
         version: 1,
-        agreementZones: JSON.stringify(agreementZones),
-        misunderstandings: JSON.stringify(misunderstandings),
-        genuineDisagreements: JSON.stringify(genuineDisagreements),
+        agreementZones: agreementZones,
+        misunderstandings: misunderstandings,
+        genuineDisagreements: genuineDisagreements,
         overallConsensusScore: 0.55,
         participantCountAtGeneration: 10,
         responseCountAtGeneration: 12,
@@ -307,7 +303,7 @@ async function main() {
     });
   }
 
-  console.log(`✅ Created common ground analysis for topic: ${topic1.title}`);
+  console.log(`✅ Created common ground analysis for topic: ${topic3.title}`);
 
   console.log('🎉 Seeding completed successfully!');
 }
