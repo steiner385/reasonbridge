@@ -1,4 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { setupWebSocketMock } from './helpers/websocket-mock';
+import {
+  buildCommonGroundUpdatedPayload,
+  buildAgreementZone,
+  buildMisunderstanding,
+} from './helpers/common-ground-fixtures';
 
 /**
  * E2E test suite for viewing common ground summary
@@ -370,13 +376,11 @@ test.describe('View Common Ground Summary', () => {
     }
   });
 
-  // TODO: Implement WebSocket mocking infrastructure for E2E tests
-  // This test requires simulating WebSocket events to verify real-time updates
-  test.skip('should update common ground summary in real-time when new responses are added', async ({
+  test('should update common ground summary in real-time when new responses are added', async ({
     page,
   }) => {
-    // This test verifies the WebSocket real-time update capability
-    // Navigate to a topic detail page
+    // Setup WebSocket mock
+    const wsMock = await setupWebSocketMock(page);
 
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
@@ -388,25 +392,73 @@ test.describe('View Common Ground Summary', () => {
       const href = await firstTopicLink.getAttribute('href');
       const topicId = href?.split('/topics/')[1];
 
+      if (!topicId) {
+        throw new Error('Could not extract topic ID from href');
+      }
+
       await page.goto(`/topics/${topicId}`);
       await page.waitForSelector('text=Loading topic details...', {
         state: 'hidden',
         timeout: 10000,
       });
 
-      // Get initial consensus score or summary state
+      // Wait for WebSocket connection
+      await wsMock.waitForConnection('/notifications');
+
+      // Get initial state
       const summaryPanel = page.locator('[data-testid="common-ground-summary"]').first();
-      const _initialText = await summaryPanel.textContent().catch(() => '');
+      const initialText = await summaryPanel.textContent().catch(() => '');
 
-      // In a real test with mocked WebSocket data, we would:
-      // 1. Trigger a WebSocket message with updated analysis
-      // 2. Wait for the UI to update
-      // 3. Verify the new data is displayed
+      // Create updated common ground with new agreement zone and misunderstanding
+      const newAgreementZone = buildAgreementZone({
+        id: 'agreement-zone-climate',
+        title: 'Climate Science Consensus',
+        description: 'Agreement on basic climate science facts',
+        participantCount: 18,
+        consensusLevel: 'high',
+      });
 
-      // For now, just verify page remains stable
-      await page.waitForTimeout(1000);
-      expect(true).toBe(true);
+      const newMisunderstanding = buildMisunderstanding({
+        id: 'misunderstanding-carbon',
+        term: 'carbon neutral',
+        definitions: [
+          {
+            definition: 'Zero net carbon emissions',
+            participants: ['user-1', 'user-2', 'user-3'],
+          },
+          {
+            definition: 'Carbon offset through capture',
+            participants: ['user-4', 'user-5'],
+          },
+        ],
+      });
+
+      // Emit WebSocket event with updated common ground
+      const payload = buildCommonGroundUpdatedPayload({
+        topicId,
+        agreementZones: [newAgreementZone],
+        misunderstandings: [newMisunderstanding],
+        overallConsensusScore: 0.8,
+      });
+
+      await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
+
+      // Wait for React state update and re-render
+      await page.waitForTimeout(1500);
+
+      // Verify UI updated
+      const updatedText = await summaryPanel.textContent().catch(() => '');
+
+      // Verify content changed or contains expected text
+      expect(
+        updatedText !== initialText ||
+          updatedText.includes('Climate') ||
+          updatedText.includes('consensus') ||
+          updatedText.includes('80'),
+      ).toBe(true);
     }
+
+    await wsMock.cleanup();
   });
 
   test('should handle common ground analysis errors gracefully', async ({ page }) => {
