@@ -198,11 +198,32 @@ test.describe('Skeleton Loaders', () => {
   });
 
   test.describe('Profile Page Skeleton', () => {
+    // Mock user data for profile API - needed since profile page requires authentication
+    const mockUserResponse = {
+      id: 'test-user-id',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      verificationLevel: 'EMAIL_VERIFIED',
+      status: 'ACTIVE',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      trustScoreAbility: 0.75,
+      trustScoreBenevolence: 0.8,
+      trustScoreIntegrity: 0.85,
+      topicCount: 5,
+      responseCount: 12,
+      followerCount: 3,
+      followingCount: 7,
+    };
+
     test('should display profile skeleton during loading', async ({ page }) => {
-      // Throttle profile API
+      // Intercept profile API and delay response with mock data
       await page.route('**/api/users/me**', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockUserResponse),
+        });
       });
 
       await page.goto('/profile');
@@ -220,7 +241,11 @@ test.describe('Skeleton Loaders', () => {
     test('should display circular avatar skeleton', async ({ page }) => {
       await page.route('**/api/users/me**', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockUserResponse),
+        });
       });
 
       await page.goto('/profile');
@@ -235,7 +260,11 @@ test.describe('Skeleton Loaders', () => {
     test('should display trust score progress bar skeletons', async ({ page }) => {
       await page.route('**/api/users/me**', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockUserResponse),
+        });
       });
 
       await page.goto('/profile');
@@ -253,7 +282,11 @@ test.describe('Skeleton Loaders', () => {
     test('should display activity section skeleton by default', async ({ page }) => {
       await page.route('**/api/users/me**', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockUserResponse),
+        });
       });
 
       await page.goto('/profile');
@@ -269,7 +302,11 @@ test.describe('Skeleton Loaders', () => {
     test('should have accessible skeleton loaders on profile page', async ({ page }) => {
       await page.route('**/api/users/me**', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockUserResponse),
+        });
       });
 
       await page.goto('/profile');
@@ -278,14 +315,18 @@ test.describe('Skeleton Loaders', () => {
       await expect(skeleton).toBeVisible({ timeout: 3000 });
 
       // Verify accessibility attributes
-      const statusElements = skeleton.locator('[role="status"]');
+      const statusElements = skeleton.locator('[role=\"status\"]');
       expect(await statusElements.count()).toBeGreaterThan(0);
     });
 
     test('should transition from skeleton to real profile content', async ({ page }) => {
       await page.route('**/api/users/me**', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockUserResponse),
+        });
       });
 
       await page.goto('/profile');
@@ -293,20 +334,12 @@ test.describe('Skeleton Loaders', () => {
       const skeleton = page.locator('[data-testid="profile-skeleton"]');
       await expect(skeleton).toBeVisible({ timeout: 3000 });
 
-      // Wait for skeleton to disappear (either content loads or auth required)
+      // Wait for skeleton to disappear and content to load
       await expect(skeleton).not.toBeVisible({ timeout: 10000 });
 
-      // Page should show either profile content or login prompt
+      // Page should show profile content with mock user
       const profileContent = page.getByRole('heading', { name: /my profile/i });
-      const notLoggedIn = page.getByText(/not logged in|please log in/i);
-      const errorMessage = page.getByText(/unable to load profile/i);
-
-      const hasContent =
-        (await profileContent.isVisible().catch(() => false)) ||
-        (await notLoggedIn.isVisible().catch(() => false)) ||
-        (await errorMessage.isVisible().catch(() => false));
-
-      expect(hasContent).toBeTruthy();
+      await expect(profileContent).toBeVisible({ timeout: 5000 });
     });
   });
 });
