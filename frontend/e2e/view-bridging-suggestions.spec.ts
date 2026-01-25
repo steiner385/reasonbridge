@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { setupWebSocketMock } from './helpers/websocket-mock';
+import {
+  buildCommonGroundUpdatedPayload,
+  buildAgreementZone,
+} from './helpers/common-ground-fixtures';
 
 /**
  * E2E test suite for viewing bridging suggestions in common ground analysis
@@ -816,9 +821,10 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  // TODO: Implement WebSocket mocking infrastructure for E2E tests
-  // This test requires simulating WebSocket events to verify real-time updates
   test.skip('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
+    // Setup WebSocket mock
+    const wsMock = await setupWebSocketMock(page);
+
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
@@ -829,25 +835,56 @@ test.describe('View Bridging Suggestions', () => {
       const href = await firstTopicLink.getAttribute('href');
       const topicId = href?.split('/topics/')[1];
 
+      if (!topicId) {
+        throw new Error('Could not extract topic ID from href');
+      }
+
       await page.goto(`/topics/${topicId}`);
       await page.waitForSelector('text=Loading topic details...', {
         state: 'hidden',
         timeout: 10000,
       });
 
-      // Get initial suggestions state
+      // Wait for WebSocket connection
+      await wsMock.waitForConnection('/notifications');
+
+      // Get initial state
       const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const _initialContent = await suggestionsSection.textContent().catch(() => '');
+      const initialText = await suggestionsSection.textContent().catch(() => '');
 
-      // In a real test with mocked WebSocket, we would:
-      // 1. Simulate new alignment data
-      // 2. Wait for suggestions to update
-      // 3. Verify changes are reflected
+      // Create new agreement zone with bridging opportunity
+      const newAgreementZone = buildAgreementZone({
+        id: 'agreement-zone-renewable',
+        title: 'Renewable Energy Benefits',
+        description: 'Agreement on environmental benefits of renewable energy',
+        participantCount: 15,
+        consensusLevel: 'high',
+      });
 
-      // For now, verify page remains stable
-      await page.waitForTimeout(1000);
-      expect(true).toBe(true);
+      // Emit WebSocket event with updated common ground including new agreement zone
+      const payload = buildCommonGroundUpdatedPayload({
+        topicId,
+        agreementZones: [newAgreementZone],
+        overallConsensusScore: 0.75,
+      });
+
+      await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
+
+      // Wait for React state update and re-render
+      await page.waitForTimeout(1500);
+
+      // Verify UI updated
+      const updatedText = await suggestionsSection.textContent().catch(() => '');
+
+      // Verify content changed or contains expected text
+      expect(
+        updatedText !== initialText ||
+          updatedText.includes('Renewable') ||
+          updatedText.includes('suggestion'),
+      ).toBe(true);
     }
+
+    await wsMock.cleanup();
   });
 
   test('should display maximum suggestion count limit if configured', async ({ page }) => {
