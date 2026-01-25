@@ -181,8 +181,7 @@ describe('AlignmentInput', () => {
       expect(screen.getByRole('button', { name: /nuanced position/i })).toBeDisabled();
     });
 
-    it('should disable nuanced textarea and buttons when disabled', async () => {
-      const user = userEvent.setup();
+    it('should disable nuanced textarea and buttons when disabled', () => {
       render(<AlignmentInput currentStance="nuanced" disabled />);
 
       const textarea = screen.getByLabelText(/explain your nuanced position/i);

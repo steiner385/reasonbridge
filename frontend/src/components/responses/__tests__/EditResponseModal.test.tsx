@@ -307,8 +307,7 @@ describe('EditResponseModal', () => {
       expect(screen.getByLabelText(/this response contains my opinion/i)).toBeDisabled();
     });
 
-    it('should show loading state on save button', async () => {
-      const user = userEvent.setup();
+    it('should show loading state on save button', () => {
       render(<EditResponseModal {...defaultProps} isLoading />);
 
       const textarea = screen.getByLabelText(/your response/i);
