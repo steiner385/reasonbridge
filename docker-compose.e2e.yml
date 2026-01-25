@@ -82,6 +82,22 @@ services:
       - unite-e2e
     restart: 'no'
 
+  db-seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: unitediscord-e2e/db-seed:latest
+    command: ['sh', '-c', 'cd packages/db-models && npx tsx prisma/seed.ts']
+    environment:
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+    restart: 'no'
+
   # ============================================================================
   # Backend Microservices
   # ============================================================================
@@ -111,7 +127,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
       user-service:
         condition: service_started
@@ -152,7 +168,7 @@ services:
         condition: service_healthy
       localstack:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
     mem_limit: 256m
     networks:
@@ -182,7 +198,7 @@ services:
         condition: service_healthy
       localstack:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
     mem_limit: 256m
     networks:
@@ -206,7 +222,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
     mem_limit: 256m
     networks:
@@ -231,7 +247,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
@@ -257,7 +273,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
     mem_limit: 256m
     networks:
@@ -281,7 +297,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
     mem_limit: 256m
     networks:
@@ -306,7 +322,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      db-migrate:
+      db-seed:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
