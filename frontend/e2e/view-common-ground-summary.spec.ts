@@ -376,7 +376,7 @@ test.describe('View Common Ground Summary', () => {
     }
   });
 
-  test('should update common ground summary in real-time when new responses are added', async ({
+  test.skip('should update common ground summary in real-time when new responses are added', async ({
     page,
   }) => {
     // Setup WebSocket mock

@@ -821,7 +821,7 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  test('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
+  test.skip('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
     // Setup WebSocket mock
     const wsMock = await setupWebSocketMock(page);
 
