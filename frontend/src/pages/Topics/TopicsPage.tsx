@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useTopics } from '../../lib/useTopics';
+import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { TopicCard, TopicFilterUI } from '../../components/topics';
+import TopicCardSkeleton from '../../components/ui/skeletons/TopicCardSkeleton';
 import type { GetTopicsParams } from '../../types/topic';
 
 function TopicsPage() {
@@ -14,6 +16,7 @@ function TopicsPage() {
   });
 
   const { data, isLoading, error } = useTopics(filters);
+  const showSkeleton = useDelayedLoading(isLoading);
 
   const handleFiltersChange = (newFilters: GetTopicsParams) => {
     setFilters(newFilters);
@@ -54,16 +57,17 @@ function TopicsPage() {
         />
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-600">Loading topics...</p>
+      {/* Loading State - Skeleton cards (with 100ms delay to prevent flash) */}
+      {showSkeleton && (
+        <div className="space-y-4 mb-6">
+          {[1, 2, 3].map((i) => (
+            <TopicCardSkeleton key={i} />
+          ))}
         </div>
       )}
 
       {/* Topic List */}
-      {!isLoading && data && (
+      {!showSkeleton && data && (
         <>
           <div className="space-y-4 mb-6">
             {data.data.length === 0 ? (
