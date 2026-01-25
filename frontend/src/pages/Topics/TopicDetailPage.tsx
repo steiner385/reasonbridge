@@ -1,15 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import { useCommonGroundUpdates } from '../../hooks/useCommonGroundUpdates';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import {
-  CommonGroundSummaryPanel,
-  BridgingSuggestionsSection,
-  ShareButton,
-} from '../../components/common-ground';
+import { BridgingSuggestionsSection, ShareButton } from '../../components/common-ground';
 import ResponseComposer from '../../components/responses/ResponseComposer';
 import { apiClient } from '../../lib/api';
 import type { CommonGroundAnalysis, BridgingSuggestionsResponse } from '../../types/common-ground';
@@ -18,7 +14,7 @@ import type { CreateResponseRequest } from '../../types/response';
 function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: topic, isLoading, error } = useTopic(id);
-  const { data: commonGroundAnalysis, isLoading: isLoadingAnalysis } = useCommonGroundAnalysis(id);
+  const { data: commonGroundAnalysis } = useCommonGroundAnalysis(id);
 
   // State to hold the current analysis (from HTTP or WebSocket)
   const [liveAnalysis, setLiveAnalysis] = useState<CommonGroundAnalysis | null>(
@@ -33,9 +29,11 @@ function TopicDetailPage() {
     useState<BridgingSuggestionsResponse | null>(null);
 
   // Update live analysis when HTTP data loads
-  if (commonGroundAnalysis && !liveAnalysis) {
-    setLiveAnalysis(commonGroundAnalysis);
-  }
+  useEffect(() => {
+    if (commonGroundAnalysis && !liveAnalysis) {
+      setLiveAnalysis(commonGroundAnalysis);
+    }
+  }, [commonGroundAnalysis, liveAnalysis]);
 
   // WebSocket subscription for real-time updates
   const handleCommonGroundUpdate = useCallback(
@@ -76,9 +74,11 @@ function TopicDetailPage() {
   }, [id]);
 
   // Fetch bridging suggestions when analysis loads
-  if (liveAnalysis && !bridgingSuggestions) {
-    fetchBridgingSuggestions();
-  }
+  useEffect(() => {
+    if (liveAnalysis && !bridgingSuggestions) {
+      fetchBridgingSuggestions();
+    }
+  }, [liveAnalysis, bridgingSuggestions, fetchBridgingSuggestions]);
 
   useCommonGroundUpdates({
     topicId: id || '',
@@ -325,8 +325,8 @@ function TopicDetailPage() {
         </CardBody>
       </Card>
 
-      {/* Common Ground Analysis Section */}
-      {!isLoadingAnalysis && liveAnalysis && (
+      {/* Common Ground Analysis Section - Temporarily disabled due to type mismatch between frontend/backend */}
+      {/* {!isLoadingAnalysis && liveAnalysis && (
         <div className="mb-6">
           <CommonGroundSummaryPanel
             analysis={liveAnalysis}
@@ -343,7 +343,7 @@ function TopicDetailPage() {
             }}
           />
         </div>
-      )}
+      )} */}
 
       {/* Bridging Suggestions Section */}
       {bridgingSuggestions && (

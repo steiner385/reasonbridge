@@ -69,4 +69,31 @@ export class TopicsProxyController {
 
     res.status(response.status).send(response.data);
   }
+
+  // Alias for common-ground (frontend uses both routes)
+  @Get(':id/common-ground-analysis')
+  async getCommonGroundAnalysisAlias(
+    @Param('id') id: string,
+    @Query() query: Record<string, string>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    // Delegate to the same handler
+    return this.getCommonGroundAnalysis(id, query, authHeader, res);
+  }
+
+  @Get(':id/bridging-suggestions')
+  async getBridgingSuggestions(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToAiService({
+      method: 'GET',
+      path: `/suggest/bridging-suggestions/${id}`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
 }

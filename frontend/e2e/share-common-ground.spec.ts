@@ -537,10 +537,8 @@ test.describe('Share Common Ground Analysis', () => {
       if ((await shareButton.count()) > 0) {
         await shareButton.click();
 
-        // Find and click close button
-        const closeButton = page
-          .locator('[data-testid="close-modal"]')
-          .or(page.getByRole('button', { name: /close|×/i }).first());
+        // Find and click the footer close button specifically
+        const closeButton = page.locator('[data-testid="close-modal"]');
 
         if ((await closeButton.count()) > 0) {
           await closeButton.click();

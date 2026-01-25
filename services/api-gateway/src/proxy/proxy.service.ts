@@ -16,6 +16,7 @@ export interface ProxyRequest {
 export class ProxyService {
   private readonly userServiceUrl: string;
   private readonly discussionServiceUrl: string;
+  private readonly aiServiceUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
@@ -29,6 +30,7 @@ export class ProxyService {
       'DISCUSSION_SERVICE_URL',
       'http://localhost:3007',
     );
+    this.aiServiceUrl = this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:3002');
   }
 
   async proxyToUserService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
@@ -37,6 +39,10 @@ export class ProxyService {
 
   async proxyToDiscussionService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
     return this.proxy<T>(this.discussionServiceUrl, request);
+  }
+
+  async proxyToAiService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
+    return this.proxy<T>(this.aiServiceUrl, request);
   }
 
   private async proxy<T>(baseUrl: string, request: ProxyRequest): Promise<AxiosResponse<T>> {

@@ -594,9 +594,7 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  // TODO: Requires CommonGroundAnalysis seed data to render consensus score
-  // The BridgingSuggestionsSection only renders when analysis data exists
-  test.skip('should display consensus score as percentage (0-100)', async ({ page }) => {
+  test('should display consensus score as percentage (0-100)', async ({ page }) => {
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
