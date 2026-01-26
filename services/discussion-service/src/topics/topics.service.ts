@@ -6,7 +6,7 @@ import { GetTopicsQueryDto } from './dto/get-topics-query.dto.js';
 import { SearchTopicsQueryDto } from './dto/search-topics-query.dto.js';
 import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-response.dto.js';
 import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
-import { Prisma } from '@unite-discord/db-models';
+import { Prisma } from '@reason-bridge/db-models';
 
 @Injectable()
 export class TopicsService {

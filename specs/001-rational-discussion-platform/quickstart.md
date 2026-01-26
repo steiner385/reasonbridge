@@ -1,8 +1,8 @@
-# Developer Quickstart: uniteDiscord
+# Developer Quickstart: reasonBridge
 
 **Feature**: 001-rational-discussion-platform | **Date**: 2026-01-17
 
-This guide helps developers get the uniteDiscord platform running locally and understand the development workflow.
+This guide helps developers get the reasonBridge platform running locally and understand the development workflow.
 
 ## Prerequisites
 
@@ -16,8 +16,8 @@ This guide helps developers get the uniteDiscord platform running locally and un
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/uniteDiscord.git
-cd uniteDiscord
+git clone https://github.com/your-org/reasonBridge.git
+cd reasonBridge
 
 # Install dependencies
 pnpm install
@@ -35,7 +35,7 @@ open http://localhost:3000
 ## Project Structure
 
 ```
-uniteDiscord/
+reasonBridge/
 ├── services/              # Backend microservices
 │   ├── api-gateway/       # Request routing, auth
 │   ├── user-service/      # Users, verification, trust
@@ -263,7 +263,7 @@ make docker:test-down
 **Integration Test Setup**:
 ```typescript
 // tests/integration/setup.ts
-import { prisma } from '@uniteDiscord/db-models';
+import { prisma } from '@reasonBridge/db-models';
 import { startTestServer } from './helpers';
 
 beforeAll(async () => {

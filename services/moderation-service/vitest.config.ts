@@ -9,7 +9,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      // Module resolution issues - @unite-discord/common not resolving
+      // Module resolution issues - @reason-bridge/common not resolving
       '**/moderation.controller.test.ts',
       '**/moderation-queue.service.spec.ts',
       '**/moderation-action.repository.spec.ts',

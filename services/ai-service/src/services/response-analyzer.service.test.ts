@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ResponseAnalyzerService } from './response-analyzer.service.js';
-import { FeedbackType } from '@unite-discord/db-models';
+import { FeedbackType } from '@reason-bridge/db-models';
 
 const createMockToneAnalyzer = () => ({
   analyze: vi.fn().mockResolvedValue(null),

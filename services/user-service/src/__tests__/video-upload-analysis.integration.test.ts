@@ -73,7 +73,7 @@ describe('Video Upload and Analysis - Integration Tests', () => {
 
   const mockConfigData: Record<string, unknown> = {
     AWS_REGION: 'us-east-1',
-    S3_VIDEO_VERIFICATION_BUCKET: 'unite-discord-video-verifications',
+    S3_VIDEO_VERIFICATION_BUCKET: 'reason-bridge-video-verifications',
     AWS_ACCESS_KEY_ID: 'test-key',
     AWS_SECRET_ACCESS_KEY: 'test-secret',
     VIDEO_MAX_FILE_SIZE: 100 * 1024 * 1024, // 100MB

@@ -6,7 +6,7 @@
  *
  * @example Publishing events
  * ```typescript
- * import { SnsEventPublisher } from '@unite-discord/common/events';
+ * import { SnsEventPublisher } from '@reason-bridge/common/events';
  *
  * const publisher = new SnsEventPublisher({
  *   topicArn: process.env.SNS_TOPIC_ARN!,
@@ -25,7 +25,7 @@
  *
  * @example Subscribing to events
  * ```typescript
- * import { SqsEventSubscriber } from '@unite-discord/common/events';
+ * import { SqsEventSubscriber } from '@reason-bridge/common/events';
  *
  * const subscriber = new SqsEventSubscriber({
  *   queueUrl: process.env.SQS_QUEUE_URL!,

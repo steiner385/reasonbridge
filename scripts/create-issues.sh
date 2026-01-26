@@ -1,8 +1,8 @@
 #!/bin/bash
 # Script to create GitHub issues from tasks.md
-# Repository: steiner385/uniteDiscord
+# Repository: steiner385/reasonBridge
 
-REPO="steiner385/uniteDiscord"
+REPO="steiner385/reasonBridge"
 
 create_issue() {
     local id="$1"

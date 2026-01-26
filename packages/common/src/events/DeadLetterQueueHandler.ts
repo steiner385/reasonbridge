@@ -8,7 +8,7 @@
  * - Monitoring DLQ metrics
  */
 
-import type { BaseEvent, EventEnvelope } from '@unite-discord/event-schemas';
+import type { BaseEvent, EventEnvelope } from '@reason-bridge/event-schemas';
 import type { EventContext, ProcessingResult } from './EventSubscriber.js';
 
 /**

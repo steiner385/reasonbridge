@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
-import type { UserTrustUpdatedEvent } from '@unite-discord/event-schemas';
-import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
+import type { UserTrustUpdatedEvent } from '@reason-bridge/event-schemas';
+import { MODERATION_EVENT_TYPES } from '@reason-bridge/event-schemas';
 import type {
   CreateAppealRequest,
   AppealResponse,
@@ -38,15 +38,11 @@ export class AppealService {
     }
 
     if (request.reason.length < 20) {
-      throw new BadRequestException(
-        'Appeal reason must be at least 20 characters long',
-      );
+      throw new BadRequestException('Appeal reason must be at least 20 characters long');
     }
 
     if (request.reason.length > 5000) {
-      throw new BadRequestException(
-        'Appeal reason cannot exceed 5000 characters',
-      );
+      throw new BadRequestException('Appeal reason cannot exceed 5000 characters');
     }
 
     const action = await this.prisma.moderationAction.findUnique({
@@ -54,9 +50,7 @@ export class AppealService {
     });
 
     if (!action) {
-      throw new NotFoundException(
-        `Moderation action ${actionId} not found`,
-      );
+      throw new NotFoundException(`Moderation action ${actionId} not found`);
     }
 
     if (action.status === 'REVERSED') {
@@ -143,8 +137,7 @@ export class AppealService {
 
     const appeals = await this.prisma.appeal.findMany(findManyArgs);
 
-    const nextCursor =
-      appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
+    const nextCursor = appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
 
     return {
       appeals: appeals.map((appeal) => ({
@@ -162,10 +155,7 @@ export class AppealService {
    * Assign an appeal to a moderator for review
    * Updates appeal status to UNDER_REVIEW
    */
-  async assignAppealToModerator(
-    appealId: string,
-    moderatorId: string,
-  ): Promise<AppealResponse> {
+  async assignAppealToModerator(appealId: string, moderatorId: string): Promise<AppealResponse> {
     const appeal = await this.prisma.appeal.findUnique({
       where: { id: appealId },
     });
@@ -250,9 +240,7 @@ export class AppealService {
     }
 
     if (request.reasoning.length > 2000) {
-      throw new BadRequestException(
-        'Appeal decision reasoning cannot exceed 2000 characters',
-      );
+      throw new BadRequestException('Appeal decision reasoning cannot exceed 2000 characters');
     }
 
     const appeal = await this.prisma.appeal.findUnique({
@@ -272,8 +260,7 @@ export class AppealService {
       );
     }
 
-    const newStatus =
-      request.decision === 'upheld' ? 'UPHELD' : 'DENIED';
+    const newStatus = request.decision === 'upheld' ? 'UPHELD' : 'DENIED';
 
     // Update the appeal with the decision
     const updatedAppeal = await this.prisma.appeal.update({

@@ -167,7 +167,7 @@ export class VerificationController {
    * {
    *   "videoUploadId": "a1b2c3d4-e5f6-4789-0123-456789abcdef",
    *   "verificationId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-   *   "s3Url": "s3://unite-discord-video-verifications/videos/user123/...",
+   *   "s3Url": "s3://reason-bridge-video-verifications/videos/user123/...",
    *   "fileName": "verification.webm",
    *   "fileSize": 2097152,
    *   "completedAt": "2026-01-18T14:30:00.000Z",

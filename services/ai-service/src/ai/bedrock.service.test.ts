@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BedrockService } from './bedrock.service.js';
 
 // Mock the ai-client module at the top level
-vi.mock('@unite-discord/ai-client', () => {
+vi.mock('@reason-bridge/ai-client', () => {
   const mockComplete = vi.fn();
   const mockIsReady = vi.fn().mockResolvedValue(true);
 
@@ -18,7 +18,7 @@ vi.mock('@unite-discord/ai-client', () => {
 
 // Access the mocks
 const getMocks = async () => {
-  const mod = await import('@unite-discord/ai-client');
+  const mod = await import('@reason-bridge/ai-client');
   return {
     mockComplete: (mod as any).__mockComplete as ReturnType<typeof vi.fn>,
     mockIsReady: (mod as any).__mockIsReady as ReturnType<typeof vi.fn>,

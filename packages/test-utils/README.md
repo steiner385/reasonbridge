@@ -1,6 +1,6 @@
-# @unite-discord/test-utils
+# @reason-bridge/test-utils
 
-Test utilities for the uniteDiscord monorepo to facilitate unit testing without external dependencies.
+Test utilities for the reasonBridge monorepo to facilitate unit testing without external dependencies.
 
 ## Purpose
 

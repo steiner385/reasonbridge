@@ -19,7 +19,7 @@ const eksStack = new EksStack(app, 'UniteEksStack', {
   env,
   description: 'Unite Discord Platform - EKS Cluster and VPC',
   tags: {
-    Project: 'unite-discord',
+    Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
     ManagedBy: 'CDK',
   },
@@ -31,7 +31,7 @@ const rdsStack = new RdsStack(app, 'UniteRdsStack', {
   vpc: eksStack.vpc,
   description: 'Unite Discord Platform - PostgreSQL Database',
   tags: {
-    Project: 'unite-discord',
+    Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
     ManagedBy: 'CDK',
   },
@@ -44,7 +44,7 @@ const elastiCacheStack = new ElastiCacheStack(app, 'UniteElastiCacheStack', {
   vpc: eksStack.vpc,
   description: 'Unite Discord Platform - Redis Cache',
   tags: {
-    Project: 'unite-discord',
+    Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
     ManagedBy: 'CDK',
   },
@@ -56,7 +56,7 @@ new BedrockStack(app, 'UniteBedrockStack', {
   env,
   description: 'Unite Discord Platform - Bedrock IAM Permissions',
   tags: {
-    Project: 'unite-discord',
+    Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
     ManagedBy: 'CDK',
   },
@@ -67,7 +67,7 @@ new CognitoStack(app, 'UniteCognitoStack', {
   env,
   description: 'Unite Discord Platform - Cognito User Pool',
   tags: {
-    Project: 'unite-discord',
+    Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
     ManagedBy: 'CDK',
   },

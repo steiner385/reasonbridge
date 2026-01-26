@@ -1,11 +1,11 @@
-# Data Model: uniteDiscord - Rational Discussion Platform
+# Data Model: reasonBridge - Rational Discussion Platform
 
 **Feature**: 001-rational-discussion-platform | **Date**: 2026-01-17
 **Source**: [spec.md](./spec.md) Key Entities section
 
 ## Overview
 
-This document defines the data model for the uniteDiscord platform, extracted from the feature specification. The model supports a microservices architecture with clear ownership boundaries.
+This document defines the data model for the reasonBridge platform, extracted from the feature specification. The model supports a microservices architecture with clear ownership boundaries.
 
 ## Entity Relationship Diagram
 

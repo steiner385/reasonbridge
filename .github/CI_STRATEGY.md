@@ -16,7 +16,8 @@ All CI/CD operations run on **self-hosted Jenkins**, triggered directly via **Gi
 ```
 
 ### Self-Hosted Jenkins (Primary CI)
-- **Job**: `unitediscord-ci`
+
+- **Job**: `reasonbridge-ci`
 - **Trigger**: GitHub webhooks on push/merge to **any branch**
 - **Responsible for**:
   - Security scanning (secrets, duplication, file sizes)
@@ -26,11 +27,13 @@ All CI/CD operations run on **self-hosted Jenkins**, triggered directly via **Gi
   - Build verification
 
 ### GitHub Webhooks
+
 - Configured in GitHub repository settings
 - Sends push events to Jenkins webhook endpoint
 - Triggers builds for all branches automatically
 
 ### GitHub Actions (Optional Status Sync)
+
 - **jenkins-status.yml** (optional)
   - Reports Jenkins results back to GitHub commit status
   - Enables branch protection to require Jenkins checks
@@ -63,6 +66,7 @@ When you push or merge to any branch:
 See [Jenkinsfile](../../Jenkinsfile) for complete pipeline definition.
 
 Current stages:
+
 - Notify Start
 - Setup (pnpm, dependencies)
 - Build Dependencies
@@ -78,6 +82,7 @@ Current stages:
 ## Maintenance
 
 To disable GitHub Actions entirely (optional):
+
 - The `jenkins-trigger.yml` and `jenkins-status.yml` workflows can be disabled if Jenkins webhook integration is set up in GitHub
 - Currently, these workflows are lightweight and serve as a reliable trigger mechanism
 

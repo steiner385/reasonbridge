@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/shared",
+  "name": "@reason-bridge/shared",
   "version": "0.1.0",
   "description": "Shared utilities and constants for Unite Discord",
   "private": true,

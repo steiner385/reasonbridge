@@ -1,7 +1,7 @@
 {
-  "name": "@unite-discord/frontend",
+  "name": "@reason-bridge/frontend",
   "version": "0.1.0",
-  "description": "Frontend application for uniteDiscord - Rational Discussion Platform",
+  "description": "Frontend application for reasonBridge - Rational Discussion Platform",
   "private": true,
   "type": "module",
   "scripts": {

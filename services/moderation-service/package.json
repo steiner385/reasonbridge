@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/moderation-service",
+  "name": "@reason-bridge/moderation-service",
   "version": "0.1.0",
   "description": "Moderation service for content review and policy enforcement",
   "type": "module",
@@ -21,9 +21,9 @@
     "@nestjs/core": "^10.3.0",
     "@nestjs/platform-fastify": "^10.3.0",
     "@prisma/client": "6.3.1",
-    "@unite-discord/common": "workspace:*",
-    "@unite-discord/db-models": "workspace:*",
-    "@unite-discord/event-schemas": "workspace:*",
+    "@reason-bridge/common": "workspace:*",
+    "@reason-bridge/db-models": "workspace:*",
+    "@reason-bridge/event-schemas": "workspace:*",
     "fastify": "^4.25.2",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1"

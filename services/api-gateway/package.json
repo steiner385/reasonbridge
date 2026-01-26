@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/api-gateway",
+  "name": "@reason-bridge/api-gateway",
   "version": "0.1.0",
   "description": "API Gateway service with NestJS and Fastify adapter",
   "type": "module",

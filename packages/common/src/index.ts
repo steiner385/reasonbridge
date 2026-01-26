@@ -1,7 +1,7 @@
 /**
- * @unite-discord/common
+ * @reason-bridge/common
  *
- * Shared types, utilities, and constants for the uniteDiscord platform.
+ * Shared types, utilities, and constants for the reasonBridge platform.
  */
 
 export * from './types/index.js';

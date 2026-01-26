@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: uniteDiscord Moderation Service API
+  title: reasonBridge Moderation Service API
   description: Content moderation, user actions, and appeals management
   version: 1.0.0
   contact:
-    name: uniteDiscord Team
+    name: reasonBridge Team
 
 servers:
   - url: /api/v1/moderation

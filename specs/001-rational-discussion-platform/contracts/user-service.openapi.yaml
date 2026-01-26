@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: uniteDiscord User Service API
+  title: reasonBridge User Service API
   description: User account management, verification, trust scores, and social follows
   version: 1.0.0
   contact:
-    name: uniteDiscord Team
+    name: reasonBridge Team
 
 servers:
   - url: /api/v1/users

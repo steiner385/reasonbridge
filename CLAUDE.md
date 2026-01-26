@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-uniteDiscord is a **Rational Discussion Platform** built with modern web technologies. The application provides tools for structured debates, claim validation, bias detection, and common ground discovery.
+reasonBridge is a **Rational Discussion Platform** built with modern web technologies. The application provides tools for structured debates, claim validation, bias detection, and common ground discovery.
 
 **Stack**: React 18 + TypeScript 5 + Vite (frontend), Node.js 20 LTS (runtime), pnpm (package manager)
 
@@ -52,37 +52,45 @@ src/
 ### Technology Decisions
 
 **Frontend Framework**: React 18
+
 - Reason: Mature ecosystem, concurrent rendering, strong TypeScript support
 - Hooks-based architecture for state management
 
 **Build Tool**: Vite
+
 - Reason: Fast HMR, ESM-native, excellent dev experience
 - Configuration: `vite.config.ts`
 
 **Language**: TypeScript 5.x
+
 - Reason: Type safety, IDE support, refactoring confidence
 - Strict mode enabled for maximum safety
 
 **Package Manager**: pnpm 9.x
+
 - Reason: Fast, disk-efficient, workspace support
 - Lockfile: `pnpm-lock.yaml` (always use frozen lockfile in CI)
 
 **Styling**: Tailwind CSS 3.x
+
 - Reason: Utility-first, consistent design system, small bundle
 - Configuration: `tailwind.config.js`
 
 **Testing**:
+
 - Unit/Integration: Vitest 2.x (fast, ESM-native, Vite integration)
 - E2E: Playwright 1.40+ (cross-browser, reliable, great DX)
 - Coverage: @vitest/coverage-v8
 
 **Code Quality**:
+
 - ESLint 8.x (Airbnb config + TypeScript rules)
 - Prettier 3.x (formatting)
 - Husky 9.x (Git hooks)
 - lint-staged (staged file linting)
 
 **CI/CD**: Jenkins (multibranch pipeline)
+
 - Comprehensive test stages (lint, unit, integration, contract, E2E)
 - Branch protection via required status checks
 - Allure reporting for test results
@@ -90,6 +98,7 @@ src/
 ### Development Workflow
 
 1. **Local Development**:
+
    ```bash
    pnpm install          # Install dependencies
    pnpm dev              # Start dev server (http://localhost:5173)
@@ -97,6 +106,7 @@ src/
    ```
 
 2. **Code Quality**:
+
    ```bash
    pnpm lint             # Check linting
    pnpm format:check     # Check formatting
@@ -187,7 +197,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 ## Jenkins CI/CD
 
-**Jenkins Server:** `http://jenkins.uniteDiscord.org`
+**Jenkins Server:** `http://jenkins.reasonBridge.org`
 **Credentials:** Stored in `~/.jenkins-cli.yaml`
 
 **Infrastructure:**
@@ -198,17 +208,17 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 **Jenkins Shared Library:**
 
-- Repository: `github.com/steiner385/unitediscord-jenkins-lib`
-- Local clone: `/tmp/unitediscord-jenkins-lib`
+- Repository: `github.com/steiner385/reasonbridge-jenkins-lib`
+- Local clone: `/tmp/reasonbridge-jenkins-lib`
 - **IMPORTANT:** Push changes directly to `main` branch - no PRs needed
 - Jenkins loads the library directly from `main`, so branches/PRs just add unnecessary overhead
 - The library contains reusable pipeline steps in `vars/` directory
 
-**Key Job:** `uniteDiscord-multibranch` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
+**Key Job:** `reasonBridge-multibranch` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
 
 - Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
 - No manual triggering needed - commits trigger builds automatically
-- **NOTE:** Job name is `uniteDiscord-multibranch`, NOT `unitediscord-ci`
+- **NOTE:** Job name is `reasonBridge-multibranch`, NOT `reasonbridge-ci`
 
 **Pipeline Stages:**
 
@@ -225,7 +235,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 **Debugging:**
 
 - Check console output: `echo $UNIT_TEST_EXIT_CODE` for test exit codes
-- View build logs: Jenkins UI → uniteDiscord-multibranch → [branch-name] → Build Console
+- View build logs: Jenkins UI → reasonBridge-multibranch → [branch-name] → Build Console
 - Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
 - Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
 
@@ -234,36 +244,41 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 **CRITICAL: Branch protection configuration must match actual Jenkins status checks.**
 
 **Required Status Checks for `main` branch (Defense-in-Depth):**
+
 ```json
 {
   "contexts": [
-    "continuous-integration/jenkins/pr-merge",  // Automatic (Jenkins plugin)
-    "jenkins/lint",                             // Code quality
-    "jenkins/unit-tests",                       // Unit tests
-    "jenkins/integration"                       // Integration tests
+    "continuous-integration/jenkins/pr-merge", // Automatic (Jenkins plugin)
+    "jenkins/lint", // Code quality
+    "jenkins/unit-tests", // Unit tests
+    "jenkins/integration" // Integration tests
   ],
   "strict": true
 }
 ```
 
 **Why this configuration:**
+
 - **Comprehensive validation**: Requires lint, unit tests, AND integration tests before merge
 - **Pre-merge checks**: All required checks post BEFORE merge (not after like `jenkins/ci`)
 - **Strict mode**: Ensures PRs are up-to-date with base branch
 - **Defense-in-depth**: Multiple layers prevent broken code from merging
 
 **Status Check Sources:**
+
 - `continuous-integration/jenkins/pr-merge` - Automatic from Jenkins GitHub Branch Source plugin
 - `jenkins/lint` - Posted by `runLintChecks()` helper
 - `jenkins/unit-tests` - Posted by `runUnitTests()` helper
 - `jenkins/integration` - Posted by `runIntegrationTests()` helper
 
 **Verification:**
+
 ```bash
-gh api repos/steiner385/uniteDiscord/branches/main/protection/required_status_checks --jq '.contexts'
+gh api repos/steiner385/reasonBridge/branches/main/protection/required_status_checks --jq '.contexts'
 ```
 
 **NEVER modify branch protection without:**
+
 1. Verifying the new status check context actually exists in Jenkins builds
 2. Ensuring the check posts BEFORE merge (not in post-success/failure blocks)
 3. Testing with a dummy PR that auto-merge correctly waits for all checks
@@ -305,6 +320,7 @@ npx playwright show-report
 **CI/CD E2E Configuration:**
 
 The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E tests:
+
 - **Image**: `mcr.microsoft.com/playwright:v1.57.0-noble`
 - **Pre-installed**: @playwright/test, Chromium browser binaries (~400MB), system dependencies
 - **Benefits**: Eliminates browser downloads, prevents OOM kills (exit code 137), faster startup
@@ -312,18 +328,21 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Historical Issues:**
 
 1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
+
    - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
    - **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
    - **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
    - **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
 
 2. **DNS Resolution (net::ERR_NAME_NOT_RESOLVED)** - Fixed 2026-01-24 16:05 UTC:
+
    - PR #672 build #1: 14 tests in view-common-ground-summary.spec.ts failed with `net::ERR_NAME_NOT_RESOLVED at http://frontend/topics`
    - **Root cause**: PLAYWRIGHT_BASE_URL environment variable not passed correctly to docker exec process
    - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
    - **Result**: All 14 tests now resolve correct baseURL for navigation
 
 3. **Port Already Allocated (E2E Start Failure)** - Fixed 2026-01-24 16:27 UTC:
+
    - PR #672 build #2: Docker Compose failed with `Bind for 0.0.0.0:3004 failed: port is already allocated`
    - **Root cause**: Crashed/killed containers leave processes holding E2E ports; aggressive cleanup only removed containers by name, not port-based processes
    - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
@@ -348,12 +367,14 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 **Issue**: TypeScript errors about missing types
 **Solution**:
+
 - Check `node_modules/@types` directories exist
 - Run `pnpm install` to refresh types
 - Restart TypeScript server in IDE
 
 **Issue**: Pre-commit hooks fail
 **Solution**:
+
 - **NEVER bypass with `--no-verify`**
 - Read the error message carefully
 - Fix the reported issue (e.g., remove console.log, fix formatting)
@@ -362,18 +383,21 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 **Issue**: Vite dev server won't start
 **Solution**:
+
 - Check port 5173 is not already in use: `lsof -i :5173`
 - Clear Vite cache: `rm -rf node_modules/.vite`
 - Restart with `pnpm dev`
 
 **Issue**: Tests fail with "Cannot find module"
 **Solution**:
+
 - Ensure all test files have `.spec.ts` or `.test.ts` extension
 - Check import paths use correct relative paths
 - Verify `vitest.config.ts` has correct `resolve.alias` settings
 
 **Issue**: E2E tests timeout
 **Solution**:
+
 - Ensure headless mode (never use `--debug` or `--headed` in CI)
 - Check `playwright.config.ts` timeout settings
 - Verify test selectors are stable (use `data-testid` attributes)
@@ -381,6 +405,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 **Issue**: Jenkins build fails but passes locally
 **Solution**:
+
 - Check Jenkins console logs for specific errors
 - Verify environment variables are set correctly
 - Ensure Docker services (postgres, redis) are running in Jenkins
@@ -388,6 +413,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 **Issue**: PR cannot merge - status checks pending
 **Solution**:
+
 - Wait for all Jenkins pipeline stages to complete
 - Required checks: `jenkins/lint`, `jenkins/unit-tests`, `jenkins/integration`, `continuous-integration/jenkins/pr-merge`
 - If checks fail, fix issues and push new commits
@@ -396,16 +422,19 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 ### Debugging Workflow
 
 1. **Identify the Error**:
+
    - Read error message completely
    - Check file and line number
    - Review recent changes
 
 2. **Reproduce Locally**:
+
    - Pull latest changes
    - Install dependencies
    - Run the failing command locally
 
 3. **Fix and Verify**:
+
    - Make minimal fix
    - Run tests to verify fix
    - Ensure no regressions
@@ -417,7 +446,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ### Getting Help
 
-- **Jenkins Logs**: Jenkins UI → uniteDiscord-multibranch → [branch] → Build Console
+- **Jenkins Logs**: Jenkins UI → reasonBridge-multibranch → [branch] → Build Console
 - **CI Setup Guide**: `.github/CI_SETUP.md`
 - **Systematic Debugging Plan**: `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md`
 - **Local Reproduction**: Run pipeline stages from `.jenkins/Jenkinsfile` locally
