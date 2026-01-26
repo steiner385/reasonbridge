@@ -126,6 +126,10 @@ export class AuthService {
         onboardingProgress: {
           userId: user.id,
           currentStep: OnboardingStep.VERIFICATION,
+          emailVerified: false,
+          topicsSelected: false,
+          orientationViewed: false,
+          firstPostMade: false,
           completionPercentage: 0,
           nextAction: {
             step: 'VERIFICATION',
@@ -246,6 +250,7 @@ export class AuthService {
 
       // Generate new verification token in our system
       const token = await this.verificationService.generateToken(user.id, user.email);
+      const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
 
       this.logger.log(`Verification code resent to: ${dto.email}`);
 
@@ -253,7 +258,7 @@ export class AuthService {
         message: 'Verification code resent successfully',
         email: dto.email,
         remainingAttempts: remaining - 1,
-        expiresAt: token.expiresAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
       };
     } catch (error) {
       this.logger.error(`Resend verification failed for ${dto.email}:`, error);
@@ -494,6 +499,10 @@ export class AuthService {
     return {
       userId: progress.userId,
       currentStep: progress.currentStep,
+      emailVerified: progress.emailVerified ?? false,
+      topicsSelected: progress.topicsSelected ?? false,
+      orientationViewed: progress.orientationViewed ?? false,
+      firstPostMade: progress.firstPostMade ?? false,
       completionPercentage: progress.completionPercentage || 0,
       nextAction: this.getNextActionForStep(progress.currentStep),
     };
@@ -522,14 +531,8 @@ export class AuthService {
         description: 'Quick tour of the platform features',
         url: '/onboarding/orientation',
       },
-      FIRST_POST: {
-        step: 'FIRST_POST',
-        label: 'Make your first post',
-        description: 'Share your perspective on a topic',
-        url: '/discussions',
-      },
-      COMPLETED: {
-        step: 'COMPLETED',
+      COMPLETE: {
+        step: 'COMPLETE',
         label: 'Onboarding complete',
         description: 'You are all set!',
         url: '/dashboard',

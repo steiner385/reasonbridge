@@ -13,6 +13,7 @@ import { SelectTopicsResponseDto } from './dto/select-topics-response.dto';
 import { SelectedTopicDto } from '../dto/common.dto';
 import { ActivityLevel } from '../topics/dto/topic.dto';
 import { OnboardingStep } from '@prisma/client';
+import type { OnboardingProgress } from '@prisma/client';
 
 @Injectable()
 export class OnboardingService {
@@ -136,6 +137,10 @@ export class OnboardingService {
         onboardingProgress: {
           userId: onboardingProgress.userId,
           currentStep: onboardingProgress.currentStep,
+          emailVerified: onboardingProgress.emailVerified,
+          topicsSelected: onboardingProgress.topicsSelected,
+          orientationViewed: onboardingProgress.orientationViewed,
+          firstPostMade: onboardingProgress.firstPostMade,
           completionPercentage: this.calculateCompletionPercentage(onboardingProgress),
           nextAction: this.getNextActionForStep(onboardingProgress.currentStep),
         },
@@ -267,7 +272,7 @@ export class OnboardingService {
   /**
    * Helper: Calculate completion percentage
    */
-  private calculateCompletionPercentage(progress: any): number {
+  private calculateCompletionPercentage(progress: OnboardingProgress): number {
     const steps = {
       [OnboardingStep.VERIFICATION]: 25,
       [OnboardingStep.TOPICS]: 50,
