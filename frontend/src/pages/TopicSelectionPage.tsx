@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TopicCard from '../components/onboarding/TopicCard';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
-import {
-  onboardingService,
-  type Topic,
-} from '../services/onboardingService';
+import { onboardingService, type Topic } from '../services/onboardingService';
 
 interface SelectedTopicWithPriority {
   topic: Topic;
@@ -271,9 +268,7 @@ export const TopicSelectionPage: React.FC = () => {
             </div>
 
             {!isValidSelection && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Required: 2-3 topics
-              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Required: 2-3 topics</span>
             )}
           </div>
 
@@ -319,18 +314,15 @@ export const TopicSelectionPage: React.FC = () => {
           <div className="grid gap-4 md:grid-cols-2 mb-8">
             {topics.map((topic) => {
               const selected = selectedTopics.get(topic.id);
-              const topicCardProps = {
-                key: topic.id,
-                topic,
-                isSelected: !!selected,
-                onClick: () => handleTopicClick(topic),
-                onPrioritySelect: (priority: number) => handlePriorityChange(topic.id, priority),
-                enablePrioritySelection: true,
-                ...(selected?.priority ? { priority: selected.priority } : {}),
-              };
               return (
                 <TopicCard
-                  {...topicCardProps}
+                  key={topic.id}
+                  topic={topic}
+                  isSelected={!!selected}
+                  onClick={() => handleTopicClick(topic)}
+                  onPrioritySelect={(priority: number) => handlePriorityChange(topic.id, priority)}
+                  enablePrioritySelection={true}
+                  {...(selected?.priority ? { priority: selected.priority } : {})}
                 />
               );
             })}

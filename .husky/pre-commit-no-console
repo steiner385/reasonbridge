@@ -77,6 +77,12 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip scripts/ folder - build scripts need console output
+  if [[ "$file" =~ /scripts/ ]]; then
+    debug "Skipping scripts folder file: $file"
+    continue
+  fi
+
   # Get staged content and check for problematic console statements
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 
