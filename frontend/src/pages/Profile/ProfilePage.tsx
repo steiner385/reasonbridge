@@ -2,22 +2,19 @@
  * Profile page for the current authenticated user
  */
 
+import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../lib/useCurrentUser';
+import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Link } from 'react-router-dom';
+import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
 
 function ProfilePage() {
   const { data: user, isLoading, isError, error } = useCurrentUser();
+  const showSkeleton = useDelayedLoading(isLoading);
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-center items-center py-12">
-          <div className="text-gray-600">Loading your profile...</div>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <ProfileSkeleton />;
   }
 
   if (isError) {

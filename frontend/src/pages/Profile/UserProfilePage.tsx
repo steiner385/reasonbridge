@@ -4,21 +4,18 @@
 
 import { useParams, Link } from 'react-router-dom';
 import { useUser } from '../../lib/useUser';
+import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
 
 function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
   const { data: user, isLoading, isError, error } = useUser(id);
+  const showSkeleton = useDelayedLoading(isLoading);
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-center items-center py-12">
-          <div className="text-gray-600">Loading profile...</div>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <ProfileSkeleton />;
   }
 
   if (isError) {

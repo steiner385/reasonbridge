@@ -3,10 +3,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import { useCommonGroundUpdates } from '../../hooks/useCommonGroundUpdates';
+import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { BridgingSuggestionsSection, ShareButton } from '../../components/common-ground';
 import ResponseComposer from '../../components/responses/ResponseComposer';
+import TopicDetailSkeleton from '../../components/ui/skeletons/TopicDetailSkeleton';
 import { apiClient } from '../../lib/api';
 import type { CommonGroundAnalysis, BridgingSuggestionsResponse } from '../../types/common-ground';
 import type { CreateResponseRequest } from '../../types/response';
@@ -15,6 +17,7 @@ function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: topic, isLoading, error } = useTopic(id);
   const { data: commonGroundAnalysis } = useCommonGroundAnalysis(id);
+  const showSkeleton = useDelayedLoading(isLoading);
 
   // State to hold the current analysis (from HTTP or WebSocket)
   const [liveAnalysis, setLiveAnalysis] = useState<CommonGroundAnalysis | null>(
@@ -86,15 +89,8 @@ function TopicDetailPage() {
     enabled: !!id,
   });
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-600">Loading topic details...</p>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <TopicDetailSkeleton />;
   }
 
   if (error) {
