@@ -28,6 +28,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-fastify": "^10.3.0",
     "@prisma/client": "6.3.1",
+    "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "apple-signin-auth": "^2.0.0",
     "bcrypt": "^6.0.0",

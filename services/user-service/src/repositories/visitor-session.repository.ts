@@ -172,7 +172,6 @@ export class VisitorSessionRepository {
         where: { sessionId },
         data: {
           convertedToUserId: userId,
-          convertedAt: new Date(),
         },
       });
 

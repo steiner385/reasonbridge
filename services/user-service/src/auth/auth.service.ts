@@ -87,7 +87,8 @@ export class AuthService {
 
     try {
       // T055: Create Cognito user (triggers verification email automatically)
-      const cognitoUser = await this.cognitoService.signUp(dto.email, dto.password);
+      const displayName = dto.displayName || this.generateDisplayNameFromEmail(dto.email);
+      const cognitoUser = await this.cognitoService.signUp(dto.email, dto.password, displayName);
 
       // T055-T057: Create User record and OnboardingProgress in transaction
       const user = await this.prisma.$transaction(async (tx) => {
@@ -95,20 +96,13 @@ export class AuthService {
         const newUser = await this.userRepository.create({
           cognitoSub: cognitoUser.userSub,
           email: emailValidation.normalizedEmail!,
-          displayName: dto.displayName || this.generateDisplayNameFromEmail(dto.email),
+          displayName,
           authMethod: AuthMethod.EMAIL_PASSWORD,
           emailVerified: false, // Will be set to true after email verification
         });
 
         // T056: Create OnboardingProgress record (currentStep = VERIFICATION)
-        await this.onboardingProgressRepository.create({
-          userId: newUser.id,
-          currentStep: OnboardingStep.VERIFICATION,
-          emailVerified: false,
-          topicsSelected: false,
-          orientationViewed: false,
-          firstPostMade: false,
-        });
+        await this.onboardingProgressRepository.create(newUser.id);
 
         // T057: Link VisitorSession to User if provided
         if (dto.visitorSessionId) {
@@ -142,9 +136,10 @@ export class AuthService {
         },
         expiresIn: 0,
       };
-    } catch (error) {
-      this.logger.error(`Signup failed for ${dto.email}:`, error);
-      if (error.name === 'UsernameExistsException') {
+    } catch (error: unknown) {
+      const errorObj = error as { name?: string; message?: string; stack?: string };
+      this.logger.error(`Signup failed for ${dto.email}: ${errorObj.message}`, errorObj.stack);
+      if (errorObj.name === 'UsernameExistsException') {
         throw new ConflictException('Email address is already registered');
       }
       throw error;
@@ -203,12 +198,16 @@ export class AuthService {
         onboardingProgress: this.mapOnboardingProgressToDto(onboardingProgress!),
         expiresIn: tokens.expiresIn,
       };
-    } catch (error) {
-      this.logger.error(`Email verification failed for ${dto.email}:`, error);
-      if (error.name === 'CodeMismatchException') {
+    } catch (error: unknown) {
+      const errorObj = error as { name?: string; message?: string; stack?: string };
+      this.logger.error(
+        `Email verification failed for ${dto.email}: ${errorObj.message}`,
+        errorObj.stack,
+      );
+      if (errorObj.name === 'CodeMismatchException') {
         throw new UnauthorizedException('Invalid verification code');
       }
-      if (error.name === 'ExpiredCodeException') {
+      if (errorObj.name === 'ExpiredCodeException') {
         throw new BadRequestException('Verification code has expired. Please request a new code.');
       }
       throw error;
@@ -234,6 +233,9 @@ export class AuthService {
 
     // Check rate limiting (3 per hour)
     const remaining = await this.verificationService.getRemainingAttempts(dto.email);
+    if (remaining === null) {
+      throw new BadRequestException('No verification attempts remaining');
+    }
     if (remaining <= 0) {
       throw new BadRequestException('Rate limit exceeded. Please try again in an hour.');
     }
@@ -354,16 +356,7 @@ export class AuthService {
           });
 
           // Create OnboardingProgress
-          await this.onboardingProgressRepository.create({
-            userId: newUser.id,
-            currentStep: userProfile.emailVerified
-              ? OnboardingStep.TOPICS
-              : OnboardingStep.VERIFICATION,
-            emailVerified: userProfile.emailVerified,
-            topicsSelected: false,
-            orientationViewed: false,
-            firstPostMade: false,
-          });
+          await this.onboardingProgressRepository.create(newUser.id);
 
           // Link visitor session if provided
           if (visitorSessionId) {
@@ -435,9 +428,10 @@ export class AuthService {
         onboardingProgress: this.mapOnboardingProgressToDto(onboardingProgress!),
         expiresIn: tokens.expiresIn,
       };
-    } catch (error) {
-      this.logger.error(`Login failed for ${dto.email}:`, error);
-      if (error.name === 'NotAuthorizedException' || error.name === 'UserNotFoundException') {
+    } catch (error: unknown) {
+      const errorObj = error as { name?: string; message?: string; stack?: string };
+      this.logger.error(`Login failed for ${dto.email}: ${errorObj.message}`, errorObj.stack);
+      if (errorObj.name === 'NotAuthorizedException' || errorObj.name === 'UserNotFoundException') {
         throw new UnauthorizedException('Invalid email or password');
       }
       throw error;
@@ -449,6 +443,9 @@ export class AuthService {
    */
   private generateDisplayNameFromEmail(email: string): string {
     const localPart = email.split('@')[0];
+    if (!localPart) {
+      throw new BadRequestException('Invalid email format');
+    }
     return localPart
       .split(/[._-]/)
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))

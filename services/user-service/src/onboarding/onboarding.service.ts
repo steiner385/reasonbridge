@@ -73,6 +73,7 @@ export class OnboardingService {
       const highActivityTopics = await this.topicService.getHighActivityTopics(3);
       suggestions = highActivityTopics.map((topic) => ({
         topicId: topic.id,
+        name: topic.name,
         topicName: topic.name,
         topicDescription: topic.description,
         activityLevel: topic.activityLevel,
@@ -118,11 +119,12 @@ export class OnboardingService {
           const topic = topics.find((t) => t?.id === interest.topicId);
           return {
             topicId: interest.topicId,
+            name: topic!.name,
             topicName: topic!.name,
             topicDescription: topic!.description,
             activityLevel: topic!.activityLevel,
             priority: interest.priority,
-            selectedAt: interest.createdAt.toISOString(),
+            selectedAt: interest.selectedAt.toISOString(),
           };
         }),
       );

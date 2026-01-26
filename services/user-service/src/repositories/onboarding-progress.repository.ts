@@ -267,7 +267,7 @@ export class OnboardingProgressRepository {
           },
         },
         orderBy: {
-          updatedAt: 'desc',
+          lastUpdatedAt: 'desc',
         },
         take: limit,
       });

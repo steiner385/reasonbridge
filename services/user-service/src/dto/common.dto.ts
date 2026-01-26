@@ -53,6 +53,13 @@ export class UserProfileDto {
 
   @IsString()
   createdAt!: string;
+
+  @IsEnum(['ACTIVE', 'SUSPENDED', 'DELETED'])
+  accountStatus!: string;
+
+  @IsOptional()
+  @IsString()
+  lastLoginAt?: string;
 }
 
 /**
@@ -61,6 +68,9 @@ export class UserProfileDto {
  * Tracks user progress through onboarding steps.
  */
 export class OnboardingProgressDto {
+  @IsUUID()
+  userId!: string;
+
   @IsEnum(['VERIFICATION', 'TOPICS', 'ORIENTATION', 'COMPLETE'])
   currentStep!: string;
 
@@ -75,6 +85,16 @@ export class OnboardingProgressDto {
 
   @IsBoolean()
   firstPostMade!: boolean;
+
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  completionPercentage!: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => NextActionDto)
+  nextAction?: NextActionDto;
 }
 
 /**
@@ -153,10 +173,22 @@ export class SelectedTopicDto {
   @IsString()
   name!: string;
 
+  @IsString()
+  topicName!: string;
+
+  @IsString()
+  topicDescription!: string;
+
+  @IsEnum(['HIGH', 'MEDIUM', 'LOW'])
+  activityLevel!: string;
+
   @IsInt()
   @Min(1)
   @Max(3)
   priority!: number;
+
+  @IsString()
+  selectedAt!: string;
 }
 
 /**
@@ -169,11 +201,13 @@ export class NextActionDto {
   step!: string;
 
   @IsString()
-  title!: string;
+  label!: string;
 
   @IsString()
+  description!: string;
+
   @IsString()
-  actionUrl!: string;
+  url!: string;
 }
 
 /**
