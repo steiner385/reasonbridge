@@ -1,0 +1,260 @@
+{
+  "uuid": "519c6f91-3e68-41a0-aa95-7ebce8c6f36b",
+  "name": "ReasonBridge logo displays correctly in header",
+  "historyId": "d758f7903948da46e6b5365564c89eb5:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /reasonbridge-logo/\nReceived string:  \"/assets/logos/reasonbridge-icon.svg\"",
+    "trace": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /reasonbridge-logo/\nReceived string:  \"/assets/logos/reasonbridge-icon.svg\"\n    at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-logo.spec.ts:13:21"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769401015329,
+              "uuid": "66c651be-6cb4-465d-972a-6266ee8bbeaa",
+              "stop": 1769401015406
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769401015325,
+          "uuid": "aea8df92-5346-473c-a0df-75374b90def5",
+          "stop": 1769401015407
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769401015414,
+              "uuid": "8830b8f2-04da-40ed-812e-6b3ad050b4d9",
+              "stop": 1769401015425
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401015410,
+          "uuid": "b7df0536-bdf5-4b14-982f-84cc48cdab66",
+          "stop": 1769401015427
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769401015432,
+              "uuid": "76c56fec-37ce-4e27-9294-ead8af59999a",
+              "stop": 1769401015503
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401015429,
+          "uuid": "1630f7a9-4fa9-4c3b-b2fe-8d3986a4dc20",
+          "stop": 1769401015503
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769401015312,
+      "uuid": "4d417917-f521-413d-829c-b854b45c6e50",
+      "stop": 1769401015503
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401015506,
+      "name": "Navigate to \"/\"",
+      "uuid": "97f91a22-9aa7-44db-8ab4-23af5f4d2fd2",
+      "stop": 1769401016457
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401016463,
+      "name": "Expect \"toBeVisible\" locator('header img[alt*=\"ReasonBridge\"]').first()",
+      "uuid": "939d6abe-eaf9-400d-b0c0-f95022722b2d",
+      "stop": 1769401016555
+    },
+    {
+      "status": "failed",
+      "statusDetails": {
+        "message": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /reasonbridge-logo/\nReceived string:  \"/assets/logos/reasonbridge-icon.svg\"",
+        "trace": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /reasonbridge-logo/\nReceived string:  \"/assets/logos/reasonbridge-icon.svg\"\n    at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-logo.spec.ts:13:21"
+      },
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401016571,
+      "name": "Expect \"toMatch\"",
+      "uuid": "c2f846aa-c22c-4022-841c-25640a3dd44d",
+      "stop": 1769401016572
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "49a77c4c-fef2-4699-9c28-7348705260dc-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401016956,
+      "name": "screenshot",
+      "stop": 1769401016956
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "d89a7d6e-735c-4ba1-8fd6-ce492301e5ef-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401016957,
+      "name": "video",
+      "stop": 1769401016957
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "9c78a277-b3c9-447d-bcd8-8060c15edd19-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401016957,
+      "name": "error-context",
+      "stop": 1769401016957
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401016674,
+          "uuid": "0af2cc91-837e-4873-8986-be6d101612a1",
+          "stop": 1769401016675
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769401016705,
+              "uuid": "766d9999-0f07-4e8a-b1e6-7c3aaabc4d7b",
+              "stop": 1769401016860
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401016675,
+          "uuid": "b650f434-4484-4335-8d75-6e8af7c9a2ae",
+          "stop": 1769401016865
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769401016574,
+      "uuid": "5734ca28-f008-4363-af71-7052f995a970",
+      "stop": 1769401016879
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-logo.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-logo.spec.ts > Brand Identity - Logo Display"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1660350-worker-3" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-logo.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Logo Display" }
+  ],
+  "links": [],
+  "start": 1769401015311,
+  "testCaseId": "d758f7903948da46e6b5365564c89eb5",
+  "fullName": "visual/brand-logo.spec.ts:4:3",
+  "titlePath": ["visual", "brand-logo.spec.ts", "Brand Identity - Logo Display"],
+  "stop": 1769401016769
+}

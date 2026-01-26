@@ -1,0 +1,80 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+    - generic [ref=e3]:
+        - banner [ref=e4]:
+            - generic [ref=e5]:
+                - heading "ReasonBridge" [level=1] [ref=e6]
+                - paragraph [ref=e7]: Rational Discussion Platform
+        - main [ref=e8]:
+            - generic [ref=e9]:
+                - link "Back to Topics" [ref=e11] [cursor=pointer]:
+                    - /url: /topics
+                    - img [ref=e12]
+                    - text: Back to Topics
+                - generic [ref=e14]:
+                    - generic [ref=e15]:
+                        - generic [ref=e16]:
+                            - 'heading "Remote Work: The Future of Employment?" [level=3] [ref=e17]'
+                            - generic [ref=e19]:
+                                - img [ref=e20]
+                                - generic [ref=e22]: Created 1/24/2026
+                        - generic [ref=e23]: SEEDING
+                    - generic [ref=e24]:
+                        - paragraph [ref=e25]: Debate the long-term effects of remote work on productivity, work-life balance, and urban development.
+                        - generic [ref=e26]:
+                            - generic [ref=e27]:
+                                - generic [ref=e28]:
+                                    - img [ref=e29]
+                                    - generic [ref=e31]: Participants
+                                - paragraph [ref=e32]: '0'
+                            - generic [ref=e33]:
+                                - generic [ref=e34]:
+                                    - img [ref=e35]
+                                    - generic [ref=e37]: Responses
+                                - paragraph [ref=e38]: '0'
+                            - generic [ref=e39]:
+                                - generic [ref=e40]:
+                                    - img [ref=e41]
+                                    - generic [ref=e43]: Diversity Score
+                                - paragraph [ref=e44]: N/A
+                            - generic [ref=e45]:
+                                - generic [ref=e46]:
+                                    - img [ref=e47]
+                                    - generic [ref=e49]: Evidence
+                                - paragraph [ref=e50]: STANDARD
+                        - button "Join Discussion" [ref=e52] [cursor=pointer]
+                - generic [ref=e55]:
+                    - img [ref=e56]
+                    - heading "No responses yet" [level=3] [ref=e58]
+                    - paragraph [ref=e59]: Be the first to share your perspective on this topic.
+                - generic [ref=e61]:
+                    - heading "Share Your Perspective" [level=3] [ref=e62]
+                    - generic [ref=e63]:
+                        - generic [ref=e64]:
+                            - generic [ref=e65]: Your Response*
+                            - textbox "Your Response*" [ref=e66]:
+                                - /placeholder: Share your perspective on this topic...
+                            - generic [ref=e68]: 0 / 10000 characters
+                        - generic [ref=e69]:
+                            - generic [ref=e70]: Cited Sources (Optional)
+                            - generic [ref=e71]:
+                                - textbox "Cited Sources (Optional)" [ref=e74]:
+                                    - /placeholder: https://example.com/source
+                                - button "Add" [disabled] [ref=e75]
+                        - generic [ref=e76]:
+                            - generic [ref=e77]:
+                                - checkbox "This response contains my opinion" [ref=e78]
+                                - generic [ref=e79]: This response contains my opinion
+                            - generic [ref=e80]:
+                                - checkbox "This response contains factual claims" [ref=e81]
+                                - generic [ref=e82]: This response contains factual claims
+                        - generic [ref=e84]:
+                            - heading "AI Feedback (Optional)" [level=3] [ref=e85]
+                            - button "Request Feedback" [disabled] [ref=e86]
+                        - button "Post Response" [disabled] [ref=e88]
+        - contentinfo [ref=e89]:
+            - paragraph [ref=e91]: Powered by React 18 + Vite + Tailwind CSS
+    - region "Notifications"
+```

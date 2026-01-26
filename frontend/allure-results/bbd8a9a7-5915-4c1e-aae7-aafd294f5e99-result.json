@@ -1,0 +1,194 @@
+{
+  "uuid": "bbd8a9a7-5915-4c1e-aae7-aafd294f5e99",
+  "name": "Favicon uses ReasonBridge icon",
+  "historyId": "8388b4b90e044e6447388bf7fa149dde:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769401015343,
+              "uuid": "a07896d9-6a05-41ef-8572-48c8104d22bb",
+              "stop": 1769401015463
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769401015338,
+          "uuid": "ee035ac6-f228-4962-934d-a7fa9268fafa",
+          "stop": 1769401015463
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769401015473,
+              "uuid": "ec5d74dd-4d02-4fc7-8358-755065a860aa",
+              "stop": 1769401015492
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401015466,
+          "uuid": "fc84d805-36ec-4589-8df9-b896bc5a177a",
+          "stop": 1769401015493
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769401015495,
+              "uuid": "1c506c62-403c-47b5-af76-4aa742f0c031",
+              "stop": 1769401015555
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401015493,
+          "uuid": "aeba9336-e410-49d1-a78e-2ba61e757917",
+          "stop": 1769401015555
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769401015325,
+      "uuid": "a81d2c94-092e-4fb8-b92e-47fe518666e3",
+      "stop": 1769401015555
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401015558,
+      "name": "Navigate to \"/\"",
+      "uuid": "68a428a6-b690-4bae-a807-1ad7d20bbb08",
+      "stop": 1769401016751
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401016762,
+      "name": "Expect \"toHaveAttribute\" locator('link[rel=\"icon\"]').first()",
+      "uuid": "5a1e3891-cea8-4556-8a8d-194cf0f9b587",
+      "stop": 1769401016879
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401016881,
+          "uuid": "d1aa9193-f369-4dff-b06a-20e8ce7602c0",
+          "stop": 1769401016881
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769401016962,
+              "uuid": "c847ec57-3c1f-4035-ac05-40057e86c47e",
+              "stop": 1769401017041
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401016886,
+          "uuid": "350e11ca-6b53-441e-92b4-ee2b9228409c",
+          "stop": 1769401017041
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769401016880,
+      "uuid": "2b4ff5b3-2d88-4e29-a3fd-f9be5b9ec819",
+      "stop": 1769401017045
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-logo.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-logo.spec.ts > Brand Identity - Logo Display"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1660350-worker-4" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-logo.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Logo Display" }
+  ],
+  "links": [],
+  "start": 1769401015324,
+  "testCaseId": "8388b4b90e044e6447388bf7fa149dde",
+  "fullName": "visual/brand-logo.spec.ts:19:3",
+  "titlePath": ["visual", "brand-logo.spec.ts", "Brand Identity - Logo Display"],
+  "stop": 1769401016894
+}

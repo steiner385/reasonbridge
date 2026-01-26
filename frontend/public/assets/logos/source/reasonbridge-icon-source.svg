@@ -1,0 +1,12 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon-only version: Overlapping circles without text -->
+
+  <!-- Left circle (Teal) -->
+  <circle cx="45" cy="60" r="35" fill="#2A9D8F" opacity="0.9"/>
+
+  <!-- Right circle (Soft Blue) -->
+  <circle cx="75" cy="60" r="35" fill="#6B9AC4" opacity="0.9"/>
+
+  <!-- Intersection (Light Sky) - overlapping area to show common ground -->
+  <circle cx="60" cy="60" r="17.5" fill="#A8DADC"/>
+</svg>
