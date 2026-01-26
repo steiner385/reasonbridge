@@ -18,11 +18,11 @@ export class ErrorResponseDto {
  * Used for request validation failures (400 Bad Request).
  */
 export class ValidationErrorResponseDto extends ErrorResponseDto {
-  error: string = 'VALIDATION_ERROR';
+  override error: string = 'VALIDATION_ERROR';
 
-  message!: string;
+  override message!: string;
 
-  details: {
+  override details!: {
     fields: Record<string, string>;
   };
 }
@@ -33,11 +33,11 @@ export class ValidationErrorResponseDto extends ErrorResponseDto {
  * Used for authentication failures (401 Unauthorized).
  */
 export class UnauthorizedErrorResponseDto extends ErrorResponseDto {
-  error: string = 'UNAUTHORIZED';
+  override error: string = 'UNAUTHORIZED';
 
-  message!: string;
+  override message!: string;
 
-  details?: {
+  override details?: {
     hint?: string;
     reason?: string;
   };
@@ -49,11 +49,11 @@ export class UnauthorizedErrorResponseDto extends ErrorResponseDto {
  * Used for resource conflicts (409 Conflict).
  */
 export class ConflictErrorResponseDto extends ErrorResponseDto {
-  error: string = 'CONFLICT';
+  override error: string = 'CONFLICT';
 
-  message!: string;
+  override message!: string;
 
-  details?: {
+  override details?: {
     field?: string;
     suggestion?: string;
   };
@@ -65,11 +65,11 @@ export class ConflictErrorResponseDto extends ErrorResponseDto {
  * Used for rate limit exceeded (429 Too Many Requests).
  */
 export class RateLimitErrorResponseDto extends ErrorResponseDto {
-  error: string = 'RATE_LIMIT_EXCEEDED';
+  override error: string = 'RATE_LIMIT_EXCEEDED';
 
-  message!: string;
+  override message!: string;
 
-  details: {
+  override details!: {
     retryAfter: number;
     limit?: number;
     window?: number;
@@ -82,11 +82,11 @@ export class RateLimitErrorResponseDto extends ErrorResponseDto {
  * Used for resource not found (404 Not Found).
  */
 export class NotFoundErrorResponseDto extends ErrorResponseDto {
-  error: string = 'NOT_FOUND';
+  override error: string = 'NOT_FOUND';
 
-  message!: string;
+  override message!: string;
 
-  details?: {
+  override details?: {
     resource?: string;
     id?: string;
   };
@@ -98,11 +98,11 @@ export class NotFoundErrorResponseDto extends ErrorResponseDto {
  * Used for unexpected server errors (500 Internal Server Error).
  */
 export class InternalServerErrorResponseDto extends ErrorResponseDto {
-  error: string = 'INTERNAL_SERVER_ERROR';
+  override error: string = 'INTERNAL_SERVER_ERROR';
 
-  message!: string;
+  override message!: string;
 
-  details?: {
+  override details?: {
     correlationId?: string;
     support?: string;
   };
