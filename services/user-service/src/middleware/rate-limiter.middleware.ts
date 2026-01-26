@@ -84,13 +84,18 @@ export class RateLimiterMiddleware implements NestMiddleware {
     const forwarded = req.headers['x-forwarded-for'];
     if (forwarded) {
       const ip = Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0];
-      return ip.trim();
+      if (ip) {
+        return ip.trim();
+      }
     }
 
     // Try X-Real-IP header
     const realIp = req.headers['x-real-ip'];
     if (realIp) {
-      return Array.isArray(realIp) ? realIp[0] : realIp;
+      const ip = Array.isArray(realIp) ? realIp[0] : realIp;
+      if (ip) {
+        return ip;
+      }
     }
 
     // Fall back to socket address

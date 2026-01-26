@@ -53,13 +53,12 @@ export class VerificationService {
       });
 
       // Create new verification token
+      // TODO: Add email and attempts fields to VerificationToken schema
       await this.prisma.verificationToken.create({
         data: {
           userId,
-          email,
           token: code,
           expiresAt,
-          attempts: 0,
           used: false,
         },
       });
@@ -84,10 +83,25 @@ export class VerificationService {
     try {
       this.logger.debug(`Verifying token for email: ${email}`);
 
-      // Find the most recent unused token for this email
+      // TODO: Add attempts tracking to prevent brute force attacks
+      // Look up user by email first
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        select: { id: true },
+      });
+
+      if (!user) {
+        this.logger.warn(`No user found for email: ${email}`);
+        throw new NotFoundException({
+          error: 'USER_NOT_FOUND',
+          message: 'No user found with this email',
+        });
+      }
+
+      // Find the most recent unused token for this user
       const token = await this.prisma.verificationToken.findFirst({
         where: {
-          email,
+          userId: user.id,
           used: false,
         },
         orderBy: {
@@ -118,37 +132,13 @@ export class VerificationService {
         });
       }
 
-      // Check if max attempts exceeded
-      if (token.attempts >= this.MAX_ATTEMPTS) {
-        this.logger.warn(`Max verification attempts exceeded for email: ${email}`);
-        throw new BadRequestException({
-          error: 'MAX_ATTEMPTS_EXCEEDED',
-          message: 'Maximum verification attempts exceeded',
-          details: {
-            canResend: true,
-          },
-        });
-      }
-
-      // Increment attempt counter
-      await this.prisma.verificationToken.update({
-        where: { id: token.id },
-        data: {
-          attempts: token.attempts + 1,
-        },
-      });
-
       // Check if code matches
       if (token.token !== code) {
-        const remainingAttempts = this.MAX_ATTEMPTS - (token.attempts + 1);
-        this.logger.warn(`Invalid verification code for email: ${email}, attempts remaining: ${remainingAttempts}`);
+        this.logger.warn(`Invalid verification code for email: ${email}`);
 
         throw new BadRequestException({
           error: 'INVALID_CODE',
           message: 'Verification code is invalid or expired',
-          details: {
-            remainingAttempts,
-          },
         });
       }
 
@@ -157,6 +147,7 @@ export class VerificationService {
         where: { id: token.id },
         data: {
           used: true,
+          usedAt: new Date(),
         },
       });
 
@@ -197,11 +188,23 @@ export class VerificationService {
    *
    * @param email - User's email address
    * @returns Number of remaining attempts, or null if no token found
+   * @deprecated Attempts tracking not yet implemented in schema
    */
   async getRemainingAttempts(email: string): Promise<number | null> {
+    // TODO: Implement attempts tracking in VerificationToken schema
+    // For now, return MAX_ATTEMPTS to indicate feature is not active
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return null;
+    }
+
     const token = await this.prisma.verificationToken.findFirst({
       where: {
-        email,
+        userId: user.id,
         used: false,
       },
       orderBy: {
@@ -213,7 +216,8 @@ export class VerificationService {
       return null;
     }
 
-    return Math.max(0, this.MAX_ATTEMPTS - token.attempts);
+    // Return MAX_ATTEMPTS since we're not tracking attempts yet
+    return this.MAX_ATTEMPTS;
   }
 
   /**
@@ -224,10 +228,7 @@ export class VerificationService {
     try {
       const result = await this.prisma.verificationToken.deleteMany({
         where: {
-          OR: [
-            { expiresAt: { lt: new Date() } },
-            { used: true },
-          ],
+          OR: [{ expiresAt: { lt: new Date() } }, { used: true }],
         },
       });
 

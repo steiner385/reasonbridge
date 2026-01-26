@@ -259,7 +259,7 @@ export class OnboardingService {
 
     // Randomly select one
     const randomIndex = Math.floor(Math.random() * messages.length);
-    return messages[randomIndex];
+    return messages[randomIndex] ?? messages[0]!;
   }
 
   /**

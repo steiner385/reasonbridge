@@ -23,17 +23,19 @@ export class TopicService {
     suggestedOnly: boolean = false,
     minActivity?: ActivityLevel,
   ): Promise<TopicsResponseDto> {
-    this.logger.log(`Fetching topics - suggestedOnly: ${suggestedOnly}, minActivity: ${minActivity}`);
+    this.logger.log(
+      `Fetching topics - suggestedOnly: ${suggestedOnly}, minActivity: ${minActivity}`,
+    );
 
     // Fetch all discussion topics from database
     const topics = await this.prisma.discussionTopic.findMany({
       where: suggestedOnly ? { suggestedForNewUsers: true } : undefined,
       select: {
         id: true,
-        name: true,
+        title: true,
         description: true,
         suggestedForNewUsers: true,
-        discussionCount: true,
+        activeDiscussionCount: true,
         participantCount: true,
         createdAt: true,
       },
@@ -46,21 +48,23 @@ export class TopicService {
     // T091: Compute activity level for each topic
     const topicsWithActivity = topics.map((topic) => ({
       ...topic,
-      activityLevel: this.computeActivityLevel(topic.discussionCount, topic.participantCount),
+      activityLevel: this.computeActivityLevel(topic.activeDiscussionCount, topic.participantCount),
     }));
 
     // T092: Apply minimum activity filter
     const filteredTopics = minActivity
-      ? topicsWithActivity.filter((topic) => this.isActivityLevelSufficient(topic.activityLevel, minActivity))
+      ? topicsWithActivity.filter((topic) =>
+          this.isActivityLevelSufficient(topic.activityLevel, minActivity),
+        )
       : topicsWithActivity;
 
     // Map to DTOs
     const topicDtos: TopicDto[] = filteredTopics.map((topic) => ({
       id: topic.id,
-      name: topic.name,
+      name: topic.title,
       description: topic.description || '',
       activityLevel: topic.activityLevel,
-      discussionCount: topic.discussionCount,
+      discussionCount: topic.activeDiscussionCount,
       participantCount: topic.participantCount,
       suggested: topic.suggestedForNewUsers,
       createdAt: topic.createdAt.toISOString(),
@@ -111,23 +115,27 @@ export class TopicService {
       take: limit,
       select: {
         id: true,
-        name: true,
+        title: true,
         description: true,
         suggestedForNewUsers: true,
-        discussionCount: true,
+        activeDiscussionCount: true,
         participantCount: true,
         createdAt: true,
       },
     });
 
     return topics
-      .filter((topic) => this.computeActivityLevel(topic.discussionCount, topic.participantCount) === ActivityLevel.HIGH)
+      .filter(
+        (topic) =>
+          this.computeActivityLevel(topic.activeDiscussionCount, topic.participantCount) ===
+          ActivityLevel.HIGH,
+      )
       .map((topic) => ({
         id: topic.id,
-        name: topic.name,
+        name: topic.title,
         description: topic.description || '',
         activityLevel: ActivityLevel.HIGH,
-        discussionCount: topic.discussionCount,
+        discussionCount: topic.activeDiscussionCount,
         participantCount: topic.participantCount,
         suggested: topic.suggestedForNewUsers,
         createdAt: topic.createdAt.toISOString(),
@@ -142,10 +150,10 @@ export class TopicService {
       where: { id },
       select: {
         id: true,
-        name: true,
+        title: true,
         description: true,
         suggestedForNewUsers: true,
-        discussionCount: true,
+        activeDiscussionCount: true,
         participantCount: true,
         createdAt: true,
       },
@@ -157,10 +165,10 @@ export class TopicService {
 
     return {
       id: topic.id,
-      name: topic.name,
+      name: topic.title,
       description: topic.description || '',
-      activityLevel: this.computeActivityLevel(topic.discussionCount, topic.participantCount),
-      discussionCount: topic.discussionCount,
+      activityLevel: this.computeActivityLevel(topic.activeDiscussionCount, topic.participantCount),
+      discussionCount: topic.activeDiscussionCount,
       participantCount: topic.participantCount,
       suggested: topic.suggestedForNewUsers,
       createdAt: topic.createdAt.toISOString(),

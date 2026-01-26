@@ -20,9 +20,9 @@ export class ErrorResponseDto {
 export class ValidationErrorResponseDto extends ErrorResponseDto {
   override error: string = 'VALIDATION_ERROR';
 
-  override message!: string;
+  declare message: string;
 
-  override details!: {
+  declare details: {
     fields: Record<string, string>;
   };
 }
@@ -35,9 +35,9 @@ export class ValidationErrorResponseDto extends ErrorResponseDto {
 export class UnauthorizedErrorResponseDto extends ErrorResponseDto {
   override error: string = 'UNAUTHORIZED';
 
-  override message!: string;
+  declare message: string;
 
-  override details?: {
+  declare details?: {
     hint?: string;
     reason?: string;
   };
@@ -51,9 +51,9 @@ export class UnauthorizedErrorResponseDto extends ErrorResponseDto {
 export class ConflictErrorResponseDto extends ErrorResponseDto {
   override error: string = 'CONFLICT';
 
-  override message!: string;
+  declare message: string;
 
-  override details?: {
+  declare details?: {
     field?: string;
     suggestion?: string;
   };
@@ -67,9 +67,9 @@ export class ConflictErrorResponseDto extends ErrorResponseDto {
 export class RateLimitErrorResponseDto extends ErrorResponseDto {
   override error: string = 'RATE_LIMIT_EXCEEDED';
 
-  override message!: string;
+  declare message: string;
 
-  override details!: {
+  declare details: {
     retryAfter: number;
     limit?: number;
     window?: number;
@@ -84,9 +84,9 @@ export class RateLimitErrorResponseDto extends ErrorResponseDto {
 export class NotFoundErrorResponseDto extends ErrorResponseDto {
   override error: string = 'NOT_FOUND';
 
-  override message!: string;
+  declare message: string;
 
-  override details?: {
+  declare details?: {
     resource?: string;
     id?: string;
   };
@@ -100,9 +100,9 @@ export class NotFoundErrorResponseDto extends ErrorResponseDto {
 export class InternalServerErrorResponseDto extends ErrorResponseDto {
   override error: string = 'INTERNAL_SERVER_ERROR';
 
-  override message!: string;
+  declare message: string;
 
-  override details?: {
+  declare details?: {
     correlationId?: string;
     support?: string;
   };
