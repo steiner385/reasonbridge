@@ -5,5 +5,5 @@
  * Provides a simplified interface for generating AI completions.
  */
 
-export * from './types/index.js';
-export * from './bedrock/index.js';
+export * from './types/index';
+export * from './bedrock/index';

@@ -2,7 +2,7 @@
  * Discussion service event definitions
  */
 
-import type { BaseEvent } from './base.js';
+import type { BaseEvent } from './base';
 
 /**
  * Event types for discussion service

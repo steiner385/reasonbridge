@@ -19,8 +19,8 @@ import type {
   CompletionRequest,
   CompletionResponse,
   StopReason,
-} from '../types/index.js';
-import { AIClientError } from '../types/index.js';
+} from '../types/index';
+import { AIClientError } from '../types/index';
 
 /**
  * Bedrock-specific configuration options.
@@ -75,7 +75,7 @@ function mapStopReason(reason: string | undefined): StopReason {
  *   messages: [{ role: 'user', content: 'Hello!' }],
  * });
  *
- * console.log(response.content);
+ * // Response content: response.content
  * ```
  */
 export class BedrockClient implements IAIClient {

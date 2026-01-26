@@ -4,6 +4,6 @@
  * Shared test helpers, mocks, and fixtures for the reasonBridge platform.
  */
 
-export * from './mocks/index.js';
-export * from './fixtures/index.js';
-export * from './assertions/index.js';
+export * from './mocks/index';
+export * from './fixtures/index';
+export * from './assertions/index';

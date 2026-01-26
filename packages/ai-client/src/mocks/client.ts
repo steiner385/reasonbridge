@@ -5,13 +5,8 @@
  * Supports configurable responses, delays, and error scenarios.
  */
 
-import type {
-  IAIClient,
-  CompletionRequest,
-  CompletionResponse,
-  StopReason,
-} from '../types/index.js';
-import { AIClientError } from '../types/index.js';
+import type { IAIClient, CompletionRequest, CompletionResponse, StopReason } from '../types/index';
+import { AIClientError } from '../types/index';
 
 /**
  * Configuration options for the mock client.
