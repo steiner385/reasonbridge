@@ -236,23 +236,29 @@ async function seedTopics() {
     },
   ];
 
-  // Create topics (skipping if already exists by title)
+  // Create topics (skipping if already exists by id)
+  const systemUserId = await getSystemUserId();
   for (const topic of topics) {
-    await prisma.discussionTopic.upsert({
-      where: { title: topic.title },
-      update: {},
-      create: {
-        id: topic.id,
-        title: topic.title,
-        description: topic.description,
-        creatorId: await getSystemUserId(), // Create system user if needed
-        activeDiscussionCount: topic.activeDiscussionCount,
-        participantCount: topic.participantCount,
-        activityLevel: topic.activityLevel,
-        suggestedForNewUsers: topic.suggestedForNewUsers,
-        crossCuttingThemes: topic.crossCuttingThemes,
-      },
-    });
+    try {
+      await prisma.discussionTopic.create({
+        data: {
+          id: topic.id,
+          title: topic.title,
+          description: topic.description,
+          creatorId: systemUserId,
+          activeDiscussionCount: topic.activeDiscussionCount,
+          participantCount: topic.participantCount,
+          activityLevel: topic.activityLevel,
+          suggestedForNewUsers: topic.suggestedForNewUsers,
+          crossCuttingThemes: topic.crossCuttingThemes,
+        },
+      });
+    } catch (error: any) {
+      // Skip if topic already exists
+      if (error.code !== 'P2002') {
+        throw error;
+      }
+    }
   }
 
   console.log(`✓ Seeded ${topics.length} topics`);
