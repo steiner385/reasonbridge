@@ -2,7 +2,7 @@
 # Quick script to bulk label the new testing issues (337-431)
 # Based on PriorityCalculator framework
 
-REPO="steiner385/uniteDiscord"
+REPO="steiner385/reasonBridge"
 
 echo "=== Phase 11: Testing Infrastructure (337-396) ==="
 echo "Applying: test, foundation:l0, business-value:8, effort:2"

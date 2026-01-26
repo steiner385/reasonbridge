@@ -91,7 +91,7 @@ export class CognitoStack extends cdk.Stack {
     });
 
     // Create user pool domain for hosted UI
-    const domainPrefix = props?.domainPrefix || `unite-discord-${this.account}`;
+    const domainPrefix = props?.domainPrefix || `reason-bridge-${this.account}`;
     this.userPoolDomain = this.userPool.addDomain('UniteUserPoolDomain', {
       cognitoDomain: {
         domainPrefix,
@@ -111,11 +111,11 @@ export class CognitoStack extends cdk.Stack {
         // Callback URLs - configure based on environment
         callbackUrls: [
           'http://localhost:5173/auth/callback', // Local development
-          'https://app.unitediscord.com/auth/callback', // Production (example)
+          'https://app.reasonbridge.com/auth/callback', // Production (example)
         ],
         logoutUrls: [
           'http://localhost:5173/', // Local development
-          'https://app.unitediscord.com/', // Production (example)
+          'https://app.reasonbridge.com/', // Production (example)
         ],
       },
       // Enable user existence errors for better UX

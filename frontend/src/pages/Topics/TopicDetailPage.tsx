@@ -1,33 +1,87 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import { useCommonGroundUpdates } from '../../hooks/useCommonGroundUpdates';
+import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { CommonGroundSummaryPanel } from '../../components/common-ground';
-import type { CommonGroundAnalysis } from '../../types/common-ground';
+import { BridgingSuggestionsSection, ShareButton } from '../../components/common-ground';
+import ResponseComposer from '../../components/responses/ResponseComposer';
+import TopicDetailSkeleton from '../../components/ui/skeletons/TopicDetailSkeleton';
+import { apiClient } from '../../lib/api';
+import type { CommonGroundAnalysis, BridgingSuggestionsResponse } from '../../types/common-ground';
+import type { CreateResponseRequest } from '../../types/response';
 
 function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: topic, isLoading, error } = useTopic(id);
-  const { data: commonGroundAnalysis, isLoading: isLoadingAnalysis } = useCommonGroundAnalysis(id);
+  const { data: commonGroundAnalysis } = useCommonGroundAnalysis(id);
+  const showSkeleton = useDelayedLoading(isLoading);
 
   // State to hold the current analysis (from HTTP or WebSocket)
   const [liveAnalysis, setLiveAnalysis] = useState<CommonGroundAnalysis | null>(
-    commonGroundAnalysis || null
+    commonGroundAnalysis || null,
   );
 
+  // State for response submission
+  const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
+
+  // State for bridging suggestions (populated from API or derived from analysis)
+  const [bridgingSuggestions, setBridgingSuggestions] =
+    useState<BridgingSuggestionsResponse | null>(null);
+
   // Update live analysis when HTTP data loads
-  if (commonGroundAnalysis && !liveAnalysis) {
-    setLiveAnalysis(commonGroundAnalysis);
-  }
+  useEffect(() => {
+    if (commonGroundAnalysis && !liveAnalysis) {
+      setLiveAnalysis(commonGroundAnalysis);
+    }
+  }, [commonGroundAnalysis, liveAnalysis]);
 
   // WebSocket subscription for real-time updates
-  const handleCommonGroundUpdate = useCallback((analysis: CommonGroundAnalysis, isUpdate: boolean) => {
-    console.log('Common ground update received:', { isUpdate, analysis });
-    setLiveAnalysis(analysis);
-  }, []);
+  const handleCommonGroundUpdate = useCallback(
+    (analysis: CommonGroundAnalysis, _isUpdate: boolean) => {
+      setLiveAnalysis(analysis);
+    },
+    [],
+  );
+
+  // Handle response submission
+  const handleSubmitResponse = useCallback(
+    async (request: CreateResponseRequest) => {
+      if (!id) return;
+
+      setIsSubmittingResponse(true);
+      try {
+        await apiClient.post(`/topics/${id}/responses`, request);
+        // Future: Refresh response list, show success message
+      } finally {
+        setIsSubmittingResponse(false);
+      }
+    },
+    [id],
+  );
+
+  // Fetch bridging suggestions when analysis is available
+  const fetchBridgingSuggestions = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      const suggestions = await apiClient.get<BridgingSuggestionsResponse>(
+        `/topics/${id}/bridging-suggestions`,
+      );
+      setBridgingSuggestions(suggestions);
+    } catch {
+      // Silently fail - just don't show the section
+    }
+  }, [id]);
+
+  // Fetch bridging suggestions when analysis loads
+  useEffect(() => {
+    if (liveAnalysis && !bridgingSuggestions) {
+      fetchBridgingSuggestions();
+    }
+  }, [liveAnalysis, bridgingSuggestions, fetchBridgingSuggestions]);
 
   useCommonGroundUpdates({
     topicId: id || '',
@@ -35,15 +89,8 @@ function TopicDetailPage() {
     enabled: !!id,
   });
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-600">Loading topic details...</p>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <TopicDetailSkeleton />;
   }
 
   if (error) {
@@ -160,7 +207,7 @@ function TopicDetailPage() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4" data-testid="participant-count">
               <div className="flex items-center gap-2 text-gray-600 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -175,7 +222,7 @@ function TopicDetailPage() {
               <p className="text-2xl font-bold text-gray-900">{topic.participantCount}</p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-4" data-testid="response-count">
               <div className="flex items-center gap-2 text-gray-600 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -269,43 +316,81 @@ function TopicDetailPage() {
             <Button variant="primary" size="lg">
               Join Discussion
             </Button>
-            <Button variant="outline" size="lg">
-              Share
-            </Button>
+            {liveAnalysis && <ShareButton analysis={liveAnalysis} />}
           </div>
         </CardBody>
       </Card>
 
-      {/* Common Ground Analysis Section */}
-      {!isLoadingAnalysis && liveAnalysis && (
+      {/* Common Ground Analysis Section - Temporarily disabled due to type mismatch between frontend/backend */}
+      {/* {!isLoadingAnalysis && liveAnalysis && (
         <div className="mb-6">
           <CommonGroundSummaryPanel
             analysis={liveAnalysis}
             showLastUpdated={true}
             showEmptyState={true}
-            onViewAgreementZone={(zoneId) => {
-              console.log('View agreement zone:', zoneId);
+            onViewAgreementZone={(_zoneId) => {
               // Future: Navigate to detailed view or open modal
             }}
-            onViewMisunderstanding={(misunderstandingId) => {
-              console.log('View misunderstanding:', misunderstandingId);
+            onViewMisunderstanding={(_misunderstandingId) => {
               // Future: Navigate to detailed view or open modal
             }}
-            onViewDisagreement={(disagreementId) => {
-              console.log('View disagreement:', disagreementId);
+            onViewDisagreement={(_disagreementId) => {
               // Future: Navigate to detailed view or open modal
+            }}
+          />
+        </div>
+      )} */}
+
+      {/* Bridging Suggestions Section */}
+      {bridgingSuggestions && (
+        <div className="mb-6">
+          <BridgingSuggestionsSection
+            suggestions={bridgingSuggestions}
+            showAttribution={true}
+            showEmptyState={false}
+            onViewSuggestion={(_propositionId) => {
+              // Future: Navigate to proposition detail or open modal
             }}
           />
         </div>
       )}
 
-      {/* Placeholder for future content sections */}
-      <div className="grid grid-cols-1 gap-6">
+      {/* Responses Section */}
+      {topic.responseCount === 0 && (
+        <div className="mb-6">
+          <Card variant="default" padding="lg">
+            <div className="text-center py-8">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              <h3 className="mt-4 text-lg font-semibold text-gray-900">No responses yet</h3>
+              <p className="mt-2 text-gray-600">
+                Be the first to share your perspective on this topic.
+              </p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Response Composer Section */}
+      <div className="mb-6">
         <Card variant="default" padding="lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Discussion Responses</h3>
-          <p className="text-gray-600">
-            Response listing will be implemented in a future iteration.
-          </p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Share Your Perspective</h3>
+          <ResponseComposer
+            onSubmit={handleSubmitResponse}
+            isLoading={isSubmittingResponse}
+            placeholder="Share your perspective on this topic..."
+          />
         </Card>
       </div>
     </div>

@@ -8,7 +8,7 @@
 /**
  * API configuration
  */
-const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || '/api';
 
 /**
  * Custom error class for API errors
@@ -74,7 +74,26 @@ export class ApiClient {
    * Build URL with query parameters
    */
   private buildURL(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = new URL(endpoint, this.baseURL);
+    // Build absolute URL from baseURL and endpoint
+    // Handle both absolute baseURLs (http://...) and relative (/api)
+    let fullUrl: string;
+
+    if (this.baseURL.startsWith('http')) {
+      // Absolute baseURL - concatenate paths properly
+      // Remove trailing slash from base and leading slash from endpoint
+      const base = this.baseURL.replace(/\/$/, '');
+      const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      fullUrl = `${base}${path}`;
+    } else {
+      // Relative baseURL - prepend origin and concatenate paths
+      // Remove trailing slash from baseURL and leading slash from endpoint to avoid double slashes
+      const base = this.baseURL.replace(/\/$/, '');
+      const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      fullUrl = `${window.location.origin}${base}${path}`;
+    }
+
+    // Use URL to add query parameters
+    const url = new URL(fullUrl);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -250,3 +269,44 @@ export class ApiClient {
  * Default API client instance
  */
 export const apiClient = new ApiClient();
+
+/**
+ * Phone verification API response types
+ */
+export interface PhoneVerificationRequestResponse {
+  verificationId: string;
+  expiresAt: string;
+  message: string;
+}
+
+export interface PhoneVerificationVerifyResponse {
+  success: boolean;
+  message: string;
+  verificationId: string;
+}
+
+/**
+ * Request phone number verification
+ * Sends a 6-digit OTP code to the provided phone number
+ */
+export async function requestPhoneVerification(
+  phoneNumber: string,
+): Promise<PhoneVerificationRequestResponse> {
+  return apiClient.post<PhoneVerificationRequestResponse>('/verification/phone/request', {
+    phoneNumber,
+  });
+}
+
+/**
+ * Verify phone number with OTP code
+ * Validates the code and marks verification as complete
+ */
+export async function verifyPhoneOTP(
+  verificationId: string,
+  code: string,
+): Promise<PhoneVerificationVerifyResponse> {
+  return apiClient.post<PhoneVerificationVerifyResponse>('/verification/phone/verify', {
+    verificationId,
+    code,
+  });
+}

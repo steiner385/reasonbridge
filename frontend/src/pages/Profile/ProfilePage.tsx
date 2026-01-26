@@ -2,22 +2,19 @@
  * Profile page for the current authenticated user
  */
 
+import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../lib/useCurrentUser';
+import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Link } from 'react-router-dom';
+import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
 
 function ProfilePage() {
   const { data: user, isLoading, isError, error } = useCurrentUser();
+  const showSkeleton = useDelayedLoading(isLoading);
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-center items-center py-12">
-          <div className="text-gray-600">Loading your profile...</div>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <ProfileSkeleton />;
   }
 
   if (isError) {
@@ -89,7 +86,18 @@ function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
               <div>
                 <p className="text-sm font-medium text-gray-500">Verification Level</p>
-                <p className="text-lg text-gray-900">{user.verificationLevel.replace('_', ' ')}</p>
+                <p className="text-lg text-gray-900" data-testid="verification-level">
+                  {user.verificationLevel.replace('_', ' ')}
+                </p>
+                {user.verificationLevel === 'VERIFIED_HUMAN' && (
+                  <span
+                    data-testid="trust-badge"
+                    className="inline-flex items-center gap-1 mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-300"
+                    title="This user has been verified as a real human"
+                  >
+                    ✓ Verified Human
+                  </span>
+                )}
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Status</p>
@@ -110,8 +118,8 @@ function ProfilePage() {
           <h2 className="text-xl font-semibold text-gray-900">Trust Scores</h2>
         </CardHeader>
         <CardBody>
-          <div className="space-y-4">
-            <div>
+          <div className="space-y-4" data-testid="trust-score-display">
+            <div data-testid="trust-score-ability">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-gray-700">Ability</span>
                 <span className="text-sm font-semibold text-primary-600">
@@ -126,7 +134,7 @@ function ProfilePage() {
               </div>
             </div>
 
-            <div>
+            <div data-testid="trust-score-benevolence">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-gray-700">Benevolence</span>
                 <span className="text-sm font-semibold text-secondary-600">
@@ -141,7 +149,7 @@ function ProfilePage() {
               </div>
             </div>
 
-            <div>
+            <div data-testid="trust-score-integrity">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-gray-700">Integrity</span>
                 <span className="text-sm font-semibold text-indigo-600">

@@ -1,4 +1,4 @@
-# @unite-discord/frontend
+# @reason-bridge/frontend
 
 Frontend application for Unite Discord - Rational Discussion Platform.
 

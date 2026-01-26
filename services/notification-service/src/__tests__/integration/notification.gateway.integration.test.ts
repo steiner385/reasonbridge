@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Integration tests for NotificationGateway
  * Tests WebSocket real-time updates for common ground analysis

@@ -1,0 +1,194 @@
+{
+  "uuid": "5d0a2d2f-ff70-49df-bd90-b8259fac2869",
+  "name": "should filter out dismissed feedback from display",
+  "historyId": "4376535cd5646419c00f321cfae5c548:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245035683,
+                  "uuid": "6d4f6520-5884-4e43-8a71-2ed943088bf0",
+                  "stop": 1769245035685
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245035683,
+              "uuid": "255bbd9d-6eb1-4994-9ea6-70152c857a73",
+              "stop": 1769245035685
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245035686,
+                  "uuid": "4388c877-0005-4718-bf23-695f6e999d0e",
+                  "stop": 1769245035708
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245035686,
+              "uuid": "438f189e-c8af-45fc-8aac-44a6715a243d",
+              "stop": 1769245035708
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245035678,
+          "uuid": "f2452ac3-2ee2-4666-a071-995038ab544b",
+          "stop": 1769245035710
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245035678,
+      "uuid": "314b197c-47ba-4b47-a101-f273a5a2717e",
+      "stop": 1769245035711
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035711,
+      "name": "Navigate to \"/\"",
+      "uuid": "331108f5-5580-44c1-97e3-0e5599f6c91e",
+      "stop": 1769245035743
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035744,
+      "name": "Evaluate",
+      "uuid": "9f4d0c58-1867-4274-a75d-9e0e0a17c72c",
+      "stop": 1769245035761
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035762,
+      "name": "Expect \"toBe\"",
+      "uuid": "818b5bbd-b797-4c0e-9a49-7bd7aaf071dc",
+      "stop": 1769245035762
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245035762,
+          "uuid": "5066f618-234d-4cd2-b507-8e1abdbaf769",
+          "stop": 1769245035762
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245035794,
+              "uuid": "f179f5ea-ac20-46b8-917a-7882585711d9",
+              "stop": 1769245035848
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245035762,
+          "uuid": "dba4525e-cc6d-4c94-871f-e818188abe2f",
+          "stop": 1769245035848
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245035762,
+      "uuid": "93d15a09-e0ac-4947-80e0-d33abff3904e",
+      "stop": 1769245035853
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "request-and-view-feedback.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > request-and-view-feedback.spec.ts > Feedback Display Panel Integration"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-6" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "request-and-view-feedback.spec.ts" },
+    { "name": "subSuite", "value": "Feedback Display Panel Integration" }
+  ],
+  "links": [],
+  "start": 1769245035678,
+  "testCaseId": "4376535cd5646419c00f321cfae5c548",
+  "fullName": "request-and-view-feedback.spec.ts:364:3",
+  "titlePath": ["request-and-view-feedback.spec.ts", "Feedback Display Panel Integration"],
+  "stop": 1769245035843
+}

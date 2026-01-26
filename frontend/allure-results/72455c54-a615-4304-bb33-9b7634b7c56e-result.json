@@ -1,0 +1,38 @@
+{
+  "uuid": "72455c54-a615-4304-bb33-9b7634b7c56e",
+  "name": "should accept phone number input",
+  "historyId": "e58dadbcf7557404edd9cc82adbc0011:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "skipped",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-trust-indicators.spec.ts > User Story 4: Trust Indicators and Human Authenticity > PhoneVerificationForm"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker--1" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "subSuite",
+      "value": "User Story 4: Trust Indicators and Human Authenticity > PhoneVerificationForm"
+    }
+  ],
+  "links": [],
+  "start": 1769245017931,
+  "testCaseId": "e58dadbcf7557404edd9cc82adbc0011",
+  "fullName": "profile-trust-indicators.spec.ts:172:5",
+  "titlePath": [
+    "profile-trust-indicators.spec.ts",
+    "User Story 4: Trust Indicators and Human Authenticity",
+    "PhoneVerificationForm"
+  ],
+  "stop": 1769245017931
+}

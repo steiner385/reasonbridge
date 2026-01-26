@@ -37,7 +37,7 @@ export class EksStack extends cdk.Stack {
 
     // Create EKS cluster
     this.cluster = new eks.Cluster(this, 'UniteCluster', {
-      clusterName: props?.clusterName || 'unite-discord-cluster',
+      clusterName: props?.clusterName || 'reason-bridge-cluster',
       version: eks.KubernetesVersion.V1_31,
       vpc: this.vpc,
       vpcSubnets: [{ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }],

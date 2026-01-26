@@ -1,0 +1,38 @@
+{
+  "uuid": "18eab2e3-658b-4f4b-907f-9883deedf0a7",
+  "name": "should show caution indicator on low trust score accounts",
+  "historyId": "97b27eb4b33ac61dedb201b7b65c35ca:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "skipped",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-trust-indicators.spec.ts > User Story 4: Trust Indicators and Human Authenticity > Bot Detection Indicators"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker--1" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "subSuite",
+      "value": "User Story 4: Trust Indicators and Human Authenticity > Bot Detection Indicators"
+    }
+  ],
+  "links": [],
+  "start": 1769245017933,
+  "testCaseId": "97b27eb4b33ac61dedb201b7b65c35ca",
+  "fullName": "profile-trust-indicators.spec.ts:187:5",
+  "titlePath": [
+    "profile-trust-indicators.spec.ts",
+    "User Story 4: Trust Indicators and Human Authenticity",
+    "Bot Detection Indicators"
+  ],
+  "stop": 1769245017933
+}

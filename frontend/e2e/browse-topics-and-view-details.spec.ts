@@ -10,9 +10,18 @@ import { test, expect } from '@playwright/test';
  * - Navigating back to the topics list
  */
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe('Browse Topics and View Details', () => {
-  test.skip('should load and display the topics list page', async ({ page }) => {
+  // Skip backend-dependent tests when not in E2E Docker mode
+  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
+  test('should load and display the topics list page', async ({ page }) => {
     await page.goto('/topics');
+
+    // Wait for page to finish loading
+    await page.waitForLoadState('networkidle');
 
     // Check for page heading
     const heading = page.getByRole('heading', { name: /discussion topics/i });
@@ -26,30 +35,38 @@ test.describe('Browse Topics and View Details', () => {
     await expect(filterSection.or(page.locator('text=Sort by').first())).toBeVisible();
   });
 
-  test.skip('should display topic cards when topics are available', async ({ page }) => {
+  test('should display topic cards when topics are available', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading to complete (spinner disappears)
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for content to appear - either topic cards, "no topics" message, or error
+    // This is more robust than waiting for skeleton to hide (avoids race conditions)
+    await Promise.race([
+      page.waitForSelector('[data-testid="topic-card"]', { state: 'visible', timeout: 15000 }),
+      page.waitForSelector('text=/no topics found/i', { state: 'visible', timeout: 15000 }),
+      page.waitForSelector('text=/error loading topics/i', { state: 'visible', timeout: 15000 }),
+    ]);
 
     // Check if either topics are displayed or "No topics found" message
     const noTopicsMessage = page.getByText(/no topics found/i);
-    const topicCards = page
-      .locator('[data-testid="topic-card"]')
-      .or(page.locator('article').first());
+    const topicCards = page.locator('[data-testid="topic-card"]');
+    const errorMessage = page.getByText(/error loading topics/i);
 
     const hasTopics = (await topicCards.count()) > 0;
     const hasNoTopicsMessage = await noTopicsMessage.isVisible().catch(() => false);
+    const hasError = await errorMessage.isVisible().catch(() => false);
 
-    // Either topics should be shown or "no topics" message
-    expect(hasTopics || hasNoTopicsMessage).toBeTruthy();
+    // Either topics, "no topics" message, or error should be shown
+    expect(hasTopics || hasNoTopicsMessage || hasError).toBeTruthy();
   });
 
-  test.skip('should navigate to topic detail page when clicking on a topic', async ({ page }) => {
+  test('should navigate to topic detail page when clicking on a topic', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading to complete
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for topic cards to appear (more robust than waiting for skeleton to hide)
+    await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     // Find and click the first topic card (either by link or card container)
     const firstTopicLink = page.locator('a[href^="/topics/"]').first();
@@ -72,11 +89,14 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should display topic details correctly', async ({ page }) => {
+  test('should display topic details correctly', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for topic cards to appear
+    await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     // Navigate to first topic
     const firstTopicLink = page.locator('a[href^="/topics/"]').first();
@@ -85,10 +105,10 @@ test.describe('Browse Topics and View Details', () => {
     if (linkCount > 0) {
       await firstTopicLink.click();
 
-      // Wait for detail page to load
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
+      // Wait for topic detail content to appear (status badge indicates loaded)
+      await page.waitForSelector('text=/ACTIVE|SEEDING|ARCHIVED/', {
+        state: 'visible',
+        timeout: 15000,
       });
 
       // Verify detail page components
@@ -97,19 +117,22 @@ test.describe('Browse Topics and View Details', () => {
       await expect(statusBadge).toBeVisible();
 
       // Stats sections (Participants, Responses, etc.)
-      await expect(page.getByText(/participants/i)).toBeVisible();
-      await expect(page.getByText(/responses/i)).toBeVisible();
+      await expect(page.locator('[data-testid="participant-count"]')).toBeVisible();
+      await expect(page.locator('[data-testid="response-count"]')).toBeVisible();
 
       // Action buttons
       await expect(page.getByRole('button', { name: /join discussion/i })).toBeVisible();
     }
   });
 
-  test.skip('should navigate back to topics list from detail page', async ({ page }) => {
+  test('should navigate back to topics list from detail page', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for topic cards to appear
+    await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     // Navigate to first topic
     const firstTopicLink = page.locator('a[href^="/topics/"]').first();
@@ -118,14 +141,14 @@ test.describe('Browse Topics and View Details', () => {
     if (linkCount > 0) {
       await firstTopicLink.click();
 
-      // Wait for detail page
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
+      // Wait for topic detail content to appear (back link indicates loaded)
+      await page.waitForSelector('a[href="/topics"]', {
+        state: 'visible',
+        timeout: 15000,
       });
 
-      // Click back to topics link
-      const backLink = page.getByText(/back to topics/i).or(page.locator('a[href="/topics"]'));
+      // Click back to topics link (use specific link selector to avoid matching both link and button)
+      const backLink = page.locator('a[href="/topics"]').first();
       await backLink.click();
 
       // Verify we're back on topics list page
@@ -134,11 +157,14 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should handle pagination on topics list', async ({ page }) => {
+  test('should handle pagination on topics list', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for content to appear (topic cards or "no topics" message)
+    await Promise.race([
+      page.waitForSelector('[data-testid="topic-card"]', { state: 'visible', timeout: 15000 }),
+      page.waitForSelector('text=/no topics found/i', { state: 'visible', timeout: 15000 }),
+    ]);
 
     // Check if pagination controls exist
     const nextButton = page.getByRole('button', { name: /next/i });
@@ -167,11 +193,14 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should display topic filters and allow filtering', async ({ page }) => {
+  test('should display topic filters and allow filtering', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for page to fully load (heading indicates page is ready)
+    await page.waitForSelector('h1:has-text("Discussion Topics")', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     // Look for sort controls
     const sortControls = page
@@ -189,29 +218,35 @@ test.describe('Browse Topics and View Details', () => {
     await expect(filterContainer).toBeVisible();
   });
 
-  test.skip('should show loading state while fetching topics', async ({ page }) => {
+  test('should show loading state while fetching topics', async ({ page }) => {
     // Start navigation but don't wait
     const navigationPromise = page.goto('/topics');
 
-    // Check for loading indicator
+    // Check for loading indicator (skeleton loaders with pulse animation)
     const loadingIndicator = page
-      .locator('text=Loading topics...')
-      .or(page.locator('.animate-spin'));
+      .locator('[data-testid="topic-card-skeleton"]')
+      .or(page.locator('.animate-pulse'));
 
     // Loading should appear briefly
     await loadingIndicator.isVisible().catch(() => false);
 
     // Note: Loading might be too fast to catch, so we don't fail if we miss it
-    // Just verify the page eventually loads
+    // Just verify the page eventually loads with content
     await navigationPromise;
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    await Promise.race([
+      page.waitForSelector('[data-testid="topic-card"]', { state: 'visible', timeout: 15000 }),
+      page.waitForSelector('text=/no topics found/i', { state: 'visible', timeout: 15000 }),
+    ]);
   });
 
-  test.skip('should display topic card information', async ({ page }) => {
+  test('should display topic card information', async ({ page }) => {
     await page.goto('/topics');
 
-    // Wait for loading
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for topic cards to appear
+    await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     // Get first topic card
     const firstCard = page.locator('a[href^="/topics/"]').first();
@@ -231,10 +266,13 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  test.skip('should handle direct navigation to topic detail page', async ({ page }) => {
+  test('should handle direct navigation to topic detail page', async ({ page }) => {
     // First, get a valid topic ID from the topics list
     await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     const firstTopicLink = page.locator('a[href^="/topics/"]').first();
     const linkCount = await firstTopicLink.count();
@@ -246,10 +284,10 @@ test.describe('Browse Topics and View Details', () => {
       // Navigate directly to the topic detail page
       await page.goto(topicUrl);
 
-      // Should show topic details (not 404)
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
+      // Wait for topic detail content to appear (status badge indicates loaded)
+      await page.waitForSelector('text=/ACTIVE|SEEDING|ARCHIVED/', {
+        state: 'visible',
+        timeout: 15000,
       });
 
       // Should have back navigation

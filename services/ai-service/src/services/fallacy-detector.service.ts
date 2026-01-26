@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FeedbackType } from '@unite-discord/db-models';
+import { FeedbackType } from '@reason-bridge/db-models';
 import type { AnalysisResult } from './response-analyzer.service.js';
 
 /**

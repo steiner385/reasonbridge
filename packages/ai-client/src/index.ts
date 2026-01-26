@@ -1,5 +1,5 @@
 /**
- * @unite-discord/ai-client
+ * @reason-bridge/ai-client
  *
  * AI client wrapper for AWS Bedrock integration.
  * Provides a simplified interface for generating AI completions.

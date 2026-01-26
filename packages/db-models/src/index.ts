@@ -1,7 +1,7 @@
 /**
- * @unite-discord/db-models
+ * @reason-bridge/db-models
  *
- * Prisma database models and client for uniteDiscord.
+ * Prisma database models and client for reasonBridge.
  * This package provides the generated Prisma client and re-exports
  * all model types for use across the monorepo.
  */

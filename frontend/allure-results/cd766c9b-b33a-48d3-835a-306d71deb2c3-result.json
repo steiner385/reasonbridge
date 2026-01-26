@@ -1,0 +1,215 @@
+{
+  "uuid": "cd766c9b-b33a-48d3-835a-306d71deb2c3",
+  "name": "should show remember me checkbox",
+  "historyId": "2f09453df227787b0ec23226f28af3c8:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245015663,
+                  "uuid": "bd105977-ccf6-4ca5-a2fe-c5014c88ba4f",
+                  "stop": 1769245015668
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245015663,
+              "uuid": "7972b342-ae9b-4040-9f70-f6442dbe7aff",
+              "stop": 1769245015669
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245015670,
+                  "uuid": "d7455c3e-670b-4b92-8f4c-004d8595c05c",
+                  "stop": 1769245015700
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245015669,
+              "uuid": "ab09f651-0eea-4db0-913e-ad2b927fe47b",
+              "stop": 1769245015700
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Navigate to \"/login\"",
+              "start": 1769245015703,
+              "uuid": "b3a9f22c-9cce-4367-a131-48c64a734e03",
+              "stop": 1769245015740
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245015655,
+          "uuid": "39790b8e-47dc-4a6a-8486-ee7192b9ec85",
+          "stop": 1769245015740
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245015655,
+      "uuid": "f6e787f6-357b-4535-8763-19becf25190a",
+      "stop": 1769245015740
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245015743,
+      "name": "Expect \"toBeVisible\" getByRole('checkbox', { name: /remember me/i })",
+      "uuid": "0cc4be10-7cd3-4e1d-9f44-c5a54932d71b",
+      "stop": 1769245015801
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245015804,
+      "name": "Expect \"not toBeChecked\" getByRole('checkbox', { name: /remember me/i })",
+      "uuid": "454daddd-d7cb-434f-ad8c-50821d158c28",
+      "stop": 1769245015813
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245015814,
+      "name": "Click getByRole('checkbox', { name: /remember me/i })",
+      "uuid": "d4421856-025a-49e7-b08e-76245279eae4",
+      "stop": 1769245015881
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245015883,
+      "name": "Expect \"toBeChecked\" getByRole('checkbox', { name: /remember me/i })",
+      "uuid": "6b9aa99c-d176-4e51-9948-461f4e93d12b",
+      "stop": 1769245015903
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245015904,
+          "uuid": "e92950c4-50f3-43cb-adc6-7b2f82c979fc",
+          "stop": 1769245015904
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245015973,
+              "uuid": "849091ac-1fb7-48d5-809f-57f38b77b99c",
+              "stop": 1769245016114
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245015905,
+          "uuid": "a7ed43ca-d079-47d9-bc03-4604d0f42f51",
+          "stop": 1769245016114
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245015904,
+      "uuid": "a4071eea-186d-4a23-8ab5-fc451fde4e07",
+      "stop": 1769245016122
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "login-form.spec.ts" },
+    { "name": "titlePath", "value": " > chromium > login-form.spec.ts > LoginForm Component" },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-5" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "login-form.spec.ts" },
+    { "name": "subSuite", "value": "LoginForm Component" }
+  ],
+  "links": [],
+  "start": 1769245015655,
+  "testCaseId": "2f09453df227787b0ec23226f28af3c8",
+  "fullName": "login-form.spec.ts:81:3",
+  "titlePath": ["login-form.spec.ts", "LoginForm Component"],
+  "stop": 1769245016106
+}

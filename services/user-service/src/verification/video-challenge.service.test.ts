@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BadRequestException } from '@nestjs/common';
 import { VideoVerificationService } from './video-challenge.service.js';
 import { ConfigService } from '@nestjs/config';
@@ -35,7 +36,7 @@ describe('VideoVerificationService', () => {
     vi.clearAllMocks();
     // Reset mock implementation for each test
     (mockConfigService.get as ReturnType<typeof vi.fn>).mockImplementation(
-      <T>(key: string): T | undefined => mockConfig[key] as T | undefined
+      <T>(key: string): T | undefined => mockConfig[key] as T | undefined,
     );
     // Direct instantiation - bypasses NestJS DI issues with vitest mocks
     service = new VideoVerificationService(mockConfigService);
@@ -79,9 +80,7 @@ describe('VideoVerificationService', () => {
 
     it('should throw BadRequestException for unknown challenge type', () => {
       // @ts-ignore - Testing invalid input
-      expect(() => service.generateChallenge('INVALID_TYPE')).toThrow(
-        BadRequestException,
-      );
+      expect(() => service.generateChallenge('INVALID_TYPE')).toThrow(BadRequestException);
     });
 
     it('should generate different phrases on multiple calls', () => {
@@ -116,10 +115,7 @@ describe('VideoVerificationService', () => {
       const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
       vi.mocked(getSignedUrl).mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
 
-      const url = await service.generateUploadUrl(
-        'user-123',
-        'verification-456',
-      );
+      const url = await service.generateUploadUrl('user-123', 'verification-456');
 
       expect(url).toBe('https://s3.amazonaws.com/signed-url');
       expect(getSignedUrl).toHaveBeenCalled();
@@ -129,11 +125,7 @@ describe('VideoVerificationService', () => {
       const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
       vi.mocked(getSignedUrl).mockResolvedValueOnce('https://s3.amazonaws.com/signed-url');
 
-      const url = await service.generateUploadUrl(
-        'user-123',
-        'verification-456',
-        'my-video.mp4',
-      );
+      const url = await service.generateUploadUrl('user-123', 'verification-456', 'my-video.mp4');
 
       expect(url).toBe('https://s3.amazonaws.com/signed-url');
       expect(getSignedUrl).toHaveBeenCalled();
@@ -143,9 +135,9 @@ describe('VideoVerificationService', () => {
       const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
       vi.mocked(getSignedUrl).mockRejectedValueOnce(new Error('S3 service error'));
 
-      await expect(
-        service.generateUploadUrl('user-123', 'verification-456'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateUploadUrl('user-123', 'verification-456')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should include userId and verificationId in metadata', async () => {

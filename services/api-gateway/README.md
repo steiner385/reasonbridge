@@ -15,13 +15,13 @@ API Gateway service built with NestJS and Fastify adapter.
 pnpm install
 
 # Start development server
-pnpm --filter @unite-discord/api-gateway dev
+pnpm --filter @reason-bridge/api-gateway dev
 
 # Build
-pnpm --filter @unite-discord/api-gateway build
+pnpm --filter @reason-bridge/api-gateway build
 
 # Start production
-pnpm --filter @unite-discord/api-gateway start
+pnpm --filter @reason-bridge/api-gateway start
 ```
 
 ## Endpoints

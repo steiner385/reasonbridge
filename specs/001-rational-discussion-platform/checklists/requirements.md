@@ -1,4 +1,4 @@
-# Specification Quality Checklist: uniteDiscord - Rational Discussion Platform
+# Specification Quality Checklist: reasonBridge - Rational Discussion Platform
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-01-17

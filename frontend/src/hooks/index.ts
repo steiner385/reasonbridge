@@ -4,3 +4,5 @@ export type {
   ApplyTopicLinkOptions,
   SuggestionActionsState,
 } from './useSuggestionActions';
+export { useNotification, useShowNotification } from './useNotification';
+export { useModerationNotifications } from './useModerationNotifications';

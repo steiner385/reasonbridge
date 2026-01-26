@@ -1,5 +1,5 @@
 /**
- * Event schema definitions for uniteDiscord
+ * Event schema definitions for reasonBridge
  *
  * This package contains type definitions for all domain events
  * used in the event-driven architecture.

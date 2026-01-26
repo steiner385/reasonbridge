@@ -1,0 +1,219 @@
+{
+  "uuid": "83de72a4-c722-44ce-b897-7b12d5257fc9",
+  "name": "should display stance-specific UI for oppose alignment",
+  "historyId": "beaa6543f5892ac53d0c307c24dcd571:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Launch browser",
+                  "start": 1769245003394,
+                  "uuid": "61d06917-2630-493f-90c2-e6683cf187eb",
+                  "stop": 1769245003496
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"browser\"",
+              "start": 1769245003391,
+              "uuid": "68293adc-1b41-4f08-936b-a4ec85485b36",
+              "stop": 1769245003497
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245003505,
+                  "uuid": "6cecee6a-47bd-4d5c-87a2-020b3cb3a49c",
+                  "stop": 1769245003514
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245003503,
+              "uuid": "ca2792e3-4381-4d36-a42f-d135f5ec1b4b",
+              "stop": 1769245003515
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245003518,
+                  "uuid": "e0b24270-2844-4262-9b03-122f7203a92d",
+                  "stop": 1769245003594
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245003516,
+              "uuid": "23813be2-5061-4068-be29-78d02d5b0899",
+              "stop": 1769245003594
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Navigate to \"/\"",
+              "start": 1769245003597,
+              "uuid": "308d8d6e-f5c0-44da-854d-431d13741dd1",
+              "stop": 1769245003651
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245003369,
+          "uuid": "46d1ead3-2c24-4285-972f-0e39fcd00226",
+          "stop": 1769245003651
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245003368,
+      "uuid": "bb6be77e-a477-4438-831c-a0df3275db85",
+      "stop": 1769245003652
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245003654,
+      "name": "Expect \"toBe\"",
+      "uuid": "0414adbe-016e-4c5c-98c9-3ade29d24edd",
+      "stop": 1769245003655
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "afterEach hook",
+          "start": 1769245003660,
+          "uuid": "17f7987f-c50e-4d76-bab0-c2576eeeca8b",
+          "stop": 1769245003661
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245003661,
+          "uuid": "938e4b42-a782-493f-b2b5-3c0f5454400b",
+          "stop": 1769245003662
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245003793,
+              "uuid": "8323097e-0e37-4997-bd86-940469239f6d",
+              "stop": 1769245003946
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245003662,
+          "uuid": "1ce1b955-e88f-46f5-a8f1-9eca744505b0",
+          "stop": 1769245003946
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245003657,
+      "uuid": "db06129e-d9eb-410a-b905-75ab8175df85",
+      "stop": 1769245003954
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "alignment-reasoning-modal.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > alignment-reasoning-modal.spec.ts > AlignmentReasoningModal Component"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "alignment-reasoning-modal.spec.ts" },
+    { "name": "subSuite", "value": "AlignmentReasoningModal Component" }
+  ],
+  "links": [],
+  "start": 1769245003365,
+  "testCaseId": "beaa6543f5892ac53d0c307c24dcd571",
+  "fullName": "alignment-reasoning-modal.spec.ts:67:3",
+  "titlePath": ["alignment-reasoning-modal.spec.ts", "AlignmentReasoningModal Component"],
+  "stop": 1769245003806
+}

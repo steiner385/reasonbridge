@@ -26,6 +26,9 @@ model User {
   passwordHash           String?           @map("password_hash")
   accountStatus          AccountStatus     @default(ACTIVE) @map("account_status")
   lastLoginAt            DateTime?         @map("last_login_at")
+  // Phone verification
+  phoneNumber            String?           @map("phone_number")
+  phoneVerified          Boolean           @default(false) @map("phone_verified")
   // Trust & verification
   verificationLevel      VerificationLevel @default(BASIC) @map("verification_level")
   trustScoreAbility      Decimal           @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
@@ -58,6 +61,7 @@ model User {
   @@index([email])
   @@index([displayName])
   @@index([emailVerified])
+  @@index([phoneNumber])
   @@index([createdAt])
   @@map("users")
 }
@@ -89,12 +93,19 @@ model VerificationRecord {
   providerReference String?            @map("provider_reference")
   createdAt         DateTime           @default(now()) @map("created_at")
 
+  // OTP-specific fields (otpCode stores bcrypt-hashed values, never plaintext)
+  otpCode           String?            @map("otp_code")      // bcrypt-hashed OTP (never store plaintext)
+  otpExpiresAt      DateTime?          @map("otp_expires_at")
+  otpAttempts       Int                @default(0) @map("otp_attempts")
+  phoneNumber       String?            @map("phone_number")
+
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   videoUpload  VideoUpload?
 
   @@index([userId, type])
   @@index([status])
+  @@index([phoneNumber])
   @@map("verification_records")
 }
 

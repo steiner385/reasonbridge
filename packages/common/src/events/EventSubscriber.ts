@@ -5,7 +5,7 @@
  * from message queues (SQS, RabbitMQ, etc.) in the event-driven architecture.
  */
 
-import type { BaseEvent, EventEnvelope } from '@unite-discord/event-schemas';
+import type { BaseEvent, EventEnvelope } from '@reason-bridge/event-schemas';
 
 /**
  * Context provided to event handlers with metadata about the message

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { PrismaService } from '../prisma/prisma.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import type { BridgingSuggestionDto } from '../suggestions/dto/bridging-suggestions.dto.js';
 
 /**
@@ -52,8 +52,9 @@ export class BridgingSuggester {
         overallConsensusScore: 0,
         conflictAreas: [],
         commonGroundAreas: [],
-        confidenceScore: 0.50,
-        reasoning: 'No propositions found for this topic. Bridging suggestions require active discussion with multiple viewpoints.',
+        confidenceScore: 0.5,
+        reasoning:
+          'No propositions found for this topic. Bridging suggestions require active discussion with multiple viewpoints.',
       };
     }
 
@@ -81,15 +82,11 @@ export class BridgingSuggester {
 
       // Identify propositions with significant disagreement (good bridging opportunities)
       const hasDisagreement =
-        (alignmentCounts.SUPPORT > 0 && alignmentCounts.OPPOSE > 0) ||
-        alignmentCounts.NUANCED > 0;
+        (alignmentCounts.SUPPORT > 0 && alignmentCounts.OPPOSE > 0) || alignmentCounts.NUANCED > 0;
 
       if (hasDisagreement) {
         // This proposition has multiple perspectives - good candidate for bridging
-        const bridgingSuggestion = this.generateBridgingSuggestion(
-          proposition,
-          alignmentCounts,
-        );
+        const bridgingSuggestion = this.generateBridgingSuggestion(proposition, alignmentCounts);
         suggestions.push(bridgingSuggestion);
 
         // Track conflict areas
@@ -105,15 +102,10 @@ export class BridgingSuggester {
     }
 
     const overallConsensusScore =
-      propositionsWithConsensus > 0
-        ? totalConsensusScore / propositionsWithConsensus
-        : 0;
+      propositionsWithConsensus > 0 ? totalConsensusScore / propositionsWithConsensus : 0;
 
     // Calculate overall confidence based on data availability
-    const confidenceScore = this.calculateConfidence(
-      propositions.length,
-      suggestions.length,
-    );
+    const confidenceScore = this.calculateConfidence(propositions.length, suggestions.length);
 
     const reasoning = this.generateReasoning(
       propositions.length,
@@ -165,10 +157,7 @@ export class BridgingSuggester {
     );
 
     // Identify common ground
-    const commonGround = this.identifyCommonGround(
-      proposition.statement,
-      alignmentCounts,
-    );
+    const commonGround = this.identifyCommonGround(proposition.statement, alignmentCounts);
 
     // Calculate confidence for this specific suggestion
     const confidenceScore = this.calculateSuggestionConfidence(
@@ -230,17 +219,14 @@ export class BridgingSuggester {
   /**
    * Calculate confidence score for a specific suggestion
    */
-  private calculateSuggestionConfidence(
-    totalAlignments: number,
-    nuancedCount: number,
-  ): number {
-    let confidence = 0.50; // Base confidence
+  private calculateSuggestionConfidence(totalAlignments: number, nuancedCount: number): number {
+    let confidence = 0.5; // Base confidence
 
     // More alignments = higher confidence in the analysis
     if (totalAlignments >= 10) {
-      confidence += 0.20;
+      confidence += 0.2;
     } else if (totalAlignments >= 5) {
-      confidence += 0.10;
+      confidence += 0.1;
     }
 
     // Presence of nuanced views increases confidence (shows thoughtful engagement)
@@ -254,17 +240,14 @@ export class BridgingSuggester {
   /**
    * Calculate overall confidence score for the analysis
    */
-  private calculateConfidence(
-    propositionCount: number,
-    suggestionCount: number,
-  ): number {
-    let confidence = 0.50; // Base confidence
+  private calculateConfidence(propositionCount: number, suggestionCount: number): number {
+    let confidence = 0.5; // Base confidence
 
     // More propositions = more data to analyze
     if (propositionCount >= 10) {
-      confidence += 0.20;
+      confidence += 0.2;
     } else if (propositionCount >= 5) {
-      confidence += 0.10;
+      confidence += 0.1;
     }
 
     // Having suggestions indicates active disagreement to bridge
@@ -287,29 +270,39 @@ export class BridgingSuggester {
   ): string {
     const parts: string[] = [];
 
-    parts.push(`Analyzed ${propositionCount} proposition${propositionCount === 1 ? '' : 's'} from this topic.`);
+    parts.push(
+      `Analyzed ${propositionCount} proposition${propositionCount === 1 ? '' : 's'} from this topic.`,
+    );
 
     if (suggestionCount > 0) {
-      parts.push(`Found ${suggestionCount} bridging opportunit${suggestionCount === 1 ? 'y' : 'ies'} where different perspectives could be connected.`);
+      parts.push(
+        `Found ${suggestionCount} bridging opportunit${suggestionCount === 1 ? 'y' : 'ies'} where different perspectives could be connected.`,
+      );
     }
 
     if (conflictCount > 0) {
-      parts.push(`Identified ${conflictCount} area${conflictCount === 1 ? '' : 's'} of disagreement that could benefit from bridging dialogue.`);
+      parts.push(
+        `Identified ${conflictCount} area${conflictCount === 1 ? '' : 's'} of disagreement that could benefit from bridging dialogue.`,
+      );
     }
 
     if (commonGroundCount > 0) {
-      parts.push(`Found ${commonGroundCount} area${commonGroundCount === 1 ? '' : 's'} of common ground with high consensus.`);
+      parts.push(
+        `Found ${commonGroundCount} area${commonGroundCount === 1 ? '' : 's'} of common ground with high consensus.`,
+      );
     }
 
     if (consensusScore > 0) {
       const consensusLevel =
-        consensusScore > 0.7 ? 'high' :
-        consensusScore > 0.4 ? 'moderate' :
-        'low';
-      parts.push(`Overall consensus level is ${consensusLevel} (${(consensusScore * 100).toFixed(0)}%).`);
+        consensusScore > 0.7 ? 'high' : consensusScore > 0.4 ? 'moderate' : 'low';
+      parts.push(
+        `Overall consensus level is ${consensusLevel} (${(consensusScore * 100).toFixed(0)}%).`,
+      );
     }
 
-    parts.push('Note: This is a rule-based analysis. AI-powered semantic understanding will provide more nuanced bridging suggestions in future iterations.');
+    parts.push(
+      'Note: This is a rule-based analysis. AI-powered semantic understanding will provide more nuanced bridging suggestions in future iterations.',
+    );
 
     return parts.join(' ');
   }

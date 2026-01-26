@@ -1,339 +1,316 @@
-/**
- * Database Seed Script
- * T164-T165: Creates seed data for topics and demo discussions
- */
-
-import { PrismaClient, ActivityLevel } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-/**
- * T164: Seed topics with realistic activity levels
- */
-async function seedTopics() {
-  console.log('Seeding topics...');
+async function main() {
+  console.log('🌱 Seeding E2E database...');
 
-  const topics = [
+  // Create test users
+  console.log('Creating test users...');
+  const testUser1 = await prisma.user.upsert({
+    where: { cognitoSub: 'test-user-1' },
+    update: {},
+    create: {
+      email: 'testuser1@example.com',
+      cognitoSub: 'test-user-1',
+      displayName: 'Test User 1',
+      trustScoreAbility: 0.75,
+      trustScoreBenevolence: 0.8,
+      trustScoreIntegrity: 0.85,
+      verificationLevel: 'BASIC',
+    },
+  });
+
+  const testUser2 = await prisma.user.upsert({
+    where: { cognitoSub: 'test-user-2' },
+    update: {},
+    create: {
+      email: 'verifieduser@example.com',
+      cognitoSub: 'test-user-2',
+      displayName: 'Verified User',
+      trustScoreAbility: 0.9,
+      trustScoreBenevolence: 0.92,
+      trustScoreIntegrity: 0.88,
+      verificationLevel: 'VERIFIED_HUMAN',
+    },
+  });
+
+  console.log(`✅ Created users: ${testUser1.displayName}, ${testUser2.displayName}`);
+
+  // Create test topics (check if they exist first by title since we can't use custom IDs)
+  console.log('Creating test topics...');
+  const existingTopic1 = await prisma.discussionTopic.findFirst({
+    where: { title: 'Should renewable energy be prioritized over fossil fuels?' },
+  });
+  const topic1 =
+    existingTopic1 ||
+    (await prisma.discussionTopic.create({
+      data: {
+        title: 'Should renewable energy be prioritized over fossil fuels?',
+        description:
+          'Discuss the transition to renewable energy sources and their impact on the environment and economy.',
+        creatorId: testUser1.id,
+        crossCuttingThemes: [],
+      },
+    }));
+
+  const existingTopic2 = await prisma.discussionTopic.findFirst({
+    where: { title: 'Universal Basic Income: Viable or Unsustainable?' },
+  });
+  const topic2 =
+    existingTopic2 ||
+    (await prisma.discussionTopic.create({
+      data: {
+        title: 'Universal Basic Income: Viable or Unsustainable?',
+        description:
+          'Explore the feasibility and potential impact of implementing universal basic income policies.',
+        creatorId: testUser2.id,
+        crossCuttingThemes: [],
+      },
+    }));
+
+  const existingTopic3 = await prisma.discussionTopic.findFirst({
+    where: { title: 'Remote Work: The Future of Employment?' },
+  });
+  const topic3 =
+    existingTopic3 ||
+    (await prisma.discussionTopic.create({
+      data: {
+        title: 'Remote Work: The Future of Employment?',
+        description:
+          'Debate the long-term effects of remote work on productivity, work-life balance, and urban development.',
+        creatorId: testUser1.id,
+        crossCuttingThemes: [],
+      },
+    }));
+
+  console.log(`✅ Created topics: "${topic1.title}", "${topic2.title}", "${topic3.title}"`);
+
+  // Create some test responses
+  console.log('Creating test responses...');
+  const existingResponse1 = await prisma.response.findFirst({
+    where: {
+      topicId: topic3.id,
+      authorId: testUser2.id,
+      content: { startsWith: 'Renewable energy is crucial' },
+    },
+  });
+  const response1 =
+    existingResponse1 ||
+    (await prisma.response.create({
+      data: {
+        topicId: topic3.id,
+        authorId: testUser2.id,
+        content:
+          'Renewable energy is crucial for reducing carbon emissions and combating climate change. The initial investment costs are offset by long-term savings and environmental benefits.',
+        citedSources: [],
+      },
+    }));
+
+  const existingResponse2 = await prisma.response.findFirst({
+    where: {
+      topicId: topic3.id,
+      authorId: testUser1.id,
+      parentId: response1.id,
+    },
+  });
+  const response2 =
+    existingResponse2 ||
+    (await prisma.response.create({
+      data: {
+        topicId: topic3.id,
+        authorId: testUser1.id,
+        parentId: response1.id,
+        content:
+          'While I agree on the environmental benefits, we need to consider the economic transition costs and job displacement in fossil fuel industries. A gradual transition with retraining programs would be more sustainable.',
+        citedSources: [],
+      },
+    }));
+
+  console.log(`✅ Created ${2} test responses`);
+
+  // Create propositions for remote work topic (topic3 - appears first in API due to DESC sort)
+  console.log('Creating test propositions...');
+
+  // Find or create propositions using findFirst + create pattern (no unique constraint exists)
+  let prop1 = await prisma.proposition.findFirst({
+    where: {
+      topicId: topic3.id,
+      statement: 'Remote work significantly improves work-life balance',
+    },
+  });
+  if (!prop1) {
+    prop1 = await prisma.proposition.create({
+      data: {
+        topicId: topic3.id,
+        statement: 'Remote work significantly improves work-life balance',
+        source: 'AI_IDENTIFIED',
+        supportCount: 8,
+        opposeCount: 1,
+        nuancedCount: 1,
+        consensusScore: 0.8,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  let prop2 = await prisma.proposition.findFirst({
+    where: {
+      topicId: topic3.id,
+      statement: 'Remote work increases overall productivity for most workers',
+    },
+  });
+  if (!prop2) {
+    prop2 = await prisma.proposition.create({
+      data: {
+        topicId: topic3.id,
+        statement: 'Remote work increases overall productivity for most workers',
+        source: 'AI_IDENTIFIED',
+        supportCount: 5,
+        opposeCount: 4,
+        nuancedCount: 1,
+        consensusScore: 0.52,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  let prop3 = await prisma.proposition.findFirst({
+    where: {
+      topicId: topic3.id,
+      statement: 'Remote work harms company culture and team collaboration',
+    },
+  });
+  if (!prop3) {
+    prop3 = await prisma.proposition.create({
+      data: {
+        topicId: topic3.id,
+        statement: 'Remote work harms company culture and team collaboration',
+        source: 'AI_IDENTIFIED',
+        supportCount: 3,
+        opposeCount: 6,
+        nuancedCount: 1,
+        consensusScore: 0.3,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  console.log(`✅ Created propositions for topic: ${topic3.title}`);
+
+  // Create alignments
+  console.log('Creating test alignments...');
+  const alignments = [
+    // Prop 1 - High consensus (8 support, 1 oppose, 1 nuanced)
+    { userId: testUser1.id, propositionId: prop1.id, stance: 'SUPPORT' as const },
+    { userId: testUser2.id, propositionId: prop1.id, stance: 'SUPPORT' as const },
+
+    // Prop 2 - Moderate consensus (5 support, 4 oppose, 1 nuanced)
+    { userId: testUser1.id, propositionId: prop2.id, stance: 'SUPPORT' as const },
+    { userId: testUser2.id, propositionId: prop2.id, stance: 'OPPOSE' as const },
+
+    // Prop 3 - Low consensus (3 support, 6 oppose, 1 nuanced)
     {
-      id: crypto.randomUUID(),
-      title: 'Climate Change & Environmental Policy',
-      description: 'Discussions about climate science, environmental policies, and sustainable practices',
-      creatorId: null, // System-created
-      activeDiscussionCount: 45,
-      participantCount: 230,
-      activityLevel: ActivityLevel.HIGH,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['environment', 'science', 'policy'],
+      userId: testUser1.id,
+      propositionId: prop3.id,
+      stance: 'OPPOSE' as const,
     },
     {
-      id: crypto.randomUUID(),
-      title: 'Economic Policy & Inequality',
-      description: 'Exploring economic systems, wealth distribution, and fiscal policy',
-      creatorId: null,
-      activeDiscussionCount: 38,
-      participantCount: 195,
-      activityLevel: ActivityLevel.HIGH,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['economics', 'policy', 'society'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Technology & AI Ethics',
-      description: 'The impact of technology on society, AI regulation, and digital rights',
-      creatorId: null,
-      activeDiscussionCount: 52,
-      participantCount: 310,
-      activityLevel: ActivityLevel.HIGH,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['technology', 'ethics', 'privacy'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Healthcare & Public Health',
-      description: 'Healthcare systems, medical policy, and public health initiatives',
-      creatorId: null,
-      activeDiscussionCount: 28,
-      participantCount: 145,
-      activityLevel: ActivityLevel.HIGH,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['health', 'policy', 'science'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Education Reform',
-      description: 'Discussions about education systems, curriculum, and learning methods',
-      creatorId: null,
-      activeDiscussionCount: 22,
-      participantCount: 110,
-      activityLevel: ActivityLevel.HIGH,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['education', 'society', 'policy'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Immigration & Border Policy',
-      description: 'Immigration systems, refugee policy, and border security',
-      creatorId: null,
-      activeDiscussionCount: 15,
-      participantCount: 95,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['policy', 'society', 'security'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Criminal Justice Reform',
-      description: 'Policing, incarceration, rehabilitation, and justice system improvements',
-      creatorId: null,
-      activeDiscussionCount: 18,
-      participantCount: 88,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['justice', 'policy', 'society'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Foreign Policy & International Relations',
-      description: 'Global diplomacy, international conflicts, and trade policy',
-      creatorId: null,
-      activeDiscussionCount: 12,
-      participantCount: 75,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['international', 'policy', 'security'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Housing & Urban Development',
-      description: 'Affordable housing, zoning policy, and urban planning',
-      creatorId: null,
-      activeDiscussionCount: 14,
-      participantCount: 65,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['housing', 'economics', 'policy'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Energy & Renewable Resources',
-      description: 'Energy policy, renewable energy transition, and grid infrastructure',
-      creatorId: null,
-      activeDiscussionCount: 19,
-      participantCount: 102,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['energy', 'environment', 'technology'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Voting Rights & Electoral Reform',
-      description: 'Voting access, electoral systems, and campaign finance',
-      creatorId: null,
-      activeDiscussionCount: 8,
-      participantCount: 52,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['democracy', 'policy', 'rights'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Gun Policy & Second Amendment',
-      description: 'Gun regulations, rights, and public safety',
-      creatorId: null,
-      activeDiscussionCount: 10,
-      participantCount: 68,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['rights', 'safety', 'policy'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Social Media & Free Speech',
-      description: 'Platform moderation, free expression, and misinformation',
-      creatorId: null,
-      activeDiscussionCount: 16,
-      participantCount: 89,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['technology', 'rights', 'society'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Mental Health & Wellness',
-      description: 'Mental health services, stigma reduction, and public awareness',
-      creatorId: null,
-      activeDiscussionCount: 11,
-      participantCount: 71,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['health', 'society', 'policy'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Space Exploration & Science',
-      description: 'Space programs, scientific research, and astronomy',
-      creatorId: null,
-      activeDiscussionCount: 6,
-      participantCount: 42,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['science', 'technology', 'exploration'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Privacy & Data Protection',
-      description: 'Data privacy laws, surveillance, and digital security',
-      creatorId: null,
-      activeDiscussionCount: 13,
-      participantCount: 78,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: true,
-      crossCuttingThemes: ['privacy', 'technology', 'rights'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Food Systems & Agriculture',
-      description: 'Sustainable farming, food security, and agricultural policy',
-      creatorId: null,
-      activeDiscussionCount: 4,
-      participantCount: 28,
-      activityLevel: ActivityLevel.LOW,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['agriculture', 'environment', 'economics'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Labor Rights & Worker Protections',
-      description: 'Unions, workplace safety, and employment law',
-      creatorId: null,
-      activeDiscussionCount: 7,
-      participantCount: 45,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['labor', 'economics', 'rights'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Arts & Cultural Funding',
-      description: 'Public funding for arts, cultural preservation, and creative industries',
-      creatorId: null,
-      activeDiscussionCount: 3,
-      participantCount: 19,
-      activityLevel: ActivityLevel.LOW,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['arts', 'culture', 'economics'],
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Infrastructure & Transportation',
-      description: 'Public transit, roads, bridges, and infrastructure investment',
-      creatorId: null,
-      activeDiscussionCount: 9,
-      participantCount: 58,
-      activityLevel: ActivityLevel.MEDIUM,
-      suggestedForNewUsers: false,
-      crossCuttingThemes: ['infrastructure', 'policy', 'economics'],
+      userId: testUser2.id,
+      propositionId: prop3.id,
+      stance: 'NUANCED' as const,
+      nuanceExplanation: 'Costs are high but necessary investment',
     },
   ];
 
-  // Create topics (skipping if already exists by title)
-  for (const topic of topics) {
-    await prisma.discussionTopic.upsert({
-      where: { title: topic.title },
+  for (const alignment of alignments) {
+    await prisma.alignment.upsert({
+      where: {
+        userId_propositionId: {
+          userId: alignment.userId,
+          propositionId: alignment.propositionId,
+        },
+      },
       update: {},
-      create: {
-        id: topic.id,
-        title: topic.title,
-        description: topic.description,
-        creatorId: await getSystemUserId(), // Create system user if needed
-        activeDiscussionCount: topic.activeDiscussionCount,
-        participantCount: topic.participantCount,
-        activityLevel: topic.activityLevel,
-        suggestedForNewUsers: topic.suggestedForNewUsers,
-        crossCuttingThemes: topic.crossCuttingThemes,
-      },
+      create: alignment,
     });
   }
 
-  console.log(`✓ Seeded ${topics.length} topics`);
-}
+  console.log(`✅ Created ${alignments.length} alignments`);
 
-/**
- * Get or create system user for topic creation
- */
-async function getSystemUserId(): Promise<string> {
-  const systemEmail = 'system@reasonbridge.org';
-
-  let systemUser = await prisma.user.findUnique({
-    where: { email: systemEmail },
-  });
-
-  if (!systemUser) {
-    systemUser = await prisma.user.create({
-      data: {
-        email: systemEmail,
-        displayName: 'System',
-        cognitoSub: 'system-user-000',
-        authMethod: 'EMAIL_PASSWORD',
-        emailVerified: true,
-        accountStatus: 'ACTIVE',
-      },
-    });
-    console.log('✓ Created system user');
-  }
-
-  return systemUser.id;
-}
-
-/**
- * T165: Seed demo discussions with high common ground scores
- */
-async function seedDemoDiscussions() {
-  console.log('Seeding demo discussions...');
-
-  // Find HIGH activity topics for demo content
-  const topics = await prisma.discussionTopic.findMany({
-    where: {
-      activityLevel: ActivityLevel.HIGH,
+  // Create CommonGroundAnalysis
+  console.log('Creating common ground analysis...');
+  const agreementZones = [
+    {
+      proposition: 'Remote work offers flexibility benefits',
+      agreementPercentage: 80,
+      supportingEvidence: ['Survey data', 'Employee satisfaction reports'],
+      participantCount: 10,
     },
-    take: 5,
+  ];
+
+  const misunderstandings = [
+    {
+      topic: 'Productivity metrics',
+      interpretations: [
+        { interpretation: 'Hours logged', participantCount: 5 },
+        { interpretation: 'Output quality', participantCount: 5 },
+      ],
+      clarification: 'Distinguish between time-based and results-based productivity measures',
+    },
+  ];
+
+  const genuineDisagreements = [
+    {
+      proposition: 'Optimal work arrangement',
+      viewpoints: [
+        {
+          position: 'Fully remote',
+          participantCount: 4,
+          reasoning: ['Flexibility', 'Cost savings'],
+        },
+        {
+          position: 'Hybrid model',
+          participantCount: 6,
+          reasoning: ['Team bonding', 'Work-life separation'],
+        },
+      ],
+      underlyingValues: ['Individual autonomy', 'Team collaboration'],
+    },
+  ];
+
+  // Check if analysis exists first (no unique constraint)
+  const existingAnalysis = await prisma.commonGroundAnalysis.findFirst({
+    where: {
+      topicId: topic3.id,
+      version: 1,
+    },
   });
 
-  if (topics.length === 0) {
-    console.warn('⚠ No HIGH activity topics found. Run seedTopics first.');
-    return;
+  if (!existingAnalysis) {
+    await prisma.commonGroundAnalysis.create({
+      data: {
+        topicId: topic3.id,
+        version: 1,
+        agreementZones: agreementZones,
+        misunderstandings: misunderstandings,
+        genuineDisagreements: genuineDisagreements,
+        overallConsensusScore: 0.55,
+        participantCountAtGeneration: 10,
+        responseCountAtGeneration: 12,
+        modelVersion: 'claude-sonnet-3.5',
+      },
+    });
   }
 
-  const systemUserId = await getSystemUserId();
+  console.log(`✅ Created common ground analysis for topic: ${topic3.title}`);
 
-  // Note: Full demo discussion seeding would require creating actual discussion content
-  // with propositions, responses, and common ground analyses.
-  // This is a placeholder that shows the structure.
-
-  console.log(`✓ Demo discussions would use these ${topics.length} topics as basis`);
-  console.log('  (Full implementation requires creating propositions, responses, and analyses)');
-}
-
-/**
- * Main seed function
- */
-async function main() {
-  console.log('🌱 Starting database seed...\n');
-
-  try {
-    await seedTopics();
-    await seedDemoDiscussions();
-
-    console.log('\n✅ Database seeding completed successfully!');
-  } catch (error) {
-    console.error('\n❌ Error during seeding:', error);
-    throw error;
-  }
+  console.log('🎉 Seeding completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Error seeding database:', e);
     process.exit(1);
   })
   .finally(async () => {

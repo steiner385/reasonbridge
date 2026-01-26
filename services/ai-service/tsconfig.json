@@ -5,9 +5,15 @@
     "rootDir": "./src",
     "composite": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "types": ["jest", "node"]
+    "experimentalDecorators": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts"
+  ]
 }

@@ -43,7 +43,7 @@ export class ElastiCacheStack extends cdk.Stack {
 
     // Create Redis replication group
     this.replicationGroup = new elasticache.CfnReplicationGroup(this, 'RedisReplicationGroup', {
-      replicationGroupId: props.clusterName || 'unite-discord-redis',
+      replicationGroupId: props.clusterName || 'reason-bridge-redis',
       replicationGroupDescription: 'Redis cluster for Unite Discord platform',
       engine: 'redis',
       engineVersion: '7.1',

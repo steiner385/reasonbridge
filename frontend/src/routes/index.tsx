@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import AboutPage from '../pages/AboutPage';
+import { LoginPage, RegisterPage } from '../pages/Auth';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
 import CommonGroundDemoPage from '../pages/Topics/CommonGroundDemoPage';
@@ -9,6 +10,7 @@ import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
 import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
+import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -25,6 +27,14 @@ export const routes: RouteObject[] = [
   {
     path: '/about',
     element: <AboutPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
   },
   {
     path: '/topics',
@@ -61,6 +71,10 @@ export const routes: RouteObject[] = [
   {
     path: '/admin/moderation',
     element: <ModerationDashboardPage />,
+  },
+  {
+    path: '/appeals',
+    element: <AppealStatusPage />,
   },
   {
     path: '*',

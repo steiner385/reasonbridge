@@ -1,0 +1,182 @@
+{
+  "uuid": "ba481475-df88-41f0-a9f2-6e6d51bec555",
+  "name": "should navigate to verification page directly",
+  "historyId": "6422d8c889f3aaad52320dd617d0ac89:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245007243,
+                  "uuid": "09eff3f4-1965-466a-b279-57b9983f1578",
+                  "stop": 1769245007245
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245007242,
+              "uuid": "c7280a22-90e9-4137-978b-12a3f34b8fcb",
+              "stop": 1769245007245
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245007246,
+                  "uuid": "50be667a-2201-437b-93a2-3ad8d12e6945",
+                  "stop": 1769245007267
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245007245,
+              "uuid": "43efd748-e55e-4adf-a872-78ebc04a1315",
+              "stop": 1769245007267
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245007235,
+          "uuid": "fcb909b5-0866-4ebe-b161-e5c04f755e32",
+          "stop": 1769245007267
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245007235,
+      "uuid": "64da03c5-4a7a-4e98-8cd3-6446aef83256",
+      "stop": 1769245007268
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245007268,
+      "name": "Navigate to \"/verification\"",
+      "uuid": "e03e8252-439c-4fe4-bd47-401056c3aad1",
+      "stop": 1769245007298
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245007300,
+      "name": "Expect \"toBeVisible\" getByRole('heading', { name: /account verification|error|verification/i })",
+      "uuid": "37d8ef63-02ac-40b2-8dd9-42c2a4f008c4",
+      "stop": 1769245007340
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245007340,
+          "uuid": "cbef0632-f751-4112-b97c-a55804967c10",
+          "stop": 1769245007340
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245007381,
+              "uuid": "d55e1d4a-c5cf-4fb3-b4bf-e60c1780538d",
+              "stop": 1769245007482
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245007340,
+          "uuid": "cd3f4622-203a-43f0-9034-9d6f8b21abe5",
+          "stop": 1769245007483
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245007340,
+      "uuid": "5171d997-cb29-46b7-9630-97b6514987e0",
+      "stop": 1769245007486
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "complete-verification-flow.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > complete-verification-flow.spec.ts > Complete Verification Flow"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "complete-verification-flow.spec.ts" },
+    { "name": "subSuite", "value": "Complete Verification Flow" }
+  ],
+  "links": [],
+  "start": 1769245007235,
+  "testCaseId": "6422d8c889f3aaad52320dd617d0ac89",
+  "fullName": "complete-verification-flow.spec.ts:41:3",
+  "titlePath": ["complete-verification-flow.spec.ts", "Complete Verification Flow"],
+  "stop": 1769245007475
+}

@@ -1,7 +1,7 @@
-import type { User, VerificationLevel, UserStatus } from '@unite-discord/db-models';
+import type { User, VerificationLevel, UserStatus } from '@reason-bridge/db-models';
 
 /**
- * Response DTO for user data
+ * Response DTO for user data (includes private fields like email)
  */
 export class UserResponseDto {
   id: string;
@@ -32,5 +32,31 @@ export class UserResponseDto {
     this.status = user.status;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
+  }
+}
+
+/**
+ * Public response DTO for viewing other users' profiles
+ * Does not expose sensitive information like email
+ */
+export class PublicUserResponseDto {
+  id: string;
+  displayName: string;
+  verificationLevel: VerificationLevel;
+  trustScoreAbility: number;
+  trustScoreBenevolence: number;
+  trustScoreIntegrity: number;
+  status: UserStatus;
+  createdAt: Date;
+
+  constructor(user: User) {
+    this.id = user.id;
+    this.displayName = user.displayName;
+    this.verificationLevel = user.verificationLevel;
+    this.trustScoreAbility = Number(user.trustScoreAbility);
+    this.trustScoreBenevolence = Number(user.trustScoreBenevolence);
+    this.trustScoreIntegrity = Number(user.trustScoreIntegrity);
+    this.status = user.status;
+    this.createdAt = user.createdAt;
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Shared utility functions for uniteDiscord
+ * Shared utility functions for reasonBridge
  */
 
 export * from './assert.js';

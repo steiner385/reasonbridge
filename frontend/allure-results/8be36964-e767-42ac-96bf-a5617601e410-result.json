@@ -1,0 +1,194 @@
+{
+  "uuid": "8be36964-e767-42ac-96bf-a5617601e410",
+  "name": "should submit a reply to create a threaded response",
+  "historyId": "0a831c5ab1386ec7e0c06ab14f4040b0:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245046852,
+                  "uuid": "ea67db91-3b8c-4443-8b9b-59dc505ecac0",
+                  "stop": 1769245046854
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245046852,
+              "uuid": "f56fb8bd-b952-4a83-b0e0-4d27301671f5",
+              "stop": 1769245046854
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245046854,
+                  "uuid": "6162e508-c640-473d-897a-154312bc60b8",
+                  "stop": 1769245046879
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245046854,
+              "uuid": "5e58ca79-84b1-436e-a5b0-e67dfc024172",
+              "stop": 1769245046879
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Navigate to \"/topics\"",
+              "start": 1769245046880,
+              "uuid": "da79ada8-db83-41de-be95-cfd3f862bcb5",
+              "stop": 1769245046903
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Wait for selector locator('text=Loading topics...')",
+              "start": 1769245046904,
+              "uuid": "2136770f-017f-4e00-b3a5-eec33020d0e3",
+              "stop": 1769245048221
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245046843,
+          "uuid": "8aeeef44-bdf6-402a-bff4-698e2822b36a",
+          "stop": 1769245048221
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245046843,
+      "uuid": "a7bfe7fd-a31e-401a-9263-949818370a1d",
+      "stop": 1769245048221
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245048222,
+      "name": "Query count locator('a[href^=\"/topics/\"]').first()",
+      "uuid": "e6f452d6-7136-43cf-89ff-3b6a13bdf2dc",
+      "stop": 1769245048223
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245048224,
+          "uuid": "ca5ba1d1-a02a-4a68-8dcc-547dd4db1200",
+          "stop": 1769245048224
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245048250,
+              "uuid": "6df8ed89-e381-46d5-87a0-9a134e25f307",
+              "stop": 1769245048304
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245048224,
+          "uuid": "dc885a76-d7cf-4308-b25e-98a373b03f40",
+          "stop": 1769245048304
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245048223,
+      "uuid": "62389859-c9bd-465b-9d43-887995ca2e5a",
+      "stop": 1769245048307
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "thread-navigation-reply.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > thread-navigation-reply.spec.ts > Thread Navigation and Reply"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "thread-navigation-reply.spec.ts" },
+    { "name": "subSuite", "value": "Thread Navigation and Reply" }
+  ],
+  "links": [],
+  "start": 1769245046843,
+  "testCaseId": "0a831c5ab1386ec7e0c06ab14f4040b0",
+  "fullName": "thread-navigation-reply.spec.ts:196:3",
+  "titlePath": ["thread-navigation-reply.spec.ts", "Thread Navigation and Reply"],
+  "stop": 1769245048296
+}

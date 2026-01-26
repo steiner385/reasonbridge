@@ -1,0 +1,206 @@
+{
+  "uuid": "02be0b9f-a99d-4caf-a41d-1bf0997f31cb",
+  "name": "should handle empty feedback responses",
+  "historyId": "b6db59683caa4a3e9720897df3fbfd3f:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245035487,
+                  "uuid": "ec6b8511-fe9f-4ba7-8d49-e76c0149e9f5",
+                  "stop": 1769245035489
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245035487,
+              "uuid": "1413fc4d-2974-46db-8b6f-a1c7c9cb3f66",
+              "stop": 1769245035489
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245035490,
+                  "uuid": "9d45c186-ce33-42ac-bb16-2a5b8d8f31df",
+                  "stop": 1769245035512
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245035489,
+              "uuid": "5801f891-e063-4307-bd89-fcb2dfac3686",
+              "stop": 1769245035512
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245035482,
+          "uuid": "e3d5fec6-badc-489a-aba4-ae4070fe4d58",
+          "stop": 1769245035515
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245035482,
+      "uuid": "cefac130-a9b3-4567-a244-cc48c6a6e493",
+      "stop": 1769245035515
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035516,
+      "name": "Navigate to \"/\"",
+      "uuid": "9151a540-6d3e-42c1-9603-1fae944ca59a",
+      "stop": 1769245035549
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035550,
+      "name": "Evaluate",
+      "uuid": "f5255f9c-259b-4a55-a5a3-2d3c4ce1e524",
+      "stop": 1769245035569
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035569,
+      "name": "Expect \"toBeTruthy\"",
+      "uuid": "3dbdb7a7-964c-4012-8113-9aa5df6faa1f",
+      "stop": 1769245035570
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245035570,
+      "name": "Expect \"toBe\"",
+      "uuid": "359c77aa-41f5-4e77-b488-d5b1e79e62ba",
+      "stop": 1769245035570
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245035571,
+          "uuid": "b8cec679-7bee-4cd9-84e5-989bdc5f3541",
+          "stop": 1769245035571
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245035609,
+              "uuid": "2407ce50-5aa0-4b39-934a-8a6a63be8637",
+              "stop": 1769245035671
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245035571,
+          "uuid": "57b36ef8-edac-4317-835d-599e6ce8495c",
+          "stop": 1769245035671
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245035570,
+      "uuid": "b6f49eb3-068e-4195-83a8-f5293f031324",
+      "stop": 1769245035676
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "request-and-view-feedback.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > request-and-view-feedback.spec.ts > Request and View Feedback Flow"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-6" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "request-and-view-feedback.spec.ts" },
+    { "name": "subSuite", "value": "Request and View Feedback Flow" }
+  ],
+  "links": [],
+  "start": 1769245035482,
+  "testCaseId": "b6db59683caa4a3e9720897df3fbfd3f",
+  "fullName": "request-and-view-feedback.spec.ts:294:3",
+  "titlePath": ["request-and-view-feedback.spec.ts", "Request and View Feedback Flow"],
+  "stop": 1769245035666
+}

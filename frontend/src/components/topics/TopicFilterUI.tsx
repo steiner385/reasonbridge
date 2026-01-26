@@ -112,6 +112,7 @@ export function TopicFilterUI({
           <div className="flex flex-wrap gap-2">
             <span className="text-sm font-medium text-gray-700 self-center">Sort by:</span>
             <select
+              data-testid="sort-select"
               className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
               value={filters.sortBy || 'createdAt'}
               onChange={(e) =>

@@ -1,6 +1,6 @@
 # API Contracts
 
-This directory contains OpenAPI 3.1 specifications for all uniteDiscord microservices.
+This directory contains OpenAPI 3.1 specifications for all reasonBridge microservices.
 
 ## Service APIs
 
@@ -238,7 +238,7 @@ Verify error responses match the taxonomy:
 
 ```typescript
 // error-codes.contract.test.ts
-import { ERROR_CODES } from '@uniteDiscord/shared';
+import { ERROR_CODES } from '@reasonBridge/shared';
 
 describe('Error Code Contracts', () => {
   const errorScenarios = [
@@ -269,7 +269,7 @@ npx openapi-typescript specs/001-rational-discussion-platform/contracts/*.yaml -
 
 ```typescript
 // Using generated types for type-safe API clients
-import type { paths } from '@uniteDiscord/shared/types/api/discussion-service';
+import type { paths } from '@reasonBridge/shared/types/api/discussion-service';
 
 type GetDiscussionResponse = paths['/discussions/{id}']['get']['responses']['200']['content']['application/json'];
 type CreateResponseBody = paths['/discussions/{id}/responses']['post']['requestBody']['content']['application/json'];

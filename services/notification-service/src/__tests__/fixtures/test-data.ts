@@ -1,5 +1,7 @@
 /**
  * Test fixtures for integration tests
+ * Note: Using 'as any' for event types due to schema evolution.
+ * These fixtures test handler behavior, not type compliance.
  */
 
 export const testTopicId = '550e8400-e29b-41d4-a716-446655440000';
@@ -18,7 +20,7 @@ export const mockTopic = {
 };
 
 export const mockCommonGroundGeneratedEvent = {
-  type: 'common-ground.generated',
+  type: 'common-ground.generated' as const,
   timestamp: new Date().toISOString(),
   payload: {
     topicId: testTopicId,
@@ -46,7 +48,7 @@ export const mockCommonGroundGeneratedEvent = {
 };
 
 export const mockCommonGroundUpdatedEvent = {
-  type: 'common-ground.updated',
+  type: 'common-ground.updated' as const,
   timestamp: new Date().toISOString(),
   payload: {
     topicId: testTopicId,
@@ -128,7 +130,7 @@ export const mockUserTrustUpdatedEvent = {
     userId: testUserId1,
     previousScores: {
       ability: 0.75,
-      benevolence: 0.80,
+      benevolence: 0.8,
       integrity: 0.85,
     },
     newScores: {
