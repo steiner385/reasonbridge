@@ -73,9 +73,19 @@ export interface VideoChallenge {
   type: string;
 
   /**
-   * Text the user should say or description of gesture/timestamp
+   * Instructions for the user to complete the challenge
    */
-  text: string;
+  instruction: string;
+
+  /**
+   * Random value (phrase or gesture) for RANDOM_PHRASE/RANDOM_GESTURE challenges
+   */
+  randomValue?: string;
+
+  /**
+   * Timestamp for TIMESTAMP challenge
+   */
+  timestamp?: string;
 }
 
 /**
