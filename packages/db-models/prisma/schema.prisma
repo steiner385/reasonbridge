@@ -18,8 +18,15 @@ datasource db {
 model User {
   id                     String            @id @default(uuid()) @db.Uuid
   email                  String            @unique
-  displayName            String            @map("display_name") @db.VarChar(50)
+  displayName            String?           @map("display_name") @db.VarChar(50)
   cognitoSub             String            @unique @map("cognito_sub")
+  // Onboarding fields
+  authMethod             AuthMethod        @map("auth_method")
+  emailVerified          Boolean           @default(false) @map("email_verified")
+  passwordHash           String?           @map("password_hash")
+  accountStatus          AccountStatus     @default(ACTIVE) @map("account_status")
+  lastLoginAt            DateTime?         @map("last_login_at")
+  // Trust & verification
   verificationLevel      VerificationLevel @default(BASIC) @map("verification_level")
   trustScoreAbility      Decimal           @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
   trustScoreBenevolence  Decimal           @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
@@ -45,10 +52,13 @@ model User {
   appeals             Appeal[]
   moderationApprovals ModerationAction[]   @relation("ModeratorApproval")
   appealReviews       Appeal[]             @relation("AppealReviewer")
+  topicInterests      TopicInterest[]
 
   @@index([cognitoSub])
   @@index([email])
   @@index([displayName])
+  @@index([emailVerified])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -159,20 +169,24 @@ model UserFollow {
 /// - Requires 2-5 tags (enforced via TopicTag relations)
 /// - Cannot transition to ACTIVE until minimum_diversity_score is met
 model DiscussionTopic {
-  id                    String           @id @default(uuid()) @db.Uuid
-  title                 String           @db.VarChar(200)
-  description           String           @db.Text
-  creatorId             String           @map("creator_id") @db.Uuid
-  status                TopicStatus      @default(SEEDING)
-  evidenceStandards     EvidenceStandard @default(STANDARD) @map("evidence_standards")
-  minimumDiversityScore Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
-  currentDiversityScore Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
-  participantCount      Int              @default(0) @map("participant_count")
-  responseCount         Int              @default(0) @map("response_count")
-  crossCuttingThemes    String[]         @map("cross_cutting_themes")
-  createdAt             DateTime         @default(now()) @map("created_at")
-  activatedAt           DateTime?        @map("activated_at")
-  archivedAt            DateTime?        @map("archived_at")
+  id                     String           @id @default(uuid()) @db.Uuid
+  title                  String           @db.VarChar(200)
+  description            String           @db.Text
+  creatorId              String           @map("creator_id") @db.Uuid
+  status                 TopicStatus      @default(SEEDING)
+  evidenceStandards      EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  minimumDiversityScore  Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
+  currentDiversityScore  Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
+  participantCount       Int              @default(0) @map("participant_count")
+  responseCount          Int              @default(0) @map("response_count")
+  // Onboarding fields
+  activeDiscussionCount  Int              @default(0) @map("active_discussion_count")
+  activityLevel          ActivityLevel    @default(LOW) @map("activity_level")
+  suggestedForNewUsers   Boolean          @default(false) @map("suggested_for_new_users")
+  crossCuttingThemes     String[]         @map("cross_cutting_themes")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  activatedAt            DateTime?        @map("activated_at")
+  archivedAt             DateTime?        @map("archived_at")
 
   // Relations
   creator              User                   @relation(fields: [creatorId], references: [id])
@@ -182,10 +196,13 @@ model DiscussionTopic {
   propositions         Proposition[]
   responses            Response[]
   commonGroundAnalyses CommonGroundAnalysis[]
+  topicInterests       TopicInterest[]
 
   @@index([status])
   @@index([creatorId])
   @@index([createdAt(sort: Desc)])
+  @@index([activityLevel])
+  @@index([suggestedForNewUsers])
   @@map("discussion_topics")
 }
 
@@ -651,4 +668,109 @@ enum AppealStatus {
   DENIED
 
   @@map("appeal_status")
+}
+
+// ============================================================================
+// ONBOARDING ENTITIES (Feature 003)
+// ============================================================================
+
+/// Authentication method used for user signup
+enum AuthMethod {
+  EMAIL_PASSWORD
+  GOOGLE_OAUTH
+  APPLE_OAUTH
+
+  @@map("auth_method")
+}
+
+/// Onboarding step progression
+enum OnboardingStep {
+  VERIFICATION
+  TOPICS
+  ORIENTATION
+  COMPLETE
+
+  @@map("onboarding_step")
+}
+
+/// Topic activity level for selection guidance
+enum ActivityLevel {
+  HIGH
+  MEDIUM
+  LOW
+
+  @@map("activity_level")
+}
+
+/// Account status for user management
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+
+  @@map("account_status")
+}
+
+/// Email verification token for signup flow
+model VerificationToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(6)
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  usedAt    DateTime? @map("used_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("verification_tokens")
+}
+
+/// Tracks user progress through onboarding steps
+model OnboardingProgress {
+  id                String         @id @default(uuid()) @db.Uuid
+  userId            String         @unique @map("user_id") @db.Uuid
+  emailVerified     Boolean        @default(false) @map("email_verified")
+  topicsSelected    Boolean        @default(false) @map("topics_selected")
+  orientationViewed Boolean        @default(false) @map("orientation_viewed")
+  firstPostMade     Boolean        @default(false) @map("first_post_made")
+  currentStep       OnboardingStep @map("current_step")
+  lastUpdatedAt     DateTime       @updatedAt @map("last_updated_at")
+  completedAt       DateTime?      @map("completed_at")
+
+  @@index([currentStep])
+  @@index([completedAt])
+  @@map("onboarding_progress")
+}
+
+/// User's selected topic interests for personalization
+model TopicInterest {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  topicId    String   @map("topic_id") @db.Uuid
+  priority   Int      @db.SmallInt
+  selectedAt DateTime @default(now()) @map("selected_at")
+
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId, priority])
+  @@map("topic_interests")
+}
+
+/// Pre-authentication visitor session tracking for demo
+model VisitorSession {
+  id                       String     @id @default(uuid()) @db.Uuid
+  sessionId                String     @unique @map("session_id")
+  viewedDemoDiscussionIds  String[]   @default([]) @map("viewed_demo_discussion_ids") @db.Uuid
+  interactionTimestamps    DateTime[] @default([]) @map("interaction_timestamps")
+  referralSource           String?    @map("referral_source")
+  convertedToUserId        String?    @unique @map("converted_to_user_id") @db.Uuid
+  createdAt                DateTime   @default(now()) @map("created_at")
+  lastActivityAt           DateTime   @updatedAt @map("last_activity_at")
+
+  @@index([convertedToUserId])
+  @@index([lastActivityAt])
+  @@map("visitor_sessions")
 }
