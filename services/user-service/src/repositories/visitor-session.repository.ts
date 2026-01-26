@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { VisitorSession } from '@prisma/client';
+import type { VisitorSession } from '@prisma/client';
 
 /**
  * Visitor Session Repository
@@ -211,8 +211,10 @@ export class VisitorSessionRepository {
       if (interactionCount > 0) {
         const firstInteraction = session.interactionTimestamps[0];
         const lastInteraction = session.interactionTimestamps[interactionCount - 1];
-        const durationMs = lastInteraction.getTime() - firstInteraction.getTime();
-        sessionDurationMinutes = Math.round(durationMs / 1000 / 60);
+        if (firstInteraction && lastInteraction) {
+          const durationMs = lastInteraction.getTime() - firstInteraction.getTime();
+          sessionDurationMinutes = Math.round(durationMs / 1000 / 60);
+        }
       }
 
       return {
@@ -303,10 +305,14 @@ export class VisitorSessionRepository {
    * @param limit - Maximum number of results
    * @returns Array of { discussionId, viewCount }
    */
-  async getMostViewedDemoDiscussions(limit: number = 10): Promise<Array<{ discussionId: string; viewCount: number }>> {
+  async getMostViewedDemoDiscussions(
+    limit: number = 10,
+  ): Promise<Array<{ discussionId: string; viewCount: number }>> {
     try {
       // This requires a raw query since we're querying array elements
-      const result = await this.prisma.$queryRaw<Array<{ discussion_id: string; view_count: bigint }>>`
+      const result = await this.prisma.$queryRaw<
+        Array<{ discussion_id: string; view_count: bigint }>
+      >`
         SELECT
           unnest(viewed_demo_discussion_ids::text[]) as discussion_id,
           COUNT(*) as view_count

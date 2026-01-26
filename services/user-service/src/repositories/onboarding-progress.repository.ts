@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { OnboardingProgress, OnboardingStep } from '@prisma/client';
+import type { OnboardingProgress } from '@prisma/client';
+import { OnboardingStep } from '@prisma/client';
 
 /**
  * Onboarding Progress Repository

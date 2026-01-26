@@ -1,5 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-
 /**
  * Standard Error Response DTO
  *
@@ -7,27 +5,10 @@ import { ApiProperty } from '@nestjs/swagger';
  * Used for all error responses across the API.
  */
 export class ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'INVALID_CREDENTIALS',
-  })
-  error: string;
+  error!: string;
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'Email or password is incorrect',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Additional error context',
-    required: false,
-    type: 'object',
-    example: {
-      field: 'email',
-      remainingAttempts: 4,
-    },
-  })
   details?: Record<string, any>;
 }
 
@@ -37,27 +18,10 @@ export class ErrorResponseDto {
  * Used for request validation failures (400 Bad Request).
  */
 export class ValidationErrorResponseDto extends ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'VALIDATION_ERROR',
-  })
   error: string = 'VALIDATION_ERROR';
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'Request validation failed',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Field-level validation errors',
-    example: {
-      fields: {
-        email: 'Invalid email format',
-        password: 'Password must be at least 8 characters',
-      },
-    },
-  })
   details: {
     fields: Record<string, string>;
   };
@@ -69,24 +33,10 @@ export class ValidationErrorResponseDto extends ErrorResponseDto {
  * Used for authentication failures (401 Unauthorized).
  */
 export class UnauthorizedErrorResponseDto extends ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'UNAUTHORIZED',
-  })
   error: string = 'UNAUTHORIZED';
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'Authentication required',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Additional context',
-    example: {
-      hint: 'Include valid JWT token in Authorization header',
-    },
-  })
   details?: {
     hint?: string;
     reason?: string;
@@ -99,25 +49,10 @@ export class UnauthorizedErrorResponseDto extends ErrorResponseDto {
  * Used for resource conflicts (409 Conflict).
  */
 export class ConflictErrorResponseDto extends ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'CONFLICT',
-  })
   error: string = 'CONFLICT';
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'An account with this email already exists',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Conflict details',
-    example: {
-      field: 'email',
-      suggestion: 'Try logging in instead or use password reset',
-    },
-  })
   details?: {
     field?: string;
     suggestion?: string;
@@ -130,26 +65,10 @@ export class ConflictErrorResponseDto extends ErrorResponseDto {
  * Used for rate limit exceeded (429 Too Many Requests).
  */
 export class RateLimitErrorResponseDto extends ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'RATE_LIMIT_EXCEEDED',
-  })
   error: string = 'RATE_LIMIT_EXCEEDED';
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'Too many requests',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Rate limit details',
-    example: {
-      retryAfter: 60,
-      limit: 5,
-      window: 3600,
-    },
-  })
   details: {
     retryAfter: number;
     limit?: number;
@@ -163,26 +82,10 @@ export class RateLimitErrorResponseDto extends ErrorResponseDto {
  * Used for resource not found (404 Not Found).
  */
 export class NotFoundErrorResponseDto extends ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'NOT_FOUND',
-  })
   error: string = 'NOT_FOUND';
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'Resource not found',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Additional context',
-    required: false,
-    example: {
-      resource: 'User',
-      id: '550e8400-e29b-41d4-a716-446655440000',
-    },
-  })
   details?: {
     resource?: string;
     id?: string;
@@ -195,25 +98,10 @@ export class NotFoundErrorResponseDto extends ErrorResponseDto {
  * Used for unexpected server errors (500 Internal Server Error).
  */
 export class InternalServerErrorResponseDto extends ErrorResponseDto {
-  @ApiProperty({
-    description: 'Error code',
-    example: 'INTERNAL_SERVER_ERROR',
-  })
   error: string = 'INTERNAL_SERVER_ERROR';
 
-  @ApiProperty({
-    description: 'Human-readable error message',
-    example: 'An unexpected error occurred',
-  })
-  message: string;
+  message!: string;
 
-  @ApiProperty({
-    description: 'Support information',
-    example: {
-      correlationId: '550e8400-e29b-41d4-a716-446655440000',
-      support: 'support@unitediscord.org',
-    },
-  })
   details?: {
     correlationId?: string;
     support?: string;

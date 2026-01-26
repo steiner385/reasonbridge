@@ -29,7 +29,10 @@ export class OnboardingService {
    * T096-T099: Select topics for user during onboarding
    * Validates 2-3 topics, assigns priorities, warns about low activity
    */
-  async selectTopics(userId: string, dto: SelectTopicsRequestDto): Promise<SelectTopicsResponseDto> {
+  async selectTopics(
+    userId: string,
+    dto: SelectTopicsRequestDto,
+  ): Promise<SelectTopicsResponseDto> {
     this.logger.log(`Selecting topics for user: ${userId}`);
 
     // T097: Validate topic selection (2-3 topics)
@@ -63,7 +66,8 @@ export class OnboardingService {
     let suggestions: SelectedTopicDto[] | undefined;
 
     if (allLowActivity) {
-      warning = 'All selected topics have low activity. Consider selecting at least one high-activity topic for better engagement.';
+      warning =
+        'All selected topics have low activity. Consider selecting at least one high-activity topic for better engagement.';
 
       // Get high-activity alternatives
       const highActivityTopics = await this.topicService.getHighActivityTopics(3);
@@ -200,7 +204,9 @@ export class OnboardingService {
    * Updates firstPostMade flag, completes onboarding, generates encouragement message
    */
   async markFirstPost(userId: string, postId?: string, discussionId?: string): Promise<any> {
-    this.logger.log(`Marking first post for user: ${userId}, postId: ${postId}, discussionId: ${discussionId}`);
+    this.logger.log(
+      `Marking first post for user: ${userId}, postId: ${postId}, discussionId: ${discussionId}`,
+    );
 
     const progress = await this.onboardingProgressRepository.findByUserId(userId);
     if (!progress) {
@@ -261,11 +267,10 @@ export class OnboardingService {
    */
   private calculateCompletionPercentage(progress: any): number {
     const steps = {
-      [OnboardingStep.VERIFICATION]: 20,
-      [OnboardingStep.TOPICS]: 40,
-      [OnboardingStep.ORIENTATION]: 60,
-      [OnboardingStep.FIRST_POST]: 80,
-      [OnboardingStep.COMPLETED]: 100,
+      [OnboardingStep.VERIFICATION]: 25,
+      [OnboardingStep.TOPICS]: 50,
+      [OnboardingStep.ORIENTATION]: 75,
+      [OnboardingStep.COMPLETE]: 100,
     };
 
     return steps[progress.currentStep] || 0;
@@ -290,18 +295,12 @@ export class OnboardingService {
       },
       ORIENTATION: {
         step: 'ORIENTATION',
-        label: 'Learn how it works',
-        description: 'Quick tour of the platform features',
-        url: '/onboarding/orientation',
-      },
-      FIRST_POST: {
-        step: 'FIRST_POST',
         label: 'Make your first post',
-        description: 'Share your perspective on a topic',
+        description: 'Share your perspective on a topic to complete onboarding',
         url: '/discussions',
       },
-      COMPLETED: {
-        step: 'COMPLETED',
+      COMPLETE: {
+        step: 'COMPLETE',
         label: 'Onboarding complete',
         description: 'You are all set!',
         url: '/dashboard',

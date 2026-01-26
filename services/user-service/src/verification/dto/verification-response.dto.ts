@@ -70,22 +70,12 @@ export interface VideoChallenge {
   /**
    * Type of challenge: RANDOM_PHRASE, RANDOM_GESTURE, or TIMESTAMP
    */
-  type: 'RANDOM_PHRASE' | 'RANDOM_GESTURE' | 'TIMESTAMP';
+  type: string;
 
   /**
-   * Instructions for what the user should do
+   * Text the user should say or description of gesture/timestamp
    */
-  instruction: string;
-
-  /**
-   * For phrase-based challenges: the phrase to say
-   */
-  randomValue?: string;
-
-  /**
-   * For timestamp-based challenges: the timestamp to show
-   */
-  timestamp?: string;
+  text: string;
 }
 
 /**
