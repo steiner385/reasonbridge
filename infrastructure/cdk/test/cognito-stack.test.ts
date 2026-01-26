@@ -15,7 +15,7 @@ describe('CognitoStack', () => {
 
     // Verify user pool is created
     template.hasResourceProperties('AWS::Cognito::UserPool', {
-      UserPoolName: 'unite-user-pool',
+      UserPoolName: 'reason-bridge-user-pool',
       AutoVerifiedAttributes: ['email'],
       UsernameAttributes: ['email'],
       // Email-based sign-in
@@ -118,11 +118,11 @@ describe('CognitoStack', () => {
       Domain: Match.objectLike({
         'Fn::Join': Match.arrayEquals([
           '', // separator
-          Match.arrayWith(['unite-discord-']),
+          Match.arrayWith(['reason-bridge-']),
         ]),
       }),
       UserPoolId: {
-        Ref: Match.stringLikeRegexp('UniteUserPool.*'),
+        Ref: Match.stringLikeRegexp('ReasonBridgeUserPool.*'),
       },
     });
   });
@@ -132,7 +132,7 @@ describe('CognitoStack', () => {
     const template = Template.fromStack(stack);
 
     template.hasResourceProperties('AWS::Cognito::UserPoolClient', {
-      ClientName: 'unite-web-client',
+      ClientName: 'reason-bridge-web-client',
       // OAuth flows
       AllowedOAuthFlows: ['code'],
       AllowedOAuthFlowsUserPoolClient: true,
@@ -140,9 +140,9 @@ describe('CognitoStack', () => {
       // Callback URLs
       CallbackURLs: Match.arrayWith([
         'http://localhost:5173/auth/callback',
-        'https://app.unitediscord.com/auth/callback',
+        'https://app.reasonbridge.org/auth/callback',
       ]),
-      LogoutURLs: Match.arrayWith(['http://localhost:5173/', 'https://app.unitediscord.com/']),
+      LogoutURLs: Match.arrayWith(['http://localhost:5173/', 'https://app.reasonbridge.org/']),
       // Generate secret
       GenerateSecret: false,
       // Prevent user existence errors - CDK converts false to "LEGACY"
@@ -204,28 +204,28 @@ describe('CognitoStack', () => {
     template.hasOutput('UserPoolId', {
       Description: 'Cognito User Pool ID',
       Export: {
-        Name: 'UniteUserPoolId',
+        Name: 'ReasonBridgeUserPoolId',
       },
     });
 
     template.hasOutput('UserPoolArn', {
       Description: 'Cognito User Pool ARN',
       Export: {
-        Name: 'UniteUserPoolArn',
+        Name: 'ReasonBridgeUserPoolArn',
       },
     });
 
     template.hasOutput('UserPoolClientId', {
       Description: 'Cognito User Pool Client ID',
       Export: {
-        Name: 'UniteUserPoolClientId',
+        Name: 'ReasonBridgeUserPoolClientId',
       },
     });
 
     template.hasOutput('UserPoolDomain', {
       Description: 'Cognito User Pool Domain',
       Export: {
-        Name: 'UniteUserPoolDomain',
+        Name: 'ReasonBridgeUserPoolDomain',
       },
     });
 

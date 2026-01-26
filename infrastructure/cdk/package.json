@@ -1,8 +1,8 @@
 {
-  "name": "@unite/infrastructure-cdk",
+  "name": "@reasonbridge/infrastructure-cdk",
   "version": "0.1.0",
   "private": true,
-  "description": "AWS CDK infrastructure for uniteDiscord platform",
+  "description": "AWS CDK infrastructure for ReasonBridge platform",
   "type": "module",
   "scripts": {
     "build": "tsc",

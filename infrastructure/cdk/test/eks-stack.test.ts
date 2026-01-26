@@ -32,7 +32,7 @@ describe('EksStack', () => {
       Config: {
         version: '1.31',
         roleArn: {
-          'Fn::GetAtt': [Match.stringLikeRegexp('UniteClusterRole.*'), 'Arn'],
+          'Fn::GetAtt': [Match.stringLikeRegexp('ReasonBridgeClusterRole.*'), 'Arn'],
         },
       },
     });
@@ -148,7 +148,7 @@ describe('EksStack', () => {
     // Verify default cluster name is used
     template.hasResourceProperties('Custom::AWSCDK-EKS-Cluster', {
       Config: {
-        name: 'unite-discord-cluster',
+        name: 'reason-bridge-cluster',
       },
     });
   });

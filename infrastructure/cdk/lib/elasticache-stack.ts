@@ -18,23 +18,23 @@ export class ElastiCacheStack extends cdk.Stack {
     // Create security group for ElastiCache
     this.securityGroup = new ec2.SecurityGroup(this, 'RedisSecurityGroup', {
       vpc: props.vpc,
-      description: 'Security group for Unite ElastiCache Redis cluster',
+      description: 'Security group for ReasonBridge ElastiCache Redis cluster',
       allowAllOutbound: false,
     });
 
     // Create subnet group for ElastiCache
     const subnetGroup = new elasticache.CfnSubnetGroup(this, 'RedisSubnetGroup', {
-      description: 'Subnet group for Unite Redis cluster',
+      description: 'Subnet group for ReasonBridge Redis cluster',
       subnetIds: props.vpc.selectSubnets({
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       }).subnetIds,
-      cacheSubnetGroupName: 'unite-redis-subnet-group',
+      cacheSubnetGroupName: 'reason-bridge-redis-subnet-group',
     });
 
     // Create parameter group for Redis 7.x
     const parameterGroup = new elasticache.CfnParameterGroup(this, 'RedisParameterGroup', {
       cacheParameterGroupFamily: 'redis7',
-      description: 'Parameter group for Unite Redis cluster',
+      description: 'Parameter group for ReasonBridge Redis cluster',
       properties: {
         'maxmemory-policy': 'allkeys-lru',
         timeout: '300',
@@ -43,8 +43,8 @@ export class ElastiCacheStack extends cdk.Stack {
 
     // Create Redis replication group
     this.replicationGroup = new elasticache.CfnReplicationGroup(this, 'RedisReplicationGroup', {
-      replicationGroupId: props.clusterName || 'unite-discord-redis',
-      replicationGroupDescription: 'Redis cluster for Unite Discord platform',
+      replicationGroupId: props.clusterName || 'reason-bridge-redis',
+      replicationGroupDescription: 'Redis cluster for ReasonBridge platform',
       engine: 'redis',
       engineVersion: '7.1',
       cacheNodeType: 'cache.t3.medium',

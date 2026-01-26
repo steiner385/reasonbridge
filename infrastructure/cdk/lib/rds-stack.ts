@@ -19,15 +19,15 @@ export class RdsStack extends cdk.Stack {
     // Create security group for Aurora cluster
     const dbSecurityGroup = new ec2.SecurityGroup(this, 'DbSecurityGroup', {
       vpc: props.vpc,
-      description: 'Security group for Unite Aurora Serverless v2 cluster',
+      description: 'Security group for ReasonBridge Aurora Serverless v2 cluster',
       allowAllOutbound: false,
     });
 
     // Create database credentials secret
     this.dbSecret = new secretsmanager.Secret(this, 'DbCredentials', {
-      secretName: 'unite-discord/rds/credentials',
+      secretName: 'reason-bridge/rds/credentials',
       generateSecretString: {
-        secretStringTemplate: JSON.stringify({ username: 'uniteadmin' }),
+        secretStringTemplate: JSON.stringify({ username: 'reasonbridgeadmin' }),
         generateStringKey: 'password',
         excludePunctuation: true,
         includeSpace: false,
@@ -36,12 +36,12 @@ export class RdsStack extends cdk.Stack {
     });
 
     // Create Aurora Serverless v2 cluster
-    this.cluster = new rds.DatabaseCluster(this, 'UniteAuroraCluster', {
+    this.cluster = new rds.DatabaseCluster(this, 'ReasonBridgeAuroraCluster', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_15_5,
       }),
       credentials: rds.Credentials.fromSecret(this.dbSecret),
-      defaultDatabaseName: props.databaseName || 'unite_discord',
+      defaultDatabaseName: props.databaseName || 'reasonbridge',
       vpc: props.vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,

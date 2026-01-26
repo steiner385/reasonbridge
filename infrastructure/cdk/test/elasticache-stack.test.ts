@@ -48,7 +48,7 @@ describe('ElastiCacheStack', () => {
 
     // Verify security group is created
     template.hasResourceProperties('AWS::EC2::SecurityGroup', {
-      GroupDescription: 'Security group for Unite ElastiCache Redis cluster',
+      GroupDescription: 'Security group for ReasonBridge ElastiCache Redis cluster',
     });
   });
 
@@ -61,8 +61,8 @@ describe('ElastiCacheStack', () => {
 
     // Verify subnet group is created
     template.hasResourceProperties('AWS::ElastiCache::SubnetGroup', {
-      Description: 'Subnet group for Unite Redis cluster',
-      CacheSubnetGroupName: 'unite-redis-subnet-group',
+      Description: 'Subnet group for ReasonBridge Redis cluster',
+      CacheSubnetGroupName: 'reason-bridge-redis-subnet-group',
     });
   });
 
@@ -76,7 +76,7 @@ describe('ElastiCacheStack', () => {
     // Verify parameter group is created with correct settings
     template.hasResourceProperties('AWS::ElastiCache::ParameterGroup', {
       CacheParameterGroupFamily: 'redis7',
-      Description: 'Parameter group for Unite Redis cluster',
+      Description: 'Parameter group for ReasonBridge Redis cluster',
       Properties: {
         'maxmemory-policy': 'allkeys-lru',
         timeout: '300',
@@ -129,7 +129,7 @@ describe('ElastiCacheStack', () => {
 
     // Verify default cluster name is used
     template.hasResourceProperties('AWS::ElastiCache::ReplicationGroup', {
-      ReplicationGroupId: 'unite-discord-redis',
+      ReplicationGroupId: 'reason-bridge-redis',
     });
   });
 
