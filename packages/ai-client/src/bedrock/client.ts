@@ -19,8 +19,8 @@ import type {
   CompletionRequest,
   CompletionResponse,
   StopReason,
-} from '../types/index';
-import { AIClientError } from '../types/index';
+} from '../types/index.js';
+import { AIClientError } from '../types/index.js';
 
 /**
  * Bedrock-specific configuration options.
