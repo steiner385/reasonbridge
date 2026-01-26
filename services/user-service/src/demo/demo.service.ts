@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { DemoDiscussionDto, DemoDiscussionsResponseDto, ViewsSpectrumDto } from './dto/demo-discussion.dto.js';
+import {
+  DemoDiscussionDto,
+  DemoDiscussionsResponseDto,
+  ViewsSpectrumDto,
+} from './dto/demo-discussion.dto.js';
 
 /**
  * Service for managing demo discussions displayed on the landing page
@@ -24,7 +28,9 @@ export class DemoService {
     limit: number = 5,
     sessionId?: string,
   ): Promise<DemoDiscussionsResponseDto> {
-    this.logger.log(`Fetching ${limit} demo discussions${sessionId ? ` for session ${sessionId}` : ''}`);
+    this.logger.log(
+      `Fetching ${limit} demo discussions${sessionId ? ` for session ${sessionId}` : ''}`,
+    );
 
     // Track visitor session if provided
     if (sessionId) {
@@ -162,9 +168,7 @@ export class DemoService {
     ];
 
     // Filter discussions with high common ground score (>0.65)
-    const highQualityDiscussions = curatedDiscussions.filter(
-      (d) => d.commonGroundScore > 0.65,
-    );
+    const highQualityDiscussions = curatedDiscussions.filter((d) => d.commonGroundScore > 0.65);
 
     // Return requested number of discussions
     return highQualityDiscussions.slice(0, limit);
@@ -188,24 +192,15 @@ export class DemoService {
     }
 
     // Calculate average common ground score
-    const totalScore = discussions.reduce(
-      (sum, d) => sum + d.commonGroundScore,
-      0,
-    );
+    const totalScore = discussions.reduce((sum, d) => sum + d.commonGroundScore, 0);
     const averageCommonGroundScore = totalScore / discussions.length;
 
     // Calculate total participants across discussions
-    const totalParticipants = discussions.reduce(
-      (sum, d) => sum + d.participantCount,
-      0,
-    );
+    const totalParticipants = discussions.reduce((sum, d) => sum + d.participantCount, 0);
 
     // Platform satisfaction derived from common ground scores
     // High common ground correlates with user satisfaction
-    const platformSatisfaction = Math.min(
-      averageCommonGroundScore * 1.2,
-      0.95,
-    );
+    const platformSatisfaction = Math.min(averageCommonGroundScore * 1.2, 0.95);
 
     return {
       averageCommonGroundScore: Math.round(averageCommonGroundScore * 100) / 100,
@@ -222,23 +217,22 @@ export class DemoService {
     try {
       // Check if visitor session exists
       const existingSession = await this.prisma.visitorSession.findUnique({
-        where: { id: sessionId },
+        where: { sessionId },
       });
 
       if (existingSession) {
         // Update last viewed timestamp
         await this.prisma.visitorSession.update({
-          where: { id: sessionId },
+          where: { sessionId },
           data: {
-            lastViewedAt: new Date(),
+            lastActivityAt: new Date(),
           },
         });
       } else {
         // Create new visitor session
         await this.prisma.visitorSession.create({
           data: {
-            id: sessionId,
-            lastViewedAt: new Date(),
+            sessionId,
             viewedDemoDiscussionIds: [],
             interactionTimestamps: [],
           },

@@ -1,5 +1,5 @@
 import { Injectable, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@unite-discord/db-models';
+import { PrismaClient } from '@reason-bridge/db-models';
 
 /**
  * Prisma service that provides database access throughout the discussion service.

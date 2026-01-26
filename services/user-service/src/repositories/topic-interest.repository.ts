@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TopicInterest } from '@prisma/client';
+import type { TopicInterest } from '@prisma/client';
 
 /**
  * Topic Interest Repository
@@ -23,20 +23,24 @@ export class TopicInterestRepository {
   /**
    * Create topic interest for a user
    *
-   * @param userId - User ID
-   * @param topicId - Topic ID
-   * @param priority - Priority (1-3, where 1 is highest)
+   * @param data - Object containing userId, topicId, and priority
    * @returns Created topic interest
    */
-  async create(userId: string, topicId: string, priority: number): Promise<TopicInterest> {
+  async create(data: {
+    userId: string;
+    topicId: string;
+    priority: number;
+  }): Promise<TopicInterest> {
     try {
-      this.logger.debug(`Creating topic interest for user ${userId}, topic ${topicId}, priority ${priority}`);
+      this.logger.debug(
+        `Creating topic interest for user ${data.userId}, topic ${data.topicId}, priority ${data.priority}`,
+      );
 
       const interest = await this.prisma.topicInterest.create({
         data: {
-          userId,
-          topicId,
-          priority,
+          userId: data.userId,
+          topicId: data.topicId,
+          priority: data.priority,
         },
       });
 
@@ -55,7 +59,10 @@ export class TopicInterestRepository {
    * @param topics - Array of { topicId, priority }
    * @returns Array of created topic interests
    */
-  async createMany(userId: string, topics: Array<{ topicId: string; priority: number }>): Promise<TopicInterest[]> {
+  async createMany(
+    userId: string,
+    topics: Array<{ topicId: string; priority: number }>,
+  ): Promise<TopicInterest[]> {
     try {
       this.logger.debug(`Creating ${topics.length} topic interests for user: ${userId}`);
 
@@ -252,7 +259,9 @@ export class TopicInterestRepository {
    * @param limit - Maximum number of topics to return
    * @returns Array of { topicId, count }
    */
-  async getMostPopularTopics(limit: number = 10): Promise<Array<{ topicId: string; count: number }>> {
+  async getMostPopularTopics(
+    limit: number = 10,
+  ): Promise<Array<{ topicId: string; count: number }>> {
     try {
       const results = await this.prisma.topicInterest.groupBy({
         by: ['topicId'],
@@ -285,7 +294,10 @@ export class TopicInterestRepository {
    * @param topics - Array of { topicId, priority }
    * @returns Array of created topic interests
    */
-  async replaceAll(userId: string, topics: Array<{ topicId: string; priority: number }>): Promise<TopicInterest[]> {
+  async replaceAll(
+    userId: string,
+    topics: Array<{ topicId: string; priority: number }>,
+  ): Promise<TopicInterest[]> {
     try {
       this.logger.debug(`Replacing all topic interests for user: ${userId}`);
 

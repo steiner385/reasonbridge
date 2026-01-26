@@ -1,0 +1,363 @@
+# E2E Testing Environment
+# Complete stack with infrastructure, all backend services, and frontend
+# Mimics production deployment for realistic end-to-end testing
+#
+# Note: Explicit image names are set for all built services to enable Docker
+# layer caching across builds with different COMPOSE_PROJECT_NAME values.
+# Without explicit image names, each unique project name would rebuild all images.
+
+services:
+  # ============================================================================
+  # Infrastructure Services
+  # ============================================================================
+
+  postgres:
+    image: postgres:15-alpine
+    # Note: container_name removed to allow parallel builds with different COMPOSE_PROJECT_NAME
+    environment:
+      POSTGRES_USER: unite_test
+      POSTGRES_PASSWORD: unite_test
+      POSTGRES_DB: unite_test
+    # Host port removed to prevent CI conflicts - services communicate via Docker network
+    # For local debugging, uncomment: ports: ['5434:5432']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U unite_test -d unite_test']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  redis:
+    image: redis:7-alpine
+    # Host port removed to prevent CI conflicts - services communicate via Docker network
+    # For local debugging, uncomment: ports: ['6381:6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    mem_limit: 128m
+    networks:
+      - unite-e2e
+
+  localstack:
+    image: localstack/localstack:3.0
+    environment:
+      SERVICES: s3,sqs,sns
+      DEBUG: 0
+      DATA_DIR: ''
+    # Host port removed to prevent CI conflicts - services communicate via Docker network
+    # For local debugging, uncomment: ports: ['4568:4566']
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4566/_localstack/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    mem_limit: 512m
+    networks:
+      - unite-e2e
+
+  # ============================================================================
+  # Database Migration
+  # ============================================================================
+
+  db-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/db-migrate:latest
+    command: ['sh', '-c', 'cd packages/db-models && npx prisma migrate deploy']
+    environment:
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+    restart: 'no'
+
+  db-seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/db-seed:latest
+    command: ['sh', '-c', 'cd packages/db-models && npx tsx prisma/seed.ts']
+    environment:
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+    restart: 'no'
+
+  # ============================================================================
+  # Backend Microservices
+  # ============================================================================
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/api-gateway:latest
+    command: ['node', 'services/api-gateway/dist/main.js']
+    environment:
+      PORT: 3000
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      USER_SERVICE_URL: http://user-service:3001
+      DISCUSSION_SERVICE_URL: http://discussion-service:3007
+      AI_SERVICE_URL: http://ai-service:3002
+      MODERATION_SERVICE_URL: http://moderation-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:3004
+      FACT_CHECK_SERVICE_URL: http://fact-check-service:3006
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+      user-service:
+        condition: service_started
+      discussion-service:
+        condition: service_started
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/user-service:latest
+    command: ['node', 'services/user-service/dist/main.js']
+    environment:
+      PORT: 3001
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AWS_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      # Use mock authentication for E2E testing (no real Cognito needed)
+      AUTH_MOCK: 'true'
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      # Cognito configuration (fallback, not used when AUTH_MOCK=true)
+      COGNITO_USER_POOL_ID: us-east-1_test123
+      COGNITO_CLIENT_ID: test_client_id
+      COGNITO_REGION: us-east-1
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/ai-service:latest
+    command: ['node', 'services/ai-service/dist/main.js']
+    environment:
+      PORT: 3002
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AWS_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - '3002:3002'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  discussion-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/discussion-service:latest
+    command: ['node', 'services/discussion-service/dist/main.js']
+    environment:
+      PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3007:3007'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  moderation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/moderation-service:latest
+    command: ['node', 'services/moderation-service/dist/main.js']
+    environment:
+      PORT: 3003
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:3002
+    ports:
+      - '3003:3003'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+      ai-service:
+        condition: service_started
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/recommendation-service:latest
+    command: ['node', 'services/recommendation-service/dist/main.js']
+    environment:
+      PORT: 3004
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3004:3004'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/notification-service:latest
+    command: ['node', 'services/notification-service/dist/main.js']
+    environment:
+      PORT: 3005
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3005:3005'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  fact-check-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/fact-check-service:latest
+    command: ['node', 'services/fact-check-service/dist/main.js']
+    environment:
+      PORT: 3006
+      NODE_ENV: test
+      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:3002
+    ports:
+      - '3006:3006'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
+      ai-service:
+        condition: service_started
+    mem_limit: 256m
+    networks:
+      - unite-e2e
+
+  # ============================================================================
+  # Frontend
+  # ============================================================================
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: /api
+        VITE_API_GATEWAY_URL: /api
+        VITE_NOTIFICATION_SERVICE_URL: ''
+    image: reasonbridge-e2e/frontend:latest
+    ports:
+      - '9080:80'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:80']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      api-gateway:
+        condition: service_started
+    mem_limit: 64m
+    networks:
+      - unite-e2e
+
+networks:
+  unite-e2e:
+    driver: bridge

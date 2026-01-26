@@ -1,5 +1,5 @@
 /**
- * Shared type definitions for uniteDiscord
+ * Shared type definitions for reasonBridge
  */
 
 export * from './result.js';

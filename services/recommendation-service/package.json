@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/recommendation-service",
+  "name": "@reason-bridge/recommendation-service",
   "version": "0.1.0",
   "description": "Recommendation service for personalized content suggestions",
   "type": "module",
@@ -19,7 +19,7 @@
     "@nestjs/common": "^10.3.0",
     "@nestjs/core": "^10.3.0",
     "@nestjs/platform-fastify": "^10.3.0",
-    "@unite-discord/db-models": "workspace:*",
+    "@reason-bridge/db-models": "workspace:*",
     "fastify": "^4.25.2",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1"

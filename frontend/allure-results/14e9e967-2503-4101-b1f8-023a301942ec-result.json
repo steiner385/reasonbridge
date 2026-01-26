@@ -1,0 +1,248 @@
+{
+  "uuid": "14e9e967-2503-4101-b1f8-023a301942ec",
+  "name": "Page uses warm white background (#FAFBFC)",
+  "historyId": "d4080c4d56113803976fdc68e74cb0c4:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "Error: expect(locator).toHaveCSS(expected) failed\n\nLocator:  locator('body')\nExpected: \"rgb(250, 251, 252)\"\nReceived: \"rgb(250, 250, 250)\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCSS\" with timeout 5000ms\n  - waiting for locator('body')\n    9 × locator resolved to <body>…</body>\n      - unexpected value \"rgb(250, 250, 250)\"\n",
+    "trace": "Error: expect(locator).toHaveCSS(expected) failed\n\nLocator:  locator('body')\nExpected: \"rgb(250, 251, 252)\"\nReceived: \"rgb(250, 250, 250)\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCSS\" with timeout 5000ms\n  - waiting for locator('body')\n    9 × locator resolved to <body>…</body>\n      - unexpected value \"rgb(250, 250, 250)\"\n\n    at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-colors.spec.ts:42:24"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769400887460,
+              "uuid": "5ab96256-b94c-491b-ae56-b6a6bfaaefab",
+              "stop": 1769400889743
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769400887457,
+          "uuid": "9dd08bd2-34b9-47c6-b18d-d249e4fa1762",
+          "stop": 1769400889743
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769400889746,
+              "uuid": "b3f0c74a-e8b6-428e-81d3-1799d63261a5",
+              "stop": 1769400889816
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769400889744,
+          "uuid": "578c6a34-8aa7-44f6-83c7-e80d934a37cb",
+          "stop": 1769400889816
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769400889817,
+              "uuid": "839f5c58-3a98-4e5a-b854-a612aa4a3c21",
+              "stop": 1769400890732
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769400889817,
+          "uuid": "8c0f6a4d-67d8-44f0-b31b-5cdfa54c4d63",
+          "stop": 1769400890732
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769400887443,
+      "uuid": "490f4e2b-e378-4532-ad46-06562042afe6",
+      "stop": 1769400890732
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400890734,
+      "name": "Navigate to \"/\"",
+      "uuid": "e0025966-b63e-4f16-9688-feb0561f9a4c",
+      "stop": 1769400891489
+    },
+    {
+      "status": "failed",
+      "statusDetails": {
+        "message": "Error: expect(locator).toHaveCSS(expected) failed\n\nLocator:  locator('body')\nExpected: \"rgb(250, 251, 252)\"\nReceived: \"rgb(250, 250, 250)\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCSS\" with timeout 5000ms\n  - waiting for locator('body')\n    9 × locator resolved to <body>…</body>\n      - unexpected value \"rgb(250, 250, 250)\"\n",
+        "trace": "Error: expect(locator).toHaveCSS(expected) failed\n\nLocator:  locator('body')\nExpected: \"rgb(250, 251, 252)\"\nReceived: \"rgb(250, 250, 250)\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCSS\" with timeout 5000ms\n  - waiting for locator('body')\n    9 × locator resolved to <body>…</body>\n      - unexpected value \"rgb(250, 250, 250)\"\n\n    at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-colors.spec.ts:42:24"
+      },
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400891508,
+      "name": "Expect \"toHaveCSS\" locator('body')",
+      "uuid": "85ee8651-a8f0-4142-a570-585542d1fa94",
+      "stop": 1769400896515
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "7ab4b2ad-7c4f-4fea-b17a-33ae6228985d-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769400896811,
+      "name": "screenshot",
+      "stop": 1769400896811
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "56315020-4361-4731-93e1-a43182657fc6-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769400896811,
+      "name": "video",
+      "stop": 1769400896811
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "708ce7e9-80a2-4327-b39f-6b4172fec6b5-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769400896811,
+      "name": "error-context",
+      "stop": 1769400896811
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769400896541,
+          "uuid": "2489fccd-066e-4da2-a977-f688e849c64e",
+          "stop": 1769400896541
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769400896555,
+              "uuid": "634378b7-60b8-40f3-b5d3-25da78264e88",
+              "stop": 1769400896786
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769400896542,
+          "uuid": "7c2ee196-bf53-4bb4-8d73-06d54172a978",
+          "stop": 1769400896787
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769400896516,
+      "uuid": "9b4bf271-10d6-4e77-8c38-e372bf3be13f",
+      "stop": 1769400896792
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-colors.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-colors.spec.ts > Brand Identity - Color Palette"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1654388-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-colors.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Color Palette" }
+  ],
+  "links": [],
+  "start": 1769400887442,
+  "testCaseId": "d4080c4d56113803976fdc68e74cb0c4",
+  "fullName": "visual/brand-colors.spec.ts:38:3",
+  "titlePath": ["visual", "brand-colors.spec.ts", "Brand Identity - Color Palette"],
+  "stop": 1769400894486
+}

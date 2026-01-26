@@ -1,0 +1,181 @@
+{
+  "uuid": "1ebdfde6-8a52-490c-a1dd-7fae7e092a36",
+  "name": "should support clicking view proposition button if callback provided",
+  "historyId": "ae1c361c2dead8c1077655612d65c089:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245053701,
+              "uuid": "c2293fe2-d1b1-4586-bb95-22ad4e822e77",
+              "stop": 1769245053702
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245053700,
+          "uuid": "265adcee-0b77-4606-9e25-df64bbf9644e",
+          "stop": 1769245053702
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245053703,
+              "uuid": "66ae2376-16db-42ef-926b-6b217b72bb94",
+              "stop": 1769245053721
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245053702,
+          "uuid": "866c2196-94a3-49e8-b8cf-d3d28b494c08",
+          "stop": 1769245053721
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245053697,
+      "uuid": "cb2c614c-38da-48e5-9b6c-ce3e7f266494",
+      "stop": 1769245053721
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245053722,
+      "name": "Navigate to \"/topics\"",
+      "uuid": "f5910564-c857-4611-8eb4-095677f8b316",
+      "stop": 1769245053746
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245053747,
+      "name": "Wait for selector locator('text=Loading topics...')",
+      "uuid": "86e80e3d-4a0c-4500-b005-d09f25595743",
+      "stop": 1769245055071
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245055071,
+      "name": "Query count locator('a[href^=\"/topics/\"]').first()",
+      "uuid": "6fb139b6-f5fb-4268-a2cd-673f226e6092",
+      "stop": 1769245055073
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245055073,
+          "uuid": "e1b0669f-1591-4648-be48-8e2322e77fa3",
+          "stop": 1769245055073
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245055098,
+              "uuid": "ed89cca4-1baf-4f68-ac5a-87395c9f0135",
+              "stop": 1769245055174
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245055073,
+          "uuid": "65248851-c59f-4454-ac7b-2643a0bb9de8",
+          "stop": 1769245055174
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245055073,
+      "uuid": "9cc3bef0-024c-40e6-a1be-ad444d51e38b",
+      "stop": 1769245055177
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "view-bridging-suggestions.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > view-bridging-suggestions.spec.ts > View Bridging Suggestions"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "view-bridging-suggestions.spec.ts" },
+    { "name": "subSuite", "value": "View Bridging Suggestions" }
+  ],
+  "links": [],
+  "start": 1769245053697,
+  "testCaseId": "ae1c361c2dead8c1077655612d65c089",
+  "fullName": "view-bridging-suggestions.spec.ts:437:3",
+  "titlePath": ["view-bridging-suggestions.spec.ts", "View Bridging Suggestions"],
+  "stop": 1769245055171
+}

@@ -7,7 +7,7 @@ import {
   DismissFeedbackDto,
   FeedbackSensitivity,
 } from './dto/index.js';
-import { Prisma } from '@unite-discord/db-models';
+import { Prisma } from '@reason-bridge/db-models';
 
 /**
  * Service for handling AI-generated feedback on responses

@@ -4,7 +4,7 @@ import { NotificationGateway } from '../gateways/notification.gateway.js';
 import type {
   ModerationActionRequestedEvent,
   UserTrustUpdatedEvent,
-} from '@unite-discord/event-schemas/moderation';
+} from '@reason-bridge/event-schemas/moderation';
 
 /**
  * Handles moderation service events and creates notifications
@@ -44,13 +44,12 @@ export class ModerationNotificationHandler {
         });
 
         if (!response) {
-          this.logger.warn(
-            `Response ${event.payload.targetId} not found, skipping notification`,
-          );
+          this.logger.warn(`Response ${event.payload.targetId} not found, skipping notification`);
           return;
         }
 
-        targetTitle = response.content.substring(0, 100) + (response.content.length > 100 ? '...' : '');
+        targetTitle =
+          response.content.substring(0, 100) + (response.content.length > 100 ? '...' : '');
         affectedUserId = response.authorId;
       } else if (event.payload.targetType === 'user') {
         const user = await this.prisma.user.findUnique({
@@ -63,7 +62,7 @@ export class ModerationNotificationHandler {
           return;
         }
 
-        targetTitle = user.displayName;
+        targetTitle = user.displayName ?? `User ${user.id}`;
         affectedUserId = user.id;
       } else if (event.payload.targetType === 'topic') {
         const topic = await this.prisma.discussionTopic.findUnique({
@@ -82,7 +81,10 @@ export class ModerationNotificationHandler {
       }
 
       // Build notification content
-      const title = this.buildModerationActionTitle(event.payload.actionType, event.payload.severity);
+      const title = this.buildModerationActionTitle(
+        event.payload.actionType,
+        event.payload.severity,
+      );
       const body = this.buildModerationActionBody(
         event.payload.actionType,
         event.payload.severity,
@@ -192,10 +194,7 @@ export class ModerationNotificationHandler {
   /**
    * Build notification title for moderation action
    */
-  private buildModerationActionTitle(
-    actionType: string,
-    severity: string,
-  ): string {
+  private buildModerationActionTitle(actionType: string, severity: string): string {
     const actionLabel = actionType.charAt(0).toUpperCase() + actionType.slice(1);
     const severityLabel = severity === 'consequential' ? 'Consequential' : 'Educational';
     return `${severityLabel} Moderation: ${actionLabel}`;
@@ -243,11 +242,7 @@ export class ModerationNotificationHandler {
   /**
    * Build notification body for trust update
    */
-  private buildTrustUpdateBody(
-    previousScores: any,
-    newScores: any,
-    reason: string,
-  ): string {
+  private buildTrustUpdateBody(previousScores: any, newScores: any, reason: string): string {
     const changes = {
       ability: newScores.ability - previousScores.ability,
       benevolence: newScores.benevolence - previousScores.benevolence,
@@ -296,9 +291,7 @@ export class ModerationNotificationHandler {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
     // Log notification details (placeholder until Notification model exists in schema)
-    this.logger.log(
-      `Would create ${recipientIds.length} notification(s) of type "${type}"`,
-    );
+    this.logger.log(`Would create ${recipientIds.length} notification(s) of type "${type}"`);
     this.logger.debug(
       `Notification details: title="${title}", body="${body}", actionUrl="${actionUrl}"`,
     );

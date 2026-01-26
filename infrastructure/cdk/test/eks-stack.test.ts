@@ -148,7 +148,7 @@ describe('EksStack', () => {
     // Verify default cluster name is used
     template.hasResourceProperties('Custom::AWSCDK-EKS-Cluster', {
       Config: {
-        name: 'unite-discord-cluster',
+        name: 'reason-bridge-cluster',
       },
     });
   });

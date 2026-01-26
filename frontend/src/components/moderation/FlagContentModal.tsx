@@ -12,6 +12,7 @@ import Input from '../ui/Input';
 import type { FlagCategory } from '../../types/moderation';
 import { FLAG_CATEGORIES } from '../../types/moderation';
 import { useFlagContent } from '../../lib/useFlagContent';
+import { useShowNotification } from '../../hooks/useNotification';
 
 export interface FlagContentModalProps {
   /**
@@ -54,6 +55,7 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const { flagContent, isLoading, isSuccess, isError, error } = useFlagContent();
+  const notify = useShowNotification();
 
   // Reset form when modal opens
   useEffect(() => {
@@ -69,10 +71,22 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
   // Close modal and call onSuccess when flag is submitted successfully
   useEffect(() => {
     if (isSuccess) {
+      notify.success(
+        'Report submitted',
+        'Thank you! Our moderation team will review your report.',
+        4000,
+      );
       onSuccess?.();
       onClose();
     }
-  }, [isSuccess, onClose, onSuccess]);
+  }, [isSuccess, onClose, onSuccess, notify]);
+
+  // Show error notification when submission fails
+  useEffect(() => {
+    if (isError && error) {
+      notify.error('Failed to submit report', error);
+    }
+  }, [isError, error, notify]);
 
   const validateForm = (): boolean => {
     if (!selectedCategory) {

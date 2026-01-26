@@ -12,11 +12,11 @@ import { Logger } from '@nestjs/common';
 import type {
   CommonGroundGeneratedEvent,
   CommonGroundUpdatedEvent,
-} from '@unite-discord/event-schemas/ai';
+} from '@reason-bridge/event-schemas/ai';
 import type {
   ModerationActionRequestedEvent,
   UserTrustUpdatedEvent,
-} from '@unite-discord/event-schemas/moderation';
+} from '@reason-bridge/event-schemas/moderation';
 
 /**
  * WebSocket Gateway for real-time notifications
@@ -86,7 +86,9 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
     const room = `topic:${topicId}:common-ground`;
 
     await client.leave(room);
-    this.logger.log(`Client ${client.id} unsubscribed from common ground updates for topic ${topicId}`);
+    this.logger.log(
+      `Client ${client.id} unsubscribed from common ground updates for topic ${topicId}`,
+    );
 
     client.emit('unsubscription:confirmed', {
       type: 'common-ground',

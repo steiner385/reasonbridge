@@ -1,15 +1,15 @@
-# Feature Specification: uniteDiscord - Rational Discussion Platform
+# Feature Specification: reasonBridge - Rational Discussion Platform
 
 **Feature Branch**: `001-rational-discussion-platform`
 **Created**: 2026-01-17
 **Status**: Draft
-**Input**: User description: "Build a web-based public discord application called 'uniteDiscord' - a platform for rational discussion across diverse perspectives with core tenets around truth, fact-checking, respect, anti-bot/propaganda measures, finding common ground, and forward problem-solving."
+**Input**: User description: "Build a web-based public discord application called 'reasonBridge' - a platform for rational discussion across diverse perspectives with core tenets around truth, fact-checking, respect, anti-bot/propaganda measures, finding common ground, and forward problem-solving."
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Join and Participate in a Discussion Topic (Priority: P1)
 
-A user discovers uniteDiscord and wants to engage in a conversation about a topic they care about. They create an account, browse available discussion topics, and join a conversation where they can share their perspective while seeing others' viewpoints organized to highlight areas of agreement and disagreement.
+A user discovers reasonBridge and wants to engage in a conversation about a topic they care about. They create an account, browse available discussion topics, and join a conversation where they can share their perspective while seeing others' viewpoints organized to highlight areas of agreement and disagreement.
 
 **Why this priority**: This is the core value proposition - without the ability to join and participate in discussions, the platform has no purpose. This story establishes the fundamental user flow.
 
@@ -17,7 +17,7 @@ A user discovers uniteDiscord and wants to engage in a conversation about a topi
 
 **Acceptance Scenarios**:
 
-1. **Given** a visitor on the homepage, **When** they click "Join uniteDiscord", **Then** they can create an account with email or social login and are guided to select topics of interest
+1. **Given** a visitor on the homepage, **When** they click "Join reasonBridge", **Then** they can create an account with email or social login and are guided to select topics of interest
 2. **Given** an authenticated user, **When** they browse topics, **Then** they see discussions organized by category with clear indicators of activity level and participant diversity
 3. **Given** a user viewing a discussion, **When** they submit a response, **Then** their contribution is added to the conversation and they can see how it relates to existing viewpoints
 4. **Given** a user reading responses, **When** they view the discussion thread, **Then** areas of agreement and disagreement between participants are visually distinguished

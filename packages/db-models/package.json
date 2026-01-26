@@ -1,7 +1,7 @@
 {
-  "name": "@unite-discord/db-models",
+  "name": "@reason-bridge/db-models",
   "version": "0.1.0",
-  "description": "Prisma database models and client for uniteDiscord",
+  "description": "Prisma database models and client for reasonBridge",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,6 +24,9 @@
     "clean": "rm -rf dist .tsbuildinfo",
     "typecheck": "tsc --noEmit",
     "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -36,14 +39,16 @@
   },
   "devDependencies": {
     "prisma": "6.3.1",
-    "tsx": "^4.7.0",
-    "typescript": "5.7.3"
+    "tsx": "^4.19.2",
+    "typescript": "5.7.3",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
   },
   "peerDependencies": {
-    "@unite-discord/common": "workspace:*"
+    "@reason-bridge/common": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@unite-discord/common": {
+    "@reason-bridge/common": {
       "optional": true
     }
   },

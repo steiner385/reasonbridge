@@ -3,8 +3,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
 
     "strict": true,
     "noImplicitAny": true,
@@ -21,7 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
 
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

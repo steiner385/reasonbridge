@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: uniteDiscord Discussion Service API
+  title: reasonBridge Discussion Service API
   description: Topics, propositions, responses, alignments, and common ground analysis
   version: 1.0.0
   contact:
-    name: uniteDiscord Team
+    name: reasonBridge Team
 
 servers:
   - url: /api/v1/discussions

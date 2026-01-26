@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: uniteDiscord AI Service API
+  title: reasonBridge AI Service API
   description: AI-powered feedback, analysis, and content evaluation
   version: 1.0.0
   contact:
-    name: uniteDiscord Team
+    name: reasonBridge Team
 
 servers:
   - url: /api/v1/ai

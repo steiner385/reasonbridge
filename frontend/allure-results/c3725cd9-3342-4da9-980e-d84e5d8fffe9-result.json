@@ -1,0 +1,145 @@
+{
+  "uuid": "c3725cd9-3342-4da9-980e-d84e5d8fffe9",
+  "name": "should accept valid display name (3-50 characters)",
+  "historyId": "55705cbdb26b14201db253481f425ad5:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245016681,
+              "uuid": "05259b60-cbfe-4559-810d-1a1472b980eb",
+              "stop": 1769245016683
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245016680,
+          "uuid": "7706256e-4ab0-4c9b-8519-f8189e770db2",
+          "stop": 1769245016684
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245016685,
+              "uuid": "7b30e288-60fd-490f-a7b8-4871f01c6e1e",
+              "stop": 1769245016708
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245016684,
+          "uuid": "0f87b5b3-87c0-4aca-a27e-2c0efab00839",
+          "stop": 1769245016708
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245016676,
+      "uuid": "f0e5a6b6-3c47-48c5-9770-313f7913dd5c",
+      "stop": 1769245016708
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245016709,
+          "uuid": "c7544b08-e25c-4fec-8e4b-43486a4c9593",
+          "stop": 1769245016709
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245016765,
+              "uuid": "bb939f83-ca6d-4a9d-ab9b-0e118bca62db",
+              "stop": 1769245016859
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245016709,
+          "uuid": "0b4dc6ee-822b-4b53-ba6b-ff72c705403f",
+          "stop": 1769245016859
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245016708,
+      "uuid": "27a17108-1463-4a14-9718-1c7df22458ca",
+      "stop": 1769245016863
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-edit-form.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-edit-form.spec.ts > ProfileEditForm Component"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-0" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-edit-form.spec.ts" },
+    { "name": "subSuite", "value": "ProfileEditForm Component" }
+  ],
+  "links": [],
+  "start": 1769245016676,
+  "testCaseId": "55705cbdb26b14201db253481f425ad5",
+  "fullName": "profile-edit-form.spec.ts:80:3",
+  "titlePath": ["profile-edit-form.spec.ts", "ProfileEditForm Component"],
+  "stop": 1769245016854
+}

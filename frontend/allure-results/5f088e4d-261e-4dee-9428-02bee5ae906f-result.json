@@ -1,0 +1,194 @@
+{
+  "uuid": "5f088e4d-261e-4dee-9428-02bee5ae906f",
+  "name": "should allow authenticated user to express nuanced alignment",
+  "historyId": "69590849b860100b7b07c7acffb4644f:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245014446,
+                  "uuid": "8d099a98-78da-4ebb-b223-65eb48b1fa0c",
+                  "stop": 1769245014457
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245014445,
+              "uuid": "1525d3d4-50a8-46e2-942d-7fc56523e8a6",
+              "stop": 1769245014457
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245014459,
+                  "uuid": "71625183-967e-4e04-b409-ef28f2edb890",
+                  "stop": 1769245014483
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245014458,
+              "uuid": "fd98828d-117a-4480-a67d-571caa977a35",
+              "stop": 1769245014483
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Navigate to \"/\"",
+              "start": 1769245014485,
+              "uuid": "6fbe3a3f-dc0f-4c12-a7e5-8897e17729aa",
+              "stop": 1769245014519
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245014436,
+          "uuid": "fbf9ac2f-dcca-498a-8793-05652dec6eec",
+          "stop": 1769245014519
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245014436,
+      "uuid": "3b602876-5db2-46d3-beb5-73c7dc4c46b9",
+      "stop": 1769245014519
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245014521,
+      "name": "Expect \"toBe\"",
+      "uuid": "36238ed0-74f8-4869-aaf9-cd5060a7cae8",
+      "stop": 1769245014521
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "afterEach hook",
+          "start": 1769245014522,
+          "uuid": "6e44415c-cc02-4b50-b6d8-2e135f394976",
+          "stop": 1769245014523
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245014523,
+          "uuid": "574e61e2-9ca8-46dc-a46c-c527a10b0710",
+          "stop": 1769245014523
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245014589,
+              "uuid": "a489a4fa-166c-4916-9add-168036daa146",
+              "stop": 1769245014705
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245014523,
+          "uuid": "e0f283e7-bb87-498f-aa82-9aadd7752bca",
+          "stop": 1769245014705
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245014522,
+      "uuid": "609b5dd7-0128-4cf2-b537-8b32b9105ee8",
+      "stop": 1769245014711
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "express-alignment-on-response.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > express-alignment-on-response.spec.ts > Express Alignment on Response"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-5" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "express-alignment-on-response.spec.ts" },
+    { "name": "subSuite", "value": "Express Alignment on Response" }
+  ],
+  "links": [],
+  "start": 1769245014436,
+  "testCaseId": "69590849b860100b7b07c7acffb4644f",
+  "fullName": "express-alignment-on-response.spec.ts:103:3",
+  "titlePath": ["express-alignment-on-response.spec.ts", "Express Alignment on Response"],
+  "stop": 1769245014696
+}

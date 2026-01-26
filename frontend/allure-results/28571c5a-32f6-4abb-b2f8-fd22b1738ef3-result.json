@@ -1,0 +1,145 @@
+{
+  "uuid": "28571c5a-32f6-4abb-b2f8-fd22b1738ef3",
+  "name": "should show empty state when no responses exist",
+  "historyId": "4dd2d840d9167c57fca24438109782ff:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245049662,
+              "uuid": "9d88b462-c4bf-49e6-9026-427c08592905",
+              "stop": 1769245049663
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245049662,
+          "uuid": "9a088efa-636c-48a9-acba-ff703ea8a1ac",
+          "stop": 1769245049664
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245049665,
+              "uuid": "76e447a7-bdb5-4552-b505-348b84b33efa",
+              "stop": 1769245049682
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245049664,
+          "uuid": "f575917f-3cfd-4531-9ee3-eabb8ec480e5",
+          "stop": 1769245049682
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245049659,
+      "uuid": "26efa5c6-73c6-42de-bb13-4be7b79ce753",
+      "stop": 1769245049682
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245049683,
+          "uuid": "2618a341-77fa-4a26-9da3-2e231554f7b9",
+          "stop": 1769245049683
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245049728,
+              "uuid": "5db2bbb0-df16-45db-a2a0-d38872a23275",
+              "stop": 1769245049803
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245049683,
+          "uuid": "50673138-cf9c-4746-8843-5461e3c562df",
+          "stop": 1769245049803
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245049683,
+      "uuid": "78768b18-e938-413b-abdc-4091acd8c9c8",
+      "stop": 1769245049807
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "threaded-response-display.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > threaded-response-display.spec.ts > ThreadedResponseDisplay Component"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-7" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "threaded-response-display.spec.ts" },
+    { "name": "subSuite", "value": "ThreadedResponseDisplay Component" }
+  ],
+  "links": [],
+  "start": 1769245049659,
+  "testCaseId": "4dd2d840d9167c57fca24438109782ff",
+  "fullName": "threaded-response-display.spec.ts:55:3",
+  "titlePath": ["threaded-response-display.spec.ts", "ThreadedResponseDisplay Component"],
+  "stop": 1769245049800
+}

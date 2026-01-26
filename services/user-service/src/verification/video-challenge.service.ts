@@ -54,29 +54,23 @@ export class VideoVerificationService {
     this.region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
     this.videoBucket =
       this.configService.get<string>('S3_VIDEO_VERIFICATION_BUCKET') ||
-      'unite-discord-video-verifications';
+      'reason-bridge-video-verifications';
 
     // Video constraints
-    this.videoMaxFileSize = this.configService.get<number>(
-      'VIDEO_MAX_FILE_SIZE',
-    ) || 100 * 1024 * 1024; // 100MB default
-    this.videoMinDurationSeconds = this.configService.get<number>(
-      'VIDEO_MIN_DURATION_SECONDS',
-    ) || 3;
-    this.videoMaxDurationSeconds = this.configService.get<number>(
-      'VIDEO_MAX_DURATION_SECONDS',
-    ) || 30;
-    this.videoUploadUrlExpiresIn = this.configService.get<number>(
-      'VIDEO_UPLOAD_URL_EXPIRES_IN',
-    ) || 3600; // 1 hour
+    this.videoMaxFileSize =
+      this.configService.get<number>('VIDEO_MAX_FILE_SIZE') || 100 * 1024 * 1024; // 100MB default
+    this.videoMinDurationSeconds =
+      this.configService.get<number>('VIDEO_MIN_DURATION_SECONDS') || 3;
+    this.videoMaxDurationSeconds =
+      this.configService.get<number>('VIDEO_MAX_DURATION_SECONDS') || 30;
+    this.videoUploadUrlExpiresIn =
+      this.configService.get<number>('VIDEO_UPLOAD_URL_EXPIRES_IN') || 3600; // 1 hour
 
     this.s3Client = new S3Client({
       region: this.region,
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>(
-          'AWS_SECRET_ACCESS_KEY',
-        ) || '',
+        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
       },
     });
 
@@ -112,8 +106,7 @@ export class VideoVerificationService {
    * User must speak a randomly selected phrase during video
    */
   private generatePhraseChallenge(): VideoChallenge {
-    const randomPhrase =
-      RANDOM_PHRASES[Math.floor(Math.random() * RANDOM_PHRASES.length)];
+    const randomPhrase = RANDOM_PHRASES[Math.floor(Math.random() * RANDOM_PHRASES.length)];
 
     return {
       type: 'RANDOM_PHRASE',
@@ -127,8 +120,7 @@ export class VideoVerificationService {
    * User must perform a randomly selected gesture during video
    */
   private generateGestureChallenge(): VideoChallenge {
-    const randomGesture =
-      RANDOM_GESTURES[Math.floor(Math.random() * RANDOM_GESTURES.length)];
+    const randomGesture = RANDOM_GESTURES[Math.floor(Math.random() * RANDOM_GESTURES.length)];
 
     return {
       type: 'RANDOM_GESTURE',
@@ -197,11 +189,8 @@ export class VideoVerificationService {
 
       return url;
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.logger.error(
-        `Failed to generate video upload URL: ${errorMessage}`,
-      );
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to generate video upload URL: ${errorMessage}`);
       throw new BadRequestException('Failed to generate video upload URL');
     }
   }

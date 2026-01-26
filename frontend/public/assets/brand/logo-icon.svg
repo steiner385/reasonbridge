@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ReasonBridge Logo - Overlapping Circles -->
+  <!-- Represents two perspectives finding common ground -->
+
+  <defs>
+    <!-- Clip path for the overlap region -->
+    <clipPath id="leftCircleClip">
+      <circle cx="192" cy="256" r="160"/>
+    </clipPath>
+    <clipPath id="rightCircleClip">
+      <circle cx="320" cy="256" r="160"/>
+    </clipPath>
+  </defs>
+
+  <!-- Left circle - Teal -->
+  <circle cx="192" cy="256" r="160" fill="#2A9D8F"/>
+
+  <!-- Right circle - Soft Blue -->
+  <circle cx="320" cy="256" r="160" fill="#6B9AC4"/>
+
+  <!-- Overlap region - Light Sky (drawn on top) -->
+  <!-- This is the intersection of both circles -->
+  <g clip-path="url(#leftCircleClip)">
+    <circle cx="320" cy="256" r="160" fill="#A8DADC"/>
+  </g>
+</svg>

@@ -1,0 +1,194 @@
+{
+  "uuid": "6482c4c8-144d-499e-bb82-9bd9c5b5f4c6",
+  "name": "should display loading state before content",
+  "historyId": "facca8151a4c30aec07cee07f0f867d9:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245007296,
+                  "uuid": "cbb3079e-8cc1-4693-a858-3bd37c0257a9",
+                  "stop": 1769245007298
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245007296,
+              "uuid": "47bd83d8-d043-4b9e-a053-82eff6ffc9e5",
+              "stop": 1769245007299
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245007300,
+                  "uuid": "83aa9f20-ee46-4d59-b356-114f997f2fcd",
+                  "stop": 1769245007329
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245007299,
+              "uuid": "4f611659-557b-44a9-8f9a-65e043709699",
+              "stop": 1769245007329
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245007289,
+          "uuid": "00540077-920d-4338-8964-8a6bbb7b378f",
+          "stop": 1769245007329
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245007288,
+      "uuid": "2e44cf45-09cc-44ac-952a-81b1ac811069",
+      "stop": 1769245007329
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245007330,
+      "name": "Navigate to \"/verification\"",
+      "uuid": "18001ca1-a721-47c3-b291-63865be4b139",
+      "stop": 1769245007357
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245007358,
+      "name": "Expect \"toBeLessThan\"",
+      "uuid": "cb1c9e09-6190-42c7-a064-b76073dd72cb",
+      "stop": 1769245007358
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245007359,
+      "name": "Expect \"toBeVisible\" locator('h1, h2').first()",
+      "uuid": "d61ad7dd-9ca8-4386-8dfe-3a709cb27fb2",
+      "stop": 1769245007390
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245007391,
+          "uuid": "2bb42941-638c-412e-9a35-47679a5ede98",
+          "stop": 1769245007391
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245007431,
+              "uuid": "be485ca6-c510-4f4e-a280-8442b866d363",
+              "stop": 1769245007496
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245007391,
+          "uuid": "652bbafe-332c-4b14-97df-acff46b91121",
+          "stop": 1769245007496
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245007391,
+      "uuid": "807612a4-306f-4bba-b0b0-8309d820f99c",
+      "stop": 1769245007499
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "complete-verification-flow.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > complete-verification-flow.spec.ts > Complete Verification Flow"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-3" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "complete-verification-flow.spec.ts" },
+    { "name": "subSuite", "value": "Complete Verification Flow" }
+  ],
+  "links": [],
+  "start": 1769245007288,
+  "testCaseId": "facca8151a4c30aec07cee07f0f867d9",
+  "fullName": "complete-verification-flow.spec.ts:70:3",
+  "titlePath": ["complete-verification-flow.spec.ts", "Complete Verification Flow"],
+  "stop": 1769245007488
+}

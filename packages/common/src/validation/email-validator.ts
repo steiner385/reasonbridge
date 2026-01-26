@@ -4,7 +4,8 @@
  */
 
 // RFC 5322 compliant email regex (simplified but robust version)
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // Common disposable email domains to block
 const DISPOSABLE_DOMAINS = new Set([
@@ -34,7 +35,7 @@ export function validateEmail(
   options: {
     allowDisposable?: boolean;
     requireDomain?: string[];
-  } = {}
+  } = {},
 ): EmailValidationResult {
   if (!email) {
     return {
@@ -63,6 +64,13 @@ export function validateEmail(
 
   // Extract domain
   const domain = lowercaseEmail.split('@')[1];
+  if (!domain) {
+    errors.push('Email must contain a domain');
+    return {
+      isValid: false,
+      errors,
+    };
+  }
 
   // Check for disposable email domains
   if (!options.allowDisposable && DISPOSABLE_DOMAINS.has(domain)) {
@@ -71,7 +79,9 @@ export function validateEmail(
 
   // Require specific domain(s)
   if (options.requireDomain && options.requireDomain.length > 0) {
-    const domainMatches = options.requireDomain.some((reqDomain) => domain === reqDomain.toLowerCase());
+    const domainMatches = options.requireDomain.some(
+      (reqDomain) => domain === reqDomain.toLowerCase(),
+    );
     if (!domainMatches) {
       errors.push(`Email must be from one of these domains: ${options.requireDomain.join(', ')}`);
     }
@@ -84,17 +94,24 @@ export function validateEmail(
 
   // Check for leading/trailing dots in local part
   const localPart = lowercaseEmail.split('@')[0];
-  if (localPart.startsWith('.') || localPart.endsWith('.')) {
+  if (!localPart) {
+    errors.push('Email must contain a local part');
+  } else if (localPart.startsWith('.') || localPart.endsWith('.')) {
     errors.push('Email local part cannot start or end with a dot');
   }
 
   const isValid = errors.length === 0;
 
-  return {
-    isValid,
-    errors,
-    normalizedEmail: isValid ? lowercaseEmail : undefined,
-  };
+  return isValid
+    ? {
+        isValid,
+        errors,
+        normalizedEmail: lowercaseEmail,
+      }
+    : {
+        isValid,
+        errors,
+      };
 }
 
 /**
@@ -123,7 +140,7 @@ export function normalizeEmail(email: string): string | null {
  */
 export function isDisposableEmail(email: string): boolean {
   const domain = email.toLowerCase().split('@')[1];
-  return DISPOSABLE_DOMAINS.has(domain);
+  return domain ? DISPOSABLE_DOMAINS.has(domain) : false;
 }
 
 /**
@@ -135,7 +152,7 @@ export function getEmailDomain(email: string): string | null {
   if (!EMAIL_REGEX.test(email)) {
     return null;
   }
-  return email.toLowerCase().split('@')[1];
+  return email.toLowerCase().split('@')[1] ?? null;
 }
 
 /**

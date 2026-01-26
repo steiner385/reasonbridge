@@ -1,7 +1,7 @@
 {
-  "name": "unite-discord",
+  "name": "reason-bridge",
   "version": "0.1.0",
-  "description": "uniteDiscord - Rational Discussion Platform",
+  "description": "reasonBridge - Rational Discussion Platform",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.0",
@@ -22,21 +22,21 @@
     "validate:deps": "bash .husky/pre-commit-dependencies-audit",
     "validate:file-size": "bash .husky/pre-commit-file-size",
     "// === ISSUE PRIORITIZATION ===": "",
-    "next-issue": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --claim --verbose",
-    "next-issue:preview": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --verbose",
-    "next-issue:top5": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r uniteDiscord --top 5",
+    "next-issue": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r reasonBridge --claim --verbose",
+    "next-issue:preview": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r reasonBridge --verbose",
+    "next-issue:top5": "node ../PriorityCalculator/dist/cli.js -o steiner385 -r reasonBridge --top 5",
     "implement-issue": "node scripts/implement-next-issue.js",
     "// === WORKSPACE COMMANDS ===": "",
     "build": "echo 'Build requires pnpm workspaces - skipping in npm context' && exit 0",
     "test": "pnpm -r test",
-    "test:unit": "vitest run --passWithNoTests",
+    "test:unit": "bash bin/test-unit.sh",
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage --passWithNoTests",
     "test:integration": "vitest run --config vitest.integration.config.ts --passWithNoTests",
     "test:e2e": "pnpm --filter frontend test:e2e",
     "test:contract": "vitest run --config vitest.contract.config.ts --passWithNoTests",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint . && pnpm --filter @reason-bridge/frontend lint",
+    "lint:fix": "eslint . --fix && pnpm --filter @reason-bridge/frontend lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "clean": "pnpm -r clean",
@@ -62,7 +62,6 @@
     "@vitest/coverage-v8": "^2.1.0",
     "allure-commandline": "^2.27.0",
     "allure-playwright": "^3.0.0",
-    "allure-vitest": "^3.4.5",
     "eslint": "8.57.1",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-airbnb-base": "15.0.0",
@@ -88,5 +87,10 @@
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "@nestjs/platform-fastify@<11.1.10": ">=11.1.11"
+    }
   }
 }

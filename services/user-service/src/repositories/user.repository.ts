@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, AuthMethod, AccountStatus, Prisma } from '@prisma/client';
+import type { User, Prisma } from '@prisma/client';
+import { AuthMethod, AccountStatus } from '@prisma/client';
 
 /**
  * User Repository

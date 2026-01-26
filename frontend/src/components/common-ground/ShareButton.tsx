@@ -65,15 +65,12 @@ const ShareButton: React.FC<ShareButtonProps> = ({
         leftIcon={showIcon ? shareIcon : undefined}
         className={className}
         aria-label="Share common ground analysis"
+        data-testid="share-button"
       >
         {label}
       </Button>
 
-      <ShareModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        analysis={analysis}
-      />
+      <ShareModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} analysis={analysis} />
     </>
   );
 };

@@ -61,6 +61,7 @@ ALLOWED_FILES=(
   "^package.*\\.yaml$"          # package.yaml
   "^tsconfig.*\\.json$"         # TypeScript configs
   "^vite.*\\.config\\..*$"      # Vite configs
+  "^vitest\\.workspace\\.ts$"   # Vitest workspace config
   "^jest.*\\.config\\..*$"      # Jest configs
   "^webpack.*\\.config\\..*$"   # Webpack configs
   "^playwright.*\\.config\\..*$" # Playwright configs
@@ -68,16 +69,21 @@ ALLOWED_FILES=(
   "^eslint.*\\.config\\..*$"    # ESLint configs
   "^\\.eslintrc.*$"             # ESLint rc files
   "^docker-compose.*\\.yml$"    # Docker compose
-  "^Dockerfile$"                # Dockerfile
+  "^Dockerfile.*$"              # Dockerfile and variants (Dockerfile.frontend, Dockerfile.service, etc.)
   "^docker-compose$"            # docker-compose executable
   "^\\.editorconfig$"           # EditorConfig
   "^Makefile$"                  # Makefile
   "^turbo\\.json$"              # Turbo config
   "^nx\\.json$"                 # NX config
   "^pnpm-workspace\\.yaml$"     # PNPM workspace
+  "^pnpm-lock\\.yaml$"          # PNPM lockfile
   "^lerna\\.json$"              # Lerna config
   "^index\\.html$"              # Vite HTML template entry point
   "^CLAUDE\\.md$"               # Claude Code instructions
+  "^SHARED_TASK_NOTES\\.md$"    # Shared task notes
+  "^DEBUG-E2E\\.md$"            # E2E debugging notes
+  "^Jenkinsfile$"               # Jenkins pipeline
+  "^cleanup_old_branches\\.sh$" # Branch cleanup script
 )
 
 # ============================================================================

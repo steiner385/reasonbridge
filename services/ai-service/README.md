@@ -4,7 +4,7 @@ AI service for content analysis and moderation using AWS Bedrock.
 
 ## Overview
 
-This service provides AI-powered capabilities for the uniteDiscord platform, including:
+This service provides AI-powered capabilities for the reasonBridge platform, including:
 
 - Content analysis and classification
 - Automated moderation
@@ -16,8 +16,8 @@ This service provides AI-powered capabilities for the uniteDiscord platform, inc
 - **Framework**: NestJS 10.x
 - **Runtime**: Node.js 20 LTS
 - **HTTP Server**: Fastify
-- **Database ORM**: Prisma (via @unite-discord/db-models)
-- **AI Provider**: AWS Bedrock (via @unite-discord/ai-client)
+- **Database ORM**: Prisma (via @reason-bridge/db-models)
+- **AI Provider**: AWS Bedrock (via @reason-bridge/ai-client)
 
 ## Project Structure
 

@@ -3,7 +3,14 @@
  * Handles signup, login, email verification, and OAuth flows
  */
 
-import { Injectable, Logger, ConflictException, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRepository } from '../repositories/user.repository';
@@ -16,8 +23,16 @@ import { VerificationService } from './verification.service';
 import { validatePassword, validateEmail } from '@reasonbridge/common/validation';
 import { SignupRequestDto } from './dto/signup.dto';
 import { VerifyEmailRequestDto } from './dto/verify-email.dto';
-import { ResendVerificationRequestDto, ResendVerificationResponseDto } from './dto/resend-verification.dto';
-import { InitiateOAuthRequestDto, InitiateOAuthResponseDto, OAuthProvider, OAuthCallbackQueryDto } from './dto/oauth.dto';
+import {
+  ResendVerificationRequestDto,
+  ResendVerificationResponseDto,
+} from './dto/resend-verification.dto';
+import {
+  InitiateOAuthRequestDto,
+  InitiateOAuthResponseDto,
+  OAuthProvider,
+  OAuthCallbackQueryDto,
+} from './dto/oauth.dto';
 import { LoginRequestDto } from './dto/login.dto';
 import { AuthSuccessResponseDto, VerificationEmailSentResponseDto } from './dto/auth-response.dto';
 import { UserProfileDto, OnboardingProgressDto } from '../dto/common.dto';
@@ -203,7 +218,9 @@ export class AuthService {
   /**
    * T065: Resend verification email with rate limiting (3 per hour)
    */
-  async resendVerification(dto: ResendVerificationRequestDto): Promise<ResendVerificationResponseDto> {
+  async resendVerification(
+    dto: ResendVerificationRequestDto,
+  ): Promise<ResendVerificationResponseDto> {
     this.logger.log(`Resend verification request for: ${dto.email}`);
 
     const user = await this.userRepository.findByEmail(dto.email);
@@ -296,7 +313,13 @@ export class AuthService {
     }
 
     try {
-      let userProfile: { email: string; emailVerified: boolean; name?: string };
+      let userProfile: {
+        email: string;
+        emailVerified: boolean;
+        name?: string;
+        googleId?: string;
+        appleId?: string;
+      };
 
       // Verify and get user profile from OAuth provider
       if (provider === OAuthProvider.GOOGLE) {
@@ -315,17 +338,27 @@ export class AuthService {
         // T070: Create new user
         isNewUser = true;
         user = await this.prisma.$transaction(async (tx) => {
+          // Generate synthetic cognitoSub for OAuth users
+          const cognitoSub =
+            provider === OAuthProvider.GOOGLE
+              ? `oauth:google:${userProfile.googleId}`
+              : `oauth:apple:${userProfile.appleId}`;
+
           const newUser = await this.userRepository.create({
             email: userProfile.email,
+            cognitoSub,
             displayName: userProfile.name || this.generateDisplayNameFromEmail(userProfile.email),
-            authMethod: provider === OAuthProvider.GOOGLE ? AuthMethod.GOOGLE_OAUTH : AuthMethod.APPLE_OAUTH,
+            authMethod:
+              provider === OAuthProvider.GOOGLE ? AuthMethod.GOOGLE_OAUTH : AuthMethod.APPLE_OAUTH,
             emailVerified: userProfile.emailVerified, // T071: OAuth providers confirm email
           });
 
           // Create OnboardingProgress
           await this.onboardingProgressRepository.create({
             userId: newUser.id,
-            currentStep: userProfile.emailVerified ? OnboardingStep.TOPICS : OnboardingStep.VERIFICATION,
+            currentStep: userProfile.emailVerified
+              ? OnboardingStep.TOPICS
+              : OnboardingStep.VERIFICATION,
             emailVerified: userProfile.emailVerified,
             topicsSelected: false,
             orientationViewed: false,
@@ -425,7 +458,9 @@ export class AuthService {
   /**
    * Helper: Generate JWT tokens (for OAuth or post-verification)
    */
-  private async generateJwtTokens(user: any): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
+  private async generateJwtTokens(
+    user: any,
+  ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
     // In production, generate JWT tokens using @nestjs/jwt
     // For now, return placeholder tokens
     const jwtSecret = this.configService.get<string>('JWT_SECRET');

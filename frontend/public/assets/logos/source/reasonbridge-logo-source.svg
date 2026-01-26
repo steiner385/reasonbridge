@@ -1,0 +1,15 @@
+<svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left circle (Teal) -->
+  <circle cx="60" cy="60" r="40" fill="#2A9D8F" opacity="0.9"/>
+
+  <!-- Right circle (Soft Blue) -->
+  <circle cx="100" cy="60" r="40" fill="#6B9AC4" opacity="0.9"/>
+
+  <!-- Intersection (Light Sky) - overlapping area to show common ground -->
+  <circle cx="80" cy="60" r="20" fill="#A8DADC"/>
+
+  <!-- ReasonBridge wordmark -->
+  <text x="150" y="70" font-family="sans-serif" font-size="32" font-weight="700" fill="#2D3748">
+    ReasonBridge
+  </text>
+</svg>

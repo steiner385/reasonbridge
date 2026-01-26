@@ -1,0 +1,194 @@
+{
+  "uuid": "d55c7967-6edd-4547-a2e6-905099f1882d",
+  "name": "Page uses warm white background (#FAFBFC)",
+  "historyId": "d4080c4d56113803976fdc68e74cb0c4:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769401044138,
+              "uuid": "e0498106-81e9-4033-a51a-8ef23754b6de",
+              "stop": 1769401044246
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769401044134,
+          "uuid": "accce37b-caa1-4047-bdd6-d9492ebf2b29",
+          "stop": 1769401044246
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769401044250,
+              "uuid": "fe7bd499-91bf-4691-a6f3-fb36c74dd248",
+              "stop": 1769401044259
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401044248,
+          "uuid": "77f8f448-75cb-403b-8be0-9a6b657797cd",
+          "stop": 1769401044261
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769401044264,
+              "uuid": "d0383ccc-cf8c-452d-aac5-3a71f12de96c",
+              "stop": 1769401044329
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401044262,
+          "uuid": "b77b8ebc-45bf-4920-bb35-9ab70a35f03a",
+          "stop": 1769401044330
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769401044118,
+      "uuid": "e376b939-41f1-4ced-8fee-06ba325c9bee",
+      "stop": 1769401044330
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401044332,
+      "name": "Navigate to \"/\"",
+      "uuid": "218c7038-5dff-4c34-a0b0-a8d1bec6af1d",
+      "stop": 1769401045376
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401045383,
+      "name": "Expect \"toHaveCSS\" locator('body')",
+      "uuid": "06cf4148-d01b-4ab0-968e-aff05710ed46",
+      "stop": 1769401045501
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401045503,
+          "uuid": "f1031d46-3bc1-4d9a-87df-8151e5e65607",
+          "stop": 1769401045503
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769401045581,
+              "uuid": "7a7dea3e-f60d-4caf-a3ae-18e75960d04d",
+              "stop": 1769401045719
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401045504,
+          "uuid": "c6bcc0b4-8cca-4892-9235-4c5a42b76686",
+          "stop": 1769401045720
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769401045501,
+      "uuid": "317a8e86-2e2a-4d9a-8424-80e768e36f70",
+      "stop": 1769401045731
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-colors.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-colors.spec.ts > Brand Identity - Color Palette"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1662415-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-colors.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Color Palette" }
+  ],
+  "links": [],
+  "start": 1769401044117,
+  "testCaseId": "d4080c4d56113803976fdc68e74cb0c4",
+  "fullName": "visual/brand-colors.spec.ts:38:3",
+  "titlePath": ["visual", "brand-colors.spec.ts", "Brand Identity - Color Palette"],
+  "stop": 1769401045590
+}

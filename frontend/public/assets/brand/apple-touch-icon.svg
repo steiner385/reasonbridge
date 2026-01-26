@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ReasonBridge Apple Touch Icon -->
+  <!-- Background with slight rounding handled by iOS -->
+  <rect width="180" height="180" fill="#FAFBFC"/>
+
+  <defs>
+    <clipPath id="touchLeftClip">
+      <circle cx="68" cy="90" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Left circle - Teal -->
+  <circle cx="68" cy="90" r="50" fill="#2A9D8F"/>
+
+  <!-- Right circle - Soft Blue -->
+  <circle cx="112" cy="90" r="50" fill="#6B9AC4"/>
+
+  <!-- Overlap region - Light Sky -->
+  <g clip-path="url(#touchLeftClip)">
+    <circle cx="112" cy="90" r="50" fill="#A8DADC"/>
+  </g>
+</svg>

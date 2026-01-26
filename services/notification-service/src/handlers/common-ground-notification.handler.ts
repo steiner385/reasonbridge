@@ -4,7 +4,7 @@ import { NotificationGateway } from '../gateways/notification.gateway.js';
 import type {
   CommonGroundGeneratedEvent,
   CommonGroundUpdatedEvent,
-} from '@unite-discord/event-schemas/ai';
+} from '@reason-bridge/event-schemas/ai';
 
 /**
  * Handles common ground analysis events and creates notifications
@@ -23,9 +23,7 @@ export class CommonGroundNotificationHandler {
    * Creates notification when initial common ground analysis is available
    */
   async handleCommonGroundGenerated(event: CommonGroundGeneratedEvent): Promise<void> {
-    this.logger.log(
-      `Processing common-ground.generated event for topic ${event.payload.topicId}`,
-    );
+    this.logger.log(`Processing common-ground.generated event for topic ${event.payload.topicId}`);
 
     try {
       // Fetch topic details to get title and participants
@@ -40,9 +38,7 @@ export class CommonGroundNotificationHandler {
       });
 
       if (!topic) {
-        this.logger.warn(
-          `Topic ${event.payload.topicId} not found, skipping notification`,
-        );
+        this.logger.warn(`Topic ${event.payload.topicId} not found, skipping notification`);
         return;
       }
 
@@ -99,9 +95,7 @@ export class CommonGroundNotificationHandler {
    * Creates notification when common ground analysis is updated with new insights
    */
   async handleCommonGroundUpdated(event: CommonGroundUpdatedEvent): Promise<void> {
-    this.logger.log(
-      `Processing common-ground.updated event for topic ${event.payload.topicId}`,
-    );
+    this.logger.log(`Processing common-ground.updated event for topic ${event.payload.topicId}`);
 
     try {
       // Fetch topic details
@@ -116,9 +110,7 @@ export class CommonGroundNotificationHandler {
       });
 
       if (!topic) {
-        this.logger.warn(
-          `Topic ${event.payload.topicId} not found, skipping notification`,
-        );
+        this.logger.warn(`Topic ${event.payload.topicId} not found, skipping notification`);
         return;
       }
 
@@ -180,11 +172,15 @@ export class CommonGroundNotificationHandler {
     }
 
     if (misunderstandingCount > 0) {
-      parts.push(`${misunderstandingCount} misunderstanding${misunderstandingCount === 1 ? '' : 's'} identified`);
+      parts.push(
+        `${misunderstandingCount} misunderstanding${misunderstandingCount === 1 ? '' : 's'} identified`,
+      );
     }
 
     if (disagreementCount > 0) {
-      parts.push(`${disagreementCount} genuine disagreement${disagreementCount === 1 ? '' : 's'} analyzed`);
+      parts.push(
+        `${disagreementCount} genuine disagreement${disagreementCount === 1 ? '' : 's'} analyzed`,
+      );
     }
 
     if (consensusScore !== undefined) {
@@ -198,17 +194,23 @@ export class CommonGroundNotificationHandler {
   /**
    * Build notification body for updated common ground analysis
    */
-  private buildUpdatedNotificationBody(changes: CommonGroundUpdatedEvent['payload']['changes']): string {
+  private buildUpdatedNotificationBody(
+    changes: CommonGroundUpdatedEvent['payload']['changes'],
+  ): string {
     const highlights: string[] = [];
 
     // Highlight new agreements
     if (changes.newAgreementZones > 0) {
-      highlights.push(`${changes.newAgreementZones} new agreement${changes.newAgreementZones === 1 ? '' : 's'}`);
+      highlights.push(
+        `${changes.newAgreementZones} new agreement${changes.newAgreementZones === 1 ? '' : 's'}`,
+      );
     }
 
     // Highlight resolved misunderstandings
     if (changes.resolvedMisunderstandings > 0) {
-      highlights.push(`${changes.resolvedMisunderstandings} misunderstanding${changes.resolvedMisunderstandings === 1 ? '' : 's'} resolved`);
+      highlights.push(
+        `${changes.resolvedMisunderstandings} misunderstanding${changes.resolvedMisunderstandings === 1 ? '' : 's'} resolved`,
+      );
     }
 
     // Highlight consensus change
@@ -220,17 +222,19 @@ export class CommonGroundNotificationHandler {
 
     // Highlight new misunderstandings if no positive changes
     if (highlights.length === 0 && changes.newMisunderstandings > 0) {
-      highlights.push(`${changes.newMisunderstandings} new misunderstanding${changes.newMisunderstandings === 1 ? '' : 's'}`);
+      highlights.push(
+        `${changes.newMisunderstandings} new misunderstanding${changes.newMisunderstandings === 1 ? '' : 's'}`,
+      );
     }
 
     // Highlight new disagreements if no other changes
     if (highlights.length === 0 && changes.newDisagreements > 0) {
-      highlights.push(`${changes.newDisagreements} new disagreement${changes.newDisagreements === 1 ? '' : 's'}`);
+      highlights.push(
+        `${changes.newDisagreements} new disagreement${changes.newDisagreements === 1 ? '' : 's'}`,
+      );
     }
 
-    return highlights.length > 0
-      ? highlights.join(' • ')
-      : 'Common ground analysis updated';
+    return highlights.length > 0 ? highlights.join(' • ') : 'Common ground analysis updated';
   }
 
   /**
@@ -248,9 +252,7 @@ export class CommonGroundNotificationHandler {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
     // Log notification details (placeholder until Notification model exists in schema)
-    this.logger.log(
-      `Would create ${recipientIds.length} notification(s) of type "${type}"`,
-    );
+    this.logger.log(`Would create ${recipientIds.length} notification(s) of type "${type}"`);
     this.logger.debug(
       `Notification details: title="${title}", body="${body}", actionUrl="${actionUrl}"`,
     );

@@ -1,4 +1,4 @@
-# Implementation Plan: uniteDiscord - Rational Discussion Platform
+# Implementation Plan: reasonBridge - Rational Discussion Platform
 
 **Branch**: `001-rational-discussion-platform` | **Date**: 2026-01-17 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-rational-discussion-platform/spec.md`
@@ -7,7 +7,7 @@
 
 ## Summary
 
-Build a web-based public discussion platform called "uniteDiscord" that facilitates rational discourse across diverse perspectives. The platform features proposition-based discussion organization, AI-assisted communication feedback (bias detection, fact-checking prompts), common ground analysis using Moral Foundations Theory, anti-bot measures with trust scoring (Mayer's ABI Model), and graduated moderation with human-in-the-loop for consequential actions.
+Build a web-based public discussion platform called "reasonBridge" that facilitates rational discourse across diverse perspectives. The platform features proposition-based discussion organization, AI-assisted communication feedback (bias detection, fact-checking prompts), common ground analysis using Moral Foundations Theory, anti-bot measures with trust scoring (Mayer's ABI Model), and graduated moderation with human-in-the-loop for consequential actions.
 
 **Technical Approach**: Hybrid AI architecture with lightweight local models for real-time feedback (<500ms) and cloud LLMs for complex synthesis (<5s). React 18 frontend with Node.js 20 LTS backend, PostgreSQL for persistence, and structured event logging with correlation IDs for comprehensive testing and observability.
 

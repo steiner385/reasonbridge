@@ -1,7 +1,7 @@
 /**
- * @unite-discord/testing-utils
+ * @reason-bridge/testing-utils
  *
- * Shared test helpers, mocks, and fixtures for the uniteDiscord platform.
+ * Shared test helpers, mocks, and fixtures for the reasonBridge platform.
  */
 
 export * from './mocks/index.js';

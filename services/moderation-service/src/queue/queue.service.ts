@@ -3,11 +3,11 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { SnsEventPublisher } from '@unite-discord/common';
-import { SqsEventSubscriber } from '@unite-discord/common';
-import { DeadLetterQueueHandler } from '@unite-discord/common';
-import type { BaseEvent } from '@unite-discord/event-schemas';
-import type { EventHandler } from '@unite-discord/common';
+import { SnsEventPublisher } from '@reason-bridge/common';
+import { SqsEventSubscriber } from '@reason-bridge/common';
+import { DeadLetterQueueHandler } from '@reason-bridge/common';
+import type { BaseEvent } from '@reason-bridge/event-schemas';
+import type { EventHandler } from '@reason-bridge/common';
 import type { QueueConfig } from './queue.config.js';
 
 @Injectable()

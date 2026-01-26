@@ -3,7 +3,19 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+  const fastifyAdapter = new FastifyAdapter();
+
+  // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
+    // Only log errors in test mode to prevent memory leaks from verbose logging
+    logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
+  });
+
+  // Enable CORS for frontend requests
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
   const port = process.env['PORT'] || 3000;
   await app.listen(port, '0.0.0.0');

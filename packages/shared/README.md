@@ -1,4 +1,4 @@
-# @unite-discord/shared
+# @reason-bridge/shared
 
 Shared utilities, constants, and types for Unite Discord platform.
 
@@ -30,6 +30,7 @@ pnpm clean
 ## Testing & Coverage
 
 This package is configured with Vitest and enforces 80% coverage thresholds across:
+
 - **Lines**: 80%
 - **Functions**: 80%
 - **Branches**: 80%

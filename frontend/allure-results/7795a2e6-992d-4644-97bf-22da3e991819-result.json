@@ -1,0 +1,295 @@
+{
+  "uuid": "7795a2e6-992d-4644-97bf-22da3e991819",
+  "name": "should complete full registration and login flow",
+  "historyId": "cdff6b7b2137f531d562b471e16a9ba7:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "TimeoutError: page.waitForURL: Timeout 10000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+    "trace": "TimeoutError: page.waitForURL: Timeout 10000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/user-registration-login-flow.spec.ts:59:16"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245049813,
+              "uuid": "4b022ff2-6501-4859-a0fc-9bdd9566860f",
+              "stop": 1769245049815
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245049813,
+          "uuid": "1172c011-5a62-4dba-9bc8-0cc52553670b",
+          "stop": 1769245049815
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245049816,
+              "uuid": "1854b80f-ab9a-4482-8003-5ee33bf4d0ee",
+              "stop": 1769245049836
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245049815,
+          "uuid": "b362d343-a164-469e-95e3-41ec524fb7b1",
+          "stop": 1769245049836
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245049810,
+      "uuid": "62464e66-28fc-447b-b99a-8fd5e26eec14",
+      "stop": 1769245049836
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049837,
+      "name": "Navigate to \"/register\"",
+      "uuid": "dd4663ce-10ff-4976-b323-9d1291fede7c",
+      "stop": 1769245049868
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049871,
+      "name": "Expect \"toBeVisible\" getByRole('heading', { name: /sign up|register|create account/i })",
+      "uuid": "92685eb5-69d7-4b34-939b-fb21a8ae0aa0",
+      "stop": 1769245049906
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049908,
+      "name": "Fill \"test-user-1769245049836@example.com\" getByLabel(/email/i)",
+      "uuid": "934f108e-ed6f-49c9-88ee-53b3b2c5c888",
+      "stop": 1769245049919
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049920,
+      "name": "Fill \"testuser1769245049836\" getByLabel(/display name/i)",
+      "uuid": "3188a89f-2369-4b7b-b37c-fa81d73b56d3",
+      "stop": 1769245049929
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049930,
+      "name": "Fill \"SecurePassword123!\" getByLabel(/^password/i).first()",
+      "uuid": "3a28904b-dca5-4faa-a2d2-afae062acd4f",
+      "stop": 1769245049940
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049941,
+      "name": "Fill \"SecurePassword123!\" getByLabel(/confirm password/i)",
+      "uuid": "f772d35c-5162-4228-b07d-d085b0c9d37d",
+      "stop": 1769245049949
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049950,
+      "name": "Click getByRole('button', { name: /sign up|register|create account/i })",
+      "uuid": "9c0b53b9-8ace-409f-910d-134b1e19e7ce",
+      "stop": 1769245049986
+    },
+    {
+      "status": "failed",
+      "statusDetails": {
+        "message": "TimeoutError: page.waitForURL: Timeout 10000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+        "trace": "TimeoutError: page.waitForURL: Timeout 10000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/user-registration-login-flow.spec.ts:59:16"
+      },
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245049987,
+      "name": "Wait for navigation",
+      "uuid": "014d0168-24c3-493b-9941-b8eca59399cf",
+      "stop": 1769245059988
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "0794ead5-ee5c-49ff-bc99-88772fe613d3-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245060891,
+      "name": "screenshot",
+      "stop": 1769245060892
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "46616dc5-7623-42e6-a0e3-85a84dcddb55-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245060892,
+      "name": "video",
+      "stop": 1769245060892
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "404be029-b4eb-4579-802c-4ca96b08dceb-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245060892,
+      "name": "error-context",
+      "stop": 1769245060892
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245060027,
+          "uuid": "262b5371-0059-4527-97b5-7129220a8cde",
+          "stop": 1769245060027
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245060047,
+              "uuid": "80df461b-93cc-4fcf-a7c0-c45a1367a859",
+              "stop": 1769245060852
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245060027,
+          "uuid": "88484cbd-b0cb-4e60-8e15-b8f755f122e8",
+          "stop": 1769245060854
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245059989,
+      "uuid": "658e1c97-87ab-4691-83c7-0e6190ad5144",
+      "stop": 1769245060860
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "user-registration-login-flow.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > user-registration-login-flow.spec.ts > User Registration and Login Flow"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-4" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "user-registration-login-flow.spec.ts" },
+    { "name": "subSuite", "value": "User Registration and Login Flow" }
+  ],
+  "links": [],
+  "start": 1769245049810,
+  "testCaseId": "cdff6b7b2137f531d562b471e16a9ba7",
+  "fullName": "user-registration-login-flow.spec.ts:30:3",
+  "titlePath": ["user-registration-login-flow.spec.ts", "User Registration and Login Flow"],
+  "stop": 1769245060851
+}

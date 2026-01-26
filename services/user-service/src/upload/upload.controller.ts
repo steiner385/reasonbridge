@@ -58,7 +58,7 @@ export class UploadController {
   /**
    * Delete avatar by key
    */
-  @Delete('avatar/:key(*)')
+  @Delete('avatar/:key(.*)')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAvatar(@Param('key') key: string) {
     await this.uploadService.deleteAvatar(key);

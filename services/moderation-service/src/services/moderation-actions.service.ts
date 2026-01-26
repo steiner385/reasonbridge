@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
-import type { UserTrustUpdatedEvent, ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
-import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
+import type {
+  UserTrustUpdatedEvent,
+  ModerationActionRequestedEvent,
+} from '@reason-bridge/event-schemas';
+import { MODERATION_EVENT_TYPES } from '@reason-bridge/event-schemas';
 import type {
   CreateActionRequest,
   ApproveActionRequest,
@@ -99,13 +102,10 @@ export class ModerationActionsService {
 
     const actions = await this.prisma.moderationAction.findMany(findManyArgs);
 
-    const nextCursor =
-      actions.length === limit ? actions[actions.length - 1]!.id : null;
+    const nextCursor = actions.length === limit ? actions[actions.length - 1]!.id : null;
 
     return {
-      actions: actions.map((action) =>
-        this.mapModerationActionToResponse(action),
-      ),
+      actions: actions.map((action) => this.mapModerationActionToResponse(action)),
       nextCursor,
       totalCount,
     };
@@ -120,9 +120,7 @@ export class ModerationActionsService {
     moderatorId: string,
   ): Promise<ModerationActionResponse> {
     if (request.reasoning.length < 20) {
-      throw new BadRequestException(
-        'Reasoning must be at least 20 characters long',
-      );
+      throw new BadRequestException('Reasoning must be at least 20 characters long');
     }
 
     const severity = this.mapActionToSeverity(request.actionType);
@@ -160,7 +158,13 @@ export class ModerationActionsService {
         payload: {
           targetType: request.targetType as 'response' | 'user' | 'topic',
           targetId: request.targetId,
-          actionType: request.actionType as 'educate' | 'warn' | 'hide' | 'remove' | 'suspend' | 'ban',
+          actionType: request.actionType as
+            | 'educate'
+            | 'warn'
+            | 'hide'
+            | 'remove'
+            | 'suspend'
+            | 'ban',
           severity: severity === 'NON_PUNITIVE' ? 'non_punitive' : 'consequential',
           reasoning: request.reasoning,
           aiConfidence: 1.0, // Moderator-initiated actions have high confidence
@@ -247,9 +251,7 @@ export class ModerationActionsService {
     }
 
     if (action.severity === 'NON_PUNITIVE') {
-      throw new BadRequestException(
-        'Non-punitive actions cannot be explicitly approved',
-      );
+      throw new BadRequestException('Non-punitive actions cannot be explicitly approved');
     }
 
     const updatedAction = await this.prisma.moderationAction.update({
@@ -277,10 +279,7 @@ export class ModerationActionsService {
   /**
    * Reject a pending moderation action
    */
-  async rejectAction(
-    actionId: string,
-    request: RejectActionRequest,
-  ): Promise<void> {
+  async rejectAction(actionId: string, request: RejectActionRequest): Promise<void> {
     const action = await this.prisma.moderationAction.findUnique({
       where: { id: actionId },
     });
@@ -337,13 +336,10 @@ export class ModerationActionsService {
 
     const actions = await this.prisma.moderationAction.findMany(findManyArgs);
 
-    const nextCursor =
-      actions.length === limit ? actions[actions.length - 1]!.id : null;
+    const nextCursor = actions.length === limit ? actions[actions.length - 1]!.id : null;
 
     return {
-      actions: actions.map((action) =>
-        this.mapModerationActionToResponse(action),
-      ),
+      actions: actions.map((action) => this.mapModerationActionToResponse(action)),
       nextCursor,
       totalCount,
     };
@@ -378,15 +374,11 @@ export class ModerationActionsService {
     }
 
     if (request.reason.length < 20) {
-      throw new BadRequestException(
-        'Appeal reason must be at least 20 characters long',
-      );
+      throw new BadRequestException('Appeal reason must be at least 20 characters long');
     }
 
     if (request.reason.length > 5000) {
-      throw new BadRequestException(
-        'Appeal reason cannot exceed 5000 characters',
-      );
+      throw new BadRequestException('Appeal reason cannot exceed 5000 characters');
     }
 
     const action = await this.prisma.moderationAction.findUnique({
@@ -394,9 +386,7 @@ export class ModerationActionsService {
     });
 
     if (!action) {
-      throw new NotFoundException(
-        `Moderation action ${actionId} not found`,
-      );
+      throw new NotFoundException(`Moderation action ${actionId} not found`);
     }
 
     if (action.status === 'REVERSED') {
@@ -445,10 +435,7 @@ export class ModerationActionsService {
   /**
    * Get pending appeals for review
    */
-  async getPendingAppeals(
-    limit: number = 20,
-    cursor?: string,
-  ): Promise<ListAppealResponse> {
+  async getPendingAppeals(limit: number = 20, cursor?: string): Promise<ListAppealResponse> {
     const where = {
       status: 'PENDING' as const,
     };
@@ -477,8 +464,7 @@ export class ModerationActionsService {
 
     const appeals = await this.prisma.appeal.findMany(findManyArgs);
 
-    const nextCursor =
-      appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
+    const nextCursor = appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
 
     return {
       appeals: appeals.map((appeal) => ({
@@ -511,9 +497,7 @@ export class ModerationActionsService {
     }
 
     if (request.reasoning.length > 2000) {
-      throw new BadRequestException(
-        'Appeal decision reasoning cannot exceed 2000 characters',
-      );
+      throw new BadRequestException('Appeal decision reasoning cannot exceed 2000 characters');
     }
 
     const appeal = await this.prisma.appeal.findUnique({
@@ -533,8 +517,7 @@ export class ModerationActionsService {
       );
     }
 
-    const newStatus =
-      request.decision === 'upheld' ? 'UPHELD' : 'DENIED';
+    const newStatus = request.decision === 'upheld' ? 'UPHELD' : 'DENIED';
 
     // Update the appeal with the decision
     const updatedAppeal = await this.prisma.appeal.update({
@@ -599,9 +582,7 @@ export class ModerationActionsService {
   /**
    * Map target type string to enum value
    */
-  private mapTargetType(
-    targetType: string,
-  ): 'RESPONSE' | 'USER' | 'TOPIC' {
+  private mapTargetType(targetType: string): 'RESPONSE' | 'USER' | 'TOPIC' {
     const typeMap: Record<string, 'RESPONSE' | 'USER' | 'TOPIC'> = {
       response: 'RESPONSE',
       user: 'USER',
@@ -616,10 +597,7 @@ export class ModerationActionsService {
   private mapActionType(
     actionType: string,
   ): 'EDUCATE' | 'WARN' | 'HIDE' | 'REMOVE' | 'SUSPEND' | 'BAN' {
-    const actionMap: Record<
-      string,
-      'EDUCATE' | 'WARN' | 'HIDE' | 'REMOVE' | 'SUSPEND' | 'BAN'
-    > = {
+    const actionMap: Record<string, 'EDUCATE' | 'WARN' | 'HIDE' | 'REMOVE' | 'SUSPEND' | 'BAN'> = {
       educate: 'EDUCATE',
       warn: 'WARN',
       hide: 'HIDE',
@@ -683,9 +661,7 @@ export class ModerationActionsService {
     moderatorId: string,
   ): Promise<ModerationActionResponse> {
     if (durationDays <= 0) {
-      throw new BadRequestException(
-        'Ban duration must be greater than 0 days',
-      );
+      throw new BadRequestException('Ban duration must be greater than 0 days');
     }
 
     if (durationDays > 365) {
@@ -793,7 +769,7 @@ export class ModerationActionsService {
       await this.prisma.moderationAction.updateMany({
         where: {
           id: {
-            in: expiredBans.map(b => b.id),
+            in: expiredBans.map((b) => b.id),
           },
         },
         data: {

@@ -1,0 +1,191 @@
+{
+  "uuid": "a4913b94-0fb9-4333-9165-424031138a49",
+  "name": "should have proper autocomplete attributes",
+  "historyId": "02abc1cf68c154a8a6fd592cf05db7d5:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245015791,
+                  "uuid": "10a97db9-1a65-4917-9cc8-71fea318b4ab",
+                  "stop": 1769245015802
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245015790,
+              "uuid": "990bbf87-9ee5-4c13-9988-0a9658ed373a",
+              "stop": 1769245015803
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245015804,
+                  "uuid": "52b4959d-8faf-459f-922f-e59d9c46e5ef",
+                  "stop": 1769245015842
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245015803,
+              "uuid": "111e7725-3675-4741-bcb9-17eef3787ad8",
+              "stop": 1769245015842
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Navigate to \"/login\"",
+              "start": 1769245015845,
+              "uuid": "3b921644-8c83-4442-8276-027a5bee195f",
+              "stop": 1769245015888
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245015780,
+          "uuid": "ff86f7af-9fc8-41eb-9993-c54db2e8e6e6",
+          "stop": 1769245015888
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245015780,
+      "uuid": "6ddd36ca-2b7b-4ef1-a6f0-bf3703d4a493",
+      "stop": 1769245015889
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245015890,
+      "name": "Expect \"toHaveAttribute\" getByLabel(/email/i)",
+      "uuid": "4d8f6f56-9ac7-4fe1-b182-91a77ecd714b",
+      "stop": 1769245015950
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245015951,
+      "name": "Expect \"toHaveAttribute\" getByLabel(/password/i)",
+      "uuid": "2edf4076-1c87-46e2-adb1-4ecd3414c42b",
+      "stop": 1769245015955
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245015955,
+          "uuid": "bea0d223-476e-4026-b16e-3cb21d51c2bb",
+          "stop": 1769245015955
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245016010,
+              "uuid": "4401700e-5ae5-42cf-a26e-6b0af48b786c",
+              "stop": 1769245016146
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245015956,
+          "uuid": "9549316e-c488-46a9-85e8-a475e4d7bd60",
+          "stop": 1769245016146
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245015955,
+      "uuid": "9cfe4db4-6220-4e13-a7b3-89f7257b09a1",
+      "stop": 1769245016152
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "login-form.spec.ts" },
+    { "name": "titlePath", "value": " > chromium > login-form.spec.ts > LoginForm Component" },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-0" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "login-form.spec.ts" },
+    { "name": "subSuite", "value": "LoginForm Component" }
+  ],
+  "links": [],
+  "start": 1769245015778,
+  "testCaseId": "02abc1cf68c154a8a6fd592cf05db7d5",
+  "fullName": "login-form.spec.ts:118:3",
+  "titlePath": ["login-form.spec.ts", "LoginForm Component"],
+  "stop": 1769245016133
+}

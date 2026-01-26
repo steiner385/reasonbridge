@@ -1,5 +1,6 @@
-import { Injectable, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import type { NestMiddleware } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
 
 /**
  * Rate Limiter Middleware
@@ -46,7 +47,10 @@ export class RateLimiterMiddleware implements NestMiddleware {
 
     // Set rate limit headers
     res.setHeader('X-RateLimit-Limit', this.defaultLimit.toString());
-    res.setHeader('X-RateLimit-Remaining', Math.max(0, this.defaultLimit - rateLimitData.count).toString());
+    res.setHeader(
+      'X-RateLimit-Remaining',
+      Math.max(0, this.defaultLimit - rateLimitData.count).toString(),
+    );
     res.setHeader('X-RateLimit-Reset', new Date(rateLimitData.resetTime).toISOString());
 
     // Check if limit exceeded

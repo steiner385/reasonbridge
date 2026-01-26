@@ -1,0 +1,76 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+build
+**/build
+.next
+**/.next
+coverage
+**/coverage
+
+# Environment and config
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+*.test.ts.snap
+allure-results
+**/allure-results
+allure-report
+**/allure-report
+playwright-report
+**/playwright-report
+test-results
+**/test-results
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+CLAUDE.md
+*.md
+!packages/**/README.md
+!services/**/README.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.jenkins
+
+# Misc
+.husky
+.prettierignore
+.eslintignore
+.eslintcache
