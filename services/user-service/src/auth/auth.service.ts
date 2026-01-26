@@ -20,7 +20,7 @@ import { CognitoService } from './cognito.service';
 import { GoogleOAuthService } from './oauth/google-oauth.service';
 import { AppleOAuthService } from './oauth/apple-oauth.service';
 import { VerificationService } from './verification.service';
-import { validatePassword, validateEmail } from '@reasonbridge/common/validation';
+import { validatePassword, validateEmail } from '@reason-bridge/common';
 import { SignupRequestDto } from './dto/signup.dto';
 import { VerifyEmailRequestDto } from './dto/verify-email.dto';
 import {
@@ -33,7 +33,7 @@ import {
   OAuthProvider,
   OAuthCallbackQueryDto,
 } from './dto/oauth.dto';
-import { LoginRequestDto } from './dto/login.dto';
+import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponseDto, VerificationEmailSentResponseDto } from './dto/auth-response.dto';
 import { UserProfileDto, OnboardingProgressDto } from '../dto/common.dto';
 import { AuthMethod, OnboardingStep } from '@prisma/client';
@@ -403,7 +403,7 @@ export class AuthService {
    * T074: Login with email/password
    * Authenticates with Cognito and updates lastLoginAt
    */
-  async login(dto: LoginRequestDto): Promise<AuthSuccessResponseDto> {
+  async login(dto: LoginDto): Promise<AuthSuccessResponseDto> {
     this.logger.log(`Login attempt for: ${dto.email}`);
 
     // Find user

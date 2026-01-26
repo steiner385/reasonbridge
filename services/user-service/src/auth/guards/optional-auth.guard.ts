@@ -1,6 +1,7 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import type { ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * Optional JWT Authentication Guard
@@ -38,7 +39,9 @@ export class OptionalAuthGuard extends AuthGuard('jwt') {
    * Determines if the request can activate the route
    * Always returns true (never blocks the request)
    */
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  override canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
     // Call parent to attempt authentication
     // But we'll override handleRequest to not throw errors
     return super.canActivate(context) as boolean | Promise<boolean> | Observable<boolean>;
@@ -48,7 +51,13 @@ export class OptionalAuthGuard extends AuthGuard('jwt') {
    * Handles authentication result without throwing errors
    * Returns user if authentication succeeded, undefined otherwise
    */
-  handleRequest<TUser = any>(err: any, user: any, info: any, context: ExecutionContext): TUser | undefined {
+  override handleRequest<TUser = any>(
+    err: any,
+    user: any,
+    info: any,
+    context: ExecutionContext,
+    status?: any,
+  ): TUser {
     // If authentication succeeded, return the user
     if (user) {
       return user;
@@ -63,7 +72,7 @@ export class OptionalAuthGuard extends AuthGuard('jwt') {
    * Override to prevent errors from bubbling up
    * This ensures missing/invalid tokens don't stop request processing
    */
-  getRequest(context: ExecutionContext): any {
+  override getRequest(context: ExecutionContext): any {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
 

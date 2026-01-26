@@ -7,3 +7,4 @@
 export * from './types/index';
 export * from './utils/index';
 export * from './events/index';
+export * from './validation/index';

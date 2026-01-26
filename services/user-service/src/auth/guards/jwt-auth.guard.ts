@@ -1,6 +1,7 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import type { ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * JWT Authentication Guard
@@ -28,14 +29,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    * Determines if the request can activate the route
    * Validates JWT token and attaches user to request
    */
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  override canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
     return super.canActivate(context);
   }
 
   /**
    * Handles authentication errors and provides user-friendly messages
    */
-  handleRequest<TUser = any>(err: any, user: any, info: any, context: ExecutionContext): TUser {
+  override handleRequest<TUser = any>(
+    err: any,
+    user: any,
+    info: any,
+    context: ExecutionContext,
+  ): TUser {
     // If Passport strategy threw an error
     if (err) {
       throw err;
