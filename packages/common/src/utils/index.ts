@@ -2,5 +2,5 @@
  * Shared utility functions for reasonBridge
  */
 
-export * from './assert';
-export * from './id';
+export * from './assert.js';
+export * from './id.js';

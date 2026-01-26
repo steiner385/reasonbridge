@@ -4,5 +4,5 @@
  * Provides a simplified interface for interacting with AWS Bedrock.
  */
 
-export { BedrockClient } from './client';
-export type { BedrockClientConfig } from './client';
+export { BedrockClient } from './client.js';
+export type { BedrockClientConfig } from './client.js';

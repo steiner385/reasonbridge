@@ -9,7 +9,7 @@
  */
 
 import type { BaseEvent, EventEnvelope } from '@reason-bridge/event-schemas';
-import type { EventContext, ProcessingResult } from './EventSubscriber';
+import type { EventContext, ProcessingResult } from './EventSubscriber.js';
 
 /**
  * Metadata about a failed message in the DLQ

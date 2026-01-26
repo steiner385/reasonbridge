@@ -48,9 +48,9 @@ export type {
   PublishOptions,
   PublishResult,
   SnsPublisherConfig,
-} from './EventPublisher';
+} from './EventPublisher.js';
 
-export { SnsEventPublisher } from './EventPublisher';
+export { SnsEventPublisher } from './EventPublisher.js';
 
 // EventSubscriber exports
 export type {
@@ -59,9 +59,9 @@ export type {
   ProcessingResult,
   SubscriptionConfig,
   SqsSubscriberConfig,
-} from './EventSubscriber';
+} from './EventSubscriber.js';
 
-export { EventSubscriber, SqsEventSubscriber } from './EventSubscriber';
+export { EventSubscriber, SqsEventSubscriber } from './EventSubscriber.js';
 
 // Dead Letter Queue exports
 export type {
@@ -71,6 +71,6 @@ export type {
   DlqMonitorConfig,
   DlqProcessingResult,
   DlqStats,
-} from './DeadLetterQueueHandler';
+} from './DeadLetterQueueHandler.js';
 
-export { DeadLetterQueueHandler, DlqMonitor } from './DeadLetterQueueHandler';
+export { DeadLetterQueueHandler, DlqMonitor } from './DeadLetterQueueHandler.js';

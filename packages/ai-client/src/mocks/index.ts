@@ -4,4 +4,4 @@
  * Provides mock implementations for testing AI client functionality.
  */
 
-export * from './client';
+export * from './client.js';

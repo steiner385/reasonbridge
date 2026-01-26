@@ -2,7 +2,7 @@
  * Discussion-related type definitions
  */
 
-import type { UserId } from './user';
+import type { UserId } from './user.js';
 
 /**
  * Unique identifier for a discussion
