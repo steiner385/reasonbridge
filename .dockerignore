@@ -11,6 +11,8 @@ build
 **/.next
 coverage
 **/coverage
+*.tsbuildinfo
+**/*.tsbuildinfo
 
 # Environment and config
 .env
