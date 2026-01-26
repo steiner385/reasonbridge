@@ -6,19 +6,19 @@
  */
 
 // Base event types
-export * from './base';
+export * from './base.js';
 
 // Domain event types
-export * from './discussion';
-export * from './ai';
-export * from './moderation';
-export * from './user';
+export * from './discussion.js';
+export * from './ai.js';
+export * from './moderation.js';
+export * from './user.js';
 
 // Import event type constants
-import { DISCUSSION_EVENT_TYPES } from './discussion';
-import { AI_EVENT_TYPES } from './ai';
-import { MODERATION_EVENT_TYPES } from './moderation';
-import { USER_EVENT_TYPES } from './user';
+import { DISCUSSION_EVENT_TYPES } from './discussion.js';
+import { AI_EVENT_TYPES } from './ai.js';
+import { MODERATION_EVENT_TYPES } from './moderation.js';
+import { USER_EVENT_TYPES } from './user.js';
 
 // Re-export individually
 export { DISCUSSION_EVENT_TYPES, AI_EVENT_TYPES, MODERATION_EVENT_TYPES, USER_EVENT_TYPES };

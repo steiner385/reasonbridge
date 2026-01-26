@@ -2,7 +2,7 @@
  * AI service event definitions
  */
 
-import type { BaseEvent } from './base';
+import type { BaseEvent } from './base.js';
 
 /**
  * Event types for AI service
