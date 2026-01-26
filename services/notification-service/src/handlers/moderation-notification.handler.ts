@@ -62,7 +62,7 @@ export class ModerationNotificationHandler {
           return;
         }
 
-        targetTitle = user.displayName;
+        targetTitle = user.displayName ?? `User ${user.id}`;
         affectedUserId = user.id;
       } else if (event.payload.targetType === 'topic') {
         const topic = await this.prisma.discussionTopic.findUnique({
