@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/notification-service",
+  "name": "@reason-bridge/notification-service",
   "version": "0.1.0",
   "description": "Notification service with NestJS, Socket.io, and Prisma",
   "type": "module",
@@ -23,8 +23,8 @@
     "@nestjs/platform-fastify": "^10.3.0",
     "@nestjs/platform-socket.io": "^10.3.0",
     "@nestjs/websockets": "^10.3.0",
-    "@unite-discord/db-models": "workspace:*",
-    "@unite-discord/event-schemas": "workspace:*",
+    "@reason-bridge/db-models": "workspace:*",
+    "@reason-bridge/event-schemas": "workspace:*",
     "fastify": "^4.25.2",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",

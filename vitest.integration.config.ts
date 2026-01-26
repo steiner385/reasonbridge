@@ -21,12 +21,12 @@ export default defineConfig({
   resolve: {
     alias: {
       // Workspace packages - resolve to source for better test experience
-      '@unite-discord/common': resolve(__dirname, 'packages/common/src'),
-      '@unite-discord/shared': resolve(__dirname, 'packages/shared/src'),
-      '@unite-discord/db-models': resolve(__dirname, 'packages/db-models/src'),
-      '@unite-discord/event-schemas': resolve(__dirname, 'packages/event-schemas/src'),
-      '@unite-discord/ai-client': resolve(__dirname, 'packages/ai-client/src'),
-      '@unite-discord/testing-utils': resolve(__dirname, 'packages/testing-utils/src'),
+      '@reason-bridge/common': resolve(__dirname, 'packages/common/src'),
+      '@reason-bridge/shared': resolve(__dirname, 'packages/shared/src'),
+      '@reason-bridge/db-models': resolve(__dirname, 'packages/db-models/src'),
+      '@reason-bridge/event-schemas': resolve(__dirname, 'packages/event-schemas/src'),
+      '@reason-bridge/ai-client': resolve(__dirname, 'packages/ai-client/src'),
+      '@reason-bridge/testing-utils': resolve(__dirname, 'packages/testing-utils/src'),
     },
   },
   test: {

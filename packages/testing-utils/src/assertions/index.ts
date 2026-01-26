@@ -2,7 +2,7 @@
  * Custom test assertions and matchers
  */
 
-import type { Result } from '@unite-discord/common';
+import type { Result } from '@reason-bridge/common';
 
 /**
  * Assertion error with detailed context

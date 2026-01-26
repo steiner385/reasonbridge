@@ -45,7 +45,7 @@ echo ""
 
 # Run Playwright tests in Docker container on the same network
 docker run --rm \
-    --network unitediscord_unite-e2e \
+    --network reasonbridge_unite-e2e \
     -v $(pwd)/frontend:/app/frontend \
     -v $(pwd)/coverage:/app/coverage \
     -w /app/frontend \

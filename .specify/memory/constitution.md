@@ -33,7 +33,7 @@ Templates validated:
 
 -->
 
-# uniteDiscord Constitution
+# reasonBridge Constitution
 
 ## Core Principles
 

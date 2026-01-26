@@ -2,7 +2,7 @@ import { ResponseAnalyzerService } from '../services/response-analyzer.service.j
 import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
 import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
 import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js';
-import { FeedbackType } from '@unite-discord/db-models';
+import { FeedbackType } from '@reason-bridge/db-models';
 
 describe('ResponseAnalyzerService', () => {
   let service: ResponseAnalyzerService;

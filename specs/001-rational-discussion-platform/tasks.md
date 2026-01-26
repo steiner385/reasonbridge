@@ -1,4 +1,4 @@
-# Tasks: uniteDiscord - Rational Discussion Platform
+# Tasks: reasonBridge - Rational Discussion Platform
 
 **Input**: Design documents from `/specs/001-rational-discussion-platform/`
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/

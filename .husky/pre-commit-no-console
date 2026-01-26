@@ -65,6 +65,18 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip event infrastructure files - operational logging is needed
+  if [[ "$file" =~ /events/ ]]; then
+    debug "Skipping event infrastructure file: $file"
+    continue
+  fi
+
+  # Skip Prisma service files - database connection logging is needed
+  if [[ "$file" =~ prisma\.service\.(js|ts)$ ]]; then
+    debug "Skipping Prisma service file: $file"
+    continue
+  fi
+
   # Get staged content and check for problematic console statements
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 

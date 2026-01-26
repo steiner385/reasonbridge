@@ -59,7 +59,7 @@ echo -e "${GREEN}✓ Git hooks configured${NC}"
 # Build shared packages
 echo ""
 echo -e "${YELLOW}Building shared packages...${NC}"
-pnpm -r --filter="@unite-discord/*" build 2>/dev/null || true
+pnpm -r --filter="@reason-bridge/*" build 2>/dev/null || true
 echo -e "${GREEN}✓ Shared packages built${NC}"
 
 # Generate Prisma client (if applicable)

@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/user-service",
+  "name": "@reason-bridge/user-service",
   "version": "0.1.0",
   "description": "User service with NestJS and Prisma",
   "type": "module",
@@ -27,7 +27,7 @@
     "@nestjs/jwt": "11.0.2",
     "@nestjs/platform-fastify": "^10.3.0",
     "@prisma/client": "6.3.1",
-    "@unite-discord/db-models": "workspace:*",
+    "@reason-bridge/db-models": "workspace:*",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",

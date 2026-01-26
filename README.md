@@ -1,4 +1,4 @@
-# UniteDiscord
+# ReasonBridge
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-green.svg)
@@ -60,7 +60,7 @@ If you prefer to set up manually:
 pnpm install
 
 # Build shared packages
-pnpm -r --filter="@unite-discord/*" build
+pnpm -r --filter="@reason-bridge/*" build
 
 # Generate Prisma client
 pnpm --filter="user-service" exec prisma generate
@@ -234,8 +234,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For questions or issues:
 
-- Open a [GitHub Issue](https://github.com/steiner385/uniteDiscord/issues)
-- Check existing [discussions](https://github.com/steiner385/uniteDiscord/discussions)
+- Open a [GitHub Issue](https://github.com/steiner385/reasonBridge/issues)
+- Check existing [discussions](https://github.com/steiner385/reasonBridge/discussions)
 - Review project [specifications](./specs/)
 
 # Webhook test

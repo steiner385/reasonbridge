@@ -1,4 +1,4 @@
-import type { User, VerificationLevel, UserStatus } from '@unite-discord/db-models';
+import type { User, VerificationLevel, UserStatus } from '@reason-bridge/db-models';
 
 /**
  * Response DTO for user data (includes private fields like email)

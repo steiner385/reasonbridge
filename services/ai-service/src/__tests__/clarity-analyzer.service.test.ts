@@ -1,5 +1,5 @@
 import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js';
-import { FeedbackType } from '@unite-discord/db-models';
+import { FeedbackType } from '@reason-bridge/db-models';
 
 describe('ClarityAnalyzerService', () => {
   let service: ClarityAnalyzerService;

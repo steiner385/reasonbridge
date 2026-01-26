@@ -25,7 +25,7 @@ export class RdsStack extends cdk.Stack {
 
     // Create database credentials secret
     this.dbSecret = new secretsmanager.Secret(this, 'DbCredentials', {
-      secretName: 'unite-discord/rds/credentials',
+      secretName: 'reason-bridge/rds/credentials',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({ username: 'uniteadmin' }),
         generateStringKey: 'password',

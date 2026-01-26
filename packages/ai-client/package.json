@@ -1,5 +1,5 @@
 {
-  "name": "@unite-discord/ai-client",
+  "name": "@reason-bridge/ai-client",
   "version": "0.1.0",
   "description": "AI client wrapper for AWS Bedrock integration",
   "type": "module",
@@ -39,10 +39,10 @@
     "typescript": "5.7.3"
   },
   "peerDependencies": {
-    "@unite-discord/common": "workspace:*"
+    "@reason-bridge/common": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@unite-discord/common": {
+    "@reason-bridge/common": {
       "optional": true
     }
   },

@@ -70,7 +70,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/db-migrate:latest
+    image: reasonbridge-e2e/db-migrate:latest
     command: ['sh', '-c', 'cd packages/db-models && npx prisma migrate deploy']
     environment:
       DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
@@ -86,7 +86,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/db-seed:latest
+    image: reasonbridge-e2e/db-seed:latest
     command: ['sh', '-c', 'cd packages/db-models && npx tsx prisma/seed.ts']
     environment:
       DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
@@ -106,7 +106,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/api-gateway:latest
+    image: reasonbridge-e2e/api-gateway:latest
     command: ['node', 'services/api-gateway/dist/main.js']
     environment:
       PORT: 3000
@@ -141,7 +141,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/user-service:latest
+    image: reasonbridge-e2e/user-service:latest
     command: ['node', 'services/user-service/dist/main.js']
     environment:
       PORT: 3001
@@ -178,7 +178,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/ai-service:latest
+    image: reasonbridge-e2e/ai-service:latest
     command: ['node', 'services/ai-service/dist/main.js']
     environment:
       PORT: 3002
@@ -208,7 +208,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/discussion-service:latest
+    image: reasonbridge-e2e/discussion-service:latest
     command: ['node', 'services/discussion-service/dist/main.js']
     environment:
       PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
@@ -232,7 +232,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/moderation-service:latest
+    image: reasonbridge-e2e/moderation-service:latest
     command: ['node', 'services/moderation-service/dist/main.js']
     environment:
       PORT: 3003
@@ -259,7 +259,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/recommendation-service:latest
+    image: reasonbridge-e2e/recommendation-service:latest
     command: ['node', 'services/recommendation-service/dist/main.js']
     environment:
       PORT: 3004
@@ -283,7 +283,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/notification-service:latest
+    image: reasonbridge-e2e/notification-service:latest
     command: ['node', 'services/notification-service/dist/main.js']
     environment:
       PORT: 3005
@@ -307,7 +307,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.service
-    image: unitediscord-e2e/fact-check-service:latest
+    image: reasonbridge-e2e/fact-check-service:latest
     command: ['node', 'services/fact-check-service/dist/main.js']
     environment:
       PORT: 3006
@@ -342,7 +342,7 @@ services:
         VITE_API_BASE_URL: /api
         VITE_API_GATEWAY_URL: /api
         VITE_NOTIFICATION_SERVICE_URL: ''
-    image: unitediscord-e2e/frontend:latest
+    image: reasonbridge-e2e/frontend:latest
     ports:
       - '9080:80'
     healthcheck:

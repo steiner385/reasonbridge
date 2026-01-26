@@ -129,7 +129,7 @@ describe('ElastiCacheStack', () => {
 
     // Verify default cluster name is used
     template.hasResourceProperties('AWS::ElastiCache::ReplicationGroup', {
-      ReplicationGroupId: 'unite-discord-redis',
+      ReplicationGroupId: 'reason-bridge-redis',
     });
   });
 

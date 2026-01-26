@@ -1,4 +1,4 @@
-# Research: uniteDiscord Technology Decisions
+# Research: reasonBridge Technology Decisions
 
 **Feature**: 001-rational-discussion-platform
 **Date**: 2026-01-17
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This document captures technology decisions for the uniteDiscord platform based on the specified constraints: local development with Jenkins, AWS production deployment with EKS, RDS, and Bedrock.
+This document captures technology decisions for the reasonBridge platform based on the specified constraints: local development with Jenkins, AWS production deployment with EKS, RDS, and Bedrock.
 
 ---
 

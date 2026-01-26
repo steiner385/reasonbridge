@@ -201,7 +201,7 @@ importers:
       '@aws-sdk/client-bedrock-runtime':
         specifier: ^3.504.0
         version: 3.971.0
-      '@unite-discord/common':
+      '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
     devDependencies:
@@ -217,7 +217,7 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.504.0
         version: 3.971.0
-      '@unite-discord/event-schemas':
+      '@reason-bridge/event-schemas':
         specifier: workspace:*
         version: link:../event-schemas
     devDependencies:
@@ -230,7 +230,7 @@ importers:
       '@prisma/client':
         specifier: 6.3.1
         version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
-      '@unite-discord/common':
+      '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
     devDependencies:
@@ -270,7 +270,7 @@ importers:
 
   packages/test-utils:
     dependencies:
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../db-models
       vitest:
@@ -289,12 +289,12 @@ importers:
 
   packages/testing-utils:
     dependencies:
+      '@reason-bridge/common':
+        specifier: workspace:*
+        version: link:../common
       '@types/jest':
         specifier: '>=29.0.0'
         version: 30.0.0
-      '@unite-discord/common':
-        specifier: workspace:*
-        version: link:../common
     devDependencies:
       '@types/node':
         specifier: 20.17.12
@@ -314,10 +314,10 @@ importers:
       '@nestjs/platform-fastify':
         specifier: '>=11.1.11'
         version: 11.1.12(@nestjs/common@10.4.22(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22)
-      '@unite-discord/ai-client':
+      '@reason-bridge/ai-client':
         specifier: workspace:*
         version: link:../../packages/ai-client
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
       class-transformer:
@@ -412,7 +412,7 @@ importers:
       '@prisma/client':
         specifier: 6.3.1
         version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
       cache-manager:
@@ -473,7 +473,7 @@ importers:
       '@nestjs/platform-fastify':
         specifier: '>=11.1.11'
         version: 11.1.12(@nestjs/common@10.4.22(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22)
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
       fastify:
@@ -510,13 +510,13 @@ importers:
       '@prisma/client':
         specifier: 6.3.1
         version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
-      '@unite-discord/common':
+      '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
-      '@unite-discord/event-schemas':
+      '@reason-bridge/event-schemas':
         specifier: workspace:*
         version: link:../../packages/event-schemas
       fastify:
@@ -565,10 +565,10 @@ importers:
       '@nestjs/websockets':
         specifier: ^10.3.0
         version: 10.4.22(@nestjs/common@10.4.22(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22)(@nestjs/platform-socket.io@10.4.22)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
-      '@unite-discord/event-schemas':
+      '@reason-bridge/event-schemas':
         specifier: workspace:*
         version: link:../../packages/event-schemas
       fastify:
@@ -617,7 +617,7 @@ importers:
       '@nestjs/platform-fastify':
         specifier: '>=11.1.11'
         version: 11.1.12(@nestjs/common@10.4.22(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22)
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
       fastify:
@@ -669,7 +669,7 @@ importers:
       '@prisma/client':
         specifier: 6.3.1
         version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
-      '@unite-discord/db-models':
+      '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
       bcrypt:

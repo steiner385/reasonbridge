@@ -3,8 +3,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
 import type { ScreeningResult } from './content-screening.service.js';
 import { ContentScreeningService } from './content-screening.service.js';
-import type { ModerationActionRequestedEvent } from '@unite-discord/event-schemas';
-import { MODERATION_EVENT_TYPES } from '@unite-discord/event-schemas';
+import type { ModerationActionRequestedEvent } from '@reason-bridge/event-schemas';
+import { MODERATION_EVENT_TYPES } from '@reason-bridge/event-schemas';
 
 export interface AiRecommendationRequest {
   targetType: 'response' | 'user' | 'topic';
@@ -80,7 +80,13 @@ export class AIReviewService {
         payload: {
           targetType: request.targetType as 'response' | 'user' | 'topic',
           targetId: request.targetId,
-          actionType: request.actionType as 'educate' | 'warn' | 'hide' | 'remove' | 'suspend' | 'ban',
+          actionType: request.actionType as
+            | 'educate'
+            | 'warn'
+            | 'hide'
+            | 'remove'
+            | 'suspend'
+            | 'ban',
           severity: severity === 'NON_PUNITIVE' ? 'non_punitive' : 'consequential',
           reasoning: request.reasoning,
           aiConfidence: request.confidence,
@@ -105,9 +111,7 @@ export class AIReviewService {
   /**
    * Get pending AI recommendations for moderator review queue
    */
-  async getPendingRecommendations(
-    limit: number = 20,
-  ): Promise<AiRecommendationResponse[]> {
+  async getPendingRecommendations(limit: number = 20): Promise<AiRecommendationResponse[]> {
     const actions = await this.prisma.moderationAction.findMany({
       where: {
         aiRecommended: true,
@@ -173,9 +177,7 @@ export class AIReviewService {
 
     return {
       totalPending: pending,
-      byActionType: Object.fromEntries(
-        byActionType.map((item) => [item.actionType, item._count]),
-      ),
+      byActionType: Object.fromEntries(byActionType.map((item) => [item.actionType, item._count])),
       avgConfidence,
       approvalRate,
     };
@@ -204,10 +206,7 @@ export class AIReviewService {
   /**
    * Reject an AI recommendation (moderator action)
    */
-  async rejectRecommendation(
-    actionId: string,
-    rejectionReason: string,
-  ): Promise<void> {
+  async rejectRecommendation(actionId: string, rejectionReason: string): Promise<void> {
     await this.prisma.moderationAction.update({
       where: { id: actionId },
       data: {
@@ -220,9 +219,7 @@ export class AIReviewService {
   /**
    * Map target type string to enum value
    */
-  private mapTargetType(
-    targetType: string,
-  ): 'RESPONSE' | 'USER' | 'TOPIC' {
+  private mapTargetType(targetType: string): 'RESPONSE' | 'USER' | 'TOPIC' {
     const typeMap: Record<string, 'RESPONSE' | 'USER' | 'TOPIC'> = {
       response: 'RESPONSE',
       user: 'USER',
@@ -237,10 +234,7 @@ export class AIReviewService {
   private mapActionType(
     actionType: string,
   ): 'EDUCATE' | 'WARN' | 'HIDE' | 'REMOVE' | 'SUSPEND' | 'BAN' {
-    const actionMap: Record<
-      string,
-      'EDUCATE' | 'WARN' | 'HIDE' | 'REMOVE' | 'SUSPEND' | 'BAN'
-    > = {
+    const actionMap: Record<string, 'EDUCATE' | 'WARN' | 'HIDE' | 'REMOVE' | 'SUSPEND' | 'BAN'> = {
       educate: 'EDUCATE',
       warn: 'WARN',
       hide: 'HIDE',
@@ -266,9 +260,7 @@ export class AIReviewService {
   /**
    * Map Prisma moderation action to response DTO
    */
-  private mapModerationActionToResponse(
-    action: any,
-  ): AiRecommendationResponse {
+  private mapModerationActionToResponse(action: any): AiRecommendationResponse {
     return {
       id: action.id,
       targetType: action.targetType,

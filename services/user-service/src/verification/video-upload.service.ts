@@ -26,21 +26,17 @@ export class VideoUploadService {
     this.region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
     this.videoBucket =
       this.configService.get<string>('S3_VIDEO_VERIFICATION_BUCKET') ||
-      'unite-discord-video-verifications';
-    this.videoMaxFileSize = this.configService.get<number>(
-      'VIDEO_MAX_FILE_SIZE',
-    ) || 100 * 1024 * 1024;
-    this.videoUploadRetentionDays = this.configService.get<number>(
-      'VIDEO_UPLOAD_RETENTION_DAYS',
-    ) || 30;
+      'reason-bridge-video-verifications';
+    this.videoMaxFileSize =
+      this.configService.get<number>('VIDEO_MAX_FILE_SIZE') || 100 * 1024 * 1024;
+    this.videoUploadRetentionDays =
+      this.configService.get<number>('VIDEO_UPLOAD_RETENTION_DAYS') || 30;
 
     this.s3Client = new S3Client({
       region: this.region,
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>(
-          'AWS_SECRET_ACCESS_KEY',
-        ) || '',
+        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
       },
     });
 
@@ -81,9 +77,7 @@ export class VideoUploadService {
 
       // Validate MIME type
       if (!this.isValidVideoMimeType(dto.mimeType)) {
-        throw new BadRequestException(
-          `MIME type ${dto.mimeType} is not a supported video format`,
-        );
+        throw new BadRequestException(`MIME type ${dto.mimeType} is not a supported video format`);
       }
 
       // Fetch verification record
@@ -101,9 +95,7 @@ export class VideoUploadService {
         this.logger.warn(
           `User ${userId} attempted to upload video for verification belonging to ${verification.userId}`,
         );
-        throw new BadRequestException(
-          'Verification does not belong to this user',
-        );
+        throw new BadRequestException('Verification does not belong to this user');
       }
 
       // Validate verification type
@@ -273,8 +265,7 @@ export class VideoUploadService {
         lastModified: response.LastModified,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       // Log but don't throw - object may not exist yet due to timing
       this.logger.debug(`Could not retrieve S3 object metadata: ${errorMessage}`);
       return null;

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BedrockClient, type AIClientConfig } from '@unite-discord/ai-client';
+import { BedrockClient, type AIClientConfig } from '@reason-bridge/ai-client';
 
 /**
  * Bedrock AI Service
