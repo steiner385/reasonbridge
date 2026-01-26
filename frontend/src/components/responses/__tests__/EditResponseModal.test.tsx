@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EditResponseModal from '../EditResponseModal';
 import type { Response } from '../../../types/response';
@@ -95,12 +95,11 @@ describe('EditResponseModal', () => {
     });
 
     it('should display character count with appropriate styling', async () => {
-      const user = userEvent.setup();
       render(<EditResponseModal {...defaultProps} maxLength={100} />);
 
       const textarea = screen.getByLabelText(/your response/i);
-      await user.clear(textarea);
-      await user.type(textarea, 'A'.repeat(95));
+      // Use fireEvent.change for large text input to avoid slow keystroke simulation
+      fireEvent.change(textarea, { target: { value: 'A'.repeat(95) } });
 
       const characterCount = screen.getByText(/95 \/ 100 characters/);
       expect(characterCount.className).toContain('text-secondary-600');
@@ -113,7 +112,8 @@ describe('EditResponseModal', () => {
       render(<EditResponseModal {...defaultProps} />);
 
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/);
-      await user.type(sourceInput, 'https://newexample.com');
+      // Use fireEvent.change to avoid garbled text from userEvent.type in CI
+      fireEvent.change(sourceInput, { target: { value: 'https://newexample.com' } });
       await user.click(screen.getByRole('button', { name: /^add$/i }));
 
       expect(screen.getByText('https://newexample.com')).toBeInTheDocument();
