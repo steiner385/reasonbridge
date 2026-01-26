@@ -10,4 +10,4 @@
 export * from '@prisma/client';
 
 // Re-export the client factory
-export { prisma, createPrismaClient, disconnectPrisma } from './client';
+export { prisma, createPrismaClient, disconnectPrisma } from './client.js';
