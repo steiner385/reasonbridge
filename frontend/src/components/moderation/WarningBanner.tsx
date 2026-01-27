@@ -7,7 +7,11 @@
  */
 
 import { useState } from 'react';
-import type { ModerationAction, ModerationActionType, ModerationSeverity } from '../../types/moderation';
+import type {
+  ModerationAction,
+  ModerationActionType,
+  ModerationSeverity,
+} from '../../types/moderation';
 
 export interface WarningBannerProps {
   /**
@@ -46,7 +50,7 @@ export interface WarningBannerProps {
  */
 const getWarningStyles = (
   actionType: ModerationActionType,
-  severity: ModerationSeverity
+  severity: ModerationSeverity,
 ): {
   bg: string;
   border: string;
@@ -101,7 +105,9 @@ const getWarningStyles = (
 /**
  * Get text color classes based on severity
  */
-const getTextColors = (severity: ModerationSeverity): { title: string; text: string; button: string } => {
+const getTextColors = (
+  severity: ModerationSeverity,
+): { title: string; text: string; button: string } => {
   if (severity === 'non_punitive') {
     return {
       title: 'text-gray-900',
@@ -146,7 +152,10 @@ const formatActionType = (actionType: ModerationActionType): string => {
 /**
  * Get appropriate SVG icon for the warning
  */
-const getIcon = (actionType: ModerationActionType, severity: ModerationSeverity): React.ReactNode => {
+const getIcon = (
+  actionType: ModerationActionType,
+  severity: ModerationSeverity,
+): React.ReactNode => {
   if (severity === 'non_punitive') {
     if (actionType === 'educate') {
       return (
@@ -263,9 +272,7 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
               {warning.aiConfidence !== undefined && (
                 <p>
                   AI Confidence:{' '}
-                  <span className="font-medium">
-                    {(warning.aiConfidence * 100).toFixed(0)}%
-                  </span>
+                  <span className="font-medium">{(warning.aiConfidence * 100).toFixed(0)}%</span>
                 </p>
               )}
               <p>

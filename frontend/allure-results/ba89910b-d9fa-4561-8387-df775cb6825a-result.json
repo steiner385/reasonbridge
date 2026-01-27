@@ -1,1 +1,206 @@
-{"uuid":"ba89910b-d9fa-4561-8387-df775cb6825a","name":"should handle phone verification API request","historyId":"a91f69c5d2be27a5f6a675663fdc6e52:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245016070,"uuid":"cc815f50-0987-4e2e-bf79-9af789729ef5","stop":1769245016073}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245016070,"uuid":"d692cc8b-063d-4481-943e-b4ead1607bec","stop":1769245016073},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245016074,"uuid":"009d97aa-fadf-4096-8f08-fe06e0fc2cc4","stop":1769245016101}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245016074,"uuid":"bd9bdab4-68e1-4cfb-9018-f02dd0ab47b3","stop":1769245016101}],"attachments":[],"parameters":[],"name":"beforeEach hook","start":1769245016065,"uuid":"2d97f942-2c87-4898-a2bb-70f8b4675826","stop":1769245016106}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245016064,"uuid":"ec479812-b691-44ce-b226-73baa5197007","stop":1769245016106},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245016107,"name":"Navigate to \"/verification\"","uuid":"0a8e7f51-1ed9-41f0-955b-f676db8c64d6","stop":1769245016151},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245016153,"name":"Wait for event \"request\"","uuid":"df340d2f-0c63-4241-bd74-507f785a5aa7","stop":1769245016166},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245016155,"name":"Evaluate","uuid":"271e3287-3ea4-4988-95c9-cac9a73841b7","stop":1769245016174},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245016175,"name":"Expect \"toContain\"","uuid":"1e521c7c-0870-4391-a337-9f381726de68","stop":1769245016177},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245016176,"uuid":"13935a31-a267-469f-9fa6-380a3861985f","stop":1769245016176},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245016220,"uuid":"fb7b1b9d-da78-430e-9e10-58cd44ae9da6","stop":1769245016346}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245016176,"uuid":"a92cd310-3604-418d-b92c-6c569ffbc72a","stop":1769245016346}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245016175,"uuid":"e4ce60f2-fd89-4bea-8330-6c00f7fd1996","stop":1769245016353}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"phone-verification-flow.spec.ts"},{"name":"titlePath","value":" > chromium > phone-verification-flow.spec.ts > Phone Verification Flow"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-4"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"phone-verification-flow.spec.ts"},{"name":"subSuite","value":"Phone Verification Flow"}],"links":[],"start":1769245016066,"testCaseId":"a91f69c5d2be27a5f6a675663fdc6e52","fullName":"phone-verification-flow.spec.ts:54:3","titlePath":["phone-verification-flow.spec.ts","Phone Verification Flow"],"stop":1769245016342}
+{
+  "uuid": "ba89910b-d9fa-4561-8387-df775cb6825a",
+  "name": "should handle phone verification API request",
+  "historyId": "a91f69c5d2be27a5f6a675663fdc6e52:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245016070,
+                  "uuid": "cc815f50-0987-4e2e-bf79-9af789729ef5",
+                  "stop": 1769245016073
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245016070,
+              "uuid": "d692cc8b-063d-4481-943e-b4ead1607bec",
+              "stop": 1769245016073
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245016074,
+                  "uuid": "009d97aa-fadf-4096-8f08-fe06e0fc2cc4",
+                  "stop": 1769245016101
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245016074,
+              "uuid": "bd9bdab4-68e1-4cfb-9018-f02dd0ab47b3",
+              "stop": 1769245016101
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245016065,
+          "uuid": "2d97f942-2c87-4898-a2bb-70f8b4675826",
+          "stop": 1769245016106
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245016064,
+      "uuid": "ec479812-b691-44ce-b226-73baa5197007",
+      "stop": 1769245016106
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245016107,
+      "name": "Navigate to \"/verification\"",
+      "uuid": "0a8e7f51-1ed9-41f0-955b-f676db8c64d6",
+      "stop": 1769245016151
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245016153,
+      "name": "Wait for event \"request\"",
+      "uuid": "df340d2f-0c63-4241-bd74-507f785a5aa7",
+      "stop": 1769245016166
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245016155,
+      "name": "Evaluate",
+      "uuid": "271e3287-3ea4-4988-95c9-cac9a73841b7",
+      "stop": 1769245016174
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245016175,
+      "name": "Expect \"toContain\"",
+      "uuid": "1e521c7c-0870-4391-a337-9f381726de68",
+      "stop": 1769245016177
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245016176,
+          "uuid": "13935a31-a267-469f-9fa6-380a3861985f",
+          "stop": 1769245016176
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245016220,
+              "uuid": "fb7b1b9d-da78-430e-9e10-58cd44ae9da6",
+              "stop": 1769245016346
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245016176,
+          "uuid": "a92cd310-3604-418d-b92c-6c569ffbc72a",
+          "stop": 1769245016346
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245016175,
+      "uuid": "e4ce60f2-fd89-4bea-8330-6c00f7fd1996",
+      "stop": 1769245016353
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "phone-verification-flow.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > phone-verification-flow.spec.ts > Phone Verification Flow"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-4" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "phone-verification-flow.spec.ts" },
+    { "name": "subSuite", "value": "Phone Verification Flow" }
+  ],
+  "links": [],
+  "start": 1769245016066,
+  "testCaseId": "a91f69c5d2be27a5f6a675663fdc6e52",
+  "fullName": "phone-verification-flow.spec.ts:54:3",
+  "titlePath": ["phone-verification-flow.spec.ts", "Phone Verification Flow"],
+  "stop": 1769245016342
+}

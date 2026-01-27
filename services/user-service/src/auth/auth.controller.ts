@@ -34,7 +34,7 @@ export class AuthController {
     return {
       userId: user.id,
       email: user.email,
-      displayName: user.displayName,
+      displayName: user.displayName ?? '',
       message: 'Registration successful. Please check your email to verify your account.',
       requiresEmailVerification: true,
     };

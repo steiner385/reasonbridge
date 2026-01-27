@@ -48,10 +48,7 @@ export interface VerificationRequestedPayload {
  * Event published when verification is requested
  */
 export interface VerificationRequestedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_REQUESTED,
-    VerificationRequestedPayload
-  > {
+  extends BaseEvent<typeof USER_EVENT_TYPES.VERIFICATION_REQUESTED, VerificationRequestedPayload> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_REQUESTED;
 }
 
@@ -76,10 +73,7 @@ export interface VerificationCompletedPayload {
  * Event published when verification is completed
  */
 export interface VerificationCompletedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_COMPLETED,
-    VerificationCompletedPayload
-  > {
+  extends BaseEvent<typeof USER_EVENT_TYPES.VERIFICATION_COMPLETED, VerificationCompletedPayload> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_COMPLETED;
 }
 
@@ -112,10 +106,7 @@ export interface VerificationFailedPayload {
  * Event published when verification fails
  */
 export interface VerificationFailedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_FAILED,
-    VerificationFailedPayload
-  > {
+  extends BaseEvent<typeof USER_EVENT_TYPES.VERIFICATION_FAILED, VerificationFailedPayload> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_FAILED;
 }
 
@@ -138,10 +129,7 @@ export interface VerificationExpiredPayload {
  * Event published when verification expires
  */
 export interface VerificationExpiredEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_EXPIRED,
-    VerificationExpiredPayload
-  > {
+  extends BaseEvent<typeof USER_EVENT_TYPES.VERIFICATION_EXPIRED, VerificationExpiredPayload> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_EXPIRED;
 }
 

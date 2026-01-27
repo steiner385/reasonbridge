@@ -1,0 +1,42 @@
+{
+  "name": "ReasonBridge - Rational Discussion Platform",
+  "short_name": "ReasonBridge",
+  "description": "Find common ground through rational discussion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFBFC",
+  "theme_color": "#2A9D8F",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/logos/reasonbridge-icon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/logos/reasonbridge-icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/logos/reasonbridge-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/logos/reasonbridge-logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/logos/reasonbridge-logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "productivity", "education"],
+  "lang": "en-US"
+}

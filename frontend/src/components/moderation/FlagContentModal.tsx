@@ -71,7 +71,11 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
   // Close modal and call onSuccess when flag is submitted successfully
   useEffect(() => {
     if (isSuccess) {
-      notify.success('Report submitted', 'Thank you! Our moderation team will review your report.', 4000);
+      notify.success(
+        'Report submitted',
+        'Thank you! Our moderation team will review your report.',
+        4000,
+      );
       onSuccess?.();
       onClose();
     }

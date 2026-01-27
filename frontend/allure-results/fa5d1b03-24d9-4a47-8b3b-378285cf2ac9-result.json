@@ -1,1 +1,38 @@
-{"uuid":"fa5d1b03-24d9-4a47-8b3b-378285cf2ac9","name":"should show OTP confirmation step after phone submission","historyId":"71ebb34686bd2d6c2d6740773e86d4d7:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"skipped","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"profile-trust-indicators.spec.ts"},{"name":"titlePath","value":" > chromium > profile-trust-indicators.spec.ts > User Story 4: Trust Indicators and Human Authenticity > PhoneVerificationForm"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker--1"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"profile-trust-indicators.spec.ts"},{"name":"subSuite","value":"User Story 4: Trust Indicators and Human Authenticity > PhoneVerificationForm"}],"links":[],"start":1769245017931,"testCaseId":"71ebb34686bd2d6c2d6740773e86d4d7","fullName":"profile-trust-indicators.spec.ts:174:5","titlePath":["profile-trust-indicators.spec.ts","User Story 4: Trust Indicators and Human Authenticity","PhoneVerificationForm"],"stop":1769245017932}
+{
+  "uuid": "fa5d1b03-24d9-4a47-8b3b-378285cf2ac9",
+  "name": "should show OTP confirmation step after phone submission",
+  "historyId": "71ebb34686bd2d6c2d6740773e86d4d7:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "skipped",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-trust-indicators.spec.ts > User Story 4: Trust Indicators and Human Authenticity > PhoneVerificationForm"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker--1" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "subSuite",
+      "value": "User Story 4: Trust Indicators and Human Authenticity > PhoneVerificationForm"
+    }
+  ],
+  "links": [],
+  "start": 1769245017931,
+  "testCaseId": "71ebb34686bd2d6c2d6740773e86d4d7",
+  "fullName": "profile-trust-indicators.spec.ts:174:5",
+  "titlePath": [
+    "profile-trust-indicators.spec.ts",
+    "User Story 4: Trust Indicators and Human Authenticity",
+    "PhoneVerificationForm"
+  ],
+  "stop": 1769245017932
+}

@@ -10,6 +10,32 @@ reasonBridge is a **Rational Discussion Platform** built with modern web technol
 
 **Purpose**: Enable constructive discourse through AI-powered analysis, structured argumentation, and evidence-based discussions.
 
+## Core Principles
+
+### The Boy Scout Rule: Always Leave the Codebase Better
+
+**CRITICAL**: When working on any task, you MUST fix any failures, issues, TODOs, or problems you encounter, **regardless of whether you caused them**.
+
+**Philosophy**:
+- If you find a failing test → fix it
+- If you encounter a build error → fix it
+- If you discover a bug → fix it
+- If you see a TODO that's blocking progress → address it
+- If E2E tests fail for "unrelated reasons" → those reasons are now related
+
+**This is non-negotiable**. Do not:
+- ❌ Say "this is a pre-existing issue"
+- ❌ Say "this is unrelated to our changes"
+- ❌ Say "this was already broken"
+- ❌ Leave problems for later
+
+**Instead**:
+- ✅ Fix the problem you found
+- ✅ Ensure the system works end-to-end
+- ✅ Leave the codebase in a better state than you found it
+
+**Example**: If you're fixing TypeScript errors and discover E2E tests failing due to a missing module export, you fix BOTH the TypeScript errors AND the module export issue. The task isn't complete until the full pipeline passes.
+
 ## Architecture
 
 ### Frontend Structure

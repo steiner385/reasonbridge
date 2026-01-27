@@ -1,1 +1,206 @@
-{"uuid":"c30db710-74ed-4c23-a54a-04413d65a3e0","name":"should handle topic link application errors gracefully","historyId":"631dd9c48be6e06c07b23f15e2ee4593:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245004743,"uuid":"0a26f3ae-39ab-4912-b6eb-d5d9296bcddc","stop":1769245004747}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245004743,"uuid":"03eac564-ed43-420e-b091-47dfe02f5f5d","stop":1769245004747},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245004749,"uuid":"98df58cd-99df-4b66-85f3-218a04fb8494","stop":1769245004792}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245004748,"uuid":"d5f1e343-d997-4ffa-861d-cbbafd0abf6f","stop":1769245004792}],"attachments":[],"parameters":[],"name":"beforeEach hook","start":1769245004736,"uuid":"ca751cd6-a4a9-4ee4-8efe-061aecfa1bab","stop":1769245004803}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245004736,"uuid":"491e4ea5-cea9-49c1-a047-073d1c4f5e75","stop":1769245004803},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245004805,"name":"Navigate to \"/\"","uuid":"ac9d574b-8c38-441f-a9bd-8096a7eeb8ab","stop":1769245004866},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245004866,"name":"Evaluate","uuid":"7e93d8f4-c0cc-432d-9e34-cb6cd168ec31","stop":1769245004898},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245004899,"name":"Expect \"toBe\"","uuid":"09b49f5a-d433-414c-80d8-83693da77d14","stop":1769245004899},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245004899,"name":"Expect \"toBe\"","uuid":"82ce935b-8942-4e98-85e8-8d37a966068a","stop":1769245004899},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245004900,"uuid":"88f5ca75-66e3-4a65-8e0a-815eea54adf2","stop":1769245004900},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245004954,"uuid":"230a6658-6bbd-4537-8841-38a207532bb2","stop":1769245005088}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245004900,"uuid":"48b1ca75-dfc9-449f-afda-c035506fca8d","stop":1769245005088}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245004900,"uuid":"17b870cc-9e92-464a-bf7b-95970dca3c9f","stop":1769245005094}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"apply-suggestion-flow.spec.ts"},{"name":"titlePath","value":" > chromium > apply-suggestion-flow.spec.ts > Apply Suggestion Flow - Error Handling"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-1"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"apply-suggestion-flow.spec.ts"},{"name":"subSuite","value":"Apply Suggestion Flow - Error Handling"}],"links":[],"start":1769245004736,"testCaseId":"631dd9c48be6e06c07b23f15e2ee4593","fullName":"apply-suggestion-flow.spec.ts:457:3","titlePath":["apply-suggestion-flow.spec.ts","Apply Suggestion Flow - Error Handling"],"stop":1769245005081}
+{
+  "uuid": "c30db710-74ed-4c23-a54a-04413d65a3e0",
+  "name": "should handle topic link application errors gracefully",
+  "historyId": "631dd9c48be6e06c07b23f15e2ee4593:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245004743,
+                  "uuid": "0a26f3ae-39ab-4912-b6eb-d5d9296bcddc",
+                  "stop": 1769245004747
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245004743,
+              "uuid": "03eac564-ed43-420e-b091-47dfe02f5f5d",
+              "stop": 1769245004747
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245004749,
+                  "uuid": "98df58cd-99df-4b66-85f3-218a04fb8494",
+                  "stop": 1769245004792
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245004748,
+              "uuid": "d5f1e343-d997-4ffa-861d-cbbafd0abf6f",
+              "stop": 1769245004792
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245004736,
+          "uuid": "ca751cd6-a4a9-4ee4-8efe-061aecfa1bab",
+          "stop": 1769245004803
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245004736,
+      "uuid": "491e4ea5-cea9-49c1-a047-073d1c4f5e75",
+      "stop": 1769245004803
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245004805,
+      "name": "Navigate to \"/\"",
+      "uuid": "ac9d574b-8c38-441f-a9bd-8096a7eeb8ab",
+      "stop": 1769245004866
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245004866,
+      "name": "Evaluate",
+      "uuid": "7e93d8f4-c0cc-432d-9e34-cb6cd168ec31",
+      "stop": 1769245004898
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245004899,
+      "name": "Expect \"toBe\"",
+      "uuid": "09b49f5a-d433-414c-80d8-83693da77d14",
+      "stop": 1769245004899
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245004899,
+      "name": "Expect \"toBe\"",
+      "uuid": "82ce935b-8942-4e98-85e8-8d37a966068a",
+      "stop": 1769245004899
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245004900,
+          "uuid": "88f5ca75-66e3-4a65-8e0a-815eea54adf2",
+          "stop": 1769245004900
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245004954,
+              "uuid": "230a6658-6bbd-4537-8841-38a207532bb2",
+              "stop": 1769245005088
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245004900,
+          "uuid": "48b1ca75-dfc9-449f-afda-c035506fca8d",
+          "stop": 1769245005088
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245004900,
+      "uuid": "17b870cc-9e92-464a-bf7b-95970dca3c9f",
+      "stop": 1769245005094
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "apply-suggestion-flow.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > apply-suggestion-flow.spec.ts > Apply Suggestion Flow - Error Handling"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-1" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "apply-suggestion-flow.spec.ts" },
+    { "name": "subSuite", "value": "Apply Suggestion Flow - Error Handling" }
+  ],
+  "links": [],
+  "start": 1769245004736,
+  "testCaseId": "631dd9c48be6e06c07b23f15e2ee4593",
+  "fullName": "apply-suggestion-flow.spec.ts:457:3",
+  "titlePath": ["apply-suggestion-flow.spec.ts", "Apply Suggestion Flow - Error Handling"],
+  "stop": 1769245005081
+}

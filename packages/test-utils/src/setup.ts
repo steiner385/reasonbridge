@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 
 import { config } from 'dotenv';
-import { createMockPrisma } from './prisma-mock.js';
+import { createMockPrisma } from './prisma-mock';
 
 // Load environment variables for tests
 config({ path: '.env.test' });

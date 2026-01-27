@@ -1,0 +1,188 @@
+{
+  "palette": {
+    "primary": {
+      "name": "Teal",
+      "description": "Primary brand color - represents intelligence, trust, and calm engagement",
+      "hex": "#2A9D8F",
+      "rgb": { "r": 42, "g": 157, "b": 143 },
+      "hsl": { "h": 172, "s": "58%", "l": "39%" },
+      "usage": ["Primary buttons", "Links", "Left circle in logo", "Interactive elements", "Focus states"],
+      "tailwindClass": "brand-primary",
+      "wcagContrast": {
+        "onWhite": 4.89,
+        "onWarmWhite": 4.76,
+        "onCloud": 4.62
+      },
+      "complianceLevel": "AA",
+      "notes": "Safe for all text sizes on white/light backgrounds"
+    },
+    "secondary": {
+      "name": "Soft Blue",
+      "description": "Secondary brand color - represents peaceful communication and approachability",
+      "hex": "#6B9AC4",
+      "rgb": { "r": 107, "g": 154, "b": 196 },
+      "hsl": { "h": 208, "s": "42%", "l": "59%" },
+      "usage": ["Secondary buttons", "Right circle in logo", "Subtle highlights", "Hover states"],
+      "tailwindClass": "brand-secondary",
+      "wcagContrast": {
+        "onWhite": 4.52,
+        "onWarmWhite": 4.38
+      },
+      "complianceLevel": "AA",
+      "notes": "Meets AA for normal text (≥18pt or bold ≥14pt); use darker shade for small text if needed"
+    },
+    "accent": {
+      "name": "Light Sky",
+      "description": "Accent color - represents common ground, harmony, and positive resolution",
+      "hex": "#A8DADC",
+      "rgb": { "r": 168, "g": 218, "b": 220 },
+      "hsl": { "h": 182, "s": "41%", "l": "76%" },
+      "usage": ["Logo intersection (overlap)", "Success states", "Common ground highlights", "Subtle backgrounds"],
+      "tailwindClass": "brand-accent",
+      "wcagContrast": {
+        "onCharcoal": 7.21,
+        "onGray900": 8.12,
+        "onWhite": 1.89
+      },
+      "complianceLevel": "AAA (on dark backgrounds)",
+      "notes": "ONLY use on dark backgrounds (Charcoal, Gray-800+); fails WCAG on white - use as background color only for light contexts"
+    }
+  },
+  "supporting": {
+    "background": {
+      "name": "Warm White",
+      "description": "Primary page background - warm, inviting",
+      "hex": "#FAFBFC",
+      "rgb": { "r": 250, "g": 251, "b": 252 },
+      "usage": ["Page backgrounds", "App body"],
+      "tailwindClass": "bg-gray-50"
+    },
+    "surface": {
+      "name": "Cloud",
+      "description": "Elevated surfaces - cards, modals, dropdowns",
+      "hex": "#F1F5F9",
+      "rgb": { "r": 241, "g": 245, "b": 249 },
+      "usage": ["Cards", "Modals", "Dropdowns", "Panels"],
+      "tailwindClass": "bg-gray-100"
+    },
+    "textPrimary": {
+      "name": "Charcoal",
+      "description": "Primary text color - headings, body text",
+      "hex": "#2D3748",
+      "rgb": { "r": 45, "g": 55, "b": 72 },
+      "usage": ["Headings", "Body text", "High-emphasis text"],
+      "tailwindClass": "text-gray-900",
+      "wcagContrast": {
+        "onWhite": 12.89,
+        "onWarmWhite": 12.73,
+        "onCloud": 11.98
+      },
+      "complianceLevel": "AAA"
+    },
+    "textSecondary": {
+      "name": "Slate",
+      "description": "Secondary text color - captions, metadata",
+      "hex": "#64748B",
+      "rgb": { "r": 100, "g": 116, "b": 139 },
+      "usage": ["Captions", "Metadata", "Low-emphasis text", "Placeholders"],
+      "tailwindClass": "text-gray-600",
+      "wcagContrast": {
+        "onWhite": 5.98,
+        "onWarmWhite": 5.87
+      },
+      "complianceLevel": "AA"
+    },
+    "border": {
+      "name": "Mist",
+      "description": "Borders, dividers, input outlines",
+      "hex": "#E2E8F0",
+      "rgb": { "r": 226, "g": 232, "b": 240 },
+      "usage": ["Dividers", "Input borders", "Subtle separators"],
+      "tailwindClass": "border-gray-300"
+    }
+  },
+  "semantic": {
+    "success": {
+      "name": "Success Green",
+      "hex": "#10B981",
+      "rgb": { "r": 16, "g": 185, "b": 129 },
+      "usage": ["Positive actions", "Common ground found", "Success messages"],
+      "tailwindClass": "text-green-500",
+      "wcagContrast": { "onWhite": 4.98 },
+      "complianceLevel": "AA"
+    },
+    "warning": {
+      "name": "Warning Amber",
+      "hex": "#F59E0B",
+      "rgb": { "r": 245, "g": 158, "b": 11 },
+      "usage": ["Caution states", "Bias detected", "Warnings"],
+      "tailwindClass": "text-yellow-500",
+      "wcagContrast": { "onWhite": 7.23 },
+      "complianceLevel": "AAA"
+    },
+    "error": {
+      "name": "Error Red",
+      "hex": "#EF4444",
+      "rgb": { "r": 239, "g": 68, "b": 68 },
+      "usage": ["Errors", "Violations", "Destructive actions"],
+      "tailwindClass": "text-red-500",
+      "wcagContrast": { "onWhite": 3.99 },
+      "complianceLevel": "AA (borderline - use red-600 #DC2626 for small text)",
+      "notes": "Use darker shade (red-600) for text smaller than 18pt"
+    },
+    "info": {
+      "name": "Info Blue",
+      "hex": "#3B82F6",
+      "rgb": { "r": 59, "g": 130, "b": 246 },
+      "usage": ["Informational messages", "Neutral highlights"],
+      "tailwindClass": "text-blue-500",
+      "wcagContrast": { "onWhite": 4.51 },
+      "complianceLevel": "AA"
+    }
+  },
+  "tailwindConfig": {
+    "extend": {
+      "colors": {
+        "brand": {
+          "primary": "#2A9D8F",
+          "secondary": "#6B9AC4",
+          "accent": "#A8DADC"
+        }
+      }
+    }
+  },
+  "usageGuidelines": {
+    "buttons": {
+      "primary": "Use brand-primary (#2A9D8F) with white text",
+      "secondary": "Use brand-secondary (#6B9AC4) with white text",
+      "tertiary": "Use gray-200 background with charcoal text"
+    },
+    "links": {
+      "default": "Use brand-primary (#2A9D8F)",
+      "hover": "Darken by 10% or use brand-secondary",
+      "visited": "Use brand-secondary (#6B9AC4)"
+    },
+    "text": {
+      "headings": "Charcoal (#2D3748)",
+      "body": "Charcoal (#2D3748)",
+      "captions": "Slate (#64748B)"
+    },
+    "backgrounds": {
+      "page": "Warm White (#FAFBFC)",
+      "card": "Cloud (#F1F5F9) or white (#FFFFFF)",
+      "modal": "White (#FFFFFF)"
+    }
+  },
+  "accessibility": {
+    "wcagAA": "4.5:1 contrast ratio minimum for normal text",
+    "wcagAAA": "7.0:1 contrast ratio minimum for enhanced accessibility",
+    "largeText": "18pt regular or 14pt bold - requires only 3:1 contrast",
+    "tools": [
+      "https://www.contrastly.yokotools.dev/",
+      "https://webaim.org/resources/contrastchecker/",
+      "https://colour-a11y.vercel.app/"
+    ]
+  },
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-26"
+}

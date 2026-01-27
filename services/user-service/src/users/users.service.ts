@@ -55,6 +55,7 @@ export class UsersService {
         email: data.email,
         displayName: data.displayName,
         cognitoSub: data.cognitoSub,
+        authMethod: 'EMAIL_PASSWORD',
         verificationLevel: 'BASIC',
         trustScoreAbility: 0.5,
         trustScoreBenevolence: 0.5,

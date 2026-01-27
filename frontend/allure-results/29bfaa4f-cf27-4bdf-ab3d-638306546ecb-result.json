@@ -1,1 +1,194 @@
-{"uuid":"29bfaa4f-cf27-4bdf-ab3d-638306546ecb","name":"should display version details including participants and responses","historyId":"97907301bdd0a2b6eb621f74868f8916:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245006972,"uuid":"d43c343a-e9d7-4b47-ae5e-1d828b4ee845","stop":1769245006973}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245006971,"uuid":"99e94c42-04d0-4812-bcc4-b996f0b657ef","stop":1769245006974},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245006975,"uuid":"25c463e9-12e3-490e-a7d8-f39013930e0c","stop":1769245006996}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245006974,"uuid":"3d245201-3bae-475d-81d3-7cf6f72e9ebb","stop":1769245006996},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Navigate to \"/\"","start":1769245006998,"uuid":"599486c7-3a11-47e0-bc3a-c9096b4a2484","stop":1769245007040}],"attachments":[],"parameters":[],"name":"beforeEach hook","start":1769245006965,"uuid":"aa5b7e36-37ff-4452-a73a-2d282890542a","stop":1769245007040}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245006964,"uuid":"19f68c53-f22e-41cf-b0f5-4807c69efd32","stop":1769245007041},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245007041,"name":"Expect \"toBe\"","uuid":"490557a0-d7c7-4ff1-a62b-4a7a3480c365","stop":1769245007042},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"afterEach hook","start":1769245007042,"uuid":"8a2aef7b-172d-4a86-8e63-486c2cd54b9a","stop":1769245007042},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245007046,"uuid":"ce3a09e4-bd0c-4258-9217-04db339702e0","stop":1769245007046},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245007100,"uuid":"f6ad1cfd-fce8-4351-b885-59cabaf93228","stop":1769245007225}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245007046,"uuid":"e95da303-9ff1-47cf-8272-ba2971ff4cd7","stop":1769245007225}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245007042,"uuid":"18fbefa9-2216-4e4b-8fc5-828dacc34524","stop":1769245007228}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"common-ground-history.spec.ts"},{"name":"titlePath","value":" > chromium > common-ground-history.spec.ts > CommonGroundHistory Component"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-2"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"common-ground-history.spec.ts"},{"name":"subSuite","value":"CommonGroundHistory Component"}],"links":[],"start":1769245006964,"testCaseId":"97907301bdd0a2b6eb621f74868f8916","fullName":"common-ground-history.spec.ts:77:3","titlePath":["common-ground-history.spec.ts","CommonGroundHistory Component"],"stop":1769245007214}
+{
+  "uuid": "29bfaa4f-cf27-4bdf-ab3d-638306546ecb",
+  "name": "should display version details including participants and responses",
+  "historyId": "97907301bdd0a2b6eb621f74868f8916:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create context",
+                  "start": 1769245006972,
+                  "uuid": "d43c343a-e9d7-4b47-ae5e-1d828b4ee845",
+                  "stop": 1769245006973
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"context\"",
+              "start": 1769245006971,
+              "uuid": "99e94c42-04d0-4812-bcc4-b996f0b657ef",
+              "stop": 1769245006974
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [
+                {
+                  "status": "passed",
+                  "statusDetails": {},
+                  "stage": "finished",
+                  "steps": [],
+                  "attachments": [],
+                  "parameters": [],
+                  "name": "Create page",
+                  "start": 1769245006975,
+                  "uuid": "25c463e9-12e3-490e-a7d8-f39013930e0c",
+                  "stop": 1769245006996
+                }
+              ],
+              "attachments": [],
+              "parameters": [],
+              "name": "Fixture \"page\"",
+              "start": 1769245006974,
+              "uuid": "3d245201-3bae-475d-81d3-7cf6f72e9ebb",
+              "stop": 1769245006996
+            },
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Navigate to \"/\"",
+              "start": 1769245006998,
+              "uuid": "599486c7-3a11-47e0-bc3a-c9096b4a2484",
+              "stop": 1769245007040
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "beforeEach hook",
+          "start": 1769245006965,
+          "uuid": "aa5b7e36-37ff-4452-a73a-2d282890542a",
+          "stop": 1769245007040
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245006964,
+      "uuid": "19f68c53-f22e-41cf-b0f5-4807c69efd32",
+      "stop": 1769245007041
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245007041,
+      "name": "Expect \"toBe\"",
+      "uuid": "490557a0-d7c7-4ff1-a62b-4a7a3480c365",
+      "stop": 1769245007042
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "afterEach hook",
+          "start": 1769245007042,
+          "uuid": "8a2aef7b-172d-4a86-8e63-486c2cd54b9a",
+          "stop": 1769245007042
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245007046,
+          "uuid": "ce3a09e4-bd0c-4258-9217-04db339702e0",
+          "stop": 1769245007046
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245007100,
+              "uuid": "f6ad1cfd-fce8-4351-b885-59cabaf93228",
+              "stop": 1769245007225
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245007046,
+          "uuid": "e95da303-9ff1-47cf-8272-ba2971ff4cd7",
+          "stop": 1769245007225
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245007042,
+      "uuid": "18fbefa9-2216-4e4b-8fc5-828dacc34524",
+      "stop": 1769245007228
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "common-ground-history.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > common-ground-history.spec.ts > CommonGroundHistory Component"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "common-ground-history.spec.ts" },
+    { "name": "subSuite", "value": "CommonGroundHistory Component" }
+  ],
+  "links": [],
+  "start": 1769245006964,
+  "testCaseId": "97907301bdd0a2b6eb621f74868f8916",
+  "fullName": "common-ground-history.spec.ts:77:3",
+  "titlePath": ["common-ground-history.spec.ts", "CommonGroundHistory Component"],
+  "stop": 1769245007214
+}

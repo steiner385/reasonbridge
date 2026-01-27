@@ -1,0 +1,194 @@
+{
+  "uuid": "898fcf84-2821-4299-bad4-a6c39a08c11b",
+  "name": "Headings use Nunito font",
+  "historyId": "77c6f30fca4094caf729b8cfc3e64eb4:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769401066253,
+              "uuid": "2ad7e720-0e8d-499a-82dd-549716a84590",
+              "stop": 1769401066381
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769401066249,
+          "uuid": "3fbe683e-e3e7-4482-b3d5-986eac1fb16d",
+          "stop": 1769401066381
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769401066394,
+              "uuid": "c21ec90a-a4e4-4f9f-b122-b3dd32d64e8d",
+              "stop": 1769401066402
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401066392,
+          "uuid": "4cca1d7f-3f7b-49a9-9931-b0b0ff07be1c",
+          "stop": 1769401066403
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769401066410,
+              "uuid": "9bad970b-005d-4279-a217-024f6acc7f5d",
+              "stop": 1769401066449
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401066408,
+          "uuid": "848adc42-3121-4444-979b-26de388d460b",
+          "stop": 1769401066449
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769401066233,
+      "uuid": "04089062-6daf-46e8-863c-9261bd2bc220",
+      "stop": 1769401066449
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401066451,
+      "name": "Navigate to \"/\"",
+      "uuid": "3543f76e-98cf-48b6-b93b-c021a9b96022",
+      "stop": 1769401067630
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401067637,
+      "name": "Query count locator('h1').first()",
+      "uuid": "2e3d1d72-3a49-4ad2-a5b3-e5093b99ddd5",
+      "stop": 1769401067751
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401067755,
+          "uuid": "fe2d8583-87ed-4c9f-afbf-73ca320303ed",
+          "stop": 1769401067755
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769401067819,
+              "uuid": "67ffebac-0dd7-474f-8e97-380ee2563857",
+              "stop": 1769401067903
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401067756,
+          "uuid": "c4994e5b-f682-425c-8bd5-caee4b375ad8",
+          "stop": 1769401067903
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769401067753,
+      "uuid": "90159f62-fd38-4a95-8ca4-85ab16813da9",
+      "stop": 1769401067912
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-typography.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-typography.spec.ts > Brand Identity - Typography"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1664818-worker-5" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-typography.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Typography" }
+  ],
+  "links": [],
+  "start": 1769401066231,
+  "testCaseId": "77c6f30fca4094caf729b8cfc3e64eb4",
+  "fullName": "visual/brand-typography.spec.ts:4:3",
+  "titlePath": ["visual", "brand-typography.spec.ts", "Brand Identity - Typography"],
+  "stop": 1769401067740
+}

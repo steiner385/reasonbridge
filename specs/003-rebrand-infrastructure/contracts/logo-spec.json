@@ -1,0 +1,166 @@
+{
+  "name": "ReasonBridge Logo",
+  "symbolism": "Two overlapping circles representing different perspectives finding common ground",
+  "brand": {
+    "personality": "Warm, trustworthy, approachable, intellectual but not intimidating",
+    "mission": "Find common ground through rational discussion"
+  },
+  "variants": [
+    {
+      "type": "full",
+      "description": "Symbol (overlapping circles) + 'ReasonBridge' wordmark",
+      "formats": ["svg", "png"],
+      "sizes": [1024, 512, 192],
+      "usage": "App icon (large), header logo, marketing materials, social media profile",
+      "minSize": "192x192px",
+      "files": [
+        {
+          "path": "/assets/logos/reasonbridge-logo.svg",
+          "format": "svg",
+          "optimized": true,
+          "targetSize": "8KB"
+        },
+        {
+          "path": "/assets/logos/reasonbridge-logo-1024.png",
+          "format": "png",
+          "size": 1024,
+          "targetSize": "40KB"
+        },
+        {
+          "path": "/assets/logos/reasonbridge-logo-512.png",
+          "format": "png",
+          "size": 512,
+          "targetSize": "20KB"
+        },
+        {
+          "path": "/assets/logos/reasonbridge-logo-192.png",
+          "format": "png",
+          "size": 192,
+          "targetSize": "8KB"
+        }
+      ]
+    },
+    {
+      "type": "icon-only",
+      "description": "Overlapping circles without text (favicon, app icon)",
+      "formats": ["svg", "png"],
+      "sizes": [180, 32, 16],
+      "usage": "Favicon, app icon (iOS/Android), browser tab, PWA manifest",
+      "minSize": "16x16px",
+      "files": [
+        {
+          "path": "/assets/logos/reasonbridge-icon.svg",
+          "format": "svg",
+          "optimized": true,
+          "targetSize": "5KB"
+        },
+        {
+          "path": "/assets/logos/reasonbridge-icon-180.png",
+          "format": "png",
+          "size": 180,
+          "usage": "Apple Touch Icon",
+          "targetSize": "6KB"
+        },
+        {
+          "path": "/assets/logos/reasonbridge-icon-32.png",
+          "format": "png",
+          "size": 32,
+          "usage": "Favicon (standard)",
+          "targetSize": "1.5KB"
+        },
+        {
+          "path": "/assets/logos/reasonbridge-icon-16.png",
+          "format": "png",
+          "size": 16,
+          "usage": "Favicon (small)",
+          "targetSize": "0.5KB"
+        }
+      ]
+    }
+  ],
+  "colors": {
+    "leftCircle": {
+      "name": "Primary Teal",
+      "hex": "#2A9D8F",
+      "description": "Represents intelligence, trust, calm engagement"
+    },
+    "rightCircle": {
+      "name": "Soft Blue",
+      "hex": "#6B9AC4",
+      "description": "Represents peaceful communication, approachability"
+    },
+    "intersection": {
+      "name": "Light Sky",
+      "hex": "#A8DADC",
+      "description": "Represents common ground, harmony, resolution"
+    }
+  },
+  "geometry": {
+    "safeArea": "10% padding on all sides",
+    "minSize": "16x16px (favicon)",
+    "circleOverlap": "Approximately 30% intersection area",
+    "circleStyle": "Solid fill, no strokes",
+    "corners": "None (perfect circles)"
+  },
+  "usage": {
+    "header": {
+      "variant": "full",
+      "format": "svg",
+      "maxHeight": "48px",
+      "placement": "Top-left corner"
+    },
+    "favicon": {
+      "variant": "icon-only",
+      "formats": ["svg", "png"],
+      "sizes": [32, 16],
+      "fallback": "ico format for legacy browsers"
+    },
+    "pwa": {
+      "variant": "icon-only",
+      "format": "png",
+      "sizes": [192, 512],
+      "maskable": false
+    },
+    "appleTouchIcon": {
+      "variant": "icon-only",
+      "format": "png",
+      "size": 180,
+      "path": "/apple-touch-icon.png"
+    },
+    "socialMedia": {
+      "variant": "full",
+      "format": "png",
+      "size": 1024,
+      "usage": "Twitter profile, Facebook page, LinkedIn"
+    }
+  },
+  "doNot": [
+    "Distort or skew the circles (maintain aspect ratio)",
+    "Change the overlap intersection area",
+    "Rotate or flip the logo",
+    "Add drop shadows or gradients",
+    "Use non-brand colors for circles",
+    "Place text too close to the symbol (<10px spacing)",
+    "Use on busy backgrounds without white/neutral backdrop"
+  ],
+  "accessibility": {
+    "altText": "ReasonBridge logo: two overlapping circles representing different perspectives finding common ground",
+    "ariaLabel": "ReasonBridge",
+    "wcag": {
+      "leftCircleOnWhite": "4.89:1 (AA compliant)",
+      "rightCircleOnWhite": "4.52:1 (AA compliant)",
+      "intersectionOnCharcoal": "7.21:1 (AAA compliant)"
+    }
+  },
+  "fileNaming": {
+    "pattern": "reasonbridge-{variant}-{size}.{format}",
+    "examples": [
+      "reasonbridge-logo.svg",
+      "reasonbridge-logo-1024.png",
+      "reasonbridge-icon.svg",
+      "reasonbridge-icon-180.png"
+    ]
+  },
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-26"
+}

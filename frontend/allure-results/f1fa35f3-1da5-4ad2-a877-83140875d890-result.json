@@ -1,1 +1,235 @@
-{"uuid":"f1fa35f3-1da5-4ad2-a877-83140875d890","name":"should display topic filters and allow filtering","historyId":"14a71f0b2c0b4c16117e2c43b3c8d60e:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"failed","statusDetails":{"message":"Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n","trace":"Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:191:40"},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245005158,"uuid":"f8ad7da6-9379-489b-89c0-a97f85f46d8b","stop":1769245005163}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245005157,"uuid":"de1a6d3d-39bd-45ca-8498-378e46b2e678","stop":1769245005164},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245005166,"uuid":"0a9311ca-f776-4fa4-a629-3b930d65579f","stop":1769245005200}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245005165,"uuid":"34aa847d-c3a0-427b-9ecc-0bbabc0591af","stop":1769245005200}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245005149,"uuid":"57c03f60-adc8-4f26-a411-617e1f9b1b11","stop":1769245005200},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245005202,"name":"Navigate to \"/topics\"","uuid":"96d3fbc6-d4b5-4878-b200-acf5d4b702a5","stop":1769245005237},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245005240,"name":"Wait for selector locator('text=Loading topics...')","uuid":"33d72b17-8360-4127-842c-c0b75a661991","stop":1769245006642},{"status":"failed","statusDetails":{"message":"Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n","trace":"Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:191:40"},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245006646,"name":"Expect \"toBeVisible\" locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()","uuid":"a29da5f4-03eb-4b03-8406-a2103a0e25ee","stop":1769245011650},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"screenshot","source":"5f0a2c4f-eb6a-4d10-9257-ccb5589c6fb5-attachment.png","type":"image/png"}],"parameters":[],"start":1769245012102,"name":"screenshot","stop":1769245012102},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"video","source":"8647fc8e-e743-49cc-80e4-bd7626cf6c28-attachment.webm","type":"video/webm"}],"parameters":[],"start":1769245012102,"name":"video","stop":1769245012102},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"error-context","source":"4c9401e8-8339-46c4-830d-8351e0b55eb9-attachment.md","type":"text/markdown"}],"parameters":[],"start":1769245012103,"name":"error-context","stop":1769245012103},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245011679,"uuid":"7bdbbf8a-67d5-446c-b9a3-ac09d08d3aaf","stop":1769245011679},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245011688,"uuid":"60895b31-3711-4a43-9f40-5968ac9e6a30","stop":1769245012071}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245011680,"uuid":"c59dcac7-279f-45df-87e0-77adeee569c3","stop":1769245012072}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245011651,"uuid":"1545cd9e-9b1e-496a-843e-cc509d3f79ba","stop":1769245012076}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"browse-topics-and-view-details.spec.ts"},{"name":"titlePath","value":" > chromium > browse-topics-and-view-details.spec.ts > Browse Topics and View Details"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-5"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"browse-topics-and-view-details.spec.ts"},{"name":"subSuite","value":"Browse Topics and View Details"}],"links":[],"start":1769245005147,"testCaseId":"14a71f0b2c0b4c16117e2c43b3c8d60e","fullName":"browse-topics-and-view-details.spec.ts:179:3","titlePath":["browse-topics-and-view-details.spec.ts","Browse Topics and View Details"],"stop":1769245012060}
+{
+  "uuid": "f1fa35f3-1da5-4ad2-a877-83140875d890",
+  "name": "should display topic filters and allow filtering",
+  "historyId": "14a71f0b2c0b4c16117e2c43b3c8d60e:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n",
+    "trace": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:191:40"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245005158,
+              "uuid": "f8ad7da6-9379-489b-89c0-a97f85f46d8b",
+              "stop": 1769245005163
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245005157,
+          "uuid": "de1a6d3d-39bd-45ca-8498-378e46b2e678",
+          "stop": 1769245005164
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245005166,
+              "uuid": "0a9311ca-f776-4fa4-a629-3b930d65579f",
+              "stop": 1769245005200
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245005165,
+          "uuid": "34aa847d-c3a0-427b-9ecc-0bbabc0591af",
+          "stop": 1769245005200
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245005149,
+      "uuid": "57c03f60-adc8-4f26-a411-617e1f9b1b11",
+      "stop": 1769245005200
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245005202,
+      "name": "Navigate to \"/topics\"",
+      "uuid": "96d3fbc6-d4b5-4878-b200-acf5d4b702a5",
+      "stop": 1769245005237
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245005240,
+      "name": "Wait for selector locator('text=Loading topics...')",
+      "uuid": "33d72b17-8360-4127-842c-c0b75a661991",
+      "stop": 1769245006642
+    },
+    {
+      "status": "failed",
+      "statusDetails": {
+        "message": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n",
+        "trace": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()\n\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:191:40"
+      },
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245006646,
+      "name": "Expect \"toBeVisible\" locator('text=/sort by/i').or(locator('[data-testid=\"sort-select\"]')).first()",
+      "uuid": "a29da5f4-03eb-4b03-8406-a2103a0e25ee",
+      "stop": 1769245011650
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "5f0a2c4f-eb6a-4d10-9257-ccb5589c6fb5-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245012102,
+      "name": "screenshot",
+      "stop": 1769245012102
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "8647fc8e-e743-49cc-80e4-bd7626cf6c28-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245012102,
+      "name": "video",
+      "stop": 1769245012102
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "4c9401e8-8339-46c4-830d-8351e0b55eb9-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245012103,
+      "name": "error-context",
+      "stop": 1769245012103
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245011679,
+          "uuid": "7bdbbf8a-67d5-446c-b9a3-ac09d08d3aaf",
+          "stop": 1769245011679
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245011688,
+              "uuid": "60895b31-3711-4a43-9f40-5968ac9e6a30",
+              "stop": 1769245012071
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245011680,
+          "uuid": "c59dcac7-279f-45df-87e0-77adeee569c3",
+          "stop": 1769245012072
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245011651,
+      "uuid": "1545cd9e-9b1e-496a-843e-cc509d3f79ba",
+      "stop": 1769245012076
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "browse-topics-and-view-details.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > browse-topics-and-view-details.spec.ts > Browse Topics and View Details"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-5" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "browse-topics-and-view-details.spec.ts" },
+    { "name": "subSuite", "value": "Browse Topics and View Details" }
+  ],
+  "links": [],
+  "start": 1769245005147,
+  "testCaseId": "14a71f0b2c0b4c16117e2c43b3c8d60e",
+  "fullName": "browse-topics-and-view-details.spec.ts:179:3",
+  "titlePath": ["browse-topics-and-view-details.spec.ts", "Browse Topics and View Details"],
+  "stop": 1769245012060
+}

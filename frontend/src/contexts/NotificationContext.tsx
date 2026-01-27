@@ -12,22 +12,15 @@ export interface NotificationContextType {
 export { NotificationContext } from './NotificationContextFactory';
 
 // Provider component exported separately to satisfy react-refresh only-export-components
-function NotificationProviderComponent({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function NotificationProviderComponent({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addNotification = useCallback(
-    (notification: Omit<Toast, 'id'>): string => {
-      const id = `toast-${Date.now()}-${Math.random()}`;
-      const toast: Toast = { ...notification, id };
-      setToasts((prev) => [...prev, toast]);
-      return id;
-    },
-    []
-  );
+  const addNotification = useCallback((notification: Omit<Toast, 'id'>): string => {
+    const id = `toast-${Date.now()}-${Math.random()}`;
+    const toast: Toast = { ...notification, id };
+    setToasts((prev) => [...prev, toast]);
+    return id;
+  }, []);
 
   const removeNotification = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -38,7 +31,9 @@ function NotificationProviderComponent({
   }, []);
 
   return (
-    <NotificationContext.Provider value={{ addNotification, removeNotification, clearNotifications }}>
+    <NotificationContext.Provider
+      value={{ addNotification, removeNotification, clearNotifications }}
+    >
       {children}
       <ToastContainer toasts={toasts} onClose={removeNotification} />
     </NotificationContext.Provider>
