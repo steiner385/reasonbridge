@@ -63,7 +63,12 @@ const calculatePasswordStrength = (password: string): PasswordStrength => {
  * EmailSignupForm component - Form for email/password registration with real-time validation
  * Features password strength indicator, email format validation, and accessibility
  */
-function EmailSignupForm({ onSubmit, isLoading = false, error, className = '' }: EmailSignupFormProps) {
+function EmailSignupForm({
+  onSubmit,
+  isLoading = false,
+  error,
+  className = '',
+}: EmailSignupFormProps) {
   const [formData, setFormData] = useState<EmailSignupFormData>({
     email: '',
     password: '',
@@ -122,37 +127,38 @@ function EmailSignupForm({ onSubmit, isLoading = false, error, className = '' }:
   };
 
   // Handle input change
-  const handleChange = (field: keyof EmailSignupFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange =
+    (field: keyof EmailSignupFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Update password strength in real-time
-    if (field === 'password') {
-      setPasswordStrength(calculatePasswordStrength(value));
-    }
-
-    // Validate on change if field has been touched
-    if (touched[field]) {
-      let fieldError: string | undefined;
-      switch (field) {
-        case 'email':
-          fieldError = validateEmail(value);
-          break;
-        case 'password':
-          fieldError = validatePassword(value);
-          break;
+      // Update password strength in real-time
+      if (field === 'password') {
+        setPasswordStrength(calculatePasswordStrength(value));
       }
-      setErrors((prev) => {
-        const updated = { ...prev };
-        if (fieldError) {
-          updated[field] = fieldError;
-        } else {
-          delete updated[field];
+
+      // Validate on change if field has been touched
+      if (touched[field]) {
+        let fieldError: string | undefined;
+        switch (field) {
+          case 'email':
+            fieldError = validateEmail(value);
+            break;
+          case 'password':
+            fieldError = validatePassword(value);
+            break;
         }
-        return updated;
-      });
-    }
-  };
+        setErrors((prev) => {
+          const updated = { ...prev };
+          if (fieldError) {
+            updated[field] = fieldError;
+          } else {
+            delete updated[field];
+          }
+          return updated;
+        });
+      }
+    };
 
   // Handle input blur
   const handleBlur = (field: keyof EmailSignupFormData) => () => {
@@ -279,7 +285,9 @@ function EmailSignupForm({ onSubmit, isLoading = false, error, className = '' }:
               <div
                 className={`h-full ${currentStrength.color} transition-all duration-300 ${currentStrength.width}`}
                 role="progressbar"
-                aria-valuenow={passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100}
+                aria-valuenow={
+                  passwordStrength === 'weak' ? 33 : passwordStrength === 'medium' ? 66 : 100
+                }
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={`Password strength: ${currentStrength.text}`}
