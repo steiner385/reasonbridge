@@ -15,9 +15,9 @@ const env = {
 };
 
 // Create EKS stack (creates VPC and EKS cluster)
-const eksStack = new EksStack(app, 'UniteEksStack', {
+const eksStack = new EksStack(app, 'ReasonBridgeEksStack', {
   env,
-  description: 'Unite Discord Platform - EKS Cluster and VPC',
+  description: 'ReasonBridge Platform - EKS Cluster and VPC',
   tags: {
     Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
@@ -26,10 +26,10 @@ const eksStack = new EksStack(app, 'UniteEksStack', {
 });
 
 // Create RDS stack (depends on VPC from EKS stack)
-const rdsStack = new RdsStack(app, 'UniteRdsStack', {
+const rdsStack = new RdsStack(app, 'ReasonBridgeRdsStack', {
   env,
   vpc: eksStack.vpc,
-  description: 'Unite Discord Platform - PostgreSQL Database',
+  description: 'ReasonBridge Platform - PostgreSQL Database',
   tags: {
     Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
@@ -39,10 +39,10 @@ const rdsStack = new RdsStack(app, 'UniteRdsStack', {
 rdsStack.addDependency(eksStack);
 
 // Create ElastiCache stack (depends on VPC from EKS stack)
-const elastiCacheStack = new ElastiCacheStack(app, 'UniteElastiCacheStack', {
+const elastiCacheStack = new ElastiCacheStack(app, 'ReasonBridgeElastiCacheStack', {
   env,
   vpc: eksStack.vpc,
-  description: 'Unite Discord Platform - Redis Cache',
+  description: 'ReasonBridge Platform - Redis Cache',
   tags: {
     Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
@@ -52,9 +52,9 @@ const elastiCacheStack = new ElastiCacheStack(app, 'UniteElastiCacheStack', {
 elastiCacheStack.addDependency(eksStack);
 
 // Create Bedrock stack (IAM permissions for AI services)
-new BedrockStack(app, 'UniteBedrockStack', {
+new BedrockStack(app, 'ReasonBridgeBedrockStack', {
   env,
-  description: 'Unite Discord Platform - Bedrock IAM Permissions',
+  description: 'ReasonBridge Platform - Bedrock IAM Permissions',
   tags: {
     Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',
@@ -63,9 +63,9 @@ new BedrockStack(app, 'UniteBedrockStack', {
 });
 
 // Create Cognito stack (User authentication and authorization)
-new CognitoStack(app, 'UniteCognitoStack', {
+new CognitoStack(app, 'ReasonBridgeCognitoStack', {
   env,
-  description: 'Unite Discord Platform - Cognito User Pool',
+  description: 'ReasonBridge Platform - Cognito User Pool',
   tags: {
     Project: 'reason-bridge',
     Environment: process.env.ENVIRONMENT || 'dev',

@@ -7,12 +7,14 @@ This directory would contain unit tests for the orientation components once a un
 ### OrientationOverlay Component
 
 #### State Management Tests
+
 - **Initial state**: Should start at step 1 when opened
 - **Step navigation**: Should correctly update currentStep state
 - **Step boundaries**: Should not allow navigating before step 1 or after step 3
 - **Progress calculation**: Should correctly calculate percentage (33%, 67%, 100%)
 
 #### Navigation Tests
+
 - **Next button**: Should increment step by 1
 - **Previous button**: Should decrement step by 1
 - **Step indicators**: Should jump to specific step when clicked
@@ -21,6 +23,7 @@ This directory would contain unit tests for the orientation components once a un
 - **Dismiss action**: Should call onDismiss when clicking Dismiss or X button
 
 #### Keyboard Navigation Tests
+
 - **Arrow Right**: Should advance to next step
 - **Arrow Left**: Should go to previous step (if not on step 1)
 - **Escape key**: Should call onDismiss
@@ -28,6 +31,7 @@ This directory would contain unit tests for the orientation components once a un
 - **Shift+Tab**: Should focus previous focusable element
 
 #### Accessibility Tests
+
 - **Dialog role**: Should have role="dialog"
 - **aria-modal**: Should be set to true
 - **aria-labelledby**: Should reference heading ID
@@ -37,6 +41,7 @@ This directory would contain unit tests for the orientation components once a un
 - **Progress bar**: Should have proper ARIA attributes
 
 #### Rendering Tests
+
 - **Conditional rendering**: Should only render when isOpen is true
 - **Step content**: Should render correct step component based on currentStep
 - **Button visibility**: Previous button should only show on steps 2-3
@@ -46,6 +51,7 @@ This directory would contain unit tests for the orientation components once a un
 ### OrientationPage Component
 
 #### API Integration Tests
+
 - **Progress fetching**: Should call getOnboardingProgress on mount
 - **Already viewed**: Should redirect if orientationViewed is true
 - **Mark as viewed**: Should call markOrientationViewed with (true, false) on complete
@@ -54,11 +60,13 @@ This directory would contain unit tests for the orientation components once a un
 - **Retry logic**: Should refetch progress when clicking Try Again
 
 #### Loading States Tests
+
 - **Initial loading**: Should show loading spinner while fetching
 - **Error state**: Should show error UI with retry button
 - **Success state**: Should show OrientationOverlay when loaded
 
 #### Navigation Tests
+
 - **Redirect on complete**: Should navigate to nextAction.url after complete
 - **Redirect on skip**: Should navigate to nextAction.url after skip
 - **Fallback navigation**: Should navigate to / if no nextAction provided
@@ -66,6 +74,7 @@ This directory would contain unit tests for the orientation components once a un
 ### HelpMenu Component
 
 #### Dropdown Tests
+
 - **Initial state**: Should be closed by default
 - **Toggle open**: Should open dropdown when clicking button
 - **Toggle close**: Should close dropdown when clicking button again
@@ -73,30 +82,35 @@ This directory would contain unit tests for the orientation components once a un
 - **Escape key**: Should close dropdown when pressing Escape
 
 #### Accessibility Tests
+
 - **Button attributes**: Should have aria-label, aria-expanded, aria-haspopup
 - **Focus management**: Should focus first menu item when opened
 - **Keyboard navigation**: Should support arrow keys in menu
 - **Screen reader**: Menu items should have proper labels
 
 #### Callback Tests
+
 - **Reopen orientation**: Should call onReopenOrientation when clicking menu item
 - **Menu close**: Should close menu after selecting an item
 
 ### Step Content Components
 
 #### Step1PropositionBased Tests
+
 - **Rendering**: Should render heading and description
 - **Example content**: Should show 3 example propositions
 - **Visual indicators**: Should show agreement percentages
 - **Call to action**: Should display "Your Turn" message
 
 #### Step2AIFeedback Tests
+
 - **Rendering**: Should render heading and description
 - **Insight cards**: Should show 3 types of AI insights
 - **Icons**: Should display appropriate icons for each insight type
 - **Explanation**: Should include disclaimer about helpful suggestions
 
 #### Step3CommonGround Tests
+
 - **Rendering**: Should render heading and description
 - **Agreement spectrum**: Should show visual spectrum
 - **Results example**: Should display example voting results with percentages
@@ -122,6 +136,7 @@ pnpm test:unit OrientationOverlay
 ## Test Setup Requirements
 
 ### Dependencies to Install
+
 ```json
 {
   "devDependencies": {
@@ -135,7 +150,9 @@ pnpm test:unit OrientationOverlay
 ```
 
 ### Vitest Configuration
+
 Create `frontend/vitest.config.ts`:
+
 ```typescript
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
@@ -149,19 +166,16 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'src/test/',
-        '**/*.spec.ts',
-        '**/*.test.ts',
-      ],
+      exclude: ['node_modules/', 'src/test/', '**/*.spec.ts', '**/*.test.ts'],
     },
   },
 });
 ```
 
 ### Test Setup File
+
 Create `frontend/src/test/setup.ts`:
+
 ```typescript
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';

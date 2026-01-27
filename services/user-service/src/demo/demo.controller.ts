@@ -1,6 +1,9 @@
 import { Controller, Get, Query, HttpCode, HttpStatus, Logger } from '@nestjs/common';
 import { DemoService } from './demo.service.js';
-import { DemoDiscussionsResponseDto, GetDemoDiscussionsQueryDto } from './dto/demo-discussion.dto.js';
+import {
+  DemoDiscussionsResponseDto,
+  GetDemoDiscussionsQueryDto,
+} from './dto/demo-discussion.dto.js';
 
 /**
  * Controller for demo content endpoints

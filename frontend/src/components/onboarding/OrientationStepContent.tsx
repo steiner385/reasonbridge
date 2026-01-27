@@ -226,9 +226,7 @@ export const Step3CommonGround: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">
-          Finding Common Ground Together
-        </h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">Finding Common Ground Together</h2>
         <p className="text-lg text-gray-600">
           See what percentage of participants agree, and explore the spectrum of opinions.
         </p>
@@ -281,10 +279,7 @@ export const Step3CommonGround: React.FC = () => {
                   <span className="font-semibold text-green-400">28%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-green-300 h-3 rounded-full"
-                    style={{ width: '28%' }}
-                  ></div>
+                  <div className="bg-green-300 h-3 rounded-full" style={{ width: '28%' }}></div>
                 </div>
               </div>
               <div>
@@ -293,10 +288,7 @@ export const Step3CommonGround: React.FC = () => {
                   <span className="font-semibold text-yellow-500">12%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-yellow-300 h-3 rounded-full"
-                    style={{ width: '12%' }}
-                  ></div>
+                  <div className="bg-yellow-300 h-3 rounded-full" style={{ width: '12%' }}></div>
                 </div>
               </div>
               <div>
@@ -310,8 +302,8 @@ export const Step3CommonGround: React.FC = () => {
               </div>
             </div>
             <p className="text-sm text-gray-600 mt-4">
-              <span className="font-semibold">Common Ground Found:</span> 73% of participants
-              agree or strongly agree on this proposition.
+              <span className="font-semibold">Common Ground Found:</span> 73% of participants agree
+              or strongly agree on this proposition.
             </p>
           </div>
 

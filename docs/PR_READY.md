@@ -8,6 +8,7 @@ All implementation files are ready but encountering pre-commit hook issues durin
 ## Files Ready to Commit
 
 ### Backend Services (Services/user-service)
+
 ```
 services/user-service/src/
 ├── auth/ (auth.service.ts, cognito.service.ts, verification.service.ts, OAuth services)
@@ -21,6 +22,7 @@ services/user-service/src/
 ```
 
 ### Frontend (Complete UI)
+
 ```
 frontend/src/
 ├── pages/ (LandingPage, SignupPage, EmailVerificationPage, TopicSelectionPage, OrientationPage)
@@ -31,6 +33,7 @@ frontend/src/
 ```
 
 ### Database
+
 ```
 packages/db-models/prisma/
 ├── schema.prisma (modified with onboarding entities)
@@ -39,6 +42,7 @@ packages/db-models/prisma/
 ```
 
 ### Common Utilities
+
 ```
 packages/common/src/validation/
 ├── password-validator.ts
@@ -47,6 +51,7 @@ packages/common/src/validation/
 ```
 
 ### E2E Tests
+
 ```
 frontend/e2e/
 ├── landing-page.spec.ts
@@ -57,6 +62,7 @@ frontend/e2e/
 ```
 
 ### Documentation
+
 ```
 IMPLEMENTATION_STATUS.md
 ORIENTATION_IMPLEMENTATION.md
@@ -66,6 +72,7 @@ ORIENTATION_IMPLEMENTATION.md
 ## Manual Commit Steps
 
 ### Option 1: Commit with Pre-commit Bypass (Quick)
+
 ```bash
 # Note: Only use if you'll fix hooks in follow-up commit
 HUSKY=0 git add .
@@ -80,6 +87,7 @@ git push -u origin 003-user-onboarding
 ```
 
 ### Option 2: Fix Hook Issues First (Recommended)
+
 The pre-commit hook is hanging during parallel checks. To debug:
 
 ```bash
@@ -96,6 +104,7 @@ git push -u origin 003-user-onboarding
 ```
 
 ### Option 3: Commit in Chunks
+
 ```bash
 # 1. Backend only
 git add services/user-service/ packages/db-models/ packages/common/src/validation/ .env.example
@@ -121,6 +130,7 @@ git push -u origin 003-user-onboarding
 ## Create Pull Request
 
 ### Using GitHub CLI
+
 ```bash
 gh pr create \
   --title "feat: User Onboarding Implementation (Feature 003)" \
@@ -130,6 +140,7 @@ gh pr create \
 ```
 
 ### PR Body (PR_BODY.md)
+
 See generated PR description below.
 
 ## Known Issues to Address in PR
