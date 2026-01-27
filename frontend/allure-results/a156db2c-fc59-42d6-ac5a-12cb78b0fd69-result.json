@@ -1,0 +1,206 @@
+{
+  "uuid": "a156db2c-fc59-42d6-ac5a-12cb78b0fd69",
+  "name": "Body text uses Nunito font",
+  "historyId": "051cc65f60cf49b75a2192aff06ccd16:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769400887475,
+              "uuid": "496f0dfc-82c8-4cd3-b485-4785703adc74",
+              "stop": 1769400889743
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769400887472,
+          "uuid": "727fd81c-2d6f-4791-bd17-13caf77687c1",
+          "stop": 1769400889744
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769400889748,
+              "uuid": "37c93dbb-7e99-4584-95be-68a8cabc4825",
+              "stop": 1769400889816
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769400889747,
+          "uuid": "b66662e5-cbbc-4b8d-8daa-ddcd3a37f7bc",
+          "stop": 1769400889816
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769400889818,
+              "uuid": "438f3652-481d-4512-bff4-98c617578ae0",
+              "stop": 1769400890732
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769400889817,
+          "uuid": "5f62254c-0eca-441f-9959-808a5eefad00",
+          "stop": 1769400890733
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769400887459,
+      "uuid": "219990b9-ac65-4cbf-91ce-7f4a1467d198",
+      "stop": 1769400890733
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400890734,
+      "name": "Navigate to \"/\"",
+      "uuid": "87b07d38-7402-4af4-af1c-9cf9628fca70",
+      "stop": 1769400891492
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400891507,
+      "name": "Evaluate locator('body')",
+      "uuid": "064a1036-4e71-4b49-bd04-6f5527e07c10",
+      "stop": 1769400891708
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400891712,
+      "name": "Expect \"toContain\"",
+      "uuid": "9c25ecdd-036c-406d-9adb-f38622d41256",
+      "stop": 1769400891713
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769400891715,
+          "uuid": "d994fc2e-3333-4ce2-838b-5364137930c1",
+          "stop": 1769400891715
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769400891772,
+              "uuid": "705d56af-6a40-4465-a8b8-8a182523e4ea",
+              "stop": 1769400891854
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769400891716,
+          "uuid": "4597d3d0-74c8-43c8-92d7-9468641b50ad",
+          "stop": 1769400891854
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769400891714,
+      "uuid": "fee3351c-c3d0-427e-be3e-6c4ec7e384a4",
+      "stop": 1769400891858
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-typography.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-typography.spec.ts > Brand Identity - Typography"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1654388-worker-6" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-typography.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Typography" }
+  ],
+  "links": [],
+  "start": 1769400887457,
+  "testCaseId": "051cc65f60cf49b75a2192aff06ccd16",
+  "fullName": "visual/brand-typography.spec.ts:19:3",
+  "titlePath": ["visual", "brand-typography.spec.ts", "Brand Identity - Typography"],
+  "stop": 1769400889565
+}

@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: uniteDiscord Fact-Check Service API
+  title: reasonBridge Fact-Check Service API
   description: External fact-check API integration and claim verification
   version: 1.0.0
   contact:
-    name: uniteDiscord Team
+    name: reasonBridge Team
 
 servers:
   - url: /api/v1/fact-check

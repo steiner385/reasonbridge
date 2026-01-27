@@ -4,7 +4,7 @@ Recommendation service for personalized content suggestions.
 
 ## Overview
 
-This service provides personalized recommendation capabilities for the uniteDiscord platform, including:
+This service provides personalized recommendation capabilities for the reasonBridge platform, including:
 
 - Content discovery and suggestions
 - User interest profiling
@@ -16,7 +16,7 @@ This service provides personalized recommendation capabilities for the uniteDisc
 - **Framework**: NestJS 10.x
 - **Runtime**: Node.js 20 LTS
 - **HTTP Server**: Fastify
-- **Database ORM**: Prisma (via @unite-discord/db-models)
+- **Database ORM**: Prisma (via @reason-bridge/db-models)
 
 ## Project Structure
 

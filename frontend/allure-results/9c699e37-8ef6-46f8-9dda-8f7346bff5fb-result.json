@@ -1,0 +1,312 @@
+{
+  "uuid": "9c699e37-8ef6-46f8-9dda-8f7346bff5fb",
+  "name": "ReasonBridge logo displays correctly in header",
+  "historyId": "d758f7903948da46e6b5365564c89eb5:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "Error: A snapshot doesn't exist at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-logo.spec.ts-snapshots/header-with-logo-chromium-linux.png, writing actual.",
+    "trace": "Error: A snapshot doesn't exist at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-logo.spec.ts-snapshots/header-with-logo-chromium-linux.png, writing actual.\n    at /mnt/ssk-ssd/tony/GitHub/reasonbridge/frontend/e2e/visual/brand-logo.spec.ts:16:5"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769401044166,
+              "uuid": "ace97046-f82a-482d-a48d-1497cb82a09b",
+              "stop": 1769401044286
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769401044162,
+          "uuid": "dca7659a-f6fa-47ed-ba84-10cf1b1b2b4f",
+          "stop": 1769401044286
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769401044297,
+              "uuid": "c59570c5-b5cb-4b3c-b42d-962d1591f19c",
+              "stop": 1769401044309
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401044295,
+          "uuid": "93208d59-f4e7-4703-a542-4762d47a76ee",
+          "stop": 1769401044317
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769401044319,
+              "uuid": "f19f0579-9fbc-45c5-9a0f-a29e5e66f087",
+              "stop": 1769401044371
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401044318,
+          "uuid": "48ca555e-6d42-4a22-b1a0-240f28e920a9",
+          "stop": 1769401044371
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769401044145,
+      "uuid": "6518c133-0695-4b71-8cb7-d5bddeb0cf08",
+      "stop": 1769401044371
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401044373,
+      "name": "Navigate to \"/\"",
+      "uuid": "cf9a76b0-6a04-4c0e-af82-b4186253d64b",
+      "stop": 1769401045591
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401045625,
+      "name": "Expect \"toBeVisible\" locator('header img[alt*=\"ReasonBridge\"]').first()",
+      "uuid": "85d913ba-ab6e-4aa6-b82e-4e0cec9b3216",
+      "stop": 1769401045701
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401045725,
+      "name": "Expect \"toMatch\"",
+      "uuid": "3785a7fb-a342-4265-ac54-ddce1383b694",
+      "stop": 1769401045729
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769401045727,
+      "name": "Expect \"toHaveScreenshot(header-with-logo.png)\"",
+      "uuid": "f6bef7b8-bfbc-40fa-985f-715ed6230c17",
+      "stop": 1769401045994
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "header-with-logo-expected.png",
+          "source": "b14072d6-80c0-4e51-8d5f-ebe6a878ce89-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401046113,
+      "name": "header-with-logo-expected.png",
+      "stop": 1769401046113
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "header-with-logo-actual.png",
+          "source": "823760bd-c370-42fd-a011-20e1398ba7f0-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401046114,
+      "name": "header-with-logo-actual.png",
+      "stop": 1769401046114
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "0f8be54e-dfdd-4342-afa7-366fcebb12fd-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401046115,
+      "name": "screenshot",
+      "stop": 1769401046115
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "dcd5a97d-3541-43b3-a81b-bdf55d044ad6-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401046116,
+      "name": "video",
+      "stop": 1769401046116
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "96ebda66-e2a1-4371-9d18-7b6104099359-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769401046116,
+      "name": "error-context",
+      "stop": 1769401046116
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769401046017,
+          "uuid": "24c44c18-ef17-4d64-b0da-08527c7a8f7d",
+          "stop": 1769401046017
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769401046027,
+              "uuid": "1236afb1-1c20-41d2-bb53-c62b9033f328",
+              "stop": 1769401046085
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769401046018,
+          "uuid": "905b5690-aa30-48c3-afae-8312c0a4e843",
+          "stop": 1769401046087
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769401045994,
+      "uuid": "294e4b41-4456-49c4-87c8-188d9ef10a0c",
+      "stop": 1769401046095
+    }
+  ],
+  "attachments": [
+    {
+      "name": "header-with-logo",
+      "source": "cf02a04b-68e3-42e7-b263-9ab0e373ff91-attachment.imagediff",
+      "type": "application/vnd.allure.image.diff"
+    },
+    {
+      "name": "header-with-logo",
+      "source": "cafe0f53-13b2-4d25-8ad3-549e9a294d9f-attachment.imagediff",
+      "type": "application/vnd.allure.image.diff"
+    }
+  ],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-logo.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-logo.spec.ts > Brand Identity - Logo Display"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1662415-worker-3" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-logo.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Logo Display" }
+  ],
+  "links": [],
+  "start": 1769401044141,
+  "testCaseId": "d758f7903948da46e6b5365564c89eb5",
+  "fullName": "visual/brand-logo.spec.ts:4:3",
+  "titlePath": ["visual", "brand-logo.spec.ts", "Brand Identity - Logo Display"],
+  "stop": 1769401045939
+}

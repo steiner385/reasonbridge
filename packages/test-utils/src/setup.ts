@@ -1,14 +1,14 @@
 /// <reference types="vitest" />
 
 import { config } from 'dotenv';
-import { createMockPrisma } from './prisma-mock.js';
+import { createMockPrisma } from './prisma-mock';
 
 // Load environment variables for tests
 config({ path: '.env.test' });
 
 // Mock Prisma globally to avoid database connections in unit tests
-vi.mock('@unite-discord/db-models', async () => {
-  const actual = await vi.importActual('@unite-discord/db-models');
+vi.mock('@reason-bridge/db-models', async () => {
+  const actual = await vi.importActual('@reason-bridge/db-models');
   return {
     ...actual,
     PrismaClient: class MockPrismaClient {

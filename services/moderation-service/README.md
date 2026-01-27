@@ -4,7 +4,7 @@ Moderation service for content review and policy enforcement.
 
 ## Overview
 
-This service provides moderation capabilities for the uniteDiscord platform, including:
+This service provides moderation capabilities for the reasonBridge platform, including:
 
 - Content review workflows
 - Policy enforcement
@@ -16,7 +16,7 @@ This service provides moderation capabilities for the uniteDiscord platform, inc
 - **Framework**: NestJS 10.x
 - **Runtime**: Node.js 20 LTS
 - **HTTP Server**: Fastify
-- **Database ORM**: Prisma (via @unite-discord/db-models)
+- **Database ORM**: Prisma (via @reason-bridge/db-models)
 
 ## Project Structure
 

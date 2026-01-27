@@ -81,6 +81,9 @@ ALLOWED_FILES=(
   "^index\\.html$"              # Vite HTML template entry point
   "^CLAUDE\\.md$"               # Claude Code instructions
   "^SHARED_TASK_NOTES\\.md$"    # Shared task notes
+  "^DEBUG-E2E\\.md$"            # E2E debugging notes
+  "^Jenkinsfile$"               # Jenkins pipeline
+  "^cleanup_old_branches\\.sh$" # Branch cleanup script
 )
 
 # ============================================================================

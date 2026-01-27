@@ -1,0 +1,194 @@
+{
+  "uuid": "96e2bbb9-1279-4a14-b1d9-e30066fc7835",
+  "name": "Primary buttons use brand-primary color (Teal #2A9D8F)",
+  "historyId": "a69c9704ce85ae34452ef5ec9bb4b124:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Launch browser",
+              "start": 1769400887459,
+              "uuid": "bc77937d-e594-403a-9aa6-a1bcf492c47a",
+              "stop": 1769400889743
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"browser\"",
+          "start": 1769400887456,
+          "uuid": "cc334350-1085-4dda-a25f-1027efd6ff5b",
+          "stop": 1769400889743
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769400889748,
+              "uuid": "af936257-9727-4f0d-9d9a-9ad610fe8ef9",
+              "stop": 1769400889814
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769400889744,
+          "uuid": "645dfefa-aece-4bda-a53f-f9aee4f1946b",
+          "stop": 1769400889814
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769400889816,
+              "uuid": "89915c17-4f57-4265-af72-c49bbbd1262b",
+              "stop": 1769400890732
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769400889815,
+          "uuid": "df9f40cd-5b32-4e3f-b358-2e202f6934d4",
+          "stop": 1769400890732
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769400887439,
+      "uuid": "d7e6fc08-9264-4a45-86e7-818b02f0cb2c",
+      "stop": 1769400890732
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400890734,
+      "name": "Navigate to \"/\"",
+      "uuid": "68a2c10d-a37a-4260-96f6-2bc96abc0b6d",
+      "stop": 1769400891484
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769400891505,
+      "name": "Query count locator('button').filter({ hasText: /sign up|get started|join|create/i }).first()",
+      "uuid": "ff279ad4-d4ad-40b1-b102-077d82d856d3",
+      "stop": 1769400891614
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769400891627,
+          "uuid": "5f460ea0-203b-4a8e-9406-8d4aaf8dba9c",
+          "stop": 1769400891631
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769400891740,
+              "uuid": "02185e0c-609f-4644-8eb2-0d363b3bbedd",
+              "stop": 1769400891834
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769400891632,
+          "uuid": "31a6962d-617a-47f8-b538-74432fc849d1",
+          "stop": 1769400891834
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769400891624,
+      "uuid": "dea9ecd0-976a-4dd6-9be3-2a1475e51130",
+      "stop": 1769400891843
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "visual.brand-colors.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > visual/brand-colors.spec.ts > Brand Identity - Color Palette"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-1654388-worker-0" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "visual/brand-colors.spec.ts" },
+    { "name": "subSuite", "value": "Brand Identity - Color Palette" }
+  ],
+  "links": [],
+  "start": 1769400887438,
+  "testCaseId": "a69c9704ce85ae34452ef5ec9bb4b124",
+  "fullName": "visual/brand-colors.spec.ts:4:3",
+  "titlePath": ["visual", "brand-colors.spec.ts", "Brand Identity - Color Palette"],
+  "stop": 1769400889517
+}

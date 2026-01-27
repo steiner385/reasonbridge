@@ -75,7 +75,7 @@ function mapStopReason(reason: string | undefined): StopReason {
  *   messages: [{ role: 'user', content: 'Hello!' }],
  * });
  *
- * console.log(response.content);
+ * // Response content: response.content
  * ```
  */
 export class BedrockClient implements IAIClient {

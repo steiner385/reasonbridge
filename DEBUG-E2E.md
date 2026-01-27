@@ -3,7 +3,7 @@
 ## Quick Start - Run Tests Locally
 
 ```bash
-cd /mnt/ssk-ssd/tony/GitHub/uniteDiscord
+cd /mnt/ssk-ssd/tony/GitHub/reasonBridge
 ./scripts/run-e2e-local.sh
 ```
 
@@ -12,7 +12,9 @@ This runs E2E tests in Docker containers exactly like Jenkins CI.
 ## What Was Added for Debugging
 
 ### 1. Console Logging
+
 The test now logs every step of the registration process:
+
 - Form field filling
 - Button state (visible, enabled)
 - Current URL before/after button click
@@ -20,18 +22,24 @@ The test now logs every step of the registration process:
 - Navigation events
 
 ### 2. Browser Console Capture
+
 All browser console messages (log, warn, error) are captured and prefixed with `BROWSER [type]:`.
 
 ### 3. Page Error Capture
+
 JavaScript errors in the page are captured and logged with full stack traces.
 
 ### 4. Network Monitoring
+
 All API requests/responses to `/api/*` or `/auth/*` are logged:
+
 - `API REQUEST: POST /api/auth/register`
 - `API RESPONSE: 200 /api/auth/register`
 
 ### 5. Timeout Error Details
+
 If navigation times out, you'll see:
+
 - Current URL when timeout occurred
 - All API calls that were made
 - Page body text (first 500 chars)
@@ -39,6 +47,7 @@ If navigation times out, you'll see:
 - Screenshot: `debug-registration-timeout.png`
 
 ### 6. Playwright Trace
+
 Enabled full trace capture (not just on retry). Traces saved to `frontend/test-results/*/trace.zip`.
 
 ## Interpreting the Output
@@ -110,18 +119,21 @@ BROWSER [error]: [Some JavaScript error that prevented form submission]
 ## Next Steps Based on Results
 
 ### If NO API call is made:
+
 - Check browser console errors
 - Form validation might be failing silently
 - JavaScript error preventing submission
 - Event handler not attached correctly
 
 ### If API call returns error:
+
 - Check response status and body
 - Backend might be rejecting the request
 - CORS issue
 - Network connectivity problem
 
 ### If API call succeeds but no redirect:
+
 - Frontend navigation logic broken
 - React Router issue
 - Check for errors in `RegisterPage.tsx`
@@ -167,17 +179,21 @@ docker volume prune -f
 ## Common Issues
 
 ### Port Already in Use
+
 If you get "port 9080 already in use":
+
 ```bash
 docker ps | grep 9080
 docker stop [container-id]
 ```
 
 ### Out of Memory (Exit Code 137)
+
 If Playwright crashes with exit code 137:
 
 **Diagnosis (as of Build #9):**
 Jenkins pipeline now includes memory monitoring via `docker stats`. Check build logs for:
+
 - Memory usage before tests
 - Memory usage during tests (sampled continuously)
 - Peak memory usage
@@ -185,6 +201,7 @@ Jenkins pipeline now includes memory monitoring via `docker stats`. Check build 
 This helps determine if 137 is truly OOM or another resource limit.
 
 **If confirmed OOM:**
+
 ```bash
 # Increase Docker memory limit in Docker Desktop settings
 # Or reduce parallel workers in playwright.config.ts
@@ -192,7 +209,9 @@ This helps determine if 137 is truly OOM or another resource limit.
 ```
 
 ### Tests Hang Forever
+
 Check if services started:
+
 ```bash
 docker ps --format "table {{.Names}}\t{{.Status}}"
 ```

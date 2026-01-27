@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { FeedbackAnalyticsDto, FeedbackAnalyticsQueryDto } from '../feedback/dto/index.js';
-import { HelpfulRating, FeedbackType } from '@unite-discord/db-models';
+import { HelpfulRating, FeedbackType } from '@reason-bridge/db-models';
 
 /**
  * Service for analyzing feedback effectiveness

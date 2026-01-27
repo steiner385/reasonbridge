@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { QueueService } from './queue.service.js';
 
 // Mock AWS SDK-based publishers/subscribers
-vi.mock('@unite-discord/common', () => ({
+vi.mock('@reason-bridge/common', () => ({
   SnsEventPublisher: vi.fn().mockImplementation(() => ({
     publish: vi.fn().mockResolvedValue({ messageId: 'msg-123' }),
   })),
@@ -60,7 +60,7 @@ describe('QueueService', () => {
     });
 
     it('should propagate initialization errors', async () => {
-      const { SnsEventPublisher } = await import('@unite-discord/common');
+      const { SnsEventPublisher } = await import('@reason-bridge/common');
       (SnsEventPublisher as any).mockImplementationOnce(() => {
         throw new Error('SNS initialization failed');
       });
@@ -109,7 +109,7 @@ describe('QueueService', () => {
       await service.initialize();
 
       // Get the internal publisher and make it throw
-      const { SnsEventPublisher } = await import('@unite-discord/common');
+      const { SnsEventPublisher } = await import('@reason-bridge/common');
       const mockPublisher = { publish: vi.fn().mockRejectedValue(new Error('Publish failed')) };
       (SnsEventPublisher as any).mockImplementation(() => mockPublisher);
 
@@ -162,7 +162,7 @@ describe('QueueService', () => {
     });
 
     it('should propagate start errors', async () => {
-      const { SqsEventSubscriber } = await import('@unite-discord/common');
+      const { SqsEventSubscriber } = await import('@reason-bridge/common');
       const mockSubscriber = {
         on: vi.fn(),
         start: vi.fn().mockRejectedValue(new Error('Start failed')),
@@ -191,7 +191,7 @@ describe('QueueService', () => {
     });
 
     it('should propagate stop errors', async () => {
-      const { SqsEventSubscriber } = await import('@unite-discord/common');
+      const { SqsEventSubscriber } = await import('@reason-bridge/common');
       const mockSubscriber = {
         on: vi.fn(),
         start: vi.fn(),

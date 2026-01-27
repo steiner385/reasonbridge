@@ -86,17 +86,17 @@ export default function ModerationHistoryView({
 
         // Filter by type if specified
         if (typeFilter !== 'all') {
-          filteredActions = filteredActions.filter(a => a.actionType === typeFilter);
+          filteredActions = filteredActions.filter((a) => a.actionType === typeFilter);
         }
 
         // Filter by search term if provided
         if (searchTerm) {
           const term = searchTerm.toLowerCase();
           filteredActions = filteredActions.filter(
-            a =>
+            (a) =>
               a.reasoning.toLowerCase().includes(term) ||
               a.id.toLowerCase().includes(term) ||
-              a.targetId.toLowerCase().includes(term)
+              a.targetId.toLowerCase().includes(term),
           );
         }
 
@@ -146,7 +146,11 @@ export default function ModerationHistoryView({
   // Format date for display
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      ' ' +
+      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    );
   };
 
   // Format action type for display
@@ -226,7 +230,7 @@ export default function ModerationHistoryView({
               <input
                 type="text"
                 value={searchTerm}
-                onChange={e => {
+                onChange={(e) => {
                   setSearchTerm(e.target.value);
                   setPage(1);
                 }}
@@ -240,7 +244,7 @@ export default function ModerationHistoryView({
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
                 value={statusFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setStatusFilter(e.target.value as ModerationActionStatus | 'all');
                   setPage(1);
                 }}
@@ -259,7 +263,7 @@ export default function ModerationHistoryView({
               <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
               <select
                 value={typeFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setTypeFilter(e.target.value as ModerationActionType | 'all');
                   setPage(1);
                 }}
@@ -280,7 +284,7 @@ export default function ModerationHistoryView({
               <label className="block text-sm font-medium text-gray-700 mb-2">Severity</label>
               <select
                 value={severityFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setSeverityFilter(e.target.value as ModerationSeverity | 'all');
                   setPage(1);
                 }}
@@ -298,7 +302,7 @@ export default function ModerationHistoryView({
               <div className="flex gap-2">
                 <select
                   value={sortField}
-                  onChange={e => setSortField(e.target.value as SortField)}
+                  onChange={(e) => setSortField(e.target.value as SortField)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="date">Date</option>
@@ -323,9 +327,7 @@ export default function ModerationHistoryView({
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Moderation History ({actions.length} results)
-            </h2>
+            <h2 className="text-lg font-semibold">Moderation History ({actions.length} results)</h2>
           </div>
         </CardHeader>
         <CardBody>
@@ -338,17 +340,26 @@ export default function ModerationHistoryView({
             <p className="text-center text-gray-500 py-8">No moderation actions found</p>
           ) : (
             <div className="space-y-3">
-              {actions.map(action => (
-                <div key={action.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              {actions.map((action) => (
+                <div
+                  key={action.id}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
                     <div className="flex flex-wrap gap-2">
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}>
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}
+                      >
                         {action.severity === 'consequential' ? 'Consequential' : 'Non-Punitive'}
                       </span>
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getTypeColor(action.actionType)}`}>
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full border ${getTypeColor(action.actionType)}`}
+                      >
                         {formatActionType(action.actionType)}
                       </span>
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}>
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}
+                      >
                         {formatActionType(action.status)}
                       </span>
                       {action.aiRecommended && (
@@ -358,7 +369,9 @@ export default function ModerationHistoryView({
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-500 whitespace-nowrap">{formatDate(action.createdAt)}</span>
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                      {formatDate(action.createdAt)}
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">

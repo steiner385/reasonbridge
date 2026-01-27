@@ -6,15 +6,15 @@ export default defineConfig({
   resolve: {
     alias: {
       // Explicit aliases for workspace packages
-      '@unite-discord/common': path.resolve(__dirname, 'packages/common/dist/index.js'),
-      '@unite-discord/shared': path.resolve(__dirname, 'packages/shared/dist/index.js'),
-      '@unite-discord/db-models': path.resolve(__dirname, 'packages/db-models/dist/index.js'),
-      '@unite-discord/event-schemas': path.resolve(
+      '@reason-bridge/common': path.resolve(__dirname, 'packages/common/dist/index.js'),
+      '@reason-bridge/shared': path.resolve(__dirname, 'packages/shared/dist/index.js'),
+      '@reason-bridge/db-models': path.resolve(__dirname, 'packages/db-models/dist/index.js'),
+      '@reason-bridge/event-schemas': path.resolve(
         __dirname,
         'packages/event-schemas/dist/index.js',
       ),
-      '@unite-discord/ai-client': path.resolve(__dirname, 'packages/ai-client/dist/index.js'),
-      '@unite-discord/testing-utils': path.resolve(
+      '@reason-bridge/ai-client': path.resolve(__dirname, 'packages/ai-client/dist/index.js'),
+      '@reason-bridge/testing-utils': path.resolve(
         __dirname,
         'packages/testing-utils/dist/index.js',
       ),
@@ -27,7 +27,7 @@ export default defineConfig({
   },
   ssr: {
     // Don't externalize these packages - bundle them
-    noExternal: [/^@unite-discord\//, '@prisma/client'],
+    noExternal: [/^@reason-bridge\//, '@prisma/client'],
   },
   test: {
     globals: true,
@@ -37,7 +37,7 @@ export default defineConfig({
       deps: {
         inline: [
           // Workspace packages
-          /^@unite-discord\//,
+          /^@reason-bridge\//,
           // Prisma client - needs inlining for proper ESM resolution
           '@prisma/client',
         ],
@@ -102,7 +102,7 @@ export default defineConfig({
     },
     // Handle pnpm workspace symlinks and Prisma client resolution
     deps: {
-      inline: ['@prisma/client', /^@unite-discord\/.*/],
+      inline: ['@prisma/client', /^@reason-bridge\/.*/],
     },
   },
 });

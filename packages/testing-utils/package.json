@@ -1,7 +1,7 @@
 {
-  "name": "@unite-discord/testing-utils",
+  "name": "@reason-bridge/testing-utils",
   "version": "0.1.0",
-  "description": "Shared test helpers, mocks, and fixtures for uniteDiscord",
+  "description": "Shared test helpers, mocks, and fixtures for reasonBridge",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,7 +33,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@unite-discord/common": "workspace:*"
+    "@reason-bridge/common": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "20.17.12",

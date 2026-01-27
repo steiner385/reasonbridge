@@ -1,1 +1,302 @@
-{"uuid":"3d33dbdf-38ab-4ffa-9417-f6ebe823fc18","name":"should display all three trust dimensions with labels","historyId":"0998fd3b702a5df3483c42f3aee7362a:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"failed","statusDetails":{"message":"TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================","trace":"TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at registerLoginAndGoToProfile (/mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:55:16)\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:146:7"},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245017166,"uuid":"0da60af0-781e-4bbd-97fb-c16d68c891a2","stop":1769245017169}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245017166,"uuid":"2778d5cc-b608-4ea9-8675-07c61d20ebe1","stop":1769245017169},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245017170,"uuid":"36b57e57-95b6-44ae-9c59-f654075a59f3","stop":1769245017190}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245017170,"uuid":"0ac77526-12be-465c-bd02-7af39c857723","stop":1769245017190}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245017161,"uuid":"a8497acf-7041-4421-93ca-5adc934878db","stop":1769245017190},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017191,"name":"Navigate to \"/register\"","uuid":"2df8bfed-ff51-44c2-a854-bebdd8482e6c","stop":1769245017215},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017215,"name":"Wait for load state \"networkidle\"","uuid":"d10db9cc-7489-4d49-bae2-0a984f71844e","stop":1769245017711},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017712,"name":"Fill \"trust-test-1769245017190@example.com\" getByLabel(/email/i)","uuid":"334afef8-11e6-45d1-ae02-d0cee5b63c51","stop":1769245017762},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017763,"name":"Fill \"TrustTestUser1769245017190\" getByLabel(/display name/i)","uuid":"c7abf722-d438-483d-9894-0e12b7e30644","stop":1769245017789},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017790,"name":"Fill \"SecurePassword123!\" getByLabel(/^password/i).first()","uuid":"18f525b5-dfe5-4904-9cab-3f8690616713","stop":1769245017807},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017809,"name":"Fill \"SecurePassword123!\" getByLabel(/confirm password/i)","uuid":"74e9ef70-122a-40ec-a197-f34774382eb5","stop":1769245017821},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017822,"name":"Click getByRole('button', { name: /sign up|register|create account/i })","uuid":"29c2e0e3-840c-46ee-b4f5-7517dd48230f","stop":1769245017869},{"status":"failed","statusDetails":{"message":"TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================","trace":"TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at registerLoginAndGoToProfile (/mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:55:16)\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:146:7"},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245017871,"name":"Wait for navigation","uuid":"e226dea1-36eb-437a-bb9e-ee30589ca29e","stop":1769245032872},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"screenshot","source":"9fa176b2-9d38-4052-ad65-0264dbdfdaa0-attachment.png","type":"image/png"}],"parameters":[],"start":1769245033936,"name":"screenshot","stop":1769245033936},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"video","source":"8e641481-88c9-4648-bd38-437de9807b1f-attachment.webm","type":"video/webm"}],"parameters":[],"start":1769245033936,"name":"video","stop":1769245033936},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"error-context","source":"e4045864-578e-422f-8b8d-4af880ff254f-attachment.md","type":"text/markdown"}],"parameters":[],"start":1769245033937,"name":"error-context","stop":1769245033937},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245032909,"uuid":"e7688302-f4e4-47e3-8300-75147131b26d","stop":1769245032909},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245032920,"uuid":"ccb3bea4-98ec-49a5-9377-31317466103d","stop":1769245033906}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245032910,"uuid":"9f3c824c-3612-47b0-b32f-28932cd09e66","stop":1769245033908}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245032873,"uuid":"c0e1d090-df8b-46b7-b8a2-039e0467a640","stop":1769245033914}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"profile-trust-indicators.spec.ts"},{"name":"titlePath","value":" > chromium > profile-trust-indicators.spec.ts > User Story 4: Trust Indicators and Human Authenticity > TrustScoreDisplay Component"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-1"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"profile-trust-indicators.spec.ts"},{"name":"subSuite","value":"User Story 4: Trust Indicators and Human Authenticity > TrustScoreDisplay Component"}],"links":[],"start":1769245017160,"testCaseId":"0998fd3b702a5df3483c42f3aee7362a","fullName":"profile-trust-indicators.spec.ts:145:5","titlePath":["profile-trust-indicators.spec.ts","User Story 4: Trust Indicators and Human Authenticity","TrustScoreDisplay Component"],"stop":1769245033902}
+{
+  "uuid": "3d33dbdf-38ab-4ffa-9417-f6ebe823fc18",
+  "name": "should display all three trust dimensions with labels",
+  "historyId": "0998fd3b702a5df3483c42f3aee7362a:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+    "trace": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at registerLoginAndGoToProfile (/mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:55:16)\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:146:7"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245017166,
+              "uuid": "0da60af0-781e-4bbd-97fb-c16d68c891a2",
+              "stop": 1769245017169
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245017166,
+          "uuid": "2778d5cc-b608-4ea9-8675-07c61d20ebe1",
+          "stop": 1769245017169
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245017170,
+              "uuid": "36b57e57-95b6-44ae-9c59-f654075a59f3",
+              "stop": 1769245017190
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245017170,
+          "uuid": "0ac77526-12be-465c-bd02-7af39c857723",
+          "stop": 1769245017190
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245017161,
+      "uuid": "a8497acf-7041-4421-93ca-5adc934878db",
+      "stop": 1769245017190
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017191,
+      "name": "Navigate to \"/register\"",
+      "uuid": "2df8bfed-ff51-44c2-a854-bebdd8482e6c",
+      "stop": 1769245017215
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017215,
+      "name": "Wait for load state \"networkidle\"",
+      "uuid": "d10db9cc-7489-4d49-bae2-0a984f71844e",
+      "stop": 1769245017711
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017712,
+      "name": "Fill \"trust-test-1769245017190@example.com\" getByLabel(/email/i)",
+      "uuid": "334afef8-11e6-45d1-ae02-d0cee5b63c51",
+      "stop": 1769245017762
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017763,
+      "name": "Fill \"TrustTestUser1769245017190\" getByLabel(/display name/i)",
+      "uuid": "c7abf722-d438-483d-9894-0e12b7e30644",
+      "stop": 1769245017789
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017790,
+      "name": "Fill \"SecurePassword123!\" getByLabel(/^password/i).first()",
+      "uuid": "18f525b5-dfe5-4904-9cab-3f8690616713",
+      "stop": 1769245017807
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017809,
+      "name": "Fill \"SecurePassword123!\" getByLabel(/confirm password/i)",
+      "uuid": "74e9ef70-122a-40ec-a197-f34774382eb5",
+      "stop": 1769245017821
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017822,
+      "name": "Click getByRole('button', { name: /sign up|register|create account/i })",
+      "uuid": "29c2e0e3-840c-46ee-b4f5-7517dd48230f",
+      "stop": 1769245017869
+    },
+    {
+      "status": "failed",
+      "statusDetails": {
+        "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+        "trace": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at registerLoginAndGoToProfile (/mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:55:16)\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/profile-trust-indicators.spec.ts:146:7"
+      },
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245017871,
+      "name": "Wait for navigation",
+      "uuid": "e226dea1-36eb-437a-bb9e-ee30589ca29e",
+      "stop": 1769245032872
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "9fa176b2-9d38-4052-ad65-0264dbdfdaa0-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245033936,
+      "name": "screenshot",
+      "stop": 1769245033936
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "8e641481-88c9-4648-bd38-437de9807b1f-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245033936,
+      "name": "video",
+      "stop": 1769245033936
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "e4045864-578e-422f-8b8d-4af880ff254f-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245033937,
+      "name": "error-context",
+      "stop": 1769245033937
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245032909,
+          "uuid": "e7688302-f4e4-47e3-8300-75147131b26d",
+          "stop": 1769245032909
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245032920,
+              "uuid": "ccb3bea4-98ec-49a5-9377-31317466103d",
+              "stop": 1769245033906
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245032910,
+          "uuid": "9f3c824c-3612-47b0-b32f-28932cd09e66",
+          "stop": 1769245033908
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245032873,
+      "uuid": "c0e1d090-df8b-46b7-b8a2-039e0467a640",
+      "stop": 1769245033914
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-trust-indicators.spec.ts > User Story 4: Trust Indicators and Human Authenticity > TrustScoreDisplay Component"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-1" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-trust-indicators.spec.ts" },
+    {
+      "name": "subSuite",
+      "value": "User Story 4: Trust Indicators and Human Authenticity > TrustScoreDisplay Component"
+    }
+  ],
+  "links": [],
+  "start": 1769245017160,
+  "testCaseId": "0998fd3b702a5df3483c42f3aee7362a",
+  "fullName": "profile-trust-indicators.spec.ts:145:5",
+  "titlePath": [
+    "profile-trust-indicators.spec.ts",
+    "User Story 4: Trust Indicators and Human Authenticity",
+    "TrustScoreDisplay Component"
+  ],
+  "stop": 1769245033902
+}

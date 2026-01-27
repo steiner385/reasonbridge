@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to clean up old merged branches in the uniteDiscord repository
+# Script to clean up old merged branches in the reasonBridge repository
 # This will help prevent Jenkins from unnecessarily building old branches
 
 # Function to display usage

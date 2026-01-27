@@ -1,27 +1,27 @@
-import type { User, VerificationLevel, UserStatus } from '@unite-discord/db-models';
+import type { User, VerificationLevel, UserStatus } from '@reason-bridge/db-models';
 
 /**
  * Response DTO for user data (includes private fields like email)
  */
 export class UserResponseDto {
-  id: string;
-  email: string;
-  displayName: string;
-  verificationLevel: VerificationLevel;
-  trustScoreAbility: number;
-  trustScoreBenevolence: number;
-  trustScoreIntegrity: number;
-  moralFoundationProfile: any | null;
-  positionFingerprint: any | null;
-  topicAffinities: any | null;
-  status: UserStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  id!: string;
+  email!: string;
+  displayName!: string;
+  verificationLevel!: VerificationLevel;
+  trustScoreAbility!: number;
+  trustScoreBenevolence!: number;
+  trustScoreIntegrity!: number;
+  moralFoundationProfile!: any | null;
+  positionFingerprint!: any | null;
+  topicAffinities!: any | null;
+  status!: UserStatus;
+  createdAt!: Date;
+  updatedAt!: Date;
 
   constructor(user: User) {
     this.id = user.id;
     this.email = user.email;
-    this.displayName = user.displayName;
+    this.displayName = user.displayName ?? '';
     this.verificationLevel = user.verificationLevel;
     this.trustScoreAbility = Number(user.trustScoreAbility);
     this.trustScoreBenevolence = Number(user.trustScoreBenevolence);
@@ -40,18 +40,18 @@ export class UserResponseDto {
  * Does not expose sensitive information like email
  */
 export class PublicUserResponseDto {
-  id: string;
-  displayName: string;
-  verificationLevel: VerificationLevel;
-  trustScoreAbility: number;
-  trustScoreBenevolence: number;
-  trustScoreIntegrity: number;
-  status: UserStatus;
-  createdAt: Date;
+  id!: string;
+  displayName!: string;
+  verificationLevel!: VerificationLevel;
+  trustScoreAbility!: number;
+  trustScoreBenevolence!: number;
+  trustScoreIntegrity!: number;
+  status!: UserStatus;
+  createdAt!: Date;
 
   constructor(user: User) {
     this.id = user.id;
-    this.displayName = user.displayName;
+    this.displayName = user.displayName ?? '';
     this.verificationLevel = user.verificationLevel;
     this.trustScoreAbility = Number(user.trustScoreAbility);
     this.trustScoreBenevolence = Number(user.trustScoreBenevolence);

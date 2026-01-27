@@ -1,1 +1,169 @@
-{"uuid":"8683881e-1c84-4294-9fd8-bb32e8e0afe6","name":"should show error for invalid user ID","historyId":"c5d6432e6eb7c87ed4928c70197eb40a:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245016847,"uuid":"ed1c58da-5b3e-4d1e-b565-d1069b9458c9","stop":1769245016850}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245016846,"uuid":"2b69bc9d-9a87-424e-bbc5-d8243c2ed0d2","stop":1769245016850},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245016851,"uuid":"0ed42142-3c5d-4709-8808-5cd537e6f28a","stop":1769245016872}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245016850,"uuid":"6f488fa5-d82f-4434-a8b1-bb8e96e7abbb","stop":1769245016873}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245016842,"uuid":"22468410-a1eb-4478-a02d-c9db1eed1e6d","stop":1769245016873},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245016874,"name":"Navigate to \"/profile/invalid-uuid\"","uuid":"5d713726-b9a6-4d86-b36a-ab88bb272c2a","stop":1769245016919},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245016921,"name":"Expect \"toBeVisible\" getByText(/Unable to Load Profile|User Not Found/i)","uuid":"f302a1eb-f799-49d5-a142-9b7bd27f3d6a","stop":1769245018829},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245018829,"uuid":"f33e6ca4-9311-4c8c-b5b0-391ff590f623","stop":1769245018829},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245018854,"uuid":"489783a6-091d-4913-817b-c2dfa92fcb8b","stop":1769245018935}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245018830,"uuid":"46de671a-a35e-469b-a091-181c4d49d901","stop":1769245018935}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245018829,"uuid":"ee17a9f4-4ad4-43f3-b738-12a7df5fcf78","stop":1769245018939}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"profile-page.spec.ts"},{"name":"titlePath","value":" > chromium > profile-page.spec.ts > UserProfilePage Component - API Error Handling"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-4"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"profile-page.spec.ts"},{"name":"subSuite","value":"UserProfilePage Component - API Error Handling"}],"links":[],"start":1769245016841,"testCaseId":"c5d6432e6eb7c87ed4928c70197eb40a","fullName":"profile-page.spec.ts:31:3","titlePath":["profile-page.spec.ts","UserProfilePage Component - API Error Handling"],"stop":1769245018929}
+{
+  "uuid": "8683881e-1c84-4294-9fd8-bb32e8e0afe6",
+  "name": "should show error for invalid user ID",
+  "historyId": "c5d6432e6eb7c87ed4928c70197eb40a:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245016847,
+              "uuid": "ed1c58da-5b3e-4d1e-b565-d1069b9458c9",
+              "stop": 1769245016850
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245016846,
+          "uuid": "2b69bc9d-9a87-424e-bbc5-d8243c2ed0d2",
+          "stop": 1769245016850
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245016851,
+              "uuid": "0ed42142-3c5d-4709-8808-5cd537e6f28a",
+              "stop": 1769245016872
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245016850,
+          "uuid": "6f488fa5-d82f-4434-a8b1-bb8e96e7abbb",
+          "stop": 1769245016873
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245016842,
+      "uuid": "22468410-a1eb-4478-a02d-c9db1eed1e6d",
+      "stop": 1769245016873
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245016874,
+      "name": "Navigate to \"/profile/invalid-uuid\"",
+      "uuid": "5d713726-b9a6-4d86-b36a-ab88bb272c2a",
+      "stop": 1769245016919
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245016921,
+      "name": "Expect \"toBeVisible\" getByText(/Unable to Load Profile|User Not Found/i)",
+      "uuid": "f302a1eb-f799-49d5-a142-9b7bd27f3d6a",
+      "stop": 1769245018829
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245018829,
+          "uuid": "f33e6ca4-9311-4c8c-b5b0-391ff590f623",
+          "stop": 1769245018829
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245018854,
+              "uuid": "489783a6-091d-4913-817b-c2dfa92fcb8b",
+              "stop": 1769245018935
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245018830,
+          "uuid": "46de671a-a35e-469b-a091-181c4d49d901",
+          "stop": 1769245018935
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245018829,
+      "uuid": "ee17a9f4-4ad4-43f3-b738-12a7df5fcf78",
+      "stop": 1769245018939
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-page.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-page.spec.ts > UserProfilePage Component - API Error Handling"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-4" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-page.spec.ts" },
+    { "name": "subSuite", "value": "UserProfilePage Component - API Error Handling" }
+  ],
+  "links": [],
+  "start": 1769245016841,
+  "testCaseId": "c5d6432e6eb7c87ed4928c70197eb40a",
+  "fullName": "profile-page.spec.ts:31:3",
+  "titlePath": ["profile-page.spec.ts", "UserProfilePage Component - API Error Handling"],
+  "stop": 1769245018929
+}

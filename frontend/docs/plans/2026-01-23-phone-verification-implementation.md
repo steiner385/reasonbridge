@@ -15,6 +15,7 @@
 ### Task 1: Update Prisma Schema for OTP Fields
 
 **Files:**
+
 - Modify: `packages/db-models/prisma/schema.prisma:72-89`
 
 **Step 1: Add OTP fields to VerificationRecord model**
@@ -80,6 +81,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 2: OTP Service - Generate OTP Test
 
 **Files:**
+
 - Create: `services/user-service/src/verification/services/otp.service.test.ts`
 - Create: `services/user-service/src/verification/services/otp.service.ts`
 
@@ -163,6 +165,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 3: OTP Service - Hash and Validate OTP Tests
 
 **Files:**
+
 - Modify: `services/user-service/src/verification/services/otp.service.test.ts`
 - Modify: `services/user-service/src/verification/services/otp.service.ts`
 
@@ -273,6 +276,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 4: Phone Validation Service - E.164 Format Tests
 
 **Files:**
+
 - Create: `services/user-service/src/verification/services/phone-validation.service.test.ts`
 - Create: `services/user-service/src/verification/services/phone-validation.service.ts`
 
@@ -297,13 +301,13 @@ describe('PhoneValidationService', () => {
   describe('validatePhoneNumber', () => {
     it('should accept valid E.164 format', () => {
       const validPhones = [
-        '+15551234567',    // US
-        '+442071234567',   // UK
-        '+33123456789',    // France
-        '+81312345678',    // Japan
+        '+15551234567', // US
+        '+442071234567', // UK
+        '+33123456789', // France
+        '+81312345678', // Japan
       ];
 
-      validPhones.forEach(phone => {
+      validPhones.forEach((phone) => {
         const result = service.validatePhoneNumber(phone);
         expect(result.isValid).toBe(true);
         expect(result.e164).toBe(phone);
@@ -312,14 +316,14 @@ describe('PhoneValidationService', () => {
 
     it('should reject invalid formats', () => {
       const invalidPhones = [
-        '5551234567',      // Missing country code
-        '555-123-4567',    // Not E.164
-        '+1555',           // Too short
-        'invalid',         // Not a number
-        '',                // Empty
+        '5551234567', // Missing country code
+        '555-123-4567', // Not E.164
+        '+1555', // Too short
+        'invalid', // Not a number
+        '', // Empty
       ];
 
-      invalidPhones.forEach(phone => {
+      invalidPhones.forEach((phone) => {
         const result = service.validatePhoneNumber(phone);
         expect(result.isValid).toBe(false);
         expect(result.error).toBeDefined();
@@ -413,6 +417,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 5: Phone Validation Service - Mask Phone Test
 
 **Files:**
+
 - Modify: `services/user-service/src/verification/services/phone-validation.service.test.ts`
 - Modify: `services/user-service/src/verification/services/phone-validation.service.ts`
 
@@ -493,6 +498,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 6: Create DTOs for Phone Verification
 
 **Files:**
+
 - Create: `services/user-service/src/verification/dto/phone-verification-request.dto.ts`
 - Create: `services/user-service/src/verification/dto/phone-verification-verify.dto.ts`
 
@@ -540,6 +546,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 7: Add Phone Verification Methods to VerificationService
 
 **Files:**
+
 - Modify: `services/user-service/src/verification/verification.service.ts`
 - Modify: `services/user-service/src/verification/verification.module.ts`
 
@@ -796,6 +803,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 8: Phone Verification Endpoint Integration Tests
 
 **Files:**
+
 - Create: `services/user-service/src/verification/phone-verification.integration.test.ts`
 
 **Step 1: Write integration tests for phone verification flow**
@@ -844,7 +852,7 @@ describe('Phone Verification Integration Tests', () => {
         displayName: 'Test User',
         cognitoSub: `cognito-${testUserId}`,
         verificationLevel: VerificationLevel.BASIC,
-        trustScoreIntegrity: 0.50,
+        trustScoreIntegrity: 0.5,
       },
     });
   });
@@ -885,9 +893,9 @@ describe('Phone Verification Integration Tests', () => {
         phoneNumber: '555-1234', // Invalid
       };
 
-      await expect(
-        verificationService.requestPhoneVerification(testUserId, dto)
-      ).rejects.toThrow('Invalid phone number format');
+      await expect(verificationService.requestPhoneVerification(testUserId, dto)).rejects.toThrow(
+        'Invalid phone number format',
+      );
     });
 
     it('should reject duplicate phone number', async () => {
@@ -915,9 +923,9 @@ describe('Phone Verification Integration Tests', () => {
 
       const dto: PhoneVerificationRequestDto = { phoneNumber };
 
-      await expect(
-        verificationService.requestPhoneVerification(testUserId, dto)
-      ).rejects.toThrow('already verified by another user');
+      await expect(verificationService.requestPhoneVerification(testUserId, dto)).rejects.toThrow(
+        'already verified by another user',
+      );
 
       // Cleanup
       await prisma.verificationRecord.deleteMany({ where: { userId: otherUserId } });
@@ -933,9 +941,9 @@ describe('Phone Verification Integration Tests', () => {
       await verificationService.requestPhoneVerification(testUserId, dto);
 
       // Second request should fail
-      await expect(
-        verificationService.requestPhoneVerification(testUserId, dto)
-      ).rejects.toThrow('verification code was already sent');
+      await expect(verificationService.requestPhoneVerification(testUserId, dto)).rejects.toThrow(
+        'verification code was already sent',
+      );
     });
   });
 
@@ -978,12 +986,12 @@ describe('Phone Verification Integration Tests', () => {
 
       expect(result.success).toBe(true);
       expect(result.user.verificationLevel).toBe('ENHANCED');
-      expect(result.user.trustScoreIntegrity).toBe(0.60); // 0.50 + 0.10
+      expect(result.user.trustScoreIntegrity).toBe(0.6); // 0.50 + 0.10
 
       // Verify database updates
       const updatedUser = await prisma.user.findUnique({ where: { id: testUserId } });
       expect(updatedUser.verificationLevel).toBe(VerificationLevel.ENHANCED);
-      expect(Number(updatedUser.trustScoreIntegrity)).toBe(0.60);
+      expect(Number(updatedUser.trustScoreIntegrity)).toBe(0.6);
 
       const updatedVerification = await prisma.verificationRecord.findUnique({
         where: { id: verificationId },
@@ -1008,9 +1016,9 @@ describe('Phone Verification Integration Tests', () => {
         code: '999999',
       };
 
-      await expect(
-        verificationService.verifyPhoneOTP(testUserId, verifyDto)
-      ).rejects.toThrow('Incorrect code. 2 attempts remaining');
+      await expect(verificationService.verifyPhoneOTP(testUserId, verifyDto)).rejects.toThrow(
+        'Incorrect code. 2 attempts remaining',
+      );
 
       // Check attempts counter
       const verification = await prisma.verificationRecord.findUnique({
@@ -1044,9 +1052,9 @@ describe('Phone Verification Integration Tests', () => {
       }
 
       // Next attempt should fail with different error
-      await expect(
-        verificationService.verifyPhoneOTP(testUserId, verifyDto)
-      ).rejects.toThrow('Maximum verification attempts exceeded');
+      await expect(verificationService.verifyPhoneOTP(testUserId, verifyDto)).rejects.toThrow(
+        'Maximum verification attempts exceeded',
+      );
 
       // Verify status changed to EXPIRED
       const verification = await prisma.verificationRecord.findUnique({
@@ -1076,9 +1084,9 @@ describe('Phone Verification Integration Tests', () => {
         code: '123456',
       };
 
-      await expect(
-        verificationService.verifyPhoneOTP(testUserId, verifyDto)
-      ).rejects.toThrow('OTP code has expired');
+      await expect(verificationService.verifyPhoneOTP(testUserId, verifyDto)).rejects.toThrow(
+        'OTP code has expired',
+      );
     });
   });
 });
@@ -1111,6 +1119,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 9: Add Phone Verification Controller Endpoints
 
 **Files:**
+
 - Modify: `services/user-service/src/verification/verification.controller.ts`
 
 **Step 1: Add phone verification endpoints to controller**
@@ -1171,6 +1180,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 10: Install Frontend Dependencies
 
 **Files:**
+
 - Modify: `frontend/package.json`
 
 **Step 1: Install libphonenumber-js and react-phone-number-input**
@@ -1197,6 +1207,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 11: PhoneInput Component Tests
 
 **Files:**
+
 - Create: `frontend/src/components/verification/__tests__/PhoneInput.test.tsx`
 - Create: `frontend/src/components/verification/PhoneInput.tsx`
 
@@ -1335,6 +1346,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 12: OTPInput Component Tests
 
 **Files:**
+
 - Create: `frontend/src/components/verification/__tests__/OTPInput.test.tsx`
 - Create: `frontend/src/components/verification/OTPInput.tsx`
 
@@ -1547,6 +1559,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 13: PhoneVerificationModal Component Tests
 
 **Files:**
+
 - Create: `frontend/src/components/verification/__tests__/PhoneVerificationModal.test.tsx`
 - Create: `frontend/src/components/verification/PhoneVerificationModal.tsx`
 
@@ -1987,6 +2000,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 14: PhoneVerificationButton Component Tests
 
 **Files:**
+
 - Create: `frontend/src/components/verification/__tests__/PhoneVerificationButton.test.tsx`
 - Create: `frontend/src/components/verification/PhoneVerificationButton.tsx`
 
@@ -2137,6 +2151,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 15: Integrate PhoneVerificationButton into ProfilePage
 
 **Files:**
+
 - Modify: `frontend/src/pages/Profile/ProfilePage.tsx`
 
 **Step 1: Add PhoneVerificationButton to ProfilePage**
@@ -2203,6 +2218,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 16: Add Phone Verification API Methods
 
 **Files:**
+
 - Modify: `frontend/src/lib/api.ts`
 
 **Step 1: Add phone verification API methods**
@@ -2213,9 +2229,7 @@ Add these functions to `api.ts`:
 /**
  * Request phone verification (send OTP)
  */
-export async function requestPhoneVerification(data: {
-  phoneNumber: string;
-}): Promise<{
+export async function requestPhoneVerification(data: { phoneNumber: string }): Promise<{
   verificationId: string;
   expiresAt: string;
   maskedPhone: string;
@@ -2240,10 +2254,7 @@ export async function requestPhoneVerification(data: {
 /**
  * Verify phone OTP code
  */
-export async function verifyPhoneOTP(data: {
-  verificationId: string;
-  code: string;
-}): Promise<{
+export async function verifyPhoneOTP(data: { verificationId: string; code: string }): Promise<{
   success: boolean;
   user: {
     verificationLevel: string;
@@ -2288,6 +2299,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 17: Phone Verification E2E Tests
 
 **Files:**
+
 - Create: `frontend/e2e/phone-verification.spec.ts`
 
 **Step 1: Write E2E test for complete verification flow**
@@ -2463,6 +2475,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Task 18: Run Full Test Suite and Verify
 
 **Files:**
+
 - None (verification only)
 
 **Step 1: Run all backend tests**
@@ -2534,6 +2547,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### What We Built
 
 ✅ **Backend (NestJS + Prisma)**
+
 - OTP service (generation, hashing, validation)
 - Phone validation service (E.164 format, masking)
 - Verification service (request OTP, verify OTP)
@@ -2542,6 +2556,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 - Full integration tests
 
 ✅ **Frontend (React + Vitest)**
+
 - PhoneInput component with country selector
 - OTPInput component with 6-digit entry
 - PhoneVerificationModal with two-step flow
@@ -2550,6 +2565,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 - API client methods
 
 ✅ **Tests (TDD Approach)**
+
 - Backend: 13+ unit tests, 7+ integration tests
 - Frontend: 24+ component tests
 - E2E: 6+ end-to-end tests
@@ -2558,6 +2574,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ### Files Created/Modified
 
 **Backend: 13 files**
+
 - 1 migration (Prisma schema)
 - 4 service files (OTP, phone validation + tests)
 - 2 DTO files
@@ -2565,6 +2582,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 - Modified: VerificationService, VerificationController, VerificationModule
 
 **Frontend: 10 files**
+
 - 4 component files (PhoneInput, OTPInput, Modal, Button)
 - 4 test files
 - 1 E2E test file
@@ -2598,13 +2616,15 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 **Two execution options:**
 
 **1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
-   - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
-   - Stay in this session
-   - Fresh subagent per task + code review
+
+- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
+- Stay in this session
+- Fresh subagent per task + code review
 
 **2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
-   - **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans
-   - Open new session in worktree directory
-   - Batch task execution with review checkpoints
+
+- **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans
+- Open new session in worktree directory
+- Batch task execution with review checkpoints
 
 **Which approach would you prefer?**

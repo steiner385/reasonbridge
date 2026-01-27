@@ -1,7 +1,7 @@
 {
-  "name": "@unite-discord/test-utils",
+  "name": "@reason-bridge/test-utils",
   "version": "0.1.0",
-  "description": "Test utilities for uniteDiscord services",
+  "description": "Test utilities for reasonBridge services",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -26,7 +26,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@unite-discord/db-models": "workspace:*",
+    "@reason-bridge/db-models": "workspace:*",
     "vitest": "^1.0.0"
   },
   "devDependencies": {

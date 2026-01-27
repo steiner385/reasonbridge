@@ -2,7 +2,7 @@
  * Test fixture factories for common domain objects
  */
 
-import { generateId } from '@unite-discord/common';
+import { generateId } from '@reason-bridge/common';
 import type {
   User,
   UserProfile,
@@ -15,7 +15,7 @@ import type {
   DiscussionTopic,
   Contribution,
   ContributionId,
-} from '@unite-discord/common';
+} from '@reason-bridge/common';
 
 /**
  * Counter for generating sequential IDs in tests

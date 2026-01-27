@@ -1,7 +1,7 @@
 {
-  "name": "@unite-discord/common",
+  "name": "@reason-bridge/common",
   "version": "0.1.0",
-  "description": "Shared types, utilities, and constants for uniteDiscord",
+  "description": "Shared types, utilities, and constants for reasonBridge",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,6 +21,10 @@
     "./events": {
       "types": "./dist/events/index.d.ts",
       "import": "./dist/events/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "import": "./dist/validation/index.js"
     }
   },
   "files": [
@@ -35,7 +39,7 @@
   "dependencies": {
     "@aws-sdk/client-sns": "^3.504.0",
     "@aws-sdk/client-sqs": "^3.504.0",
-    "@unite-discord/event-schemas": "workspace:*"
+    "@reason-bridge/event-schemas": "workspace:*"
   },
   "devDependencies": {
     "typescript": "5.7.3"

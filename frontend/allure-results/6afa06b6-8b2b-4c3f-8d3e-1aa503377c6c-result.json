@@ -1,1 +1,31 @@
-{"uuid":"6afa06b6-8b2b-4c3f-8d3e-1aa503377c6c","name":"should update divergence points in real-time via WebSocket","historyId":"8402866187f554ad5f1d414a2a44b791:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"skipped","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"explore-divergence-points.spec.ts"},{"name":"titlePath","value":" > chromium > explore-divergence-points.spec.ts > Explore Divergence Points"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker--1"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"explore-divergence-points.spec.ts"},{"name":"subSuite","value":"Explore Divergence Points"}],"links":[],"start":1769245011898,"testCaseId":"8402866187f554ad5f1d414a2a44b791","fullName":"explore-divergence-points.spec.ts:508:8","titlePath":["explore-divergence-points.spec.ts","Explore Divergence Points"],"stop":1769245011899}
+{
+  "uuid": "6afa06b6-8b2b-4c3f-8d3e-1aa503377c6c",
+  "name": "should update divergence points in real-time via WebSocket",
+  "historyId": "8402866187f554ad5f1d414a2a44b791:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "skipped",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "explore-divergence-points.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > explore-divergence-points.spec.ts > Explore Divergence Points"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker--1" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "explore-divergence-points.spec.ts" },
+    { "name": "subSuite", "value": "Explore Divergence Points" }
+  ],
+  "links": [],
+  "start": 1769245011898,
+  "testCaseId": "8402866187f554ad5f1d414a2a44b791",
+  "fullName": "explore-divergence-points.spec.ts:508:8",
+  "titlePath": ["explore-divergence-points.spec.ts", "Explore Divergence Points"],
+  "stop": 1769245011899
+}

@@ -4,6 +4,8 @@ import {
   CognitoIdentityProviderClient,
   InitiateAuthCommand,
   SignUpCommand,
+  ConfirmSignUpCommand,
+  ResendConfirmationCodeCommand,
   type InitiateAuthCommandInput,
   type AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -170,6 +172,58 @@ export class CognitoService {
       // Log unexpected errors but don't expose details to user
       console.error('Cognito sign up error:', error);
       throw new Error('Registration failed. Please try again.');
+    }
+  }
+
+  /**
+   * Confirm user sign-up with verification code
+   * @param email - User's email address
+   * @param code - Verification code sent to user's email
+   */
+  async confirmSignUp(email: string, code: string): Promise<void> {
+    try {
+      const command = new ConfirmSignUpCommand({
+        ClientId: this.clientId,
+        Username: email,
+        ConfirmationCode: code,
+      });
+      await this.cognitoClient.send(command);
+    } catch (error: unknown) {
+      const errorObj = error as { name?: string; message?: string };
+      if (errorObj.name === 'CodeMismatchException') {
+        throw new UnauthorizedException('Invalid verification code');
+      }
+      if (errorObj.name === 'ExpiredCodeException') {
+        throw new UnauthorizedException('Verification code has expired');
+      }
+      throw new UnauthorizedException('Email verification failed');
+    }
+  }
+
+  /**
+   * Alias for authenticateUser (backward compatibility)
+   */
+  async initiateAuth(email: string, password: string) {
+    return this.authenticateUser(email, password);
+  }
+
+  /**
+   * Resend verification code to user's email
+   * @param email - User's email address
+   */
+  async resendCode(email: string): Promise<void> {
+    try {
+      const command = new ResendConfirmationCodeCommand({
+        ClientId: this.clientId,
+        Username: email,
+      });
+      await this.cognitoClient.send(command);
+    } catch (error: unknown) {
+      const errorObj = error as { name?: string };
+      if (errorObj.name === 'UserNotFoundException') {
+        throw new UnauthorizedException('User not found');
+      }
+      throw new Error('Failed to resend verification code');
     }
   }
 }

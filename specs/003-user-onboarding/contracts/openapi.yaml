@@ -1,0 +1,1497 @@
+openapi: 3.0.3
+info:
+  title: uniteDiscord User Onboarding API
+  description: |
+    API specification for user onboarding feature including authentication, email verification,
+    OAuth flows, topic selection, and onboarding progress tracking.
+
+    **Base URL**: `https://api.unitediscord.org/v1`
+
+    **Authentication**: JWT Bearer tokens issued after successful login/signup
+  version: 1.0.0
+  contact:
+    name: uniteDiscord Platform Team
+    url: https://unitediscord.org
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.unitediscord.org/v1
+    description: Production API
+  - url: https://api-staging.unitediscord.org/v1
+    description: Staging environment
+  - url: http://localhost:3000/v1
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: User signup, login, and email verification
+  - name: OAuth
+    description: Google and Apple OAuth authentication flows
+  - name: Demo
+    description: Pre-authentication demo content
+  - name: Onboarding
+    description: Topic selection and onboarding progress tracking
+  - name: Topics
+    description: Topic browsing for interest selection
+
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Create new user account with email/password
+      description: |
+        Registers a new user account using email and password. Triggers verification email
+        delivery within 60 seconds. Returns JWT access token for immediate authenticated access,
+        but account remains in unverified state until email confirmation.
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+            examples:
+              basic:
+                summary: Basic signup
+                value:
+                  email: user@example.com
+                  password: SecureP@ssw0rd
+                  referralSource: organic
+              withSession:
+                summary: Signup with visitor session
+                value:
+                  email: user@example.com
+                  password: SecureP@ssw0rd
+                  visitorSessionId: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '201':
+          description: Account created successfully, verification email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+              examples:
+                success:
+                  value:
+                    accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    expiresIn: 3600
+                    user:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      email: user@example.com
+                      emailVerified: false
+                      authMethod: EMAIL_PASSWORD
+                      createdAt: '2026-01-25T12:00:00Z'
+                    onboardingProgress:
+                      currentStep: VERIFICATION
+                      emailVerified: false
+                      topicsSelected: false
+                      orientationViewed: false
+                      firstPostMade: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicateEmail:
+                  value:
+                    error: CONFLICT
+                    message: An account with this email already exists
+                    details:
+                      field: email
+                      suggestion: Try logging in instead or use password reset
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/verify-email:
+    post:
+      tags:
+        - Authentication
+      summary: Verify email address with verification code
+      description: |
+        Confirms user email address using the 6-digit verification code sent via email.
+        Marks account as verified and advances onboarding progress to topic selection step.
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+            examples:
+              basic:
+                value:
+                  email: user@example.com
+                  verificationCode: '123456'
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: Email verified successfully
+                    nextStep: TOPICS
+                    user:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      email: user@example.com
+                      emailVerified: true
+        '400':
+          description: Invalid or expired verification code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCode:
+                  value:
+                    error: INVALID_CODE
+                    message: Verification code is invalid or expired
+                    details:
+                      remainingAttempts: 2
+                expiredCode:
+                  value:
+                    error: EXPIRED_CODE
+                    message: Verification code has expired (valid for 24 hours)
+                    details:
+                      canResend: true
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/resend-verification:
+    post:
+      tags:
+        - Authentication
+      summary: Resend email verification code
+      description: |
+        Requests a new verification email to be sent. Rate limited to 3 requests per hour
+        per email address to prevent abuse.
+      operationId: resendVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+            examples:
+              basic:
+                value:
+                  email: user@example.com
+      responses:
+        '200':
+          description: Verification email sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResendVerificationResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: Verification email sent
+                    retryAfter: 60
+                    attemptsRemaining: 2
+        '400':
+          description: Email already verified or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                alreadyVerified:
+                  value:
+                    error: ALREADY_VERIFIED
+                    message: This email is already verified
+        '404':
+          description: No account found with this email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    error: NOT_FOUND
+                    message: No account found with this email address
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimited:
+                  value:
+                    error: RATE_LIMIT_EXCEEDED
+                    message: Too many verification requests
+                    details:
+                      retryAfter: 1800
+                      maxAttempts: 3
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/oauth/initiate:
+    post:
+      tags:
+        - OAuth
+      summary: Initiate OAuth authentication flow
+      description: |
+        Generates OAuth authorization URL for Google or Apple Sign-In. Client should redirect
+        user to this URL to complete OAuth consent. User will be redirected back to callback URL
+        after granting/denying permissions.
+      operationId: initiateOAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateOAuthRequest'
+            examples:
+              google:
+                summary: Google OAuth
+                value:
+                  provider: GOOGLE
+                  redirectUri: https://unitediscord.org/auth/callback
+                  visitorSessionId: 550e8400-e29b-41d4-a716-446655440000
+              apple:
+                summary: Apple OAuth
+                value:
+                  provider: APPLE
+                  redirectUri: https://unitediscord.org/auth/callback
+      responses:
+        '200':
+          description: OAuth URL generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateOAuthResponse'
+              examples:
+                google:
+                  value:
+                    authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth?client_id=...
+                    state: random-csrf-token-here
+                    provider: GOOGLE
+                apple:
+                  value:
+                    authorizationUrl: https://appleid.apple.com/auth/authorize?client_id=...
+                    state: random-csrf-token-here
+                    provider: APPLE
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/oauth/callback:
+    get:
+      tags:
+        - OAuth
+      summary: OAuth provider callback endpoint
+      description: |
+        Handles OAuth provider redirect after user grants/denies permissions. Exchanges
+        authorization code for user profile, creates/logs in user account, and returns JWT tokens.
+        This endpoint is called by OAuth providers (Google, Apple), not directly by clients.
+      operationId: oauthCallback
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from OAuth provider
+          schema:
+            type: string
+          example: 4/0AY0e-g7X...
+        - name: state
+          in: query
+          required: true
+          description: CSRF protection token (matches initiate request)
+          schema:
+            type: string
+          example: random-csrf-token-here
+        - name: error
+          in: query
+          required: false
+          description: Error code if user denied permissions
+          schema:
+            type: string
+          example: access_denied
+      responses:
+        '302':
+          description: Redirect to frontend with auth result
+          headers:
+            Location:
+              description: Redirect URL with query parameters
+              schema:
+                type: string
+              examples:
+                success:
+                  value: https://unitediscord.org/auth/success?token=eyJhbGc...&new_user=true
+                error:
+                  value: https://unitediscord.org/auth/error?error=access_denied
+        '400':
+          description: Invalid OAuth callback parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidState:
+                  value:
+                    error: INVALID_STATE
+                    message: CSRF token validation failed
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login with email and password
+      description: |
+        Authenticates existing user with email/password credentials. Returns JWT tokens for
+        authenticated API access. Updates last login timestamp.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              basic:
+                value:
+                  email: user@example.com
+                  password: SecureP@ssw0rd
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+              examples:
+                success:
+                  value:
+                    accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    expiresIn: 3600
+                    user:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      email: user@example.com
+                      emailVerified: true
+                      authMethod: EMAIL_PASSWORD
+                      createdAt: '2026-01-20T12:00:00Z'
+                    onboardingProgress:
+                      currentStep: COMPLETE
+                      emailVerified: true
+                      topicsSelected: true
+                      orientationViewed: true
+                      firstPostMade: true
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  value:
+                    error: INVALID_CREDENTIALS
+                    message: Email or password is incorrect
+                    details:
+                      remainingAttempts: 4
+        '403':
+          description: Account suspended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                suspended:
+                  value:
+                    error: ACCOUNT_SUSPENDED
+                    message: Your account has been suspended
+                    details:
+                      reason: Terms of service violation
+                      contactSupport: support@unitediscord.org
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /demo/discussions:
+    get:
+      tags:
+        - Demo
+      summary: Get demo discussions for landing page
+      description: |
+        Returns curated discussion examples for pre-authentication demo experience.
+        Discussions are anonymized and selected to showcase platform value (common ground
+        findings, productive cross-perspective exchanges). No authentication required.
+      operationId: getDemoDiscussions
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Number of discussions to return (default 5, max 10)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+        - name: sessionId
+          in: query
+          required: false
+          description: Visitor session ID for tracking viewed discussions
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Demo discussions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoDiscussionsResponse'
+              examples:
+                success:
+                  value:
+                    discussions:
+                      - id: demo-550e8400-e29b-41d4-a716-446655440000
+                        title: Should cities ban gas-powered cars by 2030?
+                        topic: Climate & Environment
+                        participantCount: 87
+                        propositionCount: 24
+                        commonGroundScore: 0.73
+                        topCommonGround:
+                          - Public transit infrastructure must improve first
+                          - Exceptions needed for rural areas and emergency vehicles
+                          - Phase-in approach better than hard deadline
+                        viewsSpectrum:
+                          stronglySupport: 28
+                          support: 31
+                          neutral: 15
+                          oppose: 10
+                          stronglyOppose: 3
+                        createdAt: '2026-01-20T08:00:00Z'
+                      - id: demo-650e8400-e29b-41d4-a716-446655440001
+                        title: Universal basic income vs job guarantee programs
+                        topic: Economics & Policy
+                        participantCount: 142
+                        propositionCount: 38
+                        commonGroundScore: 0.68
+                        topCommonGround:
+                          - Both require sustainable funding mechanisms
+                          - Pilot programs needed before nationwide rollout
+                          - Work training should be included in either approach
+                        viewsSpectrum:
+                          stronglySupport: 45
+                          support: 38
+                          neutral: 22
+                          oppose: 25
+                          stronglyOppose: 12
+                        createdAt: '2026-01-18T14:30:00Z'
+                    metrics:
+                      averageCommonGroundScore: 0.87
+                      totalParticipants: 12500
+                      platformSatisfaction: 4.6
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /topics:
+    get:
+      tags:
+        - Topics
+      summary: List available topics with activity levels
+      description: |
+        Returns all discussion topics with activity indicators for onboarding interest selection.
+        Includes participant counts, recent activity metrics, and suggested topics for new users.
+      operationId: getTopics
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: suggestedOnly
+          in: query
+          required: false
+          description: Return only topics suggested for new users
+          schema:
+            type: boolean
+            default: false
+        - name: minActivity
+          in: query
+          required: false
+          description: Filter by minimum activity level
+          schema:
+            type: string
+            enum: [HIGH, MEDIUM, LOW]
+      responses:
+        '200':
+          description: Topics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicsResponse'
+              examples:
+                success:
+                  value:
+                    topics:
+                      - id: 550e8400-e29b-41d4-a716-446655440000
+                        name: Climate & Environment
+                        description: Climate change, environmental policy, sustainability
+                        activeDiscussionCount: 47
+                        participantCount: 3200
+                        activityLevel: HIGH
+                        suggestedForNewUsers: true
+                        recentActivity:
+                          last7Days: 23
+                          last30Days: 91
+                      - id: 650e8400-e29b-41d4-a716-446655440001
+                        name: Economics & Policy
+                        description: Economic policy, taxation, welfare programs
+                        activeDiscussionCount: 38
+                        participantCount: 2800
+                        activityLevel: HIGH
+                        suggestedForNewUsers: true
+                        recentActivity:
+                          last7Days: 19
+                          last30Days: 76
+                      - id: 750e8400-e29b-41d4-a716-446655440002
+                        name: Technology & AI
+                        description: AI ethics, tech regulation, digital privacy
+                        activeDiscussionCount: 31
+                        participantCount: 2100
+                        activityLevel: MEDIUM
+                        suggestedForNewUsers: true
+                        recentActivity:
+                          last7Days: 15
+                          last30Days: 62
+                    totalCount: 18
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /onboarding/select-topics:
+    post:
+      tags:
+        - Onboarding
+      summary: Save user topic interests
+      description: |
+        Records user's selected discussion topics (2-3 required) for feed personalization.
+        Updates onboarding progress to next step. Topics are prioritized by selection order.
+      operationId: selectTopics
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectTopicsRequest'
+            examples:
+              basic:
+                value:
+                  topicIds:
+                    - 550e8400-e29b-41d4-a716-446655440000
+                    - 650e8400-e29b-41d4-a716-446655440001
+                    - 750e8400-e29b-41d4-a716-446655440002
+      responses:
+        '200':
+          description: Topics saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelectTopicsResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: Topic interests saved
+                    selectedTopics:
+                      - topicId: 550e8400-e29b-41d4-a716-446655440000
+                        name: Climate & Environment
+                        priority: 1
+                      - topicId: 650e8400-e29b-41d4-a716-446655440001
+                        name: Economics & Policy
+                        priority: 2
+                      - topicId: 750e8400-e29b-41d4-a716-446655440002
+                        name: Technology & AI
+                        priority: 3
+                    onboardingProgress:
+                      currentStep: ORIENTATION
+                      topicsSelected: true
+                    warnings:
+                      - Low activity detected for "Technology & AI" - consider adding "Healthcare & Medicine"
+        '400':
+          description: Invalid topic selection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tooFewTopics:
+                  value:
+                    error: INVALID_SELECTION
+                    message: Must select between 2 and 3 topics
+                    details:
+                      provided: 1
+                      required: 2-3
+                invalidTopicId:
+                  value:
+                    error: INVALID_TOPIC
+                    message: One or more topic IDs are invalid
+                    details:
+                      invalidIds:
+                        - 999e8400-e29b-41d4-a716-446655440099
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Topics already selected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                alreadySelected:
+                  value:
+                    error: ALREADY_COMPLETED
+                    message: Topic selection already completed
+                    details:
+                      canUpdate: true
+                      updateEndpoint: PUT /onboarding/topics
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /onboarding/progress:
+    get:
+      tags:
+        - Onboarding
+      summary: Get current onboarding progress
+      description: |
+        Returns user's onboarding completion status including which steps are complete and
+        what the next recommended action is.
+      operationId: getOnboardingProgress
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Onboarding progress retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingProgressResponse'
+              examples:
+                inProgress:
+                  value:
+                    userId: 550e8400-e29b-41d4-a716-446655440000
+                    currentStep: TOPICS
+                    progress:
+                      emailVerified: true
+                      topicsSelected: false
+                      orientationViewed: false
+                      firstPostMade: false
+                    percentComplete: 25
+                    nextAction:
+                      step: TOPICS
+                      title: Select your interests
+                      description: Choose 2-3 topics to personalize your feed
+                      actionUrl: /onboarding/topics
+                    completedAt: null
+                complete:
+                  value:
+                    userId: 550e8400-e29b-41d4-a716-446655440000
+                    currentStep: COMPLETE
+                    progress:
+                      emailVerified: true
+                      topicsSelected: true
+                      orientationViewed: true
+                      firstPostMade: true
+                    percentComplete: 100
+                    nextAction: null
+                    completedAt: '2026-01-25T14:30:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /onboarding/mark-orientation-viewed:
+    put:
+      tags:
+        - Onboarding
+      summary: Mark orientation as viewed or skipped
+      description: |
+        Records that user has viewed or dismissed the onboarding orientation overlay.
+        Non-blocking - users can skip and still access platform features.
+      operationId: markOrientationViewed
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkOrientationRequest'
+            examples:
+              completed:
+                summary: Viewed all steps
+                value:
+                  viewed: true
+                  skipped: false
+              skipped:
+                summary: User skipped orientation
+                value:
+                  viewed: false
+                  skipped: true
+      responses:
+        '200':
+          description: Orientation status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingUpdateResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: Orientation marked as viewed
+                    onboardingProgress:
+                      currentStep: ORIENTATION
+                      orientationViewed: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /onboarding/mark-first-post:
+    put:
+      tags:
+        - Onboarding
+      summary: Mark first post completed
+      description: |
+        Records user's first discussion post, completing the onboarding journey.
+        Typically called automatically by the discussion service when user creates their first response.
+      operationId: markFirstPost
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkFirstPostRequest'
+            examples:
+              basic:
+                value:
+                  discussionId: 550e8400-e29b-41d4-a716-446655440000
+                  postId: 650e8400-e29b-41d4-a716-446655440001
+      responses:
+        '200':
+          description: First post recorded, onboarding complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingCompleteResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: Congratulations on your first post!
+                    onboardingProgress:
+                      currentStep: COMPLETE
+                      firstPostMade: true
+                      completedAt: '2026-01-25T15:45:00Z'
+                    encouragement: |
+                      Great start! Your perspective adds value to the discussion.
+                      Explore more topics to find conversations that interest you.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Discussion or post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    error: NOT_FOUND
+                    message: Discussion or post not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token obtained from signup or login endpoints.
+        Include in Authorization header as: `Authorization: Bearer <token>`
+
+  schemas:
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address (must be unique)
+          example: user@example.com
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          description: Password (min 8 chars, must include uppercase, lowercase, number, special char)
+          example: SecureP@ssw0rd
+          minLength: 8
+          maxLength: 128
+        visitorSessionId:
+          type: string
+          format: uuid
+          description: Optional visitor session ID to link pre-signup demo activity
+          example: 550e8400-e29b-41d4-a716-446655440000
+        referralSource:
+          type: string
+          description: How user found the platform (utm_source or referrer)
+          example: google_ads
+          maxLength: 100
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          description: User's password
+          example: SecureP@ssw0rd
+
+    VerifyEmailRequest:
+      type: object
+      required:
+        - email
+        - verificationCode
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address to verify
+          example: user@example.com
+        verificationCode:
+          type: string
+          pattern: '^\d{6}$'
+          description: 6-digit verification code from email
+          example: '123456'
+
+    ResendVerificationRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address to resend verification to
+          example: user@example.com
+
+    InitiateOAuthRequest:
+      type: object
+      required:
+        - provider
+        - redirectUri
+      properties:
+        provider:
+          type: string
+          enum: [GOOGLE, APPLE]
+          description: OAuth provider
+          example: GOOGLE
+        redirectUri:
+          type: string
+          format: uri
+          description: URL to redirect back to after OAuth consent
+          example: https://unitediscord.org/auth/callback
+        visitorSessionId:
+          type: string
+          format: uuid
+          description: Optional visitor session ID for pre-signup tracking
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    SelectTopicsRequest:
+      type: object
+      required:
+        - topicIds
+      properties:
+        topicIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 2
+          maxItems: 3
+          description: Array of 2-3 topic IDs
+          example:
+            - 550e8400-e29b-41d4-a716-446655440000
+            - 650e8400-e29b-41d4-a716-446655440001
+
+    MarkOrientationRequest:
+      type: object
+      required:
+        - viewed
+        - skipped
+      properties:
+        viewed:
+          type: boolean
+          description: Whether user viewed all orientation steps
+          example: true
+        skipped:
+          type: boolean
+          description: Whether user skipped orientation
+          example: false
+
+    MarkFirstPostRequest:
+      type: object
+      required:
+        - discussionId
+        - postId
+      properties:
+        discussionId:
+          type: string
+          format: uuid
+          description: ID of discussion where first post was made
+          example: 550e8400-e29b-41d4-a716-446655440000
+        postId:
+          type: string
+          format: uuid
+          description: ID of the first post
+          example: 650e8400-e29b-41d4-a716-446655440001
+
+    AuthSuccessResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - expiresIn
+        - user
+        - onboardingProgress
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token for authenticated requests
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: JWT refresh token for obtaining new access tokens
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          description: Access token expiration time in seconds
+          example: 3600
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        onboardingProgress:
+          $ref: '#/components/schemas/OnboardingProgress'
+
+    VerifyEmailResponse:
+      type: object
+      required:
+        - success
+        - message
+        - nextStep
+        - user
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Email verified successfully
+        nextStep:
+          type: string
+          enum: [TOPICS, ORIENTATION, COMPLETE]
+          example: TOPICS
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    ResendVerificationResponse:
+      type: object
+      required:
+        - success
+        - message
+        - retryAfter
+        - attemptsRemaining
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Verification email sent
+        retryAfter:
+          type: integer
+          description: Seconds until next resend is allowed
+          example: 60
+        attemptsRemaining:
+          type: integer
+          description: Number of resend attempts remaining this hour
+          example: 2
+
+    InitiateOAuthResponse:
+      type: object
+      required:
+        - authorizationUrl
+        - state
+        - provider
+      properties:
+        authorizationUrl:
+          type: string
+          format: uri
+          description: URL to redirect user for OAuth consent
+          example: https://accounts.google.com/o/oauth2/v2/auth?client_id=...
+        state:
+          type: string
+          description: CSRF protection token (verify on callback)
+          example: random-csrf-token-here
+        provider:
+          type: string
+          enum: [GOOGLE, APPLE]
+          example: GOOGLE
+
+    DemoDiscussionsResponse:
+      type: object
+      required:
+        - discussions
+        - metrics
+      properties:
+        discussions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemoDiscussion'
+        metrics:
+          type: object
+          properties:
+            averageCommonGroundScore:
+              type: number
+              format: float
+              description: Platform-wide average common ground score
+              example: 0.87
+            totalParticipants:
+              type: integer
+              description: Total active participants on platform
+              example: 12500
+            platformSatisfaction:
+              type: number
+              format: float
+              description: Average user satisfaction (1-5 scale)
+              example: 4.6
+
+    DemoDiscussion:
+      type: object
+      required:
+        - id
+        - title
+        - topic
+        - participantCount
+        - propositionCount
+        - commonGroundScore
+        - topCommonGround
+        - viewsSpectrum
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Demo discussion identifier (not real discussion ID)
+          example: demo-550e8400-e29b-41d4-a716-446655440000
+        title:
+          type: string
+          description: Discussion question or topic
+          example: Should cities ban gas-powered cars by 2030?
+        topic:
+          type: string
+          description: Topic category
+          example: Climate & Environment
+        participantCount:
+          type: integer
+          description: Number of participants
+          example: 87
+        propositionCount:
+          type: integer
+          description: Number of propositions submitted
+          example: 24
+        commonGroundScore:
+          type: number
+          format: float
+          description: Common ground score (0-1 scale)
+          example: 0.73
+        topCommonGround:
+          type: array
+          items:
+            type: string
+          description: Top 3 areas of common ground found
+          example:
+            - Public transit infrastructure must improve first
+            - Exceptions needed for rural areas
+        viewsSpectrum:
+          type: object
+          description: Distribution of participant positions
+          properties:
+            stronglySupport:
+              type: integer
+              example: 28
+            support:
+              type: integer
+              example: 31
+            neutral:
+              type: integer
+              example: 15
+            oppose:
+              type: integer
+              example: 10
+            stronglyOppose:
+              type: integer
+              example: 3
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-01-20T08:00:00Z'
+
+    TopicsResponse:
+      type: object
+      required:
+        - topics
+        - totalCount
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        totalCount:
+          type: integer
+          description: Total number of topics
+          example: 18
+
+    Topic:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - activeDiscussionCount
+        - participantCount
+        - activityLevel
+        - suggestedForNewUsers
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: Climate & Environment
+        description:
+          type: string
+          example: Climate change, environmental policy, sustainability
+        activeDiscussionCount:
+          type: integer
+          description: Active discussions in last 7 days
+          example: 47
+        participantCount:
+          type: integer
+          description: Unique participants in last 30 days
+          example: 3200
+        activityLevel:
+          type: string
+          enum: [HIGH, MEDIUM, LOW]
+          example: HIGH
+        suggestedForNewUsers:
+          type: boolean
+          example: true
+        recentActivity:
+          type: object
+          properties:
+            last7Days:
+              type: integer
+              example: 23
+            last30Days:
+              type: integer
+              example: 91
+
+    SelectTopicsResponse:
+      type: object
+      required:
+        - success
+        - message
+        - selectedTopics
+        - onboardingProgress
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Topic interests saved
+        selectedTopics:
+          type: array
+          items:
+            type: object
+            properties:
+              topicId:
+                type: string
+                format: uuid
+              name:
+                type: string
+              priority:
+                type: integer
+                minimum: 1
+                maximum: 3
+        onboardingProgress:
+          $ref: '#/components/schemas/OnboardingProgress'
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Optional warnings about low activity topics
+          example:
+            - Low activity detected for "Technology & AI"
+
+    OnboardingProgressResponse:
+      type: object
+      required:
+        - userId
+        - currentStep
+        - progress
+        - percentComplete
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        currentStep:
+          type: string
+          enum: [VERIFICATION, TOPICS, ORIENTATION, COMPLETE]
+          example: TOPICS
+        progress:
+          $ref: '#/components/schemas/OnboardingProgress'
+        percentComplete:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Percentage of onboarding steps completed
+          example: 50
+        nextAction:
+          type: object
+          nullable: true
+          properties:
+            step:
+              type: string
+            title:
+              type: string
+            description:
+              type: string
+            actionUrl:
+              type: string
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    OnboardingProgress:
+      type: object
+      required:
+        - currentStep
+        - emailVerified
+        - topicsSelected
+        - orientationViewed
+        - firstPostMade
+      properties:
+        currentStep:
+          type: string
+          enum: [VERIFICATION, TOPICS, ORIENTATION, COMPLETE]
+          example: TOPICS
+        emailVerified:
+          type: boolean
+          example: true
+        topicsSelected:
+          type: boolean
+          example: false
+        orientationViewed:
+          type: boolean
+          example: false
+        firstPostMade:
+          type: boolean
+          example: false
+
+    OnboardingUpdateResponse:
+      type: object
+      required:
+        - success
+        - message
+        - onboardingProgress
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Orientation marked as viewed
+        onboardingProgress:
+          $ref: '#/components/schemas/OnboardingProgress'
+
+    OnboardingCompleteResponse:
+      type: object
+      required:
+        - success
+        - message
+        - onboardingProgress
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Congratulations on your first post!
+        onboardingProgress:
+          $ref: '#/components/schemas/OnboardingProgress'
+        encouragement:
+          type: string
+          description: Motivational message for new user
+          example: Great start! Your perspective adds value to the discussion.
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - email
+        - emailVerified
+        - authMethod
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        emailVerified:
+          type: boolean
+          example: true
+        authMethod:
+          type: string
+          enum: [EMAIL_PASSWORD, GOOGLE_OAUTH, APPLE_OAUTH]
+          example: EMAIL_PASSWORD
+        displayName:
+          type: string
+          nullable: true
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-01-25T12:00:00Z'
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: INVALID_CREDENTIALS
+        message:
+          type: string
+          description: Human-readable error message
+          example: Email or password is incorrect
+        details:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters or validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validationError:
+              value:
+                error: VALIDATION_ERROR
+                message: Request validation failed
+                details:
+                  fields:
+                    email: Invalid email format
+                    password: Password must be at least 8 characters
+
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unauthorized:
+              value:
+                error: UNAUTHORIZED
+                message: Authentication required
+                details:
+                  hint: Include valid JWT token in Authorization header
+
+    RateLimitExceeded:
+      description: Too many requests from this client
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            rateLimited:
+              value:
+                error: RATE_LIMIT_EXCEEDED
+                message: Too many requests
+                details:
+                  retryAfter: 60
+                  limit: 5
+                  window: 3600
+
+    InternalServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            serverError:
+              value:
+                error: INTERNAL_SERVER_ERROR
+                message: An unexpected error occurred
+                details:
+                  correlationId: 550e8400-e29b-41d4-a716-446655440000
+                  support: support@unitediscord.org

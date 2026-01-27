@@ -1,7 +1,7 @@
 {
-  "name": "@unite-discord/event-schemas",
+  "name": "@reason-bridge/event-schemas",
   "version": "0.1.0",
-  "description": "Event type definitions for uniteDiscord async messaging",
+  "description": "Event type definitions for reasonBridge async messaging",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

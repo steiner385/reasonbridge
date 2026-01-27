@@ -1,5 +1,5 @@
 import { FallacyDetectorService } from './fallacy-detector.service.js';
-import { FeedbackType } from '@unite-discord/db-models';
+import { FeedbackType } from '@reason-bridge/db-models';
 
 describe('FallacyDetectorService', () => {
   let service: FallacyDetectorService;

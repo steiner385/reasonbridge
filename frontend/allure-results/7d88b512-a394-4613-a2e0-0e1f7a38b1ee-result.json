@@ -1,1 +1,145 @@
-{"uuid":"7d88b512-a394-4613-a2e0-0e1f7a38b1ee","name":"should validate display name length (minimum 3 characters)","historyId":"72949c207bfa694e4da450ebe6f2b0c3:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245016468,"uuid":"25dc62e4-ca92-4fa2-8c82-5599b9640691","stop":1769245016471}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245016468,"uuid":"5640f44c-5dbe-4df0-a7f0-686ad37759ff","stop":1769245016472},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245016473,"uuid":"6742c9cc-a4fd-48f2-8131-748c20a9c7da","stop":1769245016501}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245016472,"uuid":"45ddddac-8b56-4f75-97c4-91cca7bc49f4","stop":1769245016501}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245016464,"uuid":"c5c35d41-a54e-413d-ad27-d3ee98f71c60","stop":1769245016501},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245016502,"uuid":"03b266f1-14d4-40d3-b23b-f6b5a66c30f6","stop":1769245016502},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245016554,"uuid":"afc31962-88ef-4acd-9d0f-808d3337401d","stop":1769245016649}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245016502,"uuid":"e30ceaa9-4fce-46e3-a60f-a0da390e55b8","stop":1769245016649}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245016501,"uuid":"63489753-12fc-4169-8cdc-34ea25c781b6","stop":1769245016652}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"profile-edit-form.spec.ts"},{"name":"titlePath","value":" > chromium > profile-edit-form.spec.ts > ProfileEditForm Component"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-2"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"profile-edit-form.spec.ts"},{"name":"subSuite","value":"ProfileEditForm Component"}],"links":[],"start":1769245016463,"testCaseId":"72949c207bfa694e4da450ebe6f2b0c3","fullName":"profile-edit-form.spec.ts:24:3","titlePath":["profile-edit-form.spec.ts","ProfileEditForm Component"],"stop":1769245016643}
+{
+  "uuid": "7d88b512-a394-4613-a2e0-0e1f7a38b1ee",
+  "name": "should validate display name length (minimum 3 characters)",
+  "historyId": "72949c207bfa694e4da450ebe6f2b0c3:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "passed",
+  "statusDetails": {},
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245016468,
+              "uuid": "25dc62e4-ca92-4fa2-8c82-5599b9640691",
+              "stop": 1769245016471
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245016468,
+          "uuid": "5640f44c-5dbe-4df0-a7f0-686ad37759ff",
+          "stop": 1769245016472
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245016473,
+              "uuid": "6742c9cc-a4fd-48f2-8131-748c20a9c7da",
+              "stop": 1769245016501
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245016472,
+          "uuid": "45ddddac-8b56-4f75-97c4-91cca7bc49f4",
+          "stop": 1769245016501
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245016464,
+      "uuid": "c5c35d41-a54e-413d-ad27-d3ee98f71c60",
+      "stop": 1769245016501
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245016502,
+          "uuid": "03b266f1-14d4-40d3-b23b-f6b5a66c30f6",
+          "stop": 1769245016502
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245016554,
+              "uuid": "afc31962-88ef-4acd-9d0f-808d3337401d",
+              "stop": 1769245016649
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245016502,
+          "uuid": "e30ceaa9-4fce-46e3-a60f-a0da390e55b8",
+          "stop": 1769245016649
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245016501,
+      "uuid": "63489753-12fc-4169-8cdc-34ea25c781b6",
+      "stop": 1769245016652
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "profile-edit-form.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > profile-edit-form.spec.ts > ProfileEditForm Component"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-2" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "profile-edit-form.spec.ts" },
+    { "name": "subSuite", "value": "ProfileEditForm Component" }
+  ],
+  "links": [],
+  "start": 1769245016463,
+  "testCaseId": "72949c207bfa694e4da450ebe6f2b0c3",
+  "fullName": "profile-edit-form.spec.ts:24:3",
+  "titlePath": ["profile-edit-form.spec.ts", "ProfileEditForm Component"],
+  "stop": 1769245016643
+}

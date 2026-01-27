@@ -47,11 +47,10 @@ export interface VerificationRequestedPayload {
 /**
  * Event published when verification is requested
  */
-export interface VerificationRequestedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_REQUESTED,
-    VerificationRequestedPayload
-  > {
+export interface VerificationRequestedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.VERIFICATION_REQUESTED,
+  VerificationRequestedPayload
+> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_REQUESTED;
 }
 
@@ -75,11 +74,10 @@ export interface VerificationCompletedPayload {
 /**
  * Event published when verification is completed
  */
-export interface VerificationCompletedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_COMPLETED,
-    VerificationCompletedPayload
-  > {
+export interface VerificationCompletedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.VERIFICATION_COMPLETED,
+  VerificationCompletedPayload
+> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_COMPLETED;
 }
 
@@ -111,11 +109,10 @@ export interface VerificationFailedPayload {
 /**
  * Event published when verification fails
  */
-export interface VerificationFailedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_FAILED,
-    VerificationFailedPayload
-  > {
+export interface VerificationFailedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.VERIFICATION_FAILED,
+  VerificationFailedPayload
+> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_FAILED;
 }
 
@@ -137,11 +134,10 @@ export interface VerificationExpiredPayload {
 /**
  * Event published when verification expires
  */
-export interface VerificationExpiredEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.VERIFICATION_EXPIRED,
-    VerificationExpiredPayload
-  > {
+export interface VerificationExpiredEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.VERIFICATION_EXPIRED,
+  VerificationExpiredPayload
+> {
   type: typeof USER_EVENT_TYPES.VERIFICATION_EXPIRED;
 }
 
@@ -170,11 +166,10 @@ export interface UserVerifiedHumanStatusChangedPayload {
 /**
  * Event published when user's verified human status changes
  */
-export interface UserVerifiedHumanStatusChangedEvent
-  extends BaseEvent<
-    typeof USER_EVENT_TYPES.USER_VERIFIED_HUMAN_STATUS_CHANGED,
-    UserVerifiedHumanStatusChangedPayload
-  > {
+export interface UserVerifiedHumanStatusChangedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.USER_VERIFIED_HUMAN_STATUS_CHANGED,
+  UserVerifiedHumanStatusChangedPayload
+> {
   type: typeof USER_EVENT_TYPES.USER_VERIFIED_HUMAN_STATUS_CHANGED;
 }
 
@@ -200,8 +195,10 @@ export interface BotPatternDetectedPayload {
 /**
  * Event published when bot patterns are detected
  */
-export interface BotPatternDetectedEvent
-  extends BaseEvent<typeof USER_EVENT_TYPES.BOT_PATTERN_DETECTED, BotPatternDetectedPayload> {
+export interface BotPatternDetectedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.BOT_PATTERN_DETECTED,
+  BotPatternDetectedPayload
+> {
   type: typeof USER_EVENT_TYPES.BOT_PATTERN_DETECTED;
 }
 
@@ -234,8 +231,10 @@ export interface UserFlaggedForReviewPayload {
 /**
  * Event published when user is flagged for review
  */
-export interface UserFlaggedForReviewEvent
-  extends BaseEvent<typeof USER_EVENT_TYPES.USER_FLAGGED_FOR_REVIEW, UserFlaggedForReviewPayload> {
+export interface UserFlaggedForReviewEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.USER_FLAGGED_FOR_REVIEW,
+  UserFlaggedForReviewPayload
+> {
   type: typeof USER_EVENT_TYPES.USER_FLAGGED_FOR_REVIEW;
 }
 

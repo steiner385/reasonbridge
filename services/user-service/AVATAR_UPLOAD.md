@@ -39,7 +39,7 @@ Required environment variables:
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_AVATAR_BUCKET=unite-discord-avatars
+S3_AVATAR_BUCKET=reason-bridge-avatars
 ```
 
 ## API Usage
@@ -63,8 +63,8 @@ Response:
   "success": true,
   "data": {
     "key": "avatars/user-123/abc123.jpg",
-    "url": "https://unite-discord-avatars.s3.us-east-1.amazonaws.com/avatars/user-123/abc123.jpg",
-    "bucket": "unite-discord-avatars"
+    "url": "https://reason-bridge-avatars.s3.us-east-1.amazonaws.com/avatars/user-123/abc123.jpg",
+    "bucket": "reason-bridge-avatars"
   }
 }
 ```
@@ -90,7 +90,7 @@ Response: 204 No Content
 ## S3 Bucket Structure
 
 ```
-unite-discord-avatars/
+reason-bridge-avatars/
 └── avatars/
     └── {userId}/
         └── {hash}.{ext}

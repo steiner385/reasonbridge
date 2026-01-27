@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: uniteDiscord Notification Service API
+  title: reasonBridge Notification Service API
   description: Real-time notifications, WebSocket connections, and email delivery
   version: 1.0.0
   contact:
-    name: uniteDiscord Team
+    name: reasonBridge Team
 
 servers:
   - url: /api/v1/notifications

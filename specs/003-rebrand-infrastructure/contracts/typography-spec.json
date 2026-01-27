@@ -1,0 +1,176 @@
+{
+  "fonts": {
+    "heading": {
+      "family": "Nunito",
+      "description": "Rounded, friendly letterforms for headings - professional but warm",
+      "weights": [600, 700],
+      "styles": ["normal"],
+      "fallback": "Poppins, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      "source": "Google Fonts / @fontsource",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&display=swap",
+      "fontsourcePackage": "@fontsource/nunito",
+      "variable": false,
+      "subset": "latin",
+      "usage": "All heading levels (H1-H6), emphasis text, important labels"
+    },
+    "body": {
+      "family": "Nunito",
+      "description": "Primary body text font - excellent readability, warm personality",
+      "weights": [400, 500],
+      "styles": ["normal", "italic"],
+      "fallback": "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      "source": "Google Fonts / @fontsource",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;1,400;1,500&display=swap",
+      "fontsourcePackage": "@fontsource/nunito",
+      "variable": false,
+      "subset": "latin",
+      "usage": "Body text, paragraphs, navigation, UI labels, form inputs"
+    },
+    "monospace": {
+      "family": "Fira Code",
+      "description": "Monospace font for code blocks, data, and technical content",
+      "weights": [400, 700],
+      "styles": ["normal"],
+      "fallback": "JetBrains Mono, Monaco, Consolas, 'Courier New', monospace",
+      "source": "Google Fonts / @fontsource",
+      "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap",
+      "fontsourcePackage": "@fontsource/fira-code",
+      "variable": false,
+      "subset": "latin",
+      "usage": "Code blocks, JSON data, technical documentation, monospaced UI elements"
+    }
+  },
+  "typeScale": {
+    "h1": {
+      "size": "2.25rem",
+      "sizePixels": "36px",
+      "weight": 700,
+      "lineHeight": 1.2,
+      "letterSpacing": "-0.02em",
+      "family": "Nunito",
+      "usage": "Page titles, hero headings"
+    },
+    "h2": {
+      "size": "1.875rem",
+      "sizePixels": "30px",
+      "weight": 600,
+      "lineHeight": 1.25,
+      "letterSpacing": "-0.01em",
+      "family": "Nunito",
+      "usage": "Section headings, modal titles"
+    },
+    "h3": {
+      "size": "1.5rem",
+      "sizePixels": "24px",
+      "weight": 600,
+      "lineHeight": 1.3,
+      "letterSpacing": "0em",
+      "family": "Nunito",
+      "usage": "Sub-section headings, card titles"
+    },
+    "h4": {
+      "size": "1.25rem",
+      "sizePixels": "20px",
+      "weight": 500,
+      "lineHeight": 1.4,
+      "letterSpacing": "0em",
+      "family": "Nunito",
+      "usage": "Smaller headings, emphasis labels"
+    },
+    "body": {
+      "size": "1rem",
+      "sizePixels": "16px",
+      "weight": 400,
+      "lineHeight": 1.6,
+      "letterSpacing": "0em",
+      "family": "Nunito",
+      "usage": "Primary body text, paragraphs"
+    },
+    "small": {
+      "size": "0.875rem",
+      "sizePixels": "14px",
+      "weight": 400,
+      "lineHeight": 1.5,
+      "letterSpacing": "0em",
+      "family": "Nunito",
+      "usage": "Captions, helper text, metadata"
+    },
+    "caption": {
+      "size": "0.75rem",
+      "sizePixels": "12px",
+      "weight": 400,
+      "lineHeight": 1.4,
+      "letterSpacing": "0.02em",
+      "family": "Nunito",
+      "usage": "Timestamps, badges, very small text"
+    },
+    "code": {
+      "size": "0.875rem",
+      "sizePixels": "14px",
+      "weight": 400,
+      "lineHeight": 1.7,
+      "letterSpacing": "0em",
+      "family": "Fira Code",
+      "usage": "Inline code, code blocks"
+    }
+  },
+  "loadingStrategy": {
+    "method": "self-hosted",
+    "package": "@fontsource",
+    "subsetting": "latin",
+    "fontDisplay": "swap",
+    "preload": true,
+    "implementation": {
+      "install": "pnpm add @fontsource/nunito @fontsource/fira-code",
+      "import": "@import '@fontsource/nunito/400.css'; @import '@fontsource/nunito/500.css'; @import '@fontsource/nunito/600.css'; @import '@fontsource/nunito/700.css'; @import '@fontsource/fira-code/400.css'; @import '@fontsource/fira-code/700.css';",
+      "preloadHtml": "<link rel=\"preload\" as=\"font\" type=\"font/woff2\" href=\"/fonts/nunito-latin-400-normal.woff2\" crossorigin>",
+      "fallbackStrategy": "System fonts match weight and x-height to minimize CLS"
+    },
+    "performance": {
+      "targetLoadTime": "120ms",
+      "fileSizeTotal": "~150KB (Nunito 400, 500, 600, 700 + Fira Code 400, 700)",
+      "cls": "<0.01 (minimal layout shift)",
+      "foit": "Prevented via font-display: swap"
+    }
+  },
+  "tailwindConfig": {
+    "fontFamily": {
+      "sans": ["Nunito", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+      "serif": ["Merriweather", "Georgia", "serif"],
+      "mono": ["Fira Code", "JetBrains Mono", "Monaco", "Consolas", "Courier New", "monospace"]
+    }
+  },
+  "accessibility": {
+    "minFontSize": "16px (1rem) for body text",
+    "scalability": "All sizes in rem units for user zoom support",
+    "lineHeightMin": "1.5 for body text (WCAG 1.4.12)",
+    "letterSpacingMin": "No tighter than -0.02em (headings only)",
+    "contrastRequirements": "Ensure text meets WCAG AA contrast on all backgrounds"
+  },
+  "usageGuidelines": {
+    "doUse": [
+      "Nunito for all UI text (headings and body)",
+      "Consistent weights (400 for body, 600-700 for headings)",
+      "Fira Code only for code/technical content",
+      "rem units for font sizes (enables user zoom)",
+      "Line height 1.5+ for readability"
+    ],
+    "doNot": [
+      "Mix Nunito with other sans-serif fonts unnecessarily",
+      "Use font weights outside defined range (400, 500, 600, 700)",
+      "Apply letter-spacing tighter than -0.02em",
+      "Use font sizes smaller than 12px (0.75rem) except icons",
+      "Load unused font weights (increases page load time)"
+    ]
+  },
+  "characterSets": {
+    "latin": {
+      "unicodeRange": "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD",
+      "coverage": "English, French, German, Spanish, Portuguese, Italian",
+      "glyphs": "~445 characters",
+      "fileSizeReduction": "79% vs. full font"
+    }
+  },
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-26"
+}

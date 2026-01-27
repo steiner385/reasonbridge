@@ -1,1 +1,247 @@
-{"uuid":"22921655-2670-41e5-bfe7-776b1387612f","name":"should display topic cards when topics are available","historyId":"06e9548cafcb46ade26f316ac7e9fe44:5bd835b0d6b1d4ada3b9f0db936e82c8","status":"failed","statusDetails":{"message":"Error: expect(received).toBeTruthy()\n\nReceived: false","trace":"Error: expect(received).toBeTruthy()\n\nReceived: false\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:54:45"},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create context","start":1769245005082,"uuid":"f3da571d-0ee1-4814-bbf6-0e881d2517e7","stop":1769245005085}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245005081,"uuid":"5f06fb8c-413d-480b-b250-9001cdc67d24","stop":1769245005086},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Create page","start":1769245005087,"uuid":"3281d189-059b-46db-b75e-aa23fee486b2","stop":1769245005115}],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245005086,"uuid":"0c6f517a-6eab-4dad-b374-5ab96c0eb6b0","stop":1769245005115}],"attachments":[],"parameters":[],"name":"Before Hooks","start":1769245005076,"uuid":"63aa4df8-3659-484d-b66b-55e69f97efde","stop":1769245005115},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245005117,"name":"Navigate to \"/topics\"","uuid":"fc98ccd6-1b27-4f39-a67f-f23f403d789f","stop":1769245005159},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245005163,"name":"Wait for selector locator('text=Loading topics...')","uuid":"c84189a0-6eb8-41e3-9410-05e726c39bba","stop":1769245006595},{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245006598,"name":"Query count locator('[data-testid=\"topic-card\"]').or(locator('article').first())","uuid":"39a9c61d-ed19-4f41-97ca-e3762906df89","stop":1769245006602},{"status":"failed","statusDetails":{"message":"Error: expect(received).toBeTruthy()\n\nReceived: false","trace":"Error: expect(received).toBeTruthy()\n\nReceived: false\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:54:45"},"stage":"finished","steps":[],"attachments":[],"parameters":[],"start":1769245006608,"name":"Expect \"toBeTruthy\"","uuid":"78058557-e22a-4e9c-9f24-001cc72c2902","stop":1769245006609},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"screenshot","source":"85fe2f8a-b001-4c5c-b910-a5dacf1c4a1c-attachment.png","type":"image/png"}],"parameters":[],"start":1769245006767,"name":"screenshot","stop":1769245006767},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"video","source":"75d4bc9c-2759-4250-9ee5-cfc12dbd6166-attachment.webm","type":"video/webm"}],"parameters":[],"start":1769245006768,"name":"video","stop":1769245006768},{"statusDetails":{},"stage":"finished","steps":[],"attachments":[{"name":"error-context","source":"7f1a470b-61f0-4b2b-a04d-0b234803e367-attachment.md","type":"text/markdown"}],"parameters":[],"start":1769245006769,"name":"error-context","stop":1769245006769},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Fixture \"page\"","start":1769245006641,"uuid":"101ebaf7-5456-4185-bc77-976336e136cc","stop":1769245006641},{"status":"passed","statusDetails":{},"stage":"finished","steps":[{"status":"passed","statusDetails":{},"stage":"finished","steps":[],"attachments":[],"parameters":[],"name":"Close context","start":1769245006657,"uuid":"63a69808-5266-4a39-b3db-bc787d595bfd","stop":1769245006728}],"attachments":[],"parameters":[],"name":"Fixture \"context\"","start":1769245006641,"uuid":"5632cf5b-5eae-4482-a492-e6383c461de1","stop":1769245006729}],"attachments":[],"parameters":[],"name":"After Hooks","start":1769245006609,"uuid":"40a2cabd-fe8f-4111-86ca-b83baa835ba0","stop":1769245006733}],"attachments":[],"parameters":[{"name":"Project","value":"chromium"}],"labels":[{"name":"language","value":"javascript"},{"name":"framework","value":"playwright"},{"name":"package","value":"browse-topics-and-view-details.spec.ts"},{"name":"titlePath","value":" > chromium > browse-topics-and-view-details.spec.ts > Browse Topics and View Details"},{"name":"host","value":"dobby"},{"name":"thread","value":"pid-2154464-worker-7"},{"name":"parentSuite","value":"chromium"},{"name":"suite","value":"browse-topics-and-view-details.spec.ts"},{"name":"subSuite","value":"Browse Topics and View Details"}],"links":[],"start":1769245005076,"testCaseId":"06e9548cafcb46ade26f316ac7e9fe44","fullName":"browse-topics-and-view-details.spec.ts:38:3","titlePath":["browse-topics-and-view-details.spec.ts","Browse Topics and View Details"],"stop":1769245006724}
+{
+  "uuid": "22921655-2670-41e5-bfe7-776b1387612f",
+  "name": "should display topic cards when topics are available",
+  "historyId": "06e9548cafcb46ade26f316ac7e9fe44:5bd835b0d6b1d4ada3b9f0db936e82c8",
+  "status": "failed",
+  "statusDetails": {
+    "message": "Error: expect(received).toBeTruthy()\n\nReceived: false",
+    "trace": "Error: expect(received).toBeTruthy()\n\nReceived: false\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:54:45"
+  },
+  "stage": "finished",
+  "steps": [
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create context",
+              "start": 1769245005082,
+              "uuid": "f3da571d-0ee1-4814-bbf6-0e881d2517e7",
+              "stop": 1769245005085
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245005081,
+          "uuid": "5f06fb8c-413d-480b-b250-9001cdc67d24",
+          "stop": 1769245005086
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Create page",
+              "start": 1769245005087,
+              "uuid": "3281d189-059b-46db-b75e-aa23fee486b2",
+              "stop": 1769245005115
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245005086,
+          "uuid": "0c6f517a-6eab-4dad-b374-5ab96c0eb6b0",
+          "stop": 1769245005115
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "Before Hooks",
+      "start": 1769245005076,
+      "uuid": "63aa4df8-3659-484d-b66b-55e69f97efde",
+      "stop": 1769245005115
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245005117,
+      "name": "Navigate to \"/topics\"",
+      "uuid": "fc98ccd6-1b27-4f39-a67f-f23f403d789f",
+      "stop": 1769245005159
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245005163,
+      "name": "Wait for selector locator('text=Loading topics...')",
+      "uuid": "c84189a0-6eb8-41e3-9410-05e726c39bba",
+      "stop": 1769245006595
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245006598,
+      "name": "Query count locator('[data-testid=\"topic-card\"]').or(locator('article').first())",
+      "uuid": "39a9c61d-ed19-4f41-97ca-e3762906df89",
+      "stop": 1769245006602
+    },
+    {
+      "status": "failed",
+      "statusDetails": {
+        "message": "Error: expect(received).toBeTruthy()\n\nReceived: false",
+        "trace": "Error: expect(received).toBeTruthy()\n\nReceived: false\n    at /mnt/ssk-ssd/tony/GitHub/uniteDiscord/frontend/e2e/browse-topics-and-view-details.spec.ts:54:45"
+      },
+      "stage": "finished",
+      "steps": [],
+      "attachments": [],
+      "parameters": [],
+      "start": 1769245006608,
+      "name": "Expect \"toBeTruthy\"",
+      "uuid": "78058557-e22a-4e9c-9f24-001cc72c2902",
+      "stop": 1769245006609
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "source": "85fe2f8a-b001-4c5c-b910-a5dacf1c4a1c-attachment.png",
+          "type": "image/png"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245006767,
+      "name": "screenshot",
+      "stop": 1769245006767
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "video",
+          "source": "75d4bc9c-2759-4250-9ee5-cfc12dbd6166-attachment.webm",
+          "type": "video/webm"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245006768,
+      "name": "video",
+      "stop": 1769245006768
+    },
+    {
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [],
+      "attachments": [
+        {
+          "name": "error-context",
+          "source": "7f1a470b-61f0-4b2b-a04d-0b234803e367-attachment.md",
+          "type": "text/markdown"
+        }
+      ],
+      "parameters": [],
+      "start": 1769245006769,
+      "name": "error-context",
+      "stop": 1769245006769
+    },
+    {
+      "status": "passed",
+      "statusDetails": {},
+      "stage": "finished",
+      "steps": [
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"page\"",
+          "start": 1769245006641,
+          "uuid": "101ebaf7-5456-4185-bc77-976336e136cc",
+          "stop": 1769245006641
+        },
+        {
+          "status": "passed",
+          "statusDetails": {},
+          "stage": "finished",
+          "steps": [
+            {
+              "status": "passed",
+              "statusDetails": {},
+              "stage": "finished",
+              "steps": [],
+              "attachments": [],
+              "parameters": [],
+              "name": "Close context",
+              "start": 1769245006657,
+              "uuid": "63a69808-5266-4a39-b3db-bc787d595bfd",
+              "stop": 1769245006728
+            }
+          ],
+          "attachments": [],
+          "parameters": [],
+          "name": "Fixture \"context\"",
+          "start": 1769245006641,
+          "uuid": "5632cf5b-5eae-4482-a492-e6383c461de1",
+          "stop": 1769245006729
+        }
+      ],
+      "attachments": [],
+      "parameters": [],
+      "name": "After Hooks",
+      "start": 1769245006609,
+      "uuid": "40a2cabd-fe8f-4111-86ca-b83baa835ba0",
+      "stop": 1769245006733
+    }
+  ],
+  "attachments": [],
+  "parameters": [{ "name": "Project", "value": "chromium" }],
+  "labels": [
+    { "name": "language", "value": "javascript" },
+    { "name": "framework", "value": "playwright" },
+    { "name": "package", "value": "browse-topics-and-view-details.spec.ts" },
+    {
+      "name": "titlePath",
+      "value": " > chromium > browse-topics-and-view-details.spec.ts > Browse Topics and View Details"
+    },
+    { "name": "host", "value": "dobby" },
+    { "name": "thread", "value": "pid-2154464-worker-7" },
+    { "name": "parentSuite", "value": "chromium" },
+    { "name": "suite", "value": "browse-topics-and-view-details.spec.ts" },
+    { "name": "subSuite", "value": "Browse Topics and View Details" }
+  ],
+  "links": [],
+  "start": 1769245005076,
+  "testCaseId": "06e9548cafcb46ade26f316ac7e9fe44",
+  "fullName": "browse-topics-and-view-details.spec.ts:38:3",
+  "titlePath": ["browse-topics-and-view-details.spec.ts", "Browse Topics and View Details"],
+  "stop": 1769245006724
+}
