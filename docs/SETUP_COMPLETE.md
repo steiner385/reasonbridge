@@ -7,6 +7,7 @@ Your local development environment for the **User Onboarding** feature is now fu
 ## What Was Completed
 
 ### 1. Database Setup ✅
+
 - ✅ PostgreSQL database running (local instance on port 5432)
 - ✅ Database `unite_dev` created with user `unite`
 - ✅ All migrations applied (4 migrations including onboarding schema)
@@ -14,6 +15,7 @@ Your local development environment for the **User Onboarding** feature is now fu
 - ✅ System user created (`system@reasonbridge.org`)
 
 ### 2. Environment Configuration ✅
+
 - ✅ `.env` file created from template
 - ✅ Database connection configured
 - ✅ Redis and LocalStack configured
@@ -21,23 +23,27 @@ Your local development environment for the **User Onboarding** feature is now fu
 - ⚠️ AWS Cognito credentials placeholder (needs manual setup)
 
 ### 3. Dependencies ✅
+
 - ✅ Prisma client generated
 - ✅ All npm packages installed
 - ✅ Docker services running (Redis, LocalStack)
 
 ### 4. Documentation ✅
+
 - ✅ `AWS_COGNITO_SETUP.md` - Step-by-step Cognito configuration
 - ✅ `IMPLEMENTATION_STATUS.md` - Complete implementation status (145/175 tasks)
 - ✅ `ORIENTATION_IMPLEMENTATION.md` - Orientation flow documentation
 - ✅ `PR_READY.md` - PR preparation guide
 
 ### 5. Pull Request ✅
+
 - ✅ Branch `003-user-onboarding` pushed to GitHub
 - ✅ PR #693 created: https://github.com/steiner385/reasonbridge/pull/693
 
 ## Database Status
 
 ### Migrations Applied
+
 ```
 ✓ 20260117204909_initial
 ✓ 20260117221046_add_vote_model
@@ -46,6 +52,7 @@ Your local development environment for the **User Onboarding** feature is now fu
 ```
 
 ### Seed Data
+
 ```
 ✓ 20 discussion topics with activity levels
   - 5 HIGH activity (Climate, Economics, Technology, Healthcare, Education)
@@ -55,6 +62,7 @@ Your local development environment for the **User Onboarding** feature is now fu
 ```
 
 ### Database Connection
+
 ```bash
 Host: localhost
 Port: 5432
@@ -70,6 +78,7 @@ Password: unite
 You can test most of the onboarding flow locally without Cognito by:
 
 1. **Start the services**
+
    ```bash
    # Terminal 1: Backend
    pnpm --filter user-service dev
@@ -89,6 +98,7 @@ You can test most of the onboarding flow locally without Cognito by:
 Follow the AWS Cognito setup guide to enable authentication:
 
 1. **Configure AWS Cognito**
+
    ```bash
    # Follow the guide:
    cat AWS_COGNITO_SETUP.md
@@ -98,6 +108,7 @@ Follow the AWS Cognito setup guide to enable authentication:
    ```
 
 2. **Update .env with Cognito credentials**
+
    ```bash
    COGNITO_USER_POOL_ID=us-east-1_XXXXXXXXX
    COGNITO_CLIENT_ID=xxxxxxxxxxxxxxxxxxxx
@@ -122,6 +133,7 @@ pnpm --filter frontend test:e2e orientation.spec.ts
 ## Quick Start Commands
 
 ### Start All Services
+
 ```bash
 # Docker services (if not already running)
 docker compose up -d
@@ -134,6 +146,7 @@ pnpm --filter frontend dev
 ```
 
 ### Check Service Status
+
 ```bash
 # Database
 psql -h localhost -U unite -d unite_dev -c "\dt"
@@ -146,6 +159,7 @@ open http://localhost:3000
 ```
 
 ### View Seed Data
+
 ```bash
 # List all topics
 psql -h localhost -U unite -d unite_dev -c "
@@ -173,6 +187,7 @@ psql -h localhost -U unite -d unite_dev -c "
 ## Testing Checklist
 
 ### Without Cognito
+
 - [ ] Landing page loads with demo discussions
 - [ ] Topic selection shows 20 topics with activity badges
 - [ ] Can select 2-3 topics
@@ -182,6 +197,7 @@ psql -h localhost -U unite -d unite_dev -c "
 - [ ] Help menu reopens orientation
 
 ### With Cognito
+
 - [ ] Email signup creates Cognito user
 - [ ] Verification email received with 6-digit code
 - [ ] Email verification succeeds
@@ -193,6 +209,7 @@ psql -h localhost -U unite -d unite_dev -c "
 ## Troubleshooting
 
 ### Database Connection Issues
+
 ```bash
 # Check if postgres is running
 ps aux | grep postgres
@@ -207,6 +224,7 @@ DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" pnpm --filter d
 ```
 
 ### Port Conflicts
+
 ```bash
 # Check what's using port 5432
 lsof -i :5432
@@ -216,6 +234,7 @@ kill -9 <PID>
 ```
 
 ### Prisma Client Issues
+
 ```bash
 # Regenerate client
 DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" npx prisma generate

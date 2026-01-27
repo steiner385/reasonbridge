@@ -17,6 +17,7 @@ reasonBridge is a **Rational Discussion Platform** built with modern web technol
 **CRITICAL**: When working on any task, you MUST fix any failures, issues, TODOs, or problems you encounter, **regardless of whether you caused them**.
 
 **Philosophy**:
+
 - If you find a failing test → fix it
 - If you encounter a build error → fix it
 - If you discover a bug → fix it
@@ -24,12 +25,14 @@ reasonBridge is a **Rational Discussion Platform** built with modern web technol
 - If E2E tests fail for "unrelated reasons" → those reasons are now related
 
 **This is non-negotiable**. Do not:
+
 - ❌ Say "this is a pre-existing issue"
 - ❌ Say "this is unrelated to our changes"
 - ❌ Say "this was already broken"
 - ❌ Leave problems for later
 
 **Instead**:
+
 - ✅ Fix the problem you found
 - ✅ Ensure the system works end-to-end
 - ✅ Leave the codebase in a better state than you found it
@@ -354,21 +357,18 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Historical Issues:**
 
 1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
-
    - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
    - **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
    - **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
    - **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
 
 2. **DNS Resolution (net::ERR_NAME_NOT_RESOLVED)** - Fixed 2026-01-24 16:05 UTC:
-
    - PR #672 build #1: 14 tests in view-common-ground-summary.spec.ts failed with `net::ERR_NAME_NOT_RESOLVED at http://frontend/topics`
    - **Root cause**: PLAYWRIGHT_BASE_URL environment variable not passed correctly to docker exec process
    - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
    - **Result**: All 14 tests now resolve correct baseURL for navigation
 
 3. **Port Already Allocated (E2E Start Failure)** - Fixed 2026-01-24 16:27 UTC:
-
    - PR #672 build #2: Docker Compose failed with `Bind for 0.0.0.0:3004 failed: port is already allocated`
    - **Root cause**: Crashed/killed containers leave processes holding E2E ports; aggressive cleanup only removed containers by name, not port-based processes
    - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
@@ -448,19 +448,16 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 ### Debugging Workflow
 
 1. **Identify the Error**:
-
    - Read error message completely
    - Check file and line number
    - Review recent changes
 
 2. **Reproduce Locally**:
-
    - Pull latest changes
    - Install dependencies
    - Run the failing command locally
 
 3. **Fix and Verify**:
-
    - Make minimal fix
    - Run tests to verify fix
    - Ensure no regressions
