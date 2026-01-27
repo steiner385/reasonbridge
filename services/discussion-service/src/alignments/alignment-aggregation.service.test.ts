@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock the Prisma Decimal class for tests - defined inline within mock factory
-// since vi.mock is hoisted to the top of the file
-vi.mock('@prisma/client', () => {
+// Mock the Prisma Decimal class for tests - use importOriginal to preserve
+// other exports like PrismaClient while only mocking Prisma.Decimal
+vi.mock('@prisma/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@prisma/client')>();
+
   class MockDecimal {
     private value: number;
     constructor(value: string | number) {
@@ -15,8 +17,11 @@ vi.mock('@prisma/client', () => {
       return this.value.toString();
     }
   }
+
   return {
+    ...actual,
     Prisma: {
+      ...actual.Prisma,
       Decimal: MockDecimal,
     },
   };
