@@ -40,7 +40,7 @@
     "@types/pdfkit": "0.17.4",
     "tsx": "^4.7.0",
     "typescript": "5.7.3",
-    "vitest": "^2.1.9"
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20.0.0"

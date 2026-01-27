@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@reason-bridge/db-models": "workspace:*",
-    "vitest": "^1.0.0"
+    "vitest": "^4.0.18"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
