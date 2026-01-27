@@ -39,7 +39,7 @@
     "@types/node": "20.17.12",
     "@types/pdfkit": "0.17.4",
     "tsx": "^4.7.0",
-    "typescript": "5.7.3",
+    "typescript": "5.9.3",
     "vitest": "^2.1.9"
   },
   "engines": {
