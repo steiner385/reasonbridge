@@ -62,11 +62,7 @@ export const SignupPage: React.FC = () => {
         {/* Card Container */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           {/* Email Signup Form */}
-          <EmailSignupForm
-            onSubmit={handleEmailSignup}
-            isLoading={isLoading}
-            error={error}
-          />
+          <EmailSignupForm onSubmit={handleEmailSignup} isLoading={isLoading} error={error} />
 
           {/* OAuth Buttons */}
           <OAuthButtons onError={handleOAuthError} className="mt-6" />
