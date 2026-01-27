@@ -27,7 +27,7 @@
     "@nestjs/jwt": "11.0.2",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-fastify": "^10.3.0",
-    "@prisma/client": "7.3.0",
+    "@prisma/client": "6.3.1",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "apple-signin-auth": "^2.0.0",
@@ -54,7 +54,7 @@
     "@types/uuid": "^11.0.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.0.0"
