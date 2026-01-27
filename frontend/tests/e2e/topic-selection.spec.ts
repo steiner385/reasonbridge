@@ -28,7 +28,10 @@ test.describe('Topic Selection Flow', () => {
     // Navigate to signup
     await page.goto('/signup');
     await page.getByLabel(/email/i).fill(email);
-    await page.getByLabel(/^password$/i).first().fill(password);
+    await page
+      .getByLabel(/^password$/i)
+      .first()
+      .fill(password);
     await page.getByLabel(/confirm password/i).fill(password);
     await page.getByRole('button', { name: /sign up|create account/i }).click();
 
@@ -65,9 +68,9 @@ test.describe('Topic Selection Flow', () => {
       expect(badgeCount).toBeGreaterThan(0);
 
       // Topics should show participant counts
-      const participantIcons = page.locator('svg[title*="Participants"]').or(
-        page.locator('svg').filter({ hasText: /participants/i }),
-      );
+      const participantIcons = page
+        .locator('svg[title*="Participants"]')
+        .or(page.locator('svg').filter({ hasText: /participants/i }));
       const iconCount = await participantIcons.count();
       expect(iconCount).toBeGreaterThan(0);
     });
@@ -163,9 +166,7 @@ test.describe('Topic Selection Flow', () => {
       await expect(priority1Badge).toBeVisible();
 
       // Change priority
-      const setPriority2Button = page
-        .getByRole('button', { name: /set priority to 2/i })
-        .first();
+      const setPriority2Button = page.getByRole('button', { name: /set priority to 2/i }).first();
       await setPriority2Button.click();
 
       await page.waitForTimeout(300);
@@ -275,9 +276,7 @@ test.describe('Topic Selection Flow', () => {
       await page.waitForSelector('[role="button"][aria-pressed]', { timeout: 10000 });
 
       // Find and select only LOW activity topics
-      const lowActivityTopics = page.locator(
-        '[role="button"][aria-pressed="false"]',
-      ).filter({
+      const lowActivityTopics = page.locator('[role="button"][aria-pressed="false"]').filter({
         has: page.locator('text=/low activity/i'),
       });
 
@@ -310,9 +309,7 @@ test.describe('Topic Selection Flow', () => {
       await page.waitForSelector('[role="button"][aria-pressed]', { timeout: 10000 });
 
       // Select LOW activity topics and trigger warning
-      const lowActivityTopics = page.locator(
-        '[role="button"][aria-pressed="false"]',
-      ).filter({
+      const lowActivityTopics = page.locator('[role="button"][aria-pressed="false"]').filter({
         has: page.locator('text=/low activity/i'),
       });
 
@@ -343,9 +340,7 @@ test.describe('Topic Selection Flow', () => {
       await page.waitForSelector('[role="button"][aria-pressed]', { timeout: 10000 });
 
       // Select LOW activity topics
-      const lowActivityTopics = page.locator(
-        '[role="button"][aria-pressed="false"]',
-      ).filter({
+      const lowActivityTopics = page.locator('[role="button"][aria-pressed="false"]').filter({
         has: page.locator('text=/low activity/i'),
       });
 
@@ -379,9 +374,7 @@ test.describe('Topic Selection Flow', () => {
       await page.waitForSelector('[role="button"][aria-pressed]', { timeout: 10000 });
 
       // Select LOW activity topics
-      const lowActivityTopics = page.locator(
-        '[role="button"][aria-pressed="false"]',
-      ).filter({
+      const lowActivityTopics = page.locator('[role="button"][aria-pressed="false"]').filter({
         has: page.locator('text=/low activity/i'),
       });
 
@@ -417,9 +410,7 @@ test.describe('Topic Selection Flow', () => {
       await expect(topicCards.first()).toBeVisible({ timeout: 10000 });
 
       // Select 2 HIGH/MEDIUM activity topics to avoid warning modal
-      const highActivityTopics = page.locator(
-        '[role="button"][aria-pressed="false"]',
-      ).filter({
+      const highActivityTopics = page.locator('[role="button"][aria-pressed="false"]').filter({
         has: page.locator('text=/high activity|medium activity/i'),
       });
 

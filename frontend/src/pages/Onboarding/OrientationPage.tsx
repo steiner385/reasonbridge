@@ -8,7 +8,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OrientationOverlay from '../../components/onboarding/OrientationOverlay';
-import { onboardingService, type OnboardingProgressResponse } from '../../services/onboardingService';
+import {
+  onboardingService,
+  type OnboardingProgressResponse,
+} from '../../services/onboardingService';
 
 /**
  * OrientationPage component

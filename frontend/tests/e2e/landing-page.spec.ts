@@ -136,7 +136,10 @@ test.describe('Landing Page Demo Flow', () => {
     await firstDiscussion.getByRole('button', { name: /View Full Discussion/i }).click();
 
     // Click signup button in modal
-    await page.getByRole('dialog').getByRole('button', { name: /Sign Up Free/i }).click();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: /Sign Up Free/i })
+      .click();
 
     // Should navigate to signup page
     await expect(page).toHaveURL(/\/signup/);
@@ -148,7 +151,10 @@ test.describe('Landing Page Demo Flow', () => {
     await firstDiscussion.getByRole('button', { name: /View Full Discussion/i }).click();
 
     // Click login button in modal
-    await page.getByRole('dialog').getByRole('button', { name: /Log In/i }).click();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: /Log In/i })
+      .click();
 
     // Should navigate to login page
     await expect(page).toHaveURL(/\/login/);
@@ -156,7 +162,10 @@ test.describe('Landing Page Demo Flow', () => {
 
   test('should navigate to signup from header CTA', async ({ page }) => {
     // Click header signup button
-    await page.getByRole('button', { name: /Sign Up Free/i }).first().click();
+    await page
+      .getByRole('button', { name: /Sign Up Free/i })
+      .first()
+      .click();
 
     // Should navigate to signup page
     await expect(page).toHaveURL(/\/signup/);
@@ -164,7 +173,10 @@ test.describe('Landing Page Demo Flow', () => {
 
   test('should navigate to login from header', async ({ page }) => {
     // Click header login button
-    await page.getByRole('button', { name: /Log In/i }).first().click();
+    await page
+      .getByRole('button', { name: /Log In/i })
+      .first()
+      .click();
 
     // Should navigate to login page
     await expect(page).toHaveURL(/\/login/);

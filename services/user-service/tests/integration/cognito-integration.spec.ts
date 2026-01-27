@@ -116,7 +116,7 @@ describe('Cognito Integration Tests', () => {
               Value: testEmail,
             }),
           ]),
-        })
+        }),
       );
     });
 
@@ -127,7 +127,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(ConflictException);
+      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(
+        ConflictException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -160,7 +162,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -171,7 +175,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
@@ -197,7 +203,7 @@ describe('Cognito Integration Tests', () => {
           ClientId: testConfig.COGNITO_CLIENT_ID,
           Username: testEmail,
           ConfirmationCode: testCode,
-        })
+        }),
       );
     });
 
@@ -208,7 +214,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -219,7 +227,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -230,7 +240,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -241,7 +253,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
@@ -273,7 +287,7 @@ describe('Cognito Integration Tests', () => {
         expect.objectContaining({
           ClientId: testConfig.COGNITO_CLIENT_ID,
           Username: testEmail,
-        })
+        }),
       );
     });
 
@@ -349,7 +363,7 @@ describe('Cognito Integration Tests', () => {
             USERNAME: testEmail,
             PASSWORD: testPassword,
           },
-        })
+        }),
       );
     });
 
@@ -360,7 +374,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.authenticateUser(testEmail, 'wrong-password')).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.authenticateUser(testEmail, 'wrong-password')).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -371,7 +387,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.authenticateUser(testEmail, testPassword)).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.authenticateUser(testEmail, testPassword)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -382,7 +400,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.authenticateUser(testEmail, testPassword)).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.authenticateUser(testEmail, testPassword)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -394,7 +414,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockResolvedValue(mockResponse);
 
       // Act & Assert
-      await expect(cognitoService.authenticateUser(testEmail, testPassword)).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.authenticateUser(testEmail, testPassword)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
@@ -437,7 +459,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.initiateAuth(testEmail, testPassword)).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.initiateAuth(testEmail, testPassword)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
@@ -475,7 +499,7 @@ describe('Cognito Integration Tests', () => {
           AuthParameters: {
             REFRESH_TOKEN: testRefreshToken,
           },
-        })
+        }),
       );
     });
 
@@ -486,7 +510,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.refreshAccessToken('invalid-token')).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.refreshAccessToken('invalid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
@@ -498,7 +524,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockResolvedValue(mockResponse);
 
       // Act & Assert
-      await expect(cognitoService.refreshAccessToken(testRefreshToken)).rejects.toThrow(UnauthorizedException);
+      await expect(cognitoService.refreshAccessToken(testRefreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
@@ -566,7 +594,9 @@ describe('Cognito Integration Tests', () => {
       error.name = 'UsernameExistsException';
       mockSend.mockRejectedValueOnce(error);
 
-      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(ConflictException);
+      await expect(cognitoService.signUp(testEmail, testPassword)).rejects.toThrow(
+        ConflictException,
+      );
 
       // Login instead
       const authResponse = {
@@ -597,7 +627,9 @@ describe('Cognito Integration Tests', () => {
       expiredError.name = 'ExpiredCodeException';
       mockSend.mockRejectedValueOnce(expiredError);
 
-      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.confirmSignUp(testEmail, testCode)).rejects.toThrow(
+        BadRequestException,
+      );
 
       // Step 3: Resend code
       const resendResponse = {
@@ -628,7 +660,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(cognitoService.signUp('test@example.com', 'Pass123!@#')).rejects.toThrow(BadRequestException);
+      await expect(cognitoService.signUp('test@example.com', 'Pass123!@#')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should provide helpful error messages for common failures', async () => {
@@ -647,7 +681,9 @@ describe('Cognito Integration Tests', () => {
         error.name = scenario.name;
         mockSend.mockRejectedValueOnce(error);
 
-        await expect(cognitoService.signUp('test@example.com', 'Pass123!@#')).rejects.toThrow(scenario.expectedError);
+        await expect(cognitoService.signUp('test@example.com', 'Pass123!@#')).rejects.toThrow(
+          scenario.expectedError,
+        );
       }
     });
 
@@ -673,9 +709,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockResolvedValue(mockResponse);
 
       // Act & Assert
-      await expect(cognitoService.authenticateUser('test@example.com', 'Pass123!@#')).rejects.toThrow(
-        UnauthorizedException
-      );
+      await expect(
+        cognitoService.authenticateUser('test@example.com', 'Pass123!@#'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should handle partial authentication result', async () => {
@@ -689,7 +725,9 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockResolvedValue(mockResponse);
 
       // Act & Assert
-      await expect(cognitoService.authenticateUser('test@example.com', 'Pass123!@#')).rejects.toThrow();
+      await expect(
+        cognitoService.authenticateUser('test@example.com', 'Pass123!@#'),
+      ).rejects.toThrow();
     });
 
     it('should handle null code delivery details', async () => {
@@ -756,7 +794,7 @@ describe('Cognito Integration Tests', () => {
 
       // Act
       const results = await Promise.all(
-        emails.map((email) => cognitoService.signUp(email, 'Pass123!@#'))
+        emails.map((email) => cognitoService.signUp(email, 'Pass123!@#')),
       );
 
       // Assert
@@ -808,7 +846,10 @@ describe('Cognito Integration Tests', () => {
       mockSend.mockResolvedValue(mockResponse);
 
       // Act
-      const result = await cognitoService.authenticateUser('oauth@example.com', 'oauth-temp-password');
+      const result = await cognitoService.authenticateUser(
+        'oauth@example.com',
+        'oauth-temp-password',
+      );
 
       // Assert
       expect(result.accessToken).toBe('oauth-access-token');

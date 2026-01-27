@@ -32,7 +32,7 @@ describe('EksStack', () => {
       Config: {
         version: '1.31',
         roleArn: {
-          'Fn::GetAtt': [Match.stringLikeRegexp('UniteClusterRole.*'), 'Arn'],
+          'Fn::GetAtt': [Match.stringLikeRegexp('ReasonBridgeClusterRole.*'), 'Arn'],
         },
       },
     });
