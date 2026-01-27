@@ -52,12 +52,11 @@ describe('EditResponseModal', () => {
 
   describe('Content Validation', () => {
     it('should validate minimum character length', async () => {
-      const user = userEvent.setup();
       render(<EditResponseModal {...defaultProps} minLength={10} />);
 
       const textarea = screen.getByLabelText(/your response/i);
-      await user.clear(textarea);
-      await user.type(textarea, 'Short');
+      // Use fireEvent.change instead of userEvent.type for CI stability
+      fireEvent.change(textarea, { target: { value: 'Short' } });
 
       const saveButton = screen.getByRole('button', { name: /save changes/i });
       expect(saveButton).toBeDisabled();
@@ -66,12 +65,11 @@ describe('EditResponseModal', () => {
     });
 
     it('should validate maximum character length', async () => {
-      const user = userEvent.setup();
       render(<EditResponseModal {...defaultProps} maxLength={50} />);
 
       const textarea = screen.getByLabelText(/your response/i);
-      await user.clear(textarea);
-      await user.type(textarea, 'A'.repeat(51));
+      // Use fireEvent.change instead of userEvent.type for CI stability
+      fireEvent.change(textarea, { target: { value: 'A'.repeat(51) } });
 
       // Textarea has maxLength attribute, so it won't let you type beyond limit
       // But we can test the character counter
@@ -80,13 +78,12 @@ describe('EditResponseModal', () => {
     });
 
     it('should show error when content is below minimum length on submit', async () => {
-      const user = userEvent.setup();
       const onSubmit = vi.fn();
       render(<EditResponseModal {...defaultProps} onSubmit={onSubmit} minLength={100} />);
 
       const textarea = screen.getByLabelText(/your response/i);
-      await user.clear(textarea);
-      await user.type(textarea, 'Too short content');
+      // Use fireEvent.change instead of userEvent.type for CI stability
+      fireEvent.change(textarea, { target: { value: 'Too short content' } });
 
       const saveButton = screen.getByRole('button', { name: /save changes/i });
 

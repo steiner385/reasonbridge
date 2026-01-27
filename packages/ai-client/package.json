@@ -33,10 +33,10 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.504.0"
+    "@aws-sdk/client-bedrock-runtime": "^3.975.0"
   },
   "devDependencies": {
-    "typescript": "5.7.3"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@reason-bridge/common": "workspace:*"
