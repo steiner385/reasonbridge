@@ -1,6 +1,6 @@
-# Unite Discord - AWS CDK Infrastructure
+# ReasonBridge - AWS CDK Infrastructure
 
-This directory contains AWS CDK infrastructure-as-code for the Unite Discord platform.
+This directory contains AWS CDK infrastructure-as-code for the ReasonBridge platform.
 
 ## Architecture Overview
 
@@ -50,7 +50,7 @@ pnpm deploy --all
 ### Deploy specific stack
 
 ```bash
-pnpm deploy UniteEksStack
+pnpm deploy ReasonBridgeEksStack
 ```
 
 ### View differences

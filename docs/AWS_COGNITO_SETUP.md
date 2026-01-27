@@ -97,6 +97,7 @@ By default, Cognito sends a 6-digit verification code. To customize:
 1. Go to your User Pool → Messaging → Email
 2. Click "Edit"
 3. Customize verification message:
+
    ```
    Your ReasonBridge verification code is: {####}
 
@@ -104,6 +105,7 @@ By default, Cognito sends a 6-digit verification code. To customize:
 
    If you didn't request this code, please ignore this email.
    ```
+
 4. Save changes
 
 ## Step 3: Set Up OAuth Providers (Optional)
@@ -236,6 +238,7 @@ pnpm --filter frontend dev
 **Problem**: Cognito default email has low deliverability
 
 **Solution**: Configure Amazon SES
+
 1. Verify your domain in SES
 2. Move out of SES sandbox (request production access)
 3. Update Cognito to use SES for email delivery
@@ -245,6 +248,7 @@ pnpm --filter frontend dev
 **Problem**: Redirect URI mismatch
 
 **Solution**: Ensure redirect URIs match exactly in:
+
 - Google/Apple Developer Console
 - Cognito User Pool settings
 - Your .env file
@@ -254,6 +258,7 @@ pnpm --filter frontend dev
 **Problem**: Explicit auth flow not enabled
 
 **Solution**: Enable `ALLOW_USER_PASSWORD_AUTH` in app client settings:
+
 ```bash
 aws cognito-idp update-user-pool-client \
   --user-pool-id <POOL_ID> \
@@ -290,10 +295,12 @@ The backend makes Cognito SDK calls, not the frontend directly.
 ## Cost Optimization
 
 **Cognito Free Tier**:
+
 - First 50,000 MAU: Free
 - After: $0.0055 per MAU
 
 **SES Costs**:
+
 - First 62,000 emails/month: Free (if sending from EC2)
 - After: $0.10 per 1,000 emails
 
@@ -304,6 +311,7 @@ For development, Cognito default email is fine. For production, use SES.
 After Cognito is configured:
 
 1. **Test Complete Onboarding Flow**
+
    ```bash
    # All services should be running
    docker compose up -d
@@ -312,6 +320,7 @@ After Cognito is configured:
    ```
 
 2. **Run E2E Tests**
+
    ```bash
    pnpm --filter frontend test:e2e
    ```
