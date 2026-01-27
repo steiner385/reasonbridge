@@ -94,17 +94,14 @@ BROWSER [error]: [Some JavaScript error that prevented form submission]
 ## Key Things to Look For
 
 1. **Does the button click register?**
-
    - Look for "Register button clicked!" message
 
 2. **Does the API call happen?**
-
    - Look for "API REQUEST: POST .../auth/register"
    - If NO: Form submission is blocked (JavaScript error, validation, event handler issue)
    - If YES: Check the response status
 
 3. **What's the response status?**
-
    - 200/201: Success, should redirect
    - 400: Validation error
    - 409: User already exists
@@ -112,7 +109,6 @@ BROWSER [error]: [Some JavaScript error that prevented form submission]
    - Network error: Connection refused
 
 4. **Are there browser errors?**
-
    - Look for "BROWSER [error]:" or "PAGE ERROR:"
    - These indicate JavaScript exceptions
 

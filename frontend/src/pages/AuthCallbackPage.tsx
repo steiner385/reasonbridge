@@ -25,7 +25,8 @@ export const AuthCallbackPage: React.FC = () => {
         const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
         const state = hashParams.get('state') || queryParams.get('state');
         const errorParam = hashParams.get('error') || queryParams.get('error');
-        const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+        const errorDescription =
+          hashParams.get('error_description') || queryParams.get('error_description');
 
         // Check for OAuth errors
         if (errorParam) {
@@ -55,11 +56,14 @@ export const AuthCallbackPage: React.FC = () => {
 
         // Parse user data and onboarding progress from token or make API call
         // For now, we'll make an API call to get user info
-        const response = await fetch(`${import.meta.env['VITE_API_URL'] || 'http://localhost:3000'}/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
+        const response = await fetch(
+          `${import.meta.env['VITE_API_URL'] || 'http://localhost:3000'}/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           throw new Error('Failed to fetch user information');
@@ -118,9 +122,7 @@ export const AuthCallbackPage: React.FC = () => {
               Authentication Failed
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Redirecting to login page...
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to login page...</p>
             <button
               onClick={() => navigate('/login', { replace: true })}
               className="mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium focus:outline-none focus:underline"

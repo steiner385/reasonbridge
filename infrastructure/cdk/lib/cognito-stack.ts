@@ -19,8 +19,8 @@ export class CognitoStack extends cdk.Stack {
     super(scope, id, props);
 
     // Create Cognito User Pool
-    this.userPool = new cognito.UserPool(this, 'UniteUserPool', {
-      userPoolName: 'unite-user-pool',
+    this.userPool = new cognito.UserPool(this, 'ReasonBridgeUserPool', {
+      userPoolName: 'reason-bridge-user-pool',
       // Self-registration enabled for MVP
       selfSignUpEnabled: true,
       // Email-based sign-in
@@ -75,13 +75,13 @@ export class CognitoStack extends cdk.Stack {
       email: cognito.UserPoolEmail.withCognito(),
       // User invitation settings
       userInvitation: {
-        emailSubject: 'Welcome to Unite Discord!',
+        emailSubject: 'Welcome to ReasonBridge!',
         emailBody:
           'Hello {username}, your temporary password is {####}. Please sign in and change your password.',
       },
       // User verification settings
       userVerification: {
-        emailSubject: 'Verify your email for Unite Discord',
+        emailSubject: 'Verify your email for ReasonBridge',
         emailBody: 'Please verify your email by clicking this link: {##Verify Email##}',
         emailStyle: cognito.VerificationEmailStyle.LINK,
       },
@@ -92,15 +92,15 @@ export class CognitoStack extends cdk.Stack {
 
     // Create user pool domain for hosted UI
     const domainPrefix = props?.domainPrefix || `reason-bridge-${this.account}`;
-    this.userPoolDomain = this.userPool.addDomain('UniteUserPoolDomain', {
+    this.userPoolDomain = this.userPool.addDomain('ReasonBridgeUserPoolDomain', {
       cognitoDomain: {
         domainPrefix,
       },
     });
 
     // Create user pool client for the web application
-    this.userPoolClient = this.userPool.addClient('UniteWebClient', {
-      userPoolClientName: 'unite-web-client',
+    this.userPoolClient = this.userPool.addClient('ReasonBridgeWebClient', {
+      userPoolClientName: 'reason-bridge-web-client',
       // OAuth configuration for social sign-in
       oAuth: {
         flows: {
@@ -111,11 +111,11 @@ export class CognitoStack extends cdk.Stack {
         // Callback URLs - configure based on environment
         callbackUrls: [
           'http://localhost:5173/auth/callback', // Local development
-          'https://app.reasonbridge.com/auth/callback', // Production (example)
+          'https://app.reasonbridge.org/auth/callback', // Production (example)
         ],
         logoutUrls: [
           'http://localhost:5173/', // Local development
-          'https://app.reasonbridge.com/', // Production (example)
+          'https://app.reasonbridge.org/', // Production (example)
         ],
       },
       // Enable user existence errors for better UX
@@ -153,25 +153,25 @@ export class CognitoStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: this.userPool.userPoolId,
       description: 'Cognito User Pool ID',
-      exportName: 'UniteUserPoolId',
+      exportName: 'ReasonBridgeUserPoolId',
     });
 
     new cdk.CfnOutput(this, 'UserPoolArn', {
       value: this.userPool.userPoolArn,
       description: 'Cognito User Pool ARN',
-      exportName: 'UniteUserPoolArn',
+      exportName: 'ReasonBridgeUserPoolArn',
     });
 
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: this.userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID',
-      exportName: 'UniteUserPoolClientId',
+      exportName: 'ReasonBridgeUserPoolClientId',
     });
 
     new cdk.CfnOutput(this, 'UserPoolDomain', {
       value: this.userPoolDomain.domainName,
       description: 'Cognito User Pool Domain',
-      exportName: 'UniteUserPoolDomain',
+      exportName: 'ReasonBridgeUserPoolDomain',
     });
 
     new cdk.CfnOutput(this, 'CognitoHostedUI', {

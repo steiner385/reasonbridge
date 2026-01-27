@@ -25,4 +25,7 @@ async function bootstrap() {
   console.log(`🚀 User Service is running on: http://localhost:${port}`);
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Fatal error during bootstrap:', error);
+  process.exit(1);
+});

@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth/auth.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -178,7 +183,9 @@ describe('AuthService - Unit Tests', () => {
 
     authService = module.get<AuthService>(AuthService);
     userRepository = module.get<UserRepository>(UserRepository);
-    onboardingProgressRepository = module.get<OnboardingProgressRepository>(OnboardingProgressRepository);
+    onboardingProgressRepository = module.get<OnboardingProgressRepository>(
+      OnboardingProgressRepository,
+    );
     visitorSessionRepository = module.get<VisitorSessionRepository>(VisitorSessionRepository);
     cognitoService = module.get<CognitoService>(CognitoService);
     googleOAuthService = module.get<GoogleOAuthService>(GoogleOAuthService);
@@ -236,7 +243,10 @@ describe('AuthService - Unit Tests', () => {
       expect(mockCognitoService.signUp).toHaveBeenCalledWith(signupDto.email, signupDto.password);
       expect(mockUserRepository.create).toHaveBeenCalled();
       expect(mockOnboardingProgressRepository.create).toHaveBeenCalled();
-      expect(mockVisitorSessionRepository.convertToUser).toHaveBeenCalledWith(signupDto.visitorSessionId, 'user-456');
+      expect(mockVisitorSessionRepository.convertToUser).toHaveBeenCalledWith(
+        signupDto.visitorSessionId,
+        'user-456',
+      );
     });
 
     it('should throw BadRequestException for weak password', async () => {
@@ -331,7 +341,7 @@ describe('AuthService - Unit Tests', () => {
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           displayName: expect.any(String),
-        })
+        }),
       );
     });
 
@@ -360,7 +370,7 @@ describe('AuthService - Unit Tests', () => {
         expect.objectContaining({
           currentStep: OnboardingStep.VERIFICATION,
           emailVerified: false,
-        })
+        }),
       );
       expect(result.onboardingProgress.currentStep).toBe(OnboardingStep.VERIFICATION);
     });
@@ -400,8 +410,14 @@ describe('AuthService - Unit Tests', () => {
       expect(result.refreshToken).toBe(mockCognitoTokens.refreshToken);
       expect(result.user.emailVerified).toBe(true);
       expect(result.onboardingProgress.currentStep).toBe(OnboardingStep.TOPICS);
-      expect(mockVerificationService.verifyToken).toHaveBeenCalledWith(verifyEmailDto.email, verifyEmailDto.code);
-      expect(mockCognitoService.confirmSignUp).toHaveBeenCalledWith(verifyEmailDto.email, verifyEmailDto.code);
+      expect(mockVerificationService.verifyToken).toHaveBeenCalledWith(
+        verifyEmailDto.email,
+        verifyEmailDto.code,
+      );
+      expect(mockCognitoService.confirmSignUp).toHaveBeenCalledWith(
+        verifyEmailDto.email,
+        verifyEmailDto.code,
+      );
       expect(mockUserRepository.updateEmailVerified).toHaveBeenCalledWith('user-123', true);
       expect(mockOnboardingProgressRepository.markEmailVerified).toHaveBeenCalledWith('user-123');
     });
@@ -536,7 +552,9 @@ describe('AuthService - Unit Tests', () => {
       // Arrange
       const dto = { provider: OAuthProvider.GOOGLE, visitorSessionId: 'visitor-123' };
       mockGoogleOAuthService.generateStateToken.mockReturnValue('state-token-google');
-      mockGoogleOAuthService.generateAuthUrl.mockReturnValue('https://accounts.google.com/oauth/authorize?...');
+      mockGoogleOAuthService.generateAuthUrl.mockReturnValue(
+        'https://accounts.google.com/oauth/authorize?...',
+      );
 
       // Act
       const result = await authService.initiateOAuth(dto);
@@ -554,7 +572,9 @@ describe('AuthService - Unit Tests', () => {
       // Arrange
       const dto = { provider: OAuthProvider.APPLE, visitorSessionId: 'visitor-123' };
       mockAppleOAuthService.generateStateToken.mockReturnValue('state-token-apple');
-      mockAppleOAuthService.generateAuthUrl.mockReturnValue('https://appleid.apple.com/auth/authorize?...');
+      mockAppleOAuthService.generateAuthUrl.mockReturnValue(
+        'https://appleid.apple.com/auth/authorize?...',
+      );
 
       // Act
       const result = await authService.initiateOAuth(dto);
@@ -617,7 +637,11 @@ describe('AuthService - Unit Tests', () => {
       });
 
       // Act
-      const result = await authService.handleOAuthCallback(OAuthProvider.GOOGLE, callbackQuery, 'visitor-123');
+      const result = await authService.handleOAuthCallback(
+        OAuthProvider.GOOGLE,
+        callbackQuery,
+        'visitor-123',
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -707,7 +731,7 @@ describe('AuthService - Unit Tests', () => {
 
       // Act & Assert
       await expect(
-        authService.handleOAuthCallback(OAuthProvider.GOOGLE, errorQuery as any)
+        authService.handleOAuthCallback(OAuthProvider.GOOGLE, errorQuery as any),
       ).rejects.toThrow(UnauthorizedException);
       expect(mockGoogleOAuthService.verifyAndGetProfile).not.toHaveBeenCalled();
     });
@@ -715,7 +739,7 @@ describe('AuthService - Unit Tests', () => {
     it('should throw BadRequestException for unsupported provider', async () => {
       // Arrange & Act & Assert
       await expect(
-        authService.handleOAuthCallback('FACEBOOK' as any, callbackQuery)
+        authService.handleOAuthCallback('FACEBOOK' as any, callbackQuery),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -754,7 +778,7 @@ describe('AuthService - Unit Tests', () => {
         expect.objectContaining({
           currentStep: OnboardingStep.VERIFICATION,
           emailVerified: false,
-        })
+        }),
       );
     });
   });
@@ -783,7 +807,10 @@ describe('AuthService - Unit Tests', () => {
       expect(result.accessToken).toBe(mockCognitoTokens.accessToken);
       expect(result.refreshToken).toBe(mockCognitoTokens.refreshToken);
       expect(result.user.email).toBe(loginDto.email);
-      expect(mockCognitoService.initiateAuth).toHaveBeenCalledWith(loginDto.email, loginDto.password);
+      expect(mockCognitoService.initiateAuth).toHaveBeenCalledWith(
+        loginDto.email,
+        loginDto.password,
+      );
       expect(mockUserRepository.updateLastLogin).toHaveBeenCalledWith(verifiedUser.id);
     });
 
@@ -894,7 +921,7 @@ describe('AuthService - Unit Tests', () => {
 
       // Act & Assert
       await expect(
-        authService.handleOAuthCallback(OAuthProvider.GOOGLE, callbackQuery)
+        authService.handleOAuthCallback(OAuthProvider.GOOGLE, callbackQuery),
       ).rejects.toThrow();
     });
   });
@@ -931,7 +958,7 @@ describe('AuthService - Unit Tests', () => {
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           email: expect.stringMatching(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/),
-        })
+        }),
       );
     });
 
@@ -991,7 +1018,7 @@ describe('AuthService - Unit Tests', () => {
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           displayName: expect.any(String),
-        })
+        }),
       );
     });
   });

@@ -36,13 +36,11 @@ Brand colors have intentional contrast limitations for aesthetic appeal. Proper 
 ### ✅ Compliant Uses
 
 1. **Teal Primary**
-
    - Buttons (large elements, inherently accessible)
    - Large headings (18pt+ or 14pt bold+)
    - Header backgrounds with white text (acceptable for large UI elements)
 
 2. **Soft Blue Secondary**
-
    - Secondary buttons (large elements)
    - Large UI elements
    - Decorative accents

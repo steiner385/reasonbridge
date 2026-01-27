@@ -57,9 +57,7 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ onJoinClick })
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <p className="text-red-600 dark:text-red-400">
-          Error loading demo content: {error}
-        </p>
+        <p className="text-red-600 dark:text-red-400">Error loading demo content: {error}</p>
       </div>
     );
   }
@@ -85,9 +83,7 @@ export const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ onJoinClick })
 
       {/* Discussion Navigation */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Featured Discussions
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Featured Discussions</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevious}

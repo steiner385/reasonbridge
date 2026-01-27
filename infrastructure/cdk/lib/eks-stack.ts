@@ -18,7 +18,7 @@ export class EksStack extends cdk.Stack {
     // Use existing VPC or create new one
     this.vpc = props?.vpcId
       ? ec2.Vpc.fromLookup(this, 'Vpc', { vpcId: props.vpcId })
-      : new ec2.Vpc(this, 'UniteVpc', {
+      : new ec2.Vpc(this, 'ReasonBridgeVpc', {
           maxAzs: 3,
           natGateways: 2,
           subnetConfiguration: [
@@ -36,7 +36,7 @@ export class EksStack extends cdk.Stack {
         });
 
     // Create EKS cluster
-    this.cluster = new eks.Cluster(this, 'UniteCluster', {
+    this.cluster = new eks.Cluster(this, 'ReasonBridgeCluster', {
       clusterName: props?.clusterName || 'reason-bridge-cluster',
       version: eks.KubernetesVersion.V1_31,
       vpc: this.vpc,
