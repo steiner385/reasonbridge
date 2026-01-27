@@ -1,6 +1,42 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock the Prisma Decimal class for tests - defined inline within mock factory
+// since vi.mock is hoisted to the top of the file
+vi.mock('@prisma/client', () => {
+  class MockDecimal {
+    private value: number;
+    constructor(value: string | number) {
+      this.value = typeof value === 'string' ? parseFloat(value) : value;
+    }
+    toNumber(): number {
+      return this.value;
+    }
+    toString(): string {
+      return this.value.toString();
+    }
+  }
+  return {
+    Prisma: {
+      Decimal: MockDecimal,
+    },
+  };
+});
+
 import { AlignmentAggregationService } from './alignment-aggregation.service.js';
-import { Prisma } from '@prisma/client';
+
+// Helper MockDecimal class for test assertions (same implementation)
+class MockDecimal {
+  private value: number;
+  constructor(value: string | number) {
+    this.value = typeof value === 'string' ? parseFloat(value) : value;
+  }
+  toNumber(): number {
+    return this.value;
+  }
+  toString(): string {
+    return this.value.toString();
+  }
+}
 
 const createMockPrismaService = () => ({
   alignment: {
@@ -110,7 +146,7 @@ describe('AlignmentAggregationService', () => {
       await service.updatePropositionAggregates('proposition-1');
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
-      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(1));
+      expect(updateCall.data.consensusScore).toEqual(new MockDecimal(1));
     });
 
     it('should calculate consensus score = 0.00 for all oppose', async () => {
@@ -120,7 +156,7 @@ describe('AlignmentAggregationService', () => {
       await service.updatePropositionAggregates('proposition-1');
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
-      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(0));
+      expect(updateCall.data.consensusScore).toEqual(new MockDecimal(0));
     });
 
     it('should calculate consensus score = 0.50 for balanced votes', async () => {
@@ -135,7 +171,7 @@ describe('AlignmentAggregationService', () => {
       await service.updatePropositionAggregates('proposition-1');
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
-      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(0.5));
+      expect(updateCall.data.consensusScore).toEqual(new MockDecimal(0.5));
     });
 
     it('should calculate correct consensus score for mixed with nuanced (6-2-2)', async () => {
@@ -157,7 +193,7 @@ describe('AlignmentAggregationService', () => {
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
       // (6-2)/10 = 0.4, normalized = (0.4 + 1) / 2 = 0.70
-      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(0.7));
+      expect(updateCall.data.consensusScore).toEqual(new MockDecimal(0.7));
     });
 
     it('should query alignments with correct propositionId', async () => {
@@ -179,7 +215,7 @@ describe('AlignmentAggregationService', () => {
         supportCount: 10,
         opposeCount: 5,
         nuancedCount: 3,
-        consensusScore: new Prisma.Decimal(0.64),
+        consensusScore: new MockDecimal(0.64),
       });
 
       const result = await service.getPropositionAggregates('proposition-1');
@@ -188,7 +224,7 @@ describe('AlignmentAggregationService', () => {
         supportCount: 10,
         opposeCount: 5,
         nuancedCount: 3,
-        consensusScore: new Prisma.Decimal(0.64),
+        consensusScore: new MockDecimal(0.64),
       });
     });
 
