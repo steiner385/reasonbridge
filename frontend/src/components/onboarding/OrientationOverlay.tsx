@@ -213,12 +213,7 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
                   size="md"
                   onClick={() => setCurrentStep((prev) => prev - 1)}
                   leftIcon={
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -240,12 +235,7 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
                 onClick={handleNext}
                 rightIcon={
                   currentStep < TOTAL_STEPS ? (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -254,12 +244,7 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
                       />
                     </svg>
                   ) : (
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"

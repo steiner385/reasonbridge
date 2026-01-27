@@ -14,8 +14,8 @@ export class BedrockStack extends cdk.Stack {
 
     // Create IAM role for Bedrock access
     this.bedrockAccessRole = new iam.Role(this, 'BedrockAccessRole', {
-      roleName: 'unite-bedrock-access-role',
-      description: 'IAM role for Unite services to access Amazon Bedrock',
+      roleName: 'reason-bridge-bedrock-access-role',
+      description: 'IAM role for ReasonBridge services to access Amazon Bedrock',
       assumedBy: new iam.ServicePrincipal('eks.amazonaws.com'),
     });
 
