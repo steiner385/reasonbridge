@@ -58,9 +58,7 @@ export const DemoDiscussionView: React.FC<DemoDiscussionViewProps> = ({
             {formatDate(discussion.createdAt)}
           </span>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-          {discussion.title}
-        </h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{discussion.title}</h3>
       </div>
 
       {/* Stats */}
@@ -159,11 +157,19 @@ export const DemoDiscussionView: React.FC<DemoDiscussionViewProps> = ({
         </h4>
         <div className="space-y-2">
           {[
-            { label: 'Strongly Support', count: discussion.viewsSpectrum.stronglySupport, color: 'bg-green-600' },
+            {
+              label: 'Strongly Support',
+              count: discussion.viewsSpectrum.stronglySupport,
+              color: 'bg-green-600',
+            },
             { label: 'Support', count: discussion.viewsSpectrum.support, color: 'bg-green-400' },
             { label: 'Neutral', count: discussion.viewsSpectrum.neutral, color: 'bg-gray-400' },
             { label: 'Oppose', count: discussion.viewsSpectrum.oppose, color: 'bg-red-400' },
-            { label: 'Strongly Oppose', count: discussion.viewsSpectrum.stronglyOppose, color: 'bg-red-600' },
+            {
+              label: 'Strongly Oppose',
+              count: discussion.viewsSpectrum.stronglyOppose,
+              color: 'bg-red-600',
+            },
           ].map(({ label, count, color }) => {
             const percentage = getPositionPercentage(count);
             return (
