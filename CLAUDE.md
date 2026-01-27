@@ -277,7 +277,6 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 ```json
 {
   "contexts": [
-    "continuous-integration/jenkins/pr-merge", // Automatic (Jenkins plugin)
     "jenkins/lint", // Code quality
     "jenkins/unit-tests", // Unit tests
     "jenkins/integration" // Integration tests
@@ -292,10 +291,10 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - **Pre-merge checks**: All required checks post BEFORE merge (not after like `jenkins/ci`)
 - **Strict mode**: Ensures PRs are up-to-date with base branch
 - **Defense-in-depth**: Multiple layers prevent broken code from merging
+- **No `continuous-integration/jenkins/pr-merge`**: Removed because this automatic check from the GitHub Branch Source plugin reflects overall Jenkins build result (SUCCESS/UNSTABLE/FAILURE), not individual test results. When E2E tests are skipped for staging/* branches, Allure/JUnit plugins may mark the build UNSTABLE even though all tests pass.
 
 **Status Check Sources:**
 
-- `continuous-integration/jenkins/pr-merge` - Automatic from Jenkins GitHub Branch Source plugin
 - `jenkins/lint` - Posted by `runLintChecks()` helper
 - `jenkins/unit-tests` - Posted by `runUnitTests()` helper
 - `jenkins/integration` - Posted by `runIntegrationTests()` helper
@@ -441,7 +440,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Solution**:
 
 - Wait for all Jenkins pipeline stages to complete
-- Required checks: `jenkins/lint`, `jenkins/unit-tests`, `jenkins/integration`, `continuous-integration/jenkins/pr-merge`
+- Required checks: `jenkins/lint`, `jenkins/unit-tests`, `jenkins/integration`
 - If checks fail, fix issues and push new commits
 - PR must be up-to-date with base branch (strict mode)
 
