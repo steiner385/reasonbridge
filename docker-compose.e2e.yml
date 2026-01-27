@@ -58,7 +58,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
-    mem_limit: 512m
+    mem_limit: 384m
     networks:
       - unite-e2e
 
@@ -133,7 +133,7 @@ services:
         condition: service_started
       discussion-service:
         condition: service_started
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -170,7 +170,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -200,7 +200,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -224,7 +224,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -251,7 +251,7 @@ services:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -275,7 +275,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -299,7 +299,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
@@ -326,7 +326,7 @@ services:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - unite-e2e
 
