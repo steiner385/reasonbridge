@@ -223,7 +223,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 ## Jenkins CI/CD
 
-**Jenkins Server:** `http://jenkins.reasonBridge.org`
+**Jenkins Server:** `https://jenkins.reasonBridge.org`
 **Credentials:** Stored in `~/.jenkins-cli.yaml`
 
 **Infrastructure:**
@@ -240,11 +240,10 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - Jenkins loads the library directly from `main`, so branches/PRs just add unnecessary overhead
 - The library contains reusable pipeline steps in `vars/` directory
 
-**Key Job:** `reasonBridge-multibranch` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
+**Key Job:** `reasonbridge-ci` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
 
 - Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
 - No manual triggering needed - commits trigger builds automatically
-- **NOTE:** Job name is `reasonBridge-multibranch`, NOT `reasonbridge-ci`
 
 **Pipeline Stages:**
 
@@ -261,7 +260,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 **Debugging:**
 
 - Check console output: `echo $UNIT_TEST_EXIT_CODE` for test exit codes
-- View build logs: Jenkins UI → reasonBridge-multibranch → [branch-name] → Build Console
+- View build logs: Jenkins UI → reasonbridge-ci → [branch-name] → Build Console
 - Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
 - Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
 
@@ -472,7 +471,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ### Getting Help
 
-- **Jenkins Logs**: Jenkins UI → reasonBridge-multibranch → [branch] → Build Console
+- **Jenkins Logs**: Jenkins UI → reasonbridge-ci → [branch] → Build Console
 - **CI Setup Guide**: `.github/CI_SETUP.md`
 - **Systematic Debugging Plan**: `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md`
 - **Local Reproduction**: Run pipeline stages from `.jenkins/Jenkinsfile` locally
