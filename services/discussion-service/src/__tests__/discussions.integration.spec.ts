@@ -13,6 +13,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 import request from 'supertest';
 import { DiscussionsModule } from '../discussions/discussions.module';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -32,7 +33,7 @@ describe('Discussions API Integration Tests', () => {
       imports: [DiscussionsModule, PrismaModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication(new FastifyAdapter());
 
     // Enable validation pipe
     app.useGlobalPipes(

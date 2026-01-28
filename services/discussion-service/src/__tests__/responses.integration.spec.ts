@@ -14,6 +14,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 import request from 'supertest';
 import { ResponsesModule } from '../responses/responses.module';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -35,7 +36,7 @@ describe('Responses API Integration Tests', () => {
       imports: [ResponsesModule, PrismaModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication(new FastifyAdapter());
 
     app.useGlobalPipes(
       new ValidationPipe({
