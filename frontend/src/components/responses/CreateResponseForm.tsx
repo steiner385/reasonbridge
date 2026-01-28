@@ -10,7 +10,7 @@
  * - Optimistic updates
  */
 
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useCreateResponse } from '../../hooks/useCreateResponse';
 import Button from '../ui/Button';
 import type { CitationInput } from '../../services/discussionService';

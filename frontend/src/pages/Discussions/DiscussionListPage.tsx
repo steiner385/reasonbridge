@@ -111,7 +111,7 @@ export function DiscussionListPage() {
       )}
 
       {/* Filters and Sorting */}
-      <Card variant="outline" padding="md" className="mb-6">
+      <Card variant="outlined" padding="md" className="mb-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-700">Sort by:</span>

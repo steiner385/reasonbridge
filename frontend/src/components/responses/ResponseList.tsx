@@ -27,7 +27,7 @@ export function ResponseList({ discussionId, enableThreading = false }: Response
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i} variant="outline" padding="lg">
+          <Card key={i} variant="outlined" padding="lg">
             <div className="animate-pulse">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
@@ -61,7 +61,7 @@ export function ResponseList({ discussionId, enableThreading = false }: Response
 
   if (!responses || responses.length === 0) {
     return (
-      <Card variant="outline" padding="lg">
+      <Card variant="outlined" padding="lg">
         <div className="text-center text-gray-600 py-8">
           <svg
             className="mx-auto h-12 w-12 text-gray-400 mb-4"

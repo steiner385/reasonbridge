@@ -52,7 +52,7 @@ export function ResponseItem({
   return (
     <div className={indentClass}>
       <Card
-        variant={depth === 0 ? 'elevated' : 'outline'}
+        variant={depth === 0 ? 'elevated' : 'outlined'}
         padding="lg"
         className="transition-colors hover:bg-gray-50"
       >
