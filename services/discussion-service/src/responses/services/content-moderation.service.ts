@@ -7,8 +7,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from '../dto/moderate-response.dto.js';
-import type { $Enums } from '@prisma/client';
-type ResponseStatus = $Enums.ResponseStatus;
 
 /**
  * Service for handling content moderation operations
@@ -65,7 +63,7 @@ export class ContentModerationService {
     await this.prisma.response.update({
       where: { id: responseId },
       data: {
-        status: 'HIDDEN' as ResponseStatus,
+        status: 'HIDDEN',
       },
     });
 
@@ -109,7 +107,7 @@ export class ContentModerationService {
     await this.prisma.response.update({
       where: { id: responseId },
       data: {
-        status: 'REMOVED' as ResponseStatus,
+        status: 'REMOVED',
       },
     });
 
@@ -154,7 +152,7 @@ export class ContentModerationService {
     await this.prisma.response.update({
       where: { id: responseId },
       data: {
-        status: 'VISIBLE' as ResponseStatus,
+        status: 'VISIBLE',
       },
     });
 
@@ -198,7 +196,7 @@ export class ContentModerationService {
    * @param topicId - The ID of the topic
    * @param status - The status filter (VISIBLE, HIDDEN, or REMOVED)
    */
-  async getResponsesByStatus(topicId: string, status: ResponseStatus) {
+  async getResponsesByStatus(topicId: string, status: 'VISIBLE' | 'HIDDEN' | 'REMOVED') {
     // Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },

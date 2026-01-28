@@ -53,7 +53,7 @@ export class DiscussionsService {
     // FR-001: Verify user is verified (emailVerified === true)
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, displayName: true, emailVerified: true },
+      select: { id: true, displayName: true, emailVerified: true, verificationLevel: true },
     });
 
     if (!user) {
@@ -95,7 +95,7 @@ export class DiscussionsService {
         const validation = await validateCitationUrl(citation.url);
 
         if (!validation.safe) {
-          this.logger.ssrfBlocked(citation.url, validation.threat || 'UNKNOWN', { userId });
+          this.logger.ssrfBlocked(citation.url, validation.threat || 'UNKNOWN', userId);
           throw new BadRequestException(`Citation URL blocked: ${validation.error}`);
         }
 
@@ -119,7 +119,7 @@ export class DiscussionsService {
           status: 'ACTIVE',
           responseCount: 1, // Initial response counts
           participantCount: 1,
-          lastContributionAt: new Date(),
+          lastActivityAt: new Date(),
         },
       });
 
@@ -197,7 +197,7 @@ export class DiscussionsService {
       },
       responseCount: result.responseCount,
       participantCount: result.participantCount,
-      lastContributionAt: result.lastActivityAt.toISOString(),
+      lastActivityAt: result.lastActivityAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
       responses: result.responses.map((response) => ({
@@ -287,14 +287,15 @@ export class DiscussionsService {
         creator: {
           id: discussion.creator.id,
           displayName: discussion.creator.displayName,
+          verificationLevel: discussion.creator.verificationLevel,
         },
         responseCount: discussion.responseCount,
         participantCount: discussion.participantCount,
-        lastContributionAt: discussion.lastActivityAt.toISOString(),
+        lastActivityAt: discussion.lastActivityAt.toISOString(),
         createdAt: discussion.createdAt.toISOString(),
         updatedAt: discussion.updatedAt.toISOString(),
       })),
-      meta: paginationMeta,
+      pagination: paginationMeta,
     };
   }
 
