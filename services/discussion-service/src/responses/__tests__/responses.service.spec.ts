@@ -5,6 +5,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
+import { vi } from 'vitest';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ResponsesService } from '../responses.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -13,9 +14,9 @@ import { DiscussionLogger } from '../../utils/logger.js';
 import * as ssrfValidator from '../../utils/ssrf-validator.js';
 
 // Mock the logger, SSRF validator, and CommonGroundTriggerService
-jest.mock('../../utils/logger.js');
-jest.mock('../../utils/ssrf-validator.js');
-jest.mock('../../services/common-ground-trigger.service.js');
+vi.mock('../../utils/logger.js');
+vi.mock('../../utils/ssrf-validator.js');
+vi.mock('../../services/common-ground-trigger.service.js');
 
 describe('ResponsesService - Feature 009', () => {
   let service: ResponsesService;
@@ -59,29 +60,29 @@ describe('ResponsesService - Feature 009', () => {
 
   const mockPrismaService = {
     discussion: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
     response: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      findUniqueOrThrow: jest.fn(),
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
     },
     citation: {
-      createMany: jest.fn(),
+      createMany: vi.fn(),
     },
     participantActivity: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      count: jest.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn(),
     },
-    $transaction: jest.fn(),
+    $transaction: vi.fn(),
   };
 
   const mockCommonGroundTriggerService = {
-    checkAndTrigger: jest.fn(),
+    checkAndTrigger: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -103,10 +104,10 @@ describe('ResponsesService - Feature 009', () => {
     prisma = module.get<PrismaService>(PrismaService);
 
     // Reset all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Default SSRF validation mock
-    (ssrfValidator.validateCitationUrl as jest.Mock).mockResolvedValue({
+    (ssrfValidator.validateCitationUrl as any).mockResolvedValue({
       safe: true,
       originalUrl: 'https://example.com',
       normalizedUrl: 'https://example.com',
@@ -133,19 +134,19 @@ describe('ResponsesService - Feature 009', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback: any) => {
         return callback({
           response: {
-            create: jest.fn().mockResolvedValue(mockResponse),
-            findUniqueOrThrow: jest.fn().mockResolvedValue(mockResponse),
+            create: vi.fn().mockResolvedValue(mockResponse),
+            findUniqueOrThrow: vi.fn().mockResolvedValue(mockResponse),
           },
           citation: {
-            createMany: jest.fn(),
+            createMany: vi.fn(),
           },
           participantActivity: {
-            findUnique: jest.fn().mockResolvedValue(null),
-            create: jest.fn(),
-            count: jest.fn().mockResolvedValue(1),
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn(),
+            count: vi.fn().mockResolvedValue(1),
           },
           discussion: {
-            update: jest.fn(),
+            update: vi.fn(),
           },
         });
       });
@@ -268,7 +269,7 @@ describe('ResponsesService - Feature 009', () => {
     it('should throw BadRequestException if citation URL fails SSRF validation', async () => {
       mockPrismaService.discussion.findUnique.mockResolvedValue(mockDiscussion);
 
-      (ssrfValidator.validateCitationUrl as jest.Mock).mockResolvedValue({
+      (ssrfValidator.validateCitationUrl as any).mockResolvedValue({
         safe: false,
         error: 'Private IP address detected',
         threat: 'PRIVATE_IP',
@@ -289,19 +290,19 @@ describe('ResponsesService - Feature 009', () => {
 
       const mockTransactionClient = {
         response: {
-          create: jest.fn().mockResolvedValue(mockResponse),
-          findUniqueOrThrow: jest.fn().mockResolvedValue(mockResponse),
+          create: vi.fn().mockResolvedValue(mockResponse),
+          findUniqueOrThrow: vi.fn().mockResolvedValue(mockResponse),
         },
         citation: {
-          createMany: jest.fn(),
+          createMany: vi.fn(),
         },
         participantActivity: {
-          findUnique: jest.fn().mockResolvedValue(null), // No existing activity
-          create: jest.fn(),
-          count: jest.fn().mockResolvedValue(1),
+          findUnique: vi.fn().mockResolvedValue(null), // No existing activity
+          create: vi.fn(),
+          count: vi.fn().mockResolvedValue(1),
         },
         discussion: {
-          update: jest.fn(),
+          update: vi.fn(),
         },
       };
 
@@ -333,19 +334,19 @@ describe('ResponsesService - Feature 009', () => {
 
       const mockTransactionClient = {
         response: {
-          create: jest.fn().mockResolvedValue(mockResponse),
-          findUniqueOrThrow: jest.fn().mockResolvedValue(mockResponse),
+          create: vi.fn().mockResolvedValue(mockResponse),
+          findUniqueOrThrow: vi.fn().mockResolvedValue(mockResponse),
         },
         citation: {
-          createMany: jest.fn(),
+          createMany: vi.fn(),
         },
         participantActivity: {
-          findUnique: jest.fn().mockResolvedValue(existingActivity),
-          update: jest.fn(),
-          count: jest.fn().mockResolvedValue(1),
+          findUnique: vi.fn().mockResolvedValue(existingActivity),
+          update: vi.fn(),
+          count: vi.fn().mockResolvedValue(1),
         },
         discussion: {
-          update: jest.fn(),
+          update: vi.fn(),
         },
       };
 

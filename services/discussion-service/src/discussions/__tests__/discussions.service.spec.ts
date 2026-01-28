@@ -6,14 +6,15 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { vi } from 'vitest';
 import { DiscussionsService } from '../discussions.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { DiscussionLogger } from '../../utils/logger.js';
 import * as ssrfValidator from '../../utils/ssrf-validator.js';
 
 // Mock the logger and SSRF validator
-jest.mock('../../utils/logger.js');
-jest.mock('../../utils/ssrf-validator.js');
+vi.mock('../../utils/logger.js');
+vi.mock('../../utils/ssrf-validator.js');
 
 describe('DiscussionsService', () => {
   let service: DiscussionsService;
@@ -69,27 +70,27 @@ describe('DiscussionsService', () => {
 
   const mockPrismaService = {
     user: {
-      findUnique: jest.fn(),
+      findUnique: vi.fn(),
     },
     discussionTopic: {
-      findUnique: jest.fn(),
+      findUnique: vi.fn(),
     },
     discussion: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUniqueOrThrow: jest.fn(),
-      count: jest.fn(),
+      create: vi.fn(),
+      findMany: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      count: vi.fn(),
     },
     response: {
-      create: jest.fn(),
+      create: vi.fn(),
     },
     citation: {
-      createMany: jest.fn(),
+      createMany: vi.fn(),
     },
     participantActivity: {
-      create: jest.fn(),
+      create: vi.fn(),
     },
-    $transaction: jest.fn(),
+    $transaction: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -107,10 +108,10 @@ describe('DiscussionsService', () => {
     prisma = module.get<PrismaService>(PrismaService);
 
     // Reset all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Default SSRF validation mock
-    (ssrfValidator.validateCitationUrl as jest.Mock).mockResolvedValue({
+    (ssrfValidator.validateCitationUrl as any).mockResolvedValue({
       safe: true,
       originalUrl: 'https://example.com',
       normalizedUrl: 'https://example.com',
@@ -143,19 +144,19 @@ describe('DiscussionsService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback: any) => {
         return callback({
           discussion: {
-            create: jest.fn().mockResolvedValue(mockDiscussion),
+            create: vi.fn().mockResolvedValue(mockDiscussion),
           },
           response: {
-            create: jest.fn().mockResolvedValue(mockDiscussion.responses[0]),
+            create: vi.fn().mockResolvedValue(mockDiscussion.responses[0]),
           },
           citation: {
-            createMany: jest.fn(),
+            createMany: vi.fn(),
           },
           participantActivity: {
-            create: jest.fn(),
+            create: vi.fn(),
           },
           discussion: {
-            findUniqueOrThrow: jest.fn().mockResolvedValue(mockDiscussion),
+            findUniqueOrThrow: vi.fn().mockResolvedValue(mockDiscussion),
           },
         });
       });
@@ -230,7 +231,7 @@ describe('DiscussionsService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic);
 
-      (ssrfValidator.validateCitationUrl as jest.Mock).mockResolvedValue({
+      (ssrfValidator.validateCitationUrl as any).mockResolvedValue({
         safe: false,
         error: 'Private IP address detected',
         threat: 'PRIVATE_IP',
