@@ -117,7 +117,9 @@ export function DiscussionListPage() {
             <span className="text-sm font-medium text-gray-700">Sort by:</span>
             <select
               value={filters.sortBy}
-              onChange={(e) => handleSortChange(e.target.value as any)}
+              onChange={(e) =>
+                handleSortChange(e.target.value as 'lastActivityAt' | 'createdAt' | 'responseCount')
+              }
               className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="lastActivityAt">Recent Activity</option>

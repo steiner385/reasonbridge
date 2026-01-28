@@ -90,7 +90,7 @@ export function ResponseItem({
           <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
             <p className="text-sm font-medium text-gray-700 mb-2">Sources:</p>
             <ul className="space-y-1">
-              {response.citations.map((citation, index) => (
+              {response.citations.map((citation) => (
                 <li key={citation.id} className="text-sm">
                   <a
                     href={citation.originalUrl}
