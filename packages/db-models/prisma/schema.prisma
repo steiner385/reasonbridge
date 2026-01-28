@@ -42,23 +42,20 @@ model User {
   updatedAt              DateTime          @updatedAt @map("updated_at")
 
   // Relations
-  verificationRecords   VerificationRecord[]
-  videoUploads          VideoUpload[]
-  following             UserFollow[]          @relation("Follower")
-  followers             UserFollow[]          @relation("Followed")
-  createdTopics         DiscussionTopic[]
-  responses             Response[]
-  votes                 Vote[]
-  alignments            Alignment[]
-  proposedTopicLinks    TopicLink[]           @relation("LinkProposer")
-  createdPropositions   Proposition[]
-  appeals               Appeal[]
-  moderationApprovals   ModerationAction[]    @relation("ModeratorApproval")
-  appealReviews         Appeal[]              @relation("AppealReviewer")
-  topicInterests        TopicInterest[]
-  // Feature 009: Discussion Participation
-  createdDiscussions    Discussion[]
-  participantActivities ParticipantActivity[]
+  verificationRecords VerificationRecord[]
+  videoUploads        VideoUpload[]
+  following           UserFollow[]         @relation("Follower")
+  followers           UserFollow[]         @relation("Followed")
+  createdTopics       DiscussionTopic[]
+  responses           Response[]
+  votes               Vote[]
+  alignments          Alignment[]
+  proposedTopicLinks  TopicLink[]          @relation("LinkProposer")
+  createdPropositions Proposition[]
+  appeals             Appeal[]
+  moderationApprovals ModerationAction[]   @relation("ModeratorApproval")
+  appealReviews       Appeal[]             @relation("AppealReviewer")
+  topicInterests      TopicInterest[]
 
   @@index([cognitoSub])
   @@index([email])
@@ -97,14 +94,14 @@ model VerificationRecord {
   createdAt         DateTime           @default(now()) @map("created_at")
 
   // OTP-specific fields (otpCode stores bcrypt-hashed values, never plaintext)
-  otpCode      String?   @map("otp_code") // bcrypt-hashed OTP (never store plaintext)
-  otpExpiresAt DateTime? @map("otp_expires_at")
-  otpAttempts  Int       @default(0) @map("otp_attempts")
-  phoneNumber  String?   @map("phone_number")
+  otpCode           String?            @map("otp_code")      // bcrypt-hashed OTP (never store plaintext)
+  otpExpiresAt      DateTime?          @map("otp_expires_at")
+  otpAttempts       Int                @default(0) @map("otp_attempts")
+  phoneNumber       String?            @map("phone_number")
 
   // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoUpload VideoUpload?
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoUpload  VideoUpload?
 
   @@index([userId, type])
   @@index([status])
@@ -114,22 +111,22 @@ model VerificationRecord {
 
 /// Tracks video uploads for video verification
 model VideoUpload {
-  id             String    @id @default(uuid()) @db.Uuid
-  verificationId String    @unique @map("verification_id") @db.Uuid
-  userId         String    @map("user_id") @db.Uuid
-  s3Key          String    @map("s3_key")
-  s3Url          String    @map("s3_url")
-  fileName       String    @map("file_name")
-  fileSize       Int       @map("file_size")
-  mimeType       String    @map("mime_type")
-  uploadedAt     DateTime  @default(now()) @map("uploaded_at")
-  completedAt    DateTime? @map("completed_at")
-  expiresAt      DateTime  @map("expires_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
+  id              String   @id @default(uuid()) @db.Uuid
+  verificationId  String   @unique @map("verification_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  s3Key           String   @map("s3_key")
+  s3Url           String   @map("s3_url")
+  fileName        String   @map("file_name")
+  fileSize        Int      @map("file_size")
+  mimeType        String   @map("mime_type")
+  uploadedAt      DateTime @default(now()) @map("uploaded_at")
+  completedAt     DateTime? @map("completed_at")
+  expiresAt       DateTime @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
 
   // Relations
   verification VerificationRecord @relation(fields: [verificationId], references: [id], onDelete: Cascade)
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([verificationId])
   @@index([userId])
@@ -183,24 +180,24 @@ model UserFollow {
 /// - Requires 2-5 tags (enforced via TopicTag relations)
 /// - Cannot transition to ACTIVE until minimum_diversity_score is met
 model DiscussionTopic {
-  id                    String           @id @default(uuid()) @db.Uuid
-  title                 String           @db.VarChar(200)
-  description           String           @db.Text
-  creatorId             String           @map("creator_id") @db.Uuid
-  status                TopicStatus      @default(SEEDING)
-  evidenceStandards     EvidenceStandard @default(STANDARD) @map("evidence_standards")
-  minimumDiversityScore Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
-  currentDiversityScore Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
-  participantCount      Int              @default(0) @map("participant_count")
-  responseCount         Int              @default(0) @map("response_count")
+  id                     String           @id @default(uuid()) @db.Uuid
+  title                  String           @db.VarChar(200)
+  description            String           @db.Text
+  creatorId              String           @map("creator_id") @db.Uuid
+  status                 TopicStatus      @default(SEEDING)
+  evidenceStandards      EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  minimumDiversityScore  Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
+  currentDiversityScore  Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
+  participantCount       Int              @default(0) @map("participant_count")
+  responseCount          Int              @default(0) @map("response_count")
   // Onboarding fields
-  activeDiscussionCount Int              @default(0) @map("active_discussion_count")
-  activityLevel         ActivityLevel    @default(LOW) @map("activity_level")
-  suggestedForNewUsers  Boolean          @default(false) @map("suggested_for_new_users")
-  crossCuttingThemes    String[]         @map("cross_cutting_themes")
-  createdAt             DateTime         @default(now()) @map("created_at")
-  activatedAt           DateTime?        @map("activated_at")
-  archivedAt            DateTime?        @map("archived_at")
+  activeDiscussionCount  Int              @default(0) @map("active_discussion_count")
+  activityLevel          ActivityLevel    @default(LOW) @map("activity_level")
+  suggestedForNewUsers   Boolean          @default(false) @map("suggested_for_new_users")
+  crossCuttingThemes     String[]         @map("cross_cutting_themes")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  activatedAt            DateTime?        @map("activated_at")
+  archivedAt             DateTime?        @map("archived_at")
 
   // Relations
   creator              User                   @relation(fields: [creatorId], references: [id])
@@ -211,7 +208,6 @@ model DiscussionTopic {
   responses            Response[]
   commonGroundAnalyses CommonGroundAnalysis[]
   topicInterests       TopicInterest[]
-  Discussion           Discussion[]
 
   @@index([status])
   @@index([creatorId])
@@ -382,8 +378,6 @@ enum PropositionStatus {
 model Response {
   id                    String         @id @default(uuid()) @db.Uuid
   topicId               String         @map("topic_id") @db.Uuid
-  // T005 [P] - NEW: Link response to specific discussion (nullable during migration)
-  discussionId          String?        @map("discussion_id") @db.Uuid
   authorId              String         @map("author_id") @db.Uuid
   parentId              String?        @map("parent_id") @db.Uuid
   content               String         @db.Text
@@ -391,19 +385,12 @@ model Response {
   containsOpinion       Boolean        @default(false) @map("contains_opinion")
   containsFactualClaims Boolean        @default(false) @map("contains_factual_claims")
   status                ResponseStatus @default(VISIBLE)
-  // T004 [P] - NEW: Optimistic locking and edit tracking (Feature 009)
-  version               Int            @default(1)
-  deletedAt             DateTime?      @map("deleted_at")
-  editedAt              DateTime?      @map("edited_at")
-  editCount             Int            @default(0) @map("edit_count")
   revisionCount         Int            @default(0) @map("revision_count")
   createdAt             DateTime       @default(now()) @map("created_at")
   updatedAt             DateTime       @updatedAt @map("updated_at")
 
   // Relations
   topic            DiscussionTopic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  // T005 [P] - NEW: Discussion relation (nullable during migration)
-  discussion       Discussion?           @relation("DiscussionResponses", fields: [discussionId], references: [id], onDelete: Cascade)
   author           User                  @relation(fields: [authorId], references: [id])
   parent           Response?             @relation("ResponseThreading", fields: [parentId], references: [id], onDelete: Cascade)
   replies          Response[]            @relation("ResponseThreading")
@@ -411,13 +398,8 @@ model Response {
   feedback         Feedback[]
   factCheckResults FactCheckResult[]
   votes            Vote[]
-  // T002 [P] - NEW: Citations relation (Feature 009)
-  citations        Citation[]
 
   @@index([topicId])
-  // T004 [P] & T005 [P] - NEW: Indexes for soft delete and discussion filtering
-  @@index([discussionId, deletedAt])
-  @@index([deletedAt])
   @@index([authorId])
   @@index([parentId])
   @@index([topicId, createdAt(sort: Desc)])
@@ -522,89 +504,6 @@ model CommonGroundAnalysis {
   @@map("common_ground_analyses")
 }
 
-/// T001 [P] - Specific discussion thread within a topic (Feature 009)
-/// A user-created conversation with a title and initial response
-enum DiscussionStatus {
-  ACTIVE
-  ARCHIVED
-  DELETED
-
-  @@map("discussion_status")
-}
-
-model Discussion {
-  id               String           @id @default(uuid()) @db.Uuid
-  topicId          String           @map("topic_id") @db.Uuid
-  creatorId        String           @map("creator_id") @db.Uuid
-  title            String           @db.VarChar(200)
-  status           DiscussionStatus @default(ACTIVE)
-  responseCount    Int              @default(0) @map("response_count")
-  participantCount Int              @default(0) @map("participant_count")
-  lastActivityAt   DateTime         @default(now()) @map("last_activity_at")
-  createdAt        DateTime         @default(now()) @map("created_at")
-  updatedAt        DateTime         @updatedAt @map("updated_at")
-
-  // Relations
-  topic                 DiscussionTopic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  creator               User                  @relation(fields: [creatorId], references: [id])
-  responses             Response[]            @relation("DiscussionResponses")
-  participantActivities ParticipantActivity[]
-
-  @@index([topicId, status, lastActivityAt(sort: Desc)])
-  @@index([creatorId])
-  @@index([status])
-  @@index([createdAt(sort: Desc)])
-  @@map("discussions")
-}
-
-/// T002 [P] - Citation/source reference attached to a response (Feature 009)
-enum CitationValidationStatus {
-  ACTIVE // HTTP 2xx-3xx response
-  BROKEN // HTTP 4xx-5xx response
-  UNVERIFIED // Not yet checked or timeout
-
-  @@map("citation_validation_status")
-}
-
-model Citation {
-  id               String                   @id @default(uuid()) @db.Uuid
-  responseId       String                   @map("response_id") @db.Uuid
-  originalUrl      String                   @map("original_url") @db.VarChar(2048)
-  normalizedUrl    String                   @map("normalized_url") @db.VarChar(2048)
-  title            String?                  @db.VarChar(500)
-  resolvedIp       String?                  @map("resolved_ip") @db.VarChar(45)
-  validationStatus CitationValidationStatus @default(UNVERIFIED) @map("validation_status")
-  validatedAt      DateTime?                @map("validated_at")
-  createdAt        DateTime                 @default(now()) @map("created_at")
-
-  // Relations
-  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
-
-  @@index([responseId])
-  @@index([normalizedUrl])
-  @@index([validationStatus])
-  @@map("citations")
-}
-
-/// T003 [P] - Track user participation in discussions (Feature 009)
-model ParticipantActivity {
-  id                  String   @id @default(uuid()) @db.Uuid
-  discussionId        String   @map("discussion_id") @db.Uuid
-  userId              String   @map("user_id") @db.Uuid
-  firstContributionAt DateTime @default(now()) @map("first_contribution_at")
-  lastContributionAt  DateTime @default(now()) @map("last_contribution_at")
-  responseCount       Int      @default(1) @map("response_count")
-
-  // Relations
-  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([discussionId, userId])
-  @@index([discussionId])
-  @@index([userId])
-  @@map("participant_activities")
-}
-
 // ============================================================================
 // AI SERVICE ENTITIES
 // ============================================================================
@@ -699,10 +598,10 @@ model ModerationAction {
   executedAt    DateTime?            @map("executed_at")
 
   // Temporary ban fields
-  isTemporary     Boolean?  @default(false) @map("is_temporary")
-  banDurationDays Int?      @map("ban_duration_days")
-  expiresAt       DateTime? @map("expires_at")
-  liftedAt        DateTime? @map("lifted_at")
+  isTemporary   Boolean?             @default(false) @map("is_temporary")
+  banDurationDays Int?               @map("ban_duration_days")
+  expiresAt     DateTime?            @map("expires_at")
+  liftedAt      DateTime?            @map("lifted_at")
 
   // Relations
   approvedBy User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
@@ -825,12 +724,12 @@ enum AccountStatus {
 
 /// Email verification token for signup flow
 model VerificationToken {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  token     String    @unique @db.VarChar(6)
-  createdAt DateTime  @default(now()) @map("created_at")
-  expiresAt DateTime  @map("expires_at")
-  used      Boolean   @default(false)
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(6)
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
   usedAt    DateTime? @map("used_at")
 
   @@index([userId])
@@ -863,7 +762,7 @@ model TopicInterest {
   priority   Int      @db.SmallInt
   selectedAt DateTime @default(now()) @map("selected_at")
 
-  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@unique([userId, topicId])
@@ -873,14 +772,14 @@ model TopicInterest {
 
 /// Pre-authentication visitor session tracking for demo
 model VisitorSession {
-  id                      String     @id @default(uuid()) @db.Uuid
-  sessionId               String     @unique @map("session_id")
-  viewedDemoDiscussionIds String[]   @default([]) @map("viewed_demo_discussion_ids") @db.Uuid
-  interactionTimestamps   DateTime[] @default([]) @map("interaction_timestamps")
-  referralSource          String?    @map("referral_source")
-  convertedToUserId       String?    @unique @map("converted_to_user_id") @db.Uuid
-  createdAt               DateTime   @default(now()) @map("created_at")
-  lastActivityAt          DateTime   @updatedAt @map("last_activity_at")
+  id                       String     @id @default(uuid()) @db.Uuid
+  sessionId                String     @unique @map("session_id")
+  viewedDemoDiscussionIds  String[]   @default([]) @map("viewed_demo_discussion_ids") @db.Uuid
+  interactionTimestamps    DateTime[] @default([]) @map("interaction_timestamps")
+  referralSource           String?    @map("referral_source")
+  convertedToUserId        String?    @unique @map("converted_to_user_id") @db.Uuid
+  createdAt                DateTime   @default(now()) @map("created_at")
+  lastActivityAt           DateTime   @updatedAt @map("last_activity_at")
 
   @@index([convertedToUserId])
   @@index([lastActivityAt])

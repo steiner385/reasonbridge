@@ -7,8 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from '../dto/moderate-response.dto.js';
-import type { $Enums } from '@prisma/client';
-type ResponseStatus = $Enums.ResponseStatus;
+import type { ResponseStatus } from '@prisma/client';
 
 /**
  * Service for handling content moderation operations
@@ -124,11 +123,7 @@ export class ContentModerationService {
    * @param moderatorId - The ID of the user performing the restoration
    * @param reason - Reason for restoring the response
    */
-  async restoreResponse(
-    responseId: string,
-    moderatorId: string,
-    reason: string,
-  ): Promise<ModerationActionResponseDto> {
+  async restoreResponse(responseId: string, moderatorId: string, reason: string): Promise<ModerationActionResponseDto> {
     // Verify response exists
     const response = await this.prisma.response.findUnique({
       where: { id: responseId },
@@ -145,9 +140,7 @@ export class ContentModerationService {
 
     // Can only restore hidden responses, not removed ones
     if (response.status !== 'HIDDEN') {
-      throw new BadRequestException(
-        `Cannot restore response with status: ${response.status}. Only HIDDEN responses can be restored.`,
-      );
+      throw new BadRequestException(`Cannot restore response with status: ${response.status}. Only HIDDEN responses can be restored.`);
     }
 
     // Update response status back to VISIBLE

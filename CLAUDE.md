@@ -291,7 +291,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - **Pre-merge checks**: All required checks post BEFORE merge (not after like `jenkins/ci`)
 - **Strict mode**: Ensures PRs are up-to-date with base branch
 - **Defense-in-depth**: Multiple layers prevent broken code from merging
-- **No `continuous-integration/jenkins/pr-merge`**: Removed because this automatic check from the GitHub Branch Source plugin reflects overall Jenkins build result (SUCCESS/UNSTABLE/FAILURE), not individual test results. When E2E tests are skipped for staging/\* branches, Allure/JUnit plugins may mark the build UNSTABLE even though all tests pass.
+- **No `continuous-integration/jenkins/pr-merge`**: Removed because this automatic check from the GitHub Branch Source plugin reflects overall Jenkins build result (SUCCESS/UNSTABLE/FAILURE), not individual test results. When E2E tests are skipped for staging/* branches, Allure/JUnit plugins may mark the build UNSTABLE even though all tests pass.
 
 **Status Check Sources:**
 
@@ -356,21 +356,18 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Historical Issues:**
 
 1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
-
    - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
    - **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
    - **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
    - **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
 
 2. **DNS Resolution (net::ERR_NAME_NOT_RESOLVED)** - Fixed 2026-01-24 16:05 UTC:
-
    - PR #672 build #1: 14 tests in view-common-ground-summary.spec.ts failed with `net::ERR_NAME_NOT_RESOLVED at http://frontend/topics`
    - **Root cause**: PLAYWRIGHT_BASE_URL environment variable not passed correctly to docker exec process
    - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
    - **Result**: All 14 tests now resolve correct baseURL for navigation
 
 3. **Port Already Allocated (E2E Start Failure)** - Fixed 2026-01-24 16:27 UTC:
-
    - PR #672 build #2: Docker Compose failed with `Bind for 0.0.0.0:3004 failed: port is already allocated`
    - **Root cause**: Crashed/killed containers leave processes holding E2E ports; aggressive cleanup only removed containers by name, not port-based processes
    - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
@@ -383,9 +380,6 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Result**: Services cannot exceed limits, host OOM pressure eliminated, predictable memory footprint
 
 ## Active Technologies
-
-- TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend) (009-discussion-participation)
-- PostgreSQL (existing schema with DiscussionTopic and Response models already defined; needs extension for discussion entity and citation tracking) (009-discussion-participation)
 
 - TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)
 
@@ -453,19 +447,16 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 ### Debugging Workflow
 
 1. **Identify the Error**:
-
    - Read error message completely
    - Check file and line number
    - Review recent changes
 
 2. **Reproduce Locally**:
-
    - Pull latest changes
    - Install dependencies
    - Run the failing command locally
 
 3. **Fix and Verify**:
-
    - Make minimal fix
    - Run tests to verify fix
    - Ensure no regressions
@@ -483,8 +474,6 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 - **Local Reproduction**: Run pipeline stages from `.jenkins/Jenkinsfile` locally
 
 ## Recent Changes
-
-- 009-discussion-participation: Added TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend)
 
 - 001-rational-discussion-platform: Added TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend)
 - 2026-01-24: Updated CLAUDE.md with implemented architecture (issue #431)

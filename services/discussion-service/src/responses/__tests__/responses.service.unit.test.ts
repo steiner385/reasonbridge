@@ -313,14 +313,14 @@ describe('ResponsesService', () => {
       prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
       commonGroundTrigger.checkAndTrigger.mockRejectedValue(new Error('Trigger failed'));
 
-      const loggerSpy = vi.spyOn((service as any).logger, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const result = await service.createResponse('topic-1', 'user-1', validDto);
 
       // Should still create the response even if trigger fails
       expect(result).toBeDefined();
-      expect(loggerSpy).toHaveBeenCalled();
-      loggerSpy.mockRestore();
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
 
     it('should trim content whitespace', async () => {
