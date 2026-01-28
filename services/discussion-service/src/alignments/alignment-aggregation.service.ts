@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { Prisma } from '@prisma/client';
-import type { AlignmentStance } from '@prisma/client';
-
-// Use Prisma.Decimal for proper module resolution across all environments
-type Decimal = Prisma.Decimal;
 
 @Injectable()
 export class AlignmentAggregationService {
@@ -60,7 +55,7 @@ export class AlignmentAggregationService {
     supportCount: number,
     opposeCount: number,
     nuancedCount: number,
-  ): Decimal | null {
+  ): number | null {
     const totalAlignments = supportCount + opposeCount + nuancedCount;
 
     // No alignments = no consensus score
@@ -75,9 +70,8 @@ export class AlignmentAggregationService {
     // Normalize to 0.00-1.00 range
     const normalizedScore = (rawScore + 1) / 2;
 
-    // Round to 2 decimal places and convert to Decimal
-    const roundedScore = Math.round(normalizedScore * 100) / 100;
-    return new Prisma.Decimal(roundedScore);
+    // Round to 2 decimal places (Prisma will convert to Decimal when storing)
+    return Math.round(normalizedScore * 100) / 100;
   }
 
   /**
