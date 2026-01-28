@@ -1,33 +1,28 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { DemoService } from '../demo/demo.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 describe('DemoService', () => {
   let service: DemoService;
-  let prismaService: PrismaService;
-
-  const mockPrismaService = {
+  let mockPrismaService: {
     visitorSession: {
-      findUnique: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-    },
+      findUnique: ReturnType<typeof vi.fn>;
+      create: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+    };
   };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        DemoService,
-        {
-          provide: PrismaService,
-          useValue: mockPrismaService,
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    mockPrismaService = {
+      visitorSession: {
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      },
+    };
 
-    service = module.get<DemoService>(DemoService);
-    prismaService = module.get<PrismaService>(PrismaService);
+    // Direct instantiation with mock - bypasses NestJS DI
+    service = new DemoService(mockPrismaService as unknown as PrismaService);
   });
 
   afterEach(() => {
@@ -88,7 +83,7 @@ describe('DemoService', () => {
       expect(spectrum).toHaveProperty('stronglyOppose');
     });
 
-    it.skip('should track visitor session when sessionId provided', async () => {
+    it('should track visitor session when sessionId provided', async () => {
       const sessionId = 'test-session-id';
       mockPrismaService.visitorSession.findUnique.mockResolvedValue(null);
       mockPrismaService.visitorSession.create.mockResolvedValue({
@@ -116,7 +111,7 @@ describe('DemoService', () => {
       });
     });
 
-    it.skip('should update existing visitor session', async () => {
+    it('should update existing visitor session', async () => {
       const sessionId = 'existing-session-id';
       const existingSession = {
         id: 'existing-uuid',
