@@ -1,10 +1,33 @@
-import { Controller, Get, Post, Put, Param, Body, HttpCode, HttpStatus, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Delete,
+  Req,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ResponsesService } from './responses.service.js';
 import { ContentModerationService } from './services/content-moderation.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
+import { ResponseDetailDto } from './dto/response-detail.dto.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from './dto/moderate-response.dto.js';
 import type { ResponseDto } from './dto/response.dto.js';
+
+// Placeholder for auth guard (will be implemented in Phase 9)
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    displayName: string;
+  };
+}
 
 @Controller('topics')
 export class ResponsesController {
@@ -161,15 +184,87 @@ export class ResponsesController {
    */
   @Get(':topicId/responses/by-status/:status')
   @HttpCode(HttpStatus.OK)
-  async getResponsesByStatus(
-    @Param('topicId') topicId: string,
-    @Param('status') status: string,
-  ) {
+  async getResponsesByStatus(@Param('topicId') topicId: string, @Param('status') status: string) {
     const validStatuses = ['VISIBLE', 'HIDDEN', 'REMOVED'];
     if (!validStatuses.includes(status.toUpperCase())) {
       throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
     }
 
     return this.contentModerationService.getResponsesByStatus(topicId, status.toUpperCase() as any);
+  }
+
+  // ==================== Feature 009: Discussion Participation ====================
+
+  /**
+   * T040 [US2] - Post a response to a discussion
+   *
+   * Rate limit: 10 responses per minute per user
+   *
+   * @param req - Authenticated request with user info
+   * @param dto - Response creation data
+   * @returns The created response
+   */
+  @Post('responses')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ 'response-posting': { limit: 10, ttl: 60000 } }) // 10 per minute
+  @ApiBearerAuth()
+  @ApiTags('responses')
+  @ApiOperation({
+    summary: 'Post a response to a discussion',
+    description: 'Creates a top-level response in a discussion. Rate limited to 10 per minute.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Response created successfully',
+    type: ResponseDetailDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input or discussion not active',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Discussion not found',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Rate limit exceeded (10 responses per minute)',
+  })
+  async createResponseForDiscussion(
+    @Req() req: AuthRequest,
+    @Body() dto: CreateResponseDto,
+  ): Promise<ResponseDetailDto> {
+    // TODO: Replace with actual auth guard in Phase 9
+    const userId = req.user?.id || 'anonymous';
+    return this.responsesService.createResponseForDiscussion(userId, dto);
+  }
+
+  /**
+   * T041 [US2] - Get all responses for a discussion
+   *
+   * @param discussionId - The ID of the discussion
+   * @returns Array of responses for the discussion
+   */
+  @Get('discussions/:discussionId/responses')
+  @HttpCode(HttpStatus.OK)
+  @SkipThrottle() // No rate limit on read operations
+  @ApiTags('responses')
+  @ApiOperation({
+    summary: 'Get responses for a discussion',
+    description: 'Retrieve all non-deleted responses for a discussion in chronological order.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Responses retrieved successfully',
+    type: [ResponseDetailDto],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Discussion not found',
+  })
+  async getDiscussionResponses(
+    @Param('discussionId') discussionId: string,
+  ): Promise<ResponseDetailDto[]> {
+    return this.responsesService.getDiscussionResponses(discussionId);
   }
 }
