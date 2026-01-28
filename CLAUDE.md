@@ -279,7 +279,8 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
   "contexts": [
     "jenkins/lint", // Code quality
     "jenkins/unit-tests", // Unit tests
-    "jenkins/integration" // Integration tests
+    "jenkins/integration", // Integration tests
+    "jenkins/ci" // Overall pipeline status
   ],
   "strict": true
 }
@@ -287,22 +288,33 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 **Why this configuration:**
 
-- **Comprehensive validation**: Requires lint, unit tests, AND integration tests before merge
-- **Pre-merge checks**: All required checks post BEFORE merge (not after like `jenkins/ci`)
+- **Comprehensive validation**: Requires lint, unit tests, integration tests, AND overall pipeline success before merge
+- **Full pipeline completion**: jenkins/ci ensures entire pipeline completes successfully (including E2E when applicable)
 - **Strict mode**: Ensures PRs are up-to-date with base branch
 - **Defense-in-depth**: Multiple layers prevent broken code from merging
-- **No `continuous-integration/jenkins/pr-merge`**: Removed because this automatic check from the GitHub Branch Source plugin reflects overall Jenkins build result (SUCCESS/UNSTABLE/FAILURE), not individual test results. When E2E tests are skipped for staging/\* branches, Allure/JUnit plugins may mark the build UNSTABLE even though all tests pass.
+- **Prevents premature merges**: PR #709 (2026-01-28) merged at 20:27:43Z while jenkins/ci was pending, later failing at 20:33:31Z
 
 **Status Check Sources:**
 
 - `jenkins/lint` - Posted by `runLintChecks()` helper
 - `jenkins/unit-tests` - Posted by `runUnitTests()` helper
 - `jenkins/integration` - Posted by `runIntegrationTests()` helper
+- `jenkins/ci` - Overall pipeline status (all stages must complete successfully)
+
+**Important Note on jenkins/ci:**
+
+The `jenkins/ci` check represents the overall Jenkins pipeline result and may show UNSTABLE/FAILURE when:
+- E2E tests are skipped on feature branches
+- Allure/JUnit plugins mark builds as unstable despite passing tests
+- Any post-success/failure stage fails
+
+This is a stricter requirement than individual stage checks, ensuring the complete pipeline succeeds before merge.
 
 **Verification:**
 
 ```bash
-gh api repos/steiner385/reasonBridge/branches/main/protection/required_status_checks --jq '.contexts'
+gh api repos/steiner385/reasonbridge/branches/main/protection/required_status_checks --jq '.contexts'
+# Expected output: ["jenkins/integration","jenkins/lint","jenkins/unit-tests","jenkins/ci"]
 ```
 
 **NEVER modify branch protection without:**
@@ -312,7 +324,15 @@ gh api repos/steiner385/reasonBridge/branches/main/protection/required_status_ch
 3. Testing with a dummy PR that auto-merge correctly waits for all checks
 4. Documenting the change and reason in this file
 
-**Incident Reference:** 2026-01-24 - PR #668 merged with failing test because protection required `jenkins/ci` (posts after merge) but not the actual pre-merge checks. Comprehensive protection now prevents this. See `/tmp/branch-protection-final-config.md` for full details.
+**Incident References:**
+
+1. **2026-01-24 - PR #668**: Merged with failing test because protection required only `jenkins/ci` (which posts after merge) but not the individual pre-merge checks (lint, unit-tests, integration). Led to initial defense-in-depth configuration with three required checks.
+
+2. **2026-01-28 - PR #709**: Hotfix PR merged at 20:27:43Z with only three checks (lint, unit-tests, integration) passing. The `jenkins/ci` check was still pending and later failed at 20:33:31Z. This incident revealed that while individual stages passed, the overall pipeline could still fail in later stages. Added `jenkins/ci` as fourth required check to ensure complete pipeline success before merge.
+
+**Configuration Evolution:**
+- 2026-01-24: Added jenkins/lint, jenkins/unit-tests, jenkins/integration (removed jenkins/ci)
+- 2026-01-28: Re-added jenkins/ci as fourth required check for full pipeline validation
 
 ## Playwright E2E Testing
 
