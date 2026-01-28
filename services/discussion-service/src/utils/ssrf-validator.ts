@@ -186,7 +186,7 @@ export async function validateCitationUrl(urlString: string): Promise<SSRFValida
     }
 
     // Use first resolved IP
-    resolvedIp = addresses[0];
+    resolvedIp = addresses[0] || '';
 
     // Check if resolved IP is private (DNS rebinding attack)
     if (isPrivateIP(resolvedIp)) {

@@ -13,6 +13,7 @@ import {
   IsArray,
   ValidateNested,
   IsOptional,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -28,7 +29,7 @@ export class CreateResponseDto {
     format: 'uuid',
   })
   @IsUUID('4')
-  discussionId: string;
+  discussionId!: string;
 
   @ApiProperty({
     description: 'Response content',
@@ -39,7 +40,7 @@ export class CreateResponseDto {
   @IsString()
   @MinLength(50, { message: 'Response must be at least 50 characters' })
   @MaxLength(25000, { message: 'Response cannot exceed 25,000 characters (~5,000 words)' })
-  content: string;
+  content!: string;
 
   @ApiPropertyOptional({
     description: 'Optional citations for the response',
@@ -61,4 +62,33 @@ export class CreateResponseDto {
   @IsOptional()
   @IsUUID('4')
   parentResponseId?: string;
+
+  // Service-layer properties (mapped from API properties)
+  parentId?: string; // Maps from parentResponseId
+  citedSources?: string[]; // Maps from citations
+
+  @ApiPropertyOptional({
+    description: 'Whether the response contains opinion',
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  containsOpinion?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Whether the response contains factual claims',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  containsFactualClaims?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Optional proposition IDs this response relates to',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  propositionIds?: string[];
 }

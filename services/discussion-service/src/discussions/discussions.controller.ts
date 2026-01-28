@@ -18,7 +18,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
-import { DiscussionsService, ListDiscussionsQuery } from './discussions.service.js';
+import { DiscussionsService } from './discussions.service.js';
+import type { ListDiscussionsQuery } from './discussions.service.js';
 import { CreateDiscussionDto } from './dto/create-discussion.dto.js';
 import { DiscussionResponseDto, DiscussionDetailDto } from './dto/discussion-response.dto.js';
 import { PaginatedResponseDto } from '../dto/pagination.dto.js';

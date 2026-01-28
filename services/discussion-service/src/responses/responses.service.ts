@@ -181,7 +181,9 @@ export class ResponsesService {
     // This is fire-and-forget - we don't wait for it to complete
     this.commonGroundTrigger.checkAndTrigger(topicId).catch((error) => {
       // Error is already logged in the service, but log here too for visibility
-      this.logger.error('Failed to check/trigger common ground analysis', error, { topicId });
+      this.logger.error('Failed to check/trigger common ground analysis', error, {
+        metadata: { topicId },
+      });
     });
 
     // Fetch the complete response with all relations
@@ -554,7 +556,7 @@ export class ResponsesService {
           },
           data: {
             responseCount: { increment: 1 },
-            lastActivityAt: new Date(),
+            lastContributionAt: new Date(),
           },
         });
       } else {
@@ -563,7 +565,7 @@ export class ResponsesService {
             discussionId: dto.discussionId,
             userId,
             responseCount: 1,
-            lastActivityAt: new Date(),
+            lastContributionAt: new Date(),
           },
         });
       }
@@ -578,7 +580,7 @@ export class ResponsesService {
         data: {
           responseCount: { increment: 1 },
           participantCount,
-          lastActivityAt: new Date(),
+          lastContributionAt: new Date(),
         },
       });
 
@@ -587,7 +589,7 @@ export class ResponsesService {
         where: { id: response.id },
         include: {
           author: {
-            select: { id: true, displayName: true },
+            select: { id: true, displayName: true, verificationLevel: true },
           },
           citations: true,
         },
@@ -606,6 +608,7 @@ export class ResponsesService {
       author: {
         id: result.author.id,
         displayName: result.author.displayName,
+        verificationLevel: result.author.verificationLevel,
       },
       parentResponseId: result.parentId,
       citations: result.citations.map((citation) => ({
@@ -657,7 +660,7 @@ export class ResponsesService {
       },
       include: {
         author: {
-          select: { id: true, displayName: true },
+          select: { id: true, displayName: true, verificationLevel: true },
         },
         citations: true,
         _count: {

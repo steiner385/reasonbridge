@@ -81,7 +81,7 @@ export class AlignmentAggregationService {
     supportCount: number;
     opposeCount: number;
     nuancedCount: number;
-    consensusScore: Decimal | null;
+    consensusScore: number | null;
   }> {
     const proposition = await this.prisma.proposition.findUnique({
       where: { id: propositionId },
@@ -97,7 +97,10 @@ export class AlignmentAggregationService {
       throw new Error(`Proposition with ID ${propositionId} not found`);
     }
 
-    return proposition;
+    return {
+      ...proposition,
+      consensusScore: proposition.consensusScore ? Number(proposition.consensusScore) : null,
+    };
   }
 
   /**

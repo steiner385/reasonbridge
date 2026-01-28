@@ -17,26 +17,26 @@ export class ResponseDetailDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Discussion ID this response belongs to',
     example: '660e8400-e29b-41d4-a716-446655440001',
     format: 'uuid',
   })
-  discussionId: string;
+  discussionId!: string;
 
   @ApiProperty({
     description: 'Response content',
     example: 'I believe we should consider the environmental impact...',
   })
-  content: string;
+  content!: string;
 
   @ApiProperty({
     description: 'Author information',
     type: UserSummaryDto,
   })
-  author: UserSummaryDto;
+  author!: UserSummaryDto;
 
   @ApiPropertyOptional({
     description: 'Parent response ID for threaded replies',
@@ -44,7 +44,7 @@ export class ResponseDetailDto {
     format: 'uuid',
     nullable: true,
   })
-  parentResponseId: string | null;
+  parentResponseId!: string | null;
 
   @ApiPropertyOptional({
     description: 'Citations attached to this response',
@@ -57,39 +57,39 @@ export class ResponseDetailDto {
     description: 'Current version number for optimistic locking',
     example: 1,
   })
-  version: number;
+  version!: number;
 
   @ApiProperty({
     description: 'Number of times this response has been edited',
     example: 0,
   })
-  editCount: number;
+  editCount!: number;
 
   @ApiPropertyOptional({
     description: 'Timestamp when response was last edited',
     example: '2026-01-27T15:30:00Z',
     nullable: true,
   })
-  editedAt: string | null;
+  editedAt!: string | null;
 
   @ApiPropertyOptional({
     description: 'Timestamp when response was soft-deleted',
     example: '2026-01-27T16:00:00Z',
     nullable: true,
   })
-  deletedAt: string | null;
+  deletedAt!: string | null;
 
   @ApiProperty({
     description: 'Response creation timestamp',
     example: '2026-01-27T10:00:00Z',
   })
-  createdAt: string;
+  createdAt!: string;
 
   @ApiProperty({
     description: 'Last updated timestamp',
     example: '2026-01-27T10:00:00Z',
   })
-  updatedAt: string;
+  updatedAt!: string;
 
   @ApiPropertyOptional({
     description: 'Number of direct replies to this response',

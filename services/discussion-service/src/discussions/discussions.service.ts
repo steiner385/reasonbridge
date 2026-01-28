@@ -119,7 +119,7 @@ export class DiscussionsService {
           status: 'ACTIVE',
           responseCount: 1, // Initial response counts
           participantCount: 1,
-          lastActivityAt: new Date(),
+          lastContributionAt: new Date(),
         },
       });
 
@@ -155,7 +155,7 @@ export class DiscussionsService {
           discussionId: discussion.id,
           userId,
           responseCount: 1,
-          lastActivityAt: new Date(),
+          lastContributionAt: new Date(),
         },
       });
 
@@ -164,13 +164,13 @@ export class DiscussionsService {
         where: { id: discussion.id },
         include: {
           creator: {
-            select: { id: true, displayName: true },
+            select: { id: true, displayName: true, verificationLevel: true },
           },
           responses: {
             where: { deletedAt: null },
             include: {
               author: {
-                select: { id: true, displayName: true },
+                select: { id: true, displayName: true, verificationLevel: true },
               },
               citations: true,
             },
@@ -182,7 +182,7 @@ export class DiscussionsService {
       return createdDiscussion;
     });
 
-    this.logger.discussionCreated(result.id, userId, { topicId: dto.topicId });
+    this.logger.discussionCreated(result.id, userId, { metadata: { topicId: dto.topicId } });
 
     // Map to DiscussionDetailDto
     return {
@@ -193,10 +193,11 @@ export class DiscussionsService {
       creator: {
         id: result.creator.id,
         displayName: result.creator.displayName,
+        verificationLevel: result.creator.verificationLevel,
       },
       responseCount: result.responseCount,
       participantCount: result.participantCount,
-      lastActivityAt: result.lastActivityAt.toISOString(),
+      lastContributionAt: result.lastActivityAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
       responses: result.responses.map((response) => ({
@@ -264,7 +265,7 @@ export class DiscussionsService {
         where,
         include: {
           creator: {
-            select: { id: true, displayName: true },
+            select: { id: true, displayName: true, verificationLevel: true },
           },
         },
         orderBy: {
@@ -289,7 +290,7 @@ export class DiscussionsService {
         },
         responseCount: discussion.responseCount,
         participantCount: discussion.participantCount,
-        lastActivityAt: discussion.lastActivityAt.toISOString(),
+        lastContributionAt: discussion.lastActivityAt.toISOString(),
         createdAt: discussion.createdAt.toISOString(),
         updatedAt: discussion.updatedAt.toISOString(),
       })),

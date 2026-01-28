@@ -47,37 +47,37 @@ export class PaginationMetaDto {
     description: 'Current page number',
     example: 1,
   })
-  currentPage: number;
+  currentPage!: number;
 
   @ApiProperty({
     description: 'Total number of pages',
     example: 5,
   })
-  totalPages: number;
+  totalPages!: number;
 
   @ApiProperty({
     description: 'Total number of items across all pages',
     example: 237,
   })
-  totalItems: number;
+  totalItems!: number;
 
   @ApiProperty({
     description: 'Number of items per page',
     example: 50,
   })
-  itemsPerPage: number;
+  itemsPerPage!: number;
 
   @ApiProperty({
     description: 'Whether there is a next page',
     example: true,
   })
-  hasNextPage: boolean;
+  hasNextPage!: boolean;
 
   @ApiProperty({
     description: 'Whether there is a previous page',
     example: false,
   })
-  hasPreviousPage: boolean;
+  hasPreviousPage!: boolean;
 }
 
 /**
@@ -88,13 +88,13 @@ export class PaginatedResponseDto<T> {
     description: 'Array of items for current page',
     isArray: true,
   })
-  data: T[];
+  data!: T[];
 
   @ApiProperty({
     description: 'Pagination metadata',
     type: PaginationMetaDto,
   })
-  pagination: PaginationMetaDto;
+  pagination!: PaginationMetaDto;
 }
 
 /**

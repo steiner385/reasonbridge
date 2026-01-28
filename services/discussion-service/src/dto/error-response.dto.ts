@@ -14,13 +14,13 @@ export class ValidationErrorDto {
     description: 'Field name that failed validation',
     example: 'title',
   })
-  field: string;
+  field!: string;
 
   @ApiProperty({
     description: 'Validation error message',
     example: 'Title must be between 10 and 200 characters',
   })
-  message: string;
+  message!: string;
 }
 
 /**
@@ -31,19 +31,19 @@ export class ErrorResponseDto {
     description: 'HTTP status code',
     example: 400,
   })
-  statusCode: number;
+  statusCode!: number;
 
   @ApiProperty({
     description: 'Error message',
     example: 'Validation failed',
   })
-  message: string;
+  message!: string;
 
   @ApiProperty({
     description: 'Error type',
     example: 'Bad Request',
   })
-  error: string;
+  error!: string;
 
   @ApiPropertyOptional({
     description: 'Array of validation errors (if applicable)',
@@ -61,29 +61,29 @@ export class ConflictErrorDto {
     description: 'HTTP status code',
     example: 409,
   })
-  statusCode: number;
+  statusCode!: number;
 
   @ApiProperty({
     description: 'Conflict explanation',
     example: 'Response was modified by another operation. Please refresh and try again.',
   })
-  message: string;
+  message!: string;
 
   @ApiProperty({
     description: 'Error type',
     example: 'Conflict',
   })
-  error: string;
+  error!: string;
 
   @ApiProperty({
     description: 'Current version in database',
     example: 3,
   })
-  currentVersion: number;
+  currentVersion!: number;
 
   @ApiProperty({
     description: 'Version provided in request',
     example: 2,
   })
-  providedVersion: number;
+  providedVersion!: number;
 }

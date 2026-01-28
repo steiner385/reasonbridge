@@ -16,63 +16,63 @@ export class DiscussionResponseDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Topic ID this discussion belongs to',
     example: '660e8400-e29b-41d4-a716-446655440001',
     format: 'uuid',
   })
-  topicId: string;
+  topicId!: string;
 
   @ApiProperty({
     description: 'Discussion title',
     example: 'Should carbon taxes be increased in 2027?',
   })
-  title: string;
+  title!: string;
 
   @ApiProperty({
     description: 'Discussion status',
     enum: ['ACTIVE', 'ARCHIVED', 'DELETED'],
     example: 'ACTIVE',
   })
-  status: 'ACTIVE' | 'ARCHIVED' | 'DELETED';
+  status!: 'ACTIVE' | 'ARCHIVED' | 'DELETED';
 
   @ApiProperty({
     description: 'User who created the discussion',
     type: UserSummaryDto,
   })
-  creator: UserSummaryDto;
+  creator!: UserSummaryDto;
 
   @ApiProperty({
     description: 'Total number of responses',
     example: 42,
   })
-  responseCount: number;
+  responseCount!: number;
 
   @ApiProperty({
     description: 'Number of unique participants',
     example: 15,
   })
-  participantCount: number;
+  participantCount!: number;
 
   @ApiProperty({
     description: 'Last activity timestamp',
     example: '2026-01-27T15:30:00Z',
   })
-  lastActivityAt: string;
+  lastActivityAt!: string;
 
   @ApiProperty({
     description: 'Discussion creation timestamp',
     example: '2026-01-27T10:00:00Z',
   })
-  createdAt: string;
+  createdAt!: string;
 
   @ApiProperty({
     description: 'Last updated timestamp',
     example: '2026-01-27T15:30:00Z',
   })
-  updatedAt: string;
+  updatedAt!: string;
 }
 
 /**

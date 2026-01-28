@@ -31,7 +31,7 @@ export class InitialResponseDto {
   @IsString()
   @MinLength(50, { message: 'Initial response must be at least 50 characters' })
   @MaxLength(25000, { message: 'Initial response cannot exceed 25,000 characters (~5,000 words)' })
-  content: string;
+  content!: string;
 
   @ApiPropertyOptional({
     description: 'Optional citations for the initial response',
@@ -55,7 +55,7 @@ export class CreateDiscussionDto {
     format: 'uuid',
   })
   @IsUUID('4')
-  topicId: string;
+  topicId!: string;
 
   @ApiProperty({
     description: 'Discussion title',
@@ -66,7 +66,7 @@ export class CreateDiscussionDto {
   @IsString()
   @MinLength(10, { message: 'Title must be at least 10 characters' })
   @MaxLength(200, { message: 'Title cannot exceed 200 characters' })
-  title: string;
+  title!: string;
 
   @ApiProperty({
     description: 'Initial response to start the discussion',
@@ -74,5 +74,5 @@ export class CreateDiscussionDto {
   })
   @ValidateNested()
   @Type(() => InitialResponseDto)
-  initialResponse: InitialResponseDto;
+  initialResponse!: InitialResponseDto;
 }

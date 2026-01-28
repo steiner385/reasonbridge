@@ -16,14 +16,14 @@ export class UserSummaryDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'User display name',
     example: 'Jane Doe',
     nullable: true,
   })
-  displayName: string | null;
+  displayName!: string | null;
 
   @ApiPropertyOptional({
     description: 'User avatar URL',
@@ -37,7 +37,7 @@ export class UserSummaryDto {
     enum: ['BASIC', 'ENHANCED', 'VERIFIED_HUMAN'],
     example: 'BASIC',
   })
-  verificationLevel: 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN';
+  verificationLevel!: 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN';
 }
 
 /**
