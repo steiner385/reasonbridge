@@ -494,7 +494,7 @@ export class ResponsesService {
         const validation = await validateCitationUrl(citation.url);
 
         if (!validation.safe) {
-          this.logger.ssrfBlocked(citation.url, validation.threat || 'UNKNOWN', { userId });
+          this.logger.ssrfBlocked(citation.url, validation.threat || 'UNKNOWN', userId);
           throw new BadRequestException(`Citation URL blocked: ${validation.error}`);
         }
 
@@ -580,7 +580,7 @@ export class ResponsesService {
         data: {
           responseCount: { increment: 1 },
           participantCount,
-          lastContributionAt: new Date(),
+          lastActivityAt: new Date(),
         },
       });
 
@@ -678,6 +678,7 @@ export class ResponsesService {
       author: {
         id: response.author.id,
         displayName: response.author.displayName,
+        verificationLevel: response.author.verificationLevel,
       },
       parentResponseId: response.parentId,
       citations: response.citations.map((citation) => ({

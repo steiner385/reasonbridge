@@ -38,7 +38,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        */
       async softDelete(
         this: any,
-        { where }: { where: Prisma.ResponseWhereUniqueInput },
+        { where }: { where: any },
       ): Promise<{
         deletionType: 'SOFT' | 'HARD';
         response: any;
@@ -103,7 +103,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        * });
        * ```
        */
-      async findManyActive(this: any, args?: Prisma.ResponseFindManyArgs): Promise<any[]> {
+      async findManyActive(this: any, args?: any): Promise<any[]> {
         return this.findMany({
           ...args,
           where: {
@@ -119,7 +119,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        * @param args - Standard count arguments
        * @returns Count of non-deleted responses
        */
-      async countActive(this: any, args?: Prisma.ResponseCountArgs): Promise<number> {
+      async countActive(this: any, args?: any): Promise<number> {
         return this.count({
           ...args,
           where: {
@@ -135,10 +135,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        * @param where - Response identifier
        * @returns True if soft-deleted, false otherwise
        */
-      async isSoftDeleted(
-        this: any,
-        { where }: { where: Prisma.ResponseWhereUniqueInput },
-      ): Promise<boolean> {
+      async isSoftDeleted(this: any, { where }: { where: any }): Promise<boolean> {
         const response = await this.findUnique({
           where,
           select: {
@@ -174,6 +171,6 @@ export type PrismaClientWithSoftDelete = ReturnType<typeof createExtendedPrismaC
  * await extendedPrisma.response.softDelete({ where: { id: 'uuid' } });
  * ```
  */
-export function createExtendedPrismaClient<T extends Prisma.PrismaClient>(prisma: T) {
+export function createExtendedPrismaClient(prisma: any) {
   return prisma.$extends(softDeleteExtension);
 }
