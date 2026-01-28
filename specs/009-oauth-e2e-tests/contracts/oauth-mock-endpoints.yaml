@@ -1,0 +1,288 @@
+openapi: 3.0.3
+info:
+  title: OAuth Mock Endpoints
+  description: |
+    Mock OAuth endpoints for E2E testing. These endpoints are only active when `AUTH_MOCK=true`.
+    They simulate Google and Apple OAuth flows without requiring real provider credentials.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3001
+    description: User service (E2E environment)
+
+paths:
+  /auth/oauth/initiate:
+    post:
+      summary: Initiate OAuth flow (mocked)
+      description: |
+        In mock mode, returns a callback URL pointing to our mock handler instead of real OAuth provider.
+      tags:
+        - OAuth Mock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateOAuthRequest'
+      responses:
+        '200':
+          description: OAuth initiation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateOAuthResponse'
+              examples:
+                google:
+                  summary: Google OAuth (mocked)
+                  value:
+                    authUrl: "/auth/callback/google?code=mock_code_1706367600000&state=mock_state_abc123"
+                    state: "mock_state_abc123"
+                    provider: "google"
+                apple:
+                  summary: Apple OAuth (mocked)
+                  value:
+                    authUrl: "/auth/callback/apple?code=mock_code_1706367600001&state=mock_state_def456"
+                    state: "mock_state_def456"
+                    provider: "apple"
+
+  /auth/callback/google:
+    get:
+      summary: Google OAuth callback (mocked)
+      description: |
+        Handles mock Google OAuth callback. Accepts mock authorization codes and returns authentication tokens.
+      tags:
+        - OAuth Mock
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code (mock codes start with `mock_code_`)
+          example: mock_code_google_1706367600000
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+          description: CSRF state token
+          example: mock_state_abc123
+        - name: error
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Error code if OAuth failed
+          example: access_denied
+        - name: error_description
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Human-readable error description
+      responses:
+        '200':
+          description: OAuth successful, returns auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: OAuth failed (cancelled, invalid state, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthError'
+
+  /auth/callback/apple:
+    get:
+      summary: Apple OAuth callback (mocked)
+      description: |
+        Handles mock Apple Sign-In callback. Supports both real email and private relay email addresses.
+      tags:
+        - OAuth Mock
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code (mock codes start with `mock_code_`)
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+          description: CSRF state token
+        - name: id_token
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Apple ID token (mocked JWT)
+        - name: user
+          in: query
+          required: false
+          schema:
+            type: string
+          description: User info JSON (first auth only)
+      responses:
+        '200':
+          description: OAuth successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: OAuth failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthError'
+
+components:
+  schemas:
+    InitiateOAuthRequest:
+      type: object
+      required:
+        - provider
+      properties:
+        provider:
+          type: string
+          enum: [google, apple]
+          description: OAuth provider
+        visitorSessionId:
+          type: string
+          format: uuid
+          description: Optional visitor session to link
+        redirectUrl:
+          type: string
+          format: uri
+          description: Where to redirect after success
+
+    InitiateOAuthResponse:
+      type: object
+      required:
+        - authUrl
+        - state
+        - provider
+      properties:
+        authUrl:
+          type: string
+          description: URL to redirect user to (mock URL in E2E mode)
+        state:
+          type: string
+          description: CSRF state token
+        provider:
+          type: string
+          enum: [google, apple]
+
+    AuthSuccessResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - user
+        - onboardingProgress
+        - expiresIn
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: JWT refresh token
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        onboardingProgress:
+          $ref: '#/components/schemas/OnboardingProgress'
+        expiresIn:
+          type: integer
+          description: Token lifetime in seconds
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        authMethod:
+          type: string
+          enum: [EMAIL_PASSWORD, GOOGLE_OAUTH, APPLE_OAUTH]
+        emailVerified:
+          type: boolean
+        accountStatus:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+
+    OnboardingProgress:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        currentStep:
+          type: string
+          enum: [VERIFICATION, TOPICS, ORIENTATION, COMPLETE]
+        emailVerified:
+          type: boolean
+        topicsSelected:
+          type: boolean
+        orientationViewed:
+          type: boolean
+        firstPostMade:
+          type: boolean
+        completionPercentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+        nextAction:
+          type: object
+          properties:
+            step:
+              type: string
+            label:
+              type: string
+            description:
+              type: string
+            url:
+              type: string
+
+    OAuthError:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          enum:
+            - OAUTH_CANCELLED
+            - INVALID_STATE
+            - EXPIRED_CODE
+            - OAUTH_FAILED
+            - SERVER_ERROR
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          properties:
+            provider:
+              type: string
+            hint:
+              type: string
+
+tags:
+  - name: OAuth Mock
+    description: Mock OAuth endpoints for E2E testing (AUTH_MOCK=true only)

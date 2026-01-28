@@ -2,6 +2,8 @@ import type { RouteObject } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import AboutPage from '../pages/AboutPage';
 import { LoginPage, RegisterPage } from '../pages/Auth';
+import { SignupPage } from '../pages/SignupPage';
+import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
 import CommonGroundDemoPage from '../pages/Topics/CommonGroundDemoPage';
@@ -35,6 +37,14 @@ export const routes: RouteObject[] = [
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/signup',
+    element: <SignupPage />,
+  },
+  {
+    path: '/auth/callback/:provider',
+    element: <AuthCallbackPage />,
   },
   {
     path: '/topics',
