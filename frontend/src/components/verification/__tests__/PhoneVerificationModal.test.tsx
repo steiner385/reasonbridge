@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PhoneVerificationModal from '../PhoneVerificationModal';
 import * as api from '../../../lib/api';
@@ -13,10 +13,7 @@ vi.mock('../../../lib/api', () => ({
   verifyPhoneOTP: vi.fn(),
 }));
 
-// TODO: Fix flaky tests - multiple tests timeout intermittently in CI (5000ms timeout)
-// Tests pass locally but fail randomly in Jenkins due to timing issues with async
-// user interactions and OTP flow state transitions
-describe.skip('PhoneVerificationModal', () => {
+describe('PhoneVerificationModal', () => {
   const mockOnClose = vi.fn();
   const mockOnSuccess = vi.fn();
 
@@ -60,7 +57,7 @@ describe.skip('PhoneVerificationModal', () => {
     render(<PhoneVerificationModal isOpen={true} onClose={mockOnClose} />);
 
     const phoneInput = screen.getByPlaceholderText('Enter your phone number');
-    await user.type(phoneInput, '+12125551234');
+    fireEvent.change(phoneInput, { target: { value: '+12125551234' } });
 
     const sendButton = screen.getByRole('button', { name: /send code/i });
     await user.click(sendButton);
@@ -86,7 +83,7 @@ describe.skip('PhoneVerificationModal', () => {
     render(<PhoneVerificationModal isOpen={true} onClose={mockOnClose} />);
 
     const phoneInput = screen.getByPlaceholderText('Enter your phone number');
-    await user.type(phoneInput, '+12125551234');
+    fireEvent.change(phoneInput, { target: { value: '+12125551234' } });
 
     const sendButton = screen.getByRole('button', { name: /send code/i });
     await user.click(sendButton);
@@ -108,7 +105,7 @@ describe.skip('PhoneVerificationModal', () => {
 
     // Enter phone and send code
     const phoneInput = screen.getByPlaceholderText('Enter your phone number');
-    await user.type(phoneInput, '+12125551234');
+    fireEvent.change(phoneInput, { target: { value: '+12125551234' } });
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
     await waitFor(() => {
@@ -121,7 +118,7 @@ describe.skip('PhoneVerificationModal', () => {
 
     expect(await screen.findByText(/please enter the complete 6-digit code/i)).toBeInTheDocument();
     expect(api.verifyPhoneOTP).not.toHaveBeenCalled();
-  });
+  }, 10000);
 
   it('verifies OTP and shows success', async () => {
     const user = userEvent.setup();
@@ -142,7 +139,7 @@ describe.skip('PhoneVerificationModal', () => {
 
     // Enter phone and send code
     const phoneInput = screen.getByPlaceholderText('Enter your phone number');
-    await user.type(phoneInput, '+12125551234');
+    fireEvent.change(phoneInput, { target: { value: '+12125551234' } });
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
     await waitFor(() => {
@@ -179,9 +176,7 @@ describe.skip('PhoneVerificationModal', () => {
     );
   }, 10000);
 
-  // TODO: Fix flaky test - times out intermittently in CI (5000ms timeout)
-  // The test passes locally but fails randomly in Jenkins due to timing issues
-  it.skip('handles OTP verification error', async () => {
+  it('handles OTP verification error', async () => {
     const user = userEvent.setup();
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
       verificationId: 'test-verification-id',
@@ -194,7 +189,7 @@ describe.skip('PhoneVerificationModal', () => {
 
     // Enter phone and send code
     const phoneInput = screen.getByPlaceholderText('Enter your phone number');
-    await user.type(phoneInput, '+12125551234');
+    fireEvent.change(phoneInput, { target: { value: '+12125551234' } });
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
     await waitFor(() => {
@@ -214,7 +209,7 @@ describe.skip('PhoneVerificationModal', () => {
     await waitFor(() => {
       expect(screen.getByText(/invalid verification code/i)).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
   it('allows going back to phone entry from OTP step', async () => {
     const user = userEvent.setup();
@@ -228,7 +223,7 @@ describe.skip('PhoneVerificationModal', () => {
 
     // Enter phone and send code
     const phoneInput = screen.getByPlaceholderText('Enter your phone number');
-    await user.type(phoneInput, '+12125551234');
+    fireEvent.change(phoneInput, { target: { value: '+12125551234' } });
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
     await waitFor(() => {
@@ -241,7 +236,7 @@ describe.skip('PhoneVerificationModal', () => {
 
     expect(screen.getByText('Verify Phone Number')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter your phone number')).toBeInTheDocument();
-  });
+  }, 10000);
 
   it('resets state when modal is reopened', async () => {
     const { rerender } = render(<PhoneVerificationModal isOpen={false} onClose={mockOnClose} />);
