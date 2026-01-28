@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AlignmentAggregationService } from './alignment-aggregation.service.js';
+import { Prisma } from '@prisma/client';
 
 const createMockPrismaService = () => ({
   alignment: {
@@ -109,7 +110,7 @@ describe('AlignmentAggregationService', () => {
       await service.updatePropositionAggregates('proposition-1');
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
-      expect(Number(updateCall.data.consensusScore)).toBeCloseTo(1.0, 2);
+      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(1));
     });
 
     it('should calculate consensus score = 0.00 for all oppose', async () => {
@@ -119,7 +120,7 @@ describe('AlignmentAggregationService', () => {
       await service.updatePropositionAggregates('proposition-1');
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
-      expect(Number(updateCall.data.consensusScore)).toBeCloseTo(0.0, 2);
+      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(0));
     });
 
     it('should calculate consensus score = 0.50 for balanced votes', async () => {
@@ -134,7 +135,7 @@ describe('AlignmentAggregationService', () => {
       await service.updatePropositionAggregates('proposition-1');
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
-      expect(Number(updateCall.data.consensusScore)).toBeCloseTo(0.5, 2);
+      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(0.5));
     });
 
     it('should calculate correct consensus score for mixed with nuanced (6-2-2)', async () => {
@@ -156,7 +157,7 @@ describe('AlignmentAggregationService', () => {
 
       const updateCall = mockPrisma.proposition.update.mock.calls[0][0];
       // (6-2)/10 = 0.4, normalized = (0.4 + 1) / 2 = 0.70
-      expect(Number(updateCall.data.consensusScore)).toBeCloseTo(0.7, 2);
+      expect(updateCall.data.consensusScore).toEqual(new Prisma.Decimal(0.7));
     });
 
     it('should query alignments with correct propositionId', async () => {
@@ -178,15 +179,17 @@ describe('AlignmentAggregationService', () => {
         supportCount: 10,
         opposeCount: 5,
         nuancedCount: 3,
-        consensusScore: 0.64,
-      } as any);
+        consensusScore: new Prisma.Decimal(0.64),
+      });
 
       const result = await service.getPropositionAggregates('proposition-1');
 
-      expect(result.supportCount).toBe(10);
-      expect(result.opposeCount).toBe(5);
-      expect(result.nuancedCount).toBe(3);
-      expect(Number(result.consensusScore)).toBeCloseTo(0.64, 2);
+      expect(result).toEqual({
+        supportCount: 10,
+        opposeCount: 5,
+        nuancedCount: 3,
+        consensusScore: new Prisma.Decimal(0.64),
+      });
     });
 
     it('should throw error if proposition not found', async () => {

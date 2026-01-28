@@ -10,11 +10,7 @@ export default defineConfig({
       'src/__tests__/**/*.test.ts',
       'src/__tests__/**/*.spec.ts',
     ],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/*.integration.spec.ts', // Exclude integration tests from unit tests
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**'],
     reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',
