@@ -8,6 +8,8 @@
  * @see https://vitest.dev/config/#setupfiles
  */
 
+/// <reference types="vitest/globals" />
+
 import '@testing-library/jest-dom';
 import { server } from './test/mocks/server';
 

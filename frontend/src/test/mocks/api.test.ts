@@ -14,7 +14,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from './server';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env['VITE_API_URL'] || 'http://localhost:3000';
 
 describe('MSW Integration', () => {
   describe('Default Handlers', () => {
