@@ -2,14 +2,13 @@
 -- This migration adds the missing tables and columns for the discussion
 -- participation feature that was merged without a corresponding migration.
 
--- CreateEnum
-CREATE TYPE "evidence_standard" AS ENUM ('RELAXED', 'STANDARD', 'STRICT');
-
--- CreateEnum  
-CREATE TYPE "activity_level" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
-
--- CreateEnum
-CREATE TYPE "discussion_status" AS ENUM ('DRAFT', 'ACTIVE', 'CONCLUDED', 'ARCHIVED');
+-- CreateEnum (only if it doesn't exist)
+-- Note: evidence_standard and activity_level enums already exist from previous migrations
+DO $$ BEGIN
+    CREATE TYPE "discussion_status" AS ENUM ('DRAFT', 'ACTIVE', 'CONCLUDED', 'ARCHIVED');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- CreateTable
 CREATE TABLE "discussions" (
