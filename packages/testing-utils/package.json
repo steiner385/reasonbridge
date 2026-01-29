@@ -21,6 +21,14 @@
     "./assertions": {
       "types": "./dist/assertions/index.d.ts",
       "import": "./dist/assertions/index.js"
+    },
+    "./setup": {
+      "types": "./dist/setup/index.d.ts",
+      "import": "./dist/setup/index.js"
+    },
+    "./msw": {
+      "types": "./dist/msw/index.d.ts",
+      "import": "./dist/msw/index.js"
     }
   },
   "files": [
@@ -30,20 +38,28 @@
     "build": "tsc --build",
     "clean": "rm -rf dist .tsbuildinfo",
     "typecheck": "tsc --noEmit",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@reason-bridge/common": "workspace:*"
+    "@reason-bridge/common": "workspace:*",
+    "msw": "^2.7.0"
   },
   "devDependencies": {
     "@types/node": "20.17.12",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^2.1.0"
   },
   "peerDependencies": {
-    "@types/jest": ">=29.0.0"
+    "@types/jest": ">=29.0.0",
+    "vitest": ">=2.0.0"
   },
   "peerDependenciesMeta": {
     "@types/jest": {
+      "optional": true
+    },
+    "vitest": {
       "optional": true
     }
   },
