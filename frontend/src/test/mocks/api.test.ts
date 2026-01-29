@@ -11,8 +11,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { server } from './server';
 import { http, HttpResponse } from 'msw';
+import { server } from './server';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -169,7 +169,7 @@ describe('MSW Integration', () => {
         await fetch(`${API_BASE_URL}/custom-endpoint`);
         // If we reach here, the handler was not reset (test should fail)
         // But MSW doesn't throw by default, so we just verify the warning appears
-      } catch (error) {
+      } catch {
         // Network errors are expected for unhandled requests
       }
 
