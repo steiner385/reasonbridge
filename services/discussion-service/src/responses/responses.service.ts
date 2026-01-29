@@ -13,6 +13,14 @@ import type { ResponseDto, CitedSourceDto, UserSummaryDto } from './dto/response
 import { DiscussionLogger } from '../utils/logger.js';
 import { validateCitationUrl } from '../utils/ssrf-validator.js';
 
+/**
+ * T053 [US3] - Threaded response with nested replies
+ */
+export interface ThreadedResponse extends ResponseDetailDto {
+  replies: ThreadedResponse[];
+  depth: number;
+}
+
 @Injectable()
 export class ResponsesService {
   private readonly logger = new DiscussionLogger('ResponsesService');
@@ -627,6 +635,157 @@ export class ResponsesService {
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
     };
+  }
+
+  /**
+   * T052 [US3] - Reply to a specific response with parent validation
+   *
+   * Creates a reply to an existing response, automatically deriving the discussionId
+   * from the parent response and validating thread depth limits.
+   *
+   * Requirements:
+   * - Verify parent response exists and is not deleted
+   * - Inherit discussionId from parent
+   * - Check thread depth doesn't exceed limit (5 visual levels)
+   * - Rate limiting handled at controller level (10/min)
+   *
+   * @param parentResponseId - The ID of the response being replied to
+   * @param userId - The ID of the user creating the reply
+   * @param replyDto - The reply content and metadata
+   * @returns The created reply response
+   * @throws NotFoundException if parent response doesn't exist
+   * @throws BadRequestException if thread depth limit exceeded
+   */
+  async replyToResponse(
+    parentResponseId: string,
+    userId: string,
+    replyDto: { content: string; citations?: Array<{ url: string; title?: string }> },
+  ): Promise<ResponseDetailDto> {
+    // Fetch parent response to validate and get discussionId
+    const parentResponse = await this.prisma.response.findUnique({
+      where: { id: parentResponseId },
+      select: {
+        id: true,
+        discussionId: true,
+        deletedAt: true,
+        parentId: true,
+      },
+    });
+
+    if (!parentResponse) {
+      throw new NotFoundException(`Parent response with ID ${parentResponseId} not found`);
+    }
+
+    if (parentResponse.deletedAt) {
+      throw new BadRequestException('Cannot reply to a deleted response');
+    }
+
+    if (!parentResponse.discussionId) {
+      throw new BadRequestException('Parent response must belong to a discussion');
+    }
+
+    // Calculate thread depth to enforce limit (T054)
+    const depth = await this.calculateThreadDepth(parentResponseId);
+    const MAX_THREAD_DEPTH = 10; // Allow up to 10 levels, but UI will flatten after 5
+
+    if (depth >= MAX_THREAD_DEPTH) {
+      throw new BadRequestException(
+        `Thread depth limit exceeded (max ${MAX_THREAD_DEPTH} levels). ` +
+          'Please reply to a higher-level response.',
+      );
+    }
+
+    // Create the reply using the existing createResponseForDiscussion method
+    return this.createResponseForDiscussion(userId, {
+      discussionId: parentResponse.discussionId,
+      content: replyDto.content,
+      parentResponseId,
+      citations: replyDto.citations,
+    });
+  }
+
+  /**
+   * T054 [US3] - Calculate thread depth for a response
+   *
+   * Recursively traverses up the parent chain to determine how deep
+   * in the thread tree a response is.
+   *
+   * @param responseId - The ID of the response to calculate depth for
+   * @returns The depth (0 for top-level, 1 for first reply, etc.)
+   */
+  async calculateThreadDepth(responseId: string): Promise<number> {
+    let depth = 0;
+    let currentId: string | null = responseId;
+
+    while (currentId) {
+      const response: { parentId: string | null } | null = await this.prisma.response.findUnique({
+        where: { id: currentId },
+        select: { parentId: true },
+      });
+
+      if (!response) break;
+
+      if (response.parentId) {
+        depth++;
+        currentId = response.parentId;
+      } else {
+        break; // Reached top-level response
+      }
+    }
+
+    return depth;
+  }
+
+  /**
+   * T053 [US3] - Build recursive thread tree from flat response list
+   *
+   * Transforms a flat array of responses into a nested tree structure
+   * for display. Each response includes its direct replies as children.
+   *
+   * Requirements:
+   * - Maintain chronological order (oldest first) within each level
+   * - Calculate depth for each response
+   * - Handle orphaned responses gracefully (if parent is deleted)
+   *
+   * @param responses - Flat array of responses from database
+   * @returns Tree structure with responses and nested replies
+   */
+  buildThreadTree(responses: ResponseDetailDto[]): ThreadedResponse[] {
+    // Create a map for O(1) lookup
+    const responseMap = new Map<string, ThreadedResponse>();
+    const rootResponses: ThreadedResponse[] = [];
+
+    // Initialize all responses as threaded responses
+    responses.forEach((response) => {
+      responseMap.set(response.id, {
+        ...response,
+        replies: [],
+        depth: 0, // Will be calculated
+      });
+    });
+
+    // Build tree structure and calculate depths
+    responses.forEach((response) => {
+      const threadedResponse = responseMap.get(response.id)!;
+
+      if (response.parentResponseId) {
+        const parent = responseMap.get(response.parentResponseId);
+        if (parent) {
+          // Add as child to parent
+          parent.replies.push(threadedResponse);
+          // Calculate depth based on parent
+          threadedResponse.depth = parent.depth + 1;
+        } else {
+          // Orphaned response (parent deleted) - treat as root
+          rootResponses.push(threadedResponse);
+        }
+      } else {
+        // Top-level response
+        rootResponses.push(threadedResponse);
+      }
+    });
+
+    return rootResponses;
   }
 
   /**
