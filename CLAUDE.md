@@ -78,6 +78,50 @@ src/
 └── types/               # TypeScript type definitions
 ```
 
+### Backend Architecture (Microservices)
+
+The backend follows a microservices architecture using NestJS:
+
+```
+services/
+├── api-gateway/         # Central API gateway, routing, auth middleware
+├── user-service/        # User management, authentication, profiles
+├── discussion-service/  # Topics, propositions, responses, threading
+├── ai-service/          # AI-powered analysis (bias detection, common ground)
+├── moderation-service/  # Content moderation, appeals, reporting
+├── notification-service/# Real-time notifications, email, push
+├── fact-check-service/  # Claim verification, source validation
+└── recommendation-service/ # Content recommendations, discovery
+```
+
+**Service Communication:**
+- Synchronous: HTTP/REST between services via API Gateway
+- Asynchronous: Event-driven via Redis pub/sub and AWS SQS/SNS (LocalStack in dev)
+
+**Infrastructure Services:**
+- **PostgreSQL 15**: Primary database (Prisma ORM)
+- **Redis 7**: Caching, sessions, pub/sub
+- **LocalStack**: AWS services emulation (S3, SQS, SNS)
+
+### Shared Packages (Monorepo)
+
+```
+packages/
+├── common/              # Shared utilities, constants, types
+├── db-models/           # Prisma schema and database models
+├── event-schemas/       # Event type definitions for service communication
+├── ai-client/           # AI provider abstraction (OpenAI, Anthropic)
+├── shared/              # Cross-cutting concerns (logging, config)
+├── testing-utils/       # Shared test utilities
+└── test-utils/          # Additional test helpers
+```
+
+**Workspace Configuration:** `pnpm-workspace.yaml`
+- `packages/*` - Shared libraries
+- `services/*` - Backend microservices
+- `frontend` - React frontend
+- `e2e` - End-to-end tests
+
 ### Technology Decisions
 
 **Frontend Framework**: React 18
@@ -108,7 +152,7 @@ src/
 **Testing**:
 
 - Unit/Integration: Vitest 2.x (fast, ESM-native, Vite integration)
-- E2E: Playwright 1.40+ (cross-browser, reliable, great DX)
+- E2E: Playwright 1.58.x (cross-browser, reliable, great DX)
 - Coverage: @vitest/coverage-v8
 
 **Code Quality**:
@@ -369,7 +413,7 @@ npx playwright show-report
 
 The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E tests:
 
-- **Image**: `mcr.microsoft.com/playwright:v1.57.0-noble`
+- **Image**: `mcr.microsoft.com/playwright:v1.58.0-noble`
 - **Pre-installed**: @playwright/test, Chromium browser binaries (~400MB), system dependencies
 - **Benefits**: Eliminates browser downloads, prevents OOM kills (exit code 137), faster startup
 
@@ -401,6 +445,14 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Root cause**: Host system memory pressure causing Linux OOM killer to terminate Docker containers; E2E environment (7 Node.js services + postgres + redis + localstack + nginx + Playwright) consumed ~2.5-3GB unbounded, competing with other Jenkins builds
    - **Solution**: Added explicit memory limits to all docker-compose.e2e.yml services (postgres: 256m, redis: 128m, localstack: 512m, each Node.js service: 256m, nginx: 64m) to prevent bloat and ensure predictable resource usage (~3GB total + 4GB Playwright = 7GB max)
    - **Result**: Services cannot exceed limits, host OOM pressure eliminated, predictable memory footprint
+
+5. **Playwright Version Mismatch (Executable Not Found)** - Fixed 2026-01-28 14:20 UTC:
+   - PR #706: All 381 E2E tests failed in 1-2ms each with exit code 1 (not OOM)
+   - **Error**: `browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1208/...`
+   - **Root cause**: Project's `@playwright/test` was updated to v1.58.0 but Docker image was still v1.57.0; Playwright requires exact version match between npm package and Docker image
+   - **Solution**: Updated Docker image from `mcr.microsoft.com/playwright:v1.57.0-noble` to `v1.58.0-noble` in jenkins-lib
+   - **Result**: 312 E2E tests pass with normal execution times (200-250ms per test)
+   - **Lesson**: When updating `@playwright/test` version, always update the Docker image version in jenkins-lib to match
 
 ## Active Technologies
 
@@ -508,3 +560,4 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 - 001-rational-discussion-platform: Added TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend)
 - 2026-01-24: Updated CLAUDE.md with implemented architecture (issue #431)
+- 2026-01-28: Added backend microservices and shared packages documentation, fixed Playwright version to v1.58.0
