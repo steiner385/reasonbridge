@@ -48,6 +48,12 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip the testing-utils package itself - it IS the test utilities package
+  if [[ "$file" =~ packages/testing-utils/ ]] || [[ "$file" =~ packages/test-utils/ ]]; then
+    debug "Skipping test utilities package: $file"
+    continue
+  fi
+
   # Get staged content
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 

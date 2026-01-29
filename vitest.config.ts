@@ -18,6 +18,14 @@ export default defineConfig({
         __dirname,
         'packages/testing-utils/dist/index.js',
       ),
+      '@reason-bridge/testing-utils/setup': path.resolve(
+        __dirname,
+        'packages/testing-utils/dist/setup/index.js',
+      ),
+      '@reason-bridge/testing-utils/msw': path.resolve(
+        __dirname,
+        'packages/testing-utils/dist/msw/index.js',
+      ),
       // Prisma client alias - let Node resolve it from node_modules
       '@prisma/client': path.resolve(__dirname, 'node_modules/@prisma/client'),
     },
@@ -32,6 +40,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Shared test setup with MSW handlers
+    setupFiles: [path.resolve(__dirname, 'packages/testing-utils/dist/setup/index.js')],
     // Vitest 2.x: Inline dependencies for proper module resolution in pnpm workspaces
     server: {
       deps: {
