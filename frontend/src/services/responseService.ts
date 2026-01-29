@@ -14,6 +14,16 @@ export interface CreateResponseRequest {
   parentResponseId?: string;
 }
 
+/**
+ * T062 [US3] - Reply to response request
+ * Simplified request for replying to a specific response
+ * discussionId is inherited from parent response
+ */
+export interface ReplyToResponseRequest {
+  content: string;
+  citations?: CitationInput[];
+}
+
 class ResponseService {
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('accessToken');
@@ -36,6 +46,34 @@ class ResponseService {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to create response');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * T062 [US3] - Reply to a specific response
+   * Creates a threaded reply to an existing response
+   * The discussionId is automatically inherited from the parent response
+   *
+   * @param parentResponseId - The ID of the response being replied to
+   * @param data - Reply content and optional citations
+   * @returns The created reply
+   * @throws Error if parent response doesn't exist or thread depth limit exceeded
+   */
+  async replyToResponse(
+    parentResponseId: string,
+    data: ReplyToResponseRequest,
+  ): Promise<ResponseDetail> {
+    const response = await fetch(`${API_BASE_URL}/responses/${parentResponseId}/replies`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create reply');
     }
 
     return response.json();

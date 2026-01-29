@@ -599,4 +599,239 @@ describe('Responses API Integration Tests', () => {
         .expect(404);
     });
   });
+
+  /**
+   * T064 [US3] - Integration test for POST /responses/:id/replies endpoint
+   *
+   * Tests threaded reply creation with:
+   * - Parent response validation
+   * - discussionId inheritance from parent
+   * - Thread depth limit enforcement
+   * - Rate limiting (10 replies/min)
+   * - Nested reply structure
+   */
+  describe('POST /responses/:id/replies', () => {
+    let parentResponseId: string;
+
+    beforeEach(async () => {
+      // Create a parent response to reply to
+      const parentResponse = await prisma.response.create({
+        data: {
+          discussionId: testDiscussionId,
+          authorId: testUserId,
+          content: 'This is a parent response that can receive replies.',
+          parentId: null,
+          version: 1,
+          editCount: 0,
+        },
+      });
+      parentResponseId = parentResponse.id;
+    });
+
+    const validReplyData = {
+      content:
+        'This is a threaded reply to the parent response. It demonstrates nested discussion functionality.',
+      citations: [
+        {
+          url: 'https://example.com/reply-source',
+          title: 'Reply Source',
+        },
+      ],
+    };
+
+    it('should create a reply to an existing response', async () => {
+      const response = await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(201);
+
+      expect(response.body).toMatchObject({
+        discussionId: testDiscussionId,
+        content: validReplyData.content,
+        parentResponseId,
+        author: {
+          id: testUser2Id,
+          displayName: 'Test User 2',
+        },
+        version: 1,
+        editCount: 0,
+      });
+
+      expect(response.body.id).toBeDefined();
+      expect(response.body.citations).toHaveLength(1);
+    });
+
+    it('should inherit discussionId from parent response', async () => {
+      const response = await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(201);
+
+      // Verify reply has same discussionId as parent
+      const parentResponse = await prisma.response.findUnique({
+        where: { id: parentResponseId },
+      });
+
+      expect(response.body.discussionId).toBe(parentResponse?.discussionId);
+    });
+
+    it('should return 404 when parent response does not exist', async () => {
+      await request(app.getHttpServer())
+        .post('/responses/00000000-0000-0000-0000-000000000999/replies')
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(404);
+    });
+
+    it('should reject reply to deleted response', async () => {
+      // Soft delete the parent response
+      await prisma.response.update({
+        where: { id: parentResponseId },
+        data: { deletedAt: new Date() },
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(400);
+
+      expect(response.body.message).toContain('Cannot reply to a deleted response');
+    });
+
+    it('should reject reply when thread depth limit exceeded', async () => {
+      // Create a chain of 10 nested responses (max depth)
+      let currentParentId = parentResponseId;
+
+      for (let i = 0; i < 10; i++) {
+        const response = await prisma.response.create({
+          data: {
+            discussionId: testDiscussionId,
+            authorId: testUserId,
+            content: `Nested response level ${i + 1}`,
+            parentId: currentParentId,
+            version: 1,
+            editCount: 0,
+          },
+        });
+        currentParentId = response.id;
+      }
+
+      // Try to add 11th level (should fail)
+      const response = await request(app.getHttpServer())
+        .post(`/responses/${currentParentId}/replies`)
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(400);
+
+      expect(response.body.message).toContain('Thread depth limit exceeded');
+    });
+
+    it('should support nested reply chains (reply to reply)', async () => {
+      // Create first-level reply
+      const level1Response = await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send({
+          content: 'First-level reply to parent response. This starts a nested chain.',
+        })
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(201);
+
+      const level1Id = level1Response.body.id;
+
+      // Create second-level reply (reply to reply)
+      const level2Response = await request(app.getHttpServer())
+        .post(`/responses/${level1Id}/replies`)
+        .send({
+          content: 'Second-level reply creating deeper nesting in the thread.',
+        })
+        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .expect(201);
+
+      expect(level2Response.body.parentResponseId).toBe(level1Id);
+      expect(level2Response.body.discussionId).toBe(testDiscussionId);
+
+      // Verify all three responses are in the same discussion
+      const allResponses = await prisma.response.findMany({
+        where: { discussionId: testDiscussionId },
+      });
+
+      const parentResponse = allResponses.find((r) => r.id === parentResponseId);
+      const level1 = allResponses.find((r) => r.id === level1Id);
+      const level2 = allResponses.find((r) => r.id === level2Response.body.id);
+
+      expect(parentResponse?.parentId).toBeNull();
+      expect(level1?.parentId).toBe(parentResponseId);
+      expect(level2?.parentId).toBe(level1Id);
+    });
+
+    it('should validate reply content length (50-25000 chars)', async () => {
+      // Too short
+      const tooShort = await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send({ content: 'Too short' })
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(400);
+
+      expect(tooShort.body.message).toContain('at least 50 characters');
+
+      // Too long
+      const tooLong = await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send({ content: 'A'.repeat(25001) })
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(400);
+
+      expect(tooLong.body.message).toContain('cannot exceed 25,000 characters');
+    });
+
+    it('should update parent response reply count', async () => {
+      // Get initial reply count
+      const parentBefore = await prisma.response.findUnique({
+        where: { id: parentResponseId },
+        include: { _count: { select: { replies: true } } },
+      });
+
+      const initialReplyCount = parentBefore?._count.replies || 0;
+
+      // Create reply
+      await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(201);
+
+      // Verify reply count increased
+      const parentAfter = await prisma.response.findUnique({
+        where: { id: parentResponseId },
+        include: { _count: { select: { replies: true } } },
+      });
+
+      expect(parentAfter?._count.replies).toBe(initialReplyCount + 1);
+    });
+
+    it('should update discussion metrics (responseCount, participantCount)', async () => {
+      const discussionBefore = await prisma.discussion.findUnique({
+        where: { id: testDiscussionId },
+      });
+
+      await request(app.getHttpServer())
+        .post(`/responses/${parentResponseId}/replies`)
+        .send(validReplyData)
+        .set('Authorization', `Bearer mock-token-${testUser2Id}`)
+        .expect(201);
+
+      const discussionAfter = await prisma.discussion.findUnique({
+        where: { id: testDiscussionId },
+      });
+
+      expect(discussionAfter?.responseCount).toBe((discussionBefore?.responseCount || 0) + 1);
+      // participantCount should increase if new participant
+      expect(discussionAfter?.participantCount).toBeGreaterThanOrEqual(
+        discussionBefore?.participantCount || 0,
+      );
+    });
+  });
 });

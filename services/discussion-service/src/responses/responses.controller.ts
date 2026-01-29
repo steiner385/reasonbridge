@@ -15,6 +15,7 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ResponsesService } from './responses.service.js';
 import { ContentModerationService } from './services/content-moderation.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
+import { ReplyToResponseDto } from './dto/reply-to-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from './dto/moderate-response.dto.js';
@@ -70,6 +71,54 @@ export class ResponsesController {
     const authorId = '00000000-0000-0000-0000-000000000000'; // Placeholder
 
     return this.responsesService.createResponse(topicId, authorId, createResponseDto);
+  }
+
+  /**
+   * T055 [US3] POST /responses/:responseId/replies
+   * Create a threaded reply to a specific response
+   *
+   * Requirements (FR-019, FR-020, FR-032):
+   * - Verify parent response exists and is not deleted
+   * - Inherit discussionId from parent response
+   * - Enforce thread depth limit (max 10 levels, UI flattens after 5)
+   * - Rate limiting: 10 replies/min per user
+   * - Validate content (50-25000 chars)
+   *
+   * @param responseId - The ID of the parent response to reply to
+   * @param replyDto - The reply content and optional citations
+   * @returns The created reply
+   * @throws NotFoundException if parent response doesn't exist
+   * @throws BadRequestException if thread depth limit exceeded
+   */
+  @Post('responses/:responseId/replies')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 replies per minute
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Reply to a specific response' })
+  @ApiResponse({
+    status: 201,
+    description: 'Reply created successfully',
+    type: ResponseDetailDto,
+  })
+  @ApiResponse({ status: 404, description: 'Parent response not found' })
+  @ApiResponse({ status: 400, description: 'Thread depth limit exceeded or validation error' })
+  @ApiResponse({ status: 429, description: 'Rate limit exceeded (10 replies/min)' })
+  async replyToResponse(
+    @Param('responseId') responseId: string,
+    @Body() replyDto: ReplyToResponseDto,
+  ): Promise<ResponseDetailDto> {
+    // TODO: Extract userId from JWT token when auth is implemented
+    // For now, using a placeholder. This should be replaced with:
+    // @Req() request: AuthRequest
+    // const userId = request.user!.id;
+    const userId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+
+    // Transform DTO to service format
+    const replyData = {
+      content: replyDto.content,
+      citations: replyDto.citations?.map((c) => ({ url: c.url, title: c.title })),
+    };
+
+    return this.responsesService.replyToResponse(responseId, userId, replyData);
   }
 
   /**
