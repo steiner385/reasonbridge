@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@reason-bridge/common": "workspace:*",
-    "@prisma/client": "6.3.1",
+    "@reason-bridge/db-models": "workspace:*",
     "msw": "^2.7.0"
   },
   "devDependencies": {

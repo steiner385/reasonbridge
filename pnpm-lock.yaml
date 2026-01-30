@@ -301,12 +301,12 @@ importers:
 
   packages/testing-utils:
     dependencies:
-      '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
+      '@reason-bridge/db-models':
+        specifier: workspace:*
+        version: link:../db-models
       '@types/jest':
         specifier: '>=29.0.0'
         version: 30.0.0
