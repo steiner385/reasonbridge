@@ -304,6 +304,9 @@ importers:
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
+      '@reason-bridge/db-models':
+        specifier: workspace:*
+        version: link:../db-models
       '@types/jest':
         specifier: '>=29.0.0'
         version: 30.0.0
