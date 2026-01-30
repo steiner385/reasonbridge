@@ -33,6 +33,10 @@
     "./prisma": {
       "types": "./dist/prisma/index.d.ts",
       "import": "./dist/prisma/index.js"
+    },
+    "./pact": {
+      "types": "./dist/pact/index.d.ts",
+      "import": "./dist/pact/index.js"
     }
   },
   "files": [
@@ -47,6 +51,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@pact-foundation/pact": "^13.2.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "msw": "^2.7.0"
