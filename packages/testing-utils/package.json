@@ -29,6 +29,10 @@
     "./msw": {
       "types": "./dist/msw/index.d.ts",
       "import": "./dist/msw/index.js"
+    },
+    "./prisma": {
+      "types": "./dist/prisma/index.d.ts",
+      "import": "./dist/prisma/index.js"
     }
   },
   "files": [
@@ -44,6 +48,7 @@
   },
   "dependencies": {
     "@reason-bridge/common": "workspace:*",
+    "@prisma/client": "6.3.1",
     "msw": "^2.7.0"
   },
   "devDependencies": {
