@@ -45,6 +45,8 @@
     "@vitest/coverage-v8": "2.1.9",
     "allure-playwright": "^3.0.0",
     "autoprefixer": "10.4.23",
+    "axe-core": "^4.11.1",
+    "axe-playwright": "^2.2.2",
     "eslint": "^9.18.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
