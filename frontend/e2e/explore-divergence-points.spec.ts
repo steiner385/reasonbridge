@@ -509,6 +509,13 @@ test.describe('Explore Divergence Points', () => {
   });
 
   test.skip('should update divergence points in real-time via WebSocket', async ({ page }) => {
+    // TODO: Implement WebSocket mocking infrastructure
+    // Requirements:
+    // 1. Add WebSocket mock/stub in Playwright config
+    // 2. Simulate WebSocket events for divergence updates
+    // 3. Ensure CommonGroundAnalysis seed data exists for test topics
+    // See: /home/tony/.claude/plans/virtual-cooking-fiddle.md Category 3
+
     // Setup WebSocket mock
     const wsMock = await setupWebSocketMock(page);
 

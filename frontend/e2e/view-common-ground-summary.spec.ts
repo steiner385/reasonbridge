@@ -380,6 +380,12 @@ test.describe('View Common Ground Summary', () => {
   test.skip('should update common ground summary in real-time when new responses are added', async ({
     page,
   }) => {
+    // TODO: Implement WebSocket mocking infrastructure
+    // Requirements:
+    // 1. WebSocket event simulation for common ground updates
+    // 2. CommonGroundAnalysis seed data for test topics
+    // 3. Verify real-time update mechanism in CommonGroundSummary component
+
     // Setup WebSocket mock
     const wsMock = await setupWebSocketMock(page);
 
