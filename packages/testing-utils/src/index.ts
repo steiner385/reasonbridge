@@ -23,6 +23,7 @@
 export * from './mocks/index.js';
 export * from './fixtures/index.js';
 export * from './assertions/index.js';
+export * from './db-cleanup.js';
 
 // Re-export commonly used MSW types for convenience
 export type { RequestHandler } from 'msw';
