@@ -123,6 +123,17 @@ describe('Pact Publisher Configuration', () => {
     });
 
     it('should use defaults when env vars not set', () => {
+      // Clear any env vars that might be set in CI
+      delete process.env['PACT_BROKER_URL'];
+      delete process.env['PACT_BROKER_TOKEN'];
+      delete process.env['PACT_CONSUMER_VERSION'];
+      delete process.env['PACT_BRANCH'];
+      delete process.env['PACT_TAGS'];
+      delete process.env['PACT_FILES_DIR'];
+      delete process.env['BUILD_URL'];
+      delete process.env['GIT_COMMIT'];
+      delete process.env['GIT_BRANCH'];
+
       const options = createPactPublisherFromEnv();
 
       expect(options.pactBrokerUrl).toBe('');

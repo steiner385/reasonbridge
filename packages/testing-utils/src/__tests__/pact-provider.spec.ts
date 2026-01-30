@@ -217,6 +217,18 @@ describe('Pact Provider Configuration', () => {
     });
 
     it('should use defaults when env vars not set', () => {
+      // Clear any env vars that might be set in CI
+      delete process.env['PACT_PROVIDER_NAME'];
+      delete process.env['PACT_PROVIDER_URL'];
+      delete process.env['PACT_BROKER_URL'];
+      delete process.env['PACT_BROKER_TOKEN'];
+      delete process.env['PACT_PROVIDER_VERSION'];
+      delete process.env['PACT_PROVIDER_BRANCH'];
+      delete process.env['PACT_PUBLISH_RESULTS'];
+      delete process.env['PACT_LOG_LEVEL'];
+      delete process.env['GIT_COMMIT'];
+      delete process.env['GIT_BRANCH'];
+
       const options = createProviderVerifierFromEnv();
 
       expect(options.provider).toBe('unknown-provider');
