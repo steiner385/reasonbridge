@@ -1,5 +1,6 @@
 .PHONY: setup dev build test test-unit test-integration test-e2e lint lint-fix clean \
-        docker-up docker-down docker-test-up docker-test-down db-migrate db-studio logs
+        docker-up docker-down docker-test-up docker-test-down docker\:test-up docker\:test-down \
+        db-migrate db-studio logs
 
 # Development
 setup:
@@ -57,6 +58,11 @@ docker-test-up:
 
 docker-test-down:
 	docker-compose -f docker-compose.test.yml down -v
+
+# Alias targets with colon notation (escape colons in make)
+docker\:test-up: docker-test-up
+
+docker\:test-down: docker-test-down
 
 # Database
 db-migrate:
