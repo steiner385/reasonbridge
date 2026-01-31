@@ -99,7 +99,8 @@ test.describe('OAuth Signup Flow', () => {
         await page.waitForURL(/\/auth\/callback\/google/, { timeout: 10000 });
 
         // AuthCallbackPage will show error and redirect to login
-        await page.waitForURL(/\/login/, { timeout: 10000 });
+        // Firefox can be slower with OAuth redirects, use longer timeout
+        await page.waitForURL(/\/login/, { timeout: 30000 });
 
         // Error should be visible (callback page shows error before redirect)
         // or we're on login page after error redirect
