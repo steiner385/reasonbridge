@@ -86,6 +86,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('TrustBadge Component Display', () => {
     test('should display verification level on user profiles', async ({ page }) => {
+      // Firefox can be significantly slower (31.4s+ observed) for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       // Verify verification level is displayed
@@ -122,6 +124,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('TrustScoreDisplay Component', () => {
     test('should display three trust score metrics on user profile', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       // Check for Mayer ABI three factors
@@ -135,6 +139,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display trust scores as percentages (0-100)', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       const scoreDisplay = page.locator('[data-testid="trust-score-display"]');
@@ -146,6 +152,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display all three trust dimensions with labels', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       // Check for dimension labels
@@ -193,6 +201,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('ProfilePage Integration with Trust Indicators', () => {
     test('should display user profile with trust information', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       // Check page structure - should have profile header
@@ -205,6 +215,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display member since date', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       // Should show member since date
@@ -215,6 +227,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('Accessibility of Trust Indicators', () => {
     test('trust score display should have accessible content', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       const scoreDisplay = page.locator('[data-testid="trust-score-display"]');
@@ -227,6 +241,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('verification badge should have accessible title when visible', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       const trustBadge = page.locator('[data-testid="trust-badge"]');
@@ -241,6 +257,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('Cross-browser Trust Indicator Consistency', () => {
     test('trust scores should render correctly on mobile viewport', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await page.setViewportSize({ width: 375, height: 667 });
       await registerLoginAndGoToProfile(page);
 
@@ -254,6 +272,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('trust scores should render correctly on tablet viewport', async ({ page }) => {
+      // Firefox can be significantly slower for this multi-step flow
+      test.setTimeout(60000);
       await page.setViewportSize({ width: 768, height: 1024 });
       await registerLoginAndGoToProfile(page);
 
