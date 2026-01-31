@@ -71,7 +71,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
     // Step 3: Navigate to profile page and wait for user data to load
     await page.goto('/profile');
-    await page.waitForLoadState('networkidle');
+    // Firefox can be slower to reach networkidle state, use longer timeout
+    await page.waitForLoadState('networkidle', { timeout: 45000 });
 
     // Wait for the profile page to finish loading user data
     // The "My Profile" heading indicates authenticated user profile is loaded
