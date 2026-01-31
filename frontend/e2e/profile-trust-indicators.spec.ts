@@ -97,6 +97,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     test('should display verified human badge only for verified users', async ({ page }) => {
+      // Firefox can be significantly slower (31.5s+ observed) for this multi-step flow
+      test.setTimeout(60000);
       await registerLoginAndGoToProfile(page);
 
       // Check verification level
