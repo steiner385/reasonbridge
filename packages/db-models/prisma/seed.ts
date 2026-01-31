@@ -1,8 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { seedDemo } from './seed/demo-fixtures';
 
 const prisma = new PrismaClient();
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const isDemoSeed = args.includes('--demo');
+const isForceReset = args.includes('--force');
+
 async function main() {
+  // Handle --demo flag for demo environment seeding
+  if (isDemoSeed) {
+    console.log('🎭 Demo Environment Seed Mode');
+    console.log('');
+    await seedDemo(prisma, { force: isForceReset });
+    return;
+  }
+
   console.log('🌱 Seeding E2E database...');
 
   // Create test users

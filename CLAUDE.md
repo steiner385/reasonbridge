@@ -95,10 +95,12 @@ services/
 ```
 
 **Service Communication:**
+
 - Synchronous: HTTP/REST between services via API Gateway
 - Asynchronous: Event-driven via Redis pub/sub and AWS SQS/SNS (LocalStack in dev)
 
 **Infrastructure Services:**
+
 - **PostgreSQL 15**: Primary database (Prisma ORM)
 - **Redis 7**: Caching, sessions, pub/sub
 - **LocalStack**: AWS services emulation (S3, SQS, SNS)
@@ -117,6 +119,7 @@ packages/
 ```
 
 **Workspace Configuration:** `pnpm-workspace.yaml`
+
 - `packages/*` - Shared libraries
 - `services/*` - Backend microservices
 - `frontend` - React frontend
@@ -349,6 +352,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 **Important Note on jenkins/ci:**
 
 The `jenkins/ci` check represents the overall Jenkins pipeline result and may show UNSTABLE/FAILURE when:
+
 - E2E tests are skipped on feature branches
 - Allure/JUnit plugins mark builds as unstable despite passing tests
 - Any post-success/failure stage fails
@@ -376,6 +380,7 @@ gh api repos/steiner385/reasonbridge/branches/main/protection/required_status_ch
 2. **2026-01-28 - PR #709**: Hotfix PR merged at 20:27:43Z with only three checks (lint, unit-tests, integration) passing. The `jenkins/ci` check was still pending and later failed at 20:33:31Z. This incident revealed that while individual stages passed, the overall pipeline could still fail in later stages. Added `jenkins/ci` as fourth required check to ensure complete pipeline success before merge.
 
 **Configuration Evolution:**
+
 - 2026-01-24: Added jenkins/lint, jenkins/unit-tests, jenkins/integration (removed jenkins/ci)
 - 2026-01-28: Re-added jenkins/ci as fourth required check for full pipeline validation
 
@@ -421,21 +426,18 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Historical Issues:**
 
 1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
-
    - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
    - **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
    - **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
    - **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
 
 2. **DNS Resolution (net::ERR_NAME_NOT_RESOLVED)** - Fixed 2026-01-24 16:05 UTC:
-
    - PR #672 build #1: 14 tests in view-common-ground-summary.spec.ts failed with `net::ERR_NAME_NOT_RESOLVED at http://frontend/topics`
    - **Root cause**: PLAYWRIGHT_BASE_URL environment variable not passed correctly to docker exec process
    - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
    - **Result**: All 14 tests now resolve correct baseURL for navigation
 
 3. **Port Already Allocated (E2E Start Failure)** - Fixed 2026-01-24 16:27 UTC:
-
    - PR #672 build #2: Docker Compose failed with `Bind for 0.0.0.0:3004 failed: port is already allocated`
    - **Root cause**: Crashed/killed containers leave processes holding E2E ports; aggressive cleanup only removed containers by name, not port-based processes
    - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
@@ -471,6 +473,9 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Lesson**: E2E stability requires balancing test coverage with resource constraints; prefer fewer reliable tests over many flaky tests
 
 ## Active Technologies
+
+- TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend) + NestJS (backend services), Prisma 6.3.1 (ORM), AWS SDK v3 (Bedrock), React 18 + Vite (011-demo-environment)
+- PostgreSQL 15 (primary), Redis 7 (caching) (011-demo-environment)
 
 - **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
 - **PostgreSQL 15** - Primary database with Prisma ORM
@@ -552,19 +557,16 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 ### Debugging Workflow
 
 1. **Identify the Error**:
-
    - Read error message completely
    - Check file and line number
    - Review recent changes
 
 2. **Reproduce Locally**:
-
    - Pull latest changes
    - Install dependencies
    - Run the failing command locally
 
 3. **Fix and Verify**:
-
    - Make minimal fix
    - Run tests to verify fix
    - Ensure no regressions
@@ -583,7 +585,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
+- 011-demo-environment: Added TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend) + NestJS (backend services), Prisma 6.3.1 (ORM), AWS SDK v3 (Bedrock), React 18 + Vite
+
 - **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3
 - **2026-01-28**: Added backend microservices and shared packages documentation, fixed Playwright version to v1.58.0
-- **2026-01-24**: Updated CLAUDE.md with implemented architecture (issue #431)
-- **2026-01-24**: Fixed E2E infrastructure issues (OOM, DNS, port conflicts, memory limits)

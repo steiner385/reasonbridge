@@ -5,6 +5,14 @@ import {
   DemoDiscussionsResponseDto,
   ViewsSpectrumDto,
 } from './dto/demo-discussion.dto.js';
+import { DemoCredentialHintDto, DemoCredentialsResponseDto } from './dto/demo-credentials.dto.js';
+import {
+  DemoPersonaDto,
+  DemoPersonasResponseDto,
+  TrustScoreDto,
+  MoralFoundationProfileDto,
+  ActivityStatsDto,
+} from './dto/demo-persona.dto.js';
 
 /**
  * Service for managing demo discussions displayed on the landing page
@@ -247,5 +255,247 @@ export class DemoService {
         error instanceof Error ? error.stack : String(error),
       );
     }
+  }
+
+  /**
+   * Get demo credential hints for all personas
+   * Returns safe hints without exposing actual passwords
+   *
+   * @returns Credential hints with password pattern
+   */
+  async getDemoCredentials(): Promise<DemoCredentialsResponseDto> {
+    this.logger.log('GET /demo/credentials - returning credential hints');
+
+    const credentials: DemoCredentialHintDto[] = [
+      {
+        displayName: 'Admin Adams',
+        role: 'Admin',
+        email: 'demo-admin@reasonbridge.demo',
+        passwordHint: 'Demo + Admin + Year + !',
+        description: 'Full admin access: user management, moderation queue, system settings',
+      },
+      {
+        displayName: 'Mod Martinez',
+        role: 'Moderator',
+        email: 'demo-mod@reasonbridge.demo',
+        passwordHint: 'Demo + Mod + Year + !',
+        description: 'Moderation workflows: content review, appeals handling, user warnings',
+      },
+      {
+        displayName: 'Alice Anderson',
+        role: 'Power User',
+        email: 'demo-alice@reasonbridge.demo',
+        passwordHint: 'Demo + Alice + Year + !',
+        description:
+          'High engagement: many responses, propositions, and common ground contributions',
+      },
+      {
+        displayName: 'Bob Builder',
+        role: 'Regular User',
+        email: 'demo-bob@reasonbridge.demo',
+        passwordHint: 'Demo + Bob + Year + !',
+        description: 'Typical user experience: moderate activity, balanced viewpoints',
+      },
+      {
+        displayName: 'New User',
+        role: 'New User',
+        email: 'demo-new@reasonbridge.demo',
+        passwordHint: 'Demo + New + Year + !',
+        description: 'Fresh account: onboarding experience, first-time user flow',
+      },
+    ];
+
+    return {
+      credentials,
+      passwordPattern: 'Demo{Role}2026! (e.g., DemoAdmin2026!)',
+      warning: 'Demo credentials are blocked in production environments',
+    };
+  }
+
+  /**
+   * Get detailed information about demo personas
+   * Returns persona details, trust scores, and moral foundation profiles
+   *
+   * @param role - Optional role filter
+   * @returns Demo persona details
+   */
+  async getDemoPersonas(role?: string): Promise<DemoPersonasResponseDto> {
+    this.logger.log(`GET /demo/personas - role filter: ${role || 'none'}`);
+
+    const allPersonas: DemoPersonaDto[] = [
+      {
+        id: '11111111-0000-4000-8000-000000000001',
+        displayName: 'Admin Adams',
+        email: 'demo-admin@reasonbridge.demo',
+        role: 'admin',
+        roleLabel: 'Administrator',
+        description: 'Showcase admin features, moderation queue, user management',
+        verificationLevel: 'VERIFIED_HUMAN',
+        trustScore: {
+          ability: 0.95,
+          benevolence: 0.95,
+          integrity: 0.95,
+          composite: 0.95,
+        },
+        moralFoundationProfile: {
+          care: 0.75,
+          fairness: 0.85,
+          loyalty: 0.7,
+          authority: 0.8,
+          sanctity: 0.65,
+          liberty: 0.75,
+        },
+        activityStats: {
+          topicsCreated: 3,
+          responsesWritten: 8,
+          alignmentsRecorded: 15,
+          activityLevel: 'high',
+        },
+        capabilities: [
+          'User management',
+          'Moderation queue access',
+          'System settings',
+          'Analytics dashboard',
+          'Content removal',
+        ],
+      },
+      {
+        id: '11111111-0000-4000-8000-000000000002',
+        displayName: 'Mod Martinez',
+        email: 'demo-mod@reasonbridge.demo',
+        role: 'moderator',
+        roleLabel: 'Moderator',
+        description: 'Demonstrate moderation workflows, appeals handling',
+        verificationLevel: 'VERIFIED_HUMAN',
+        trustScore: {
+          ability: 0.9,
+          benevolence: 0.9,
+          integrity: 0.9,
+          composite: 0.9,
+        },
+        moralFoundationProfile: {
+          care: 0.8,
+          fairness: 0.9,
+          loyalty: 0.75,
+          authority: 0.7,
+          sanctity: 0.6,
+          liberty: 0.65,
+        },
+        activityStats: {
+          topicsCreated: 2,
+          responsesWritten: 12,
+          alignmentsRecorded: 12,
+          activityLevel: 'high',
+        },
+        capabilities: ['Content moderation', 'Appeals review', 'User warnings', 'Report handling'],
+      },
+      {
+        id: '11111111-0000-4000-8000-000000000003',
+        displayName: 'Alice Anderson',
+        email: 'demo-alice@reasonbridge.demo',
+        role: 'power_user',
+        roleLabel: 'Power User',
+        description: 'Active participant, high engagement, progressive viewpoints',
+        verificationLevel: 'ENHANCED',
+        trustScore: {
+          ability: 0.85,
+          benevolence: 0.85,
+          integrity: 0.85,
+          composite: 0.85,
+        },
+        moralFoundationProfile: {
+          care: 0.9,
+          fairness: 0.85,
+          loyalty: 0.55,
+          authority: 0.45,
+          sanctity: 0.4,
+          liberty: 0.85,
+        },
+        activityStats: {
+          topicsCreated: 4,
+          responsesWritten: 18,
+          alignmentsRecorded: 25,
+          activityLevel: 'very_high',
+        },
+        capabilities: [
+          'Create topics',
+          'Full response capabilities',
+          'Proposition voting',
+          'Profile customization',
+        ],
+      },
+      {
+        id: '11111111-0000-4000-8000-000000000004',
+        displayName: 'Bob Builder',
+        email: 'demo-bob@reasonbridge.demo',
+        role: 'regular_user',
+        roleLabel: 'Regular User',
+        description: 'Typical user experience, moderate activity, balanced views',
+        verificationLevel: 'BASIC',
+        trustScore: {
+          ability: 0.7,
+          benevolence: 0.7,
+          integrity: 0.7,
+          composite: 0.7,
+        },
+        moralFoundationProfile: {
+          care: 0.65,
+          fairness: 0.7,
+          loyalty: 0.75,
+          authority: 0.7,
+          sanctity: 0.65,
+          liberty: 0.6,
+        },
+        activityStats: {
+          topicsCreated: 1,
+          responsesWritten: 10,
+          alignmentsRecorded: 20,
+          activityLevel: 'medium',
+        },
+        capabilities: ['Create topics', 'Basic responses', 'Proposition voting'],
+      },
+      {
+        id: '11111111-0000-4000-8000-000000000005',
+        displayName: 'New User',
+        email: 'demo-new@reasonbridge.demo',
+        role: 'new_user',
+        roleLabel: 'New User',
+        description: 'Onboarding experience, first-time user flow, limited history',
+        verificationLevel: 'BASIC',
+        trustScore: {
+          ability: 0.5,
+          benevolence: 0.5,
+          integrity: 0.5,
+          composite: 0.5,
+        },
+        moralFoundationProfile: {
+          care: 0.5,
+          fairness: 0.5,
+          loyalty: 0.5,
+          authority: 0.5,
+          sanctity: 0.5,
+          liberty: 0.5,
+        },
+        activityStats: {
+          topicsCreated: 0,
+          responsesWritten: 4,
+          alignmentsRecorded: 5,
+          activityLevel: 'low',
+        },
+        capabilities: ['Limited responses', 'Basic voting', 'Profile setup'],
+      },
+    ];
+
+    // Filter by role if specified
+    const filteredPersonas = role ? allPersonas.filter((p) => p.role === role) : allPersonas;
+
+    return {
+      personas: filteredPersonas,
+      count: filteredPersonas.length,
+      description:
+        'Demo personas represent different user types and roles. ' +
+        'Each has unique trust scores, moral foundation profiles, and activity levels ' +
+        'to demonstrate the full range of platform functionality.',
+    };
   }
 }

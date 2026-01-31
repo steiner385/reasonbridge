@@ -5,6 +5,7 @@ import { AiModule } from './ai/ai.module.js';
 import { FeedbackModule } from './feedback/feedback.module.js';
 import { SuggestionsModule } from './suggestions/suggestions.module.js';
 import { CommonGroundModule } from './common-ground/common-ground.module.js';
+import { DemoAIModule } from './demo/demo-ai.module.js';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CommonGroundModule } from './common-ground/common-ground.module.js';
     FeedbackModule,
     SuggestionsModule,
     CommonGroundModule,
+    DemoAIModule,
   ],
   controllers: [],
   providers: [],
