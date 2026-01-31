@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
+import { FeedbackCacheService } from '../cache/feedback-cache.service.js';
 import {
   RequestFeedbackDto,
   FeedbackResponseDto,
@@ -14,9 +15,12 @@ import { Prisma } from '@reason-bridge/db-models';
  */
 @Injectable()
 export class FeedbackService {
+  private readonly logger = new Logger(FeedbackService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly analyzer: ResponseAnalyzerService,
+    private readonly feedbackCache: FeedbackCacheService,
   ) {}
 
   /**
@@ -34,11 +38,38 @@ export class FeedbackService {
       throw new NotFoundException(`Response with ID ${dto.responseId} not found`);
     }
 
-    // Generate AI feedback using Bedrock
-    const aiAnalysis = await this.generateFeedback(dto.content);
+    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
+
+    // Check cache first
+    const cachedResult = await this.feedbackCache.getCachedFeedback(dto.content, sensitivity);
+
+    let aiAnalysis;
+    if (cachedResult) {
+      this.logger.debug(`Using cached feedback for response ${dto.responseId}`);
+      aiAnalysis = {
+        type: cachedResult.type,
+        subtype: cachedResult.subtype ?? undefined,
+        suggestionText: cachedResult.suggestionText,
+        reasoning: cachedResult.reasoning,
+        confidenceScore: cachedResult.confidenceScore,
+        educationalResources: cachedResult.educationalResources ?? undefined,
+      };
+    } else {
+      // Generate AI feedback using analyzers
+      aiAnalysis = await this.generateFeedback(dto.content);
+
+      // Cache the result for future requests
+      await this.feedbackCache.cacheFeedback(dto.content, sensitivity, {
+        type: aiAnalysis.type,
+        subtype: aiAnalysis.subtype ?? null,
+        suggestionText: aiAnalysis.suggestionText,
+        reasoning: aiAnalysis.reasoning,
+        confidenceScore: aiAnalysis.confidenceScore,
+        educationalResources: aiAnalysis.educationalResources ?? null,
+      });
+    }
 
     // Apply sensitivity filtering
-    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
     const minThreshold = this.getConfidenceThreshold(sensitivity);
     const shouldDisplay = aiAnalysis.confidenceScore >= minThreshold;
 
