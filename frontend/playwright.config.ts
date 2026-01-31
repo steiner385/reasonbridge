@@ -21,13 +21,21 @@ export default defineConfig({
   retries: 0,
   /* Serialize tests in CI to prevent OOM - single worker uses less peak memory */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['list'],
-    ['junit', { outputFile: '../coverage/e2e-junit.xml' }],
-    ['allure-playwright', { outputFolder: 'allure-results' }],
-  ],
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters
+   * In CI, skip allure-playwright to avoid npm install overhead during E2E startup
+   */
+  reporter: process.env.CI
+    ? [
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+        ['list'],
+        ['junit', { outputFile: 'playwright-report/junit.xml' }],
+      ]
+    : [
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+        ['list'],
+        ['junit', { outputFile: '../coverage/e2e-junit.xml' }],
+        ['allure-playwright', { outputFolder: 'allure-results' }],
+      ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
