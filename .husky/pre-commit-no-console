@@ -83,6 +83,12 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip load-tests/ folder - k6 load tests need console output for results
+  if [[ "$file" =~ ^load-tests/ ]]; then
+    debug "Skipping load test file: $file"
+    continue
+  fi
+
   # Get staged content and check for problematic console statements
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 
