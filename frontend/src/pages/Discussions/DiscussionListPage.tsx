@@ -116,6 +116,7 @@ export function DiscussionListPage() {
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-700">Sort by:</span>
             <select
+              aria-label="Sort by"
               value={filters.sortBy}
               onChange={(e) =>
                 handleSortChange(e.target.value as 'lastActivityAt' | 'createdAt' | 'responseCount')
