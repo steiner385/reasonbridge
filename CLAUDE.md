@@ -275,7 +275,8 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 **Infrastructure:**
 
-- Master + 8 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
+- Master + 3 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
+- Agent allocation: runner-1 and runner-2 (4GB each, general tasks), runner-3 (6GB, E2E dedicated)
 - Start/stop: `cd /home/tony/jenkins/docker-compose && docker compose up -d` / `docker compose down`
 - Agent secrets configured in Docker Compose `.env`
 
@@ -454,12 +455,29 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Result**: 312 E2E tests pass with normal execution times (200-250ms per test)
    - **Lesson**: When updating `@playwright/test` version, always update the Docker image version in jenkins-lib to match
 
+6. **Recurring OOM from Test Volume and npm Install** - Fixed 2026-01-31 16:45 UTC:
+   - PR #730: E2E tests repeatedly failing with exit code 137 (OOM) despite previous fixes
+   - **Root causes**:
+     - Running 1302 tests (3 browsers × 434 tests) overwhelmed the 2GB Playwright container
+     - `npm install allure-playwright` during test startup caused memory spikes
+     - Corrupted pnpm symlinks caused install failures requiring retries
+   - **Solutions**:
+     - Reduced to chromium-only in CI (434 tests vs 1302) via `playwright.config.ts`
+     - Skip allure-playwright reporter in CI (conditional reporter config)
+     - Increased Playwright container memory from 2GB to 4GB
+     - Added pnpm install retry mechanism (3 attempts) with cache clearing
+     - Reduced Jenkins agents from 8 to 3 to free memory headroom
+   - **Result**: 320 E2E tests pass in 2.7 minutes with no OOM errors
+   - **Lesson**: E2E stability requires balancing test coverage with resource constraints; prefer fewer reliable tests over many flaky tests
+
 ## Active Technologies
 
-- TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend) (009-discussion-participation)
-- PostgreSQL (existing schema with DiscussionTopic and Response models already defined; needs extension for discussion entity and citation tracking) (009-discussion-participation)
-
-- TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend) (001-rational-discussion-platform)
+- **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
+- **PostgreSQL 15** - Primary database with Prisma ORM
+- **Redis 7** - Caching, sessions, pub/sub messaging
+- **Playwright 1.58.0** - E2E testing (chromium-only in CI)
+- **Vitest 2.x** - Unit and integration testing
+- **pnpm 9.x** - Package management (workspace monorepo)
 
 ## Troubleshooting
 
@@ -505,6 +523,15 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 - Check `playwright.config.ts` timeout settings
 - Verify test selectors are stable (use `data-testid` attributes)
 - Review Playwright HTML reports: `npx playwright show-report`
+
+**Issue**: E2E tests fail with exit code 137 (OOM)
+**Solution**:
+
+- Check Playwright container memory limit (should be 4GB)
+- Verify only chromium runs in CI (not all 3 browsers)
+- Ensure allure-playwright is skipped in CI (check reporter config)
+- Clear pnpm store cache on Jenkins agents: `rm -rf ~/.local/share/pnpm/store`
+- If recurring, consider reducing parallel test workers
 
 **Issue**: Jenkins build fails but passes locally
 **Solution**:
@@ -556,8 +583,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
-- 009-discussion-participation: Added TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend)
-
-- 001-rational-discussion-platform: Added TypeScript 5.x (Node.js 20 LTS for backend, React 18 for frontend)
-- 2026-01-24: Updated CLAUDE.md with implemented architecture (issue #431)
-- 2026-01-28: Added backend microservices and shared packages documentation, fixed Playwright version to v1.58.0
+- **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3
+- **2026-01-28**: Added backend microservices and shared packages documentation, fixed Playwright version to v1.58.0
+- **2026-01-24**: Updated CLAUDE.md with implemented architecture (issue #431)
+- **2026-01-24**: Fixed E2E infrastructure issues (OOM, DNS, port conflicts, memory limits)
