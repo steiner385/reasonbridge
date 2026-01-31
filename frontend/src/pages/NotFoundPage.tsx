@@ -9,7 +9,7 @@ function NotFoundPage() {
         <nav className="flex gap-4">
           <Link
             to="/"
-            className="bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-lg shadow transition-colors duration-200"
+            className="bg-primary-600 hover:bg-primary-700 text-white font-medium px-6 py-3 rounded-lg shadow transition-colors duration-200"
           >
             Go Home
           </Link>

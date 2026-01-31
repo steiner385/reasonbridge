@@ -114,7 +114,8 @@ describe('AlignmentInput', () => {
     });
 
     it('should require explanation text for nuanced alignment', async () => {
-      const user = userEvent.setup();
+      // Use delay: null to speed up typing and prevent timeout
+      const user = userEvent.setup({ delay: null });
       render(<AlignmentInput />);
 
       await user.click(screen.getByRole('button', { name: /nuanced position/i }));
@@ -123,38 +124,37 @@ describe('AlignmentInput', () => {
       expect(submitButton).toBeDisabled();
 
       const textarea = screen.getByLabelText(/explain your nuanced position/i);
-      await user.type(textarea, 'I partially agree because...');
+      await user.type(textarea, 'Explanation');
 
       expect(submitButton).not.toBeDisabled();
     });
 
     it('should call onAlign with explanation when nuanced alignment is submitted', async () => {
       const onAlign = vi.fn();
-      const user = userEvent.setup();
+      // Use delay: null to speed up typing and prevent timeout
+      const user = userEvent.setup({ delay: null });
 
       render(<AlignmentInput onAlign={onAlign} />);
 
       await user.click(screen.getByRole('button', { name: /nuanced position/i }));
 
       const textarea = screen.getByLabelText(/explain your nuanced position/i);
-      await user.type(textarea, 'I partially agree because of X but disagree on Y');
+      await user.type(textarea, 'Partial agreement on X');
 
       await user.click(screen.getByRole('button', { name: /submit alignment/i }));
 
-      expect(onAlign).toHaveBeenCalledWith(
-        'nuanced',
-        'I partially agree because of X but disagree on Y',
-      );
+      expect(onAlign).toHaveBeenCalledWith('nuanced', 'Partial agreement on X');
     });
 
     it('should cancel nuanced input and clear selection', async () => {
-      const user = userEvent.setup();
+      // Use delay: null to speed up typing and prevent timeout
+      const user = userEvent.setup({ delay: null });
       render(<AlignmentInput />);
 
       await user.click(screen.getByRole('button', { name: /nuanced position/i }));
 
       const textarea = screen.getByLabelText(/explain your nuanced position/i);
-      await user.type(textarea, 'Some explanation');
+      await user.type(textarea, 'Some text');
 
       await user.click(screen.getByRole('button', { name: /cancel/i }));
 

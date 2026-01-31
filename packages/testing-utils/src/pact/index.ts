@@ -4,9 +4,33 @@
  * This module provides utilities for consumer-driven contract testing
  * using Pact. It includes:
  *
+ * - **Consumer Testing**: Create consumer contracts that define API expectations
  * - **Provider Verification**: Verify that a provider meets consumer contracts
  * - **Pact Publishing**: Publish consumer pacts to a Pact Broker
  * - **Environment Configuration**: Create configurations from environment variables
+ *
+ * @example Consumer contract test
+ * ```ts
+ * import { createConsumerPact } from '@reason-bridge/testing-utils/pact';
+ *
+ * const pact = createConsumerPact({
+ *   consumer: 'api-gateway',
+ *   provider: 'ai-service',
+ * });
+ *
+ * await pact
+ *   .addInteraction()
+ *   .given('the AI service is available')
+ *   .uponReceiving('a request for feedback')
+ *   .withRequest('POST', '/feedback/request')
+ *   .willRespondWith(201, (builder) => {
+ *     builder.jsonBody({ id: 'uuid', type: 'BIAS' });
+ *   })
+ *   .executeTest(async (mockServer) => {
+ *     const response = await fetch(`${mockServer.url}/feedback/request`);
+ *     expect(response.status).toBe(201);
+ *   });
+ * ```
  *
  * @example Provider verification
  * ```ts
@@ -67,5 +91,18 @@ export {
   type DeploymentRecordOptions,
 } from './publisher.js';
 
+// Consumer testing
+export {
+  createConsumerPact,
+  createConsumerPactFromEnv,
+  createPactFetcher,
+  defaultConsumerNames,
+  defaultProviderNames,
+  commonProviderStates,
+  type ConsumerPactOptions,
+  type ConsumerPactEnvOptions,
+} from './consumer.js';
+
 // Re-export commonly used types from @pact-foundation/pact
 export type { LogLevel, VerifierOptions } from '@pact-foundation/pact';
+export { PactV4, MatchersV3, SpecificationVersion } from '@pact-foundation/pact';
