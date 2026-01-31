@@ -37,6 +37,8 @@ model User {
   moralFoundationProfile Json?             @map("moral_foundation_profile")
   positionFingerprint    Json?             @map("position_fingerprint")
   topicAffinities        Json?             @map("topic_affinities")
+  // AI Feedback preferences (T117)
+  feedbackPreferences    Json?             @map("feedback_preferences")
   status                 UserStatus        @default(ACTIVE)
   createdAt              DateTime          @default(now()) @map("created_at")
   updatedAt              DateTime          @updatedAt @map("updated_at")
