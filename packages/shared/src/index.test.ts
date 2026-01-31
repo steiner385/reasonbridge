@@ -4,7 +4,7 @@ import { SHARED_CONSTANTS, getVersionInfo } from './index';
 describe('Shared Utils', () => {
   describe('SHARED_CONSTANTS', () => {
     it('should define APP_NAME', () => {
-      expect(SHARED_CONSTANTS.APP_NAME).toBe('Unite Discord');
+      expect(SHARED_CONSTANTS.APP_NAME).toBe('ReasonBridge');
     });
 
     it('should define VERSION', () => {
@@ -15,7 +15,7 @@ describe('Shared Utils', () => {
   describe('getVersionInfo()', () => {
     it('should return formatted version string', () => {
       const versionInfo = getVersionInfo();
-      expect(versionInfo).toBe('Unite Discord v0.1.0');
+      expect(versionInfo).toBe('ReasonBridge v0.1.0');
     });
 
     it('should include app name', () => {
