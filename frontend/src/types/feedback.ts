@@ -127,3 +127,50 @@ export interface FeedbackPreferences {
     affirmation: boolean;
   };
 }
+
+/**
+ * Tone level representing the emotional temperature of content
+ * Ranges from calm (constructive) to hostile (inflammatory)
+ */
+export type ToneLevel = 'calm' | 'neutral' | 'assertive' | 'heated' | 'hostile';
+
+/**
+ * Tone subtype detected by the analyzer
+ */
+export type ToneSubtype = 'personal_attack' | 'hostile_tone' | 'personal_attack_with_hostile_tone';
+
+/**
+ * Result of tone analysis for content
+ */
+export interface ToneAnalysis {
+  /** Overall tone level */
+  level: ToneLevel;
+  /** Specific subtype if inflammatory language detected */
+  subtype?: ToneSubtype;
+  /** Confidence score from 0 to 1 */
+  confidenceScore: number;
+  /** Suggestion for improving tone (if needed) */
+  suggestion?: string;
+  /** Reasoning behind the analysis */
+  reasoning?: string;
+}
+
+/**
+ * Props for ToneIndicator component
+ */
+export interface ToneIndicatorProps {
+  /** Tone analysis data to visualize */
+  tone: ToneAnalysis;
+  /** Whether to show the full gauge or a compact indicator */
+  variant?: 'gauge' | 'compact' | 'inline';
+  /** Whether to show the suggestion text */
+  showSuggestion?: boolean;
+  /** Whether to show confidence score */
+  showConfidence?: boolean;
+  /** Custom className for the container */
+  className?: string;
+  /** Size of the indicator */
+  size?: 'sm' | 'md' | 'lg';
+  /** Callback when the indicator is clicked */
+  onClick?: () => void;
+}
