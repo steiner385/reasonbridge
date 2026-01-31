@@ -1,7 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import helmet from '@fastify/helmet';
 import { AppModule } from './app.module.js';
+import { getCorsConfig, getHelmetConfig } from './config/security.config.js';
 
 async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter();
@@ -12,11 +14,13 @@ async function bootstrap() {
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
 
-  // Enable CORS for frontend requests
-  app.enableCors({
-    origin: true,
-    credentials: true,
-  });
+  // Register Fastify security headers plugin (OWASP compliant)
+  // @ts-ignore - Type compatibility with fastify-helmet
+  await app.register(helmet, getHelmetConfig());
+
+  // Enable CORS with environment-aware configuration
+  const corsConfig = getCorsConfig();
+  app.enableCors(corsConfig);
 
   // Configure OpenAPI/Swagger documentation
   const config = new DocumentBuilder()
