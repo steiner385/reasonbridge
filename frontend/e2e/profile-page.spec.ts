@@ -41,8 +41,9 @@ test.describe('UserProfilePage Component - API Error Handling', () => {
     // Use a valid UUID format that doesn't exist
     await page.goto('/profile/00000000-0000-0000-0000-000000000000');
 
+    // Firefox can be significantly slower (26s+ observed) for API error handling
     await expect(page.getByText(/Unable to Load Profile|User Not Found/i)).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
   });
 });
