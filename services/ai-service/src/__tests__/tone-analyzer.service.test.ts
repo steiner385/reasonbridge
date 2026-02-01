@@ -1,5 +1,5 @@
 import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('ToneAnalyzerService', () => {
   let service: ToneAnalyzerService;

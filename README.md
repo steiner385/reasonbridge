@@ -35,13 +35,13 @@ A Discord-related platform using specification-driven development to foster rati
 
 ReasonBridge uses a microservices architecture with the following key components:
 
-| Service | Description |
-|---------|-------------|
-| API Gateway | Central routing, authentication, rate limiting, resilience |
-| User Service | User management, authentication, profiles |
-| Discussion Service | Topics, propositions, responses, threading |
-| AI Service | AI-powered analysis (bias detection, common ground) |
-| Moderation Service | Content moderation, appeals, reporting |
+| Service            | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| API Gateway        | Central routing, authentication, rate limiting, resilience |
+| User Service       | User management, authentication, profiles                  |
+| Discussion Service | Topics, propositions, responses, threading                 |
+| AI Service         | AI-powered analysis (bias detection, common ground)        |
+| Moderation Service | Content moderation, appeals, reporting                     |
 
 ### Resilience Features
 
@@ -197,6 +197,7 @@ k6 run load-tests/scenarios/soak-10k.js
 ```
 
 Available scenarios:
+
 - `health.js` - Health endpoint checks
 - `topics.js` - Topics CRUD operations
 - `auth.js` - Authentication flows

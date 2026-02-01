@@ -49,6 +49,53 @@ export class BedrockService {
   }
 
   /**
+   * Perform a health check by sending a minimal request to Bedrock
+   *
+   * @returns Health check result with status and latency
+   */
+  async healthCheck(): Promise<{
+    healthy: boolean;
+    latencyMs: number;
+    modelId: string;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    const modelId = process.env['BEDROCK_MODEL_ID'] || 'anthropic.claude-3-sonnet-20240229-v1:0';
+
+    if (!this.isConfigured || !this.client) {
+      return {
+        healthy: false,
+        latencyMs: Date.now() - startTime,
+        modelId,
+        error: 'Bedrock client not configured',
+      };
+    }
+
+    try {
+      // Send a minimal request to verify connectivity
+      const response = await this.client.complete({
+        systemPrompt: 'Respond with OK only.',
+        messages: [{ role: 'user', content: 'Health check' }],
+        maxTokens: 5,
+      });
+
+      return {
+        healthy: response.content.toLowerCase().includes('ok'),
+        latencyMs: Date.now() - startTime,
+        modelId,
+      };
+    } catch (error) {
+      this.logger.error('Bedrock health check failed', error);
+      return {
+        healthy: false,
+        latencyMs: Date.now() - startTime,
+        modelId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
    * Analyze content using AI
    * @param content - The content to analyze
    * @returns Analysis result

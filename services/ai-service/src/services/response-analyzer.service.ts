@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 import { ToneAnalyzerService } from './tone-analyzer.service.js';
 import { FallacyDetectorService } from './fallacy-detector.service.js';
 import { ClarityAnalyzerService } from './clarity-analyzer.service.js';

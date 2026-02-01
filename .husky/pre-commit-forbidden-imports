@@ -54,6 +54,12 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip seed files - they are fixtures/data, not production code
+  if [[ "$file" =~ prisma/seed/ ]] || [[ "$file" =~ /seed\.ts$ ]]; then
+    debug "Skipping seed/fixture file: $file"
+    continue
+  fi
+
   # Get staged content
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 
