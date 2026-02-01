@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ClarityAnalyzerService } from './clarity-analyzer.service.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('ClarityAnalyzerService', () => {
   let service: ClarityAnalyzerService;

@@ -8,7 +8,7 @@ import {
   DismissFeedbackDto,
   FeedbackSensitivity,
 } from './dto/index.js';
-import { Prisma } from '@reason-bridge/db-models';
+import { Prisma } from '@prisma/client';
 
 /**
  * Service for handling AI-generated feedback on responses

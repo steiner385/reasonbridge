@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { createHash } from 'crypto';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 import { FeedbackSensitivity } from '../feedback/dto/index.js';
 
 /**

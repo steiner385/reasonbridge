@@ -1,5 +1,5 @@
 import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('FallacyDetectorService', () => {
   let service: FallacyDetectorService;

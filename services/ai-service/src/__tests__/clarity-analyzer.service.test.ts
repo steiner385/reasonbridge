@@ -1,5 +1,5 @@
 import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('ClarityAnalyzerService', () => {
   let service: ClarityAnalyzerService;
