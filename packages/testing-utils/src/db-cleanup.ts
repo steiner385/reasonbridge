@@ -33,7 +33,7 @@
  * ```
  */
 
-import { PrismaClient } from '@reason-bridge/db-models';
+import type { PrismaClient } from '@prisma/client';
 
 /**
  * Tables in FK-safe deletion order (leaf tables first, root tables last).

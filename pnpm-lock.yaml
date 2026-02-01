@@ -304,6 +304,9 @@ importers:
       '@pact-foundation/pact':
         specifier: ^13.2.0
         version: 13.2.0
+      '@prisma/client':
+        specifier: 6.3.1
+        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common

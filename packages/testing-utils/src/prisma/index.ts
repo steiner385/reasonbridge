@@ -39,7 +39,7 @@
  * ```
  */
 
-import { PrismaClient } from '@reason-bridge/db-models';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Test database connection URL.
