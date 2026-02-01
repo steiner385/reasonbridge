@@ -322,3 +322,5 @@ When contributing to reasonBridge:
 5. Never bypass pre-commit hooks
 6. Keep the codebase clean and maintainable
 7. Follow the Boy Scout Rule - leave it better than you found it
+
+<!-- Updated: 2026-02-01 -->
