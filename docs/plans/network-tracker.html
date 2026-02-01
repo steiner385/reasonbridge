@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReasonBridge Network Engagement Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #1a1a1a;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.4in;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+            @page {
+                margin: 0.5in;
+                size: letter;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 16pt;
+            padding-bottom: 10pt;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        h1 {
+            font-size: 18pt;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 2pt;
+        }
+
+        .subtitle {
+            font-size: 10pt;
+            color: #64748b;
+        }
+
+        h2 {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 14pt;
+            margin-bottom: 8pt;
+            padding-bottom: 4pt;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        h3 {
+            font-size: 10pt;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 10pt;
+            margin-bottom: 6pt;
+        }
+
+        .phase-badge {
+            display: inline-block;
+            font-size: 8pt;
+            font-weight: 600;
+            padding: 2pt 6pt;
+            border-radius: 3pt;
+            margin-left: 6pt;
+        }
+
+        .phase-a { background: #dcfce7; color: #166534; }
+        .phase-b { background: #dbeafe; color: #1e40af; }
+        .phase-c { background: #fef3c7; color: #92400e; }
+        .phase-d { background: #f3e8ff; color: #7c3aed; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8pt 0;
+            font-size: 9pt;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            text-align: left;
+            padding: 6pt 8pt;
+            border: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 8pt;
+            border: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        .name-col { width: 18%; }
+        .value-col { width: 22%; }
+        .status-col { width: 20%; }
+        .date-col { width: 12%; }
+        .notes-col { width: 28%; }
+
+        .checkbox {
+            width: 12pt;
+            height: 12pt;
+            border: 1.5pt solid #94a3b8;
+            border-radius: 2pt;
+            display: inline-block;
+            margin-right: 4pt;
+            vertical-align: middle;
+        }
+
+        .status-options {
+            font-size: 8pt;
+            color: #64748b;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6pt;
+            padding: 10pt;
+            margin: 12pt 0;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8pt;
+            text-align: center;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 8pt;
+            border-radius: 4pt;
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-number {
+            font-size: 18pt;
+            font-weight: 700;
+            color: #1e40af;
+        }
+
+        .summary-label {
+            font-size: 8pt;
+            color: #64748b;
+        }
+
+        .tip-box {
+            background: #eff6ff;
+            border-left: 3px solid #2563eb;
+            padding: 8pt 10pt;
+            margin: 10pt 0;
+            font-size: 9pt;
+        }
+
+        .tip-box strong {
+            color: #1e40af;
+        }
+
+        .write-line {
+            border-bottom: 1px solid #cbd5e1;
+            min-height: 18pt;
+        }
+
+        .script-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8pt;
+            margin: 8pt 0;
+            font-size: 9pt;
+            font-style: italic;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ReasonBridge Network Tracker</h1>
+        <p class="subtitle">Track your outreach and engagement progress</p>
+    </header>
+
+    <div class="summary-box">
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-number">___</div>
+                <div class="summary-label">Total Contacts</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number">___</div>
+                <div class="summary-label">Contacted</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number">___</div>
+                <div class="summary-label">Responded</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number">___</div>
+                <div class="summary-label">Committed</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number">$___</div>
+                <div class="summary-label">Pledged</div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Phase A: Inner Circle <span class="phase-badge phase-a">Weeks 1-2</span></h2>
+
+    <p style="font-size: 9pt; color: #64748b; margin-bottom: 8pt;">Goal: Align on vision, get feedback, recruit to core team</p>
+
+    <table>
+        <tr>
+            <th class="name-col">Name</th>
+            <th class="value-col">Strategic Value</th>
+            <th class="status-col">Status</th>
+            <th class="date-col">Date</th>
+            <th class="notes-col">Notes / Next Steps</th>
+        </tr>
+        <tr>
+            <td>Kathy<br><span style="font-size: 8pt; color: #64748b;">Wife</span></td>
+            <td>Civic experience, communities, potential co-founder</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Discussed<br>
+                <span class="checkbox"></span>Aligned<br>
+                <span class="checkbox"></span>Active role
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Andy<br><span style="font-size: 8pt; color: #64748b;">Brother</span></td>
+            <td>Angel investing, Harvard network, advisor potential</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Contacted<br>
+                <span class="checkbox"></span>Responded<br>
+                <span class="checkbox"></span>Committed
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Hillary<br><span style="font-size: 8pt; color: #64748b;">Sister-in-law</span></td>
+            <td>Harvard network, Boston connections</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Contacted<br>
+                <span class="checkbox"></span>Responded<br>
+                <span class="checkbox"></span>Committed
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Julie<br><span style="font-size: 8pt; color: #64748b;">Sister</span></td>
+            <td>Grant writing expert (Cascadia Consulting)</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Contacted<br>
+                <span class="checkbox"></span>Responded<br>
+                <span class="checkbox"></span>Committed
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+    </table>
+
+    <div class="script-box">
+        <strong>Script:</strong> "I'm getting serious about turning ReasonBridge into a non-profit. I've put together a plan and I'd love your input before I go any further. Can we find time to talk this week?"
+    </div>
+
+    <h2>Phase B: Strategic Advisors <span class="phase-badge phase-b">Weeks 2-3</span></h2>
+
+    <p style="font-size: 9pt; color: #64748b; margin-bottom: 8pt;">Goal: Get expert guidance on legal, strategy, approach</p>
+
+    <table>
+        <tr>
+            <th class="name-col">Name</th>
+            <th class="value-col">Strategic Value</th>
+            <th class="status-col">Status</th>
+            <th class="date-col">Date</th>
+            <th class="notes-col">Notes / Next Steps</th>
+        </tr>
+        <tr>
+            <td>________________<br><span style="font-size: 8pt; color: #64748b;">Cousin (lawyer)</span></td>
+            <td>Legal guidance for 501(c)(3) formation</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Contacted<br>
+                <span class="checkbox"></span>Responded<br>
+                <span class="checkbox"></span>Committed
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Rich<br><span style="font-size: 8pt; color: #64748b;">Neighbor</span></td>
+            <td>LDS community, academic, like-minded</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Contacted<br>
+                <span class="checkbox"></span>Responded<br>
+                <span class="checkbox"></span>Committed
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+    </table>
+
+    <div class="script-box">
+        <strong>Script:</strong> "I'm launching a non-profit focused on improving online discourse. Given your experience with [legal/community], I'd love to get your thoughts on my approach. Would you have 20-30 minutes for a call?"
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>Phase C: Believers & Early Supporters <span class="phase-badge phase-c">Weeks 3-6</span></h2>
+
+    <p style="font-size: 9pt; color: #64748b; margin-bottom: 8pt;">Goal: Early donations, testimonials, beta users</p>
+
+    <h3>Like-Minded Technical Friends</h3>
+
+    <table>
+        <tr>
+            <th style="width: 25%;">Name</th>
+            <th style="width: 15%;">Contacted</th>
+            <th style="width: 15%;">Response</th>
+            <th style="width: 15%;">Amount</th>
+            <th style="width: 30%;">Notes</th>
+        </tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+    </table>
+
+    <h3>People Who Left Social Media</h3>
+
+    <table>
+        <tr>
+            <th style="width: 25%;">Name</th>
+            <th style="width: 15%;">Contacted</th>
+            <th style="width: 15%;">Response</th>
+            <th style="width: 15%;">Testimonial?</th>
+            <th style="width: 30%;">Notes</th>
+        </tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td></tr>
+    </table>
+
+    <h3>Tech Colleagues</h3>
+
+    <table>
+        <tr>
+            <th style="width: 25%;">Name</th>
+            <th style="width: 15%;">Contacted</th>
+            <th style="width: 15%;">Response</th>
+            <th style="width: 15%;">Amount</th>
+            <th style="width: 30%;">Notes</th>
+        </tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+        <tr><td class="write-line"></td><td><span class="checkbox"></span></td><td class="write-line"></td><td class="write-line"></td><td class="write-line"></td></tr>
+    </table>
+
+    <div class="script-box">
+        <strong>Script:</strong> "You know how frustrated we've both been with how toxic online conversations have become? I've been building something to address that—a platform called ReasonBridge. I'm turning it into a non-profit and starting to raise funds. Would you be open to hearing more?"
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>Phase D: Connectors & Amplifiers <span class="phase-badge phase-d">Week 6+</span></h2>
+
+    <p style="font-size: 9pt; color: #64748b; margin-bottom: 8pt;">Goal: Introductions, amplification, broader reach (after you have traction)</p>
+
+    <table>
+        <tr>
+            <th class="name-col">Name</th>
+            <th class="value-col">Network Access</th>
+            <th class="status-col">Status</th>
+            <th class="date-col">Date</th>
+            <th class="notes-col">Notes / Next Steps</th>
+        </tr>
+        <tr>
+            <td>Justin<br><span style="font-size: 8pt; color: #64748b;">Friend (political)</span></td>
+            <td>Ran for office, political networks</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Informed<br>
+                <span class="checkbox"></span>Ready to help<br>
+                <span class="checkbox"></span>Intros made
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Alex<br><span style="font-size: 8pt; color: #64748b;">Friend (education)</span></td>
+            <td>School board, education networks</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Informed<br>
+                <span class="checkbox"></span>Ready to help<br>
+                <span class="checkbox"></span>Intros made
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Ben<br><span style="font-size: 8pt; color: #64748b;">Friend (state politics)</span></td>
+            <td>Ran for OH state congress, significant network</td>
+            <td class="status-options">
+                <span class="checkbox"></span>Informed<br>
+                <span class="checkbox"></span>Ready to help<br>
+                <span class="checkbox"></span>Intros made
+            </td>
+            <td class="write-line"></td>
+            <td class="write-line"></td>
+        </tr>
+    </table>
+
+    <h3>Extended Networks / Communities</h3>
+
+    <table>
+        <tr>
+            <th style="width: 30%;">Network</th>
+            <th style="width: 20%;">Access Through</th>
+            <th style="width: 15%;">Status</th>
+            <th style="width: 35%;">Notes</th>
+        </tr>
+        <tr>
+            <td>Your parents/family networks</td>
+            <td>Parents</td>
+            <td><span class="checkbox"></span> Activated</td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Kathy's family networks</td>
+            <td>Kathy</td>
+            <td><span class="checkbox"></span> Activated</td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Book club</td>
+            <td>Kathy</td>
+            <td><span class="checkbox"></span> Activated</td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>Church preschool community</td>
+            <td>Kathy</td>
+            <td><span class="checkbox"></span> Activated</td>
+            <td class="write-line"></td>
+        </tr>
+        <tr>
+            <td>LDS church community</td>
+            <td>Rich</td>
+            <td><span class="checkbox"></span> Activated</td>
+            <td class="write-line"></td>
+        </tr>
+    </table>
+
+    <div class="script-box">
+        <strong>Script:</strong> "I'm launching a non-profit called ReasonBridge focused on improving civic discourse. Given your experience in [politics/community], I thought you might find it interesting. Once I'm a bit further along, I'd love to explore whether any of your networks might be interested."
+    </div>
+
+    <div class="tip-box">
+        <strong>Remember:</strong> Update this tracker after every conversation. Track not just donations but also: testimonials offered, introductions promised, feedback received, and follow-up needed. Momentum comes from consistent outreach—aim for at least one conversation per day during active fundraising.
+    </div>
+
+</body>
+</html>

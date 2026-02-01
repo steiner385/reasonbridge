@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReasonBridge: Problem/Solution Narrative</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1a1a1a;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.5in;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+            @page {
+                margin: 0.6in;
+                size: letter;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24pt;
+            padding-bottom: 16pt;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        h1 {
+            font-size: 24pt;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 4pt;
+        }
+
+        .tagline {
+            font-size: 11pt;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        h2 {
+            font-size: 14pt;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 20pt;
+            margin-bottom: 10pt;
+        }
+
+        h3 {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 14pt;
+            margin-bottom: 8pt;
+        }
+
+        p {
+            margin-bottom: 10pt;
+            text-align: justify;
+        }
+
+        .transition {
+            font-size: 13pt;
+            font-weight: 600;
+            color: #1e40af;
+            text-align: center;
+            margin: 20pt 0;
+            padding: 12pt;
+            background: #eff6ff;
+            border-radius: 6px;
+        }
+
+        .mission-box {
+            background: #1e40af;
+            color: white;
+            padding: 16pt;
+            border-radius: 8px;
+            margin: 16pt 0;
+        }
+
+        .mission-box p {
+            text-align: center;
+            font-size: 11pt;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        ul {
+            margin: 10pt 0 10pt 20pt;
+        }
+
+        li {
+            margin-bottom: 6pt;
+        }
+
+        strong {
+            color: #1e40af;
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8pt;
+            margin: 10pt 0;
+        }
+
+        .research-item {
+            background: #f8fafc;
+            padding: 8pt 10pt;
+            border-radius: 4px;
+            border-left: 3px solid #2563eb;
+        }
+
+        .research-item strong {
+            font-size: 10pt;
+        }
+
+        .research-item span {
+            font-size: 9pt;
+            color: #64748b;
+            display: block;
+        }
+
+        .ask-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 14pt;
+            border-radius: 8px;
+            margin-top: 16pt;
+        }
+
+        .ask-box h3 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .closing {
+            font-weight: 600;
+            color: #1e40af;
+            text-align: center;
+            margin-top: 14pt;
+            font-size: 11pt;
+        }
+
+        footer {
+            margin-top: 24pt;
+            padding-top: 12pt;
+            border-top: 1px solid #e2e8f0;
+            font-size: 9pt;
+            color: #64748b;
+        }
+
+        footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .sources {
+            font-size: 8pt;
+            color: #64748b;
+            margin-top: 16pt;
+        }
+
+        .sources h4 {
+            font-size: 9pt;
+            color: #475569;
+            margin-bottom: 4pt;
+        }
+
+        .sources p {
+            margin-bottom: 2pt;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ReasonBridge</h1>
+        <p class="tagline">Tools for Rational Discourse</p>
+    </header>
+
+    <h2>The Problem</h2>
+
+    <p>In the first half of 2025, the United States experienced 150 politically-motivated attacks—nearly twice as many as the year before. Threats against lawmakers have surged to 14,000 annually. Hate incidents reached the second-highest level since the FBI began tracking them in 1991.</p>
+
+    <p>This violence doesn't emerge from nowhere. It follows a predictable path: misinformation spreads, trust collapses, polarization deepens, and people begin to see their fellow citizens as enemies. Today, only 28% of Americans trust the media—down from 68% in 1972. Nearly three-quarters of partisans view the other side as "immoral." And 87% of Americans say polarization itself is a threat to our country.</p>
+
+    <p>The platforms where most public discourse now happens weren't designed to help us understand each other. They were designed to maximize engagement—and outrage, conflict, and division are engaging. The result: 68% of Americans say social media has impacted their relationships. Friendships have ended. Families have fractured. And increasingly, words have turned to violence.</p>
+
+    <div class="transition">But it doesn't have to be this way.</div>
+
+    <p>The same technology that amplifies division can be designed to foster understanding. The same data that powers outrage algorithms can surface common ground. The problem isn't human nature—it's platform design.</p>
+
+    <h2>The Solution</h2>
+
+    <p>Unlike social media platforms designed for engagement, <strong>ReasonBridge</strong> is designed for understanding.</p>
+
+    <p>ReasonBridge is a platform for rational discourse that uses AI-powered analysis to help people engage productively across differences. Instead of rewarding the loudest or most provocative voices, ReasonBridge rewards good-faith dialogue—helping users identify bias, evaluate evidence, find common ground, and move from conflict toward shared understanding.</p>
+
+    <h3>Grounded in Research</h3>
+
+    <div class="research-grid">
+        <div class="research-item">
+            <strong>Kahneman</strong> (dual-process theory)
+            <span>Prompts reflective thinking over reactive responses</span>
+        </div>
+        <div class="research-item">
+            <strong>Haidt</strong> (Moral Foundations Theory)
+            <span>Surfaces shared values beneath disagreements</span>
+        </div>
+        <div class="research-item">
+            <strong>Gross</strong> (emotion regulation)
+            <span>De-escalates conflict through cognitive reappraisal</span>
+        </div>
+        <div class="research-item">
+            <strong>Fogg</strong> (behavior design)
+            <span>Makes constructive communication easier</span>
+        </div>
+    </div>
+
+    <h3>How It Works</h3>
+
+    <ul>
+        <li><strong>AI-assisted analysis</strong> surfaces bias, identifies logical fallacies, and highlights agreement</li>
+        <li><strong>Structured discussion</strong> organizes claims so conversations build toward clarity</li>
+        <li><strong>Good-faith incentives</strong> reward constructive engagement over inflammatory rhetoric</li>
+        <li><strong>Common ground discovery</strong> helps people find shared values amid disagreement</li>
+    </ul>
+
+    <div class="mission-box">
+        <p>In an era of division and misinformation, ReasonBridge provides tools for rational discourse. Through AI-powered analysis and incentives for good-faith dialogue, we help people turn diverse perspectives into collective wisdom—and better outcomes for everyone.</p>
+    </div>
+
+    <div class="ask-box">
+        <h3>Support ReasonBridge</h3>
+        <p>ReasonBridge is a functional product ready for public launch. We're establishing as a 501(c)(3) non-profit because we believe rational discourse is a public good—not a product to monetize.</p>
+        <p>We're seeking seed funding to launch publicly, refine our AI tools based on real-world feedback, and build the foundation for long-term sustainability.</p>
+    </div>
+
+    <p class="closing">Your support helps rebuild the infrastructure of democratic discourse—<br>before more relationships fracture and more words turn to violence.</p>
+
+    <footer>
+        <p><strong>Contact:</strong> [Your email] | <strong>Web:</strong> reasonbridge.org</p>
+    </footer>
+
+    <div class="sources">
+        <h4>Sources</h4>
+        <p><strong>Statistics:</strong> Pew Research Center (2025), Gallup (2025), FBI/AAI (2024), Listen First Project, EBSCO Research</p>
+        <p><strong>Research:</strong> Kahneman (2003), Graham, Haidt & Nosek (2009), Gross (1998), Fogg/Stanford Behavior Design Lab (2009)</p>
+        <p>Full citations available at reasonbridge.org/sources</p>
+    </div>
+</body>
+</html>
