@@ -14,6 +14,12 @@ This document outlines a phased strategy to launch ReasonBridge as a 501(c)(3) n
 
 ---
 
+## Mission Statement
+
+> **In an era of division and misinformation, ReasonBridge provides tools for rational discourse. Through AI-powered analysis and incentives for good-faith dialogue, we help people turn diverse perspectives into collective wisdom—and better outcomes for everyone.**
+
+---
+
 ## Current Situation
 
 | Factor | Status |
@@ -370,7 +376,7 @@ Year 3-5
 
 ## Immediate Next Steps
 
-1. **This week**: Draft mission statement (2-3 sentences)
+1. ~~**This week**: Draft mission statement (2-3 sentences)~~ **DONE**
 2. **This week**: Review Open Collective Foundation application requirements
 3. **Next week**: Begin network mapping exercise
 4. **Week 2**: Apply to fiscal sponsor
