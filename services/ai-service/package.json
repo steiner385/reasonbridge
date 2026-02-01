@@ -22,6 +22,7 @@
     "@nestjs/common": "^10.3.0",
     "@nestjs/core": "^10.3.0",
     "@nestjs/platform-fastify": "^10.3.0",
+    "@prisma/client": "6.3.1",
     "@reason-bridge/ai-client": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "cache-manager": "^7.2.8",
