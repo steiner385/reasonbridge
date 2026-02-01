@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
-import { FeedbackCacheService } from '../cache/feedback-cache.service.js';
+import { SemanticCacheService } from '../cache/index.js';
 import {
   RequestFeedbackDto,
   FeedbackResponseDto,
@@ -20,7 +20,7 @@ export class FeedbackService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly analyzer: ResponseAnalyzerService,
-    private readonly feedbackCache: FeedbackCacheService,
+    private readonly semanticCache: SemanticCacheService,
   ) {}
 
   /**
@@ -38,38 +38,15 @@ export class FeedbackService {
       throw new NotFoundException(`Response with ID ${dto.responseId} not found`);
     }
 
-    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
-
-    // Check cache first
-    const cachedResult = await this.feedbackCache.getCachedFeedback(dto.content, sensitivity);
-
-    let aiAnalysis;
-    if (cachedResult) {
-      this.logger.debug(`Using cached feedback for response ${dto.responseId}`);
-      aiAnalysis = {
-        type: cachedResult.type,
-        subtype: cachedResult.subtype ?? undefined,
-        suggestionText: cachedResult.suggestionText,
-        reasoning: cachedResult.reasoning,
-        confidenceScore: cachedResult.confidenceScore,
-        educationalResources: cachedResult.educationalResources ?? undefined,
-      };
-    } else {
-      // Generate AI feedback using analyzers
-      aiAnalysis = await this.generateFeedback(dto.content);
-
-      // Cache the result for future requests
-      await this.feedbackCache.cacheFeedback(dto.content, sensitivity, {
-        type: aiAnalysis.type,
-        subtype: aiAnalysis.subtype ?? null,
-        suggestionText: aiAnalysis.suggestionText,
-        reasoning: aiAnalysis.reasoning,
-        confidenceScore: aiAnalysis.confidenceScore,
-        educationalResources: aiAnalysis.educationalResources ?? null,
-      });
-    }
+    // Get cached feedback or generate new analysis
+    const aiAnalysis = await this.semanticCache.getOrAnalyze(
+      dto.content,
+      () => this.analyzer.analyzeContent(dto.content),
+      response.topicId,
+    );
 
     // Apply sensitivity filtering
+    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
     const minThreshold = this.getConfidenceThreshold(sensitivity);
     const shouldDisplay = aiAnalysis.confidenceScore >= minThreshold;
 
@@ -138,18 +115,6 @@ export class FeedbackService {
     });
 
     return this.mapToResponseDto(updatedFeedback);
-  }
-
-  /**
-   * Generate feedback using comprehensive analysis
-   * Analyzes emotional tone, logical fallacies, and clarity
-   * @param content The response content to analyze
-   * @returns AI-generated feedback analysis
-   */
-  private async generateFeedback(content: string) {
-    // Use the response analyzer to perform comprehensive analysis
-    // This analyzes tone, fallacies, and clarity in parallel
-    return this.analyzer.analyzeContent(content);
   }
 
   /**

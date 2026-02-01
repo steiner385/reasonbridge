@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { FeedbackController } from './feedback.controller.js';
 import { FeedbackService } from './feedback.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
-import { CacheModule, FeedbackCacheService } from '../cache/index.js';
+import { CacheModule } from '../cache/index.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
 import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
 import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
@@ -18,13 +18,13 @@ import { FeedbackAnalyticsService } from '../services/feedback-analytics.service
   controllers: [FeedbackController],
   providers: [
     FeedbackService,
-    FeedbackCacheService,
+    // SemanticCacheService is provided by CacheModule (imported above)
     FeedbackAnalyticsService,
     ResponseAnalyzerService,
     ToneAnalyzerService,
     FallacyDetectorService,
     ClarityAnalyzerService,
   ],
-  exports: [FeedbackService, FeedbackCacheService],
+  exports: [FeedbackService],
 })
 export class FeedbackModule {}
