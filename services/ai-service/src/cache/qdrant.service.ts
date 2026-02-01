@@ -1,7 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import type { QdrantClient } from '@qdrant/js-client-rest';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 import type { AnalysisResult } from '../services/response-analyzer.service.js';
 import type { CachedFeedback, FeedbackMetadata } from './types.js';
 import { randomUUID } from 'crypto';
