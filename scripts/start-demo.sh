@@ -59,6 +59,12 @@ npx prisma migrate deploy
 cd ../..
 echo -e "${GREEN}✓ Database migrations complete${NC}"
 
+# Seed demo data
+echo ""
+echo -e "${YELLOW}Seeding demo data...${NC}"
+pnpm demo:seed
+echo -e "${GREEN}✓ Demo data seeded${NC}"
+
 # Start all services in development mode
 echo ""
 echo -e "${YELLOW}Starting application services...${NC}"
