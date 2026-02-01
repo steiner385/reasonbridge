@@ -190,7 +190,7 @@ export async function withTestTransaction<T>(
 
   try {
     await prisma.$transaction(
-      async (tx) => {
+      async (tx: TransactionClient) => {
         try {
           result = await callback(tx);
         } catch (error) {
