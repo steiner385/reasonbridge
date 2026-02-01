@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LocalStack SNS Topic Initialization Script
-# Creates all SNS topics and SNS-to-SQS subscriptions for the Unite Discord platform
+# Creates all SNS topics and SNS-to-SQS subscriptions for the ReasonBridge platform
 # This script runs automatically when LocalStack starts via docker-compose
 
 set -e

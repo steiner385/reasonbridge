@@ -35,9 +35,9 @@ echo "Docker containers:"
 docker ps -a | grep -E "frontend|CONTAINER" || true
 echo ""
 echo "Frontend container logs (last 50 lines):"
-docker logs unite-frontend-e2e --tail 50 2>&1 || echo "Could not fetch frontend logs"
+docker logs reasonbridge-frontend-e2e --tail 50 2>&1 || echo "Could not fetch frontend logs"
 echo ""
 echo "Checking if frontend container is running:"
-docker inspect unite-frontend-e2e --format='{{.State.Status}}' 2>&1 || echo "Container not found"
+docker inspect reasonbridge-frontend-e2e --format='{{.State.Status}}' 2>&1 || echo "Container not found"
 
 exit 1

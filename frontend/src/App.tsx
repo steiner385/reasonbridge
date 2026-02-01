@@ -8,7 +8,7 @@ function App() {
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary-600 text-white py-8 px-4 shadow-lg">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Unite Discord</h1>
+          <h1 className="text-4xl font-bold mb-2">ReasonBridge</h1>
           <p className="text-primary-100 text-lg">Rational Discussion Platform</p>
         </div>
       </header>

@@ -24,9 +24,9 @@ if [ ! -f ".env" ]; then
     cp .env.example .env
     
     # Update .env with demo-friendly defaults
-    sed -i 's|POSTGRES_PASSWORD=localdev|POSTGRES_PASSWORD=unite|g' .env
-    sed -i 's|POSTGRES_DB=unite_discord|POSTGRES_DB=unite_dev|g' .env
-    sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://unite:unite@localhost:5432/unite_dev|g' .env
+    sed -i 's|POSTGRES_PASSWORD=localdev|POSTGRES_PASSWORD=reasonbridge|g' .env
+    sed -i 's|POSTGRES_DB=reasonbridge_dev|POSTGRES_DB=reasonbridge_dev|g' .env
+    sed -i 's|DATABASE_URL=.*|DATABASE_URL=postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev|g' .env
     sed -i 's|# AWS_ENDPOINT_URL=.*|AWS_ENDPOINT_URL=http://localhost:4566|g' .env
     sed -i 's|AWS_ACCESS_KEY_ID=your_aws_access_key_here|AWS_ACCESS_KEY_ID=test|g' .env
     sed -i 's|AWS_SECRET_ACCESS_KEY=your_aws_secret_key_here|AWS_SECRET_ACCESS_KEY=test|g' .env

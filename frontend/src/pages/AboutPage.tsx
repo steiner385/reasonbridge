@@ -6,11 +6,11 @@ function AboutPage() {
       <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">About</h2>
         <p className="text-gray-600 mb-6">
-          Learn more about the Unite Discord platform and its mission.
+          Learn more about the ReasonBridge platform and its mission.
         </p>
         <div className="space-y-4">
           <p className="text-gray-700">
-            Unite Discord is a rational discussion platform designed to foster meaningful dialogue
+            ReasonBridge is a rational discussion platform designed to foster meaningful dialogue
             and constructive conversations.
           </p>
           <nav className="flex gap-4">

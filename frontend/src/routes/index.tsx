@@ -17,7 +17,7 @@ import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
- * Route definitions for the Unite Discord application.
+ * Route definitions for the ReasonBridge application.
  *
  * This file defines all routes using React Router v7.
  * Each route maps a URL path to a component.

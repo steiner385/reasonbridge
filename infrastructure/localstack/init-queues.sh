@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # LocalStack SQS Queue Initialization Script
-# Creates all SQS queues required for the Unite Discord platform
+# Creates all SQS queues required for the ReasonBridge platform
 # This script runs automatically when LocalStack starts via docker-compose
 
 set -e

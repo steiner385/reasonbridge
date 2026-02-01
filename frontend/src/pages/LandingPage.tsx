@@ -30,7 +30,7 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">uniteDiscord</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">ReasonBridge</h1>
               <span className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 rounded">
                 Beta
               </span>
@@ -89,7 +89,7 @@ export const LandingPage: React.FC = () => {
       <section className="py-16 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Why uniteDiscord?
+            Why ReasonBridge?
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
@@ -231,7 +231,7 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-sm">
-              © 2026 uniteDiscord. Building bridges through rational discussion.
+              © 2026 ReasonBridge. Building bridges through rational discussion.
             </p>
           </div>
         </div>

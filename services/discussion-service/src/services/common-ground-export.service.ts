@@ -49,9 +49,7 @@ export class CommonGroundExportService {
   /**
    * Export analysis to PDF format
    */
-  private async exportToPdf(
-    analysis: CommonGroundResponseDto,
-  ): Promise<ExportResult> {
+  private async exportToPdf(analysis: CommonGroundResponseDto): Promise<ExportResult> {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({
         size: 'A4',
@@ -72,20 +70,16 @@ export class CommonGroundExportService {
       doc.on('error', reject);
 
       // Header
-      doc
-        .fontSize(24)
-        .font('Helvetica-Bold')
-        .text('Common Ground Analysis', { align: 'center' });
+      doc.fontSize(24).font('Helvetica-Bold').text('Common Ground Analysis', { align: 'center' });
 
       doc.moveDown(0.5);
 
       // Metadata
       doc.fontSize(10).font('Helvetica');
       doc.text(`Analysis ID: ${analysis.id}`, { align: 'center' });
-      doc.text(
-        `Generated: ${new Date(analysis.generatedAt).toLocaleString()}`,
-        { align: 'center' },
-      );
+      doc.text(`Generated: ${new Date(analysis.generatedAt).toLocaleString()}`, {
+        align: 'center',
+      });
       doc.text(`Version: ${analysis.version}`, { align: 'center' });
 
       doc.moveDown(1);
@@ -98,32 +92,16 @@ export class CommonGroundExportService {
       doc.text('Summary', 60, summaryY + 10);
 
       doc.fontSize(10).font('Helvetica');
-      doc.text(
-        `Participants: ${analysis.participantCountAtGeneration}`,
-        60,
-        summaryY + 30,
-      );
-      doc.text(
-        `Responses: ${analysis.responseCountAtGeneration}`,
-        60,
-        summaryY + 45,
-      );
-      doc.text(
-        `Overall Consensus: ${analysis.overallConsensusScore}%`,
-        60,
-        summaryY + 60,
-      );
+      doc.text(`Participants: ${analysis.participantCountAtGeneration}`, 60, summaryY + 30);
+      doc.text(`Responses: ${analysis.responseCountAtGeneration}`, 60, summaryY + 45);
+      doc.text(`Overall Consensus: ${analysis.overallConsensusScore}%`, 60, summaryY + 60);
 
       doc.y = summaryY + 90;
       doc.moveDown(1);
 
       // Agreement Zones
       if (analysis.agreementZones.length > 0) {
-        this.addSection(
-          doc,
-          'Agreement Zones',
-          `${analysis.agreementZones.length}`,
-        );
+        this.addSection(doc, 'Agreement Zones', `${analysis.agreementZones.length}`);
 
         analysis.agreementZones.forEach((zone, index) => {
           doc.fontSize(11).font('Helvetica-Bold');
@@ -131,17 +109,13 @@ export class CommonGroundExportService {
 
           doc.fontSize(10).font('Helvetica');
           doc.text(`Description: ${zone.description}`, { indent: 20 });
-          doc.text(
-            `Participant Coverage: ${Math.round(zone.participantPercentage)}%`,
-            { indent: 20 },
-          );
+          doc.text(`Participant Coverage: ${Math.round(zone.participantPercentage)}%`, {
+            indent: 20,
+          });
           doc.text(`Confidence: ${Math.round(zone.confidence * 100)}%`, {
             indent: 20,
           });
-          doc.text(
-            `Propositions: ${zone.propositionIds.length} included`,
-            { indent: 20 },
-          );
+          doc.text(`Propositions: ${zone.propositionIds.length} included`, { indent: 20 });
 
           doc.moveDown(0.5);
         });
@@ -175,10 +149,7 @@ export class CommonGroundExportService {
           }
 
           if (mis.affectedPropositions.length > 0) {
-            doc.text(
-              `Affected Propositions: ${mis.affectedPropositions.length}`,
-              { indent: 20 },
-            );
+            doc.text(`Affected Propositions: ${mis.affectedPropositions.length}`, { indent: 20 });
           }
 
           doc.moveDown(0.5);
@@ -189,11 +160,7 @@ export class CommonGroundExportService {
 
       // Genuine Disagreements
       if (analysis.genuineDisagreements.length > 0) {
-        this.addSection(
-          doc,
-          'Genuine Disagreements',
-          `${analysis.genuineDisagreements.length}`,
-        );
+        this.addSection(doc, 'Genuine Disagreements', `${analysis.genuineDisagreements.length}`);
 
         analysis.genuineDisagreements.forEach((dis, index) => {
           doc.fontSize(11).font('Helvetica-Bold');
@@ -210,10 +177,7 @@ export class CommonGroundExportService {
           }
 
           if (dis.moralFoundations.length > 0) {
-            doc.text(
-              `Moral Foundations: ${dis.moralFoundations.join(', ')}`,
-              { indent: 20 },
-            );
+            doc.text(`Moral Foundations: ${dis.moralFoundations.join(', ')}`, { indent: 20 });
           }
 
           if (dis.propositionIds.length > 0) {
@@ -233,14 +197,9 @@ export class CommonGroundExportService {
 
         // Page number
         doc.fontSize(8);
-        doc.text(
-          `Page ${i + 1} of ${pages.count}`,
-          50,
-          doc.page.height - 40,
-          {
-            align: 'center',
-          },
-        );
+        doc.text(`Page ${i + 1} of ${pages.count}`, 50, doc.page.height - 40, {
+          align: 'center',
+        });
       }
 
       doc.end();
@@ -250,11 +209,7 @@ export class CommonGroundExportService {
   /**
    * Helper to add section headers in PDF
    */
-  private addSection(
-    doc: PDFKit.PDFDocument,
-    title: string,
-    count?: string,
-  ): void {
+  private addSection(doc: PDFKit.PDFDocument, title: string, count?: string): void {
     doc.fontSize(14).font('Helvetica-Bold');
     if (count) {
       doc.text(`${title} (${count})`);
@@ -267,9 +222,7 @@ export class CommonGroundExportService {
   /**
    * Export analysis to JSON format
    */
-  private async exportToJson(
-    analysis: CommonGroundResponseDto,
-  ): Promise<ExportResult> {
+  private async exportToJson(analysis: CommonGroundResponseDto): Promise<ExportResult> {
     const data = JSON.stringify(analysis, null, 2);
     return {
       data,
@@ -281,9 +234,7 @@ export class CommonGroundExportService {
   /**
    * Export analysis to Markdown format
    */
-  private async exportToMarkdown(
-    analysis: CommonGroundResponseDto,
-  ): Promise<ExportResult> {
+  private async exportToMarkdown(analysis: CommonGroundResponseDto): Promise<ExportResult> {
     let markdown = `# Common Ground Analysis\n\n`;
 
     // Metadata
@@ -358,7 +309,7 @@ export class CommonGroundExportService {
     }
 
     markdown += `---\n\n`;
-    markdown += `*Generated by Unite Discord Common Ground Analysis*\n`;
+    markdown += `*Generated by ReasonBridge Common Ground Analysis*\n`;
 
     return {
       data: markdown,

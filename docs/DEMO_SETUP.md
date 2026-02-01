@@ -36,6 +36,7 @@ pnpm -r --filter="@reason-bridge/*" build
 ```
 
 This script will:
+
 1. Create/update `.env` file with demo-friendly defaults
 2. Start Docker infrastructure services (PostgreSQL, Redis, LocalStack, etc.)
 3. Run database migrations
@@ -57,9 +58,9 @@ Once all services are running:
 ### Infrastructure Services
 
 - **PostgreSQL**: localhost:5432
-  - Database: `unite_dev`
-  - User: `unite`
-  - Password: `unite`
+  - Database: `reasonbridge_dev`
+  - User: `reasonbridge`
+  - Password: `reasonbridge`
 - **Redis**: localhost:6379
 - **LocalStack (AWS emulation)**: localhost:4566
 - **MailHog (Email testing)**: http://localhost:8025
@@ -77,7 +78,7 @@ If you prefer to start services step-by-step:
 cp .env.example .env
 
 # Edit .env and update these key values:
-# DATABASE_URL=postgresql://unite:unite@localhost:5432/unite_dev
+# DATABASE_URL=postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev
 # AWS_ENDPOINT_URL=http://localhost:4566
 # AWS_ACCESS_KEY_ID=test
 # AWS_SECRET_ACCESS_KEY=test
@@ -99,7 +100,7 @@ docker compose ps
 ```bash
 # Run migrations
 cd packages/db-models
-DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" npx prisma migrate deploy
+DATABASE_URL="postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev" npx prisma migrate deploy
 cd ../..
 ```
 
@@ -107,7 +108,7 @@ cd ../..
 
 ```bash
 # Set environment variables and start all services
-export DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev"
+export DATABASE_URL="postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev"
 export AWS_ENDPOINT_URL="http://localhost:4566"
 export AWS_ACCESS_KEY_ID="test"
 export AWS_SECRET_ACCESS_KEY="test"
@@ -129,7 +130,8 @@ pnpm -r --parallel dev
 
 **Issue**: `Error: P1001: Can't reach database server`
 
-**Solution**: 
+**Solution**:
+
 1. Check if PostgreSQL container is running: `docker compose ps`
 2. Verify DATABASE_URL in `.env` matches container credentials
 3. Restart infrastructure: `docker compose down && docker compose up -d`
@@ -139,6 +141,7 @@ pnpm -r --parallel dev
 **Issue**: `Error: listen EADDRINUSE: address already in use :::3000`
 
 **Solution**:
+
 1. Find the process using the port: `lsof -i :3000`
 2. Kill the process: `kill <PID>`
 3. Or use different ports by setting `PORT` environment variable for each service
@@ -148,6 +151,7 @@ pnpm -r --parallel dev
 **Issue**: `Cannot read properties of undefined (reading 'get')`
 
 **Solution**: Ensure AWS/LocalStack configuration is set:
+
 ```bash
 export AWS_ENDPOINT_URL="http://localhost:4566"
 export AWS_ACCESS_KEY_ID="test"
@@ -159,6 +163,7 @@ export AWS_SECRET_ACCESS_KEY="test"
 **Issue**: `Client version 1.16.2 is incompatible with server version 1.7.4`
 
 **Solution**: This is a warning and won't prevent the service from working. To fix, you can either:
+
 1. Update Qdrant Docker image to latest version in `docker-compose.yml`
 2. Or downgrade the Qdrant client in the service
 
@@ -256,6 +261,7 @@ The ReasonBridge platform uses a microservices architecture:
 ## Support
 
 For issues or questions:
+
 - Check `CLAUDE.md` for architecture details
 - Review `README.md` in the root directory
 - Check existing issues on GitHub

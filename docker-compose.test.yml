@@ -1,15 +1,15 @@
 services:
   postgres-test:
     image: postgres:15-alpine
-    container_name: unite-postgres-test
+    container_name: reasonbridge-postgres-test
     environment:
-      POSTGRES_USER: unite_test
-      POSTGRES_PASSWORD: unite_test
-      POSTGRES_DB: unite_test
+      POSTGRES_USER: reasonbridge_test
+      POSTGRES_PASSWORD: reasonbridge_test
+      POSTGRES_DB: reasonbridge_test
     ports:
       - '5433:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U unite_test -d unite_test']
+      test: ['CMD-SHELL', 'pg_isready -U reasonbridge_test -d reasonbridge_test']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -18,7 +18,7 @@ services:
 
   redis-test:
     image: redis:7-alpine
-    container_name: unite-redis-test
+    container_name: reasonbridge-redis-test
     ports:
       - '6380:6379'
     healthcheck:
@@ -29,7 +29,7 @@ services:
 
   localstack-test:
     image: localstack/localstack:3.0
-    container_name: unite-localstack-test
+    container_name: reasonbridge-localstack-test
     environment:
       SERVICES: s3,sqs,sns
       DEBUG: 0

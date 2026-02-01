@@ -65,7 +65,7 @@ COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose -f docker-compose.e2e.yml up -
 log_info "Waiting for PostgreSQL to be ready..."
 MAX_WAIT=60
 WAIT_COUNT=0
-until COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose -f docker-compose.e2e.yml exec -T postgres pg_isready -U unite_test -d unite_test > /dev/null 2>&1; do
+until COMPOSE_PROJECT_NAME=$PROJECT_NAME docker compose -f docker-compose.e2e.yml exec -T postgres pg_isready -U reasonbridge_test -d reasonbridge_test > /dev/null 2>&1; do
     if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
         log_error "PostgreSQL did not become ready after ${MAX_WAIT} seconds"
         exit 1
@@ -118,13 +118,13 @@ done
 log_info "=========================================="
 log_info "Creating Playwright test container"
 log_info "Container: $CONTAINER_NAME"
-log_info "Network: ${PROJECT_NAME}_unite-e2e"
+log_info "Network: ${PROJECT_NAME}_reasonbridge-e2e"
 log_info "Base URL: $PLAYWRIGHT_BASE_URL"
 log_info "=========================================="
 
 docker run -d \
     --name "$CONTAINER_NAME" \
-    --network ${PROJECT_NAME}_unite-e2e \
+    --network ${PROJECT_NAME}_reasonbridge-e2e \
     --memory 4g \
     -w /app/frontend \
     -e CI=true \

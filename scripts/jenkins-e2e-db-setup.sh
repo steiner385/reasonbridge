@@ -19,7 +19,7 @@ echo "🗄️  Setting up E2E database for Jenkins CI..."
 # Container name uses Docker Compose naming: ${E2E_PROJECT_NAME}-${service}-1
 # E2E_PROJECT_NAME is set in Jenkins pipeline (e.g., "e2e-build-4")
 CONTAINER="${E2E_PROJECT_NAME:-reasonbridge}-discussion-service-1"
-DB_URL="postgresql://unite_test:unite_test@postgres:5432/unite_test"
+DB_URL="postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test"
 
 # Check if container is running
 if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
