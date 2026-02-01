@@ -13,6 +13,7 @@
 ## Task 1: Add Dependencies and Docker Configuration
 
 **Files:**
+
 - Modify: `services/ai-service/package.json`
 - Modify: `docker-compose.yml`
 - Modify: `.env.example`
@@ -34,25 +35,25 @@ Edit `services/ai-service/package.json`, add to dependencies:
 Add before the `volumes:` section:
 
 ```yaml
-  qdrant:
-    image: qdrant/qdrant:v1.7.4
-    container_name: reasonbridge-qdrant
-    ports:
-      - '6333:6333'
-      - '6334:6334'
-    volumes:
-      - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:6333/health']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+qdrant:
+  image: qdrant/qdrant:v1.7.4
+  container_name: reasonbridge-qdrant
+  ports:
+    - '6333:6333'
+    - '6334:6334'
+  volumes:
+    - qdrant_data:/qdrant/storage
+  healthcheck:
+    test: ['CMD', 'curl', '-f', 'http://localhost:6333/health']
+    interval: 10s
+    timeout: 5s
+    retries: 5
 ```
 
 Add to `volumes:` section:
 
 ```yaml
-  qdrant_data:
+qdrant_data:
 ```
 
 **Step 3: Add environment variables to .env.example**
@@ -93,6 +94,7 @@ git commit -m "feat(ai-service): add Qdrant, OpenAI, and Redis cache dependencie
 ## Task 2: Create Cache Types and Interfaces
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/types.ts`
 - Test: `services/ai-service/src/cache/__tests__/types.spec.ts`
 
@@ -259,6 +261,7 @@ git commit -m "feat(ai-service): add cache type definitions"
 ## Task 3: Create Hash Utility
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/hash.util.ts`
 - Test: `services/ai-service/src/cache/__tests__/hash.util.spec.ts`
 
@@ -337,10 +340,7 @@ import { createHash } from 'crypto';
  * - Lowercases
  */
 export function normalizeContent(content: string): string {
-  return content
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, ' ');
+  return content.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 /**
@@ -371,6 +371,7 @@ git commit -m "feat(ai-service): add content hash utility"
 ## Task 4: Create Embedding Service
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/embedding.service.ts`
 - Test: `services/ai-service/src/cache/__tests__/embedding.service.spec.ts`
 
@@ -449,7 +450,7 @@ describe('EmbeddingService', () => {
       await service.getEmbedding('test content');
 
       expect(mockCacheManager.get).toHaveBeenCalledWith(
-        expect.stringMatching(/^feedback:embedding:[a-f0-9]{64}$/)
+        expect.stringMatching(/^feedback:embedding:[a-f0-9]{64}$/),
       );
     });
   });
@@ -551,6 +552,7 @@ git commit -m "feat(ai-service): add embedding service with Redis caching"
 ## Task 5: Create Qdrant Service
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/qdrant.service.ts`
 - Test: `services/ai-service/src/cache/__tests__/qdrant.service.spec.ts`
 
@@ -578,10 +580,7 @@ describe('QdrantService', () => {
     };
 
     const module = await Test.createTestingModule({
-      providers: [
-        QdrantService,
-        { provide: 'QDRANT_CLIENT', useValue: mockQdrantClient },
-      ],
+      providers: [QdrantService, { provide: 'QDRANT_CLIENT', useValue: mockQdrantClient }],
     }).compile();
 
     service = module.get<QdrantService>(QdrantService);
@@ -624,7 +623,7 @@ describe('QdrantService', () => {
     it('should return null when similarity below threshold', async () => {
       mockQdrantClient.search.mockResolvedValue([
         {
-          score: 0.90,
+          score: 0.9,
           payload: {
             feedbackType: 'FALLACY',
             suggestionText: 'Test',
@@ -672,7 +671,7 @@ describe('QdrantService', () => {
               payload: metadata,
             }),
           ]),
-        })
+        }),
       );
     });
   });
@@ -704,9 +703,7 @@ export class QdrantService implements OnModuleInit {
   private readonly logger = new Logger(QdrantService.name);
   private readonly collectionName: string;
 
-  constructor(
-    @Inject('QDRANT_CLIENT') private readonly client: QdrantClient,
-  ) {
+  constructor(@Inject('QDRANT_CLIENT') private readonly client: QdrantClient) {
     this.collectionName = process.env['QDRANT_COLLECTION'] || 'feedback_embeddings';
   }
 
@@ -720,9 +717,7 @@ export class QdrantService implements OnModuleInit {
   private async ensureCollectionExists(): Promise<void> {
     try {
       const collections = await this.client.getCollections();
-      const exists = collections.collections.some(
-        (c) => c.name === this.collectionName
-      );
+      const exists = collections.collections.some((c) => c.name === this.collectionName);
 
       if (!exists) {
         this.logger.log(`Creating Qdrant collection: ${this.collectionName}`);
@@ -742,10 +737,7 @@ export class QdrantService implements OnModuleInit {
   /**
    * Search for similar content in Qdrant
    */
-  async searchSimilar(
-    embedding: number[],
-    threshold: number,
-  ): Promise<CachedFeedback | null> {
+  async searchSimilar(embedding: number[], threshold: number): Promise<CachedFeedback | null> {
     try {
       const results = await this.client.search(this.collectionName, {
         vector: embedding,
@@ -827,6 +819,7 @@ git commit -m "feat(ai-service): add Qdrant service for vector similarity search
 ## Task 6: Create Redis Cache Service
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/redis-cache.service.ts`
 - Test: `services/ai-service/src/cache/__tests__/redis-cache.service.spec.ts`
 
@@ -853,10 +846,7 @@ describe('RedisCacheService', () => {
     };
 
     const module = await Test.createTestingModule({
-      providers: [
-        RedisCacheService,
-        { provide: CACHE_MANAGER, useValue: mockCacheManager },
-      ],
+      providers: [RedisCacheService, { provide: CACHE_MANAGER, useValue: mockCacheManager }],
     }).compile();
 
     service = module.get<RedisCacheService>(RedisCacheService);
@@ -901,7 +891,7 @@ describe('RedisCacheService', () => {
       expect(mockCacheManager.set).toHaveBeenCalledWith(
         'feedback:exact:abc123',
         result,
-        expect.any(Number)
+        expect.any(Number),
       );
     });
   });
@@ -940,9 +930,7 @@ export class RedisCacheService {
   private readonly logger = new Logger(RedisCacheService.name);
   private readonly ttl: number;
 
-  constructor(
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
-  ) {
+  constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {
     this.ttl = parseInt(process.env['FEEDBACK_CACHE_TTL'] || String(DEFAULT_TTL), 10);
   }
 
@@ -1010,6 +998,7 @@ git commit -m "feat(ai-service): add Redis cache service for exact match lookup"
 ## Task 7: Create Semantic Cache Service (Orchestrator)
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/semantic-cache.service.ts`
 - Test: `services/ai-service/src/cache/__tests__/semantic-cache.service.spec.ts`
 
@@ -1163,7 +1152,7 @@ export class SemanticCacheService {
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.similarityThreshold = parseFloat(
-      process.env['SIMILARITY_THRESHOLD'] || String(DEFAULT_SIMILARITY_THRESHOLD)
+      process.env['SIMILARITY_THRESHOLD'] || String(DEFAULT_SIMILARITY_THRESHOLD),
     );
   }
 
@@ -1280,7 +1269,7 @@ export class SemanticCacheService {
   ): Promise<void> {
     try {
       // Get or generate embedding
-      const vectorEmbedding = embedding ?? await this.embeddingService.getEmbedding(content);
+      const vectorEmbedding = embedding ?? (await this.embeddingService.getEmbedding(content));
 
       const metadata: FeedbackMetadata = {
         contentHash,
@@ -1328,6 +1317,7 @@ git commit -m "feat(ai-service): add semantic cache service orchestrator"
 ## Task 8: Create Cache Module
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/cache.module.ts`
 - Create: `services/ai-service/src/cache/index.ts`
 
@@ -1417,6 +1407,7 @@ git commit -m "feat(ai-service): add cache module with provider configuration"
 ## Task 9: Integrate Cache into Feedback Service
 
 **Files:**
+
 - Modify: `services/ai-service/src/feedback/feedback.module.ts`
 - Modify: `services/ai-service/src/feedback/feedback.service.ts`
 - Test: `services/ai-service/src/feedback/__tests__/feedback.service.spec.ts`
@@ -1587,7 +1578,7 @@ describe('FeedbackService', () => {
         service.requestFeedback({
           responseId: 'non-existent',
           content: 'test',
-        })
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -1610,7 +1601,7 @@ describe('FeedbackService', () => {
       expect(mockSemanticCache.getOrAnalyze).toHaveBeenCalledWith(
         'Test content',
         expect.any(Function),
-        mockResponse.topicId
+        mockResponse.topicId,
       );
     });
 
@@ -1655,6 +1646,7 @@ git commit -m "feat(ai-service): integrate semantic cache into feedback service"
 ## Task 10: Update App Module and Final Integration
 
 **Files:**
+
 - Modify: `services/ai-service/src/app.module.ts`
 - Modify: `services/ai-service/src/main.ts` (if needed)
 
@@ -1686,6 +1678,7 @@ git commit -m "feat(ai-service): complete feedback caching integration"
 ## Task 11: Add Integration Tests
 
 **Files:**
+
 - Create: `services/ai-service/src/cache/__tests__/integration/semantic-cache.integration.spec.ts`
 
 **Step 1: Write integration test**
@@ -1733,10 +1726,7 @@ describe.skipIf(!process.env['INTEGRATION_TESTS'])('SemanticCacheService Integra
     };
 
     // First call - should miss cache
-    const result1 = await service.getOrAnalyze(
-      content,
-      async () => mockResult,
-    );
+    const result1 = await service.getOrAnalyze(content, async () => mockResult);
 
     expect(result1).toEqual(mockResult);
 
@@ -1788,6 +1778,7 @@ git commit -m "test(ai-service): add semantic cache integration tests"
 ## Task 12: Update Documentation and Environment
 
 **Files:**
+
 - Modify: `.env.example`
 - Create: `docs/architecture/feedback-caching.md`
 
@@ -1811,17 +1802,18 @@ The AI service implements a three-tier caching system for feedback analysis:
 3. **Fresh analysis** - Fallback to regex analyzers
 
 ## Flow Diagram
-
 ```
+
 Request → Hash Content → Redis Lookup
-                            ↓
-                        Hit? → Return cached
-                            ↓
-                        Generate Embedding → Qdrant Search
-                                                ↓
-                                            Hit (≥0.95)? → Return cached
-                                                ↓
-                                            Run Analyzers → Cache Result → Return
+↓
+Hit? → Return cached
+↓
+Generate Embedding → Qdrant Search
+↓
+Hit (≥0.95)? → Return cached
+↓
+Run Analyzers → Cache Result → Return
+
 ```
 
 ## Configuration
@@ -1867,19 +1859,19 @@ git commit -m "docs: add feedback caching architecture documentation"
 
 ## Summary
 
-| Task | Description | Files |
-|------|-------------|-------|
-| 1 | Dependencies & Docker | package.json, docker-compose.yml, .env.example |
-| 2 | Type definitions | types.ts |
-| 3 | Hash utility | hash.util.ts |
-| 4 | Embedding service | embedding.service.ts |
-| 5 | Qdrant service | qdrant.service.ts |
-| 6 | Redis cache service | redis-cache.service.ts |
-| 7 | Semantic cache orchestrator | semantic-cache.service.ts |
-| 8 | Cache module | cache.module.ts, index.ts |
-| 9 | Feedback service integration | feedback.service.ts, feedback.module.ts |
-| 10 | App module & verification | app.module.ts |
-| 11 | Integration tests | semantic-cache.integration.spec.ts |
-| 12 | Documentation | feedback-caching.md |
+| Task | Description                  | Files                                          |
+| ---- | ---------------------------- | ---------------------------------------------- |
+| 1    | Dependencies & Docker        | package.json, docker-compose.yml, .env.example |
+| 2    | Type definitions             | types.ts                                       |
+| 3    | Hash utility                 | hash.util.ts                                   |
+| 4    | Embedding service            | embedding.service.ts                           |
+| 5    | Qdrant service               | qdrant.service.ts                              |
+| 6    | Redis cache service          | redis-cache.service.ts                         |
+| 7    | Semantic cache orchestrator  | semantic-cache.service.ts                      |
+| 8    | Cache module                 | cache.module.ts, index.ts                      |
+| 9    | Feedback service integration | feedback.service.ts, feedback.module.ts        |
+| 10   | App module & verification    | app.module.ts                                  |
+| 11   | Integration tests            | semantic-cache.integration.spec.ts             |
+| 12   | Documentation                | feedback-caching.md                            |
 
 Total: ~12 tasks, each with TDD steps and commits.

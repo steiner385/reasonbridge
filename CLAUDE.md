@@ -474,9 +474,6 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Active Technologies
 
-- TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend) + NestJS (backend services), Prisma 6.3.1 (ORM), AWS SDK v3 (Bedrock), React 18 + Vite (011-demo-environment)
-- PostgreSQL 15 (primary), Redis 7 (caching) (011-demo-environment)
-
 - **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
 - **PostgreSQL 15** - Primary database with Prisma ORM
 - **Redis 7** - Caching, sessions, pub/sub messaging
@@ -585,7 +582,8 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
-- 011-demo-environment: Added TypeScript 5.7.3 (Node.js 20 LTS for backend, React 18 for frontend) + NestJS (backend services), Prisma 6.3.1 (ORM), AWS SDK v3 (Bedrock), React 18 + Vite
-
+- **2026-02-01**: Consolidated pending PRs into staging branch
 - **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3
 - **2026-01-28**: Added backend microservices and shared packages documentation, fixed Playwright version to v1.58.0
+- **2026-01-24**: Updated CLAUDE.md with implemented architecture (issue #431)
+- **2026-01-24**: Fixed E2E infrastructure issues (OOM, DNS, port conflicts, memory limits)
