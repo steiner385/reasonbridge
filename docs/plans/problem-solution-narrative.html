@@ -79,123 +79,130 @@
 
         /* Charts Section */
         .charts-section {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #fff;
+            border: 2px solid #dc2626;
             border-radius: 8pt;
             padding: 12pt;
-            margin-bottom: 16pt;
+            margin: 12pt 0 16pt 0;
         }
 
         .charts-title {
-            font-size: 10pt;
-            font-weight: 600;
-            color: #475569;
+            font-size: 11pt;
+            font-weight: 700;
+            color: #991b1b;
             text-align: center;
             margin-bottom: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
         }
 
+        /* Line Chart Container */
+        .line-chart-container {
+            margin-bottom: 12pt;
+            padding-bottom: 10pt;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .line-chart-title {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #374151;
+            text-align: center;
+            margin-bottom: 6pt;
+        }
+
+        .line-chart-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .line-chart-note {
+            font-size: 7pt;
+            color: #dc2626;
+            text-align: center;
+            margin-top: 4pt;
+            font-weight: 600;
+        }
+
+        /* Bottom Charts Grid */
         .charts-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12pt;
+            grid-template-columns: 1fr 1fr;
+            gap: 14pt;
         }
 
         .chart-container {
             text-align: center;
+            background: #f9fafb;
+            border-radius: 6pt;
+            padding: 10pt;
         }
 
         .chart-label {
-            font-size: 8pt;
-            color: #64748b;
-            margin-bottom: 6pt;
+            font-size: 9pt;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12pt;
         }
 
-        /* Trust Decline Chart */
+        /* Trust Chart */
         .trust-chart {
             display: flex;
             align-items: flex-end;
             justify-content: center;
             height: 70pt;
-            gap: 16pt;
+            gap: 24pt;
+            margin-top: 8pt;
         }
 
-        .trust-bar {
-            width: 36pt;
+        .trust-bar-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .trust-bar-fill {
-            width: 100%;
-            background: linear-gradient(180deg, #3b82f6, #1e40af);
-            border-radius: 3pt 3pt 0 0;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            color: white;
-            font-size: 9pt;
+        .trust-value {
+            font-size: 12pt;
             font-weight: 700;
-            padding-bottom: 4pt;
+            margin-bottom: 3pt;
         }
 
-        .trust-bar-1972 .trust-bar-fill {
-            height: 68pt;
+        .trust-value-high {
+            color: #2563eb;
         }
 
-        .trust-bar-2025 .trust-bar-fill {
-            height: 28pt;
-            background: linear-gradient(180deg, #ef4444, #b91c1c);
+        .trust-value-low {
+            color: #dc2626;
+        }
+
+        .trust-bar {
+            width: 44pt;
+            border-radius: 3pt 3pt 0 0;
+        }
+
+        .trust-bar-1972 {
+            height: 48pt;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+        }
+
+        .trust-bar-2025 {
+            height: 20pt;
+            background: linear-gradient(180deg, #f87171, #dc2626);
         }
 
         .trust-year {
             font-size: 8pt;
-            color: #64748b;
+            color: #6b7280;
             margin-top: 4pt;
+            font-weight: 500;
         }
 
-        /* Violence Chart */
-        .violence-chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            height: 70pt;
-            gap: 12pt;
-        }
-
-        .violence-bar {
-            width: 32pt;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .violence-bar-fill {
-            width: 100%;
-            border-radius: 3pt 3pt 0 0;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            color: white;
-            font-size: 8pt;
+        .chart-stat {
+            font-size: 9pt;
             font-weight: 700;
-            padding-bottom: 3pt;
-        }
-
-        .violence-2024 .violence-bar-fill {
-            height: 35pt;
-            background: linear-gradient(180deg, #f97316, #c2410c);
-        }
-
-        .violence-2025 .violence-bar-fill {
-            height: 68pt;
-            background: linear-gradient(180deg, #ef4444, #b91c1c);
-        }
-
-        .violence-year {
-            font-size: 7pt;
-            color: #64748b;
-            margin-top: 3pt;
+            color: #dc2626;
+            margin-top: 8pt;
         }
 
         /* Polarization Gauge */
@@ -204,38 +211,28 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 70pt;
+            height: 60pt;
+            margin-top: 6pt;
         }
 
         .gauge-number {
-            font-size: 28pt;
+            font-size: 38pt;
             font-weight: 700;
             color: #dc2626;
             line-height: 1;
         }
 
         .gauge-percent {
-            font-size: 12pt;
+            font-size: 16pt;
             color: #dc2626;
+            font-weight: 600;
         }
 
         .gauge-caption {
-            font-size: 7pt;
-            color: #64748b;
+            font-size: 8pt;
+            color: #6b7280;
             text-align: center;
             margin-top: 4pt;
-            line-height: 1.3;
-        }
-
-        .chart-stat {
-            font-size: 9pt;
-            font-weight: 600;
-            color: #1e40af;
-            margin-top: 6pt;
-        }
-
-        .chart-stat-red {
-            color: #dc2626;
         }
 
         /* Rest of styles */
@@ -392,53 +389,118 @@
         <p class="tagline">Tools for Rational Discourse</p>
     </header>
 
+    <h2>The Problem</h2>
+
+    <p>In the first half of 2025, the United States experienced 150 politically-motivated attacks—nearly twice as many as the year before. Threats against lawmakers have surged to 14,000 annually. Hate incidents reached the second-highest level since the FBI began tracking them in 1991.</p>
+
     <!-- Data Visualization Section -->
     <div class="charts-section">
-        <div class="charts-title">Why Now? The Data Demands Action</div>
+        <div class="charts-title">The Data Demands Action</div>
+
+        <!-- FBI Hate Incidents Line Chart -->
+        <div class="line-chart-container">
+            <div class="line-chart-title">FBI Hate Incidents (1991–2025)</div>
+            <div class="line-chart-wrapper">
+                <svg width="520" height="110" viewBox="0 0 520 110">
+                    <!-- Grid lines -->
+                    <line x1="40" y1="15" x2="500" y2="15" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="40" y1="35" x2="500" y2="35" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="40" y1="55" x2="500" y2="55" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="40" y1="75" x2="500" y2="75" stroke="#f3f4f6" stroke-width="1"/>
+
+                    <!-- Y-axis labels -->
+                    <text x="35" y="18" font-size="7" fill="#9ca3af" text-anchor="end">12K</text>
+                    <text x="35" y="38" font-size="7" fill="#9ca3af" text-anchor="end">9K</text>
+                    <text x="35" y="58" font-size="7" fill="#9ca3af" text-anchor="end">6K</text>
+                    <text x="35" y="78" font-size="7" fill="#9ca3af" text-anchor="end">3K</text>
+
+                    <!-- X-axis (baseline) -->
+                    <line x1="40" y1="90" x2="500" y2="90" stroke="#d1d5db" stroke-width="1"/>
+
+                    <!-- Area fill under the line -->
+                    <path d="M40,73 L53,65 L67,58 L80,62 L93,58 L107,60 L120,67 L133,70 L147,69 L160,62 L173,54 L187,57 L200,65 L213,68 L227,68 L240,69 L253,72 L267,72 L280,72 L293,72 L307,67 L320,59 L333,45 L347,28 L360,22 L373,18 L387,15 L400,17 L413,15 L427,16 L440,17 L453,17 L467,17 L480,18 L493,19 L500,19 L500,90 L40,90 Z"
+                          fill="url(#areaGradient)" opacity="0.3"/>
+
+                    <!-- Gradient definition -->
+                    <defs>
+                        <linearGradient id="areaGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#3b82f6"/>
+                            <stop offset="60%" stop-color="#f97316"/>
+                            <stop offset="100%" stop-color="#dc2626"/>
+                        </linearGradient>
+                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#2563eb"/>
+                            <stop offset="60%" stop-color="#ea580c"/>
+                            <stop offset="100%" stop-color="#dc2626"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- The line itself -->
+                    <path d="M40,73 L53,65 L67,58 L80,62 L93,58 L107,60 L120,67 L133,70 L147,69 L160,62 L173,54 L187,57 L200,65 L213,68 L227,68 L240,69 L253,72 L267,72 L280,72 L293,72 L307,67 L320,59 L333,45 L347,28 L360,22 L373,18 L387,15 L400,17 L413,15 L427,16 L440,17 L453,17 L467,17 L480,18 L493,19 L500,19"
+                          fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <!-- Key data points -->
+                    <circle cx="40" cy="73" r="3" fill="#3b82f6"/>
+                    <circle cx="173" cy="54" r="3" fill="#f97316"/>
+                    <circle cx="387" cy="15" r="4" fill="#dc2626"/>
+                    <circle cx="500" cy="19" r="3" fill="#dc2626"/>
+
+                    <!-- Data labels for key points -->
+                    <text x="40" y="85" font-size="6" fill="#6b7280" text-anchor="middle">4.6K</text>
+                    <text x="173" y="47" font-size="6" fill="#ea580c" text-anchor="middle">9.7K</text>
+                    <text x="387" y="10" font-size="7" fill="#dc2626" font-weight="600" text-anchor="middle">11.9K</text>
+                    <text x="500" y="12" font-size="6" fill="#dc2626" text-anchor="middle">~12K</text>
+
+                    <!-- X-axis year labels -->
+                    <text x="40" y="100" font-size="7" fill="#6b7280" text-anchor="middle">1991</text>
+                    <text x="120" y="100" font-size="7" fill="#6b7280" text-anchor="middle">1997</text>
+                    <text x="173" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2001</text>
+                    <text x="253" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2007</text>
+                    <text x="333" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2013</text>
+                    <text x="413" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2019</text>
+                    <text x="500" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2025</text>
+
+                    <!-- Annotation for 2001 spike -->
+                    <text x="173" y="66" font-size="5" fill="#9ca3af" text-anchor="middle">9/11</text>
+
+                    <!-- Annotation for recent surge -->
+                    <line x1="360" y1="25" x2="360" y2="85" stroke="#dc2626" stroke-width="0.5" stroke-dasharray="2,2"/>
+                    <text x="430" y="35" font-size="6" fill="#dc2626" font-weight="600">Record highs</text>
+                    <text x="430" y="43" font-size="6" fill="#dc2626" font-weight="600">2020-2025</text>
+                </svg>
+            </div>
+            <div class="line-chart-note">2023: Highest level in 33 years of FBI tracking</div>
+        </div>
+
+        <!-- Trust & Polarization Charts -->
         <div class="charts-grid">
             <div class="chart-container">
                 <div class="chart-label">Trust in Media</div>
                 <div class="trust-chart">
-                    <div class="trust-bar trust-bar-1972">
-                        <div class="trust-bar-fill">68%</div>
+                    <div class="trust-bar-wrapper">
+                        <div class="trust-value trust-value-high">68%</div>
+                        <div class="trust-bar trust-bar-1972"></div>
                         <div class="trust-year">1972</div>
                     </div>
-                    <div class="trust-bar trust-bar-2025">
-                        <div class="trust-bar-fill">28%</div>
+                    <div class="trust-bar-wrapper">
+                        <div class="trust-value trust-value-low">28%</div>
+                        <div class="trust-bar trust-bar-2025"></div>
                         <div class="trust-year">2025</div>
                     </div>
                 </div>
-                <div class="chart-stat chart-stat-red">-40 points</div>
+                <div class="chart-stat">-40 points in 50 years</div>
             </div>
             <div class="chart-container">
-                <div class="chart-label">Political Attacks (6 mo.)</div>
-                <div class="violence-chart">
-                    <div class="violence-bar violence-2024">
-                        <div class="violence-bar-fill">~80</div>
-                        <div class="violence-year">2024</div>
-                    </div>
-                    <div class="violence-bar violence-2025">
-                        <div class="violence-bar-fill">150</div>
-                        <div class="violence-year">2025</div>
-                    </div>
-                </div>
-                <div class="chart-stat chart-stat-red">Nearly 2x increase</div>
-            </div>
-            <div class="chart-container">
-                <div class="chart-label">Americans Who Say Polarization<br>Is a Threat to the Country</div>
+                <div class="chart-label">Americans Who Say Polarization<br>Threatens Our Country</div>
                 <div class="polarization-gauge">
                     <div>
                         <span class="gauge-number">87</span><span class="gauge-percent">%</span>
                     </div>
-                    <div class="gauge-caption">Near-universal recognition<br>across party lines</div>
+                    <div class="gauge-caption">Near-universal recognition across party lines</div>
                 </div>
             </div>
         </div>
     </div>
-
-    <h2>The Problem</h2>
-
-    <p>In the first half of 2025, the United States experienced 150 politically-motivated attacks—nearly twice as many as the year before. Threats against lawmakers have surged to 14,000 annually. Hate incidents reached the second-highest level since the FBI began tracking them in 1991.</p>
 
     <p>This violence doesn't emerge from nowhere. It follows a predictable path: misinformation spreads, trust collapses, polarization deepens, and people begin to see their fellow citizens as enemies. Today, only 28% of Americans trust the media—down from 68% in 1972. Nearly three-quarters of partisans view the other side as "immoral." And 87% of Americans say polarization itself is a threat to our country.</p>
 
@@ -521,9 +583,9 @@
         </div>
 
         <div class="source-item">
-            <div class="source-claim">Second-highest hate incidents on record (11,679 in 2024)</div>
-            <div class="source-detail">FBI via Arab American Institute, 2024</div>
-            <span class="source-url">https://www.aaiusa.org/library/2024-hate-crime-data</span>
+            <div class="source-claim">FBI Hate Crime Statistics (1991-2025)</div>
+            <div class="source-detail">FBI Uniform Crime Reports / Crime Data Explorer; 2024 data via Arab American Institute</div>
+            <span class="source-url">https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/explorer/crime/hate-crime</span>
         </div>
 
         <div class="source-item">
