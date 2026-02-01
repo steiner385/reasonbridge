@@ -1,5 +1,5 @@
 import { Injectable, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@reason-bridge/db-models';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Prisma service that provides database access throughout the fact-check service.

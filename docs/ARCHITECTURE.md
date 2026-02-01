@@ -58,24 +58,26 @@ ReasonBridge is a rational discussion platform built using a microservices archi
 
 ### Services Overview
 
-| Service | Port | Description |
-|---------|------|-------------|
-| API Gateway | 3000 | Central routing, auth, rate limiting, resilience |
-| User Service | 3001 | User management, authentication, profiles |
-| AI Service | 3002 | AI-powered analysis (bias detection, common ground) |
-| Moderation Service | 3003 | Content moderation, appeals, reporting |
-| Notification Service | 3004 | Real-time notifications, email, push |
-| Fact-Check Service | 3005 | Claim verification, source validation |
-| Recommendation Service | 3006 | Content recommendations, discovery |
-| Discussion Service | 3007 | Topics, propositions, responses, threading |
+| Service                | Port | Description                                         |
+| ---------------------- | ---- | --------------------------------------------------- |
+| API Gateway            | 3000 | Central routing, auth, rate limiting, resilience    |
+| User Service           | 3001 | User management, authentication, profiles           |
+| AI Service             | 3002 | AI-powered analysis (bias detection, common ground) |
+| Moderation Service     | 3003 | Content moderation, appeals, reporting              |
+| Notification Service   | 3004 | Real-time notifications, email, push                |
+| Fact-Check Service     | 3005 | Claim verification, source validation               |
+| Recommendation Service | 3006 | Content recommendations, discovery                  |
+| Discussion Service     | 3007 | Topics, propositions, responses, threading          |
 
 ### Service Communication
 
 **Synchronous Communication:**
+
 - HTTP/REST via API Gateway
 - Direct service-to-service calls for internal operations
 
 **Asynchronous Communication:**
+
 - Redis Pub/Sub for real-time events
 - AWS SQS/SNS (LocalStack in development) for message queuing
 
@@ -150,14 +152,15 @@ Prevents cascade failures when upstream services are unhealthy.
 // Configuration per service
 interface CircuitBreakerConfig {
   name: string;
-  timeout: 5000;              // 5 second timeout
+  timeout: 5000; // 5 second timeout
   errorThresholdPercentage: 50; // Trip at 50% failures
-  resetTimeout: 30000;        // Try again after 30s
-  volumeThreshold: 5;         // Min 5 requests before tripping
+  resetTimeout: 30000; // Try again after 30s
+  volumeThreshold: 5; // Min 5 requests before tripping
 }
 ```
 
 **States:**
+
 - **Closed** - Normal operation, requests pass through
 - **Open** - Failures exceeded threshold, requests fail fast
 - **Half-Open** - Testing if service recovered
@@ -172,14 +175,15 @@ Automatically retries transient failures with increasing delays.
 // Default configuration
 const DEFAULT_RETRY_CONFIG = {
   maxAttempts: 3,
-  initialDelay: 100,    // 100ms
-  maxDelay: 5000,       // 5 seconds
-  backoffFactor: 2,     // Exponential multiplier
-  jitter: true,         // ±25% randomization
+  initialDelay: 100, // 100ms
+  maxDelay: 5000, // 5 seconds
+  backoffFactor: 2, // Exponential multiplier
+  jitter: true, // ±25% randomization
 };
 ```
 
 **Retryable Errors:**
+
 - HTTP 5xx (Server errors)
 - HTTP 408 (Request Timeout)
 - HTTP 429 (Too Many Requests)
@@ -191,12 +195,12 @@ Configurable rate limiting tiers to protect the system.
 
 **Implementation:** `services/api-gateway/src/config/security.config.ts`
 
-| Tier | Limit | Use Case |
-|------|-------|----------|
-| Default | 100/min | General API access |
-| Strict | 10/min | Expensive operations (AI analysis) |
-| Auth | 5/min | Login attempts (brute force protection) |
-| API | 1000/min | Authenticated API users |
+| Tier    | Limit    | Use Case                                |
+| ------- | -------- | --------------------------------------- |
+| Default | 100/min  | General API access                      |
+| Strict  | 10/min   | Expensive operations (AI analysis)      |
+| Auth    | 5/min    | Login attempts (brute force protection) |
+| API     | 1000/min | Authenticated API users                 |
 
 ## Observability
 
@@ -218,6 +222,7 @@ Every request is assigned a unique correlation ID (`X-Correlation-ID`) that prop
 ### Logging
 
 Structured JSON logging with:
+
 - Request/response logging
 - Error details with stack traces
 - Service communication logs
@@ -229,14 +234,14 @@ Structured JSON logging with:
 
 Implemented via `@fastify/helmet`:
 
-| Header | Value | Purpose |
-|--------|-------|---------|
-| X-Content-Type-Options | nosniff | Prevent MIME sniffing |
-| X-Frame-Options | DENY | Prevent clickjacking |
-| Referrer-Policy | strict-origin-when-cross-origin | Control referrer info |
-| X-DNS-Prefetch-Control | off | Privacy protection |
-| Strict-Transport-Security | max-age=31536000 | Force HTTPS (production) |
-| Content-Security-Policy | Configured | XSS protection (production) |
+| Header                    | Value                           | Purpose                     |
+| ------------------------- | ------------------------------- | --------------------------- |
+| X-Content-Type-Options    | nosniff                         | Prevent MIME sniffing       |
+| X-Frame-Options           | DENY                            | Prevent clickjacking        |
+| Referrer-Policy           | strict-origin-when-cross-origin | Control referrer info       |
+| X-DNS-Prefetch-Control    | off                             | Privacy protection          |
+| Strict-Transport-Security | max-age=31536000                | Force HTTPS (production)    |
+| Content-Security-Policy   | Configured                      | XSS protection (production) |
 
 ### CORS Configuration
 
@@ -244,13 +249,13 @@ Environment-aware CORS settings:
 
 ```typescript
 // Production
-origin: ['https://reasonbridge.org', 'https://app.reasonbridge.org']
+origin: ['https://reasonbridge.org', 'https://app.reasonbridge.org'];
 
 // Development
-origin: ['http://localhost:3000', 'http://localhost:5173']
+origin: ['http://localhost:3000', 'http://localhost:5173'];
 
 // Test
-origin: true  // Allow all
+origin: true; // Allow all
 ```
 
 ### Authentication
@@ -278,6 +283,7 @@ origin: true  // Allow all
 ### LocalStack (AWS Services Emulation)
 
 Development environment for:
+
 - **S3** - File storage (avatars, attachments)
 - **SQS** - Message queuing
 - **SNS** - Push notifications
@@ -388,28 +394,29 @@ k6 run load-tests/scenarios/soak-10k.js
 
 Key configuration categories:
 
-| Category | Examples |
-|----------|----------|
-| Application | `NODE_ENV`, `PORT`, `LOG_LEVEL` |
-| Database | `DATABASE_URL`, `REDIS_URL` |
-| Auth | `JWT_SECRET`, `COGNITO_*` |
-| Services | `USER_SERVICE_URL`, `AI_SERVICE_URL` |
-| Resilience | `*_TIMEOUT`, `*_RETRY_ATTEMPTS` |
-| Security | `ALLOWED_ORIGINS`, `CORS_*` |
+| Category    | Examples                             |
+| ----------- | ------------------------------------ |
+| Application | `NODE_ENV`, `PORT`, `LOG_LEVEL`      |
+| Database    | `DATABASE_URL`, `REDIS_URL`          |
+| Auth        | `JWT_SECRET`, `COGNITO_*`            |
+| Services    | `USER_SERVICE_URL`, `AI_SERVICE_URL` |
+| Resilience  | `*_TIMEOUT`, `*_RETRY_ATTEMPTS`      |
+| Security    | `ALLOWED_ORIGINS`, `CORS_*`          |
 
 ### Service-Specific Timeouts
 
-| Service | Default Timeout | Retry Attempts |
-|---------|-----------------|----------------|
-| User Service | 5s | 3 |
-| Discussion Service | 5s | 3 |
-| AI Service | 30s | 2 |
+| Service            | Default Timeout | Retry Attempts |
+| ------------------ | --------------- | -------------- |
+| User Service       | 5s              | 3              |
+| Discussion Service | 5s              | 3              |
+| AI Service         | 30s             | 2              |
 
 ## Monitoring and Alerting
 
 ### Health Checks
 
 Each service exposes:
+
 - `GET /health` - Basic liveness check
 - `GET /health/ready` - Readiness check (dependencies)
 

@@ -17,24 +17,25 @@ This guide provides comprehensive instructions for setting up, developing, and c
 
 ### Required Software
 
-| Software | Version | Purpose |
-|----------|---------|---------|
-| Node.js | 20.x LTS | Runtime environment |
-| pnpm | 9.x | Package manager |
-| Docker | Latest | Development services |
-| Git | Latest | Version control |
+| Software | Version  | Purpose              |
+| -------- | -------- | -------------------- |
+| Node.js  | 20.x LTS | Runtime environment  |
+| pnpm     | 9.x      | Package manager      |
+| Docker   | Latest   | Development services |
+| Git      | Latest   | Version control      |
 
 ### Optional Software
 
-| Software | Version | Purpose |
-|----------|---------|---------|
-| k6 | Latest | Load testing |
-| PostgreSQL Client | 15.x | Database CLI access |
-| Redis CLI | Latest | Cache inspection |
+| Software          | Version | Purpose             |
+| ----------------- | ------- | ------------------- |
+| k6                | Latest  | Load testing        |
+| PostgreSQL Client | 15.x    | Database CLI access |
+| Redis CLI         | Latest  | Cache inspection    |
 
 ### Installation
 
 **Node.js (via nvm):**
+
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 nvm install 20
@@ -42,11 +43,13 @@ nvm use 20
 ```
 
 **pnpm:**
+
 ```bash
 npm install -g pnpm
 ```
 
 **Docker:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
@@ -91,6 +94,7 @@ nano .env
 ```
 
 **Minimum Required Variables:**
+
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/reasonbridge?schema=public"
 REDIS_URL="redis://localhost:6379"
@@ -194,14 +198,14 @@ git checkout -b feat/your-feature-name
 
 ### Branch Naming Convention
 
-| Prefix | Use Case |
-|--------|----------|
-| `feat/` | New features |
-| `fix/` | Bug fixes |
-| `refactor/` | Code refactoring |
-| `docs/` | Documentation updates |
-| `test/` | Test additions/updates |
-| `chore/` | Maintenance tasks |
+| Prefix      | Use Case               |
+| ----------- | ---------------------- |
+| `feat/`     | New features           |
+| `fix/`      | Bug fixes              |
+| `refactor/` | Code refactoring       |
+| `docs/`     | Documentation updates  |
+| `test/`     | Test additions/updates |
+| `chore/`    | Maintenance tasks      |
 
 ### Making Changes
 
@@ -239,6 +243,7 @@ git commit -m "refactor(frontend): simplify auth context logic"
 ```
 
 **Pre-commit hooks will run automatically:**
+
 - Secrets scanning
 - Code duplication detection
 - Console statement check
@@ -257,6 +262,7 @@ gh pr create --title "feat: your feature description" --body "..."
 ```
 
 **PR Requirements:**
+
 - Passes all CI checks (lint, unit, integration)
 - Has descriptive title and body
 - Links related issues
@@ -266,12 +272,12 @@ gh pr create --title "feat: your feature description" --body "..."
 
 ### Test Types
 
-| Type | Command | Location |
-|------|---------|----------|
-| Unit | `pnpm test:unit` | `**/__tests__/*.spec.ts` |
+| Type        | Command                 | Location                        |
+| ----------- | ----------------------- | ------------------------------- |
+| Unit        | `pnpm test:unit`        | `**/__tests__/*.spec.ts`        |
 | Integration | `pnpm test:integration` | `**/__tests__/*.integration.ts` |
-| Contract | `pnpm test:contract` | `**/contract/*.spec.ts` |
-| E2E | `pnpm test:e2e` | `frontend/e2e/*.spec.ts` |
+| Contract    | `pnpm test:contract`    | `**/contract/*.spec.ts`         |
+| E2E         | `pnpm test:e2e`         | `frontend/e2e/*.spec.ts`        |
 
 ### Running Tests
 
@@ -292,6 +298,7 @@ pnpm test:coverage
 ### Writing Tests
 
 **Unit Test Example:**
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
 import { UserService } from '../user.service';
@@ -299,7 +306,7 @@ import { UserService } from '../user.service';
 describe('UserService', () => {
   it('should create a user', async () => {
     const mockPrisma = {
-      user: { create: vi.fn().mockResolvedValue({ id: '1', email: 'test@example.com' }) }
+      user: { create: vi.fn().mockResolvedValue({ id: '1', email: 'test@example.com' }) },
     };
 
     const service = new UserService(mockPrisma);
@@ -444,18 +451,21 @@ TTL rate-limit:192.168.1.1
 ### Common Issues
 
 **Issue:** `pnpm install` fails with lockfile error
+
 ```bash
 # Solution: Refresh lockfile
 pnpm install --no-frozen-lockfile
 ```
 
 **Issue:** TypeScript errors about missing types
+
 ```bash
 # Solution: Rebuild packages
 pnpm -r build
 ```
 
 **Issue:** Database connection refused
+
 ```bash
 # Solution: Ensure Docker is running
 docker-compose up -d postgres
@@ -463,6 +473,7 @@ docker-compose logs postgres
 ```
 
 **Issue:** Port already in use
+
 ```bash
 # Solution: Find and kill process
 lsof -i :3000
@@ -470,6 +481,7 @@ kill -9 <PID>
 ```
 
 **Issue:** Pre-commit hooks fail
+
 ```bash
 # Never bypass with --no-verify!
 # Fix the reported issue, stage changes, and commit again
@@ -482,6 +494,7 @@ pnpm lint:fix
 ```
 
 **Issue:** E2E tests timeout
+
 ```bash
 # Solution: Increase timeout in playwright.config.ts
 # Or check if services are running

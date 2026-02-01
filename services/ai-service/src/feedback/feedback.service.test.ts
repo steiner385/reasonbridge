@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FeedbackService } from './feedback.service.js';
 import { NotFoundException } from '@nestjs/common';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 import { FeedbackSensitivity } from './dto/request-feedback.dto.js';
 
 const createMockPrismaService = () => ({

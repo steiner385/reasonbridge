@@ -9,6 +9,28 @@ import { EmbeddingService } from './embedding.service.js';
 import { QdrantService } from './qdrant.service.js';
 import { RedisCacheService } from './redis-cache.service.js';
 
+/**
+ * Cache Module
+ *
+ * Configures semantic caching for the AI service with three tiers:
+ * 1. Redis - Fast exact-match caching by content hash
+ * 2. Qdrant - Vector similarity search for semantically similar content
+ * 3. Fresh analysis - Fallback to regex analyzers
+ *
+ * Uses AWS ElastiCache in production or local Redis in development.
+ *
+ * Environment Variables:
+ * - REDIS_HOST: Redis server hostname (default: localhost)
+ * - REDIS_PORT: Redis server port (default: 6379)
+ * - REDIS_TLS: Enable TLS for production (default: false)
+ * - FEEDBACK_CACHE_TTL: Feedback cache TTL in seconds (default: 172800 = 48 hours)
+ * - EMBEDDING_CACHE_TTL: Embedding cache TTL in seconds (default: 604800 = 7 days)
+ * - CACHE_MAX_ITEMS: Maximum cached items (default: 1000)
+ * - OPENAI_API_KEY: OpenAI API key for embeddings
+ * - QDRANT_URL: Qdrant server URL (default: http://localhost:6333)
+ * - QDRANT_API_KEY: Qdrant API key (optional for local)
+ * - SIMILARITY_THRESHOLD: Minimum similarity for cache hit (default: 0.95)
+ */
 @Module({
   imports: [
     NestCacheModule.register({
@@ -48,6 +70,6 @@ import { RedisCacheService } from './redis-cache.service.js';
     RedisCacheService,
     SemanticCacheService,
   ],
-  exports: [SemanticCacheService, RedisCacheService],
+  exports: [SemanticCacheService, RedisCacheService, NestCacheModule],
 })
 export class CacheModule {}

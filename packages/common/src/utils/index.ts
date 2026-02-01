@@ -3,4 +3,5 @@
  */
 
 export * from './assert.js';
+export * from './environment.js';
 export * from './id.js';

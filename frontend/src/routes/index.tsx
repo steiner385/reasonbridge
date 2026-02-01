@@ -8,6 +8,7 @@ import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
 import CommonGroundDemoPage from '../pages/Topics/CommonGroundDemoPage';
 import AgreementVisualizationDemoPage from '../pages/Topics/AgreementVisualizationDemoPage';
+import { DemoCredentialsPage } from '../pages/Demo';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
@@ -61,6 +62,10 @@ export const routes: RouteObject[] = [
   {
     path: '/demo/agreement-visualization',
     element: <AgreementVisualizationDemoPage />,
+  },
+  {
+    path: '/demo/credentials',
+    element: <DemoCredentialsPage />,
   },
   {
     path: '/profile',

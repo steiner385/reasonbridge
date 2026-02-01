@@ -1,4 +1,4 @@
-import type { User, VerificationLevel, UserStatus } from '@reason-bridge/db-models';
+import type { User, VerificationLevel, UserStatus } from '@prisma/client';
 
 /**
  * Response DTO for user data (includes private fields like email)

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
 import { SemanticCacheService } from '../cache/index.js';
@@ -8,13 +8,15 @@ import {
   DismissFeedbackDto,
   FeedbackSensitivity,
 } from './dto/index.js';
-import { Prisma } from '@reason-bridge/db-models';
+import { Prisma } from '@prisma/client';
 
 /**
  * Service for handling AI-generated feedback on responses
  */
 @Injectable()
 export class FeedbackService {
+  private readonly logger = new Logger(FeedbackService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly analyzer: ResponseAnalyzerService,
