@@ -43,12 +43,13 @@ function generateAlignments(): DemoAlignment[] {
     props.forEach((prop, idx) => {
       // Admin tends toward balanced/institutional views
       const stances: AlignmentStance[] = ['SUPPORT', 'NUANCED', 'SUPPORT', 'NUANCED'];
+      const stance = stances[idx % stances.length] ?? 'NUANCED';
       alignments.push({
         userId: DEMO_USER_IDS.ADMIN_ADAMS,
         propositionId: prop.id,
-        stance: stances[idx % stances.length],
+        stance,
         nuanceExplanation:
-          stances[idx % stances.length] === 'NUANCED'
+          stance === 'NUANCED'
             ? 'Both perspectives have merit; implementation details matter.'
             : undefined,
       });
@@ -66,10 +67,11 @@ function generateAlignments(): DemoAlignment[] {
     const props = getPropositionsByTopic(topicId);
     props.forEach((prop, idx) => {
       const stances: AlignmentStance[] = ['SUPPORT', 'OPPOSE', 'NUANCED', 'SUPPORT'];
+      const stance = stances[idx % stances.length] ?? 'NUANCED';
       alignments.push({
         userId: DEMO_USER_IDS.MOD_MARTINEZ,
         propositionId: prop.id,
-        stance: stances[idx % stances.length],
+        stance,
       });
     });
   });
@@ -90,12 +92,13 @@ function generateAlignments(): DemoAlignment[] {
     props.forEach((prop, idx) => {
       // Alice supports progressive positions
       const stances: AlignmentStance[] = ['SUPPORT', 'SUPPORT', 'NUANCED', 'SUPPORT', 'OPPOSE'];
+      const stance = stances[idx % stances.length] ?? 'NUANCED';
       alignments.push({
         userId: DEMO_USER_IDS.ALICE_ANDERSON,
         propositionId: prop.id,
-        stance: stances[idx % stances.length],
+        stance,
         nuanceExplanation:
-          stances[idx % stances.length] === 'NUANCED'
+          stance === 'NUANCED'
             ? 'I see validity in both sides, though I lean toward the progressive view.'
             : undefined,
       });
@@ -116,12 +119,13 @@ function generateAlignments(): DemoAlignment[] {
     props.forEach((prop, idx) => {
       // Bob takes moderate positions, often opposing extreme views
       const stances: AlignmentStance[] = ['OPPOSE', 'NUANCED', 'SUPPORT', 'NUANCED', 'OPPOSE'];
+      const stance = stances[idx % stances.length] ?? 'NUANCED';
       alignments.push({
         userId: DEMO_USER_IDS.BOB_BUILDER,
         propositionId: prop.id,
-        stance: stances[idx % stances.length],
+        stance,
         nuanceExplanation:
-          stances[idx % stances.length] === 'NUANCED'
+          stance === 'NUANCED'
             ? 'The practical implications matter more than the principle.'
             : undefined,
       });
@@ -135,14 +139,15 @@ function generateAlignments(): DemoAlignment[] {
     DEMO_PROPOSITIONS[10], // Standardized testing
     DEMO_PROPOSITIONS[13], // Return to office
     DEMO_PROPOSITIONS[17], // Preventive care
-  ];
+  ].filter((prop): prop is NonNullable<typeof prop> => prop !== undefined);
 
   newUserProps.forEach((prop, idx) => {
     const stances: AlignmentStance[] = ['SUPPORT', 'NUANCED', 'OPPOSE', 'SUPPORT', 'SUPPORT'];
+    const stance = stances[idx] ?? 'SUPPORT';
     alignments.push({
       userId: DEMO_USER_IDS.NEW_USER,
       propositionId: prop.id,
-      stance: stances[idx],
+      stance,
     });
   });
 

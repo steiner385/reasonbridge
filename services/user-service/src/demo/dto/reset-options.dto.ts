@@ -38,13 +38,13 @@ export class ResetOptionsDto {
  */
 export class ResetResultDto {
   /** Whether the reset was successful */
-  success: boolean;
+  success!: boolean;
 
   /** Time taken to reset in milliseconds */
-  durationMs: number;
+  durationMs!: number;
 
   /** Number of items deleted */
-  deletedCounts: {
+  deletedCounts!: {
     users: number;
     topics: number;
     responses: number;
@@ -55,7 +55,7 @@ export class ResetResultDto {
   };
 
   /** Number of items re-seeded */
-  seededCounts: {
+  seededCounts!: {
     users: number;
     topics: number;
     responses: number;
@@ -66,8 +66,8 @@ export class ResetResultDto {
   };
 
   /** Status messages */
-  messages: string[];
+  messages!: string[];
 
   /** Timestamp of reset */
-  completedAt: string;
+  completedAt!: string;
 }

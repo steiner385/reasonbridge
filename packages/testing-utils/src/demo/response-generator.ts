@@ -163,14 +163,15 @@ export function generateResponseContent(
     };
   }
 
-  const selectedTemplate = templates[index % templates.length];
+  const selectedTemplate = templates[index % templates.length] ?? templates[0] ?? '';
   const hasCitation = options.includeCitation ?? index % 3 === 0; // ~30% have citations
+  const citation = SAMPLE_CITATIONS[index % SAMPLE_CITATIONS.length];
 
   return {
     content: selectedTemplate,
     viewpoint,
     hasCitation,
-    citedSources: hasCitation ? [SAMPLE_CITATIONS[index % SAMPLE_CITATIONS.length]] : [],
+    citedSources: hasCitation && citation ? [citation] : [],
     mentions: options.mentions || [],
   };
 }
@@ -194,8 +195,10 @@ function generateFallbackResponse(viewpoint: ViewpointType): string {
     ],
   };
 
-  const options = fallbacks[viewpoint];
-  return options[Math.floor(Math.random() * options.length)];
+  const fallbackOptions = fallbacks[viewpoint];
+  return (
+    fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)] ?? fallbackOptions[0] ?? ''
+  );
 }
 
 /**

@@ -5,7 +5,7 @@
  * Pattern: Demo{Role}2026!
  */
 
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsOptional, IsBoolean } from 'class-validator';
 
 /**
  * Query parameters for credential hints request
@@ -21,19 +21,19 @@ export class GetDemoCredentialsQueryDto {
  */
 export class DemoCredentialHintDto {
   /** Display name of the persona */
-  displayName: string;
+  displayName!: string;
 
   /** Role category (Admin, Moderator, Power User, Regular User, New User) */
-  role: string;
+  role!: string;
 
   /** Email address for login */
-  email: string;
+  email!: string;
 
   /** Password pattern hint (not the actual password) */
-  passwordHint: string;
+  passwordHint!: string;
 
   /** Brief description of what this persona demonstrates */
-  description: string;
+  description!: string;
 }
 
 /**
@@ -41,11 +41,11 @@ export class DemoCredentialHintDto {
  */
 export class DemoCredentialsResponseDto {
   /** List of credential hints for all demo personas */
-  credentials: DemoCredentialHintDto[];
+  credentials!: DemoCredentialHintDto[];
 
   /** Pattern explanation for password format */
-  passwordPattern: string;
+  passwordPattern!: string;
 
   /** Warning about demo credential restrictions */
-  warning: string;
+  warning!: string;
 }

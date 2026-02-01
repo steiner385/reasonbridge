@@ -8,9 +8,13 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResetOptionsDto, ResetResultDto } from './dto/reset-options.dto.js';
 import { DemoStatusDto, DemoDataCountsDto, DemoHealthDto } from './dto/demo-status.dto.js';
+
+// Demo ID prefix - all demo data IDs start with this
+const DEMO_ID_PREFIX = '11111111-%';
 
 // Expected counts from seed definitions
 const EXPECTED_COUNTS: DemoDataCountsDto = {
@@ -61,9 +65,10 @@ export class DemoResetService {
   }
 
   /**
-   * Get current data counts
+   * Get current data counts using raw SQL (UUID doesn't support startsWith in Prisma)
    */
   async getDataCounts(): Promise<DemoDataCountsDto> {
+    // Use raw SQL queries to count demo data by ID prefix pattern
     const [
       users,
       topics,
@@ -74,30 +79,30 @@ export class DemoResetService {
       commonGroundAnalyses,
       feedback,
     ] = await Promise.all([
-      this.prisma.user.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
-      this.prisma.discussionTopic.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
-      this.prisma.tag.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
-      this.prisma.response.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
-      this.prisma.proposition.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
-      this.prisma.alignment.count({
-        where: { userId: { startsWith: '11111111-' } },
-      }),
-      this.prisma.commonGroundAnalysis.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
-      this.prisma.feedback.count({
-        where: { id: { startsWith: '11111111-' } },
-      }),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "User" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "DiscussionTopic" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "Tag" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "Response" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "Proposition" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "Alignment" WHERE "userId"::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "CommonGroundAnalysis" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
+      this.prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*) as count FROM "Feedback" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+        `.then((r) => Number(r[0]?.count ?? 0)),
     ]);
 
     return {
@@ -215,7 +220,8 @@ export class DemoResetService {
   }
 
   /**
-   * Truncate all demo data from the database
+   * Truncate all demo data from the database using raw SQL
+   * (UUID fields don't support startsWith in Prisma)
    */
   private async truncateDemoData(): Promise<void> {
     this.logger.log('Truncating demo data...');
@@ -224,49 +230,49 @@ export class DemoResetService {
     // All demo IDs start with 11111111-
 
     // Delete feedback first
-    await this.prisma.feedback.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "Feedback" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete alignments
-    await this.prisma.alignment.deleteMany({
-      where: { userId: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "Alignment" WHERE "userId"::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete common ground analyses
-    await this.prisma.commonGroundAnalysis.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "CommonGroundAnalysis" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete propositions
-    await this.prisma.proposition.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "Proposition" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete responses
-    await this.prisma.response.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "Response" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete topic-tag associations
-    await this.prisma.topicTag.deleteMany({
-      where: { topicId: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "TopicTag" WHERE "topicId"::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete topics
-    await this.prisma.discussionTopic.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "DiscussionTopic" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete tags
-    await this.prisma.tag.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "Tag" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     // Delete users
-    await this.prisma.user.deleteMany({
-      where: { id: { startsWith: '11111111-' } },
-    });
+    await this.prisma.$executeRaw`
+      DELETE FROM "User" WHERE id::text LIKE ${DEMO_ID_PREFIX}
+    `;
 
     this.logger.log('Demo data truncated');
   }

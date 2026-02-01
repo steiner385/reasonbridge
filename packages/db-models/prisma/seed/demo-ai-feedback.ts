@@ -177,10 +177,11 @@ function generateDemoFeedback(): DemoFeedback[] {
     // Determine feedback type based on index for variety
     const typeIndex = feedbackIndex % 5;
     const types: FeedbackType[] = ['AFFIRMATION', 'FALLACY', 'UNSOURCED', 'BIAS', 'INFLAMMATORY'];
-    const feedbackType = types[typeIndex];
+    const feedbackType = types[typeIndex] ?? 'AFFIRMATION';
 
     const templates = FEEDBACK_TEMPLATES[feedbackType];
-    const template = templates[feedbackIndex % templates.length];
+    // templates always has at least one entry per type
+    const template = templates[feedbackIndex % templates.length]!;
 
     feedback.push({
       id: generateSimpleFeedbackId(feedbackIndex++),

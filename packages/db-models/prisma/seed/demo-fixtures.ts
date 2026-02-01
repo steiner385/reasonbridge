@@ -11,7 +11,7 @@
  * - 21 common ground analyses
  */
 
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { DEMO_PERSONAS } from './demo-personas';
 import { DEMO_TOPICS } from './demo-topics';
 import { DEMO_TAGS } from './demo-tags';
@@ -20,7 +20,7 @@ import { DEMO_PROPOSITIONS } from './demo-propositions';
 import { DEMO_ALIGNMENTS } from './demo-alignments';
 import { DEMO_COMMON_GROUND } from './demo-common-ground';
 import { DEMO_AI_FEEDBACK } from './demo-ai-feedback';
-import { generateDemoTimestamp } from '../../../testing-utils/src/demo/timestamp-generator';
+import { generateDemoTimestamp } from './timestamp-generator';
 
 // Re-export for convenience
 export { DEMO_PERSONAS } from './demo-personas';
@@ -42,7 +42,7 @@ export async function seedDemoPersonas(prisma: PrismaClient): Promise<void> {
         trustScoreAbility: persona.trustScoreAbility,
         trustScoreBenevolence: persona.trustScoreBenevolence,
         trustScoreIntegrity: persona.trustScoreIntegrity,
-        moralFoundationProfile: persona.moralFoundationProfile,
+        moralFoundationProfile: persona.moralFoundationProfile as unknown as Prisma.InputJsonValue,
         phoneNumber: persona.phoneNumber,
         phoneVerified: persona.phoneVerified,
         status: persona.status,
@@ -62,7 +62,7 @@ export async function seedDemoPersonas(prisma: PrismaClient): Promise<void> {
         trustScoreAbility: persona.trustScoreAbility,
         trustScoreBenevolence: persona.trustScoreBenevolence,
         trustScoreIntegrity: persona.trustScoreIntegrity,
-        moralFoundationProfile: persona.moralFoundationProfile,
+        moralFoundationProfile: persona.moralFoundationProfile as unknown as Prisma.InputJsonValue,
         status: persona.status,
       },
     });
@@ -142,7 +142,7 @@ export async function seedDemoTopics(prisma: PrismaClient): Promise<void> {
         create: {
           topicId: topic.id,
           tagId: tagId,
-          source: 'CREATOR_ASSIGNED',
+          source: 'CREATOR',
         },
       });
 
@@ -179,7 +179,7 @@ export async function seedDemoResponses(prisma: PrismaClient): Promise<void> {
       where: { id: response.id },
       update: {
         content: response.content,
-        citedSources: response.citedSources,
+        citedSources: response.citedSources as unknown as Prisma.InputJsonValue,
       },
       create: {
         id: response.id,
@@ -187,7 +187,7 @@ export async function seedDemoResponses(prisma: PrismaClient): Promise<void> {
         authorId: response.authorId,
         parentId: response.parentId,
         content: response.content,
-        citedSources: response.citedSources,
+        citedSources: response.citedSources as unknown as Prisma.InputJsonValue,
         createdAt,
       },
     });
@@ -289,18 +289,18 @@ export async function seedDemoCommonGround(prisma: PrismaClient): Promise<void> 
     await prisma.commonGroundAnalysis.upsert({
       where: { id: cg.id },
       update: {
-        agreementZones: cg.agreementZones,
-        misunderstandings: cg.misunderstandings,
-        genuineDisagreements: cg.genuineDisagreements,
+        agreementZones: cg.agreementZones as unknown as Prisma.InputJsonValue,
+        misunderstandings: cg.misunderstandings as unknown as Prisma.InputJsonValue,
+        genuineDisagreements: cg.genuineDisagreements as unknown as Prisma.InputJsonValue,
         overallConsensusScore: cg.overallConsensusScore,
       },
       create: {
         id: cg.id,
         topicId: cg.topicId,
         version: cg.version,
-        agreementZones: cg.agreementZones,
-        misunderstandings: cg.misunderstandings,
-        genuineDisagreements: cg.genuineDisagreements,
+        agreementZones: cg.agreementZones as unknown as Prisma.InputJsonValue,
+        misunderstandings: cg.misunderstandings as unknown as Prisma.InputJsonValue,
+        genuineDisagreements: cg.genuineDisagreements as unknown as Prisma.InputJsonValue,
         overallConsensusScore: cg.overallConsensusScore,
         participantCountAtGeneration: cg.participantCountAtGeneration,
         responseCountAtGeneration: cg.responseCountAtGeneration,
@@ -336,7 +336,10 @@ export async function seedDemoAIFeedback(prisma: PrismaClient): Promise<void> {
         suggestionText: feedback.suggestionText,
         reasoning: feedback.reasoning,
         confidenceScore: feedback.confidenceScore,
-        educationalResources: feedback.educationalResources,
+        educationalResources:
+          feedback.educationalResources === null
+            ? Prisma.DbNull
+            : (feedback.educationalResources as unknown as Prisma.InputJsonValue),
         displayedToUser: feedback.displayedToUser,
         userAcknowledged: feedback.userAcknowledged,
         userRevised: feedback.userRevised,
@@ -349,7 +352,10 @@ export async function seedDemoAIFeedback(prisma: PrismaClient): Promise<void> {
         suggestionText: feedback.suggestionText,
         reasoning: feedback.reasoning,
         confidenceScore: feedback.confidenceScore,
-        educationalResources: feedback.educationalResources,
+        educationalResources:
+          feedback.educationalResources === null
+            ? Prisma.DbNull
+            : (feedback.educationalResources as unknown as Prisma.InputJsonValue),
         displayedToUser: feedback.displayedToUser,
         userAcknowledged: feedback.userAcknowledged,
         userRevised: feedback.userRevised,
@@ -374,7 +380,7 @@ export async function truncateDemoData(prisma: PrismaClient): Promise<void> {
   // Delete feedback for demo responses
   await prisma.feedback.deleteMany({
     where: {
-      id: { startsWith: '11111111-0000-4000-8000-0002' },
+      id: { in: DEMO_AI_FEEDBACK.map((f) => f.id) },
     },
   });
   console.log('  ✓ Deleted demo AI feedback');

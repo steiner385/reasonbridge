@@ -8,7 +8,8 @@
  * to block login attempts with demo account emails.
  */
 
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
@@ -101,14 +102,14 @@ export function isDemoCredential(email: string): boolean {
  * based on environment variables
  */
 export function isDemoEnvironment(): boolean {
-  return process.env.DEMO_MODE === 'true';
+  return process.env['DEMO_MODE'] === 'true';
 }
 
 /**
  * Utility function to check if current environment is production
  */
 export function isProductionEnvironment(): boolean {
-  return process.env.NODE_ENV === 'production';
+  return process.env['NODE_ENV'] === 'production';
 }
 
 /**

@@ -17,7 +17,7 @@
 import { DEMO_TOPIC_IDS, DEMO_TAG_IDS, DEMO_USER_IDS } from './demo-ids';
 
 // Topic status type matching Prisma schema
-type TopicStatus = 'ACTIVE' | 'MODERATED' | 'RESOLVED' | 'ARCHIVED';
+type TopicStatus = 'SEEDING' | 'ACTIVE' | 'ARCHIVED';
 
 export interface DemoTopic {
   id: string;
@@ -110,7 +110,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     description:
       'Explore arguments for and against compulsory voting. Consider civic duty, representation, implementation challenges, and examples from countries like Australia and Belgium.',
     creatorId: DEMO_USER_IDS.ADMIN_ADAMS,
-    status: 'MODERATED',
+    status: 'ACTIVE',
     crossCuttingThemes: ['democracy', 'civic engagement', 'rights'],
     tagIds: [DEMO_TAG_IDS.GOVERNMENT, DEMO_TAG_IDS.SOCIETY],
     category: 'Government & Civic',
@@ -134,7 +134,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     description:
       'Analyze the case for and against a comprehensive ban on single-use plastics. Consider environmental benefits, economic impacts, alternatives availability, and lessons from regional bans.',
     creatorId: DEMO_USER_IDS.ALICE_ANDERSON,
-    status: 'RESOLVED',
+    status: 'ARCHIVED',
     crossCuttingThemes: ['environment', 'policy', 'industry'],
     tagIds: [DEMO_TAG_IDS.ENVIRONMENT, DEMO_TAG_IDS.ECONOMY],
     category: 'Environment & Lifestyle',

@@ -7,31 +7,31 @@
  */
 export class DemoDataCountsDto {
   /** Number of demo users */
-  users: number;
+  users!: number;
 
   /** Number of demo topics */
-  topics: number;
+  topics!: number;
 
   /** Number of demo tags */
-  tags: number;
+  tags!: number;
 
   /** Number of demo responses */
-  responses: number;
+  responses!: number;
 
   /** Number of demo propositions */
-  propositions: number;
+  propositions!: number;
 
   /** Number of demo alignments */
-  alignments: number;
+  alignments!: number;
 
   /** Number of common ground analyses */
-  commonGroundAnalyses: number;
+  commonGroundAnalyses!: number;
 
   /** Number of AI feedback instances */
-  feedback: number;
+  feedback!: number;
 
   /** Total database entries */
-  total: number;
+  total!: number;
 }
 
 /**
@@ -39,16 +39,16 @@ export class DemoDataCountsDto {
  */
 export class DemoHealthDto {
   /** Database connectivity */
-  database: boolean;
+  database!: boolean;
 
   /** Redis cache connectivity */
-  redis: boolean;
+  redis!: boolean;
 
   /** AI service availability */
-  aiService: boolean;
+  aiService!: boolean;
 
   /** Last health check timestamp */
-  lastChecked: string;
+  lastChecked!: string;
 }
 
 /**
@@ -56,26 +56,26 @@ export class DemoHealthDto {
  */
 export class DemoStatusDto {
   /** Whether demo mode is enabled */
-  demoModeEnabled: boolean;
+  demoModeEnabled!: boolean;
 
   /** Current environment name */
-  environment: string;
+  environment!: string;
 
   /** Counts of demo data */
-  dataCounts: DemoDataCountsDto;
+  dataCounts!: DemoDataCountsDto;
 
   /** System health information */
-  health: DemoHealthDto;
+  health!: DemoHealthDto;
 
   /** Expected data counts (from seed definitions) */
-  expectedCounts: DemoDataCountsDto;
+  expectedCounts!: DemoDataCountsDto;
 
   /** Whether data is fully seeded */
-  isFullySeeded: boolean;
+  isFullySeeded!: boolean;
 
   /** Last reset timestamp */
-  lastResetAt: string | null;
+  lastResetAt!: string | null;
 
   /** Status message */
-  message: string;
+  message!: string;
 }
