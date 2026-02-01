@@ -24,16 +24,16 @@ Request → Hash Content → Redis Lookup
 
 ## Configuration
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | - | OpenAI API key for embeddings |
-| `OPENAI_EMBEDDING_MODEL` | text-embedding-3-small | Embedding model (1536 dims) |
-| `QDRANT_URL` | http://localhost:6333 | Qdrant server URL |
-| `QDRANT_API_KEY` | - | Qdrant API key (optional for local) |
-| `QDRANT_COLLECTION` | feedback_embeddings | Collection name |
-| `SIMILARITY_THRESHOLD` | 0.95 | Minimum similarity for cache hit |
-| `FEEDBACK_CACHE_TTL` | 172800 | Redis feedback cache TTL (48h in seconds) |
-| `EMBEDDING_CACHE_TTL` | 604800 | Redis embedding cache TTL (7d in seconds) |
+| Variable                 | Default                | Description                               |
+| ------------------------ | ---------------------- | ----------------------------------------- |
+| `OPENAI_API_KEY`         | -                      | OpenAI API key for embeddings             |
+| `OPENAI_EMBEDDING_MODEL` | text-embedding-3-small | Embedding model (1536 dims)               |
+| `QDRANT_URL`             | http://localhost:6333  | Qdrant server URL                         |
+| `QDRANT_API_KEY`         | -                      | Qdrant API key (optional for local)       |
+| `QDRANT_COLLECTION`      | feedback_embeddings    | Collection name                           |
+| `SIMILARITY_THRESHOLD`   | 0.95                   | Minimum similarity for cache hit          |
+| `FEEDBACK_CACHE_TTL`     | 172800                 | Redis feedback cache TTL (48h in seconds) |
+| `EMBEDDING_CACHE_TTL`    | 604800                 | Redis embedding cache TTL (7d in seconds) |
 
 ## Components
 
@@ -76,10 +76,10 @@ Exact-match caching:
 
 ## Cache Key Patterns
 
-| Purpose | Key Pattern | TTL |
-|---------|-------------|-----|
-| Exact feedback match | `feedback:exact:{contentHash}` | 48 hours |
-| Cached embedding | `feedback:embedding:{contentHash}` | 7 days |
+| Purpose              | Key Pattern                        | TTL      |
+| -------------------- | ---------------------------------- | -------- |
+| Exact feedback match | `feedback:exact:{contentHash}`     | 48 hours |
+| Cached embedding     | `feedback:embedding:{contentHash}` | 7 days   |
 
 ## Qdrant Payload Schema
 
@@ -98,14 +98,14 @@ Exact-match caching:
 
 ## Performance Expectations
 
-| Operation | Latency | Cost |
-|-----------|---------|------|
-| Redis exact match | <5ms | Free |
-| Redis embedding lookup | <5ms | Free |
-| OpenAI embedding | 100-200ms | $0.00002/1K tokens |
-| Qdrant similarity search | 10-50ms | Free (self-hosted) |
-| Regex analyzers | <50ms | Free |
-| Qdrant write (async) | 20-50ms | Free |
+| Operation                | Latency   | Cost               |
+| ------------------------ | --------- | ------------------ |
+| Redis exact match        | <5ms      | Free               |
+| Redis embedding lookup   | <5ms      | Free               |
+| OpenAI embedding         | 100-200ms | $0.00002/1K tokens |
+| Qdrant similarity search | 10-50ms   | Free (self-hosted) |
+| Regex analyzers          | <50ms     | Free               |
+| Qdrant write (async)     | 20-50ms   | Free               |
 
 ## Expected Cache Hit Rates
 

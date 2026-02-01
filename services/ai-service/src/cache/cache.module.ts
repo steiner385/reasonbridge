@@ -61,12 +61,26 @@ const logger = new Logger('CacheModule');
         return new OpenAI({ apiKey });
       },
     },
-    // Qdrant client
+    // Qdrant client - optional, returns null if not configured or in test mode without explicit URL
     {
       provide: 'QDRANT_CLIENT',
       useFactory: () => {
+        const qdrantUrl = process.env['QDRANT_URL'];
+        const isTestMode = process.env['NODE_ENV'] === 'test';
+
+        // In test mode, require explicit QDRANT_URL to enable Qdrant
+        // This prevents E2E tests from failing when Qdrant is not available
+        if (!qdrantUrl && isTestMode) {
+          logger.warn(
+            'QDRANT_URL not configured in test mode - semantic similarity caching disabled',
+          );
+          return null;
+        }
+
+        // In non-test mode, default to localhost if not configured
+        const url = qdrantUrl || 'http://localhost:6333';
         return new QdrantClient({
-          url: process.env['QDRANT_URL'] || 'http://localhost:6333',
+          url,
           apiKey: process.env['QDRANT_API_KEY'] || undefined,
         });
       },
