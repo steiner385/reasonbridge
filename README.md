@@ -10,11 +10,13 @@ A Discord-related platform using specification-driven development to foster rati
 ## Table of Contents
 
 - [Features](#features)
+- [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [Development](#development)
 - [Configuration](#configuration)
 - [Testing](#testing)
+- [Load Testing](#load-testing)
 - [API Documentation](#api-documentation)
 - [Contributing](#contributing)
 - [License](#license)
@@ -28,6 +30,27 @@ A Discord-related platform using specification-driven development to foster rati
 - **Moderation Tools** - Review and moderate content with confidence scoring
 - **User Trust System** - Track user reputation and verification status
 - **Feedback Analytics** - Measure the effectiveness of feedback mechanisms
+
+## Architecture
+
+ReasonBridge uses a microservices architecture with the following key components:
+
+| Service            | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| API Gateway        | Central routing, authentication, rate limiting, resilience |
+| User Service       | User management, authentication, profiles                  |
+| Discussion Service | Topics, propositions, responses, threading                 |
+| AI Service         | AI-powered analysis (bias detection, common ground)        |
+| Moderation Service | Content moderation, appeals, reporting                     |
+
+### Resilience Features
+
+- **Circuit Breakers** - Prevent cascade failures with automatic service isolation
+- **Retry with Backoff** - Automatic retry for transient failures with exponential backoff
+- **Rate Limiting** - Configurable tiers (100/min default, 10/min strict, 5/min auth)
+- **Security Headers** - OWASP-compliant security headers via Helmet
+
+For detailed architecture documentation, see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
 ## Prerequisites
 
@@ -152,6 +175,37 @@ The project uses Vitest for unit and integration testing with Prisma mocking to 
 
 Services use a local test setup file (e.g., `src/test-setup.ts`) that creates comprehensive Prisma client mocks, allowing unit tests to run in isolation without external dependencies.
 
+## Load Testing
+
+The project includes k6 load tests for performance validation:
+
+```bash
+# Install k6 (https://k6.io/docs/getting-started/installation/)
+brew install k6  # macOS
+
+# Run smoke test (5 users)
+k6 run load-tests/scenarios/health.js
+
+# Run load test (100 users)
+k6 run -e TEST_TYPE=load load-tests/scenarios/topics.js
+
+# Run stress test (500 users)
+k6 run -e TEST_TYPE=stress load-tests/scenarios/user-journey.js
+
+# Run soak test (10,000 users)
+k6 run load-tests/scenarios/soak-10k.js
+```
+
+Available scenarios:
+
+- `health.js` - Health endpoint checks
+- `topics.js` - Topics CRUD operations
+- `auth.js` - Authentication flows
+- `user-journey.js` - Full user journey simulation
+- `soak-10k.js` - High concurrency capacity test
+
+See [load-tests/README.md](./load-tests/README.md) for detailed documentation.
+
 ## Git Hooks
 
 This project uses [husky](https://typicode.github.io/husky/) for git hooks:
@@ -223,8 +277,11 @@ Direct pushes to `main` are blocked by git hooks. All changes must go through pu
 
 ## Additional Documentation
 
+- **[Architecture Guide](./docs/ARCHITECTURE.md)** - System architecture, microservices, resilience patterns
+- **[Developer Guide](./docs/DEVELOPER.md)** - Comprehensive setup and development instructions
+- **[Load Testing Guide](./load-tests/README.md)** - Performance testing with k6
 - **[Frontend README](./frontend/README.md)** - Frontend-specific setup and development
-- **[Architecture Documentation](./specs/001-rational-discussion-platform/)** - Detailed architecture and design specifications
+- **[Feature Specifications](./specs/)** - Detailed feature specifications and design documents
 
 ## License
 

@@ -5,3 +5,5 @@ export { default as SuggestionCards } from './SuggestionCards';
 export type { SuggestionCardsProps } from './SuggestionCards';
 export { default as SuggestionPanel } from './SuggestionPanel';
 export type { SuggestionPanelProps } from './SuggestionPanel';
+export { default as ToneIndicator } from './ToneIndicator';
+export { default as ClarityScoreDisplay } from './ClarityScoreDisplay';

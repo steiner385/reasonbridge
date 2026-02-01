@@ -4,11 +4,12 @@ import { UsersService } from './users.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
+import { FeedbackPreferencesService } from '../services/feedback-preferences.service.js';
 
 @Module({
   imports: [forwardRef(() => AuthModule), PrismaModule],
   controllers: [UsersController],
-  providers: [UsersService, BotDetectorService],
-  exports: [UsersService, BotDetectorService],
+  providers: [UsersService, BotDetectorService, FeedbackPreferencesService],
+  exports: [UsersService, BotDetectorService, FeedbackPreferencesService],
 })
 export class UsersModule {}
