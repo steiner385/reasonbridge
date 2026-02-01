@@ -1,6 +1,6 @@
 import { Module, Logger } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import * as redisStore from 'cache-manager-redis-store';
+import { redisStore } from 'cache-manager-redis-store';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import OpenAI from 'openai';
 

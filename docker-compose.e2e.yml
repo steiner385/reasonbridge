@@ -185,6 +185,8 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
       REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
       AWS_ENDPOINT: http://localstack:4566
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
