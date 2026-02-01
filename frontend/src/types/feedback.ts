@@ -174,3 +174,78 @@ export interface ToneIndicatorProps {
   /** Callback when the indicator is clicked */
   onClick?: () => void;
 }
+
+/**
+ * Clarity level representing how clear and well-structured content is
+ */
+export type ClarityLevel = 'excellent' | 'good' | 'moderate' | 'needs_improvement' | 'poor';
+
+/**
+ * Factors that contribute to clarity scoring
+ */
+export interface ClarityFactors {
+  /** How well the argument is structured (0-1) */
+  structure?: number;
+  /** How specific and precise the language is (0-1) */
+  specificity?: number;
+  /** How well claims are supported with evidence (0-1) */
+  evidenceSupport?: number;
+  /** How logically coherent the argument is (0-1) */
+  coherence?: number;
+  /** How readable the content is (0-1) */
+  readability?: number;
+}
+
+/**
+ * Issue detected during clarity analysis
+ */
+export interface ClarityIssue {
+  /** Type of clarity issue */
+  type: 'unsourced_claim' | 'vague_language' | 'bias_indicator' | 'unclear_structure';
+  /** Description of the issue */
+  description: string;
+  /** Example from the content (optional) */
+  example?: string;
+  /** Suggestion for improvement */
+  suggestion: string;
+}
+
+/**
+ * Result of clarity analysis for content
+ */
+export interface ClarityAnalysis {
+  /** Overall clarity score from 0 to 1 */
+  score: number;
+  /** Clarity level category */
+  level: ClarityLevel;
+  /** Breakdown of clarity factors (optional) */
+  factors?: ClarityFactors;
+  /** Specific issues detected (optional) */
+  issues?: ClarityIssue[];
+  /** General suggestion for improvement */
+  suggestion?: string;
+  /** Confidence in the analysis (0-1) */
+  confidenceScore?: number;
+}
+
+/**
+ * Props for ClarityScoreDisplay component
+ */
+export interface ClarityScoreDisplayProps {
+  /** Clarity analysis data to visualize */
+  clarity: ClarityAnalysis;
+  /** Display variant */
+  variant?: 'detailed' | 'compact' | 'inline';
+  /** Whether to show the breakdown of clarity factors */
+  showFactors?: boolean;
+  /** Whether to show specific issues */
+  showIssues?: boolean;
+  /** Whether to show improvement suggestions */
+  showSuggestions?: boolean;
+  /** Custom className for the container */
+  className?: string;
+  /** Size of the display */
+  size?: 'sm' | 'md' | 'lg';
+  /** Callback when the display is clicked */
+  onClick?: () => void;
+}
