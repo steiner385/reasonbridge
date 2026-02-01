@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
+import { SemanticCacheService } from '../cache/index.js';
 import {
   RequestFeedbackDto,
   FeedbackResponseDto,
@@ -17,6 +18,7 @@ export class FeedbackService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly analyzer: ResponseAnalyzerService,
+    private readonly semanticCache: SemanticCacheService,
   ) {}
 
   /**
@@ -34,8 +36,12 @@ export class FeedbackService {
       throw new NotFoundException(`Response with ID ${dto.responseId} not found`);
     }
 
-    // Generate AI feedback using Bedrock
-    const aiAnalysis = await this.generateFeedback(dto.content);
+    // Get cached feedback or generate new analysis
+    const aiAnalysis = await this.semanticCache.getOrAnalyze(
+      dto.content,
+      () => this.analyzer.analyzeContent(dto.content),
+      response.topicId,
+    );
 
     // Apply sensitivity filtering
     const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;

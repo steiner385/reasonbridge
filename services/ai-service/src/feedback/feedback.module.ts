@@ -7,12 +7,13 @@ import { ToneAnalyzerService } from '../services/tone-analyzer.service.js';
 import { FallacyDetectorService } from '../services/fallacy-detector.service.js';
 import { ClarityAnalyzerService } from '../services/clarity-analyzer.service.js';
 import { FeedbackAnalyticsService } from '../services/feedback-analytics.service.js';
+import { CacheModule } from '../cache/index.js';
 
 /**
  * Module for feedback functionality
  */
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, CacheModule],
   controllers: [FeedbackController],
   providers: [
     FeedbackService,

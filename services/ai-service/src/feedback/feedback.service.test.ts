@@ -19,6 +19,11 @@ const createMockAnalyzerService = () => ({
   analyzeContent: vi.fn(),
 });
 
+const createMockSemanticCacheService = () => ({
+  getOrAnalyze: vi.fn(),
+  lookup: vi.fn(),
+});
+
 const createMockFeedback = (overrides = {}) => ({
   id: 'feedback-1',
   responseId: 'response-1',
@@ -41,12 +46,14 @@ describe('FeedbackService', () => {
   let service: FeedbackService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockAnalyzer: ReturnType<typeof createMockAnalyzerService>;
+  let mockSemanticCache: ReturnType<typeof createMockSemanticCacheService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockAnalyzer = createMockAnalyzerService();
-    service = new FeedbackService(mockPrisma as any, mockAnalyzer as any);
+    mockSemanticCache = createMockSemanticCacheService();
+    service = new FeedbackService(mockPrisma as any, mockAnalyzer as any, mockSemanticCache as any);
   });
 
   describe('requestFeedback', () => {
@@ -62,8 +69,8 @@ describe('FeedbackService', () => {
     });
 
     it('should create feedback for valid response', async () => {
-      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1' });
-      mockAnalyzer.analyzeContent.mockResolvedValue({
+      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1', topicId: 'topic-1' });
+      mockSemanticCache.getOrAnalyze.mockResolvedValue({
         type: FeedbackType.INFLAMMATORY,
         subtype: 'hostile_tone',
         suggestionText: 'Consider...',
@@ -75,13 +82,18 @@ describe('FeedbackService', () => {
 
       const result = await service.requestFeedback(requestDto);
 
+      expect(mockSemanticCache.getOrAnalyze).toHaveBeenCalledWith(
+        requestDto.content,
+        expect.any(Function),
+        'topic-1',
+      );
       expect(mockPrisma.feedback.create).toHaveBeenCalled();
       expect(result.id).toBe('feedback-1');
     });
 
     it('should use default MEDIUM sensitivity when not provided', async () => {
-      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1' });
-      mockAnalyzer.analyzeContent.mockResolvedValue({
+      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1', topicId: 'topic-1' });
+      mockSemanticCache.getOrAnalyze.mockResolvedValue({
         type: FeedbackType.BIAS,
         suggestionText: 'Consider...',
         reasoning: 'Detected...',
@@ -99,8 +111,8 @@ describe('FeedbackService', () => {
     });
 
     it('should use LOW sensitivity threshold', async () => {
-      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1' });
-      mockAnalyzer.analyzeContent.mockResolvedValue({
+      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1', topicId: 'topic-1' });
+      mockSemanticCache.getOrAnalyze.mockResolvedValue({
         type: FeedbackType.BIAS,
         suggestionText: 'Consider...',
         reasoning: 'Detected...',
@@ -121,8 +133,8 @@ describe('FeedbackService', () => {
     });
 
     it('should use HIGH sensitivity threshold', async () => {
-      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1' });
-      mockAnalyzer.analyzeContent.mockResolvedValue({
+      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1', topicId: 'topic-1' });
+      mockSemanticCache.getOrAnalyze.mockResolvedValue({
         type: FeedbackType.BIAS,
         suggestionText: 'Consider...',
         reasoning: 'Detected...',
@@ -143,8 +155,8 @@ describe('FeedbackService', () => {
     });
 
     it('should store subtype when present', async () => {
-      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1' });
-      mockAnalyzer.analyzeContent.mockResolvedValue({
+      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1', topicId: 'topic-1' });
+      mockSemanticCache.getOrAnalyze.mockResolvedValue({
         type: FeedbackType.INFLAMMATORY,
         subtype: 'personal_attack',
         suggestionText: 'Consider...',
@@ -166,8 +178,8 @@ describe('FeedbackService', () => {
 
     it('should store educational resources when present', async () => {
       const resources = { links: [{ title: 'Test', url: 'https://test.com' }] };
-      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1' });
-      mockAnalyzer.analyzeContent.mockResolvedValue({
+      mockPrisma.response.findUnique.mockResolvedValue({ id: 'response-1', topicId: 'topic-1' });
+      mockSemanticCache.getOrAnalyze.mockResolvedValue({
         type: FeedbackType.UNSOURCED,
         suggestionText: 'Consider...',
         reasoning: 'Detected...',
