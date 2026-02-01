@@ -15,12 +15,12 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
+            font-size: 10pt;
+            line-height: 1.5;
             color: #1a1a1a;
             max-width: 8.5in;
             margin: 0 auto;
-            padding: 0.5in;
+            padding: 0.4in;
         }
 
         @media print {
@@ -28,59 +28,224 @@
                 padding: 0;
             }
             @page {
-                margin: 0.6in;
+                margin: 0.5in;
                 size: letter;
+            }
+            .page-break {
+                page-break-before: always;
             }
         }
 
         header {
             text-align: center;
-            margin-bottom: 24pt;
-            padding-bottom: 16pt;
+            margin-bottom: 16pt;
+            padding-bottom: 12pt;
             border-bottom: 2px solid #2563eb;
         }
 
         h1 {
-            font-size: 24pt;
+            font-size: 22pt;
             font-weight: 700;
             color: #1e40af;
-            margin-bottom: 4pt;
+            margin-bottom: 2pt;
         }
 
         .tagline {
-            font-size: 11pt;
+            font-size: 10pt;
             color: #64748b;
             font-style: italic;
         }
 
         h2 {
-            font-size: 14pt;
-            font-weight: 600;
-            color: #1e40af;
-            margin-top: 20pt;
-            margin-bottom: 10pt;
-        }
-
-        h3 {
-            font-size: 12pt;
-            font-weight: 600;
-            color: #334155;
-            margin-top: 14pt;
-            margin-bottom: 8pt;
-        }
-
-        p {
-            margin-bottom: 10pt;
-            text-align: justify;
-        }
-
-        .transition {
             font-size: 13pt;
             font-weight: 600;
             color: #1e40af;
-            text-align: center;
-            margin: 20pt 0;
+            margin-top: 16pt;
+            margin-bottom: 8pt;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+        }
+
+        p {
+            margin-bottom: 8pt;
+            text-align: justify;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8pt;
             padding: 12pt;
+            margin-bottom: 16pt;
+        }
+
+        .charts-title {
+            font-size: 10pt;
+            font-weight: 600;
+            color: #475569;
+            text-align: center;
+            margin-bottom: 10pt;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12pt;
+        }
+
+        .chart-container {
+            text-align: center;
+        }
+
+        .chart-label {
+            font-size: 8pt;
+            color: #64748b;
+            margin-bottom: 6pt;
+        }
+
+        /* Trust Decline Chart */
+        .trust-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 70pt;
+            gap: 16pt;
+        }
+
+        .trust-bar {
+            width: 36pt;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .trust-bar-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+            border-radius: 3pt 3pt 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-size: 9pt;
+            font-weight: 700;
+            padding-bottom: 4pt;
+        }
+
+        .trust-bar-1972 .trust-bar-fill {
+            height: 68pt;
+        }
+
+        .trust-bar-2025 .trust-bar-fill {
+            height: 28pt;
+            background: linear-gradient(180deg, #ef4444, #b91c1c);
+        }
+
+        .trust-year {
+            font-size: 8pt;
+            color: #64748b;
+            margin-top: 4pt;
+        }
+
+        /* Violence Chart */
+        .violence-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 70pt;
+            gap: 12pt;
+        }
+
+        .violence-bar {
+            width: 32pt;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .violence-bar-fill {
+            width: 100%;
+            border-radius: 3pt 3pt 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-size: 8pt;
+            font-weight: 700;
+            padding-bottom: 3pt;
+        }
+
+        .violence-2024 .violence-bar-fill {
+            height: 35pt;
+            background: linear-gradient(180deg, #f97316, #c2410c);
+        }
+
+        .violence-2025 .violence-bar-fill {
+            height: 68pt;
+            background: linear-gradient(180deg, #ef4444, #b91c1c);
+        }
+
+        .violence-year {
+            font-size: 7pt;
+            color: #64748b;
+            margin-top: 3pt;
+        }
+
+        /* Polarization Gauge */
+        .polarization-gauge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70pt;
+        }
+
+        .gauge-number {
+            font-size: 28pt;
+            font-weight: 700;
+            color: #dc2626;
+            line-height: 1;
+        }
+
+        .gauge-percent {
+            font-size: 12pt;
+            color: #dc2626;
+        }
+
+        .gauge-caption {
+            font-size: 7pt;
+            color: #64748b;
+            text-align: center;
+            margin-top: 4pt;
+            line-height: 1.3;
+        }
+
+        .chart-stat {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 6pt;
+        }
+
+        .chart-stat-red {
+            color: #dc2626;
+        }
+
+        /* Rest of styles */
+        .transition {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #1e40af;
+            text-align: center;
+            margin: 14pt 0;
+            padding: 10pt;
             background: #eff6ff;
             border-radius: 6px;
         }
@@ -88,25 +253,25 @@
         .mission-box {
             background: #1e40af;
             color: white;
-            padding: 16pt;
+            padding: 12pt;
             border-radius: 8px;
-            margin: 16pt 0;
+            margin: 12pt 0;
         }
 
         .mission-box p {
             text-align: center;
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: 500;
             margin: 0;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         ul {
-            margin: 10pt 0 10pt 20pt;
+            margin: 8pt 0 8pt 18pt;
         }
 
         li {
-            margin-bottom: 6pt;
+            margin-bottom: 4pt;
         }
 
         strong {
@@ -116,23 +281,23 @@
         .research-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8pt;
-            margin: 10pt 0;
+            gap: 6pt;
+            margin: 8pt 0;
         }
 
         .research-item {
             background: #f8fafc;
-            padding: 8pt 10pt;
+            padding: 6pt 8pt;
             border-radius: 4px;
             border-left: 3px solid #2563eb;
         }
 
         .research-item strong {
-            font-size: 10pt;
+            font-size: 9pt;
         }
 
         .research-item span {
-            font-size: 9pt;
+            font-size: 8pt;
             color: #64748b;
             display: block;
         }
@@ -140,30 +305,36 @@
         .ask-box {
             background: #fef3c7;
             border: 1px solid #f59e0b;
-            padding: 14pt;
+            padding: 10pt;
             border-radius: 8px;
-            margin-top: 16pt;
+            margin-top: 12pt;
         }
 
         .ask-box h3 {
             color: #92400e;
             margin-top: 0;
+            font-size: 10pt;
+        }
+
+        .ask-box p {
+            font-size: 9pt;
+            margin-bottom: 6pt;
         }
 
         .closing {
             font-weight: 600;
             color: #1e40af;
             text-align: center;
-            margin-top: 14pt;
-            font-size: 11pt;
+            margin-top: 12pt;
+            font-size: 10pt;
         }
 
         footer {
-            margin-top: 24pt;
-            padding-top: 12pt;
+            margin-top: 16pt;
+            padding-top: 10pt;
             border-top: 1px solid #e2e8f0;
             font-size: 9pt;
-            color: #64748b;
+            color: #475569;
         }
 
         footer a {
@@ -171,21 +342,47 @@
             text-decoration: none;
         }
 
-        .sources {
+        /* Sources Page */
+        .sources-page {
             font-size: 8pt;
-            color: #64748b;
-            margin-top: 16pt;
         }
 
-        .sources h4 {
-            font-size: 9pt;
-            color: #475569;
-            margin-bottom: 4pt;
+        .sources-page h2 {
+            font-size: 12pt;
+            margin-top: 0;
         }
 
-        .sources p {
+        .sources-page h3 {
+            font-size: 10pt;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+            color: #1e40af;
+        }
+
+        .source-item {
+            margin-bottom: 8pt;
+            padding-left: 10pt;
+            border-left: 2px solid #e2e8f0;
+        }
+
+        .source-claim {
+            font-weight: 600;
+            color: #334155;
             margin-bottom: 2pt;
-            text-align: left;
+        }
+
+        .source-detail {
+            color: #64748b;
+            font-size: 7.5pt;
+        }
+
+        .source-url {
+            font-family: 'Courier New', monospace;
+            font-size: 6.5pt;
+            color: #2563eb;
+            word-break: break-all;
+            display: block;
+            margin-top: 2pt;
         }
     </style>
 </head>
@@ -194,6 +391,50 @@
         <h1>ReasonBridge</h1>
         <p class="tagline">Tools for Rational Discourse</p>
     </header>
+
+    <!-- Data Visualization Section -->
+    <div class="charts-section">
+        <div class="charts-title">Why Now? The Data Demands Action</div>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-label">Trust in Media</div>
+                <div class="trust-chart">
+                    <div class="trust-bar trust-bar-1972">
+                        <div class="trust-bar-fill">68%</div>
+                        <div class="trust-year">1972</div>
+                    </div>
+                    <div class="trust-bar trust-bar-2025">
+                        <div class="trust-bar-fill">28%</div>
+                        <div class="trust-year">2025</div>
+                    </div>
+                </div>
+                <div class="chart-stat chart-stat-red">-40 points</div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-label">Political Attacks (6 mo.)</div>
+                <div class="violence-chart">
+                    <div class="violence-bar violence-2024">
+                        <div class="violence-bar-fill">~80</div>
+                        <div class="violence-year">2024</div>
+                    </div>
+                    <div class="violence-bar violence-2025">
+                        <div class="violence-bar-fill">150</div>
+                        <div class="violence-year">2025</div>
+                    </div>
+                </div>
+                <div class="chart-stat chart-stat-red">Nearly 2x increase</div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-label">Americans Who Say Polarization<br>Is a Threat to the Country</div>
+                <div class="polarization-gauge">
+                    <div>
+                        <span class="gauge-number">87</span><span class="gauge-percent">%</span>
+                    </div>
+                    <div class="gauge-caption">Near-universal recognition<br>across party lines</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <h2>The Problem</h2>
 
@@ -256,14 +497,91 @@
     <p class="closing">Your support helps rebuild the infrastructure of democratic discourse—<br>before more relationships fracture and more words turn to violence.</p>
 
     <footer>
-        <p><strong>Contact:</strong> [Your email] | <strong>Web:</strong> reasonbridge.org</p>
+        <p><strong>Contact:</strong> tony@steinonline.net | <strong>Web:</strong> reasonbridge.org</p>
     </footer>
 
-    <div class="sources">
-        <h4>Sources</h4>
-        <p><strong>Statistics:</strong> Pew Research Center (2025), Gallup (2025), FBI/AAI (2024), Listen First Project, EBSCO Research</p>
-        <p><strong>Research:</strong> Kahneman (2003), Graham, Haidt & Nosek (2009), Gross (1998), Fogg/Stanford Behavior Design Lab (2009)</p>
-        <p>Full citations available at reasonbridge.org/sources</p>
+    <!-- Page 2: Sources -->
+    <div class="page-break"></div>
+
+    <div class="sources-page">
+        <h2>Sources & Citations</h2>
+
+        <h3>Statistics & Data</h3>
+
+        <div class="source-item">
+            <div class="source-claim">150 political attacks in first half of 2025 (nearly 2x prior year)</div>
+            <div class="source-detail">University of Maryland via Pew Research Center, 2025</div>
+            <span class="source-url">https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">14,000 threats against lawmakers annually</div>
+            <div class="source-detail">U.S. Capitol Police via Pew Research Center, 2025</div>
+            <span class="source-url">https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Second-highest hate incidents on record (11,679 in 2024)</div>
+            <div class="source-detail">FBI via Arab American Institute, 2024</div>
+            <span class="source-url">https://www.aaiusa.org/library/2024-hate-crime-data</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">28% of Americans trust media (down from 68% in 1972)</div>
+            <div class="source-detail">Gallup, September 2025</div>
+            <span class="source-url">https://news.gallup.com/poll/695762/trust-media-new-low.aspx</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">72% of Republicans and 63% of Democrats view opposing party as "immoral"</div>
+            <div class="source-detail">Pew Research Center</div>
+            <span class="source-url">https://www.pewresearch.org/topic/politics-policy/political-parties-polarization/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">87% say polarization is a threat to America</div>
+            <div class="source-detail">Listen First Project</div>
+            <span class="source-url">https://www.listenfirstproject.org/toxic-polarization-data</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">68% say social media has impacted their relationships</div>
+            <div class="source-detail">EBSCO Research</div>
+            <span class="source-url">https://www.ebsco.com/research-starters/communication-and-mass-media/social-media-and-relationships</span>
+        </div>
+
+        <h3>Research Foundations</h3>
+
+        <div class="source-item">
+            <div class="source-claim">Dual-Process Theory (System 1 / System 2)</div>
+            <div class="source-detail">Kahneman, D. (2003). "A perspective on judgment and choice." American Psychologist, 58, 697-720.</div>
+            <span class="source-url">https://pubmed.ncbi.nlm.nih.gov/12212647/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Moral Foundations Theory</div>
+            <div class="source-detail">Graham, J., Haidt, J., & Nosek, B. A. (2009). "Liberals and conservatives rely on different sets of moral foundations." Journal of Personality and Social Psychology, 96(5), 1029-1046.</div>
+            <span class="source-url">https://pubmed.ncbi.nlm.nih.gov/19379034/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Process Model of Emotion Regulation</div>
+            <div class="source-detail">Gross, J. J. (1998). "The emerging field of emotion regulation: An integrative review." Review of General Psychology, 2(3), 271-299.</div>
+            <span class="source-url">https://journals.sagepub.com/doi/10.1037/1089-2680.2.3.271</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Fogg Behavior Model (B=MAT)</div>
+            <div class="source-detail">Fogg, B. J. (2009). "A Behavior Model for Persuasive Design." Stanford Behavior Design Lab.</div>
+            <span class="source-url">https://behaviordesign.stanford.edu/resources/fogg-behavior-model</span>
+        </div>
+
+        <div style="margin-top: 20pt; padding-top: 10pt; border-top: 1px solid #e2e8f0;">
+            <p style="font-size: 8pt; color: #64748b; text-align: center;">
+                ReasonBridge is a 501(c)(3) non-profit organization (pending).<br>
+                Last updated: February 2026
+            </p>
+        </div>
     </div>
 </body>
 </html>
