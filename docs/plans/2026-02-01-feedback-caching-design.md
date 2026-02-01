@@ -95,7 +95,11 @@ export class QdrantService {
   // Collection: "feedback_embeddings"
   // Dimensions: 1536 (text-embedding-3-small)
   async searchSimilar(embedding: number[], threshold: number): Promise<CachedFeedback | null>;
-  async store(embedding: number[], feedback: AnalysisResult, metadata: FeedbackMetadata): Promise<void>;
+  async store(
+    embedding: number[],
+    feedback: AnalysisResult,
+    metadata: FeedbackMetadata,
+  ): Promise<void>;
 }
 ```
 
@@ -115,10 +119,10 @@ export class RedisCacheService {
 
 ## Cache Keys
 
-| Purpose | Key Pattern | TTL |
-|---------|-------------|-----|
-| Exact feedback match | `feedback:exact:{contentHash}` | 48 hours |
-| Cached embedding | `feedback:embedding:{contentHash}` | 7 days |
+| Purpose              | Key Pattern                        | TTL      |
+| -------------------- | ---------------------------------- | -------- |
+| Exact feedback match | `feedback:exact:{contentHash}`     | 48 hours |
+| Cached embedding     | `feedback:embedding:{contentHash}` | 7 days   |
 
 ## Qdrant Collection Schema
 
@@ -192,32 +196,36 @@ qdrant:
 ## Use Cases Enabled
 
 ### A. Reuse Feedback for Similar Content
+
 - High threshold (0.95) ensures semantic equivalence
 - Saves analysis compute and latency
 - Falls back to fresh analysis when unsure
 
 ### B. Related Discussions Discovery (Future)
+
 - Query: "Find responses similar to this one"
 - Lower threshold (0.7-0.8) for broader matches
 - Surface related arguments across topics
 
 ### C. Pattern Analytics (Future)
+
 - Aggregate by `feedbackType` and `subtype`
 - Cluster similar responses to identify trends
 - Platform-wide insights on argument quality
 
 ## Performance Expectations
 
-| Operation | Latency | Cost |
-|-----------|---------|------|
-| Redis exact match | <5ms | Free |
-| Redis embedding lookup | <5ms | Free |
-| OpenAI embedding | 100-200ms | $0.00002/1K tokens |
-| Qdrant similarity search | 10-50ms | Free (self-hosted) |
-| Regex analyzers | <50ms | Free |
-| Qdrant write (async) | 20-50ms | Free |
+| Operation                | Latency   | Cost               |
+| ------------------------ | --------- | ------------------ |
+| Redis exact match        | <5ms      | Free               |
+| Redis embedding lookup   | <5ms      | Free               |
+| OpenAI embedding         | 100-200ms | $0.00002/1K tokens |
+| Qdrant similarity search | 10-50ms   | Free (self-hosted) |
+| Regex analyzers          | <50ms     | Free               |
+| Qdrant write (async)     | 20-50ms   | Free               |
 
 **Expected cache hit rates:**
+
 - Redis exact: 10-20% (duplicate content)
 - Qdrant similarity: 30-50% (similar arguments)
 - Fresh analysis: 30-60% (novel content)

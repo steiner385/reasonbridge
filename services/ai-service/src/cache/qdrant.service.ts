@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, Optional } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import type { QdrantClient } from '@qdrant/js-client-rest';
 import { FeedbackType } from '@prisma/client';
@@ -12,12 +12,21 @@ const VECTOR_SIZE = 1536; // text-embedding-3-small dimensions
 export class QdrantService implements OnModuleInit {
   private readonly logger = new Logger(QdrantService.name);
   private readonly collectionName: string;
+  private readonly enabled: boolean;
 
-  constructor(@Inject('QDRANT_CLIENT') private readonly client: QdrantClient) {
+  constructor(@Optional() @Inject('QDRANT_CLIENT') private readonly client: QdrantClient | null) {
     this.collectionName = process.env['QDRANT_COLLECTION'] || 'feedback_embeddings';
+    this.enabled = client !== null;
+
+    if (!this.enabled) {
+      this.logger.warn('QdrantService initialized without client - similarity search disabled');
+    }
   }
 
   async onModuleInit(): Promise<void> {
+    if (!this.enabled) {
+      return;
+    }
     await this.ensureCollectionExists();
   }
 
@@ -25,6 +34,10 @@ export class QdrantService implements OnModuleInit {
    * Ensure the Qdrant collection exists with correct schema
    */
   private async ensureCollectionExists(): Promise<void> {
+    if (!this.client) {
+      return;
+    }
+
     try {
       const collections = await this.client.getCollections();
       const exists = collections.collections.some((c) => c.name === this.collectionName);
@@ -48,6 +61,10 @@ export class QdrantService implements OnModuleInit {
    * Search for similar content in Qdrant
    */
   async searchSimilar(embedding: number[], threshold: number): Promise<CachedFeedback | null> {
+    if (!this.client) {
+      return null;
+    }
+
     try {
       const results = await this.client.search(this.collectionName, {
         vector: embedding,
@@ -91,6 +108,10 @@ export class QdrantService implements OnModuleInit {
     result: AnalysisResult,
     metadata: FeedbackMetadata,
   ): Promise<void> {
+    if (!this.client) {
+      return;
+    }
+
     try {
       await this.client.upsert(this.collectionName, {
         wait: false, // Async write
