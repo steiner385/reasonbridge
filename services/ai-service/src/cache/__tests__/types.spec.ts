@@ -5,7 +5,7 @@ import type {
   SemanticCacheConfig,
   CacheLookupResult,
 } from '../types.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('Cache Types', () => {
   it('should define FeedbackMetadata interface correctly', () => {

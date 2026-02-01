@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { CacheModule } from '../../cache.module.js';
 import { SemanticCacheService } from '../../semantic-cache.service.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 /**
  * Integration tests for SemanticCacheService.

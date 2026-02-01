@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Test } from '@nestjs/testing';
 import { RedisCacheService } from '../redis-cache.service.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('RedisCacheService', () => {
   let service: RedisCacheService;

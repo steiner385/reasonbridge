@@ -3,7 +3,7 @@ import { SemanticCacheService } from '../semantic-cache.service.js';
 import type { EmbeddingService } from '../embedding.service.js';
 import type { QdrantService } from '../qdrant.service.js';
 import type { RedisCacheService } from '../redis-cache.service.js';
-import { FeedbackType } from '@reason-bridge/db-models';
+import { FeedbackType } from '@prisma/client';
 
 describe('SemanticCacheService', () => {
   let service: SemanticCacheService;
