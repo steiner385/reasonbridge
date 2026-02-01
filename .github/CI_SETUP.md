@@ -17,10 +17,13 @@ This project uses **Jenkins** as the primary CI server, triggered directly via *
 ### GitHub Webhook → Jenkins
 
 - **Events**: Push, Pull Request
-- **Branches**: ALL branches (any push triggers a build)
+- **Branches**: 
+  - **Main branch**: All pushes trigger a build
+  - **Pull requests**: All PR updates trigger a build
+  - **Feature branches**: Builds are skipped (no CI triggered)
 - **Endpoint**: `https://your-jenkins.com/github-webhook/`
 
-The Jenkinsfile includes `githubPush()` trigger which automatically responds to GitHub webhook events.
+The Jenkinsfile includes conditional logic to only run CI for main branch and pull requests, skipping feature branch builds.
 
 ## GitHub Actions Workflows (Optional)
 
