@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { QdrantClient } from '@qdrant/js-client-rest';
@@ -8,6 +8,8 @@ import { SemanticCacheService } from './semantic-cache.service.js';
 import { EmbeddingService } from './embedding.service.js';
 import { QdrantService } from './qdrant.service.js';
 import { RedisCacheService } from './redis-cache.service.js';
+
+const logger = new Logger('CacheModule');
 
 /**
  * Cache Module
@@ -45,13 +47,18 @@ import { RedisCacheService } from './redis-cache.service.js';
     }),
   ],
   providers: [
-    // OpenAI client
+    // OpenAI client - optional, returns null if API key not configured
     {
       provide: 'OPENAI_CLIENT',
       useFactory: () => {
-        return new OpenAI({
-          apiKey: process.env['OPENAI_API_KEY'],
-        });
+        const apiKey = process.env['OPENAI_API_KEY'];
+        if (!apiKey) {
+          logger.warn(
+            'OPENAI_API_KEY not configured - semantic caching will fall back to direct analysis',
+          );
+          return null;
+        }
+        return new OpenAI({ apiKey });
       },
     },
     // Qdrant client

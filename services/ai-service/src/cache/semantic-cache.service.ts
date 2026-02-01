@@ -57,20 +57,22 @@ export class SemanticCacheService {
       return redisResult;
     }
 
-    // 2. Try Qdrant similarity search
+    // 2. Try Qdrant similarity search (only if embeddings are available)
     let embedding: number[] | null = null;
     try {
       embedding = await this.embeddingService.getEmbedding(content);
-      const qdrantResult = await this.qdrantService.searchSimilar(
-        embedding,
-        this.similarityThreshold,
-      );
+      if (embedding) {
+        const qdrantResult = await this.qdrantService.searchSimilar(
+          embedding,
+          this.similarityThreshold,
+        );
 
-      if (qdrantResult) {
-        this.logger.debug(`Cache hit: Qdrant similarity ${qdrantResult.similarity?.toFixed(3)}`);
-        // Also cache in Redis for faster future lookups
-        this.cacheInRedisAsync(contentHash, qdrantResult.result);
-        return qdrantResult.result;
+        if (qdrantResult) {
+          this.logger.debug(`Cache hit: Qdrant similarity ${qdrantResult.similarity?.toFixed(3)}`);
+          // Also cache in Redis for faster future lookups
+          this.cacheInRedisAsync(contentHash, qdrantResult.result);
+          return qdrantResult.result;
+        }
       }
     } catch (error) {
       this.logger.warn('Similarity search failed, falling back to analysis', error);
@@ -101,21 +103,23 @@ export class SemanticCacheService {
       return { hit: true, source: 'redis', result: redisResult };
     }
 
-    // Check Qdrant
+    // Check Qdrant (only if embeddings are available)
     try {
       const embedding = await this.embeddingService.getEmbedding(content);
-      const qdrantResult = await this.qdrantService.searchSimilar(
-        embedding,
-        this.similarityThreshold,
-      );
+      if (embedding) {
+        const qdrantResult = await this.qdrantService.searchSimilar(
+          embedding,
+          this.similarityThreshold,
+        );
 
-      if (qdrantResult) {
-        return {
-          hit: true,
-          source: 'qdrant',
-          result: qdrantResult.result,
-          similarity: qdrantResult.similarity,
-        };
+        if (qdrantResult) {
+          return {
+            hit: true,
+            source: 'qdrant',
+            result: qdrantResult.result,
+            similarity: qdrantResult.similarity,
+          };
+        }
       }
     } catch {
       // Ignore errors for lookup
@@ -146,6 +150,7 @@ export class SemanticCacheService {
 
   /**
    * Store result in Qdrant with embedding and metadata.
+   * Skips storage if embeddings are unavailable.
    */
   private async storeInQdrantAsync(
     contentHash: string,
@@ -157,6 +162,12 @@ export class SemanticCacheService {
     try {
       // Get or generate embedding
       const vectorEmbedding = embedding ?? (await this.embeddingService.getEmbedding(content));
+
+      // Skip Qdrant storage if embeddings are not available
+      if (!vectorEmbedding) {
+        this.logger.debug('Skipping Qdrant storage - embeddings not available');
+        return;
+      }
 
       const metadata: FeedbackMetadata = {
         contentHash,

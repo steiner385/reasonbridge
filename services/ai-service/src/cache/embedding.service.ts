@@ -12,19 +12,34 @@ export class EmbeddingService {
   private readonly logger = new Logger(EmbeddingService.name);
   private readonly model: string;
   private readonly ttl: number;
+  private readonly isAvailable: boolean;
 
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    @Inject('OPENAI_CLIENT') private readonly openai: OpenAI,
+    @Inject('OPENAI_CLIENT') private readonly openai: OpenAI | null,
   ) {
     this.model = process.env['OPENAI_EMBEDDING_MODEL'] || 'text-embedding-3-small';
     this.ttl = parseInt(process.env['EMBEDDING_CACHE_TTL'] || String(DEFAULT_TTL), 10);
+    this.isAvailable = this.openai !== null;
+
+    if (!this.isAvailable) {
+      this.logger.warn(
+        'EmbeddingService initialized without OpenAI client - embeddings unavailable',
+      );
+    }
   }
 
   /**
-   * Get embedding for content, using cache when available
+   * Get embedding for content, using cache when available.
+   * Returns null if OpenAI is not configured.
    */
-  async getEmbedding(content: string): Promise<number[]> {
+  async getEmbedding(content: string): Promise<number[] | null> {
+    // Return null if OpenAI is not available
+    if (!this.isAvailable || !this.openai) {
+      this.logger.debug('OpenAI not available, skipping embedding generation');
+      return null;
+    }
+
     const contentHash = computeContentHash(content);
     const cacheKey = `${EMBEDDING_CACHE_PREFIX}${contentHash}`;
 
