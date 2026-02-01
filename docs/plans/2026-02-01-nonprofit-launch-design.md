@@ -380,7 +380,7 @@ Year 3-5
 2. **This week**: Review Open Collective Foundation application requirements
 3. ~~**Next week**: Begin network mapping exercise~~ **DONE** - See [network-map.md](network-map.md)
 4. **Week 2**: Apply to fiscal sponsor
-5. **Week 3-4**: Start preparing core materials (problem/solution narrative first)
+5. ~~**Week 3-4**: Start preparing core materials (problem/solution narrative first)~~ **DONE** - See [problem-solution-narrative.md](problem-solution-narrative.md)
 
 ---
 
