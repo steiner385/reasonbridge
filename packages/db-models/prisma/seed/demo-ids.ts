@@ -61,50 +61,50 @@ export const DEMO_TAG_IDS = {
 
 /**
  * Generate a deterministic response ID based on topic and sequence
- * Format: 11111111-0000-4000-8000-0000TTTRRRR
+ * Format: 11111111-0000-4000-8000-000TTTRRRRRR
  * TTT = topic number (101-110)
- * RRRR = response sequence (0001-9999)
+ * RRRRRR = response sequence (000001-999999)
  */
 export function generateResponseId(topicNumber: number, responseSequence: number): string {
   const topicPart = topicNumber.toString().padStart(3, '0');
-  const responsePart = responseSequence.toString().padStart(4, '0');
-  return `11111111-0000-4000-8000-0000${topicPart}${responsePart}`;
+  const responsePart = responseSequence.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-000${topicPart}${responsePart}`;
 }
 
 /**
  * Generate a deterministic proposition ID
- * Format: 11111111-0000-4000-8000-0001TTTPPPP
+ * Format: 11111111-0000-4000-8000-001TTTPPPPPP
  * TTT = topic number (101-110)
- * PPPP = proposition sequence (0001-9999)
+ * PPPPPP = proposition sequence (000001-999999)
  */
 export function generatePropositionId(topicNumber: number, propositionSequence: number): string {
   const topicPart = topicNumber.toString().padStart(3, '0');
-  const propPart = propositionSequence.toString().padStart(4, '0');
-  return `11111111-0000-4000-8000-0001${topicPart}${propPart}`;
+  const propPart = propositionSequence.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-001${topicPart}${propPart}`;
 }
 
 /**
  * Generate a deterministic AI feedback ID
- * Format: 11111111-0000-4000-8000-0002TTTFFFF
+ * Format: 11111111-0000-4000-8000-002TTTFFFFFF
  * TTT = type code (001=bias, 002=clarity, 003=constructive, 004=common, 005=value)
- * FFFF = feedback sequence (0001-9999)
+ * FFFFFF = feedback sequence (000001-999999)
  */
 export function generateFeedbackId(typeCode: number, feedbackSequence: number): string {
   const typePart = typeCode.toString().padStart(3, '0');
-  const feedbackPart = feedbackSequence.toString().padStart(4, '0');
-  return `11111111-0000-4000-8000-0002${typePart}${feedbackPart}`;
+  const feedbackPart = feedbackSequence.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-002${typePart}${feedbackPart}`;
 }
 
 /**
  * Generate a deterministic common ground analysis ID
- * Format: 11111111-0000-4000-8000-0003TTTAAAA
+ * Format: 11111111-0000-4000-8000-003TTTAAAAAA
  * TTT = topic number (101-110)
- * AAAA = analysis sequence (0001-9999)
+ * AAAAAA = analysis sequence (000001-999999)
  */
 export function generateCommonGroundId(topicNumber: number, analysisSequence: number): string {
   const topicPart = topicNumber.toString().padStart(3, '0');
-  const analysisPart = analysisSequence.toString().padStart(4, '0');
-  return `11111111-0000-4000-8000-0003${topicPart}${analysisPart}`;
+  const analysisPart = analysisSequence.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-003${topicPart}${analysisPart}`;
 }
 
 /**
