@@ -11,7 +11,7 @@ describe('Feedback API Integration Tests', () => {
   let analyticsService: FeedbackAnalyticsService;
   let mockPrisma: any;
   let mockResponseAnalyzer: any;
-  let mockFeedbackCache: any;
+  let mockSemanticCache: any;
 
   // Test data
   const mockResponseId = '550e8400-e29b-41d4-a716-446655440000';
@@ -78,20 +78,24 @@ describe('Feedback API Integration Tests', () => {
       }),
     };
 
-    // Create mock feedback cache service (no caching in tests)
-    mockFeedbackCache = {
-      getCachedFeedback: async () => null,
-      cacheFeedback: async () => {},
-      invalidate: async () => {},
-      invalidateAll: async () => {},
-      generateCacheKey: () => 'test-key',
+    // Create mock semantic cache service that delegates to analyzer
+    mockSemanticCache = {
+      getOrAnalyze: async (
+        _content: string,
+        analyzeFunc: () => Promise<any>,
+        _topicId?: string,
+      ) => {
+        // Call the provided analyzer function (simulating cache miss behavior)
+        return analyzeFunc();
+      },
+      lookup: async () => ({ hit: false, source: 'none' }),
     };
 
     // Directly instantiate services with mocked dependencies (bypass NestJS TestingModule)
     feedbackService = new FeedbackService(
       mockPrisma as any,
       mockResponseAnalyzer,
-      mockFeedbackCache,
+      mockSemanticCache,
     );
     analyticsService = new FeedbackAnalyticsService(mockPrisma as any);
   });

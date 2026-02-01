@@ -1,4 +1,4 @@
--- AddFeedbackPreferences
--- Adds the feedback_preferences JSON column to users table for AI feedback preferences (T117)
+-- Add feedback_preferences column to users table
+-- This stores user preferences for AI feedback (T117)
 
-ALTER TABLE "users" ADD COLUMN "feedback_preferences" JSONB;
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "feedback_preferences" JSONB;
