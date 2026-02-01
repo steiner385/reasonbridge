@@ -21,5 +21,10 @@ library identifier: 'reasonbridge-lib@main',
         credentialsId: 'github-credentials'
     ])
 
-// Execute the real pipeline from jenkins-lib
-reasonbridgeMultibranchPipeline()
+// Only trigger on main branch or pull requests
+if (env.CHANGE_ID || env.BRANCH_NAME == 'main') {
+    // Execute the real pipeline from jenkins-lib
+    reasonbridgeMultibranchPipeline()
+} else {
+    echo "Skipping build for branch ${env.BRANCH_NAME} - only main branch and PRs trigger CI"
+}
