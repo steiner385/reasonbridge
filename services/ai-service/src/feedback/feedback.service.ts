@@ -116,18 +116,6 @@ export class FeedbackService {
   }
 
   /**
-   * Generate feedback using comprehensive analysis
-   * Analyzes emotional tone, logical fallacies, and clarity
-   * @param content The response content to analyze
-   * @returns AI-generated feedback analysis
-   */
-  private async generateFeedback(content: string) {
-    // Use the response analyzer to perform comprehensive analysis
-    // This analyzes tone, fallacies, and clarity in parallel
-    return this.analyzer.analyzeContent(content);
-  }
-
-  /**
    * Get minimum confidence threshold based on sensitivity level
    * @param sensitivity The sensitivity level
    * @returns Minimum confidence threshold (0.0-1.0)
