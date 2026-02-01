@@ -25,6 +25,9 @@ export type { CommonGroundHistoryProps } from './CommonGroundHistory';
 export { default as ShareModal } from './ShareModal';
 export type { ShareModalProps } from './ShareModal';
 
+export { default as CommonGroundDetailModal } from './CommonGroundDetailModal';
+export type { CommonGroundDetailModalProps, DetailType } from './CommonGroundDetailModal';
+
 export { default as ShareButton } from './ShareButton';
 export type { ShareButtonProps } from './ShareButton';
 
