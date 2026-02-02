@@ -10,3 +10,6 @@ export type { CardProps, CardHeaderProps, CardBodyProps, CardFooterProps } from 
 
 export { default as Modal } from './Modal';
 export type { ModalProps } from './Modal';
+
+export { LoadingBridge } from './LoadingBridge';
+export type { LoadingBridgeProps } from './LoadingBridge';
