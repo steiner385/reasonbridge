@@ -31,7 +31,7 @@
     "@types/opossum": "^8.1.9",
     "@willsoto/nestjs-prometheus": "^6.0.2",
     "axios": "^1.13.4",
-    "fastify": "^4.25.2",
+    "fastify": "^5.7.2",
     "ioredis": "^5.9.2",
     "opossum": "^9.0.0",
     "prom-client": "^15.1.3",
