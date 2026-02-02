@@ -250,11 +250,11 @@ function TopicDetailPage() {
                 <span className="text-sm font-medium">Diversity Score</span>
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {topic.currentDiversityScore !== null
+                {topic.currentDiversityScore != null
                   ? topic.currentDiversityScore.toFixed(1)
                   : 'N/A'}
               </p>
-              {topic.currentDiversityScore !== null && (
+              {topic.currentDiversityScore !== null && topic.minimumDiversityScore != null && (
                 <p className="text-xs text-gray-500 mt-1">
                   Min required: {topic.minimumDiversityScore.toFixed(1)}
                 </p>

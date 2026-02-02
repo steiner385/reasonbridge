@@ -67,7 +67,7 @@ function TopicsPage() {
       )}
 
       {/* Topic List */}
-      {!showSkeleton && data && (
+      {!showSkeleton && data && data.data && (
         <>
           <div className="space-y-4 mb-6">
             {data.data.length === 0 ? (
@@ -83,7 +83,7 @@ function TopicsPage() {
           </div>
 
           {/* Pagination */}
-          {data.meta.totalPages > 1 && (
+          {data.meta && data.meta.totalPages > 1 && (
             <Card padding="md">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">

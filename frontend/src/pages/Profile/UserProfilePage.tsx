@@ -83,7 +83,7 @@ function UserProfilePage() {
               <div>
                 <p className="text-sm font-medium text-gray-500">Verification Level</p>
                 <p className="text-lg text-gray-900" data-testid="verification-level">
-                  {user.verificationLevel.replace('_', ' ')}
+                  {user.verificationLevel?.replace('_', ' ') || 'Unknown'}
                 </p>
                 {user.verificationLevel === 'VERIFIED_HUMAN' && (
                   <span

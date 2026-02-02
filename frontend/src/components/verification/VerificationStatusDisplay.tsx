@@ -21,7 +21,6 @@ const getVerificationTypeLabel = (type: VerificationType): string => {
   return labels[type];
 };
 
-
 const isExpired = (expiresAt: string): boolean => {
   return new Date(expiresAt) < new Date();
 };
@@ -67,23 +66,23 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
       );
     }
 
-    const pending = (pendingVerifications.data || []).filter(
-      (v) => v.status === VerificationStatus.PENDING && !isExpired(v.expiresAt)
+    // Handle both array and object response formats
+    const dataArray = Array.isArray(pendingVerifications.data)
+      ? pendingVerifications.data
+      : (pendingVerifications.data?.data ?? []);
+
+    const pending = dataArray.filter(
+      (v) => v.status === VerificationStatus.PENDING && !isExpired(v.expiresAt),
     );
 
     if (pending.length === 0) {
-      return (
-        <p className="text-sm text-gray-500 italic">No pending verifications</p>
-      );
+      return <p className="text-sm text-gray-500 italic">No pending verifications</p>;
     }
 
     return (
       <div className="space-y-3">
         {pending.map((verification) => (
-          <div
-            key={verification.id}
-            className="p-4 border border-blue-200 rounded-lg bg-blue-50"
-          >
+          <div key={verification.id} className="p-4 border border-blue-200 rounded-lg bg-blue-50">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-gray-900">
@@ -108,15 +107,13 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
       <div className="space-y-6">
         {/* Current Verification Level */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            Current Verification Level
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Current Verification Level</h3>
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-sm text-gray-600 mb-2">Status</p>
             <p className="text-2xl font-bold text-gray-900">{currentVerificationLevel}</p>
             <p className="text-xs text-gray-500 mt-2">
-              Upgrade your verification level to unlock enhanced features and increase trust
-              within the community.
+              Upgrade your verification level to unlock enhanced features and increase trust within
+              the community.
             </p>
           </div>
         </div>

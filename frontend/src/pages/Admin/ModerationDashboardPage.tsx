@@ -36,7 +36,9 @@ export default function ModerationDashboardPage() {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'actions' | 'appeals' | 'queue'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'actions' | 'appeals' | 'queue'>(
+    'overview',
+  );
   const [actionFilter, setActionFilter] = useState<ModerationActionStatus | 'all'>('pending');
   const [approvingActionId, setApprovingActionId] = useState<string | null>(null);
   const [rejectingActionId, setRejectingActionId] = useState<string | null>(null);
@@ -52,11 +54,7 @@ export default function ModerationDashboardPage() {
         // Fetch all data in parallel
         const [statsData, actionsData, appealsData] = await Promise.all([
           getQueueStats(),
-          getModerationActions(
-            actionFilter === 'all'
-              ? {}
-              : { status: actionFilter }
-          ),
+          getModerationActions(actionFilter === 'all' ? {} : { status: actionFilter }),
           getAppeals({ status: 'pending' }),
         ]);
 
@@ -78,7 +76,7 @@ export default function ModerationDashboardPage() {
     try {
       setApprovingActionId(actionId);
       await approveModerationAction(actionId);
-      setActions(actions.filter(a => a.id !== actionId));
+      setActions(actions.filter((a) => a.id !== actionId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to approve action');
     } finally {
@@ -91,7 +89,7 @@ export default function ModerationDashboardPage() {
     try {
       setRejectingActionId(actionId);
       await rejectModerationAction(actionId);
-      setActions(actions.filter(a => a.id !== actionId));
+      setActions(actions.filter((a) => a.id !== actionId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reject action');
     } finally {
@@ -104,7 +102,7 @@ export default function ModerationDashboardPage() {
     try {
       setReviewingAppealId(appealId);
       await reviewAppeal(appealId, 'upheld');
-      setAppeals(appeals.filter(a => a.id !== appealId));
+      setAppeals(appeals.filter((a) => a.id !== appealId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to uphold appeal');
     } finally {
@@ -117,7 +115,7 @@ export default function ModerationDashboardPage() {
     try {
       setReviewingAppealId(appealId);
       await reviewAppeal(appealId, 'denied');
-      setAppeals(appeals.filter(a => a.id !== appealId));
+      setAppeals(appeals.filter((a) => a.id !== appealId));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to deny appeal');
     } finally {
@@ -133,7 +131,11 @@ export default function ModerationDashboardPage() {
   // Format date for display
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      ' ' +
+      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    );
   };
 
   // Get severity color class
@@ -262,7 +264,9 @@ export default function ModerationDashboardPage() {
                 <Card>
                   <CardBody>
                     <div className="text-center">
-                      <p className="text-4xl font-bold text-gray-900 mb-1">{stats.totalPending}</p>
+                      <p className="text-4xl font-bold text-gray-900 mb-1">
+                        {stats.totalPending ?? 0}
+                      </p>
                       <p className="text-sm text-gray-600">Pending Actions</p>
                     </div>
                   </CardBody>
@@ -270,7 +274,9 @@ export default function ModerationDashboardPage() {
                 <Card>
                   <CardBody>
                     <div className="text-center">
-                      <p className="text-4xl font-bold text-red-600 mb-1">{stats.criticalActions}</p>
+                      <p className="text-4xl font-bold text-red-600 mb-1">
+                        {stats.criticalActions ?? 0}
+                      </p>
                       <p className="text-sm text-gray-600">Critical Actions</p>
                     </div>
                   </CardBody>
@@ -278,7 +284,11 @@ export default function ModerationDashboardPage() {
                 <Card>
                   <CardBody>
                     <div className="text-center">
-                      <p className="text-4xl font-bold text-gray-900 mb-1">{Math.round(stats.avgReviewTimeMinutes)}</p>
+                      <p className="text-4xl font-bold text-gray-900 mb-1">
+                        {stats.avgReviewTimeMinutes != null
+                          ? Math.round(stats.avgReviewTimeMinutes)
+                          : 'N/A'}
+                      </p>
                       <p className="text-sm text-gray-600">Avg Review Time (min)</p>
                     </div>
                   </CardBody>
@@ -286,31 +296,35 @@ export default function ModerationDashboardPage() {
               </div>
 
               {/* Action Type Distribution */}
-              <Card>
-                <CardHeader>
-                  <h2 className="text-xl font-semibold">Pending Actions by Type</h2>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-3">
-                    {Object.entries(stats.pendingByType).map(([type, count]) => (
-                      <div key={type}>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-700">{formatActionType(type)}</span>
-                          <span className="text-sm font-semibold text-gray-900">{count}</span>
+              {stats.pendingByType && Object.keys(stats.pendingByType).length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <h2 className="text-xl font-semibold">Pending Actions by Type</h2>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="space-y-3">
+                      {Object.entries(stats.pendingByType).map(([type, count]) => (
+                        <div key={type}>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-700">
+                              {formatActionType(type)}
+                            </span>
+                            <span className="text-sm font-semibold text-gray-900">{count}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-primary-500 h-2 rounded-full"
+                              style={{
+                                width: `${stats.totalPending > 0 ? (count / stats.totalPending) * 100 : 0}%`,
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-primary-500 h-2 rounded-full"
-                            style={{
-                              width: `${stats.totalPending > 0 ? (count / stats.totalPending) * 100 : 0}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
+                      ))}
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
 
               {/* Recent Actions */}
               <Card>
@@ -322,7 +336,7 @@ export default function ModerationDashboardPage() {
                     <p className="text-center text-gray-500 py-8">No pending actions</p>
                   ) : (
                     <div className="space-y-4">
-                      {actions.slice(0, 5).map(action => (
+                      {actions.slice(0, 5).map((action) => (
                         <div key={action.id} className="p-4 border border-gray-200 rounded-lg">
                           <div className="flex items-start justify-between mb-2">
                             <div>
@@ -335,7 +349,9 @@ export default function ModerationDashboardPage() {
                                 {formatActionType(action.actionType)}
                               </span>
                             </div>
-                            <span className="text-xs text-gray-500">{formatDate(action.createdAt)}</span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(action.createdAt)}
+                            </span>
                           </div>
                           <p className="text-sm text-gray-700 mb-3">{action.reasoning}</p>
                           <div className="flex gap-2">
@@ -373,7 +389,7 @@ export default function ModerationDashboardPage() {
                     <p className="text-center text-gray-500 py-8">No pending appeals</p>
                   ) : (
                     <div className="space-y-4">
-                      {appeals.slice(0, 5).map(appeal => (
+                      {appeals.slice(0, 5).map((appeal) => (
                         <div key={appeal.id} className="p-4 border border-gray-200 rounded-lg">
                           <div className="flex items-start justify-between mb-2">
                             <span
@@ -381,7 +397,9 @@ export default function ModerationDashboardPage() {
                             >
                               {appeal.status}
                             </span>
-                            <span className="text-xs text-gray-500">{formatDate(appeal.createdAt)}</span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(appeal.createdAt)}
+                            </span>
                           </div>
                           <p className="text-sm text-gray-700 mb-3">{appeal.reason}</p>
                           {appeal.status === 'pending' && (
@@ -392,7 +410,9 @@ export default function ModerationDashboardPage() {
                                 onClick={() => handleUpholdAppeal(appeal.id)}
                                 disabled={reviewingAppealId === appeal.id}
                               >
-                                {reviewingAppealId === appeal.id ? 'Processing...' : 'Uphold Appeal'}
+                                {reviewingAppealId === appeal.id
+                                  ? 'Processing...'
+                                  : 'Uphold Appeal'}
                               </Button>
                               <Button
                                 size="sm"
@@ -431,7 +451,9 @@ export default function ModerationDashboardPage() {
                 <h2 className="text-xl font-semibold">Moderation Actions</h2>
                 <select
                   value={actionFilter}
-                  onChange={e => setActionFilter(e.target.value as ModerationActionStatus | 'all')}
+                  onChange={(e) =>
+                    setActionFilter(e.target.value as ModerationActionStatus | 'all')
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
                 >
                   <option value="all">All</option>
@@ -452,21 +474,30 @@ export default function ModerationDashboardPage() {
                 <p className="text-center text-gray-500 py-8">No actions found</p>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {actions.map(action => (
-                    <div key={action.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  {actions.map((action) => (
+                    <div
+                      key={action.id}
+                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex gap-2">
-                          <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}>
+                          <span
+                            className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}
+                          >
                             {action.severity}
                           </span>
                           <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
                             {formatActionType(action.actionType)}
                           </span>
-                          <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}>
+                          <span
+                            className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}
+                          >
                             {action.status}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">{formatDate(action.createdAt)}</span>
+                        <span className="text-xs text-gray-500">
+                          {formatDate(action.createdAt)}
+                        </span>
                       </div>
                       <p className="text-sm text-gray-700 line-clamp-2">{action.reasoning}</p>
                     </div>
@@ -495,13 +526,20 @@ export default function ModerationDashboardPage() {
                 <p className="text-center text-gray-500 py-8">No appeals found</p>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {appeals.map(appeal => (
-                    <div key={appeal.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  {appeals.map((appeal) => (
+                    <div
+                      key={appeal.id}
+                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    >
                       <div className="flex items-start justify-between mb-2">
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getAppealStatusColor(appeal.status)}`}>
+                        <span
+                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${getAppealStatusColor(appeal.status)}`}
+                        >
                           {appeal.status}
                         </span>
-                        <span className="text-xs text-gray-500">{formatDate(appeal.createdAt)}</span>
+                        <span className="text-xs text-gray-500">
+                          {formatDate(appeal.createdAt)}
+                        </span>
                       </div>
                       <p className="text-sm text-gray-700 line-clamp-2">{appeal.reason}</p>
                     </div>

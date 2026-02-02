@@ -72,9 +72,10 @@ const BridgingSuggestionsSection = ({
   showEmptyState = true,
   maxSuggestions = 0,
 }: BridgingSuggestionsSectionProps) => {
-  const hasSuggestions = suggestions.suggestions.length > 0;
+  const suggestionsList = suggestions.suggestions ?? [];
+  const hasSuggestions = suggestionsList.length > 0;
   const displayedSuggestions =
-    maxSuggestions > 0 ? suggestions.suggestions.slice(0, maxSuggestions) : suggestions.suggestions;
+    maxSuggestions > 0 ? suggestionsList.slice(0, maxSuggestions) : suggestionsList;
 
   if (!hasSuggestions && !showEmptyState) {
     return null;
@@ -116,7 +117,7 @@ const BridgingSuggestionsSection = ({
         )}
 
         {/* Common Ground Areas */}
-        {suggestions.commonGroundAreas.length > 0 && (
+        {(suggestions.commonGroundAreas?.length ?? 0) > 0 && (
           <div className="mt-4">
             <h4 className="text-sm font-medium text-gray-700 mb-2">Areas of Agreement</h4>
             <div className="flex flex-wrap gap-2">
@@ -134,7 +135,7 @@ const BridgingSuggestionsSection = ({
         )}
 
         {/* Conflict Areas */}
-        {suggestions.conflictAreas.length > 0 && (
+        {(suggestions.conflictAreas?.length ?? 0) > 0 && (
           <div className="mt-4">
             <h4 className="text-sm font-medium text-gray-700 mb-2">Areas of Disagreement</h4>
             <div className="flex flex-wrap gap-2">
@@ -157,8 +158,8 @@ const BridgingSuggestionsSection = ({
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Suggested Bridges ({displayedSuggestions.length}
-            {maxSuggestions > 0 && suggestions.suggestions.length > maxSuggestions
-              ? ` of ${suggestions.suggestions.length}`
+            {maxSuggestions > 0 && suggestionsList.length > maxSuggestions
+              ? ` of ${suggestionsList.length}`
               : ''}
             )
           </h3>
@@ -259,10 +260,10 @@ const BridgingSuggestionsSection = ({
           </div>
 
           {/* Show more indicator */}
-          {maxSuggestions > 0 && suggestions.suggestions.length > maxSuggestions && (
+          {maxSuggestions > 0 && suggestionsList.length > maxSuggestions && (
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
-                Showing {maxSuggestions} of {suggestions.suggestions.length} suggestions
+                Showing {maxSuggestions} of {suggestionsList.length} suggestions
               </p>
             </div>
           )}

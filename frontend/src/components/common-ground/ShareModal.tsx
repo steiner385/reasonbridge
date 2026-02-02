@@ -284,10 +284,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
           <h3 className="text-sm font-medium text-gray-900 mb-2">Analysis Summary</h3>
           <div className="text-sm text-gray-600 space-y-1">
             <p data-testid="participant-count">
-              <strong>Participants:</strong> {analysis.participantCount}
+              <strong>Participants:</strong> {analysis.participantCount ?? 0}
             </p>
             <p>
-              <strong>Agreement Zones:</strong> {analysis.agreementZones.length}
+              <strong>Agreement Zones:</strong> {analysis.agreementZones?.length ?? 0}
             </p>
             <p data-testid="consensus-score">
               <strong>Consensus Score:</strong> {analysis.overallConsensusScore}%

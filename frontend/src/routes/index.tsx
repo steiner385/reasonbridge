@@ -1,7 +1,7 @@
 import type { RouteObject } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import AboutPage from '../pages/AboutPage';
-import { LoginPage, RegisterPage } from '../pages/Auth';
+import { LoginPage, RegisterPage, ForgotPasswordPage } from '../pages/Auth';
 import { SignupPage } from '../pages/SignupPage';
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
@@ -38,6 +38,10 @@ export const routes: RouteObject[] = [
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
   },
   {
     path: '/signup',
