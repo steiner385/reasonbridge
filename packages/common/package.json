@@ -37,8 +37,8 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.975.0",
-    "@aws-sdk/client-sqs": "^3.975.0",
+    "@aws-sdk/client-sns": "^3.980.0",
+    "@aws-sdk/client-sqs": "^3.980.0",
     "@reason-bridge/event-schemas": "workspace:*"
   },
   "devDependencies": {
