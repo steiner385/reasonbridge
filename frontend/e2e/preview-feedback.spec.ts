@@ -81,7 +81,7 @@ async function mockPreviewFeedbackAPI(page: Page, response: object) {
  */
 async function mockAuth(page: Page) {
   // Mock auth endpoints to simulate logged-in user
-  await page.route('**/localhost:3000/auth/me', async (route) => {
+  await page.route('**/auth/me', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -98,8 +98,13 @@ async function mockAuth(page: Page) {
  * Helper to navigate to a page with the ResponseComposer
  */
 async function navigateToComposer(page: Page) {
-  // Mock discussion data - only match API calls (port 3000), not page navigation
-  await page.route('**/localhost:3000/discussions/discussion-123', async (route) => {
+  // Mock discussion API calls (fetch requests only, not page navigation)
+  await page.route('**/discussions/discussion-123', async (route) => {
+    // Only intercept fetch/xhr requests (API calls), not document navigations
+    if (route.request().resourceType() === 'document') {
+      await route.continue();
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -116,7 +121,7 @@ async function navigateToComposer(page: Page) {
     });
   });
 
-  await page.route('**/localhost:3000/discussions/discussion-123/responses', async (route) => {
+  await page.route('**/discussions/discussion-123/responses', async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
         status: 200,
@@ -510,8 +515,12 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
     expect(storedValue).toBe('HIGH');
 
     // Re-setup all mocks before reload (mocks are cleared on reload)
-    // Discussion API mock
-    await page.route('**/localhost:3000/discussions/discussion-123', async (route) => {
+    // Discussion API mock (fetch requests only, not document navigations)
+    await page.route('**/discussions/discussion-123', async (route) => {
+      if (route.request().resourceType() === 'document') {
+        await route.continue();
+        return;
+      }
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -527,7 +536,7 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
         }),
       });
     });
-    await page.route('**/localhost:3000/discussions/discussion-123/responses', async (route) => {
+    await page.route('**/discussions/discussion-123/responses', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
           status: 200,

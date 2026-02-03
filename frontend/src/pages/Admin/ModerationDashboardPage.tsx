@@ -202,8 +202,15 @@ export default function ModerationDashboardPage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div
+        role="tablist"
+        aria-label="Moderation tabs"
+        className="flex gap-2 mb-6 border-b border-gray-200"
+      >
         <button
+          role="tab"
+          aria-selected={activeTab === 'overview'}
+          aria-controls="overview-panel"
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'overview'
@@ -214,6 +221,9 @@ export default function ModerationDashboardPage() {
           Overview
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'queue'}
+          aria-controls="queue-panel"
           onClick={() => setActiveTab('queue')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'queue'
@@ -224,6 +234,9 @@ export default function ModerationDashboardPage() {
           Queue
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'actions'}
+          aria-controls="actions-panel"
           onClick={() => setActiveTab('actions')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'actions'
@@ -234,6 +247,9 @@ export default function ModerationDashboardPage() {
           Actions
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'appeals'}
+          aria-controls="appeals-panel"
           onClick={() => setActiveTab('appeals')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'appeals'
@@ -247,7 +263,12 @@ export default function ModerationDashboardPage() {
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
+        <div
+          id="overview-panel"
+          role="tabpanel"
+          aria-labelledby="overview-tab"
+          className="space-y-6"
+        >
           {loading ? (
             <Card>
               <CardBody>
@@ -267,7 +288,7 @@ export default function ModerationDashboardPage() {
                       <p className="text-4xl font-bold text-gray-900 mb-1">
                         {stats.totalPending ?? 0}
                       </p>
-                      <p className="text-sm text-gray-600">Pending Actions</p>
+                      <p className="text-sm text-gray-600">Total Pending</p>
                     </div>
                   </CardBody>
                 </Card>
@@ -339,15 +360,20 @@ export default function ModerationDashboardPage() {
                       {actions.slice(0, 5).map((action) => (
                         <div key={action.id} className="p-4 border border-gray-200 rounded-lg">
                           <div className="flex items-start justify-between mb-2">
-                            <div>
+                            <div className="flex flex-wrap gap-1">
                               <span
                                 className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}
                               >
                                 {action.severity}
                               </span>
-                              <span className="ml-2 text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
+                              <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
                                 {formatActionType(action.actionType)}
                               </span>
+                              {action.aiRecommended && (
+                                <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-blue-100 text-blue-800 border-blue-200">
+                                  AI Recommended
+                                </span>
+                              )}
                             </div>
                             <span className="text-xs text-gray-500">
                               {formatDate(action.createdAt)}
@@ -437,14 +463,14 @@ export default function ModerationDashboardPage() {
 
       {/* Queue Tab */}
       {activeTab === 'queue' && (
-        <div>
+        <div id="queue-panel" role="tabpanel" aria-labelledby="queue-tab">
           <ModerationQueueView initialStatus="pending" />
         </div>
       )}
 
       {/* Actions Tab */}
       {activeTab === 'actions' && (
-        <div className="space-y-4">
+        <div id="actions-panel" role="tabpanel" aria-labelledby="actions-tab" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -511,7 +537,7 @@ export default function ModerationDashboardPage() {
 
       {/* Appeals Tab */}
       {activeTab === 'appeals' && (
-        <div className="space-y-4">
+        <div id="appeals-panel" role="tabpanel" aria-labelledby="appeals-tab" className="space-y-4">
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">Appeals</h2>
