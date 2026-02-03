@@ -38,6 +38,7 @@ coverage/
 # Test artifacts
 playwright-report/
 test-results/
+.playwright-mcp/
 
 # Cache
 .turbo/

@@ -6,7 +6,6 @@ import { UploadModule } from './upload/upload.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { VerificationModule } from './verification/verification.module.js';
-import { DemoModule } from './demo/demo.module.js';
 
 @Module({
   imports: [
@@ -20,7 +19,6 @@ import { DemoModule } from './demo/demo.module.js';
     AuthModule,
     UsersModule,
     VerificationModule,
-    DemoModule,
   ],
   controllers: [],
   providers: [],
