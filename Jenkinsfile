@@ -21,25 +21,8 @@ library identifier: 'reasonbridge-lib@main',
         credentialsId: 'github-credentials'
     ])
 
-// Determine if this build is for a PR
 // With ONLY_PRS discovery strategy, branch jobs only exist when PRs are open
-// Check both CHANGE_ID (PR jobs) and build cause (PR events on branch jobs)
-def isPRBuild = env.CHANGE_ID != null
-def isMainBranch = env.BRANCH_NAME == 'main'
-def isPREvent = false
-
-// Check if build was triggered by a PR event (for branch jobs with ONLY_PRS strategy)
-def causes = currentBuild.rawBuild?.getCauses()
-causes?.each { cause ->
-    def description = cause.getShortDescription()
-    if (description?.contains('Pull request')) {
-        isPREvent = true
-    }
-}
-
-if (isPRBuild || isMainBranch || isPREvent) {
-    // Execute the real pipeline from jenkins-lib
-    reasonbridgeMultibranchPipeline()
-} else {
-    echo "Skipping build for branch ${env.BRANCH_NAME} - only main branch and PRs trigger CI"
-}
+// So any branch that Jenkins discovers has an open PR for it
+// Therefore, run CI for all branches (the discovery strategy handles filtering)
+echo "Running CI for branch ${env.BRANCH_NAME}"
+reasonbridgeMultibranchPipeline()
