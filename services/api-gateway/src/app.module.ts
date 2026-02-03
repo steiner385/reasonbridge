@@ -40,11 +40,12 @@ import { CorrelationMiddleware } from './middleware/correlation.middleware.js';
       }),
     }),
 
-    // Core modules
+    // Core modules - ResilienceModule must come before ProxyModule
+    // since ProxyService depends on CircuitBreakerService
     HealthModule,
-    ProxyModule,
-    MetricsModule,
     ResilienceModule,
+    MetricsModule,
+    ProxyModule,
   ],
   controllers: [],
   providers: [],

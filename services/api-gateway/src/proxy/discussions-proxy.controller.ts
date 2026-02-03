@@ -1,20 +1,29 @@
-import { Controller, Get, Param, Query, Res, Headers, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, Body, Res, Headers } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
-@Controller('topics')
-export class TopicsProxyController {
-  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
+/**
+ * Discussions Proxy Controller
+ *
+ * Proxies discussion-related endpoints to the discussion-service.
+ * Part of Feature 009 - Discussion Participation
+ */
+@Controller('discussions')
+export class DiscussionsProxyController {
+  constructor(private readonly proxyService: ProxyService) {}
 
+  /**
+   * GET /discussions - List discussions with filters
+   */
   @Get()
-  async getTopics(
+  async listDiscussions(
     @Query() query: Record<string, string>,
     @Headers('authorization') authHeader: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'GET',
-      path: '/topics',
+      path: '/discussions',
       query,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
@@ -22,39 +31,48 @@ export class TopicsProxyController {
     res.status(response.status).send(response.data);
   }
 
-  @Get('search')
-  async searchTopics(
-    @Query() query: Record<string, string>,
+  /**
+   * POST /discussions - Create a new discussion
+   */
+  @Post()
+  async createDiscussion(
+    @Body() body: unknown,
     @Headers('authorization') authHeader: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
-      method: 'GET',
-      path: '/topics/search',
-      query,
+      method: 'POST',
+      path: '/discussions',
+      body,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
 
     res.status(response.status).send(response.data);
   }
 
+  /**
+   * GET /discussions/:id - Get discussion by ID
+   */
   @Get(':id')
-  async getTopicById(
+  async getDiscussionById(
     @Param('id') id: string,
     @Headers('authorization') authHeader: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'GET',
-      path: `/topics/${id}`,
+      path: `/discussions/${id}`,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
 
     res.status(response.status).send(response.data);
   }
 
-  @Get(':id/common-ground')
-  async getCommonGroundAnalysis(
+  /**
+   * GET /discussions/:id/responses - Get responses for a discussion
+   */
+  @Get(':id/responses')
+  async getDiscussionResponses(
     @Param('id') id: string,
     @Query() query: Record<string, string>,
     @Headers('authorization') authHeader: string | undefined,
@@ -62,7 +80,7 @@ export class TopicsProxyController {
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'GET',
-      path: `/topics/${id}/common-ground`,
+      path: `/topics/discussions/${id}/responses`,
       query,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
@@ -70,27 +88,24 @@ export class TopicsProxyController {
     res.status(response.status).send(response.data);
   }
 
-  // Alias for common-ground (frontend uses both routes)
-  @Get(':id/common-ground-analysis')
-  async getCommonGroundAnalysisAlias(
-    @Param('id') id: string,
-    @Query() query: Record<string, string>,
+  /**
+   * POST /discussions/:id/responses - Create a response to a discussion
+   * Maps to POST /topics/responses with discussionId in body
+   */
+  @Post(':id/responses')
+  async createResponse(
+    @Param('id') discussionId: string,
+    @Body() body: Record<string, unknown>,
     @Headers('authorization') authHeader: string | undefined,
     @Res() res: FastifyReply,
   ) {
-    // Delegate to the same handler
-    return this.getCommonGroundAnalysis(id, query, authHeader, res);
-  }
+    // Add discussionId to the body
+    const enrichedBody = { ...body, discussionId };
 
-  @Get(':id/bridging-suggestions')
-  async getBridgingSuggestions(
-    @Param('id') id: string,
-    @Headers('authorization') authHeader: string | undefined,
-    @Res() res: FastifyReply,
-  ) {
-    const response = await this.proxyService.proxyToAiService({
-      method: 'GET',
-      path: `/suggest/bridging-suggestions/${id}`,
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'POST',
+      path: '/topics/responses',
+      body: enrichedBody,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
 
