@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardBody } from '../ui/Card';
@@ -329,9 +328,9 @@ function RegistrationForm({
 
           <p className="text-sm text-center text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+            <a href="/" className="text-primary-600 hover:text-primary-700 font-medium">
               Sign in
-            </Link>
+            </a>
           </p>
         </form>
       </CardBody>

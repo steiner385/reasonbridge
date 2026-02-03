@@ -347,6 +347,24 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
     });
   });
 
+  // Mock moderation stats endpoint (alternative path)
+  await page.route('**/api/moderation/stats', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        totalPending: 0,
+        criticalActions: 0,
+        avgReviewTimeMinutes: 15,
+        pendingByType: {},
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        totalToday: 0,
+      }),
+    });
+  });
+
   // Mock moderation actions endpoint
   await page.route('**/api/moderation/actions**', (route) => {
     route.fulfill({

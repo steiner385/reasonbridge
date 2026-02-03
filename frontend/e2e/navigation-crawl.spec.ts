@@ -237,7 +237,7 @@ test.describe('Route Registry', () => {
     const paths = ROUTE_REGISTRY.map((r) => r.path);
 
     expect(paths).toContain('/');
-    expect(paths).toContain('/login');
+    expect(paths).toContain('/register');
     expect(paths).toContain('/topics');
     expect(paths).toContain('/profile');
   });
