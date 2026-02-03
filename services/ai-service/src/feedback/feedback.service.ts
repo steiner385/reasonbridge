@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { ResponseAnalyzerService, AnalysisResult } from '../services/response-analyzer.service.js';
+import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
+import type { AnalysisResult } from '../services/response-analyzer.service.js';
 import { SemanticCacheService, RedisCacheService, computeContentHash } from '../cache/index.js';
 import {
   RequestFeedbackDto,
