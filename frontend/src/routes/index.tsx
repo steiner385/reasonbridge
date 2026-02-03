@@ -6,6 +6,7 @@ import { SignupPage } from '../pages/SignupPage';
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
+import { DiscussionDetailPage } from '../pages/Discussions/DiscussionDetailPage';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
@@ -51,6 +52,10 @@ export const routes: RouteObject[] = [
   {
     path: '/topics/:id',
     element: <TopicDetailPage />,
+  },
+  {
+    path: '/discussions/:discussionId',
+    element: <DiscussionDetailPage />,
   },
   {
     path: '/profile',

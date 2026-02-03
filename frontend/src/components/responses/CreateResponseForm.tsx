@@ -12,7 +12,9 @@
 
 import { useState, type FormEvent } from 'react';
 import { useCreateResponse } from '../../hooks/useCreateResponse';
+import { usePreviewFeedback } from '../../hooks/usePreviewFeedback';
 import Button from '../ui/Button';
+import { PreviewFeedbackPanel } from '../feedback/PreviewFeedbackPanel';
 import type { CitationInput } from '../../services/discussionService';
 
 export interface CreateResponseFormProps {
@@ -55,6 +57,17 @@ export function CreateResponseForm({
       onSuccess?.();
     },
   });
+
+  // Preview feedback integration
+  const {
+    feedback,
+    readyToPost,
+    isLoading: isFeedbackLoading,
+    error: feedbackError,
+    summary,
+    sensitivity,
+    setSensitivity,
+  } = usePreviewFeedback(content, { discussionId });
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -135,6 +148,7 @@ export function CreateResponseForm({
       {/* Content Textarea */}
       <div>
         <textarea
+          id="response-content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
@@ -151,6 +165,20 @@ export function CreateResponseForm({
             {content.length < 50 && ` (${50 - content.length} more needed)`}
           </span>
         </div>
+
+        {/* Preview Feedback Panel - shows when content >= 20 chars */}
+        {content.length >= 20 && (
+          <PreviewFeedbackPanel
+            feedback={feedback}
+            isLoading={isFeedbackLoading}
+            readyToPost={readyToPost}
+            summary={summary}
+            error={feedbackError}
+            sensitivity={sensitivity}
+            onSensitivityChange={setSensitivity}
+            showEmpty={true}
+          />
+        )}
       </div>
 
       {/* Citations Section */}

@@ -65,7 +65,7 @@ const mockEmptyFeedback = {
  * Helper to mock the preview feedback API
  */
 async function mockPreviewFeedbackAPI(page: Page, response: object) {
-  await page.route('**/feedback/preview', async (route) => {
+  await page.route('**/ai/feedback/preview', async (route) => {
     // Simulate realistic response time
     await new Promise((r) => setTimeout(r, 100));
     await route.fulfill({
@@ -81,7 +81,7 @@ async function mockPreviewFeedbackAPI(page: Page, response: object) {
  */
 async function mockAuth(page: Page) {
   // Mock auth endpoints to simulate logged-in user
-  await page.route('**/auth/me', async (route) => {
+  await page.route('**/localhost:3000/auth/me', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -98,8 +98,8 @@ async function mockAuth(page: Page) {
  * Helper to navigate to a page with the ResponseComposer
  */
 async function navigateToComposer(page: Page) {
-  // Mock discussion data
-  await page.route('**/discussions/discussion-123', async (route) => {
+  // Mock discussion data - only match API calls (port 3000), not page navigation
+  await page.route('**/localhost:3000/discussions/discussion-123', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -108,11 +108,15 @@ async function navigateToComposer(page: Page) {
         topicId: 'topic-456',
         title: 'Test Discussion',
         status: 'ACTIVE',
+        creator: { displayName: 'Test User' },
+        createdAt: new Date().toISOString(),
+        responseCount: 0,
+        participantCount: 1,
       }),
     });
   });
 
-  await page.route('**/discussions/discussion-123/responses', async (route) => {
+  await page.route('**/localhost:3000/discussions/discussion-123/responses', async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
         status: 200,
@@ -123,6 +127,9 @@ async function navigateToComposer(page: Page) {
   });
 
   await page.goto('/discussions/discussion-123');
+
+  // Click "Add Response" button to show the response form
+  await page.getByRole('button', { name: 'Add Response' }).click();
 }
 
 test.describe('Preview Feedback - User Story 1: View Feedback While Composing', () => {
@@ -156,7 +163,7 @@ test.describe('Preview Feedback - User Story 1: View Feedback While Composing', 
 
   test('T011: feedback updates when draft content is modified', async ({ page }) => {
     let requestCount = 0;
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       requestCount++;
       await new Promise((r) => setTimeout(r, 100));
       // Return different feedback based on request count
@@ -316,7 +323,7 @@ test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => 
     let responseIndex = 0;
     const responses = [mockFeedbackWithIssues, mockFeedbackAffirmation];
 
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       await new Promise((r) => setTimeout(r, 100));
       await route.fulfill({
         status: 200,
@@ -345,7 +352,7 @@ test.describe('Preview Feedback - Error Handling', () => {
 
   test('T020: compose still works when service unavailable', async ({ page }) => {
     // Mock API to return error
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
@@ -357,8 +364,8 @@ test.describe('Preview Feedback - Error Handling', () => {
     const textarea = page.locator('textarea[id="response-content"]');
     const submitButton = page.getByRole('button', { name: /Post Response/i });
 
-    // Type content
-    await textarea.fill('This is my response that I want to post.');
+    // Type content (must be at least 50 characters for submit to be enabled)
+    await textarea.fill('This is my detailed response that I want to post to the discussion.');
 
     // Verify feedback panel shows error gracefully
     await expect(page.getByText('Unable to analyze content')).toBeVisible({ timeout: 2000 });
@@ -370,7 +377,7 @@ test.describe('Preview Feedback - Error Handling', () => {
 
   test('shows loading skeleton while fetching feedback', async ({ page }) => {
     // Add delay to see loading state
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       await new Promise((r) => setTimeout(r, 500));
       await route.fulfill({
         status: 200,
@@ -383,8 +390,8 @@ test.describe('Preview Feedback - Error Handling', () => {
     const textarea = page.locator('textarea[id="response-content"]');
     await textarea.fill('This is a longer text that will trigger feedback loading.');
 
-    // Verify loading skeleton appears
-    await expect(page.locator('.animate-pulse')).toBeVisible({ timeout: 1000 });
+    // Verify loading skeleton appears (use first() to handle multiple matching elements)
+    await expect(page.locator('.animate-pulse').first()).toBeVisible({ timeout: 1000 });
 
     // Wait for content to load
     await expect(page.getByText('AFFIRMATION')).toBeVisible({ timeout: 2000 });
@@ -420,7 +427,7 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
 
   test('T035: LOW sensitivity shows more feedback items', async ({ page }) => {
     let requestedSensitivity = '';
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       const postData = route.request().postDataJSON();
       requestedSensitivity = postData?.sensitivity || 'MEDIUM';
       await new Promise((r) => setTimeout(r, 100));
@@ -452,7 +459,7 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
 
   test('T036: HIGH sensitivity shows fewer feedback items', async ({ page }) => {
     let requestedSensitivity = '';
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       const postData = route.request().postDataJSON();
       requestedSensitivity = postData?.sensitivity || 'MEDIUM';
       await new Promise((r) => setTimeout(r, 100));
@@ -502,8 +509,42 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
     );
     expect(storedValue).toBe('HIGH');
 
+    // Re-setup all mocks before reload (mocks are cleared on reload)
+    // Discussion API mock
+    await page.route('**/localhost:3000/discussions/discussion-123', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'discussion-123',
+          topicId: 'topic-456',
+          title: 'Test Discussion',
+          status: 'ACTIVE',
+          creator: { displayName: 'Test User' },
+          createdAt: new Date().toISOString(),
+          responseCount: 0,
+          participantCount: 1,
+        }),
+      });
+    });
+    await page.route('**/localhost:3000/discussions/discussion-123/responses', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([]),
+        });
+      }
+    });
+    await mockPreviewFeedbackAPI(page, mockFeedbackWithIssues);
+    await mockAuth(page);
+
     // Reload page
     await page.reload();
+
+    // After reload, need to click "Add Response" button again
+    await page.getByRole('button', { name: 'Add Response' }).click();
+
     await textarea.fill('This is content that triggers feedback analysis again.');
 
     // Wait for feedback panel
