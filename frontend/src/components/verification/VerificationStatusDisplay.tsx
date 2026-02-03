@@ -66,10 +66,7 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
       );
     }
 
-    // Handle both array and object response formats
-    const dataArray = Array.isArray(pendingVerifications.data)
-      ? pendingVerifications.data
-      : (pendingVerifications.data?.data ?? []);
+    const dataArray = pendingVerifications.data ?? [];
 
     const pending = dataArray.filter(
       (v) => v.status === VerificationStatus.PENDING && !isExpired(v.expiresAt),
