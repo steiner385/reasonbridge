@@ -263,8 +263,9 @@ test.describe('Moderation Dashboard', () => {
 
       // Verify action type distribution is visible
       await expect(page.getByText(/pending actions by type/i)).toBeVisible();
-      await expect(page.getByText(/warn/i)).toBeVisible();
-      await expect(page.getByText(/remove/i)).toBeVisible();
+      // Use first() to handle multiple matches (chart and action cards both show types)
+      await expect(page.getByText(/warn/i).first()).toBeVisible();
+      await expect(page.getByText(/remove/i).first()).toBeVisible();
     });
 
     test('should display recent pending actions', async ({ page }) => {
@@ -283,11 +284,17 @@ test.describe('Moderation Dashboard', () => {
       await page.goto('/admin/moderation');
       await page.waitForLoadState('networkidle');
 
-      // Look for severity indicators
-      const nonPunitiveBadge = page.getByText(/non.?punitive/i).first();
-      const consequentialBadge = page.getByText(/consequential/i).first();
-
-      await expect(nonPunitiveBadge.or(consequentialBadge)).toBeVisible();
+      // Look for severity indicators - at least one should be visible
+      const hasSeverityBadge =
+        (await page
+          .getByText(/non.?punitive/i)
+          .first()
+          .isVisible()) ||
+        (await page
+          .getByText(/consequential/i)
+          .first()
+          .isVisible());
+      expect(hasSeverityBadge).toBe(true);
     });
 
     test('should display AI recommendation badge when applicable', async ({ page }) => {
@@ -331,7 +338,10 @@ test.describe('Moderation Dashboard', () => {
       await page.getByRole('tab', { name: /queue/i }).click();
 
       // Find and change status filter
-      const statusFilter = page.locator('select').filter({ hasText: /all|pending/i }).first();
+      const statusFilter = page
+        .locator('select')
+        .filter({ hasText: /all|pending/i })
+        .first();
       if ((await statusFilter.count()) > 0) {
         await statusFilter.selectOption('pending');
         // Verify filter is applied (page should update)
@@ -352,7 +362,8 @@ test.describe('Moderation Dashboard', () => {
         .filter({ hasText: /consequential|non.?punitive/i })
         .first();
       if ((await severityFilter.count()) > 0) {
-        await severityFilter.selectOption({ label: /consequential/i });
+        // Use string value instead of regex for selectOption
+        await severityFilter.selectOption('consequential');
         await page.waitForTimeout(500);
       }
     });
@@ -438,12 +449,13 @@ test.describe('Moderation Dashboard', () => {
       await page.goto('/admin/moderation');
       await page.waitForLoadState('networkidle');
 
-      // Look for appeal action buttons
-      const upholdButton = page.getByRole('button', { name: /uphold/i }).first();
-      const denyButton = page.getByRole('button', { name: /deny/i }).first();
-
-      // At least one of these should be visible if there are pending appeals
-      await expect(upholdButton.or(denyButton)).toBeVisible();
+      // Look for appeal action buttons - at least one should be visible
+      const hasAppealButtons =
+        (await page
+          .getByRole('button', { name: /uphold/i })
+          .first()
+          .isVisible()) || (await page.getByRole('button', { name: /deny/i }).first().isVisible());
+      expect(hasAppealButtons).toBe(true);
     });
 
     test('should handle API error gracefully', async ({ page }) => {
@@ -459,10 +471,14 @@ test.describe('Moderation Dashboard', () => {
       await page.goto('/admin/moderation');
       await page.waitForLoadState('networkidle');
 
-      // Should show error state or fallback UI
-      await expect(
-        page.getByText(/error/i).or(page.getByText(/failed to load/i)).or(page.getByText(/0/)),
-      ).toBeVisible();
+      // Should show error state - look for the error heading specifically
+      const hasErrorState =
+        (await page.getByRole('heading', { name: /error/i }).isVisible()) ||
+        (await page
+          .getByText(/failed to load/i)
+          .first()
+          .isVisible());
+      expect(hasErrorState).toBe(true);
     });
 
     test('should display loading state initially', async ({ page }) => {
@@ -540,7 +556,10 @@ test.describe('Moderation Dashboard', () => {
 
       // Look for appeal status badges
       await expect(
-        page.getByText(/pending/i).first().or(page.getByText(/under review/i).first()),
+        page
+          .getByText(/pending/i)
+          .first()
+          .or(page.getByText(/under review/i).first()),
       ).toBeVisible();
     });
 
