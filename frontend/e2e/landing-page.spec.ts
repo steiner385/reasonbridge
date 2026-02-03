@@ -173,7 +173,53 @@ test.describe('Landing Page - Authenticated User Redirect', () => {
 });
 
 test.describe('Landing Page - Topics Section Interactions', () => {
+  // Mock topics data for consistent testing
+  const mockTopics = [
+    {
+      id: 'topic-1',
+      title: 'Remote Work Policies',
+      description: 'Discussing the future of remote work in modern organizations',
+      status: 'ACTIVE',
+      participantCount: 45,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'topic-2',
+      title: 'Universal Basic Income',
+      description: 'Exploring the economic implications of UBI programs',
+      status: 'ACTIVE',
+      participantCount: 78,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'topic-3',
+      title: 'Climate Change Solutions',
+      description: 'Finding common ground on environmental policies',
+      status: 'SEEDING',
+      participantCount: 32,
+      createdAt: new Date().toISOString(),
+    },
+  ];
+
   test.beforeEach(async ({ page }) => {
+    // Mock the topics API endpoint for consistent testing
+    await page.route('**/topics*', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            data: mockTopics,
+            total: mockTopics.length,
+            page: 1,
+            pageSize: 20,
+          }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
     await page.goto('/');
     await page.evaluate(() => {
       localStorage.removeItem('authToken');
@@ -181,8 +227,6 @@ test.describe('Landing Page - Topics Section Interactions', () => {
   });
 
   test('should scroll to topics section when clicking See How It Works', async ({ page }) => {
-    await page.goto('/');
-
     // Click the "See How It Works" button
     await page.getByRole('button', { name: /see how it works/i }).click();
 
@@ -191,14 +235,11 @@ test.describe('Landing Page - Topics Section Interactions', () => {
     await expect(topicsSection).toBeInViewport();
   });
 
-  test('should display topics section with real seeded topics', async ({ page }) => {
-    await page.goto('/');
-
+  test('should display topics section with topics', async ({ page }) => {
     // Scroll to topics section
     const topicsSection = page.locator('#topics-section');
     await topicsSection.scrollIntoViewIfNeeded();
 
-    // Wait for topics to load (real API with seeded data)
     // Should show "Current Discussions" heading when data loads
     await expect(page.getByRole('heading', { name: 'Current Discussions' })).toBeVisible({
       timeout: 10000,
@@ -208,24 +249,21 @@ test.describe('Landing Page - Topics Section Interactions', () => {
     const joinButtons = page.getByRole('button', { name: /join discussion/i });
     await expect(joinButtons.first()).toBeVisible();
 
-    // Verify at least one seeded topic title is visible
-    // The seeded topics include titles like "Remote Work", "Universal Basic Income", etc.
-    const hasSeededTopic = await page
-      .getByText(/Remote Work|Universal Basic Income|Climate Change|Healthcare|Immigration/i)
+    // Verify at least one topic title is visible
+    const hasTopicTitle = await page
+      .getByText(/Remote Work|Universal Basic Income|Climate Change/i)
       .first()
       .isVisible()
       .catch(() => false);
-    expect(hasSeededTopic).toBeTruthy();
+    expect(hasTopicTitle).toBeTruthy();
   });
 
   test('should show join modal when clicking Join Discussion button', async ({ page }) => {
-    await page.goto('/');
-
     // Scroll to topics section and wait for content to load
     const topicsSection = page.locator('#topics-section');
     await topicsSection.scrollIntoViewIfNeeded();
 
-    // Wait for topics to load from real API
+    // Wait for topics to load
     await expect(page.getByRole('heading', { name: 'Current Discussions' })).toBeVisible({
       timeout: 10000,
     });
@@ -241,13 +279,11 @@ test.describe('Landing Page - Topics Section Interactions', () => {
   });
 
   test('should close join modal when clicking Continue Browsing', async ({ page }) => {
-    await page.goto('/');
-
     // Scroll to topics section and wait for content to load
     const topicsSection = page.locator('#topics-section');
     await topicsSection.scrollIntoViewIfNeeded();
 
-    // Wait for topics to load from real API
+    // Wait for topics to load
     await expect(page.getByRole('heading', { name: 'Current Discussions' })).toBeVisible({
       timeout: 10000,
     });

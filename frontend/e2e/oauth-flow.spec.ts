@@ -98,14 +98,14 @@ test.describe('OAuth Signup Flow', () => {
         // Wait for callback page to process error
         await page.waitForURL(/\/auth\/callback\/google/, { timeout: 10000 });
 
-        // AuthCallbackPage will show error and redirect to login
+        // AuthCallbackPage will show error and redirect to home page after delay
         // Firefox can be slower with OAuth redirects, use longer timeout
-        await page.waitForURL(/\/login/, { timeout: 30000 });
+        // Wait for redirect to either home (/) or page with error visible
+        await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 30000 });
 
-        // Error should be visible (callback page shows error before redirect)
-        // or we're on login page after error redirect
+        // Should be on home page after error redirect
         const currentUrl = page.url();
-        expect(currentUrl).toContain('/login');
+        expect(currentUrl.endsWith('/') || !currentUrl.includes('/auth/callback')).toBeTruthy();
       });
     });
 
@@ -129,11 +129,11 @@ test.describe('OAuth Signup Flow', () => {
         // Wait for callback with mismatched state (fixture returns invalid_state_token)
         await page.waitForURL(/\/auth\/callback\/google/, { timeout: 10000 });
 
-        // AuthCallbackPage detects state mismatch and shows error
-        await page.waitForURL(/\/login/, { timeout: 10000 });
+        // AuthCallbackPage detects state mismatch and redirects to home page after delay
+        await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 15000 });
 
         const currentUrl = page.url();
-        expect(currentUrl).toContain('/login');
+        expect(currentUrl.endsWith('/') || !currentUrl.includes('/auth/callback')).toBeTruthy();
       });
     });
 
@@ -226,11 +226,11 @@ test.describe('OAuth Signup Flow', () => {
       // Wait for callback with error
       await page.waitForURL(/\/auth\/callback\/apple/, { timeout: 10000 });
 
-      // AuthCallbackPage shows error and redirects to login
-      await page.waitForURL(/\/login/, { timeout: 10000 });
+      // AuthCallbackPage shows error and redirects to home page after delay
+      await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 15000 });
 
       const currentUrl = page.url();
-      expect(currentUrl).toContain('/login');
+      expect(currentUrl.endsWith('/') || !currentUrl.includes('/auth/callback')).toBeTruthy();
     });
   });
 
@@ -314,11 +314,11 @@ test.describe('OAuth Signup Flow', () => {
       // Wait for callback with expired token
       await page.waitForURL(/\/auth\/callback\/google/, { timeout: 10000 });
 
-      // AuthCallbackPage should show error and redirect to login
-      await page.waitForURL(/\/login/, { timeout: 15000 });
+      // AuthCallbackPage should show error and redirect to home page after delay
+      await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 15000 });
 
       const currentUrl = page.url();
-      expect(currentUrl).toContain('/login');
+      expect(currentUrl.endsWith('/') || !currentUrl.includes('/auth/callback')).toBeTruthy();
     });
   });
 

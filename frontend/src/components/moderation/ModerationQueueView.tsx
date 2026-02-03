@@ -50,7 +50,9 @@ export default function ModerationQueueView({
   const [error, setError] = useState<string | null>(null);
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState<ModerationActionStatus | 'all'>(initialStatus || 'pending');
+  const [statusFilter, setStatusFilter] = useState<ModerationActionStatus | 'all'>(
+    initialStatus || 'pending',
+  );
   const [severityFilter, setSeverityFilter] = useState<ModerationSeverity | 'all'>('all');
   const [actionTypeFilter, setActionTypeFilter] = useState<ModerationActionType | 'all'>('all');
 
@@ -96,7 +98,7 @@ export default function ModerationQueueView({
 
         // Filter by action type if specified
         if (actionTypeFilter !== 'all') {
-          filteredActions = filteredActions.filter(a => a.actionType === actionTypeFilter);
+          filteredActions = filteredActions.filter((a) => a.actionType === actionTypeFilter);
         }
 
         // Sort actions
@@ -106,7 +108,10 @@ export default function ModerationQueueView({
 
           if (sortField === 'severity') {
             // Sort severity: consequential > non_punitive
-            const severityOrder: Record<ModerationSeverity, number> = { consequential: 1, non_punitive: 0 };
+            const severityOrder: Record<ModerationSeverity, number> = {
+              consequential: 1,
+              non_punitive: 0,
+            };
             aVal = severityOrder[a.severity];
             bVal = severityOrder[b.severity];
           } else if (sortField === 'createdAt') {
@@ -138,7 +143,7 @@ export default function ModerationQueueView({
       setProcessingActionId(actionId);
       setProcessingAction('approve');
       const updatedAction = await approveModerationAction(actionId);
-      setActions(actions.filter(a => a.id !== actionId));
+      setActions(actions.filter((a) => a.id !== actionId));
       onActionUpdated?.(updatedAction);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to approve action');
@@ -154,7 +159,7 @@ export default function ModerationQueueView({
       setProcessingActionId(actionId);
       setProcessingAction('reject');
       const updatedAction = await rejectModerationAction(actionId);
-      setActions(actions.filter(a => a.id !== actionId));
+      setActions(actions.filter((a) => a.id !== actionId));
       onActionUpdated?.(updatedAction);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reject action');
@@ -172,7 +177,11 @@ export default function ModerationQueueView({
   // Format date for display
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      ' ' +
+      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    );
   };
 
   // Get severity color class
@@ -234,10 +243,16 @@ export default function ModerationQueueView({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label
+                htmlFor="queue-status-filter"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Status
+              </label>
               <select
+                id="queue-status-filter"
                 value={statusFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setStatusFilter(e.target.value as ModerationActionStatus | 'all');
                   setPage(1);
                 }}
@@ -253,10 +268,16 @@ export default function ModerationQueueView({
 
             {/* Severity Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Severity</label>
+              <label
+                htmlFor="queue-severity-filter"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Severity
+              </label>
               <select
+                id="queue-severity-filter"
                 value={severityFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setSeverityFilter(e.target.value as ModerationSeverity | 'all');
                   setPage(1);
                 }}
@@ -270,10 +291,16 @@ export default function ModerationQueueView({
 
             {/* Action Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Action Type</label>
+              <label
+                htmlFor="queue-action-type-filter"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Action Type
+              </label>
               <select
+                id="queue-action-type-filter"
                 value={actionTypeFilter}
-                onChange={e => {
+                onChange={(e) => {
                   setActionTypeFilter(e.target.value as ModerationActionType | 'all');
                   setPage(1);
                 }}
@@ -338,17 +365,24 @@ export default function ModerationQueueView({
 
               {/* Actions List */}
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {actions.map(action => (
-                  <div key={action.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                {actions.map((action) => (
+                  <div
+                    key={action.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex flex-wrap gap-2">
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}>
+                        <span
+                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${getSeverityColor(action.severity)}`}
+                        >
                           {action.severity.replace('_', ' ')}
                         </span>
                         <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
                           {formatActionType(action.actionType)}
                         </span>
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}>
+                        <span
+                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}
+                        >
                           {action.status}
                         </span>
                         {action.aiRecommended && (
@@ -358,11 +392,15 @@ export default function ModerationQueueView({
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500 flex-shrink-0">{formatDate(action.createdAt)}</span>
+                      <span className="text-xs text-gray-500 flex-shrink-0">
+                        {formatDate(action.createdAt)}
+                      </span>
                     </div>
 
                     <div className="mb-3">
-                      <p className="text-sm text-gray-900 font-medium mb-1">Target: {action.targetType}</p>
+                      <p className="text-sm text-gray-900 font-medium mb-1">
+                        Target: {action.targetType}
+                      </p>
                       <p className="text-sm text-gray-700">{action.reasoning}</p>
                     </div>
 
@@ -374,7 +412,9 @@ export default function ModerationQueueView({
                           onClick={() => handleApprove(action.id)}
                           disabled={processingActionId === action.id}
                         >
-                          {processingActionId === action.id && processingAction === 'approve' ? 'Approving...' : 'Approve'}
+                          {processingActionId === action.id && processingAction === 'approve'
+                            ? 'Approving...'
+                            : 'Approve'}
                         </Button>
                         <Button
                           size="sm"
@@ -382,7 +422,9 @@ export default function ModerationQueueView({
                           onClick={() => handleReject(action.id)}
                           disabled={processingActionId === action.id}
                         >
-                          {processingActionId === action.id && processingAction === 'reject' ? 'Rejecting...' : 'Reject'}
+                          {processingActionId === action.id && processingAction === 'reject'
+                            ? 'Rejecting...'
+                            : 'Reject'}
                         </Button>
                       </div>
                     )}
