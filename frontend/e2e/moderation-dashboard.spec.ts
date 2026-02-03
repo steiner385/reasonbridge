@@ -252,9 +252,9 @@ test.describe('Moderation Dashboard', () => {
 
       // Verify statistics are displayed
       await expect(page.getByText(/total pending/i)).toBeVisible();
-      await expect(page.getByText(/15/)).toBeVisible(); // totalPending
-      await expect(page.getByText(/critical/i)).toBeVisible();
-      await expect(page.getByText(/4/)).toBeVisible(); // criticalActions
+      await expect(page.getByText('15', { exact: true })).toBeVisible(); // totalPending
+      await expect(page.getByText(/critical/i).first()).toBeVisible();
+      await expect(page.getByText('4', { exact: true })).toBeVisible(); // criticalActions
     });
 
     test('should display pending actions by type chart', async ({ page }) => {
