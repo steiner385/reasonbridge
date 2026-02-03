@@ -1,6 +1,7 @@
 # Demo Environment - Quick Reference
 
 ## One-Command Start
+
 ```bash
 ./scripts/start-demo.sh
 ```
@@ -8,19 +9,22 @@
 ## Service URLs
 
 ### Frontend & API
+
 - Frontend: http://localhost:3000
 - API Docs: http://localhost:3000/api-docs
 
-### Backend Services  
+### Backend Services
+
 - User Service: http://localhost:3001
-- AI Service: http://localhost:3002  
+- AI Service: http://localhost:3002
 - Moderation: http://localhost:3003
 - Recommendation: http://localhost:3004
 - Notification: http://localhost:3005
 - Fact Check: http://localhost:3006
 
 ### Infrastructure
-- PostgreSQL: localhost:5432 (unite/unite/unite_dev)
+
+- PostgreSQL: localhost:5432 (reasonbridge/reasonbridge/reasonbridge_dev)
 - Redis: localhost:6379
 - LocalStack: localhost:4566
 - MailHog: http://localhost:8025
@@ -28,6 +32,7 @@
 - Qdrant: http://localhost:6333
 
 ## Health Checks
+
 ```bash
 # Check infrastructure
 docker compose ps
@@ -44,6 +49,7 @@ done
 ## Common Commands
 
 ### Start/Stop
+
 ```bash
 # Start infrastructure only
 docker compose up -d
@@ -56,6 +62,7 @@ docker compose down -v
 ```
 
 ### Development
+
 ```bash
 # Install dependencies
 pnpm install
@@ -77,10 +84,11 @@ pnpm typecheck
 ```
 
 ### Database
+
 ```bash
 # Run migrations
 cd packages/db-models
-DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" npx prisma migrate deploy
+DATABASE_URL="postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev" npx prisma migrate deploy
 
 # Open Prisma Studio
 pnpm db:studio
@@ -92,6 +100,7 @@ pnpm db:seed
 ## Troubleshooting
 
 ### Port in use
+
 ```bash
 # Find process using port
 lsof -i :3000
@@ -101,6 +110,7 @@ kill <PID>
 ```
 
 ### Database issues
+
 ```bash
 # Check PostgreSQL
 docker compose logs postgres
@@ -110,6 +120,7 @@ docker compose restart postgres
 ```
 
 ### Clear everything and restart
+
 ```bash
 # Stop all services
 docker compose down -v
@@ -122,6 +133,7 @@ ps aux | grep -E "node.*tsx|node.*vite" | awk '{print $2}' | xargs kill
 ```
 
 ## Documentation
+
 - Full setup guide: [docs/DEMO_SETUP.md](./docs/DEMO_SETUP.md)
 - Complete summary: [docs/DEMO_COMPLETE.md](./docs/DEMO_COMPLETE.md)
 - Architecture: [CLAUDE.md](../CLAUDE.md)

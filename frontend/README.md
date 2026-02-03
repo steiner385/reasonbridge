@@ -1,6 +1,6 @@
 # @reason-bridge/frontend
 
-Frontend application for Unite Discord - Rational Discussion Platform.
+Frontend application for ReasonBridge - Rational Discussion Platform.
 
 ## Tech Stack
 

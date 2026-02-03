@@ -1,0 +1,319 @@
+openapi: 3.0.3
+info:
+  title: Preview Feedback API
+  description: |
+    Real-time AI-generated feedback for draft content during composition.
+
+    This API provides feedback to users BEFORE they post, helping them craft
+    more constructive responses. Unlike the standard feedback endpoint, preview
+    feedback is ephemeral (not stored) and returns ALL detected issues.
+  version: 1.0.0
+  contact:
+    name: ReasonBridge Team
+
+servers:
+  - url: http://localhost:3003
+    description: Local development (ai-service)
+  - url: http://localhost:3001/ai
+    description: Local development (via api-gateway)
+
+tags:
+  - name: Preview Feedback
+    description: Real-time feedback for draft content
+
+paths:
+  /feedback/preview:
+    post:
+      summary: Get preview feedback for draft content
+      description: |
+        Analyze draft content and return AI-generated feedback without storing it.
+
+        **Authentication**: Required (JWT Bearer token)
+        **Rate Limit**: 10 requests per minute per user
+        **Performance Target**: < 500ms response time
+
+        Use this endpoint while users are composing responses to help them
+        improve their content before posting.
+      tags:
+        - Preview Feedback
+      operationId: previewFeedback
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewFeedbackRequest'
+            examples:
+              minimal:
+                summary: Minimal request (content only)
+                value:
+                  content: "I think this policy is completely wrong and anyone who supports it must be an idiot."
+              withContext:
+                summary: Request with discussion context
+                value:
+                  content: "Studies show that 90% of people agree with this position, so it must be correct."
+                  discussionId: "550e8400-e29b-41d4-a716-446655440000"
+                  sensitivity: "MEDIUM"
+              constructive:
+                summary: Constructive content (should return affirmation)
+                value:
+                  content: "I understand your perspective on this issue. While I disagree, I think we can find common ground by focusing on the shared goal of improving outcomes for everyone involved."
+                  sensitivity: "LOW"
+      responses:
+        '200':
+          description: Preview feedback generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewFeedbackResult'
+              examples:
+                withIssues:
+                  summary: Response with detected issues
+                  value:
+                    feedback:
+                      - type: "INFLAMMATORY"
+                        subtype: "personal_attack"
+                        suggestionText: "Consider rephrasing to focus on ideas rather than personal characteristics."
+                        reasoning: "Detected 1 instance(s) of potentially inflammatory language (e.g., \"idiot\")."
+                        confidenceScore: 0.85
+                        shouldDisplay: true
+                        educationalResources:
+                          links:
+                            - title: "Constructive Communication Guide"
+                              url: "https://en.wikipedia.org/wiki/Nonviolent_Communication"
+                    primary:
+                      type: "INFLAMMATORY"
+                      subtype: "personal_attack"
+                      suggestionText: "Consider rephrasing to focus on ideas rather than personal characteristics."
+                      reasoning: "Detected 1 instance(s) of potentially inflammatory language."
+                      confidenceScore: 0.85
+                      shouldDisplay: true
+                    readyToPost: false
+                    summary: "Consider revising before posting. See suggestions below."
+                    analysisTimeMs: 245
+                affirmation:
+                  summary: Response with no issues (affirmation)
+                  value:
+                    feedback:
+                      - type: "AFFIRMATION"
+                        suggestionText: "Your response contributes to constructive dialogue."
+                        reasoning: "No logical fallacies, inflammatory language, or clarity issues detected."
+                        confidenceScore: 0.85
+                        shouldDisplay: true
+                    readyToPost: true
+                    summary: "Looking good! Your response is constructive and well-reasoned."
+                    analysisTimeMs: 198
+        '400':
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                statusCode: 400
+                message:
+                  - "content must be at least 20 characters for meaningful feedback"
+                error: "Bad Request"
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                message: "Unauthorized"
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 429
+                message: "Too many requests. Please wait before trying again."
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from authentication
+
+  schemas:
+    PreviewFeedbackRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 20
+          description: |
+            The draft content to analyze. Must be at least 20 characters
+            to provide meaningful feedback.
+          example: "I think this approach has some merits, but there are concerns about implementation."
+        discussionId:
+          type: string
+          format: uuid
+          description: |
+            Optional discussion ID for context-aware analysis.
+            Enables semantic caching for similar content.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        topicId:
+          type: string
+          format: uuid
+          description: |
+            Optional topic ID for context-aware analysis.
+            Used when discussionId is not available.
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        sensitivity:
+          $ref: '#/components/schemas/FeedbackSensitivity'
+
+    PreviewFeedbackResult:
+      type: object
+      required:
+        - feedback
+        - readyToPost
+        - summary
+        - analysisTimeMs
+      properties:
+        feedback:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewFeedbackItem'
+          description: |
+            All feedback items that meet the sensitivity threshold,
+            sorted by confidence score (descending).
+        primary:
+          $ref: '#/components/schemas/PreviewFeedbackItem'
+          description: |
+            The highest priority feedback item (if any issues detected).
+            Null when content has no issues.
+        readyToPost:
+          type: boolean
+          description: |
+            True if no critical issues detected (FALLACY or INFLAMMATORY
+            with confidence >= 0.75).
+        summary:
+          type: string
+          description: User-friendly summary message about content status.
+          example: "One suggestion to consider before posting."
+        analysisTimeMs:
+          type: integer
+          description: Time taken to analyze content (milliseconds).
+          example: 245
+
+    PreviewFeedbackItem:
+      type: object
+      required:
+        - type
+        - suggestionText
+        - reasoning
+        - confidenceScore
+        - shouldDisplay
+      properties:
+        type:
+          $ref: '#/components/schemas/FeedbackType'
+        subtype:
+          type: string
+          description: |
+            More specific categorization of the feedback.
+            Examples: "strawman", "ad_hominem", "statistical_claim"
+          example: "strawman"
+        suggestionText:
+          type: string
+          description: Actionable advice for improving the content.
+          example: "Consider rephrasing to focus on ideas rather than personal characteristics."
+        reasoning:
+          type: string
+          description: Explanation of why this feedback was generated.
+          example: "Detected 1 instance(s) of potentially inflammatory language."
+        confidenceScore:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Confidence level in the detection (0.00 to 1.00).
+          example: 0.85
+        educationalResources:
+          type: object
+          description: Optional links and resources for learning more.
+          properties:
+            links:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: "Constructive Communication Guide"
+                  url:
+                    type: string
+                    format: uri
+                    example: "https://en.wikipedia.org/wiki/Nonviolent_Communication"
+        shouldDisplay:
+          type: boolean
+          description: Whether this item meets the sensitivity threshold for display.
+          example: true
+
+    FeedbackType:
+      type: string
+      enum:
+        - FALLACY
+        - INFLAMMATORY
+        - UNSOURCED
+        - BIAS
+        - AFFIRMATION
+      description: |
+        Type of feedback detected:
+        - FALLACY: Logical reasoning errors (e.g., strawman, ad hominem)
+        - INFLAMMATORY: Personal attacks or hostile language
+        - UNSOURCED: Statistical or factual claims without support
+        - BIAS: One-sided framing or perspective
+        - AFFIRMATION: Positive feedback when no issues detected
+
+    FeedbackSensitivity:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+      default: MEDIUM
+      description: |
+        Sensitivity level for feedback filtering:
+        - LOW: Show all feedback (confidence >= 0.50)
+        - MEDIUM: Show moderately confident feedback (confidence >= 0.70)
+        - HIGH: Show only high-confidence feedback (confidence >= 0.85)
+
+    ValidationError:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: array
+          items:
+            type: string
+          example:
+            - "content must be at least 20 characters for meaningful feedback"
+        error:
+          type: string
+          example: "Bad Request"
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string

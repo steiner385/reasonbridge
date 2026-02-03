@@ -5,14 +5,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
+    include: ['src/**/*.test.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      // Integration tests - require DATABASE_URL and run in separate stage
-      '**/*.integration.test.ts',
-      // Flaky test - detectCoordinatedPostingPatterns assertion fails
-      '**/bot-detector.service.spec.ts',
+      '**/*.integration.test.ts', // Run in integration test phase
       // CI: Prisma client module resolution issues
       '**/trust-score.calculator.test.ts',
       '**/users.controller.test.ts',
@@ -20,8 +18,6 @@ export default defineConfig({
       '**/verification.controller.test.ts',
       '**/verification.service.test.ts',
       '**/video-upload.service.test.ts',
-      // OAuth test - requires additional dependencies (swagger, etc)
-      '**/__tests__/auth.service.spec.ts',
     ],
     coverage: {
       provider: 'v8',

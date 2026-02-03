@@ -9,7 +9,7 @@ Your local development environment for the **User Onboarding** feature is now fu
 ### 1. Database Setup ✅
 
 - ✅ PostgreSQL database running (local instance on port 5432)
-- ✅ Database `unite_dev` created with user `unite`
+- ✅ Database `reasonbridge_dev` created with user `reasonbridge`
 - ✅ All migrations applied (4 migrations including onboarding schema)
 - ✅ Database seeded with 20 curated topics
 - ✅ System user created (`system@reasonbridge.org`)
@@ -66,9 +66,9 @@ Your local development environment for the **User Onboarding** feature is now fu
 ```bash
 Host: localhost
 Port: 5432
-Database: unite_dev
-User: unite
-Password: unite
+Database: reasonbridge_dev
+User: reasonbridge
+Password: reasonbridge
 ```
 
 ## What's Next
@@ -149,7 +149,7 @@ pnpm --filter frontend dev
 
 ```bash
 # Database
-psql -h localhost -U unite -d unite_dev -c "\dt"
+psql -h localhost -U reasonbridge -d reasonbridge_dev -c "\dt"
 
 # Backend health
 curl http://localhost:8080/health
@@ -162,14 +162,14 @@ open http://localhost:3000
 
 ```bash
 # List all topics
-psql -h localhost -U unite -d unite_dev -c "
+psql -h localhost -U reasonbridge -d reasonbridge_dev -c "
   SELECT title, activity_level, suggested_for_new_users
   FROM discussion_topics
   ORDER BY activity_level DESC, participant_count DESC;
 "
 
 # Count topics by activity level
-psql -h localhost -U unite -d unite_dev -c "
+psql -h localhost -U reasonbridge -d reasonbridge_dev -c "
   SELECT activity_level, COUNT(*)
   FROM discussion_topics
   GROUP BY activity_level;
@@ -215,12 +215,12 @@ psql -h localhost -U unite -d unite_dev -c "
 ps aux | grep postgres
 
 # Test connection
-psql -h localhost -U unite -d unite_dev -c "SELECT version();"
+psql -h localhost -U reasonbridge -d reasonbridge_dev -c "SELECT version();"
 
 # Reset database (if needed)
-psql -h localhost -U unite -d unite_dev -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" npx prisma migrate deploy
-DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" pnpm --filter db-models db:seed
+psql -h localhost -U reasonbridge -d reasonbridge_dev -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+DATABASE_URL="postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev" npx prisma migrate deploy
+DATABASE_URL="postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev" pnpm --filter db-models db:seed
 ```
 
 ### Port Conflicts
@@ -237,7 +237,7 @@ kill -9 <PID>
 
 ```bash
 # Regenerate client
-DATABASE_URL="postgresql://unite:unite@localhost:5432/unite_dev" npx prisma generate
+DATABASE_URL="postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev" npx prisma generate
 
 # Clear node_modules and reinstall
 rm -rf node_modules package-lock.json

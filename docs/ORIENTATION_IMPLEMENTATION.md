@@ -18,7 +18,7 @@ The orientation flow provides a 3-step interactive overlay that introduces new u
 
 ### 1. OrientationStepContent.tsx
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/components/onboarding/OrientationStepContent.tsx`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/components/onboarding/OrientationStepContent.tsx`
 
 Three step content components with rich visual examples:
 
@@ -35,7 +35,7 @@ Three step content components with rich visual examples:
 
 ### 2. OrientationOverlay.tsx
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/components/onboarding/OrientationOverlay.tsx`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/components/onboarding/OrientationOverlay.tsx`
 
 Non-modal overlay component with comprehensive navigation.
 
@@ -77,7 +77,7 @@ interface OrientationOverlayProps {
 
 ### 3. OrientationPage.tsx
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/pages/Onboarding/OrientationPage.tsx`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/pages/Onboarding/OrientationPage.tsx`
 
 Page component that orchestrates the orientation flow.
 
@@ -102,7 +102,7 @@ Page component that orchestrates the orientation flow.
 
 ### 4. HelpMenu.tsx
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/components/onboarding/HelpMenu.tsx`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/components/onboarding/HelpMenu.tsx`
 
 Persistent help menu in navigation bar for re-accessing orientation.
 
@@ -134,7 +134,7 @@ interface HelpMenuProps {
 
 ### 5. Integration with App.tsx
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/App.tsx`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/App.tsx`
 
 Integrated HelpMenu and global OrientationOverlay.
 
@@ -147,7 +147,7 @@ Integrated HelpMenu and global OrientationOverlay.
 
 ### 6. Routes Update
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/routes/index.tsx`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/routes/index.tsx`
 
 Added orientation route:
 
@@ -182,7 +182,7 @@ await onboardingService.markOrientationViewed(false, true);
 
 ### E2E Tests
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/e2e/orientation.spec.ts`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/e2e/orientation.spec.ts`
 
 Comprehensive Playwright test suite covering:
 
@@ -229,7 +229,7 @@ Comprehensive Playwright test suite covering:
 
 ### Unit Test Documentation
 
-**Location:** `/mnt/ssk-ssd/tony/GitHub/uniteDiscord2/frontend/src/components/onboarding/__tests__/README.md`
+**Location:** `/mnt/ssk-ssd/tony/GitHub/reasonbridge2/frontend/src/components/onboarding/__tests__/README.md`
 
 Comprehensive documentation for unit tests including:
 

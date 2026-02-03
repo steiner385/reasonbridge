@@ -1,10 +1,10 @@
-import { Controller, Get, Param, Query, Res, Headers } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, Headers, Inject } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
 @Controller('topics')
 export class TopicsProxyController {
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   @Get()
   async getTopics(

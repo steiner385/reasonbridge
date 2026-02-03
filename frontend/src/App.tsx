@@ -1,14 +1,28 @@
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, useLocation, Link } from 'react-router-dom';
 import { routes } from './routes';
 
+/**
+ * Main App component with conditional layout.
+ * - Landing page ('/'): No global header/footer (page has its own)
+ * - Other pages: Standard app layout with header/footer
+ */
 function App() {
   const routing = useRoutes(routes);
+  const location = useLocation();
 
+  // Landing page has its own complete layout
+  if (location.pathname === '/') {
+    return <>{routing}</>;
+  }
+
+  // Standard layout for other pages
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary-600 text-white py-8 px-4 shadow-lg">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Unite Discord</h1>
+          <Link to="/" className="inline-block hover:opacity-90 transition-opacity">
+            <h1 className="text-4xl font-bold mb-2">ReasonBridge</h1>
+          </Link>
           <p className="text-primary-100 text-lg">Rational Discussion Platform</p>
         </div>
       </header>

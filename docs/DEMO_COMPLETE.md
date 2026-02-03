@@ -25,13 +25,13 @@ Successfully set up the ReasonBridge demo environment with all infrastructure se
    - Started all infrastructure services:
      - ✅ PostgreSQL 15 (localhost:5432) - HEALTHY
      - ✅ Redis 7 (localhost:6379) - HEALTHY
-     - ⚠️  LocalStack (localhost:4566) - RUNNING (unhealthy status but functional)
+     - ⚠️ LocalStack (localhost:4566) - RUNNING (unhealthy status but functional)
      - ✅ MailHog (localhost:8025, SMTP:1025) - RUNNING
      - ✅ Jaeger (localhost:16686) - RUNNING
-     - ⚠️  Qdrant (localhost:6333) - RUNNING (unhealthy due to version mismatch warning)
+     - ⚠️ Qdrant (localhost:6333) - RUNNING (unhealthy due to version mismatch warning)
 
 4. **Database Setup**
-   - Created database: `unite_dev`
+   - Created database: `reasonbridge_dev`
    - Applied 10 migrations successfully:
      - 20260117204909_initial
      - 20260117221046_add_vote_model
@@ -46,7 +46,7 @@ Successfully set up the ReasonBridge demo environment with all infrastructure se
 
 5. **Environment Configuration**
    - Created `.env` file with demo-friendly defaults
-   - Configured PostgreSQL connection: `postgresql://unite:unite@localhost:5432/unite_dev`
+   - Configured PostgreSQL connection: `postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge_dev`
    - Configured LocalStack (AWS emulation): `http://localhost:4566`
    - Set AWS credentials for LocalStack: `test/test`
    - Configured JWT secret for authentication
@@ -69,13 +69,16 @@ Successfully set up the ReasonBridge demo environment with all infrastructure se
 ## Current State
 
 ### Infrastructure Status
+
 All infrastructure services are running and healthy (with minor warnings):
+
 ```bash
 docker compose ps
 # All containers UP, postgres and redis HEALTHY
 ```
 
 ### Application Services Status
+
 Services are built and ready to start. Manual verification confirmed AI service works correctly with proper environment variables.
 
 ### Known Issues and Warnings
@@ -103,6 +106,7 @@ Services are built and ready to start. Manual verification confirmed AI service 
 ```
 
 This will:
+
 - Verify/update .env configuration
 - Start Docker infrastructure
 - Run database migrations
@@ -124,10 +128,12 @@ pnpm -r --parallel dev
 Once running:
 
 ### Application
+
 - **Frontend**: http://localhost:3000
 - **API Documentation**: http://localhost:3000/api-docs
 
 ### Backend Services
+
 - **API Gateway**: http://localhost:3000
 - **User Service**: http://localhost:3001
 - **AI Service**: http://localhost:3002
@@ -137,7 +143,8 @@ Once running:
 - **Fact Check Service**: http://localhost:3006
 
 ### Infrastructure
-- **PostgreSQL**: localhost:5432 (unite/unite/unite_dev)
+
+- **PostgreSQL**: localhost:5432 (reasonbridge/reasonbridge/reasonbridge_dev)
 - **Redis**: localhost:6379
 - **LocalStack**: localhost:4566
 - **MailHog UI**: http://localhost:8025
@@ -177,6 +184,7 @@ Once running:
 ## Next Steps
 
 1. **Start the Demo Environment**
+
    ```bash
    ./scripts/start-demo.sh
    ```
@@ -200,12 +208,14 @@ Once running:
 ## Files Created/Modified
 
 ### Created
+
 - `scripts/start-demo.sh` - Automated demo startup script
 - `docs/DEMO_SETUP.md` - Comprehensive setup guide
 - `docs/DEMO_COMPLETE.md` - This summary document
 - `.env` - Environment configuration (gitignored)
 
 ### Modified
+
 - `.env` - Updated with demo-friendly defaults
 
 ## Success Criteria Met
@@ -222,6 +232,7 @@ Once running:
 ## Testing Status
 
 The environment is ready for:
+
 - Local development
 - Manual testing
 - Unit/integration test runs
@@ -240,6 +251,7 @@ The environment is ready for:
 ## Support
 
 For issues:
+
 1. Check `/docs/DEMO_SETUP.md` troubleshooting section
 2. Review service logs: `docker compose logs [service-name]`
 3. Check environment: `cat .env`

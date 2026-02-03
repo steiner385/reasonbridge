@@ -1,5 +1,7 @@
 import {
+  Inject,
   Injectable,
+  Optional,
   UnauthorizedException,
   type CanActivate,
   type ExecutionContext,
@@ -26,19 +28,29 @@ export class JwtAuthGuard implements CanActivate {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    @Optional() @Inject(ConfigService) private readonly configService?: ConfigService,
   ) {
-    this.region = this.configService.get<string>('AWS_REGION', 'us-east-1');
+    // Use environment variables as fallback if ConfigService not available
+    this.region =
+      this.configService?.get<string>('AWS_REGION') ?? process.env['AWS_REGION'] ?? 'us-east-1';
     this.useMockAuth =
-      this.configService.get<string>('AUTH_MOCK') === 'true' ||
-      this.configService.get<string>('NODE_ENV') === 'test';
+      (this.configService?.get<string>('AUTH_MOCK') ?? process.env['AUTH_MOCK']) === 'true' ||
+      (this.configService?.get<string>('NODE_ENV') ?? process.env['NODE_ENV']) === 'test';
 
     if (this.useMockAuth) {
       // Mock mode - use simple JWT secret
-      this.jwtSecret = this.configService.get<string>('JWT_SECRET', 'mock-jwt-secret-for-testing');
+      this.jwtSecret =
+        this.configService?.get<string>('JWT_SECRET') ??
+        process.env['JWT_SECRET'] ??
+        'mock-jwt-secret-for-testing';
     } else {
       // Production mode - use Cognito JWKS
-      this.userPoolId = this.configService.getOrThrow<string>('COGNITO_USER_POOL_ID');
+      this.userPoolId =
+        this.configService?.get<string>('COGNITO_USER_POOL_ID') ??
+        process.env['COGNITO_USER_POOL_ID'];
+      if (!this.userPoolId) {
+        throw new Error('COGNITO_USER_POOL_ID is required in production mode');
+      }
       this.jwksClient = jwksClient.default({
         jwksUri: `https://cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}/.well-known/jwks.json`,
         cache: true,

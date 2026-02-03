@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Example E2E test suite for the Unite Discord application
+ * Example E2E test suite for the ReasonBridge application
  *
  * This file demonstrates basic Playwright test patterns and serves
  * as a template for future E2E tests.
@@ -18,7 +18,7 @@ test.describe('Application Layout', () => {
 
     // Verify the application title
     const title = page.locator('h1');
-    await expect(title).toHaveText('Unite Discord');
+    await expect(title).toHaveText('ReasonBridge');
 
     // Verify the subtitle
     const subtitle = page.getByText('Rational Discussion Platform');
@@ -45,7 +45,7 @@ test.describe('Application Layout', () => {
     await expect(page.locator('footer')).toBeVisible();
 
     // Verify the page has a title
-    await expect(page).toHaveTitle(/Unite Discord/i);
+    await expect(page).toHaveTitle(/ReasonBridge/i);
   });
 });
 

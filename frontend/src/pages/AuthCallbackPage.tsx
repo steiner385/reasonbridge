@@ -84,11 +84,10 @@ export const AuthCallbackPage: React.FC = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Authentication failed';
         setError(message);
-        console.error('OAuth callback error:', err);
 
-        // Redirect to login after a delay
+        // Redirect to home after a delay
         setTimeout(() => {
-          navigate('/login', { replace: true });
+          navigate('/', { replace: true });
         }, 5000);
       }
     };
@@ -122,12 +121,12 @@ export const AuthCallbackPage: React.FC = () => {
               Authentication Failed
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to login page...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to home page...</p>
             <button
-              onClick={() => navigate('/login', { replace: true })}
+              onClick={() => navigate('/', { replace: true })}
               className="mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium focus:outline-none focus:underline"
             >
-              Go to Login Now
+              Go to Home Now
             </button>
           </div>
         ) : (

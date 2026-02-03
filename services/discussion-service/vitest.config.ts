@@ -4,16 +4,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: [
-      'src/**/*.test.ts',
-      'src/**/*.spec.ts',
-      'src/__tests__/**/*.test.ts',
-      'src/__tests__/**/*.spec.ts',
-    ],
+    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
+    include: ['src/**/*.test.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      '**/*.integration.spec.ts', // Exclude integration tests from unit tests
+      '**/*.integration.test.ts', // Run in integration test phase
+      '**/*-performance.test.ts', // Run separately due to high memory usage
     ],
     reporters: ['default', 'junit'],
     outputFile: {

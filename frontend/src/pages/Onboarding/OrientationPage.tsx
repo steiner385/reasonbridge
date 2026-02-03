@@ -159,7 +159,7 @@ const OrientationPage: React.FC = () => {
       {/* Main content - visible underneath overlay with blur */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to UniteDiscord</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to ReasonBridge</h1>
           <p className="text-xl text-gray-600">
             Let's take a quick tour of how our platform helps you engage in meaningful discussions.
           </p>

@@ -1,14 +1,24 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
-import { SemanticCacheService } from '../cache/index.js';
+import type { AnalysisResult } from '../services/response-analyzer.service.js';
+import { SemanticCacheService, RedisCacheService, computeContentHash } from '../cache/index.js';
 import {
   RequestFeedbackDto,
   FeedbackResponseDto,
   DismissFeedbackDto,
   FeedbackSensitivity,
+  PreviewFeedbackDto,
+  PreviewFeedbackResultDto,
+  PreviewFeedbackResponseDto,
 } from './dto/index.js';
 import { Prisma } from '@prisma/client';
+
+/** Critical feedback types that should block posting */
+const CRITICAL_TYPES = ['INFLAMMATORY', 'FALLACY'] as const;
+
+/** Confidence threshold to consider a critical type as blocking */
+const CRITICAL_CONFIDENCE_THRESHOLD = 0.75;
 
 /**
  * Service for handling AI-generated feedback on responses
@@ -21,6 +31,7 @@ export class FeedbackService {
     private readonly prisma: PrismaService,
     private readonly analyzer: ResponseAnalyzerService,
     private readonly semanticCache: SemanticCacheService,
+    @Optional() private readonly redisCache?: RedisCacheService,
   ) {}
 
   /**
@@ -115,6 +126,88 @@ export class FeedbackService {
     });
 
     return this.mapToResponseDto(updatedFeedback);
+  }
+
+  /**
+   * Get real-time preview feedback for draft content.
+   * Unlike requestFeedback, this does NOT:
+   * - Require an existing responseId (content hasn't been posted yet)
+   * - Store the feedback in the database
+   * - Track acknowledgment or revision status
+   *
+   * @param dto Preview feedback request with content and optional sensitivity
+   * @returns All detected feedback items with readiness indicator
+   */
+  async previewFeedback(
+    dto: PreviewFeedbackDto | { content: string; sensitivity?: FeedbackSensitivity },
+  ): Promise<PreviewFeedbackResultDto> {
+    const startTime = Date.now();
+    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
+    const threshold = this.getConfidenceThreshold(sensitivity);
+
+    let analysisResults: AnalysisResult[];
+
+    // Try Redis cache first for fast response
+    const contentHash = computeContentHash(dto.content);
+    try {
+      const cached = await this.redisCache?.getFeedback(contentHash);
+      if (cached) {
+        // Cache hit - use cached result (wrapped in array for consistency)
+        analysisResults = [cached];
+      } else {
+        // Cache miss - run full analysis
+        analysisResults = await this.analyzer.analyzeContentFull(dto.content);
+        // Cache the primary result asynchronously (don't await to keep response fast)
+        if (analysisResults[0] && this.redisCache) {
+          this.redisCache.setFeedback(contentHash, analysisResults[0]).catch((err) => {
+            this.logger.warn('Failed to cache preview feedback', err);
+          });
+        }
+      }
+    } catch (err) {
+      // Redis error - fall back to fresh analysis (graceful degradation)
+      this.logger.warn('Redis cache error, falling back to fresh analysis', err);
+      analysisResults = await this.analyzer.analyzeContentFull(dto.content);
+    }
+
+    // Map to response DTOs with shouldDisplay flag based on sensitivity threshold
+    const feedback: PreviewFeedbackResponseDto[] = analysisResults.map((result) => ({
+      type: result.type,
+      subtype: result.subtype,
+      suggestionText: result.suggestionText,
+      reasoning: result.reasoning,
+      confidenceScore: result.confidenceScore,
+      educationalResources: result.educationalResources,
+      shouldDisplay: result.confidenceScore >= threshold,
+    }));
+
+    // Determine if content is ready to post (no critical issues above threshold)
+    const hasCriticalIssues = analysisResults.some(
+      (result) =>
+        CRITICAL_TYPES.includes(result.type as (typeof CRITICAL_TYPES)[number]) &&
+        result.confidenceScore >= CRITICAL_CONFIDENCE_THRESHOLD,
+    );
+    const readyToPost = !hasCriticalIssues;
+
+    // Find primary feedback (highest confidence non-AFFIRMATION that should display)
+    const nonAffirmations = feedback.filter((f) => f.type !== 'AFFIRMATION' && f.shouldDisplay);
+    const primary =
+      nonAffirmations.length > 0
+        ? nonAffirmations.sort((a, b) => b.confidenceScore - a.confidenceScore)[0]
+        : undefined;
+
+    // Generate user-friendly summary message
+    const summary = hasCriticalIssues
+      ? 'Consider revising your response before posting.'
+      : 'Looking good! Your response is ready to post.';
+
+    return {
+      feedback,
+      primary,
+      analysisTimeMs: Date.now() - startTime,
+      readyToPost,
+      summary,
+    };
   }
 
   /**

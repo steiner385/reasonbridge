@@ -14,9 +14,32 @@ const createMockJwtService = () => ({
   verify: vi.fn(),
 });
 
+/**
+ * Creates a mock ConfigService for testing mock auth mode (default)
+ * Mock auth uses JWT secret verification instead of JWKS
+ */
 const createMockConfigService = () => ({
   get: vi.fn((key: string, defaultValue?: string) => {
     if (key === 'AWS_REGION') return 'us-east-1';
+    if (key === 'JWT_SECRET') return 'test-jwt-secret';
+    return defaultValue;
+  }),
+  getOrThrow: vi.fn((key: string) => {
+    if (key === 'COGNITO_USER_POOL_ID') return 'us-east-1_TestPool';
+    throw new Error(`Missing config: ${key}`);
+  }),
+});
+
+/**
+ * Creates a mock ConfigService that enables production auth mode (JWKS/Cognito)
+ * Use this when testing JWKS-based token verification
+ */
+const createMockConfigServiceForJwks = () => ({
+  get: vi.fn((key: string, defaultValue?: string) => {
+    if (key === 'AWS_REGION') return 'us-east-1';
+    if (key === 'COGNITO_USER_POOL_ID') return 'us-east-1_TestPool';
+    if (key === 'AUTH_MOCK') return 'false';
+    if (key === 'NODE_ENV') return 'production';
     return defaultValue;
   }),
   getOrThrow: vi.fn((key: string) => {
@@ -67,39 +90,10 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should throw UnauthorizedException when token format is invalid', async () => {
-      const context = createMockExecutionContext({ authorization: 'Bearer invalid-token' });
-      mockJwtService.decode.mockReturnValue(null);
-
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new UnauthorizedException('Invalid token format'),
-      );
-    });
-
-    it('should throw UnauthorizedException when token has no kid header', async () => {
-      const context = createMockExecutionContext({ authorization: 'Bearer valid-format-token' });
-      mockJwtService.decode.mockReturnValue({
-        header: {},
-        payload: {},
-      });
-
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new UnauthorizedException('Invalid token format'),
-      );
-    });
-
     it('should throw UnauthorizedException for expired token', async () => {
+      // This test uses mock auth mode (default in tests)
+      // The mock auth mode uses JWT secret verification
       const context = createMockExecutionContext({ authorization: 'Bearer expired-token' });
-      mockJwtService.decode.mockReturnValue({
-        header: { kid: 'key-id-123' },
-        payload: { sub: 'user-1', email: 'test@example.com' },
-      });
-
-      // Mock the jwksClient to return a key
-      const mockGetSigningKey = vi.fn().mockResolvedValue({
-        getPublicKey: () => 'mock-public-key',
-      });
-      (guard as any).jwksClient.getSigningKey = mockGetSigningKey;
 
       mockJwtService.verify.mockImplementation(() => {
         throw new Error('Token expired');
@@ -110,7 +104,8 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should verify token and attach user to request', async () => {
+    it('should verify token and attach user to request (mock auth)', async () => {
+      // Mock auth mode uses simple JWT secret verification
       const context = createMockExecutionContext({ authorization: 'Bearer valid-token' });
       const payload = {
         sub: 'cognito-user-123',
@@ -120,16 +115,6 @@ describe('JwtAuthGuard', () => {
         iat: Date.now(),
       };
 
-      mockJwtService.decode.mockReturnValue({
-        header: { kid: 'key-id-123' },
-        payload,
-      });
-
-      const mockGetSigningKey = vi.fn().mockResolvedValue({
-        getPublicKey: () => 'mock-public-key',
-      });
-      (guard as any).jwksClient.getSigningKey = mockGetSigningKey;
-
       mockJwtService.verify.mockReturnValue(payload);
 
       const result = await guard.canActivate(context as any);
@@ -138,11 +123,91 @@ describe('JwtAuthGuard', () => {
       expect(context._request.user).toEqual(payload);
     });
 
-    it('should call jwtService.verify with correct parameters', async () => {
+    it('should call jwtService.verify with correct parameters (mock auth)', async () => {
+      // Mock auth mode uses HS256 with JWT secret
       const context = createMockExecutionContext({ authorization: 'Bearer test-token' });
       const payload = { sub: 'user-1', email: 'test@example.com' };
 
-      mockJwtService.decode.mockReturnValue({
+      mockJwtService.verify.mockReturnValue(payload);
+
+      await guard.canActivate(context as any);
+
+      expect(mockJwtService.verify).toHaveBeenCalledWith('test-token', {
+        secret: 'test-jwt-secret',
+        algorithms: ['HS256'],
+      });
+    });
+
+    it('should re-throw UnauthorizedException without wrapping', async () => {
+      const context = createMockExecutionContext({ authorization: 'Bearer token' });
+
+      mockJwtService.verify.mockImplementation(() => {
+        throw new UnauthorizedException('Custom unauthorized error');
+      });
+
+      await expect(guard.canActivate(context as any)).rejects.toThrow(
+        new UnauthorizedException('Custom unauthorized error'),
+      );
+    });
+  });
+
+  describe('canActivate (JWKS/Cognito mode)', () => {
+    let jwksGuard: JwtAuthGuard;
+    let jwksMockJwtService: ReturnType<typeof createMockJwtService>;
+
+    beforeEach(() => {
+      jwksMockJwtService = createMockJwtService();
+      const jwksConfigService = createMockConfigServiceForJwks();
+      jwksGuard = new JwtAuthGuard(jwksMockJwtService as any, jwksConfigService as any);
+    });
+
+    it('should throw UnauthorizedException when token format is invalid (JWKS)', async () => {
+      const context = createMockExecutionContext({ authorization: 'Bearer invalid-token' });
+      jwksMockJwtService.decode.mockReturnValue(null);
+
+      await expect(jwksGuard.canActivate(context as any)).rejects.toThrow(
+        new UnauthorizedException('Invalid token format'),
+      );
+    });
+
+    it('should throw UnauthorizedException when token has no kid header (JWKS)', async () => {
+      const context = createMockExecutionContext({ authorization: 'Bearer valid-format-token' });
+      jwksMockJwtService.decode.mockReturnValue({
+        header: {},
+        payload: {},
+      });
+
+      await expect(jwksGuard.canActivate(context as any)).rejects.toThrow(
+        new UnauthorizedException('Invalid token format'),
+      );
+    });
+
+    it('should use kid from token to get signing key', async () => {
+      const context = createMockExecutionContext({ authorization: 'Bearer my-token' });
+      const kidValue = 'specific-key-id-456';
+
+      jwksMockJwtService.decode.mockReturnValue({
+        header: { kid: kidValue },
+        payload: { sub: 'user-1' },
+      });
+
+      const mockGetSigningKey = vi.fn().mockResolvedValue({
+        getPublicKey: () => 'public-key',
+      });
+      (jwksGuard as any).jwksClient.getSigningKey = mockGetSigningKey;
+
+      jwksMockJwtService.verify.mockReturnValue({ sub: 'user-1' });
+
+      await jwksGuard.canActivate(context as any);
+
+      expect(mockGetSigningKey).toHaveBeenCalledWith(kidValue);
+    });
+
+    it('should call jwtService.verify with correct parameters (JWKS)', async () => {
+      const context = createMockExecutionContext({ authorization: 'Bearer test-token' });
+      const payload = { sub: 'user-1', email: 'test@example.com' };
+
+      jwksMockJwtService.decode.mockReturnValue({
         header: { kid: 'key-123' },
         payload,
       });
@@ -151,63 +216,30 @@ describe('JwtAuthGuard', () => {
       const mockGetSigningKey = vi.fn().mockResolvedValue({
         getPublicKey: () => mockPublicKey,
       });
-      (guard as any).jwksClient.getSigningKey = mockGetSigningKey;
+      (jwksGuard as any).jwksClient.getSigningKey = mockGetSigningKey;
 
-      mockJwtService.verify.mockReturnValue(payload);
+      jwksMockJwtService.verify.mockReturnValue(payload);
 
-      await guard.canActivate(context as any);
+      await jwksGuard.canActivate(context as any);
 
-      expect(mockJwtService.verify).toHaveBeenCalledWith('test-token', {
+      expect(jwksMockJwtService.verify).toHaveBeenCalledWith('test-token', {
         publicKey: mockPublicKey,
         algorithms: ['RS256'],
       });
     });
 
-    it('should use the kid from token to get signing key', async () => {
-      const context = createMockExecutionContext({ authorization: 'Bearer my-token' });
-      const kidValue = 'specific-key-id-456';
-
-      mockJwtService.decode.mockReturnValue({
-        header: { kid: kidValue },
-        payload: { sub: 'user-1' },
-      });
-
-      const mockGetSigningKey = vi.fn().mockResolvedValue({
-        getPublicKey: () => 'public-key',
-      });
-      (guard as any).jwksClient.getSigningKey = mockGetSigningKey;
-
-      mockJwtService.verify.mockReturnValue({ sub: 'user-1' });
-
-      await guard.canActivate(context as any);
-
-      expect(mockGetSigningKey).toHaveBeenCalledWith(kidValue);
-    });
-
-    it('should re-throw UnauthorizedException without wrapping', async () => {
-      const context = createMockExecutionContext({ authorization: 'Bearer token' });
-
-      mockJwtService.decode.mockImplementation(() => {
-        throw new UnauthorizedException('Custom unauthorized error');
-      });
-
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new UnauthorizedException('Custom unauthorized error'),
-      );
-    });
-
     it('should handle JWKS fetch errors', async () => {
       const context = createMockExecutionContext({ authorization: 'Bearer token' });
 
-      mockJwtService.decode.mockReturnValue({
+      jwksMockJwtService.decode.mockReturnValue({
         header: { kid: 'key-123' },
         payload: { sub: 'user-1' },
       });
 
       const mockGetSigningKey = vi.fn().mockRejectedValue(new Error('JWKS fetch failed'));
-      (guard as any).jwksClient.getSigningKey = mockGetSigningKey;
+      (jwksGuard as any).jwksClient.getSigningKey = mockGetSigningKey;
 
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
+      await expect(jwksGuard.canActivate(context as any)).rejects.toThrow(
         new UnauthorizedException('Invalid or expired token'),
       );
     });

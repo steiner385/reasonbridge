@@ -15,13 +15,13 @@ services:
     image: postgres:15-alpine
     # Note: container_name removed to allow parallel builds with different COMPOSE_PROJECT_NAME
     environment:
-      POSTGRES_USER: unite_test
-      POSTGRES_PASSWORD: unite_test
-      POSTGRES_DB: unite_test
+      POSTGRES_USER: reasonbridge_test
+      POSTGRES_PASSWORD: reasonbridge_test
+      POSTGRES_DB: reasonbridge_test
     # Host port removed to prevent CI conflicts - services communicate via Docker network
     # For local debugging, uncomment: ports: ['5434:5432']
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U unite_test -d unite_test']
+      test: ['CMD-SHELL', 'pg_isready -U reasonbridge_test -d reasonbridge_test']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
       - /var/lib/postgresql/data
     mem_limit: 256m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   redis:
     image: redis:7-alpine
@@ -42,7 +42,7 @@ services:
       retries: 5
     mem_limit: 128m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   localstack:
     image: localstack/localstack:3.0
@@ -60,7 +60,7 @@ services:
       start_period: 10s
     mem_limit: 384m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   # ============================================================================
   # Database Migration
@@ -73,13 +73,13 @@ services:
     image: reasonbridge-e2e/db-migrate:latest
     command: ['sh', '-c', 'cd packages/db-models && npx prisma migrate deploy']
     environment:
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
     depends_on:
       postgres:
         condition: service_healthy
     mem_limit: 256m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
     restart: 'no'
 
   db-seed:
@@ -89,13 +89,13 @@ services:
     image: reasonbridge-e2e/db-seed:latest
     command: ['sh', '-c', 'cd packages/db-models && npx tsx prisma/seed.ts']
     environment:
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
     depends_on:
       db-migrate:
         condition: service_completed_successfully
     mem_limit: 256m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
     restart: 'no'
 
   # ============================================================================
@@ -111,7 +111,7 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       USER_SERVICE_URL: http://user-service:3001
       DISCUSSION_SERVICE_URL: http://discussion-service:3007
@@ -135,7 +135,7 @@ services:
         condition: service_started
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   user-service:
     build:
@@ -146,7 +146,7 @@ services:
     environment:
       PORT: 3001
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       AWS_ENDPOINT: http://localstack:4566
       AWS_REGION: us-east-1
@@ -172,7 +172,7 @@ services:
         condition: service_completed_successfully
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   ai-service:
     build:
@@ -183,7 +183,7 @@ services:
     environment:
       PORT: 3002
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       REDIS_HOST: redis
       REDIS_PORT: '6379'
@@ -204,7 +204,7 @@ services:
         condition: service_completed_successfully
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   discussion-service:
     build:
@@ -215,7 +215,7 @@ services:
     environment:
       PORT: 3007 # Changed from 3002 to avoid conflict with ai-service
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
     ports:
       - '3007:3007'
@@ -228,7 +228,7 @@ services:
         condition: service_completed_successfully
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   moderation-service:
     build:
@@ -239,7 +239,7 @@ services:
     environment:
       PORT: 3003
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:3002
     ports:
@@ -255,7 +255,7 @@ services:
         condition: service_started
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   recommendation-service:
     build:
@@ -266,7 +266,7 @@ services:
     environment:
       PORT: 3004
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
     ports:
       - '3004:3004'
@@ -279,7 +279,7 @@ services:
         condition: service_completed_successfully
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   notification-service:
     build:
@@ -290,7 +290,7 @@ services:
     environment:
       PORT: 3005
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
     ports:
       - '3005:3005'
@@ -303,7 +303,7 @@ services:
         condition: service_completed_successfully
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   fact-check-service:
     build:
@@ -314,7 +314,7 @@ services:
     environment:
       PORT: 3006
       NODE_ENV: test
-      DATABASE_URL: postgresql://unite_test:unite_test@postgres:5432/unite_test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:3002
     ports:
@@ -330,7 +330,7 @@ services:
         condition: service_started
     mem_limit: 192m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
   # ============================================================================
   # Frontend
@@ -358,8 +358,8 @@ services:
         condition: service_started
     mem_limit: 64m
     networks:
-      - unite-e2e
+      - reasonbridge-e2e
 
 networks:
-  unite-e2e:
+  reasonbridge-e2e:
     driver: bridge

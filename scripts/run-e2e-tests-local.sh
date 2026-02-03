@@ -19,14 +19,14 @@ echo "🧪 Running E2E Tests in Docker Container"
 echo "=========================================="
 
 # Check if E2E environment is running
-if ! docker ps | grep -q "unite-frontend-e2e"; then
+if ! docker ps | grep -q "reasonbridge-frontend-e2e"; then
     echo "❌ ERROR: E2E environment is not running"
     echo "   Start it with: docker compose -f docker-compose.e2e.yml up -d"
     exit 1
 fi
 
 # Check if frontend is healthy
-if ! docker inspect --format='{{.State.Health.Status}}' unite-frontend-e2e 2>/dev/null | grep -q "healthy"; then
+if ! docker inspect --format='{{.State.Health.Status}}' reasonbridge-frontend-e2e 2>/dev/null | grep -q "healthy"; then
     echo "⚠️  WARNING: Frontend container is not healthy"
     echo "   Waiting for frontend to become healthy..."
     sleep 5
@@ -45,7 +45,7 @@ echo ""
 
 # Run Playwright tests in Docker container on the same network
 docker run --rm \
-    --network reasonbridge_unite-e2e \
+    --network reasonbridge_reasonbridge-e2e \
     -v $(pwd)/frontend:/app/frontend \
     -v $(pwd)/coverage:/app/coverage \
     -w /app/frontend \

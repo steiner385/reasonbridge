@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Demo mode startup script for Unite Discord application
+# Demo mode startup script for ReasonBridge application
 # This script will build and start the complete application stack with demo data
 
 set -e  # Exit on any error
 
-echo "🚀 Starting Unite Discord Demo Mode"
+echo "🚀 Starting ReasonBridge Demo Mode"
 echo "====================================="
 
 # Check if Docker is running
@@ -52,7 +52,7 @@ echo "  ✅ Redis is ready"
 echo ""
 echo "🗄️  Setting up database (migrations + seed data)..."
 docker compose -f docker-compose.e2e.yml exec -T postgres sh -c "
-    until pg_isready -U unite_test -d unite_test; do
+    until pg_isready -U reasonbridge_test -d reasonbridge_test; do
         echo 'Waiting for postgres...';
         sleep 1;
     done
@@ -63,8 +63,8 @@ docker compose -f docker-compose.e2e.yml exec -T postgres sh -c "
 # Note: db-models is already present at /app/packages/db-models via Dockerfile.service
 docker compose -f docker-compose.e2e.yml exec -T discussion-service sh -c "
     cd /app/packages/db-models || { echo 'ERROR: db-models not found at /app/packages/db-models'; exit 1; }
-    DATABASE_URL='postgresql://unite_test:unite_test@postgres:5432/unite_test' npx prisma migrate deploy
-    DATABASE_URL='postgresql://unite_test:unite_test@postgres:5432/unite_test' node prisma/seed.js
+    DATABASE_URL='postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test' npx prisma migrate deploy
+    DATABASE_URL='postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test' node prisma/seed.js
 " || echo "⚠️  Could not run migrations/seed - check that Docker containers are running"
 
 echo ""
@@ -75,7 +75,7 @@ echo ""
 echo "🌐 Access the application:"
 echo "  - Frontend: http://localhost:9080"
 echo "  - API Gateway: http://localhost:3000"
-echo "  - PostgreSQL: localhost:5434 (username: unite_test, password: unite_test, db: unite_test)"
+echo "  - PostgreSQL: localhost:5434 (username: reasonbridge_test, password: reasonbridge_test, db: reasonbridge_test)"
 echo "  - Redis: localhost:6381"
 
 echo ""
@@ -96,4 +96,4 @@ echo "🔄 To restart: docker compose -f docker-compose.e2e.yml restart"
 echo "📊 To view logs: docker compose -f docker-compose.e2e.yml logs -f"
 
 echo ""
-echo "✅ Unite Discord Demo Mode is now running!"
+echo "✅ ReasonBridge Demo Mode is now running!"

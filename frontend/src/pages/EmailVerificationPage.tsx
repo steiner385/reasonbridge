@@ -255,16 +255,16 @@ export const EmailVerificationPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Back to Login */}
+        {/* Back to Home */}
         <div className="mt-4 text-center">
           <button
             onClick={() => {
               authService.logout();
-              navigate('/login', { replace: true });
+              navigate('/', { replace: true });
             }}
             className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:underline"
           >
-            ← Back to Login
+            ← Back to Home
           </button>
         </div>
       </div>

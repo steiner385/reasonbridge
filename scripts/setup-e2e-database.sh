@@ -8,10 +8,10 @@ set -e
 echo "🔧 Setting up E2E database..."
 
 # Database connection details for E2E environment
-E2E_DATABASE_URL="postgresql://unite_test:unite_test@localhost:5434/unite_test"
+E2E_DATABASE_URL="postgresql://reasonbridge_test:reasonbridge_test@localhost:5434/reasonbridge_test"
 
 # Check if E2E postgres container is running
-if ! docker ps | grep -q "unite-postgres-e2e"; then
+if ! docker ps | grep -q "reasonbridge-postgres-e2e"; then
   echo "❌ E2E postgres container is not running!"
   echo "   Start the E2E environment first: docker compose -f docker-compose.e2e.yml up -d"
   exit 1
@@ -21,7 +21,7 @@ echo "✅ E2E postgres container is running"
 
 # Wait for postgres to be ready
 echo "⏳ Waiting for PostgreSQL to be ready..."
-timeout 30 sh -c 'until docker exec unite-postgres-e2e pg_isready -U unite_test 2>/dev/null; do sleep 1; done' || {
+timeout 30 sh -c 'until docker exec reasonbridge-postgres-e2e pg_isready -U reasonbridge_test 2>/dev/null; do sleep 1; done' || {
   echo "❌ PostgreSQL did not become ready in time"
   exit 1
 }

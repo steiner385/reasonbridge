@@ -45,7 +45,7 @@ export default defineConfig({
         ? `http://localhost:${process.env.E2E_FRONTEND_PORT || '9080'}` // Containerized frontend for E2E tests (configurable port)
         : process.env.CI
           ? 'http://localhost:4173' // Vite preview for CI
-          : 'http://localhost:3000'), // Dev server for local development
+          : 'http://localhost:5173'), // Vite dev server for local development
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -92,7 +92,7 @@ export default defineConfig({
     ? undefined // Don't start dev server when using Docker Compose
     : {
         command: process.env.CI ? 'npm run preview' : 'npm run dev',
-        url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
+        url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
         reuseExistingServer: !process.env.CI,
         timeout: 180000, // 3 minutes to allow dev server to start
         stdout: 'ignore',

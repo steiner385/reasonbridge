@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { SERVICE_PORTS } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -19,7 +20,8 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env['PORT'] || 3002;
+  // Port from single source of truth - see packages/common/src/config/ports.ts
+  const port = process.env['PORT'] || SERVICE_PORTS.DISCUSSION_SERVICE;
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 Discussion Service is running on: http://localhost:${port}`);
