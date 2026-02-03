@@ -180,6 +180,7 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
               id: 'test-topic-1',
               title: 'Test Topic',
               description: 'A test topic for E2E testing',
+              status: 'ACTIVE',
               createdAt: new Date().toISOString(),
               participantCount: 5,
               responseCount: 3,
@@ -191,6 +192,7 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
               id: 'test-topic-1',
               title: 'Test Topic',
               description: 'A test topic for E2E testing',
+              status: 'ACTIVE',
               createdAt: new Date().toISOString(),
               participantCount: 5,
               responseCount: 3,
@@ -220,6 +222,7 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
           id: topicId,
           title: 'Test Topic',
           description: 'A test topic for E2E testing',
+          status: 'ACTIVE',
           createdAt: new Date().toISOString(),
           participantCount: 5,
           responseCount: 3,
@@ -330,23 +333,21 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
     });
   });
 
-  // Mock moderation queue endpoint (for admin)
-  await page.route('**/api/moderation/**', (route) => {
+  // Mock moderation stats endpoint (more specific, should be before wildcard route)
+  await page.route('**/api/moderation/queue/stats', (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        data: [],
-        items: [],
-        queue: [],
-        total: 0,
-        page: 1,
-        limit: 10,
+        totalPending: 0,
+        criticalActions: 0,
+        avgReviewTimeMinutes: 15,
+        pendingByType: {},
       }),
     });
   });
 
-  // Mock moderation stats endpoint
+  // Mock moderation stats endpoint (alternative path)
   await page.route('**/api/moderation/stats', (route) => {
     route.fulfill({
       status: 200,
@@ -360,6 +361,50 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
         approved: 0,
         rejected: 0,
         totalToday: 0,
+      }),
+    });
+  });
+
+  // Mock moderation actions endpoint
+  await page.route('**/api/moderation/actions**', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 20,
+      }),
+    });
+  });
+
+  // Mock moderation appeals endpoint
+  await page.route('**/api/moderation/appeals**', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 20,
+      }),
+    });
+  });
+
+  // Mock generic moderation endpoint (fallback)
+  await page.route('**/api/moderation/**', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: [],
+        items: [],
+        queue: [],
+        total: 0,
+        page: 1,
+        limit: 10,
       }),
     });
   });

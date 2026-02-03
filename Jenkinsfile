@@ -21,10 +21,8 @@ library identifier: 'reasonbridge-lib@main',
         credentialsId: 'github-credentials'
     ])
 
-// Only trigger on main branch or pull requests
-if (env.CHANGE_ID || env.BRANCH_NAME == 'main') {
-    // Execute the real pipeline from jenkins-lib
-    reasonbridgeMultibranchPipeline()
-} else {
-    echo "Skipping build for branch ${env.BRANCH_NAME} - only main branch and PRs trigger CI"
-}
+// With ONLY_PRS discovery strategy, branch jobs only exist when PRs are open
+// So any branch that Jenkins discovers has an open PR for it
+// Therefore, run CI for all branches (the discovery strategy handles filtering)
+echo "Running CI for branch ${env.BRANCH_NAME}"
+reasonbridgeMultibranchPipeline()

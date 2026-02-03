@@ -106,8 +106,14 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
   });
 });
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe('Accessibility - Page-Specific Checks', () => {
   test.describe('Topics Page', () => {
+    // Skip when backend is not available - topics page requires API data
+    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
     test('topics list page has no critical accessibility violations', async ({ page }) => {
       await page.goto('/topics');
       await page.waitForLoadState('networkidle');

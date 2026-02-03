@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardBody } from '../ui/Card';
@@ -202,12 +203,12 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
               />
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
-            <a
-              href="/forgot-password"
+            <Link
+              to="/forgot-password"
               className="text-sm text-primary-600 hover:text-primary-700 font-medium"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           <Button
@@ -223,9 +224,9 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
 
           <p className="text-sm text-center text-gray-600">
             Don't have an account?{' '}
-            <a href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
               Create one
-            </a>
+            </Link>
           </p>
         </form>
       </CardBody>

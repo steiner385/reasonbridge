@@ -20,9 +20,9 @@ test.describe('Application Layout', () => {
     const title = page.locator('h1');
     await expect(title).toHaveText('ReasonBridge');
 
-    // Verify the subtitle
-    const subtitle = page.getByText('Rational Discussion Platform');
-    await expect(subtitle).toBeVisible();
+    // Verify the hero headline is visible
+    const heroHeadline = page.getByText('Find Common Ground Through Thoughtful Discussion');
+    await expect(heroHeadline).toBeVisible();
   });
 
   test('should display the footer', async ({ page }) => {
@@ -33,7 +33,9 @@ test.describe('Application Layout', () => {
     await expect(footer).toBeVisible();
 
     // Verify footer content
-    await expect(footer).toContainText('Powered by React 18 + Vite + Tailwind CSS');
+    await expect(footer).toContainText(
+      '© 2026 ReasonBridge. Building bridges through rational discussion.',
+    );
   });
 
   test('should have proper page structure', async ({ page }) => {
