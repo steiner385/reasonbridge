@@ -38,6 +38,7 @@ export async function seedDemoPersonas(prisma: PrismaClient): Promise<void> {
       update: {
         displayName: persona.displayName,
         email: persona.email,
+        passwordHash: persona.passwordHash,
         verificationLevel: persona.verificationLevel,
         trustScoreAbility: persona.trustScoreAbility,
         trustScoreBenevolence: persona.trustScoreBenevolence,

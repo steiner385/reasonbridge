@@ -55,19 +55,18 @@ interface MoralFoundationProfile {
 // Demo password hashes (bcrypt hashed versions of documented passwords)
 // Password pattern: Demo{Role}2026!
 // These are pre-computed bcrypt hashes for demo purposes
-// IMPORTANT: Real passwords documented in password manager, not source
+// Generated with bcrypt cost factor 10
 const DEMO_PASSWORD_HASHES = {
-  // All use cost factor 10, can be verified with bcrypt.compare()
   // DemoAdmin2026!
-  ADMIN: '$2b$10$demo.admin.hash.placeholder.for.development.only',
+  ADMIN: '$2b$10$XeGHaDeHLKYgmfeT1lGHn.aPnW.nq9PqzXfw3ObFHJkwZVcgqBFxu',
   // DemoMod2026!
-  MOD: '$2b$10$demo.mod.hash.placeholder.for.development.only',
+  MOD: '$2b$10$XFH6XgTCu8SGbU5.V4jKsOgX4JxdH9jax61CH0Auulp2SRrKZQ3Ou',
   // DemoAlice2026!
-  ALICE: '$2b$10$demo.alice.hash.placeholder.for.development.only',
+  ALICE: '$2b$10$Z.Ffiwi8yokNZYbTaVDUbOX96jsBimCmiVjsvnNLKFqEwExl5Poiq',
   // DemoBob2026!
-  BOB: '$2b$10$demo.bob.hash.placeholder.for.development.only',
+  BOB: '$2b$10$hiiwt49G4xz40WNJNrUJiu6lAw3V1KnjnqWY8YhzFuOcYnD8ZaPYu',
   // DemoNew2026!
-  NEW: '$2b$10$demo.new.hash.placeholder.for.development.only',
+  NEW: '$2b$10$dJPE1gjx.bzf1x4qtXlukOnOARg60n9eTYdpYTnXxwA/3v6EKP9wC',
 };
 
 /**
