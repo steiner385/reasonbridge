@@ -5,10 +5,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/**/*.integration.test.ts'],
+    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
+    include: ['src/**/*.test.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      '**/*.integration.test.ts', // Run in integration test phase
       // CI: Prisma client module resolution issues
       '**/common-ground-notification.handler.test.ts',
       '**/moderation-notification.handler.test.ts',

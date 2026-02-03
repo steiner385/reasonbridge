@@ -5,8 +5,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/**/*.integration.test.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**'],
+    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
+    include: ['src/**/*.test.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/*.integration.test.ts', // Run in integration test phase
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
