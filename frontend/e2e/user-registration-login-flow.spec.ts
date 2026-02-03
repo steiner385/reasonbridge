@@ -55,31 +55,32 @@ test.describe('User Registration and Login Flow', () => {
     await registerButton.click();
 
     // Step 4: Wait for registration to complete and redirect
-    // This could redirect to login page, dashboard, or show a success message
-    await page.waitForURL(/\/(login|dashboard|home|profile)/, { timeout: 10000 });
+    // This could redirect to login page, dashboard, home, or landing page (/)
+    // Note: The app redirects to root (/) after registration
+    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
 
-    // Step 5: If redirected to login, proceed with login
-    // If redirected to dashboard/home, registration included auto-login
+    // Step 5: Login after registration
+    // Registration redirects to landing page (/) - navigate to login page
     const currentUrl = page.url();
-
-    if (currentUrl.includes('/login')) {
-      // Manual login required
-      await test.step('Login with newly created credentials', async () => {
-        // Fill login form
-        const loginEmailInput = page.getByLabel(/email/i);
-        const loginPasswordInput = page.getByLabel(/^password/i).first();
-
-        await loginEmailInput.fill(testUser.email);
-        await loginPasswordInput.fill(testUser.password);
-
-        // Submit login
-        const loginButton = page.getByRole('button', { name: /sign in|log in/i });
-        await loginButton.click();
-
-        // Wait for successful login redirect (navigates to / which is the home page)
-        await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 10000 });
-      });
+    if (!currentUrl.includes('/login')) {
+      await page.goto('/login');
     }
+
+    await test.step('Login with newly created credentials', async () => {
+      // Fill login form
+      const loginEmailInput = page.getByLabel(/email/i);
+      const loginPasswordInput = page.getByLabel(/^password/i).first();
+
+      await loginEmailInput.fill(testUser.email);
+      await loginPasswordInput.fill(testUser.password);
+
+      // Submit login
+      const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+      await loginButton.click();
+
+      // Wait for successful login redirect (navigates to / which is the home page)
+      await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 10000 });
+    });
 
     // Step 6: Verify successful authentication
     // The login was successful if we reached the home page (/)
@@ -108,8 +109,8 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for first registration to complete
-    await page.waitForURL(/\/(login|dashboard|home|profile)/, { timeout: 10000 });
+    // Wait for first registration to complete (redirects to landing page /)
+    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
 
     // Attempt second registration with same email
     await page.goto('/register');

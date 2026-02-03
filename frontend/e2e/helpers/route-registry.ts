@@ -86,6 +86,8 @@ export const ROUTE_REGISTRY: RouteDefinition[] = [
     requiresAuth: false,
     isDynamic: true,
     testParams: { id: 'test-topic-1' },
+    skipReason:
+      'Requires seeded topic UUID - topic tests covered in browse-topics-and-view-details.spec.ts',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -125,6 +127,8 @@ export const ROUTE_REGISTRY: RouteDefinition[] = [
     requiresAuth: false, // Public - can view other users' profiles
     isDynamic: true,
     testParams: { id: 'test-user-1' },
+    skipReason:
+      'Requires seeded user UUID - profile tests covered in profile-trust-indicators.spec.ts',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
