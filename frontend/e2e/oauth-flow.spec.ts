@@ -19,9 +19,15 @@ import { test, expect } from './fixtures/oauth-mock.fixture';
  * Covers User Story 2 (US2) - Create Account with Minimal Friction
  */
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 // OAuth routes are mocked via oauth-mock.fixture.ts
 // Tests no longer timeout because they use Playwright route interception
 test.describe('OAuth Signup Flow', () => {
+  // Skip all OAuth tests when backend is not available
+  // These tests need /auth/me endpoint to complete the authentication flow
+  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
   test.describe('Google OAuth', () => {
     test('should complete Google OAuth signup flow', async ({ page }) => {
       // Step 1: Navigate to signup page

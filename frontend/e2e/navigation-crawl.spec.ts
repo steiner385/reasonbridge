@@ -25,7 +25,14 @@ import { ErrorCollector } from './helpers/error-collector';
 import { PageValidator, ValidationResult, formatValidationResults } from './helpers/page-validator';
 import { mockAuthenticatedUser, mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
 
+// Check if running in E2E Docker mode with full backend
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe('Navigation Crawl - Full Coverage', () => {
+  // Skip all navigation crawl tests when backend is not available
+  // These tests check for network errors and console errors from API calls
+  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
   // ═══════════════════════════════════════════════════════════════════════════
   // Public Routes - No authentication required
   // ═══════════════════════════════════════════════════════════════════════════
