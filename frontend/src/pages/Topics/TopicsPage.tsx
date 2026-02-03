@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTopics } from '../../lib/useTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card from '../../components/ui/Card';
@@ -7,7 +8,11 @@ import { TopicCard, TopicFilterUI } from '../../components/topics';
 import TopicCardSkeleton from '../../components/ui/skeletons/TopicCardSkeleton';
 import type { GetTopicsParams } from '../../types/topic';
 
+const WELCOME_BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
+
 function TopicsPage() {
+  const [searchParams] = useSearchParams();
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [filters, setFilters] = useState<GetTopicsParams>({
     page: 1,
     limit: 10,
@@ -17,6 +22,18 @@ function TopicsPage() {
 
   const { data, isLoading, error } = useTopics(filters);
   const showSkeleton = useDelayedLoading(isLoading);
+
+  // Check for welcome param and dismissed state
+  useEffect(() => {
+    const isWelcome = searchParams.get('welcome') === 'true';
+    const isDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY) === 'true';
+    setShowWelcomeBanner(isWelcome && !isDismissed);
+  }, [searchParams]);
+
+  const handleDismissWelcome = () => {
+    localStorage.setItem(WELCOME_BANNER_DISMISSED_KEY, 'true');
+    setShowWelcomeBanner(false);
+  };
 
   const handleFiltersChange = (newFilters: GetTopicsParams) => {
     setFilters(newFilters);
@@ -47,6 +64,42 @@ function TopicsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Discussion Topics</h1>
         <p className="text-gray-600">Browse and join rational discussions on various topics</p>
       </div>
+
+      {/* Welcome Banner */}
+      {showWelcomeBanner && (
+        <div
+          role="status"
+          className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">👋</span>
+            <div>
+              <p className="font-medium text-blue-900">Welcome back to ReasonBridge!</p>
+              <p className="text-sm text-blue-700">
+                Ready to continue exploring discussions and finding common ground?
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleDismissWelcome}
+            className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-100 transition-colors"
+            aria-label="Dismiss welcome banner"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="mb-6">

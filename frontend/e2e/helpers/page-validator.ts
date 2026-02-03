@@ -157,16 +157,11 @@ export class PageValidator {
   }
 
   /**
-   * Check if the page redirected to the login page.
+   * Check if the page redirected to the landing page (login is via modal on landing page).
    */
   async isLoginRedirect(): Promise<boolean> {
     const currentUrl = new URL(this.page.url());
-    return (
-      currentUrl.pathname === '/login' ||
-      currentUrl.pathname.includes('/login') ||
-      currentUrl.pathname === '/signin' ||
-      currentUrl.pathname.includes('/signin')
-    );
+    return currentUrl.pathname === '/' || currentUrl.pathname === '/signin';
   }
 
   /**

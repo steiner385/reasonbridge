@@ -36,14 +36,8 @@ export const ROUTE_REGISTRY: RouteDefinition[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Authentication Routes - Login/Register flows
+  // Authentication Routes - Register flows (Login is via modal on landing page)
   // ═══════════════════════════════════════════════════════════════════════════
-  {
-    path: '/login',
-    name: 'Login',
-    requiresAuth: false,
-    isDynamic: false,
-  },
   {
     path: '/register',
     name: 'Register',

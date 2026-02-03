@@ -32,9 +32,9 @@ function RegisterPage() {
         displayName: data.displayName,
       });
 
-      // Registration successful - redirect to login
+      // Registration successful - redirect to landing page
       // User will need to verify email before logging in
-      navigate('/login', {
+      navigate('/', {
         state: {
           message: 'Registration successful! Please check your email to verify your account.',
         },

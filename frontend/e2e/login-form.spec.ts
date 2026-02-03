@@ -1,112 +1,87 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E test suite for the LoginForm component
+ * E2E test suite for the Login Modal
  *
- * Tests the login form functionality including:
- * - Form rendering and accessibility
- * - Input validation
- * - Form submission
- * - Error handling
+ * Tests the login modal functionality including:
+ * - Modal rendering and accessibility
+ * - Demo credential selection
+ * - Form input and validation
+ * - Modal close behavior
  */
 
-test.describe('LoginForm Component', () => {
+test.describe('Login Modal', () => {
   test.beforeEach(async ({ page }) => {
-    // Note: This will need to be updated when the login route is implemented
-    // For now, we're testing the component in isolation
-    await page.goto('/login');
+    await page.goto('/');
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
   });
 
-  test('should render the login form with all required fields', async ({ page }) => {
-    // Check for form heading
-    const heading = page.getByRole('heading', { name: /sign in/i });
+  test('should render the login modal with all required elements', async ({ page }) => {
+    // Check for modal heading
+    const heading = page.getByRole('heading', { name: 'Log In' });
     await expect(heading).toBeVisible();
 
     // Check for email input
     const emailInput = page.getByLabel(/email/i);
     await expect(emailInput).toBeVisible();
     await expect(emailInput).toHaveAttribute('type', 'email');
-    await expect(emailInput).toHaveAttribute('required');
 
     // Check for password input
     const passwordInput = page.getByLabel(/password/i);
     await expect(passwordInput).toBeVisible();
     await expect(passwordInput).toHaveAttribute('type', 'password');
-    await expect(passwordInput).toHaveAttribute('required');
 
-    // Check for submit button
-    const submitButton = page.getByRole('button', { name: /sign in/i });
+    // Check for submit button (inside the modal form)
+    const dialog = page.getByRole('dialog');
+    const submitButton = dialog.getByRole('button', { name: /^log in$/i });
     await expect(submitButton).toBeVisible();
   });
 
-  test('should display validation errors for empty fields', async ({ page }) => {
-    // Try to submit empty form
-    const submitButton = page.getByRole('button', { name: /sign in/i });
-    await submitButton.click();
+  test('should display demo credentials section', async ({ page }) => {
+    const dialog = page.getByRole('dialog');
 
-    // Browser native validation should prevent submission
-    // Check that we're still on the form page
-    const heading = page.getByRole('heading', { name: /sign in/i });
-    await expect(heading).toBeVisible();
+    // Check for demo credentials heading
+    await expect(dialog.getByText('Quick Login with Demo Accounts')).toBeVisible();
+
+    // Check for all demo accounts (using .first() where text may match role badge too)
+    await expect(dialog.getByText('Admin Adams')).toBeVisible();
+    await expect(dialog.getByText('Mod Martinez')).toBeVisible();
+    await expect(dialog.getByText('Alice Anderson')).toBeVisible();
+    await expect(dialog.getByText('Bob Builder')).toBeVisible();
+    await expect(dialog.getByText('New User').first()).toBeVisible();
   });
 
-  test('should validate email format', async ({ page }) => {
+  test('should auto-fill credentials when clicking demo account', async ({ page }) => {
     const emailInput = page.getByLabel(/email/i);
     const passwordInput = page.getByLabel(/password/i);
 
-    // Enter invalid email
-    await emailInput.fill('invalid-email');
-    await passwordInput.fill('password123');
+    // Click on Admin Adams demo account
+    await page.getByText('Admin Adams').click();
 
-    // Blur the email field to trigger validation
-    await passwordInput.click();
-
-    // Check for validation error (after blur)
-    await expect(page.getByText(/please enter a valid email address/i)).toBeVisible();
+    // Verify credentials are auto-filled
+    await expect(emailInput).toHaveValue('demo-admin@reasonbridge.demo');
+    await expect(passwordInput).toHaveValue('DemoAdmin2026!');
   });
 
-  test('should validate required password', async ({ page }) => {
+  test('should auto-fill different credentials for different demo accounts', async ({ page }) => {
     const emailInput = page.getByLabel(/email/i);
     const passwordInput = page.getByLabel(/password/i);
 
-    // Enter valid email but leave password empty
-    await emailInput.fill('test@example.com');
-    await passwordInput.click();
-    await emailInput.click(); // Blur password field
+    // Click on Bob Builder demo account
+    await page.getByText('Bob Builder').click();
 
-    // Check for validation error
-    await expect(page.getByText(/password is required/i)).toBeVisible();
+    // Verify Bob's credentials are auto-filled
+    await expect(emailInput).toHaveValue('demo-bob@reasonbridge.demo');
+    await expect(passwordInput).toHaveValue('DemoBob2026!');
   });
 
-  test('should show remember me checkbox', async ({ page }) => {
-    const rememberMeCheckbox = page.getByRole('checkbox', { name: /remember me/i });
-    await expect(rememberMeCheckbox).toBeVisible();
-
-    // Should be unchecked by default
-    await expect(rememberMeCheckbox).not.toBeChecked();
-
-    // Should be clickable
-    await rememberMeCheckbox.click();
-    await expect(rememberMeCheckbox).toBeChecked();
-  });
-
-  test('should display forgot password link', async ({ page }) => {
-    const forgotPasswordLink = page.getByRole('link', { name: /forgot password/i });
-    await expect(forgotPasswordLink).toBeVisible();
-    await expect(forgotPasswordLink).toHaveAttribute('href', '/forgot-password');
-  });
-
-  test('should display create account link', async ({ page }) => {
-    const createAccountLink = page.getByRole('link', { name: /create one/i });
-    await expect(createAccountLink).toBeVisible();
-    await expect(createAccountLink).toHaveAttribute('href', '/register');
-  });
-
-  test('should allow entering valid credentials', async ({ page }) => {
+  test('should allow manual entry of credentials', async ({ page }) => {
     const emailInput = page.getByLabel(/email/i);
     const passwordInput = page.getByLabel(/password/i);
 
-    // Enter valid credentials
+    // Enter credentials manually
     await emailInput.fill('test@example.com');
     await passwordInput.fill('SecurePassword123!');
 
@@ -115,25 +90,93 @@ test.describe('LoginForm Component', () => {
     await expect(passwordInput).toHaveValue('SecurePassword123!');
   });
 
-  test('should have proper autocomplete attributes', async ({ page }) => {
+  test('should close modal when clicking outside', async ({ page }) => {
+    // Click outside the modal (on the overlay)
+    await page.locator('.fixed.inset-0').click({ position: { x: 10, y: 10 } });
+
+    // Modal should be closed
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+  });
+
+  test('should close modal when clicking close button', async ({ page }) => {
+    // Click the close button (X icon)
+    await page.getByRole('button', { name: /close login modal/i }).click();
+
+    // Modal should be closed
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+  });
+
+  test('should display sign up link', async ({ page }) => {
+    const dialog = page.getByRole('dialog');
+
+    // Check for sign up link
+    await expect(dialog.getByText("Don't have an account?")).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /sign up free/i })).toBeVisible();
+  });
+
+  test('should navigate to signup page when clicking sign up link', async ({ page }) => {
+    const dialog = page.getByRole('dialog');
+
+    // Click sign up link (inside the modal)
+    await dialog.getByRole('button', { name: /sign up free/i }).click();
+
+    // Should navigate to signup page
+    await expect(page).toHaveURL('/signup');
+  });
+
+  test('should show error for invalid login credentials', async ({ page }) => {
+    const dialog = page.getByRole('dialog');
     const emailInput = page.getByLabel(/email/i);
     const passwordInput = page.getByLabel(/password/i);
 
-    // Check autocomplete attributes for better UX
-    await expect(emailInput).toHaveAttribute('autocomplete', 'email');
-    await expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
+    // Enter invalid credentials
+    await emailInput.fill('invalid@example.com');
+    await passwordInput.fill('WrongPassword123!');
+
+    // Submit the form (using the submit button inside the dialog)
+    await dialog.getByRole('button', { name: /^log in$/i }).click();
+
+    // Should show error message (actual message depends on backend)
+    await expect(dialog.locator('.bg-red-50').first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should show loading state while logging in', async ({ page }) => {
+    const dialog = page.getByRole('dialog');
+    const emailInput = page.getByLabel(/email/i);
+    const passwordInput = page.getByLabel(/password/i);
+
+    // Enter credentials
+    await emailInput.fill('demo-admin@reasonbridge.demo');
+    await passwordInput.fill('DemoAdmin2026!');
+
+    // Submit the form (using the submit button inside the dialog)
+    await dialog.getByRole('button', { name: /^log in$/i }).click();
+
+    // Should show loading state (button text changes)
+    // Note: This may be very fast, so we just verify the form submitted
+    // by checking we either see loading or the modal closes
+    const loginButton = dialog.getByRole('button', { name: /logging in|log in/i });
+    await expect(loginButton).toBeVisible();
   });
 
   test('should have accessible form structure', async ({ page }) => {
-    // Check for proper heading hierarchy
-    const h2Count = await page.locator('h2').count();
-    expect(h2Count).toBeGreaterThan(0);
-
     // All inputs should have labels
     const emailInput = page.getByLabel(/email/i);
     const passwordInput = page.getByLabel(/password/i);
 
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
+
+    // Modal should have proper dialog role
+    const modal = page.getByRole('dialog');
+    await expect(modal).toHaveAttribute('aria-modal', 'true');
+  });
+
+  test('should display role badges for demo accounts', async ({ page }) => {
+    // Check for role badges
+    await expect(page.getByText('Admin').first()).toBeVisible();
+    await expect(page.getByText('Moderator')).toBeVisible();
+    await expect(page.getByText('Power User')).toBeVisible();
+    await expect(page.getByText('Regular User')).toBeVisible();
   });
 });

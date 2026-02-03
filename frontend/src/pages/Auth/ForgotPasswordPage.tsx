@@ -32,8 +32,8 @@ function ForgotPasswordPage() {
               Password reset functionality is not yet available. Please contact support if you need
               to reset your password.
             </p>
-            <Link to="/login">
-              <Button variant="primary">Back to Login</Button>
+            <Link to="/">
+              <Button variant="primary">Back to Home</Button>
             </Link>
           </div>
         </CardBody>

@@ -37,11 +37,12 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
     await checkCriticalAccessibility(page);
   });
 
-  test('login page has no critical accessibility violations', async ({ page }) => {
-    await page.goto('/login');
+  test('login modal has no critical accessibility violations', async ({ page }) => {
+    await page.goto('/');
 
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Check for critical/serious violations
     await checkCriticalAccessibility(page);
@@ -117,11 +118,14 @@ test.describe('Accessibility - Page-Specific Checks', () => {
 
   test.describe('Interactive Elements', () => {
     test('modal dialogs are accessible when opened', async ({ page }) => {
-      await page.goto('/login');
+      await page.goto('/');
       await page.waitForLoadState('networkidle');
 
-      // If there's a dialog trigger, we'd test the modal here
-      // For now, just verify the page itself is accessible
+      // Open login modal
+      await page.getByRole('button', { name: /log in/i }).click();
+      await expect(page.getByRole('dialog')).toBeVisible();
+
+      // Verify the modal is accessible
       await checkCriticalAccessibility(page);
     });
   });

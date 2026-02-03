@@ -1,15 +1,11 @@
 import type { RouteObject } from 'react-router-dom';
-import HomePage from '../pages/HomePage';
+import { LandingPage } from '../pages/LandingPage';
 import AboutPage from '../pages/AboutPage';
-import { LoginPage, RegisterPage, ForgotPasswordPage } from '../pages/Auth';
+import { RegisterPage, ForgotPasswordPage } from '../pages/Auth';
 import { SignupPage } from '../pages/SignupPage';
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
-import CommonGroundDemoPage from '../pages/Topics/CommonGroundDemoPage';
-import AgreementVisualizationDemoPage from '../pages/Topics/AgreementVisualizationDemoPage';
-import { DemoCredentialsPage } from '../pages/Demo';
-import LoadingDemo from '../pages/Demo/LoadingDemo';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
@@ -26,15 +22,11 @@ import NotFoundPage from '../pages/NotFoundPage';
 export const routes: RouteObject[] = [
   {
     path: '/',
-    element: <HomePage />,
+    element: <LandingPage />,
   },
   {
     path: '/about',
     element: <AboutPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
   },
   {
     path: '/register',
@@ -59,22 +51,6 @@ export const routes: RouteObject[] = [
   {
     path: '/topics/:id',
     element: <TopicDetailPage />,
-  },
-  {
-    path: '/demo/common-ground',
-    element: <CommonGroundDemoPage />,
-  },
-  {
-    path: '/demo/agreement-visualization',
-    element: <AgreementVisualizationDemoPage />,
-  },
-  {
-    path: '/demo/credentials',
-    element: <DemoCredentialsPage />,
-  },
-  {
-    path: '/demo/loading',
-    element: <LoadingDemo />,
   },
   {
     path: '/profile',
