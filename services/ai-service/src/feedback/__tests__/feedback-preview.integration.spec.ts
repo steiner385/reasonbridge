@@ -4,13 +4,19 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../../app.module.js';
 
+// Skip integration tests when DATABASE_URL is not available (e.g., CI unit test phase)
+const skipIntegration = !process.env['DATABASE_URL'];
+
 /**
  * Integration tests for POST /feedback/preview endpoint
  *
  * Tests authentication (FR-015), rate limiting (FR-016), and response format.
  * Uses actual NestJS application with mocked external services.
+ *
+ * NOTE: These tests require DATABASE_URL to be set. They are skipped in CI
+ * unit test phase and run during integration test phase when database is available.
  */
-describe('POST /feedback/preview Integration', () => {
+describe.skipIf(skipIntegration)('POST /feedback/preview Integration', () => {
   let app: NestFastifyApplication;
   let validToken: string;
 
