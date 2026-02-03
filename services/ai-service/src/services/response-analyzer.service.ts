@@ -60,6 +60,35 @@ export class ResponseAnalyzerService {
   }
 
   /**
+   * Analyze content and return ALL feedback items (not just highest confidence)
+   * Used for preview feedback where users see all detected issues
+   * @param content The response content to analyze
+   * @returns Array of all analysis results
+   */
+  async analyzeContentFull(content: string): Promise<AnalysisResult[]> {
+    // Run all analyzers in parallel for performance (<500ms requirement)
+    const [toneResult, fallacyResult, clarityResult] = await Promise.all([
+      this.toneAnalyzer.analyze(content),
+      this.fallacyDetector.analyze(content),
+      this.clarityAnalyzer.analyze(content),
+    ]);
+
+    // Collect all results that were detected
+    const results: AnalysisResult[] = [];
+    if (toneResult) results.push(toneResult);
+    if (fallacyResult) results.push(fallacyResult);
+    if (clarityResult) results.push(clarityResult);
+
+    // If no issues detected, return affirmation
+    if (results.length === 0) {
+      return [this.createAffirmation()];
+    }
+
+    // Sort by confidence score descending
+    return results.sort((a, b) => b.confidenceScore - a.confidenceScore);
+  }
+
+  /**
    * Select the best feedback to display based on confidence and priority
    * @param results Array of analysis results
    * @returns The most relevant feedback
