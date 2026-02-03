@@ -51,3 +51,8 @@ temp/
 
 # Git worktrees
 .worktrees/
+
+# Sensitive personal information (non-profit planning)
+docs/plans/network-map.md
+docs/plans/network-tracker.html
+docs/plans/network-tracker.pdf

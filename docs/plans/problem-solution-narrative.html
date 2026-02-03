@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReasonBridge: Problem/Solution Narrative</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #1a1a1a;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 0.4in;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+            @page {
+                margin: 0.5in;
+                size: letter;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 16pt;
+            padding-bottom: 12pt;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        h1 {
+            font-size: 22pt;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 2pt;
+        }
+
+        .tagline {
+            font-size: 10pt;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            color: #1e40af;
+            margin-top: 16pt;
+            margin-bottom: 8pt;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+        }
+
+        p {
+            margin-bottom: 8pt;
+            text-align: justify;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            background: #fff;
+            border: 2px solid #dc2626;
+            border-radius: 8pt;
+            padding: 12pt;
+            margin: 12pt 0 16pt 0;
+        }
+
+        .charts-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #991b1b;
+            text-align: center;
+            margin-bottom: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+        }
+
+        /* Line Chart Container */
+        .line-chart-container {
+            margin-bottom: 12pt;
+            padding-bottom: 10pt;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .line-chart-title {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #374151;
+            text-align: center;
+            margin-bottom: 6pt;
+        }
+
+        .line-chart-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .line-chart-note {
+            font-size: 7pt;
+            color: #dc2626;
+            text-align: center;
+            margin-top: 4pt;
+            font-weight: 600;
+        }
+
+        /* Bottom Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14pt;
+        }
+
+        .chart-container {
+            text-align: center;
+            background: #f9fafb;
+            border-radius: 6pt;
+            padding: 10pt;
+        }
+
+        .chart-label {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12pt;
+        }
+
+        /* Trust Chart */
+        .trust-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 70pt;
+            gap: 24pt;
+            margin-top: 8pt;
+        }
+
+        .trust-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .trust-value {
+            font-size: 12pt;
+            font-weight: 700;
+            margin-bottom: 3pt;
+        }
+
+        .trust-value-high {
+            color: #2563eb;
+        }
+
+        .trust-value-low {
+            color: #dc2626;
+        }
+
+        .trust-bar {
+            width: 44pt;
+            border-radius: 3pt 3pt 0 0;
+        }
+
+        .trust-bar-1972 {
+            height: 48pt;
+            background: linear-gradient(180deg, #3b82f6, #1e40af);
+        }
+
+        .trust-bar-2025 {
+            height: 20pt;
+            background: linear-gradient(180deg, #f87171, #dc2626);
+        }
+
+        .trust-year {
+            font-size: 8pt;
+            color: #6b7280;
+            margin-top: 4pt;
+            font-weight: 500;
+        }
+
+        .chart-stat {
+            font-size: 9pt;
+            font-weight: 700;
+            color: #dc2626;
+            margin-top: 8pt;
+        }
+
+        /* Polarization Gauge */
+        .polarization-gauge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60pt;
+            margin-top: 6pt;
+        }
+
+        .gauge-number {
+            font-size: 38pt;
+            font-weight: 700;
+            color: #dc2626;
+            line-height: 1;
+        }
+
+        .gauge-percent {
+            font-size: 16pt;
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .gauge-caption {
+            font-size: 8pt;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 4pt;
+        }
+
+        /* Rest of styles */
+        .transition {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #1e40af;
+            text-align: center;
+            margin: 14pt 0;
+            padding: 10pt;
+            background: #eff6ff;
+            border-radius: 6px;
+        }
+
+        .mission-box {
+            background: #1e40af;
+            color: white;
+            padding: 12pt;
+            border-radius: 8px;
+            margin: 12pt 0;
+        }
+
+        .mission-box p {
+            text-align: center;
+            font-size: 10pt;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        ul {
+            margin: 8pt 0 8pt 18pt;
+        }
+
+        li {
+            margin-bottom: 4pt;
+        }
+
+        strong {
+            color: #1e40af;
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6pt;
+            margin: 8pt 0;
+        }
+
+        .research-item {
+            background: #f8fafc;
+            padding: 6pt 8pt;
+            border-radius: 4px;
+            border-left: 3px solid #2563eb;
+        }
+
+        .research-item strong {
+            font-size: 9pt;
+        }
+
+        .research-item span {
+            font-size: 8pt;
+            color: #64748b;
+            display: block;
+        }
+
+        .ask-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 10pt;
+            border-radius: 8px;
+            margin-top: 12pt;
+        }
+
+        .ask-box h3 {
+            color: #92400e;
+            margin-top: 0;
+            font-size: 10pt;
+        }
+
+        .ask-box p {
+            font-size: 9pt;
+            margin-bottom: 6pt;
+        }
+
+        .closing {
+            font-weight: 600;
+            color: #1e40af;
+            text-align: center;
+            margin-top: 12pt;
+            font-size: 10pt;
+        }
+
+        footer {
+            margin-top: 16pt;
+            padding-top: 10pt;
+            border-top: 1px solid #e2e8f0;
+            font-size: 9pt;
+            color: #475569;
+        }
+
+        footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        /* Sources Page */
+        .sources-page {
+            font-size: 8pt;
+        }
+
+        .sources-page h2 {
+            font-size: 12pt;
+            margin-top: 0;
+        }
+
+        .sources-page h3 {
+            font-size: 10pt;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+            color: #1e40af;
+        }
+
+        .source-item {
+            margin-bottom: 8pt;
+            padding-left: 10pt;
+            border-left: 2px solid #e2e8f0;
+        }
+
+        .source-claim {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 2pt;
+        }
+
+        .source-detail {
+            color: #64748b;
+            font-size: 7.5pt;
+        }
+
+        .source-url {
+            font-family: 'Courier New', monospace;
+            font-size: 6.5pt;
+            color: #2563eb;
+            word-break: break-all;
+            display: block;
+            margin-top: 2pt;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ReasonBridge</h1>
+        <p class="tagline">Tools for Rational Discourse</p>
+    </header>
+
+    <h2>The Problem</h2>
+
+    <p>In the first half of 2025, the United States experienced 150 politically-motivated attacks—nearly twice as many as the year before. Threats against lawmakers have surged to 14,000 annually. Hate incidents reached the second-highest level since the FBI began tracking them in 1991.</p>
+
+    <!-- Data Visualization Section -->
+    <div class="charts-section">
+        <div class="charts-title">The Data Demands Action</div>
+
+        <!-- FBI Hate Incidents Line Chart -->
+        <div class="line-chart-container">
+            <div class="line-chart-title">FBI Hate Incidents (1991–2025)</div>
+            <div class="line-chart-wrapper">
+                <svg width="520" height="110" viewBox="0 0 520 110">
+                    <!-- Grid lines -->
+                    <line x1="40" y1="15" x2="500" y2="15" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="40" y1="35" x2="500" y2="35" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="40" y1="55" x2="500" y2="55" stroke="#f3f4f6" stroke-width="1"/>
+                    <line x1="40" y1="75" x2="500" y2="75" stroke="#f3f4f6" stroke-width="1"/>
+
+                    <!-- Y-axis labels -->
+                    <text x="35" y="18" font-size="7" fill="#9ca3af" text-anchor="end">12K</text>
+                    <text x="35" y="38" font-size="7" fill="#9ca3af" text-anchor="end">9K</text>
+                    <text x="35" y="58" font-size="7" fill="#9ca3af" text-anchor="end">6K</text>
+                    <text x="35" y="78" font-size="7" fill="#9ca3af" text-anchor="end">3K</text>
+
+                    <!-- X-axis (baseline) -->
+                    <line x1="40" y1="90" x2="500" y2="90" stroke="#d1d5db" stroke-width="1"/>
+
+                    <!-- Area fill under the line -->
+                    <path d="M40,73 L53,65 L67,58 L80,62 L93,58 L107,60 L120,67 L133,70 L147,69 L160,62 L173,54 L187,57 L200,65 L213,68 L227,68 L240,69 L253,72 L267,72 L280,72 L293,72 L307,67 L320,59 L333,45 L347,28 L360,22 L373,18 L387,15 L400,17 L413,15 L427,16 L440,17 L453,17 L467,17 L480,18 L493,19 L500,19 L500,90 L40,90 Z"
+                          fill="url(#areaGradient)" opacity="0.3"/>
+
+                    <!-- Gradient definition -->
+                    <defs>
+                        <linearGradient id="areaGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#3b82f6"/>
+                            <stop offset="60%" stop-color="#f97316"/>
+                            <stop offset="100%" stop-color="#dc2626"/>
+                        </linearGradient>
+                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#2563eb"/>
+                            <stop offset="60%" stop-color="#ea580c"/>
+                            <stop offset="100%" stop-color="#dc2626"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- The line itself -->
+                    <path d="M40,73 L53,65 L67,58 L80,62 L93,58 L107,60 L120,67 L133,70 L147,69 L160,62 L173,54 L187,57 L200,65 L213,68 L227,68 L240,69 L253,72 L267,72 L280,72 L293,72 L307,67 L320,59 L333,45 L347,28 L360,22 L373,18 L387,15 L400,17 L413,15 L427,16 L440,17 L453,17 L467,17 L480,18 L493,19 L500,19"
+                          fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <!-- Key data points -->
+                    <circle cx="40" cy="73" r="3" fill="#3b82f6"/>
+                    <circle cx="173" cy="54" r="3" fill="#f97316"/>
+                    <circle cx="387" cy="15" r="4" fill="#dc2626"/>
+                    <circle cx="500" cy="19" r="3" fill="#dc2626"/>
+
+                    <!-- Data labels for key points -->
+                    <text x="40" y="85" font-size="6" fill="#6b7280" text-anchor="middle">4.6K</text>
+                    <text x="173" y="47" font-size="6" fill="#ea580c" text-anchor="middle">9.7K</text>
+                    <text x="387" y="10" font-size="7" fill="#dc2626" font-weight="600" text-anchor="middle">11.9K</text>
+                    <text x="500" y="12" font-size="6" fill="#dc2626" text-anchor="middle">~12K</text>
+
+                    <!-- X-axis year labels -->
+                    <text x="40" y="100" font-size="7" fill="#6b7280" text-anchor="middle">1991</text>
+                    <text x="120" y="100" font-size="7" fill="#6b7280" text-anchor="middle">1997</text>
+                    <text x="173" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2001</text>
+                    <text x="253" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2007</text>
+                    <text x="333" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2013</text>
+                    <text x="413" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2019</text>
+                    <text x="500" y="100" font-size="7" fill="#6b7280" text-anchor="middle">2025</text>
+
+                    <!-- Annotation for 2001 spike -->
+                    <text x="173" y="66" font-size="5" fill="#9ca3af" text-anchor="middle">9/11</text>
+
+                    <!-- Annotation for recent surge -->
+                    <line x1="360" y1="25" x2="360" y2="85" stroke="#dc2626" stroke-width="0.5" stroke-dasharray="2,2"/>
+                    <text x="430" y="35" font-size="6" fill="#dc2626" font-weight="600">Record highs</text>
+                    <text x="430" y="43" font-size="6" fill="#dc2626" font-weight="600">2020-2025</text>
+                </svg>
+            </div>
+            <div class="line-chart-note">2023: Highest level in 33 years of FBI tracking</div>
+        </div>
+
+        <!-- Trust & Polarization Charts -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-label">Trust in Media</div>
+                <div class="trust-chart">
+                    <div class="trust-bar-wrapper">
+                        <div class="trust-value trust-value-high">68%</div>
+                        <div class="trust-bar trust-bar-1972"></div>
+                        <div class="trust-year">1972</div>
+                    </div>
+                    <div class="trust-bar-wrapper">
+                        <div class="trust-value trust-value-low">28%</div>
+                        <div class="trust-bar trust-bar-2025"></div>
+                        <div class="trust-year">2025</div>
+                    </div>
+                </div>
+                <div class="chart-stat">-40 points in 50 years</div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-label">Americans Who Say Polarization<br>Threatens Our Country</div>
+                <div class="polarization-gauge">
+                    <div>
+                        <span class="gauge-number">87</span><span class="gauge-percent">%</span>
+                    </div>
+                    <div class="gauge-caption">Near-universal recognition across party lines</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p>This violence doesn't emerge from nowhere. It follows a predictable path: misinformation spreads, trust collapses, polarization deepens, and people begin to see their fellow citizens as enemies. Today, only 28% of Americans trust the media—down from 68% in 1972. Nearly three-quarters of partisans view the other side as "immoral." And 87% of Americans say polarization itself is a threat to our country.</p>
+
+    <p>The platforms where most public discourse now happens weren't designed to help us understand each other. They were designed to maximize engagement—and outrage, conflict, and division are engaging. The result: 68% of Americans say social media has impacted their relationships. Friendships have ended. Families have fractured. And increasingly, words have turned to violence.</p>
+
+    <div class="transition">But it doesn't have to be this way.</div>
+
+    <p>The same technology that amplifies division can be designed to foster understanding. The same data that powers outrage algorithms can surface common ground. The problem isn't human nature—it's platform design.</p>
+
+    <h2>The Solution</h2>
+
+    <p>Unlike social media platforms designed for engagement, <strong>ReasonBridge</strong> is designed for understanding.</p>
+
+    <p>ReasonBridge is a platform for rational discourse that uses AI-powered analysis to help people engage productively across differences. Instead of rewarding the loudest or most provocative voices, ReasonBridge rewards good-faith dialogue—helping users identify bias, evaluate evidence, find common ground, and move from conflict toward shared understanding.</p>
+
+    <h3>Grounded in Research</h3>
+
+    <div class="research-grid">
+        <div class="research-item">
+            <strong>Kahneman</strong> (dual-process theory)
+            <span>Prompts reflective thinking over reactive responses</span>
+        </div>
+        <div class="research-item">
+            <strong>Haidt</strong> (Moral Foundations Theory)
+            <span>Surfaces shared values beneath disagreements</span>
+        </div>
+        <div class="research-item">
+            <strong>Gross</strong> (emotion regulation)
+            <span>De-escalates conflict through cognitive reappraisal</span>
+        </div>
+        <div class="research-item">
+            <strong>Fogg</strong> (behavior design)
+            <span>Makes constructive communication easier</span>
+        </div>
+    </div>
+
+    <h3>How It Works</h3>
+
+    <ul>
+        <li><strong>AI-assisted analysis</strong> surfaces bias, identifies logical fallacies, and highlights agreement</li>
+        <li><strong>Structured discussion</strong> organizes claims so conversations build toward clarity</li>
+        <li><strong>Good-faith incentives</strong> reward constructive engagement over inflammatory rhetoric</li>
+        <li><strong>Common ground discovery</strong> helps people find shared values amid disagreement</li>
+    </ul>
+
+    <div class="mission-box">
+        <p>In an era of division and misinformation, ReasonBridge provides tools for rational discourse. Through AI-powered analysis and incentives for good-faith dialogue, we help people turn diverse perspectives into collective wisdom—and better outcomes for everyone.</p>
+    </div>
+
+    <div class="ask-box">
+        <h3>Support ReasonBridge</h3>
+        <p>ReasonBridge is a functional product ready for public launch. We're establishing as a 501(c)(3) non-profit because we believe rational discourse is a public good—not a product to monetize.</p>
+        <p>We're seeking seed funding to launch publicly, refine our AI tools based on real-world feedback, and build the foundation for long-term sustainability.</p>
+    </div>
+
+    <p class="closing">Your support helps rebuild the infrastructure of democratic discourse—<br>before more relationships fracture and more words turn to violence.</p>
+
+    <footer>
+        <p><strong>Contact:</strong> tony@steinonline.net | <strong>Web:</strong> reasonbridge.org</p>
+    </footer>
+
+    <!-- Page 2: Sources -->
+    <div class="page-break"></div>
+
+    <div class="sources-page">
+        <h2>Sources & Citations</h2>
+
+        <h3>Statistics & Data</h3>
+
+        <div class="source-item">
+            <div class="source-claim">150 political attacks in first half of 2025 (nearly 2x prior year)</div>
+            <div class="source-detail">University of Maryland via Pew Research Center, 2025</div>
+            <span class="source-url">https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">14,000 threats against lawmakers annually</div>
+            <div class="source-detail">U.S. Capitol Police via Pew Research Center, 2025</div>
+            <span class="source-url">https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">FBI Hate Crime Statistics (1991-2025)</div>
+            <div class="source-detail">FBI Uniform Crime Reports / Crime Data Explorer; 2024 data via Arab American Institute</div>
+            <span class="source-url">https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/explorer/crime/hate-crime</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">28% of Americans trust media (down from 68% in 1972)</div>
+            <div class="source-detail">Gallup, September 2025</div>
+            <span class="source-url">https://news.gallup.com/poll/695762/trust-media-new-low.aspx</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">72% of Republicans and 63% of Democrats view opposing party as "immoral"</div>
+            <div class="source-detail">Pew Research Center</div>
+            <span class="source-url">https://www.pewresearch.org/topic/politics-policy/political-parties-polarization/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">87% say polarization is a threat to America</div>
+            <div class="source-detail">Listen First Project</div>
+            <span class="source-url">https://www.listenfirstproject.org/toxic-polarization-data</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">68% say social media has impacted their relationships</div>
+            <div class="source-detail">EBSCO Research</div>
+            <span class="source-url">https://www.ebsco.com/research-starters/communication-and-mass-media/social-media-and-relationships</span>
+        </div>
+
+        <h3>Research Foundations</h3>
+
+        <div class="source-item">
+            <div class="source-claim">Dual-Process Theory (System 1 / System 2)</div>
+            <div class="source-detail">Kahneman, D. (2003). "A perspective on judgment and choice." American Psychologist, 58, 697-720.</div>
+            <span class="source-url">https://pubmed.ncbi.nlm.nih.gov/12212647/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Moral Foundations Theory</div>
+            <div class="source-detail">Graham, J., Haidt, J., & Nosek, B. A. (2009). "Liberals and conservatives rely on different sets of moral foundations." Journal of Personality and Social Psychology, 96(5), 1029-1046.</div>
+            <span class="source-url">https://pubmed.ncbi.nlm.nih.gov/19379034/</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Process Model of Emotion Regulation</div>
+            <div class="source-detail">Gross, J. J. (1998). "The emerging field of emotion regulation: An integrative review." Review of General Psychology, 2(3), 271-299.</div>
+            <span class="source-url">https://journals.sagepub.com/doi/10.1037/1089-2680.2.3.271</span>
+        </div>
+
+        <div class="source-item">
+            <div class="source-claim">Fogg Behavior Model (B=MAT)</div>
+            <div class="source-detail">Fogg, B. J. (2009). "A Behavior Model for Persuasive Design." Stanford Behavior Design Lab.</div>
+            <span class="source-url">https://behaviordesign.stanford.edu/resources/fogg-behavior-model</span>
+        </div>
+
+        <div style="margin-top: 20pt; padding-top: 10pt; border-top: 1px solid #e2e8f0;">
+            <p style="font-size: 8pt; color: #64748b; text-align: center;">
+                ReasonBridge is a 501(c)(3) non-profit organization (pending).<br>
+                Last updated: February 2026
+            </p>
+        </div>
+    </div>
+</body>
+</html>
