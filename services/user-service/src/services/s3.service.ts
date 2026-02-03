@@ -5,7 +5,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -22,15 +22,26 @@ export class S3Service {
   private readonly bucket: string;
   private readonly region: string;
 
-  constructor(private readonly configService: ConfigService) {
-    this.region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
-    this.bucket = this.configService.get<string>('S3_AVATAR_BUCKET') || 'reason-bridge-avatars';
+  constructor(@Optional() @Inject(ConfigService) private readonly configService?: ConfigService) {
+    // Use environment variables as fallback if ConfigService not available
+    this.region =
+      this.configService?.get<string>('AWS_REGION') ?? process.env['AWS_REGION'] ?? 'us-east-1';
+    this.bucket =
+      this.configService?.get<string>('S3_AVATAR_BUCKET') ??
+      process.env['S3_AVATAR_BUCKET'] ??
+      'reason-bridge-avatars';
 
     this.s3Client = new S3Client({
       region: this.region,
       credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
+        accessKeyId:
+          this.configService?.get<string>('AWS_ACCESS_KEY_ID') ??
+          process.env['AWS_ACCESS_KEY_ID'] ??
+          '',
+        secretAccessKey:
+          this.configService?.get<string>('AWS_SECRET_ACCESS_KEY') ??
+          process.env['AWS_SECRET_ACCESS_KEY'] ??
+          '',
       },
     });
 
