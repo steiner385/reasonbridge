@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional, Inject } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { SERVICE_PORTS, getServiceUrl } from '@reason-bridge/common';
 import { CircuitBreakerService } from '../resilience/circuit-breaker.service.js';
 import { withRetry, isRetryableHttpError } from '../resilience/retry.util.js';
 
@@ -54,33 +55,40 @@ export class ProxyService {
   private readonly aiService: ServiceConfig;
 
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
-    private readonly circuitBreakerService: CircuitBreakerService,
+    @Inject(HttpService) private readonly httpService: HttpService,
+    @Optional() @Inject(ConfigService) private readonly configService: ConfigService | null,
+    @Inject(CircuitBreakerService) private readonly circuitBreakerService: CircuitBreakerService,
   ) {
+    // Helper to get config value with fallback to process.env
+    const getConfig = <T>(key: string, defaultValue: T): T => {
+      if (this.configService) {
+        return this.configService.get<T>(key, defaultValue) ?? defaultValue;
+      }
+      const envValue = process.env[key];
+      if (envValue === undefined) return defaultValue;
+      if (typeof defaultValue === 'number') return Number(envValue) as T;
+      return envValue as T;
+    };
+
+    // Service URLs use single source of truth from @reason-bridge/common
+    // Environment variables can override for Docker/production deployments
     this.userService = {
-      url: this.configService.get<string>('USER_SERVICE_URL', 'http://localhost:3001'),
-      timeout: this.configService.get<number>('USER_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
-      retryAttempts: this.configService.get<number>(
-        'USER_SERVICE_RETRY_ATTEMPTS',
-        DEFAULT_RETRY_ATTEMPTS,
-      ),
+      url: getConfig<string>('USER_SERVICE_URL', getServiceUrl('USER_SERVICE')),
+      timeout: getConfig<number>('USER_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      retryAttempts: getConfig<number>('USER_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
     this.discussionService = {
-      url: this.configService.get<string>('DISCUSSION_SERVICE_URL', 'http://localhost:3007'),
-      timeout: this.configService.get<number>('DISCUSSION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
-      retryAttempts: this.configService.get<number>(
-        'DISCUSSION_SERVICE_RETRY_ATTEMPTS',
-        DEFAULT_RETRY_ATTEMPTS,
-      ),
+      url: getConfig<string>('DISCUSSION_SERVICE_URL', getServiceUrl('DISCUSSION_SERVICE')),
+      timeout: getConfig<number>('DISCUSSION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      retryAttempts: getConfig<number>('DISCUSSION_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
     this.aiService = {
-      url: this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:3002'),
+      url: getConfig<string>('AI_SERVICE_URL', getServiceUrl('AI_SERVICE')),
       // AI service gets longer timeout as it may have longer processing times
-      timeout: this.configService.get<number>('AI_SERVICE_TIMEOUT', 30000),
-      retryAttempts: this.configService.get<number>('AI_SERVICE_RETRY_ATTEMPTS', 2),
+      timeout: getConfig<number>('AI_SERVICE_TIMEOUT', 30000),
+      retryAttempts: getConfig<number>('AI_SERVICE_RETRY_ATTEMPTS', 2),
     };
   }
 
