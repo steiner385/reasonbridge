@@ -180,12 +180,14 @@ export function useHybridPreviewFeedback(
 
   // When AI data arrives, mark feedback as AI-powered
   useEffect(() => {
-    if (aiQuery.data && !aiQuery.isLoading) {
+    // Mark as AI feedback only when AI has data AND is not currently fetching
+    if (aiQuery.data && !aiQuery.isFetching) {
       setIsAIFeedback(true);
-    } else if (!aiQuery.data) {
+    } else if (aiQuery.isFetching || !aiQuery.data) {
+      // Reset to false when fetching new data or no data
       setIsAIFeedback(false);
     }
-  }, [aiQuery.data, aiQuery.isLoading]);
+  }, [aiQuery.data, aiQuery.isFetching]);
 
   // Determine which data to use: AI if available, otherwise regex
   const activeData = aiQuery.data || regexQuery.data;
@@ -197,9 +199,10 @@ export function useHybridPreviewFeedback(
   // IMPORTANT: Don't show definitive "readyToPost" until AI completes
   // This prevents the jarring transition from green (regex AFFIRMATION) to red (AI detected issues)
   const readyToPost = (() => {
-    // If AI is enabled and currently loading, show "pending" state (null)
+    // If AI is enabled and currently fetching (initial OR refetch), show "pending" state (null)
     // This prevents showing green prematurely based on regex-only results
-    if (enableAI && isContentValid && aiQuery.isLoading && !aiQuery.data) {
+    // CRITICAL: Use isFetching not isLoading to catch subsequent edits
+    if (enableAI && isContentValid && aiQuery.isFetching) {
       return null; // Pending - don't show green yet
     }
 
@@ -219,8 +222,9 @@ export function useHybridPreviewFeedback(
 
   // Update summary based on state
   const summary = (() => {
-    // While AI is loading, show pending message (even if regex has results)
-    if (enableAI && isContentValid && aiQuery.isLoading && !aiQuery.data) {
+    // While AI is fetching (initial OR refetch), show pending message (even if regex has results)
+    // CRITICAL: Use isFetching not isLoading to show message on EVERY edit
+    if (enableAI && isContentValid && aiQuery.isFetching) {
       return 'Quick check complete. Waiting for AI analysis...';
     }
 
@@ -233,8 +237,10 @@ export function useHybridPreviewFeedback(
     primary: activeData?.primary,
     readyToPost,
     summary,
-    isLoading: regexQuery.isLoading && isContentValid,
-    isAILoading: aiQuery.isLoading && isContentValid,
+    // Use isLoading for initial load, isFetching for all loads (including refetches)
+    isLoading: regexQuery.isFetching && isContentValid,
+    // CRITICAL: Use isFetching not isLoading to show banner on EVERY AI analysis
+    isAILoading: aiQuery.isFetching && isContentValid,
     isError: regexQuery.isError || aiQuery.isError,
     error: errorMessage,
     sensitivity,
