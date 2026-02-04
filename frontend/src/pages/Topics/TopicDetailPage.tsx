@@ -390,6 +390,7 @@ function TopicDetailPage() {
             onSubmit={handleSubmitResponse}
             isLoading={isSubmittingResponse}
             placeholder="Share your perspective on this topic..."
+            topicId={id}
           />
         </Card>
       </div>

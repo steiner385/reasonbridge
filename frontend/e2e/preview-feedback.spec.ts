@@ -10,28 +10,11 @@
  * - T036-T038: Sensitivity level control
  *
  * @see specs/014-realtime-preview-feedback/
- *
- * TODO: These tests are SKIPPED because the real-time preview feedback feature
- * is not yet integrated into the ResponseComposer component.
- *
- * The usePreviewFeedback hook exists (src/hooks/usePreviewFeedback.ts) but needs to be:
- * 1. Integrated into ResponseComposer to auto-trigger on content changes
- * 2. A preview feedback panel with aria-label="Preview feedback" needs to be added
- * 3. A sensitivity selector dropdown (#sensitivity-selector) needs to be added
- * 4. The UI elements tested here need to be implemented
- *
- * Current behavior: ResponseComposer has manual "Request Feedback" button only.
- * Target behavior: Auto-triggering real-time preview as user types.
- *
- * Issue to track: Create GitHub issue for Feature 014 UI integration
  */
 
 import { test, expect, type Page } from '@playwright/test';
 
-// Skip all preview feedback tests - feature not yet integrated
 test.describe.configure({ mode: 'serial' });
-const skipReason =
-  'Preview feedback feature not integrated into ResponseComposer (see Feature 014)';
 
 // Mock preview feedback responses for different content types
 const mockFeedbackWithIssues = {
@@ -84,7 +67,7 @@ const mockEmptyFeedback = {
  * Helper to mock the preview feedback API
  */
 async function mockPreviewFeedbackAPI(page: Page, response: object) {
-  await page.route('**/feedback/preview', async (route) => {
+  await page.route('**/ai/feedback/preview', async (route) => {
     // Simulate realistic response time
     await new Promise((r) => setTimeout(r, 100));
     await route.fulfill({
@@ -100,7 +83,7 @@ async function mockPreviewFeedbackAPI(page: Page, response: object) {
  */
 async function mockAuth(page: Page) {
   // Mock auth endpoints to simulate logged-in user
-  await page.route('**/auth/me', async (route) => {
+  await page.route('**/api/auth/me', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -120,8 +103,8 @@ async function navigateToComposer(page: Page) {
   // Use a mock topic ID - the actual ID doesn't matter since we mock the API
   const MOCK_TOPIC_ID = 'topic-123';
 
-  // Mock topic data
-  await page.route(`**/topics/${MOCK_TOPIC_ID}`, async (route) => {
+  // Mock topic data API endpoint
+  await page.route(`**/api/topics/${MOCK_TOPIC_ID}`, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -138,7 +121,7 @@ async function navigateToComposer(page: Page) {
     });
   });
 
-  await page.route(`**/topics/${MOCK_TOPIC_ID}/responses`, async (route) => {
+  await page.route(`**/api/topics/${MOCK_TOPIC_ID}/responses`, async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
         status: 200,
@@ -149,7 +132,7 @@ async function navigateToComposer(page: Page) {
   });
 
   // Mock propositions endpoint (topic detail page may request this)
-  await page.route(`**/topics/${MOCK_TOPIC_ID}/propositions`, async (route) => {
+  await page.route(`**/api/topics/${MOCK_TOPIC_ID}/propositions`, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -157,12 +140,32 @@ async function navigateToComposer(page: Page) {
     });
   });
 
+  // Mock common ground analysis endpoint
+  await page.route(`**/api/topics/${MOCK_TOPIC_ID}/common-ground-analysis`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    });
+  });
+
+  // Mock bridging suggestions endpoint
+  await page.route(`**/api/topics/${MOCK_TOPIC_ID}/bridging-suggestions`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(null),
+    });
+  });
+
   await page.goto(`/topics/${MOCK_TOPIC_ID}`);
+
+  // Wait for the page to load and the composer to be visible
+  await page.waitForLoadState('networkidle');
+  await page.waitForSelector('textarea[id="response-content"]', { timeout: 10000 });
 }
 
 test.describe('Preview Feedback - User Story 1: View Feedback While Composing', () => {
-  test.skip(true, skipReason);
-
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
@@ -193,7 +196,7 @@ test.describe('Preview Feedback - User Story 1: View Feedback While Composing', 
 
   test('T011: feedback updates when draft content is modified', async ({ page }) => {
     let requestCount = 0;
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       requestCount++;
       await new Promise((r) => setTimeout(r, 100));
       // Return different feedback based on request count
@@ -249,8 +252,6 @@ test.describe('Preview Feedback - User Story 1: View Feedback While Composing', 
 });
 
 test.describe('Preview Feedback - User Story 2: Understand Specific Issues', () => {
-  test.skip(true, skipReason);
-
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
     await mockPreviewFeedbackAPI(page, mockFeedbackWithIssues);
@@ -311,8 +312,6 @@ test.describe('Preview Feedback - User Story 2: Understand Specific Issues', () 
 });
 
 test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => {
-  test.skip(true, skipReason);
-
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
@@ -328,11 +327,12 @@ test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => 
     await expect(page.locator('[aria-label="Preview feedback"]')).toBeVisible({ timeout: 2000 });
 
     // Verify ready to post indicator with checkmark
-    const readyIndicator = page.getByText('✓ Ready to post');
+    const readyIndicator = page.getByText('Ready to post');
     await expect(readyIndicator).toBeVisible();
 
-    // Verify green styling
-    await expect(readyIndicator).toHaveClass(/bg-green-100/);
+    // Verify green styling (the indicator uses bg-green-100 for ready state)
+    const indicatorContainer = page.locator('[role="status"]').filter({ hasText: 'Ready to post' });
+    await expect(indicatorContainer).toHaveClass(/bg-green-100/);
   });
 
   test('T029: revision indicator shows when critical issues present', async ({ page }) => {
@@ -346,18 +346,21 @@ test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => 
     await expect(page.locator('[aria-label="Preview feedback"]')).toBeVisible({ timeout: 2000 });
 
     // Verify revision suggested indicator
-    const revisionIndicator = page.getByText('⚠ Review suggested');
+    const revisionIndicator = page.getByText('Review suggested');
     await expect(revisionIndicator).toBeVisible();
 
-    // Verify yellow/warning styling
-    await expect(revisionIndicator).toHaveClass(/bg-yellow-100/);
+    // Verify yellow/warning styling (the indicator uses bg-yellow-100 for review state)
+    const indicatorContainer = page
+      .locator('[role="status"]')
+      .filter({ hasText: 'Review suggested' });
+    await expect(indicatorContainer).toHaveClass(/bg-yellow-100/);
   });
 
   test('T030: indicator updates when user edits content to fix issues', async ({ page }) => {
     let responseIndex = 0;
     const responses = [mockFeedbackWithIssues, mockFeedbackAffirmation];
 
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       await new Promise((r) => setTimeout(r, 100));
       await route.fulfill({
         status: 200,
@@ -380,15 +383,13 @@ test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => 
 });
 
 test.describe('Preview Feedback - Error Handling', () => {
-  test.skip(true, skipReason);
-
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
 
   test('T020: compose still works when service unavailable', async ({ page }) => {
     // Mock API to return error
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
@@ -413,7 +414,7 @@ test.describe('Preview Feedback - Error Handling', () => {
 
   test('shows loading skeleton while fetching feedback', async ({ page }) => {
     // Add delay to see loading state
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       await new Promise((r) => setTimeout(r, 500));
       await route.fulfill({
         status: 200,
@@ -426,8 +427,8 @@ test.describe('Preview Feedback - Error Handling', () => {
     const textarea = page.locator('textarea[id="response-content"]');
     await textarea.fill('This is a longer text that will trigger feedback loading.');
 
-    // Verify loading skeleton appears
-    await expect(page.locator('.animate-pulse')).toBeVisible({ timeout: 1000 });
+    // Verify loading state appears (either skeleton or "Analyzing..." text)
+    await expect(page.getByText('Analyzing...')).toBeVisible({ timeout: 1000 });
 
     // Wait for content to load
     await expect(page.getByText('AFFIRMATION')).toBeVisible({ timeout: 2000 });
@@ -457,15 +458,13 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
     analysisTimeMs: 110,
   };
 
-  test.skip(true, skipReason);
-
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
 
   test('T035: LOW sensitivity shows more feedback items', async ({ page }) => {
     let requestedSensitivity = '';
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       const postData = route.request().postDataJSON();
       requestedSensitivity = postData?.sensitivity || 'MEDIUM';
       await new Promise((r) => setTimeout(r, 100));
@@ -497,7 +496,7 @@ test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
 
   test('T036: HIGH sensitivity shows fewer feedback items', async ({ page }) => {
     let requestedSensitivity = '';
-    await page.route('**/feedback/preview', async (route) => {
+    await page.route('**/ai/feedback/preview', async (route) => {
       const postData = route.request().postDataJSON();
       requestedSensitivity = postData?.sensitivity || 'MEDIUM';
       await new Promise((r) => setTimeout(r, 100));
