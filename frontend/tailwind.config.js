@@ -137,6 +137,7 @@ export default {
         'slide-in': 'slideIn 0.3s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'bounce-slow': 'bounce 2s infinite',
+        progress: 'progress 2.5s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -150,6 +151,11 @@ export default {
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        progress: {
+          '0%': { transform: 'translateX(-100%)' },
+          '50%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(100%)' },
         },
       },
       // Breakpoints for responsive design (extending defaults)

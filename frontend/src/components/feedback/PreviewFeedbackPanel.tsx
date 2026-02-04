@@ -3,6 +3,7 @@ import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedbac
 import { FeedbackItem } from './FeedbackItem';
 import { ReadyToPostIndicator } from './ReadyToPostIndicator';
 import { SensitivitySelector } from './SensitivitySelector';
+import { LoadingBridge } from '../ui/LoadingBridge';
 
 export interface PreviewFeedbackPanelProps {
   /** Array of feedback items to display */
@@ -40,6 +41,42 @@ const FeedbackSkeleton: React.FC = () => (
     </div>
     <div className="h-3 bg-gray-200 rounded w-full" />
     <div className="h-3 bg-gray-200 rounded w-3/4" />
+  </div>
+);
+
+/**
+ * Prominent AI loading banner with ReasonBridge logo animation
+ */
+const AILoadingBanner: React.FC = () => (
+  <div className="mb-4 rounded-lg border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 p-4 shadow-sm">
+    <div className="flex items-start gap-4">
+      {/* ReasonBridge logo animation */}
+      <div className="flex-shrink-0">
+        <LoadingBridge size="lg" label="AI analyzing content" />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <h4 className="text-base font-semibold text-gray-900 mb-1">AI Analysis in Progress</h4>
+        <p className="text-sm text-gray-600 mb-3">
+          Claude is analyzing your response for nuanced tone, fallacies, and unsourced claims...
+        </p>
+
+        {/* Animated progress bar */}
+        <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-[progress_2.5s_ease-in-out_infinite]"
+            style={{
+              width: '100%',
+            }}
+          />
+        </div>
+
+        <p className="text-xs text-gray-500 mt-2">
+          This usually takes 2-5 seconds • Using AWS Bedrock Claude 3.5 Sonnet
+        </p>
+      </div>
+    </div>
   </div>
 );
 
@@ -86,7 +123,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
 
   return (
     <div
-      className={`mt-3 rounded-lg border bg-white shadow-sm ${className}`}
+      className={`mt-3 rounded-lg border bg-white shadow-sm ${isAILoading ? 'ring-2 ring-blue-200 ring-opacity-50' : ''} ${className}`}
       role="region"
       aria-label="Preview feedback"
       aria-live="polite"
@@ -98,13 +135,8 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium text-gray-900">Feedback Preview</h3>
             {isAIFeedback && !isAILoading && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                ✨ AI
-              </span>
-            )}
-            {isAILoading && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 animate-pulse">
-                🤖 Analyzing...
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200">
+                ✨ AI-Enhanced
               </span>
             )}
           </div>
@@ -125,19 +157,22 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
 
       {/* Content area */}
       <div className="p-4">
-        {/* Loading state - show loading skeleton while regex or AI is loading */}
-        {anyLoading && feedback.length === 0 && (
+        {/* Prominent AI loading banner */}
+        {isAILoading && <AILoadingBanner />}
+
+        {/* Loading state - show loading skeleton while regex is loading and no feedback yet */}
+        {isLoading && !isAILoading && feedback.length === 0 && (
           <div className="space-y-3">
             <FeedbackSkeleton />
             <FeedbackSkeleton />
           </div>
         )}
 
-        {/* AI Loading with existing feedback - show existing feedback with loading indicator */}
+        {/* Show existing feedback while AI is loading (regex results) */}
         {isAILoading && feedback.length > 0 && (
-          <div className="space-y-3">
-            <div className="text-xs text-blue-600 font-medium mb-2">
-              Refining analysis with AI...
+          <div className="space-y-3 opacity-60">
+            <div className="text-xs text-gray-500 font-medium mb-2 italic">
+              Quick check results (AI refining below...)
             </div>
             {feedback.map((item, index) => (
               <FeedbackItem key={`${item.type}-${item.subtype || ''}-${index}`} item={item} />
