@@ -17,19 +17,35 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto): Promise<RegisterResponseDto> {
-    // 1. Register with auth service (Cognito or Mock)
+    // 1. Register with auth service (Cognito or Database)
     const authResult = await this.authService.signUp(
       registerDto.email,
       registerDto.password,
       registerDto.displayName,
     );
 
-    // 2. Create user in local database
-    const user = await this.usersService.createUser({
-      email: registerDto.email,
-      displayName: registerDto.displayName,
-      cognitoSub: authResult.userSub,
-    });
+    // 2. Create user in local database (or get existing if already created by auth service)
+    // In database auth mode, the user is already created by signUp().
+    // In Cognito mode, we need to create the local user record.
+    let user;
+    try {
+      user = await this.usersService.createUser({
+        email: registerDto.email,
+        displayName: registerDto.displayName,
+        cognitoSub: authResult.userSub,
+      });
+    } catch (error) {
+      // If user already exists (created by database auth service), find them
+      if (
+        error instanceof Error &&
+        (error.message.includes('already exists') || error.name === 'ConflictException')
+      ) {
+        // User was already created by the auth service, look them up
+        user = await this.usersService.findByCognitoSub(authResult.userSub);
+      } else {
+        throw error;
+      }
+    }
 
     return {
       userId: user.id,

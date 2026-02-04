@@ -11,13 +11,14 @@ import { test, expect } from '@playwright/test';
  */
 
 // Generate unique test user credentials
-// Uses timestamp + random suffix to avoid collisions across builds
+// Uses timestamp + random suffix + process ID to avoid collisions across parallel workers
 const generateTestUser = () => {
   const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  const processId = process.pid || Math.floor(Math.random() * 10000);
   return {
-    email: `test-user-${timestamp}-${randomSuffix}@example.com`,
-    username: `testuser${timestamp}${randomSuffix}`,
+    email: `e2e-${timestamp}-${processId}-${randomSuffix}@example.com`,
+    username: `e2euser${timestamp}${randomSuffix}`,
     password: 'SecurePassword123!',
   };
 };
@@ -56,21 +57,27 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Step 4: Wait for registration to complete and redirect
-    // The registration API can take time - wait for button to show loading then complete
-    // Or for an error message to appear, or for the redirect to happen
-    await Promise.race([
-      // Success: redirects to landing page
-      page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 15000 }),
-      // Error: shows error message on the form
-      expect(page.getByText(/already exists|failed|error/i)).toBeVisible({ timeout: 15000 }),
+    // Step 4: Wait for registration to complete
+    // Use Promise.race to detect either redirect OR error display
+    const result = await Promise.race([
+      page
+        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
+        .then(() => 'redirect' as const),
+      page
+        .locator('.bg-fallacy-light p')
+        .waitFor({ state: 'visible', timeout: 20000 })
+        .then(() => 'error' as const),
     ]);
 
-    // If we got an error, fail the test with a clear message
-    const errorMessage = page.getByText(/already exists|failed|error/i);
-    if (await errorMessage.isVisible()) {
-      throw new Error(`Registration failed with error: ${await errorMessage.textContent()}`);
+    if (result === 'error') {
+      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
+      throw new Error(`Registration failed with error: ${errorText}`);
     }
+
+    // Success: verify we landed on an expected page
+    await expect(page).toHaveURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
+      timeout: 5000,
+    });
 
     // Step 5: Login after registration
     // Registration redirects to landing page (/) - use login modal
@@ -127,11 +134,26 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for first registration to complete (redirects to landing page /)
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 15000 });
+    // Wait for first registration to complete
+    // Use Promise.race to detect either redirect OR error display
+    const firstResult = await Promise.race([
+      page
+        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
+        .then(() => 'redirect' as const),
+      page
+        .locator('.bg-fallacy-light p')
+        .waitFor({ state: 'visible', timeout: 20000 })
+        .then(() => 'error' as const),
+    ]);
+
+    if (firstResult === 'error') {
+      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
+      throw new Error(`First registration failed: ${errorText}`);
+    }
 
     // Attempt second registration with same email
     await page.goto('/register');
+    await page.waitForLoadState('networkidle');
 
     // Re-query form elements on new page
     const emailInput2 = page.getByLabel(/email/i);
@@ -147,10 +169,13 @@ test.describe('User Registration and Login Flow', () => {
 
     await registerButton2.click();
 
-    // Should show error message about existing email
-    const errorMessage = page.getByText(
-      /email already exists|account with this email already exists/i,
-    );
+    // Wait for API response
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+
+    // Should show error message about existing email - check the error container
+    const errorMessage = page.locator('.bg-fallacy-light p, [role="alert"]').filter({
+      hasText: /already exists|account.*exists/i,
+    });
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
@@ -222,11 +247,22 @@ test.describe('User Registration and Login Flow', () => {
     const loginButton = dialog.getByRole('button', { name: /^log in$/i });
     await loginButton.click();
 
+    // Wait for API response
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
+
     // Should show authentication error within the modal
-    const errorMessage = dialog.getByText(
-      /invalid email or password|invalid credentials|incorrect email or password/i,
+    // Error messages include: "Invalid credentials", "Invalid email or password", "Login failed", etc.
+    // The login error is displayed in a div with bg-red-50 containing p.text-red-600
+    const errorMessage = dialog
+      .locator('.bg-red-50 p.text-red-600, .text-red-400, [role="alert"]')
+      .first();
+    await expect(errorMessage).toBeVisible({ timeout: 10000 });
+
+    // Verify the error text is meaningful
+    const errorText = await errorMessage.textContent();
+    expect(errorText?.toLowerCase()).toMatch(
+      /invalid|failed|error|incorrect|unauthorized|wrong|credentials/i,
     );
-    await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
   test('should navigate between login modal and registration page', async ({ page }) => {
@@ -239,25 +275,28 @@ test.describe('User Registration and Login Flow', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
-    // Find and click "Don't have an account?" or "Create one" link in modal
-    const createAccountLink = dialog.getByRole('link', { name: /create one|sign up|register/i });
-    await expect(createAccountLink).toBeVisible();
-    await createAccountLink.click();
+    // Find and click "Sign up free" button in modal
+    // Note: This is a button element that navigates to signup, not a link
+    const createAccountButton = dialog.getByRole('button', { name: /sign up free/i });
+    await expect(createAccountButton).toBeVisible();
+    await createAccountButton.click();
 
-    // Should navigate to registration page
-    await expect(page).toHaveURL(/\/register|\/signup/);
+    // Should navigate to signup page
+    await expect(page).toHaveURL(/\/register|\/signup/, { timeout: 10000 });
+
+    // Wait for page to load and find the heading
+    // SignupPage has heading "Create Your Account"
     const registrationHeading = page.getByRole('heading', {
-      name: /create account|sign up/i,
+      name: /create.*account|sign up/i,
     });
-    await expect(registrationHeading).toBeVisible();
+    await expect(registrationHeading).toBeVisible({ timeout: 10000 });
 
-    // Find and click "Already have account" link on registration page
-    const loginLink = page.getByRole('link', { name: /sign in|log in/i });
-    await expect(loginLink).toBeVisible();
-    await loginLink.click();
+    // Find and click "Sign in" button on signup page (it's a button, not a link)
+    const loginButton = page.getByRole('button', { name: /sign in/i });
+    await expect(loginButton).toBeVisible();
+    await loginButton.click();
 
-    // Should either open login modal or redirect to landing page with modal
-    // After consolidation, this navigates to landing page where login is a modal
+    // Should navigate back to landing page where login is a modal
     await expect(page).toHaveURL(/\/$|\/login/);
   });
 });

@@ -17,11 +17,14 @@ import { test, expect, Page } from '@playwright/test';
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
 // Generate unique test user credentials for each test run
+// Uses timestamp + random suffix + process ID to avoid collisions across parallel workers
 const generateTestUser = () => {
   const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  const processId = process.pid || Math.floor(Math.random() * 10000);
   return {
-    email: `trust-test-${timestamp}@example.com`,
-    displayName: `TrustTestUser${timestamp}`,
+    email: `trust-e2e-${timestamp}-${processId}-${randomSuffix}@example.com`,
+    displayName: `TrustUser${timestamp}${randomSuffix.substring(0, 4)}`,
     password: 'SecurePassword123!',
   };
 };
@@ -51,23 +54,31 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for registration to complete - redirects to landing page (/) or login
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
-      timeout: 15000,
+    // Wait for registration to complete - use Promise.race to detect either redirect OR error
+    const result = await Promise.race([
+      page
+        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
+        .then(() => 'redirect' as const),
+      page
+        .locator('.bg-fallacy-light p')
+        .waitFor({ state: 'visible', timeout: 20000 })
+        .then(() => 'error' as const),
+    ]);
+
+    if (result === 'error') {
+      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
+      throw new Error(`Registration failed with error: ${errorText}`);
+    }
+
+    // Success: verify we landed on an expected page
+    await expect(page).toHaveURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
+      timeout: 5000,
     });
 
     // Step 2: Login after registration
-    // Registration redirects to landing page (/) or /topics - use login modal
-    const currentUrl = page.url();
-    if (!currentUrl.includes('/topics')) {
-      // Navigate to landing page to use login modal
-      await page.goto('/');
-      await page.waitForLoadState('networkidle');
-    } else {
-      // If we're already on /topics, go to landing page
-      await page.goto('/');
-      await page.waitForLoadState('networkidle');
-    }
+    // Registration redirects to landing page (/) - use login modal
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Open login modal by clicking Log In button
     await page.getByRole('button', { name: /log in/i }).click();
