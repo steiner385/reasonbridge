@@ -17,11 +17,14 @@ import { test, expect, Page } from '@playwright/test';
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
 // Generate unique test user credentials for each test run
+// Uses timestamp + random suffix + process ID to avoid collisions across parallel workers
 const generateTestUser = () => {
   const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  const processId = process.pid || Math.floor(Math.random() * 10000);
   return {
-    email: `trust-test-${timestamp}@example.com`,
-    displayName: `TrustTestUser${timestamp}`,
+    email: `trust-e2e-${timestamp}-${processId}-${randomSuffix}@example.com`,
+    displayName: `TrustUser${timestamp}${randomSuffix.substring(0, 4)}`,
     password: 'SecurePassword123!',
   };
 };
@@ -51,30 +54,65 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for registration to complete - redirects to landing page (/) or login
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
-      timeout: 15000,
+    // Wait for registration to complete - use Promise.race to detect either redirect OR error
+    const result = await Promise.race([
+      page
+        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
+        .then(() => 'redirect' as const),
+      page
+        .locator('.bg-fallacy-light p')
+        .waitFor({ state: 'visible', timeout: 20000 })
+        .then(() => 'error' as const),
+    ]);
+
+    if (result === 'error') {
+      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
+      throw new Error(`Registration failed with error: ${errorText}`);
+    }
+
+    // Success: verify we landed on an expected page
+    await expect(page).toHaveURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
+      timeout: 5000,
     });
 
     // Step 2: Login after registration
-    // Registration redirects to landing page (/) - need to navigate to login
-    const currentUrl = page.url();
-    if (!currentUrl.includes('/login')) {
-      // Navigate to login page if not already there
-      await page.goto('/login');
-      await page.waitForLoadState('networkidle');
-    }
+    // Registration redirects to landing page (/) - use login modal
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    const loginEmailInput = page.getByLabel(/email/i);
-    const loginPasswordInput = page.getByLabel(/^password/i).first();
-    const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+    // Open login modal by clicking Log In button
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    // Fill login form inside the modal
+    const dialog = page.getByRole('dialog');
+    const loginEmailInput = dialog.getByLabel(/email/i);
+    const loginPasswordInput = dialog.getByLabel(/password/i);
+    const loginButton = dialog.getByRole('button', { name: /^log in$/i });
 
     await loginEmailInput.fill(testUser.email);
     await loginPasswordInput.fill(testUser.password);
     await loginButton.click();
 
-    // Wait for login to complete - navigates to home page (/)
-    await page.waitForURL(/^http:\/\/[^/]+\/?$/, { timeout: 10000 });
+    // Wait for login to complete - use Promise.race to detect either success OR error
+    const loginResult = await Promise.race([
+      dialog.waitFor({ state: 'hidden', timeout: 15000 }).then(() => 'success' as const),
+      dialog
+        .locator('.bg-red-50 p, [class*="error"] p')
+        .waitFor({ state: 'visible', timeout: 15000 })
+        .then(() => 'error' as const),
+    ]);
+
+    if (loginResult === 'error') {
+      const errorText = await dialog
+        .locator('.bg-red-50 p, [class*="error"] p')
+        .first()
+        .textContent();
+      throw new Error(`Login failed with error: ${errorText}`);
+    }
+
+    // Wait for redirect to authenticated page (/ or /topics)
+    await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
 
     // Step 3: Navigate to profile page and wait for user data to load
     await page.goto('/profile');

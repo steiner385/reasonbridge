@@ -35,11 +35,12 @@ interface TokenStorage {
 
 /**
  * Default token storage using localStorage
+ * Note: Uses 'authToken' to be consistent with authService.ts
  */
 const defaultTokenStorage: TokenStorage = {
-  getToken: () => localStorage.getItem('auth_token'),
-  setToken: (token: string) => localStorage.setItem('auth_token', token),
-  clearToken: () => localStorage.removeItem('auth_token'),
+  getToken: () => localStorage.getItem('authToken'),
+  setToken: (token: string) => localStorage.setItem('authToken', token),
+  clearToken: () => localStorage.removeItem('authToken'),
 };
 
 /**

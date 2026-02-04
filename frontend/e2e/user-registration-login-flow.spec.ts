@@ -11,11 +11,14 @@ import { test, expect } from '@playwright/test';
  */
 
 // Generate unique test user credentials
+// Uses timestamp + random suffix + process ID to avoid collisions across parallel workers
 const generateTestUser = () => {
   const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  const processId = process.pid || Math.floor(Math.random() * 10000);
   return {
-    email: `test-user-${timestamp}@example.com`,
-    username: `testuser${timestamp}`,
+    email: `e2e-${timestamp}-${processId}-${randomSuffix}@example.com`,
+    username: `e2euser${timestamp}${randomSuffix}`,
     password: 'SecurePassword123!',
   };
 };
@@ -54,38 +57,76 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Step 4: Wait for registration to complete and redirect
-    // This could redirect to login page, dashboard, home, or landing page (/)
-    // Note: The app redirects to root (/) after registration
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
+    // Step 4: Wait for registration to complete
+    // Use Promise.race to detect either redirect OR error display
+    const result = await Promise.race([
+      page
+        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
+        .then(() => 'redirect' as const),
+      page
+        .locator('.bg-fallacy-light p')
+        .waitFor({ state: 'visible', timeout: 20000 })
+        .then(() => 'error' as const),
+    ]);
 
-    // Step 5: Login after registration
-    // Registration redirects to landing page (/) - navigate to login page
-    const currentUrl = page.url();
-    if (!currentUrl.includes('/login')) {
-      await page.goto('/login');
+    if (result === 'error') {
+      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
+      throw new Error(`Registration failed with error: ${errorText}`);
     }
 
+    // Success: verify we landed on an expected page
+    await expect(page).toHaveURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
+      timeout: 5000,
+    });
+
+    // Step 5: Login after registration
+    // Registration redirects to landing page (/) - use login modal
     await test.step('Login with newly created credentials', async () => {
-      // Fill login form
-      const loginEmailInput = page.getByLabel(/email/i);
-      const loginPasswordInput = page.getByLabel(/^password/i).first();
+      // Navigate to landing page to access login modal
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+
+      // Open login modal by clicking Log In button
+      await page.getByRole('button', { name: /log in/i }).click();
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+      // Fill login form inside the modal
+      const dialog = page.getByRole('dialog');
+      const loginEmailInput = dialog.getByLabel(/email/i);
+      const loginPasswordInput = dialog.getByLabel(/password/i);
 
       await loginEmailInput.fill(testUser.email);
       await loginPasswordInput.fill(testUser.password);
 
       // Submit login
-      const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+      const loginButton = dialog.getByRole('button', { name: /^log in$/i });
       await loginButton.click();
 
-      // Wait for successful login redirect (navigates to / which is the home page)
-      await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 10000 });
+      // Wait for login to complete - use Promise.race to detect either success OR error
+      const loginResult = await Promise.race([
+        dialog.waitFor({ state: 'hidden', timeout: 15000 }).then(() => 'success' as const),
+        dialog
+          .locator('.bg-red-50 p, [class*="error"] p')
+          .waitFor({ state: 'visible', timeout: 15000 })
+          .then(() => 'error' as const),
+      ]);
+
+      if (loginResult === 'error') {
+        const errorText = await dialog
+          .locator('.bg-red-50 p, [class*="error"] p')
+          .first()
+          .textContent();
+        throw new Error(`Login failed with error: ${errorText}`);
+      }
+
+      // Wait for redirect to authenticated page
+      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
     });
 
     // Step 6: Verify successful authentication
     // The login was successful if we reached the home page (/)
     // Check that auth token was stored in localStorage
-    const authToken = await page.evaluate(() => localStorage.getItem('auth_token'));
+    const authToken = await page.evaluate(() => localStorage.getItem('authToken'));
     expect(authToken).toBeTruthy();
     expect(authToken!.length).toBeGreaterThan(0);
   });
@@ -109,11 +150,26 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for first registration to complete (redirects to landing page /)
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
+    // Wait for first registration to complete
+    // Use Promise.race to detect either redirect OR error display
+    const firstResult = await Promise.race([
+      page
+        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
+        .then(() => 'redirect' as const),
+      page
+        .locator('.bg-fallacy-light p')
+        .waitFor({ state: 'visible', timeout: 20000 })
+        .then(() => 'error' as const),
+    ]);
+
+    if (firstResult === 'error') {
+      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
+      throw new Error(`First registration failed: ${errorText}`);
+    }
 
     // Attempt second registration with same email
     await page.goto('/register');
+    await page.waitForLoadState('networkidle');
 
     // Re-query form elements on new page
     const emailInput2 = page.getByLabel(/email/i);
@@ -129,10 +185,13 @@ test.describe('User Registration and Login Flow', () => {
 
     await registerButton2.click();
 
-    // Should show error message about existing email
-    const errorMessage = page.getByText(
-      /email already exists|account with this email already exists/i,
-    );
+    // Wait for API response
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+
+    // Should show error message about existing email - check the error container
+    const errorMessage = page.locator('.bg-fallacy-light p, [role="alert"]').filter({
+      hasText: /already exists|account.*exists/i,
+    });
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
@@ -185,49 +244,75 @@ test.describe('User Registration and Login Flow', () => {
   });
 
   test('should show error for invalid login credentials', async ({ page }) => {
-    await page.goto('/login');
+    // Navigate to landing page and open login modal
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/^password/i).first();
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    const dialog = page.getByRole('dialog');
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel(/password/i);
 
     // Attempt login with non-existent credentials
     await emailInput.fill('nonexistent@example.com');
     await passwordInput.fill('WrongPassword123!');
 
-    const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+    const loginButton = dialog.getByRole('button', { name: /^log in$/i });
     await loginButton.click();
 
-    // Should show authentication error
-    const errorMessage = page.getByText(
-      /invalid email or password|invalid credentials|incorrect email or password/i,
+    // Wait for API response
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
+
+    // Should show authentication error within the modal
+    // Error messages include: "Invalid credentials", "Invalid email or password", "Login failed", etc.
+    // The login error is displayed in a div with bg-red-50 containing p.text-red-600
+    const errorMessage = dialog
+      .locator('.bg-red-50 p.text-red-600, .text-red-400, [role="alert"]')
+      .first();
+    await expect(errorMessage).toBeVisible({ timeout: 10000 });
+
+    // Verify the error text is meaningful
+    const errorText = await errorMessage.textContent();
+    expect(errorText?.toLowerCase()).toMatch(
+      /invalid|failed|error|incorrect|unauthorized|wrong|credentials/i,
     );
-    await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
-  test('should navigate between login and registration pages', async ({ page }) => {
-    // Start at login page
-    await page.goto('/login');
+  test('should navigate between login modal and registration page', async ({ page }) => {
+    // Start at landing page and open login modal
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    // Find and click "Create account" link
-    const createAccountLink = page.getByRole('link', { name: /create one/i });
-    await expect(createAccountLink).toBeVisible();
-    await createAccountLink.click();
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
 
-    // Should navigate to registration page
-    await expect(page).toHaveURL(/\/register/);
+    // Find and click "Sign up free" button in modal
+    // Note: This is a button element that navigates to signup, not a link
+    const createAccountButton = dialog.getByRole('button', { name: /sign up free/i });
+    await expect(createAccountButton).toBeVisible();
+    await createAccountButton.click();
+
+    // Should navigate to signup page
+    await expect(page).toHaveURL(/\/register|\/signup/, { timeout: 10000 });
+
+    // Wait for page to load and find the heading
+    // SignupPage has heading "Create Your Account"
     const registrationHeading = page.getByRole('heading', {
-      name: /create account/i,
+      name: /create.*account|sign up/i,
     });
-    await expect(registrationHeading).toBeVisible();
+    await expect(registrationHeading).toBeVisible({ timeout: 10000 });
 
-    // Find and click "Already have account" link
-    const loginLink = page.getByRole('link', { name: /sign in/i });
-    await expect(loginLink).toBeVisible();
-    await loginLink.click();
+    // Find and click "Sign in" button on signup page (it's a button, not a link)
+    const loginButton = page.getByRole('button', { name: /sign in/i });
+    await expect(loginButton).toBeVisible();
+    await loginButton.click();
 
-    // Should navigate back to login page
-    await expect(page).toHaveURL(/\/login/);
-    const loginHeading = page.getByRole('heading', { name: /sign in/i });
-    await expect(loginHeading).toBeVisible();
+    // Should navigate back to landing page where login is a modal
+    await expect(page).toHaveURL(/\/$|\/login/);
   });
 });

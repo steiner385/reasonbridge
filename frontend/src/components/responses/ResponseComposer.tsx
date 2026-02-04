@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { FeedbackDisplayPanel } from '../feedback';
+import { FeedbackDisplayPanel, PreviewFeedbackPanel } from '../feedback';
+import { usePreviewFeedback } from '../../hooks/usePreviewFeedback';
 import type { CreateResponseRequest } from '../../types/response';
 import type { FeedbackResponse } from '../../types/feedback';
 import { apiClient } from '../../lib/api';
@@ -46,6 +47,11 @@ export interface ResponseComposerProps {
    * Whether to show the cancel button
    */
   showCancel?: boolean;
+
+  /**
+   * Optional topic ID for preview feedback context
+   */
+  topicId?: string;
 }
 
 const ResponseComposer: React.FC<ResponseComposerProps> = ({
@@ -57,6 +63,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   minLength = 10,
   onCancel,
   showCancel = false,
+  topicId,
 }) => {
   const [content, setContent] = useState('');
   const [citedSources, setCitedSources] = useState<string[]>([]);
@@ -67,6 +74,17 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [feedback, setFeedback] = useState<FeedbackResponse[]>([]);
   const [isRequestingFeedback, setIsRequestingFeedback] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
+
+  // Real-time preview feedback integration
+  const {
+    feedback: previewFeedback,
+    readyToPost,
+    isLoading: isPreviewLoading,
+    error: previewError,
+    summary: previewSummary,
+    sensitivity,
+    setSensitivity,
+  } = usePreviewFeedback(content, { topicId });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,6 +225,21 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
             {characterCount < minLength && characterCount > 0 && ` (minimum ${minLength})`}
           </span>
         </div>
+
+        {/* Real-time Preview Feedback - shows when content >= 20 chars */}
+        {characterCount >= 20 && (
+          <PreviewFeedbackPanel
+            feedback={previewFeedback}
+            isLoading={isPreviewLoading}
+            readyToPost={readyToPost}
+            summary={previewSummary}
+            error={previewError}
+            sensitivity={sensitivity}
+            onSensitivityChange={setSensitivity}
+            showEmpty={true}
+            aria-label="Preview feedback"
+          />
+        )}
       </div>
 
       {error && (

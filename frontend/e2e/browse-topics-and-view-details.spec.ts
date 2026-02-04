@@ -105,23 +105,38 @@ test.describe('Browse Topics and View Details', () => {
     if (linkCount > 0) {
       await firstTopicLink.click();
 
-      // Wait for topic detail content to appear (status badge indicates loaded)
-      await page.waitForSelector('text=/ACTIVE|SEEDING|ARCHIVED/', {
-        state: 'visible',
-        timeout: 15000,
-      });
+      // Wait for topic detail content to load using multiple indicators
+      // Use Promise.race to wait for any of: status badge, back link, or participant count
+      await Promise.race([
+        page.waitForSelector('text=/ACTIVE|SEEDING|ARCHIVED/', {
+          state: 'visible',
+          timeout: 15000,
+        }),
+        page.waitForSelector('[data-testid="participant-count"]', {
+          state: 'visible',
+          timeout: 15000,
+        }),
+        page.waitForSelector('a[href="/topics"]', { state: 'visible', timeout: 15000 }),
+      ]);
+
+      // Wait for networkidle to ensure all data is loaded
+      await page.waitForLoadState('networkidle', { timeout: 10000 });
 
       // Verify detail page components
-      // Status badge (ACTIVE, SEEDING, or ARCHIVED)
+      // Status badge (ACTIVE, SEEDING, or ARCHIVED) - wait with longer timeout
       const statusBadge = page.locator('text=/ACTIVE|SEEDING|ARCHIVED/').first();
-      await expect(statusBadge).toBeVisible();
+      await expect(statusBadge).toBeVisible({ timeout: 10000 });
 
       // Stats sections (Participants, Responses, etc.)
-      await expect(page.locator('[data-testid="participant-count"]')).toBeVisible();
-      await expect(page.locator('[data-testid="response-count"]')).toBeVisible();
+      await expect(page.locator('[data-testid="participant-count"]')).toBeVisible({
+        timeout: 5000,
+      });
+      await expect(page.locator('[data-testid="response-count"]')).toBeVisible({ timeout: 5000 });
 
       // Action buttons
-      await expect(page.getByRole('button', { name: /join discussion/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /join discussion/i })).toBeVisible({
+        timeout: 5000,
+      });
     }
   });
 
@@ -284,18 +299,28 @@ test.describe('Browse Topics and View Details', () => {
       // Navigate directly to the topic detail page
       await page.goto(topicUrl);
 
-      // Wait for topic detail content to appear (status badge indicates loaded)
-      await page.waitForSelector('text=/ACTIVE|SEEDING|ARCHIVED/', {
-        state: 'visible',
-        timeout: 15000,
-      });
+      // Wait for topic detail content to load using multiple indicators
+      await Promise.race([
+        page.waitForSelector('text=/ACTIVE|SEEDING|ARCHIVED/', {
+          state: 'visible',
+          timeout: 15000,
+        }),
+        page.waitForSelector('[data-testid="participant-count"]', {
+          state: 'visible',
+          timeout: 15000,
+        }),
+        page.waitForSelector('a[href="/topics"]', { state: 'visible', timeout: 15000 }),
+      ]);
+
+      // Wait for networkidle to ensure all data is loaded
+      await page.waitForLoadState('networkidle', { timeout: 10000 });
 
       // Should have back navigation
-      await expect(page.getByText(/back to topics/i)).toBeVisible();
+      await expect(page.getByText(/back to topics/i)).toBeVisible({ timeout: 5000 });
 
       // Should have status badge
       const statusBadge = page.locator('text=/ACTIVE|SEEDING|ARCHIVED/').first();
-      await expect(statusBadge).toBeVisible();
+      await expect(statusBadge).toBeVisible({ timeout: 10000 });
     }
   });
 });

@@ -28,11 +28,17 @@ export class DatabaseAuthService implements IAuthService {
 
   /**
    * Register a new user
+   *
+   * In database auth mode, this creates the user record directly with password hash.
+   * The auth.controller.ts will then call createUser() which should handle the
+   * case where the user already exists (upsert or skip).
    */
   async signUp(email: string, password: string, displayName: string): Promise<{ userSub: string }> {
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -48,10 +54,10 @@ export class DatabaseAuthService implements IAuthService {
     const passwordHash = await bcrypt.hash(password, 10);
     const userSub = uuidv4();
 
-    // Create user in database
+    // Create user in database with password hash
     await this.prisma.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         displayName,
         cognitoSub: userSub,
         authMethod: 'EMAIL_PASSWORD',
@@ -59,6 +65,11 @@ export class DatabaseAuthService implements IAuthService {
         passwordHash,
         accountStatus: 'ACTIVE',
         status: 'ACTIVE',
+        // Set trust scores and verification level for new users
+        verificationLevel: 'BASIC',
+        trustScoreAbility: 0.5,
+        trustScoreBenevolence: 0.5,
+        trustScoreIntegrity: 0.5,
       },
     });
 

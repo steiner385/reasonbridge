@@ -112,7 +112,12 @@ export class ProxyService {
     serviceConfig: ServiceConfig,
     request: ProxyRequest,
   ): Promise<AxiosResponse<T>> {
-    const breaker = this.circuitBreakerService.getOrCreate(
+    // Get or create a circuit breaker that accepts the request as an argument
+    // This ensures each request is executed with its own data, not a captured closure
+    const breaker = this.circuitBreakerService.getOrCreateWithArgs<
+      [ProxyRequest],
+      AxiosResponse<T>
+    >(
       {
         name: serviceName,
         timeout: serviceConfig.timeout,
@@ -120,9 +125,9 @@ export class ProxyService {
         resetTimeout: 30000,
         volumeThreshold: 5,
       },
-      async () => {
+      async (req: ProxyRequest) => {
         return withRetry(
-          () => this.executeRequest<T>(serviceConfig.url, request, serviceConfig.timeout),
+          () => this.executeRequest<T>(serviceConfig.url, req, serviceConfig.timeout),
           {
             maxAttempts: serviceConfig.retryAttempts,
             isRetryable: isRetryableHttpError,
@@ -132,7 +137,8 @@ export class ProxyService {
     );
 
     try {
-      return await breaker.fire();
+      // Pass the request as an argument to fire() so each request uses its own data
+      return await breaker.fire(request);
     } catch (error) {
       this.logger.error(
         `Request to ${serviceName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,

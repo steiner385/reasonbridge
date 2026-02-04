@@ -256,7 +256,8 @@ test.describe('Moderation Dashboard', () => {
       await page.waitForLoadState('networkidle');
 
       // Verify statistics are displayed
-      await expect(page.getByText(/total pending/i)).toBeVisible();
+      // Component shows "Pending Actions" label with totalPending count
+      await expect(page.getByText(/pending actions/i).first()).toBeVisible();
       await expect(page.getByText('15', { exact: true })).toBeVisible(); // totalPending
       await expect(page.getByText(/critical/i).first()).toBeVisible();
       await expect(page.getByText('4', { exact: true })).toBeVisible(); // criticalActions
@@ -306,7 +307,11 @@ test.describe('Moderation Dashboard', () => {
       await page.goto('/admin/moderation');
       await page.waitForLoadState('networkidle');
 
-      // Look for AI recommendation indicator
+      // AI recommendation badge is shown in Queue tab, not Overview
+      // Navigate to Queue tab to see the badge
+      await page.getByRole('tab', { name: /queue/i }).click();
+
+      // Look for AI recommendation indicator on actions with aiRecommended=true
       await expect(page.getByText(/ai recommended/i).first()).toBeVisible();
     });
 
@@ -552,7 +557,8 @@ test.describe('Moderation Dashboard', () => {
 
       // Verify average review time is displayed
       await expect(page.getByText(/avg|average/i)).toBeVisible();
-      await expect(page.getByText(/12\.5|13/)).toBeVisible(); // avgReviewTimeMinutes
+      // avgReviewTimeMinutes is 12.5, rounded to 13 - use first() to avoid matching dates
+      await expect(page.getByText('13', { exact: true }).first()).toBeVisible();
     });
 
     test('should display appeal status badges correctly', async ({ page }) => {

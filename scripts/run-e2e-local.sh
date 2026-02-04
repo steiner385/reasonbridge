@@ -6,7 +6,7 @@ set -e  # Exit on error
 
 # Configuration
 PROJECT_NAME="e2e-local-$$"
-PLAYWRIGHT_VERSION="v1.57.0-noble"
+PLAYWRIGHT_VERSION="v1.58.0-noble"
 CONTAINER_NAME="playwright-e2e-local-$$"
 PLAYWRIGHT_BASE_URL="http://frontend:80"
 

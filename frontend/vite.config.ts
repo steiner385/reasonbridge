@@ -9,15 +9,13 @@ export default defineConfig({
     host: true,
     proxy: {
       // Proxy API requests to the API Gateway
-      '/topics': {
+      // All API calls use /api prefix via apiClient
+      '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
-      '/auth': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-      '/users': {
+      // Proxy AI service requests
+      '/ai': {
         target: 'http://localhost:3000',
         changeOrigin: true,
       },

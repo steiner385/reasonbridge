@@ -7,3 +7,5 @@ export { default as SuggestionPanel } from './SuggestionPanel';
 export type { SuggestionPanelProps } from './SuggestionPanel';
 export { default as ToneIndicator } from './ToneIndicator';
 export { default as ClarityScoreDisplay } from './ClarityScoreDisplay';
+export { PreviewFeedbackPanel } from './PreviewFeedbackPanel';
+export type { PreviewFeedbackPanelProps } from './PreviewFeedbackPanel';

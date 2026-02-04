@@ -49,10 +49,12 @@ const DEFAULT_CONFIG: Partial<Options> = {
  *
  * Usage:
  * ```
- * const breaker = circuitBreakerService.create('user-service', async () => {
- *   return await httpClient.get('/users');
- * });
- * const result = await breaker.fire();
+ * const breaker = circuitBreakerService.getOrCreateWithArgs<[RequestType], ResponseType>(
+ *   'user-service',
+ *   config,
+ *   async (request) => await httpClient.request(request)
+ * );
+ * const result = await breaker.fire(request);
  * ```
  */
 @Injectable()
@@ -62,6 +64,7 @@ export class CircuitBreakerService implements OnModuleDestroy {
 
   /**
    * Create a circuit breaker for a named service
+   * @deprecated Use getOrCreateWithArgs instead for dynamic request handling
    */
   create<T>(
     config: CircuitBreakerConfig,
@@ -89,33 +92,74 @@ export class CircuitBreakerService implements OnModuleDestroy {
       breaker.fallback(fallback);
     }
 
-    // Log state changes
-    breaker.on('open', () => {
-      this.logger.warn(`Circuit breaker OPENED for ${config.name}`);
-    });
-
-    breaker.on('halfOpen', () => {
-      this.logger.log(`Circuit breaker HALF-OPEN for ${config.name}`);
-    });
-
-    breaker.on('close', () => {
-      this.logger.log(`Circuit breaker CLOSED for ${config.name}`);
-    });
-
-    breaker.on('timeout', () => {
-      this.logger.warn(`Request to ${config.name} timed out`);
-    });
-
-    breaker.on('reject', () => {
-      this.logger.warn(`Request to ${config.name} rejected (circuit open)`);
-    });
-
+    this.setupBreakerEvents(config.name, breaker);
     this.breakers.set(config.name, breaker);
     return breaker;
   }
 
   /**
+   * Get or create a circuit breaker that accepts arguments
+   * This allows the same breaker to handle different requests
+   */
+  getOrCreateWithArgs<TArgs extends unknown[], TResult>(
+    config: CircuitBreakerConfig,
+    action: (...args: TArgs) => Promise<TResult>,
+    fallback?: (...args: TArgs) => TResult | Promise<TResult>,
+  ): CircuitBreaker<TArgs, TResult> {
+    const existingBreaker = this.breakers.get(config.name);
+    if (existingBreaker) {
+      return existingBreaker as CircuitBreaker<TArgs, TResult>;
+    }
+
+    const options: Options = {
+      ...DEFAULT_CONFIG,
+      timeout: config.timeout ?? DEFAULT_CONFIG.timeout,
+      errorThresholdPercentage:
+        config.errorThresholdPercentage ?? DEFAULT_CONFIG.errorThresholdPercentage,
+      resetTimeout: config.resetTimeout ?? DEFAULT_CONFIG.resetTimeout,
+      volumeThreshold: config.volumeThreshold ?? DEFAULT_CONFIG.volumeThreshold,
+    };
+
+    const breaker = new CircuitBreaker(action, options);
+
+    // Set fallback if provided
+    if (fallback) {
+      breaker.fallback(fallback);
+    }
+
+    this.setupBreakerEvents(config.name, breaker);
+    this.breakers.set(config.name, breaker);
+    return breaker as CircuitBreaker<TArgs, TResult>;
+  }
+
+  /**
+   * Setup event listeners for a circuit breaker
+   */
+  private setupBreakerEvents(name: string, breaker: CircuitBreaker): void {
+    breaker.on('open', () => {
+      this.logger.warn(`Circuit breaker OPENED for ${name}`);
+    });
+
+    breaker.on('halfOpen', () => {
+      this.logger.log(`Circuit breaker HALF-OPEN for ${name}`);
+    });
+
+    breaker.on('close', () => {
+      this.logger.log(`Circuit breaker CLOSED for ${name}`);
+    });
+
+    breaker.on('timeout', () => {
+      this.logger.warn(`Request to ${name} timed out`);
+    });
+
+    breaker.on('reject', () => {
+      this.logger.warn(`Request to ${name} rejected (circuit open)`);
+    });
+  }
+
+  /**
    * Get or create a circuit breaker for a service
+   * @deprecated Use getOrCreateWithArgs instead for dynamic request handling
    */
   getOrCreate<T>(
     config: CircuitBreakerConfig,
