@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { ResponseAnalyzerService } from '../services/response-analyzer.service.js';
 import type { AnalysisResult } from '../services/response-analyzer.service.js';
 import { SemanticCacheService, RedisCacheService, computeContentHash } from '../cache/index.js';
+import { BedrockService } from '../ai/bedrock.service.js';
 import {
   RequestFeedbackDto,
   FeedbackResponseDto,
@@ -12,7 +13,7 @@ import {
   PreviewFeedbackResultDto,
   PreviewFeedbackResponseDto,
 } from './dto/index.js';
-import { Prisma } from '@prisma/client';
+import { Prisma, FeedbackType } from '@prisma/client';
 
 /** Critical feedback types that should block posting */
 const CRITICAL_TYPES = ['INFLAMMATORY', 'FALLACY'] as const;
@@ -31,6 +32,7 @@ export class FeedbackService {
     private readonly prisma: PrismaService,
     private readonly analyzer: ResponseAnalyzerService,
     private readonly semanticCache: SemanticCacheService,
+    private readonly bedrockService: BedrockService,
     @Optional() private readonly redisCache?: RedisCacheService,
   ) {}
 
@@ -211,6 +213,151 @@ export class FeedbackService {
   }
 
   /**
+   * Get AI-powered preview feedback using Bedrock.
+   * This method uses Claude to analyze content for nuanced issues that
+   * regex patterns might miss, such as subtle dismissiveness, condescension,
+   * or context-dependent tone problems.
+   *
+   * @param dto Preview feedback request with content and optional sensitivity
+   * @returns AI-analyzed feedback items with readiness indicator
+   */
+  async previewFeedbackAI(dto: PreviewFeedbackDto): Promise<PreviewFeedbackResultDto> {
+    const startTime = Date.now();
+    const sensitivity = dto.sensitivity ?? FeedbackSensitivity.MEDIUM;
+    const threshold = this.getConfidenceThreshold(sensitivity);
+
+    // Check if Bedrock is available
+    const isReady = await this.bedrockService.isReady();
+    if (!isReady) {
+      this.logger.warn('Bedrock not available for AI feedback analysis');
+      // Fallback to regex-based analysis
+      return this.previewFeedback(dto);
+    }
+
+    try {
+      // Try Redis cache first
+      const contentHash = computeContentHash(`ai:${dto.content}`);
+      const cached = await this.redisCache?.getFeedback(contentHash);
+
+      let analysisResults: AnalysisResult[];
+
+      if (cached) {
+        analysisResults = [cached];
+      } else {
+        // Call Bedrock to analyze content
+        const response = await this.bedrockService.complete({
+          systemPrompt: `You are an expert content moderator for online discussions. Analyze the user's draft response for potential issues:
+
+1. **Inflammatory language**: Personal attacks, hostile tone, dismissiveness
+2. **Logical fallacies**: Strawman, ad hominem, false dichotomy, slippery slope, etc.
+3. **Bias**: Confirmation bias, selection bias, implicit bias
+4. **Unsourced claims**: Statistical claims or factual assertions without evidence
+5. **Positive aspects**: Constructive engagement, good evidence, respectful tone
+
+For each issue found, provide:
+- type: INFLAMMATORY | FALLACY | BIAS | UNSOURCED | AFFIRMATION
+- subtype: Specific issue (e.g., "ad_hominem", "strawman", "statistical_claim")
+- suggestion: Actionable advice for improvement
+- reasoning: Brief explanation of the issue
+- confidence: 0.0-1.0 score
+
+Return JSON array of feedback items:
+[{
+  "type": "INFLAMMATORY",
+  "subtype": "dismissive_language",
+  "suggestion": "Consider rephrasing to focus on ideas rather than people",
+  "reasoning": "The phrase 'these people are stupid' attacks individuals rather than arguments",
+  "confidence": 0.85
+}]
+
+If the content is constructive and well-reasoned, return AFFIRMATION type.`,
+          messages: [
+            {
+              role: 'user',
+              content: `Analyze this draft response:\n\n${dto.content}`,
+            },
+          ],
+          maxTokens: 2048,
+          temperature: 0.2,
+        });
+
+        // Parse JSON response
+        const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) {
+          this.logger.warn('Failed to parse AI feedback response, falling back to regex');
+          return this.previewFeedback(dto);
+        }
+
+        const aiResults = JSON.parse(jsonMatch[0]) as Array<{
+          type: string;
+          subtype?: string;
+          suggestion: string;
+          reasoning: string;
+          confidence: number;
+        }>;
+
+        // Map to AnalysisResult format
+        analysisResults = aiResults.map((result) => ({
+          type: result.type as FeedbackType,
+          subtype: result.subtype,
+          suggestionText: result.suggestion,
+          reasoning: result.reasoning,
+          confidenceScore: result.confidence,
+          educationalResources: this.getEducationalResources(result.type as FeedbackType),
+        }));
+
+        // Cache the primary result
+        if (analysisResults[0] && this.redisCache) {
+          this.redisCache.setFeedback(contentHash, analysisResults[0]).catch((err) => {
+            this.logger.warn('Failed to cache AI feedback', err);
+          });
+        }
+      }
+
+      // Map to response DTOs
+      const feedback: PreviewFeedbackResponseDto[] = analysisResults.map((result) => ({
+        type: result.type,
+        subtype: result.subtype,
+        suggestionText: result.suggestionText,
+        reasoning: result.reasoning,
+        confidenceScore: result.confidenceScore,
+        educationalResources: result.educationalResources,
+        shouldDisplay: result.confidenceScore >= threshold,
+      }));
+
+      // Determine if content is ready to post
+      const hasCriticalIssues = analysisResults.some(
+        (result) =>
+          CRITICAL_TYPES.includes(result.type as (typeof CRITICAL_TYPES)[number]) &&
+          result.confidenceScore >= CRITICAL_CONFIDENCE_THRESHOLD,
+      );
+      const readyToPost = !hasCriticalIssues;
+
+      // Find primary feedback
+      const nonAffirmations = feedback.filter((f) => f.type !== 'AFFIRMATION' && f.shouldDisplay);
+      const primary =
+        nonAffirmations.length > 0
+          ? nonAffirmations.sort((a, b) => b.confidenceScore - a.confidenceScore)[0]
+          : undefined;
+
+      const summary = hasCriticalIssues
+        ? 'AI detected potential issues. Consider revising before posting.'
+        : 'AI analysis complete. Your response looks good!';
+
+      return {
+        feedback,
+        primary,
+        analysisTimeMs: Date.now() - startTime,
+        readyToPost,
+        summary,
+      };
+    } catch (error) {
+      this.logger.error('AI feedback analysis failed, falling back to regex', error);
+      return this.previewFeedback(dto);
+    }
+  }
+
+  /**
    * Get minimum confidence threshold based on sensitivity level
    * @param sensitivity The sensitivity level
    * @returns Minimum confidence threshold (0.0-1.0)
@@ -226,6 +373,65 @@ export class FeedbackService {
       default:
         return 0.7; // Default to MEDIUM
     }
+  }
+
+  /**
+   * Get educational resources based on feedback type
+   */
+  private getEducationalResources(type: FeedbackType): Record<string, unknown> {
+    const resources: Record<FeedbackType, Record<string, unknown>> = {
+      INFLAMMATORY: {
+        links: [
+          {
+            title: 'Constructive Communication Guide',
+            url: 'https://en.wikipedia.org/wiki/Nonviolent_Communication',
+          },
+          {
+            title: 'Avoiding Personal Attacks',
+            url: 'https://en.wikipedia.org/wiki/Ad_hominem',
+          },
+        ],
+      },
+      FALLACY: {
+        links: [
+          {
+            title: 'Logical Fallacies Guide',
+            url: 'https://en.wikipedia.org/wiki/List_of_fallacies',
+          },
+          {
+            title: 'Critical Thinking',
+            url: 'https://en.wikipedia.org/wiki/Critical_thinking',
+          },
+        ],
+      },
+      BIAS: {
+        links: [
+          {
+            title: 'Cognitive Biases',
+            url: 'https://en.wikipedia.org/wiki/List_of_cognitive_biases',
+          },
+          {
+            title: 'Confirmation Bias',
+            url: 'https://en.wikipedia.org/wiki/Confirmation_bias',
+          },
+        ],
+      },
+      UNSOURCED: {
+        links: [
+          {
+            title: 'Evidence-Based Discussion',
+            url: 'https://en.wikipedia.org/wiki/Evidence-based_practice',
+          },
+          {
+            title: 'Citing Sources',
+            url: 'https://en.wikipedia.org/wiki/Citation',
+          },
+        ],
+      },
+      AFFIRMATION: { links: [] },
+    };
+
+    return resources[type];
   }
 
   /**

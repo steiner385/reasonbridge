@@ -3,6 +3,9 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthProxyController } from './auth-proxy.controller.js';
 import { UsersProxyController } from './users-proxy.controller.js';
 import { TopicsProxyController } from './topics-proxy.controller.js';
+import { DiscussionsProxyController } from './discussions-proxy.controller.js';
+import { DemoProxyController } from './demo-proxy.controller.js';
+import { AiProxyController } from './ai-proxy.controller.js';
 import { ProxyService } from './proxy.service.js';
 
 @Module({
@@ -13,7 +16,14 @@ import { ProxyService } from './proxy.service.js';
       maxRedirects: 5,
     }),
   ],
-  controllers: [AuthProxyController, UsersProxyController, TopicsProxyController],
+  controllers: [
+    AuthProxyController,
+    UsersProxyController,
+    TopicsProxyController,
+    DiscussionsProxyController,
+    DemoProxyController,
+    AiProxyController,
+  ],
   providers: [ProxyService],
   exports: [ProxyService],
 })

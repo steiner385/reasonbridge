@@ -152,8 +152,8 @@ services:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
-      # Use mock authentication for E2E testing (no real Cognito needed)
-      AUTH_MOCK: 'true'
+      # Use database authentication for demo environment (supports bcrypt password hashes)
+      AUTH_MODE: 'database'
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
       # Cognito configuration (fallback, not used when AUTH_MOCK=true)
       COGNITO_USER_POOL_ID: us-east-1_test123
@@ -187,18 +187,20 @@ services:
       REDIS_URL: redis://redis:6379
       REDIS_HOST: redis
       REDIS_PORT: '6379'
-      AWS_ENDPOINT: http://localstack:4566
+      # AWS Bedrock configuration for AI features
       AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
+      AWS_PROFILE: default
+      # Use cross-region inference profile for on-demand access
+      BEDROCK_MODEL_ID: us.anthropic.claude-3-5-sonnet-20241022-v2:0
     ports:
       - '3002:3002'
+    volumes:
+      # Mount AWS credentials from host for Bedrock access
+      - ${HOME}/.aws:/root/.aws:ro
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      localstack:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully

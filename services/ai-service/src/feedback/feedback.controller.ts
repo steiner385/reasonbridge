@@ -17,6 +17,8 @@ import {
   DismissFeedbackDto,
   FeedbackAnalyticsDto,
   FeedbackAnalyticsQueryDto,
+  PreviewFeedbackDto,
+  PreviewFeedbackResultDto,
 } from './dto/index.js';
 
 /**
@@ -28,6 +30,32 @@ export class FeedbackController {
     private readonly feedbackService: FeedbackService,
     private readonly analyticsService: FeedbackAnalyticsService,
   ) {}
+
+  /**
+   * Get real-time preview feedback for draft content (regex-based, fast)
+   * POST /feedback/preview
+   *
+   * @param dto Preview request containing content and optional context
+   * @returns Ephemeral feedback items (not stored in database)
+   */
+  @Post('preview')
+  @HttpCode(HttpStatus.OK)
+  async previewFeedback(@Body() dto: PreviewFeedbackDto): Promise<PreviewFeedbackResultDto> {
+    return this.feedbackService.previewFeedback(dto);
+  }
+
+  /**
+   * Get AI-powered preview feedback for draft content (Bedrock-based, slower but more accurate)
+   * POST /feedback/preview/ai
+   *
+   * @param dto Preview request containing content and optional context
+   * @returns AI-analyzed feedback items (not stored in database)
+   */
+  @Post('preview/ai')
+  @HttpCode(HttpStatus.OK)
+  async previewFeedbackAI(@Body() dto: PreviewFeedbackDto): Promise<PreviewFeedbackResultDto> {
+    return this.feedbackService.previewFeedbackAI(dto);
+  }
 
   /**
    * Request AI-generated feedback for a response

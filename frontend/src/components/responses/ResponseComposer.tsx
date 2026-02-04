@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { FeedbackDisplayPanel, PreviewFeedbackPanel } from '../feedback';
-import { usePreviewFeedback } from '../../hooks/usePreviewFeedback';
+import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
 import type { CreateResponseRequest } from '../../types/response';
 import type { FeedbackResponse } from '../../types/feedback';
 import { apiClient } from '../../lib/api';
@@ -75,16 +75,18 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [isRequestingFeedback, setIsRequestingFeedback] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
 
-  // Real-time preview feedback integration
+  // Hybrid preview feedback integration (regex + AI)
   const {
     feedback: previewFeedback,
     readyToPost,
     isLoading: isPreviewLoading,
+    isAILoading,
+    isAIFeedback,
     error: previewError,
     summary: previewSummary,
     sensitivity,
     setSensitivity,
-  } = usePreviewFeedback(content, { topicId });
+  } = useHybridPreviewFeedback(content, { topicId });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,11 +228,13 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           </span>
         </div>
 
-        {/* Real-time Preview Feedback - shows when content >= 20 chars */}
+        {/* Hybrid Preview Feedback - shows when content >= 20 chars */}
         {characterCount >= 20 && (
           <PreviewFeedbackPanel
             feedback={previewFeedback}
             isLoading={isPreviewLoading}
+            isAILoading={isAILoading}
+            isAIFeedback={isAIFeedback}
             readyToPost={readyToPost}
             summary={previewSummary}
             error={previewError}

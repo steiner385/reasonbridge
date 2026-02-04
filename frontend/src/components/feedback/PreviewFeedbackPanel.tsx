@@ -7,8 +7,12 @@ import { SensitivitySelector } from './SensitivitySelector';
 export interface PreviewFeedbackPanelProps {
   /** Array of feedback items to display */
   feedback: PreviewFeedbackItem[];
-  /** Whether feedback is currently loading */
+  /** Whether regex feedback is currently loading */
   isLoading?: boolean;
+  /** Whether AI feedback is currently loading */
+  isAILoading?: boolean;
+  /** Whether the current feedback is from AI (vs regex) */
+  isAIFeedback?: boolean;
   /** Whether content is ready to post (no critical issues) */
   readyToPost?: boolean;
   /** Summary message to display */
@@ -63,6 +67,8 @@ const FeedbackSkeleton: React.FC = () => (
 export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
   feedback,
   isLoading = false,
+  isAILoading = false,
+  isAIFeedback = false,
   readyToPost = true,
   summary = '',
   error = null,
@@ -72,9 +78,11 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
   onSensitivityChange,
 }) => {
   // Don't render if no feedback and not loading and not showing empty state
-  if (!showEmpty && !isLoading && feedback.length === 0 && !error) {
+  if (!showEmpty && !isLoading && !isAILoading && feedback.length === 0 && !error) {
     return null;
   }
+
+  const anyLoading = isLoading || isAILoading;
 
   return (
     <div
@@ -82,21 +90,33 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
       role="region"
       aria-label="Preview feedback"
       aria-live="polite"
-      aria-busy={isLoading}
+      aria-busy={anyLoading}
     >
       {/* Header with summary */}
       <div className="px-4 py-3 border-b bg-gray-50 rounded-t-lg">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-900">Feedback Preview</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-gray-900">Feedback Preview</h3>
+            {isAIFeedback && !isAILoading && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                ✨ AI
+              </span>
+            )}
+            {isAILoading && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 animate-pulse">
+                🤖 Analyzing...
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             {onSensitivityChange && (
               <SensitivitySelector
                 value={sensitivity}
                 onChange={onSensitivityChange}
-                disabled={isLoading}
+                disabled={anyLoading}
               />
             )}
-            {!error && <ReadyToPostIndicator readyToPost={readyToPost} isLoading={isLoading} />}
+            {!error && <ReadyToPostIndicator readyToPost={readyToPost} isLoading={anyLoading} />}
           </div>
         </div>
         {summary && !error && <p className="mt-1 text-sm text-gray-600">{summary}</p>}
@@ -105,16 +125,28 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
 
       {/* Content area */}
       <div className="p-4">
-        {/* Loading state */}
-        {isLoading && (
+        {/* Loading state - show loading skeleton while regex or AI is loading */}
+        {anyLoading && feedback.length === 0 && (
           <div className="space-y-3">
             <FeedbackSkeleton />
             <FeedbackSkeleton />
           </div>
         )}
 
+        {/* AI Loading with existing feedback - show existing feedback with loading indicator */}
+        {isAILoading && feedback.length > 0 && (
+          <div className="space-y-3">
+            <div className="text-xs text-blue-600 font-medium mb-2">
+              Refining analysis with AI...
+            </div>
+            {feedback.map((item, index) => (
+              <FeedbackItem key={`${item.type}-${item.subtype || ''}-${index}`} item={item} />
+            ))}
+          </div>
+        )}
+
         {/* Error state */}
-        {error && !isLoading && (
+        {error && !anyLoading && (
           <div className="text-center py-4">
             <p className="text-sm text-gray-500">
               Unable to analyze content. Your response can still be posted.
@@ -123,7 +155,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
         )}
 
         {/* Feedback items */}
-        {!isLoading && !error && feedback.length > 0 && (
+        {!anyLoading && !error && feedback.length > 0 && (
           <div className="space-y-3">
             {feedback.map((item, index) => (
               <FeedbackItem key={`${item.type}-${item.subtype || ''}-${index}`} item={item} />
@@ -132,7 +164,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
         )}
 
         {/* Empty state (no issues found) */}
-        {!isLoading && !error && feedback.length === 0 && showEmpty && (
+        {!anyLoading && !error && feedback.length === 0 && showEmpty && (
           <div className="text-center py-4">
             <span className="text-2xl mb-2 block">✨</span>
             <p className="text-sm text-gray-600">
