@@ -11,11 +11,13 @@ import { test, expect } from '@playwright/test';
  */
 
 // Generate unique test user credentials
+// Uses timestamp + random suffix to avoid collisions across builds
 const generateTestUser = () => {
   const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
   return {
-    email: `test-user-${timestamp}@example.com`,
-    username: `testuser${timestamp}`,
+    email: `test-user-${timestamp}-${randomSuffix}@example.com`,
+    username: `testuser${timestamp}${randomSuffix}`,
     password: 'SecurePassword123!',
   };
 };
