@@ -6,6 +6,7 @@ import { TopicsProxyController } from './topics-proxy.controller.js';
 import { DiscussionsProxyController } from './discussions-proxy.controller.js';
 import { DemoProxyController } from './demo-proxy.controller.js';
 import { AiProxyController } from './ai-proxy.controller.js';
+import { ModerationProxyController } from './moderation-proxy.controller.js';
 import { ProxyService } from './proxy.service.js';
 
 @Module({
@@ -23,6 +24,7 @@ import { ProxyService } from './proxy.service.js';
     DiscussionsProxyController,
     DemoProxyController,
     AiProxyController,
+    ModerationProxyController,
   ],
   providers: [ProxyService],
   exports: [ProxyService],

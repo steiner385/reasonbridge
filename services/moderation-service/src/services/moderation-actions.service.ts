@@ -479,6 +479,61 @@ export class ModerationActionsService {
   }
 
   /**
+   * List all appeals with optional status filter
+   */
+  async listAppeals(
+    status?: 'PENDING' | 'UNDER_REVIEW' | 'UPHELD' | 'DENIED',
+    limit: number = 20,
+    cursor?: string,
+  ): Promise<ListAppealResponse> {
+    type WhereInput = {
+      status?: 'PENDING' | 'UNDER_REVIEW' | 'UPHELD' | 'DENIED';
+    };
+    const where: WhereInput = {};
+
+    if (status) {
+      where.status = status;
+    }
+
+    const totalCount = await this.prisma.appeal.count({ where });
+
+    const findManyArgs = {
+      where,
+      include: {
+        moderationAction: {
+          include: {
+            approvedBy: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' as const },
+      take: limit,
+      skip: cursor ? 1 : 0,
+      ...(cursor && { cursor: { id: cursor } }),
+    };
+
+    const appeals = await this.prisma.appeal.findMany(findManyArgs);
+
+    const nextCursor = appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
+
+    return {
+      appeals: appeals.map((appeal) => ({
+        ...this.mapAppealToResponse(appeal),
+        moderationAction: appeal.moderationAction
+          ? this.mapModerationActionToResponse(appeal.moderationAction)
+          : undefined,
+      })),
+      nextCursor,
+      totalCount,
+    };
+  }
+
+  /**
    * Review and decide on an appeal
    */
   async reviewAppeal(

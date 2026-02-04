@@ -82,7 +82,7 @@ export default function ModerationHistoryView({
 
         const response = await getModerationActions(options);
 
-        let filteredActions = response.data;
+        let filteredActions = response.actions;
 
         // Filter by type if specified
         if (typeFilter !== 'all') {
@@ -132,7 +132,7 @@ export default function ModerationHistoryView({
         });
 
         setActions(filteredActions);
-        setTotalPages(Math.ceil(response.total / pageSize));
+        setTotalPages(Math.ceil(response.totalCount / pageSize));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load moderation history');
       } finally {
