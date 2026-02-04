@@ -87,7 +87,7 @@ services:
       context: .
       dockerfile: Dockerfile.service
     image: reasonbridge-e2e/db-seed:latest
-    command: ['sh', '-c', 'cd packages/db-models && npx tsx prisma/seed.ts']
+    command: ['sh', '-c', 'cd packages/db-models && npx tsx prisma/seed.ts --demo']
     environment:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
     depends_on:
