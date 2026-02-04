@@ -57,24 +57,36 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     });
 
     // Step 2: Login after registration
-    // Registration redirects to landing page (/) - need to navigate to login
+    // Registration redirects to landing page (/) or /topics - use login modal
     const currentUrl = page.url();
-    if (!currentUrl.includes('/login')) {
-      // Navigate to login page if not already there
-      await page.goto('/login');
+    if (!currentUrl.includes('/topics')) {
+      // Navigate to landing page to use login modal
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+    } else {
+      // If we're already on /topics, go to landing page
+      await page.goto('/');
       await page.waitForLoadState('networkidle');
     }
 
-    const loginEmailInput = page.getByLabel(/email/i);
-    const loginPasswordInput = page.getByLabel(/^password/i).first();
-    const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+    // Open login modal by clicking Log In button
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    // Fill login form inside the modal
+    const dialog = page.getByRole('dialog');
+    const loginEmailInput = dialog.getByLabel(/email/i);
+    const loginPasswordInput = dialog.getByLabel(/password/i);
+    const loginButton = dialog.getByRole('button', { name: /^log in$/i });
 
     await loginEmailInput.fill(testUser.email);
     await loginPasswordInput.fill(testUser.password);
     await loginButton.click();
 
-    // Wait for login to complete - navigates to home page (/)
-    await page.waitForURL(/^http:\/\/[^/]+\/?$/, { timeout: 10000 });
+    // Wait for login to complete - dialog closes and redirects to topics or home
+    await expect(dialog).not.toBeVisible({ timeout: 15000 });
+    // Wait for redirect to authenticated page (/ or /topics)
+    await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
 
     // Step 3: Navigate to profile page and wait for user data to load
     await page.goto('/profile');
