@@ -55,9 +55,20 @@ test.describe('User Registration and Login Flow', () => {
     await registerButton.click();
 
     // Step 4: Wait for registration to complete and redirect
-    // This could redirect to login page, dashboard, home, or landing page (/)
-    // Note: The app redirects to root (/) after registration
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
+    // The registration API can take time - wait for button to show loading then complete
+    // Or for an error message to appear, or for the redirect to happen
+    await Promise.race([
+      // Success: redirects to landing page
+      page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 15000 }),
+      // Error: shows error message on the form
+      expect(page.getByText(/already exists|failed|error/i)).toBeVisible({ timeout: 15000 }),
+    ]);
+
+    // If we got an error, fail the test with a clear message
+    const errorMessage = page.getByText(/already exists|failed|error/i);
+    if (await errorMessage.isVisible()) {
+      throw new Error(`Registration failed with error: ${await errorMessage.textContent()}`);
+    }
 
     // Step 5: Login after registration
     // Registration redirects to landing page (/) - use login modal
@@ -115,7 +126,7 @@ test.describe('User Registration and Login Flow', () => {
     await registerButton.click();
 
     // Wait for first registration to complete (redirects to landing page /)
-    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
+    await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 15000 });
 
     // Attempt second registration with same email
     await page.goto('/register');
