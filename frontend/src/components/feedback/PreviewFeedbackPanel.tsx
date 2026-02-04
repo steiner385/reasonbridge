@@ -14,8 +14,8 @@ export interface PreviewFeedbackPanelProps {
   isAILoading?: boolean;
   /** Whether the current feedback is from AI (vs regex) */
   isAIFeedback?: boolean;
-  /** Whether content is ready to post (no critical issues) */
-  readyToPost?: boolean;
+  /** Whether content is ready to post (no critical issues). Null means AI is still analyzing. */
+  readyToPost?: boolean | null;
   /** Summary message to display */
   summary?: string;
   /** Error message if feedback fetch failed */

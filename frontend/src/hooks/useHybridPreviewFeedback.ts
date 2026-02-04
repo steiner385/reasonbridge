@@ -37,8 +37,8 @@ export interface UseHybridPreviewFeedbackResult {
   feedback: PreviewFeedbackResponse['feedback'];
   /** Primary feedback item (highest priority issue) */
   primary?: PreviewFeedbackResponse['primary'];
-  /** Whether content is ready to post (no critical issues) */
-  readyToPost: boolean;
+  /** Whether content is ready to post (no critical issues). Null means AI is still analyzing - don't show green yet. */
+  readyToPost: boolean | null;
   /** User-friendly summary message */
   summary: string;
   /** Whether regex feedback is currently being fetched */
@@ -194,11 +194,45 @@ export function useHybridPreviewFeedback(
   // Parse error message
   const errorMessage = activeError instanceof Error ? activeError.message : null;
 
+  // IMPORTANT: Don't show definitive "readyToPost" until AI completes
+  // This prevents the jarring transition from green (regex AFFIRMATION) to red (AI detected issues)
+  const readyToPost = (() => {
+    // If AI is enabled and currently loading, show "pending" state (null)
+    // This prevents showing green prematurely based on regex-only results
+    if (enableAI && isContentValid && aiQuery.isLoading && !aiQuery.data) {
+      return null; // Pending - don't show green yet
+    }
+
+    // If AI completed (success or gave up after retries), use its result
+    if (aiQuery.data) {
+      return aiQuery.data.readyToPost;
+    }
+
+    // If AI is disabled or permanently failed, fall back to regex result
+    if (regexQuery.data) {
+      return regexQuery.data.readyToPost;
+    }
+
+    // Default: true (no feedback loaded yet)
+    return true;
+  })();
+
+  // Update summary based on state
+  const summary = (() => {
+    // While AI is loading, show pending message (even if regex has results)
+    if (enableAI && isContentValid && aiQuery.isLoading && !aiQuery.data) {
+      return 'Quick check complete. Waiting for AI analysis...';
+    }
+
+    // Use active data summary (from AI or regex)
+    return activeData?.summary ?? '';
+  })();
+
   return {
     feedback: activeData?.feedback ?? [],
     primary: activeData?.primary,
-    readyToPost: activeData?.readyToPost ?? true,
-    summary: activeData?.summary ?? '',
+    readyToPost,
+    summary,
     isLoading: regexQuery.isLoading && isContentValid,
     isAILoading: aiQuery.isLoading && isContentValid,
     isError: regexQuery.isError || aiQuery.isError,
