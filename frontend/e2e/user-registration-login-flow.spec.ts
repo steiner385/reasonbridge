@@ -102,8 +102,24 @@ test.describe('User Registration and Login Flow', () => {
       const loginButton = dialog.getByRole('button', { name: /^log in$/i });
       await loginButton.click();
 
-      // Wait for dialog to close and redirect to authenticated page
-      await expect(dialog).not.toBeVisible({ timeout: 10000 });
+      // Wait for login to complete - use Promise.race to detect either success OR error
+      const loginResult = await Promise.race([
+        dialog.waitFor({ state: 'hidden', timeout: 15000 }).then(() => 'success' as const),
+        dialog
+          .locator('.bg-red-50 p, [class*="error"] p')
+          .waitFor({ state: 'visible', timeout: 15000 })
+          .then(() => 'error' as const),
+      ]);
+
+      if (loginResult === 'error') {
+        const errorText = await dialog
+          .locator('.bg-red-50 p, [class*="error"] p')
+          .first()
+          .textContent();
+        throw new Error(`Login failed with error: ${errorText}`);
+      }
+
+      // Wait for redirect to authenticated page
       await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
     });
 
