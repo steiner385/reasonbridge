@@ -14,6 +14,10 @@
 
 import { test, expect, type Page } from '@playwright/test';
 
+// Skip in E2E Docker mode - these tests use mocked APIs and require mock isolation
+// In E2E Docker mode, the real backend would interfere with route mocking
+const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
 test.describe.configure({ mode: 'serial' });
 
 // Mock preview feedback responses for different content types
@@ -166,6 +170,9 @@ async function navigateToComposer(page: Page) {
 }
 
 test.describe('Preview Feedback - User Story 1: View Feedback While Composing', () => {
+  // Skip in E2E Docker mode - these tests use mocked APIs
+  test.skip(isE2EDocker, 'Uses mocked APIs - skipped in E2E Docker mode');
+
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
@@ -252,6 +259,9 @@ test.describe('Preview Feedback - User Story 1: View Feedback While Composing', 
 });
 
 test.describe('Preview Feedback - User Story 2: Understand Specific Issues', () => {
+  // Skip in E2E Docker mode - these tests use mocked APIs
+  test.skip(isE2EDocker, 'Uses mocked APIs - skipped in E2E Docker mode');
+
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
     await mockPreviewFeedbackAPI(page, mockFeedbackWithIssues);
@@ -312,6 +322,9 @@ test.describe('Preview Feedback - User Story 2: Understand Specific Issues', () 
 });
 
 test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => {
+  // Skip in E2E Docker mode - these tests use mocked APIs
+  test.skip(isE2EDocker, 'Uses mocked APIs - skipped in E2E Docker mode');
+
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
@@ -383,6 +396,9 @@ test.describe('Preview Feedback - User Story 3: Ready-to-Post Indicator', () => 
 });
 
 test.describe('Preview Feedback - Error Handling', () => {
+  // Skip in E2E Docker mode - these tests use mocked APIs
+  test.skip(isE2EDocker, 'Uses mocked APIs - skipped in E2E Docker mode');
+
   test.beforeEach(async ({ page }) => {
     await mockAuth(page);
   });
@@ -436,6 +452,9 @@ test.describe('Preview Feedback - Error Handling', () => {
 });
 
 test.describe('Preview Feedback - User Story 4: Sensitivity Levels', () => {
+  // Skip in E2E Docker mode - these tests use mocked APIs
+  test.skip(isE2EDocker, 'Uses mocked APIs - skipped in E2E Docker mode');
+
   const mockLowSensitivityFeedback = {
     feedback: [
       ...mockFeedbackWithIssues.feedback,

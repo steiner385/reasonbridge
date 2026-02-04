@@ -60,32 +60,37 @@ test.describe('User Registration and Login Flow', () => {
     await page.waitForURL(/(\/$|\/login|\/dashboard|\/home|\/profile)/, { timeout: 10000 });
 
     // Step 5: Login after registration
-    // Registration redirects to landing page (/) - navigate to login page
-    const currentUrl = page.url();
-    if (!currentUrl.includes('/login')) {
-      await page.goto('/login');
-    }
-
+    // Registration redirects to landing page (/) - use login modal
     await test.step('Login with newly created credentials', async () => {
-      // Fill login form
-      const loginEmailInput = page.getByLabel(/email/i);
-      const loginPasswordInput = page.getByLabel(/^password/i).first();
+      // Navigate to landing page to access login modal
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+
+      // Open login modal by clicking Log In button
+      await page.getByRole('button', { name: /log in/i }).click();
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+      // Fill login form inside the modal
+      const dialog = page.getByRole('dialog');
+      const loginEmailInput = dialog.getByLabel(/email/i);
+      const loginPasswordInput = dialog.getByLabel(/password/i);
 
       await loginEmailInput.fill(testUser.email);
       await loginPasswordInput.fill(testUser.password);
 
       // Submit login
-      const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+      const loginButton = dialog.getByRole('button', { name: /^log in$/i });
       await loginButton.click();
 
-      // Wait for successful login redirect (navigates to / which is the home page)
-      await page.waitForURL(/^http:\/\/[^\/]+\/?$/, { timeout: 10000 });
+      // Wait for dialog to close and redirect to authenticated page
+      await expect(dialog).not.toBeVisible({ timeout: 10000 });
+      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
     });
 
     // Step 6: Verify successful authentication
     // The login was successful if we reached the home page (/)
     // Check that auth token was stored in localStorage
-    const authToken = await page.evaluate(() => localStorage.getItem('auth_token'));
+    const authToken = await page.evaluate(() => localStorage.getItem('authToken'));
     expect(authToken).toBeTruthy();
     expect(authToken!.length).toBeGreaterThan(0);
   });
@@ -185,49 +190,61 @@ test.describe('User Registration and Login Flow', () => {
   });
 
   test('should show error for invalid login credentials', async ({ page }) => {
-    await page.goto('/login');
+    // Navigate to landing page and open login modal
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/^password/i).first();
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    const dialog = page.getByRole('dialog');
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel(/password/i);
 
     // Attempt login with non-existent credentials
     await emailInput.fill('nonexistent@example.com');
     await passwordInput.fill('WrongPassword123!');
 
-    const loginButton = page.getByRole('button', { name: /sign in|log in/i });
+    const loginButton = dialog.getByRole('button', { name: /^log in$/i });
     await loginButton.click();
 
-    // Should show authentication error
-    const errorMessage = page.getByText(
+    // Should show authentication error within the modal
+    const errorMessage = dialog.getByText(
       /invalid email or password|invalid credentials|incorrect email or password/i,
     );
     await expect(errorMessage).toBeVisible({ timeout: 5000 });
   });
 
-  test('should navigate between login and registration pages', async ({ page }) => {
-    // Start at login page
-    await page.goto('/login');
+  test('should navigate between login modal and registration page', async ({ page }) => {
+    // Start at landing page and open login modal
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    // Find and click "Create account" link
-    const createAccountLink = page.getByRole('link', { name: /create one/i });
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+
+    // Find and click "Don't have an account?" or "Create one" link in modal
+    const createAccountLink = dialog.getByRole('link', { name: /create one|sign up|register/i });
     await expect(createAccountLink).toBeVisible();
     await createAccountLink.click();
 
     // Should navigate to registration page
-    await expect(page).toHaveURL(/\/register/);
+    await expect(page).toHaveURL(/\/register|\/signup/);
     const registrationHeading = page.getByRole('heading', {
-      name: /create account/i,
+      name: /create account|sign up/i,
     });
     await expect(registrationHeading).toBeVisible();
 
-    // Find and click "Already have account" link
-    const loginLink = page.getByRole('link', { name: /sign in/i });
+    // Find and click "Already have account" link on registration page
+    const loginLink = page.getByRole('link', { name: /sign in|log in/i });
     await expect(loginLink).toBeVisible();
     await loginLink.click();
 
-    // Should navigate back to login page
-    await expect(page).toHaveURL(/\/login/);
-    const loginHeading = page.getByRole('heading', { name: /sign in/i });
-    await expect(loginHeading).toBeVisible();
+    // Should either open login modal or redirect to landing page with modal
+    // After consolidation, this navigates to landing page where login is a modal
+    await expect(page).toHaveURL(/\/$|\/login/);
   });
 });

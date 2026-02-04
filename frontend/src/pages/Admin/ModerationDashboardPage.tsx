@@ -202,8 +202,16 @@ export default function ModerationDashboardPage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div
+        role="tablist"
+        aria-label="Moderation dashboard sections"
+        className="flex gap-2 mb-6 border-b border-gray-200"
+      >
         <button
+          role="tab"
+          aria-selected={activeTab === 'overview'}
+          aria-controls="panel-overview"
+          id="tab-overview"
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'overview'
@@ -214,6 +222,10 @@ export default function ModerationDashboardPage() {
           Overview
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'queue'}
+          aria-controls="panel-queue"
+          id="tab-queue"
           onClick={() => setActiveTab('queue')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'queue'
@@ -224,6 +236,10 @@ export default function ModerationDashboardPage() {
           Queue
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'actions'}
+          aria-controls="panel-actions"
+          id="tab-actions"
           onClick={() => setActiveTab('actions')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'actions'
@@ -234,6 +250,10 @@ export default function ModerationDashboardPage() {
           Actions
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'appeals'}
+          aria-controls="panel-appeals"
+          id="tab-appeals"
           onClick={() => setActiveTab('appeals')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'appeals'
@@ -247,7 +267,12 @@ export default function ModerationDashboardPage() {
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
+        <div
+          id="panel-overview"
+          role="tabpanel"
+          aria-labelledby="tab-overview"
+          className="space-y-6"
+        >
           {loading ? (
             <Card>
               <CardBody>
@@ -437,14 +462,14 @@ export default function ModerationDashboardPage() {
 
       {/* Queue Tab */}
       {activeTab === 'queue' && (
-        <div>
+        <div id="panel-queue" role="tabpanel" aria-labelledby="tab-queue">
           <ModerationQueueView initialStatus="pending" />
         </div>
       )}
 
       {/* Actions Tab */}
       {activeTab === 'actions' && (
-        <div className="space-y-4">
+        <div id="panel-actions" role="tabpanel" aria-labelledby="tab-actions" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -511,7 +536,7 @@ export default function ModerationDashboardPage() {
 
       {/* Appeals Tab */}
       {activeTab === 'appeals' && (
-        <div className="space-y-4">
+        <div id="panel-appeals" role="tabpanel" aria-labelledby="tab-appeals" className="space-y-4">
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">Appeals</h2>
