@@ -24,11 +24,29 @@ test.slow(); // Mark as slow tests (5x timeout)
  * Helper to login with demo user
  */
 async function loginAsAlice(page) {
-  await page.goto('/login');
-  await page.getByLabel(/email/i).fill('alice@demo.reasonbridge.org');
-  await page.getByLabel(/password/i).fill('DemoAlice2026!');
-  await page.getByRole('button', { name: /sign in|log in/i }).click();
-  await page.waitForURL(/(\/$|\/topics|\/dashboard)/);
+  // Navigate to landing page
+  await page.goto('/');
+
+  // Click "Log In" button to open modal
+  await page.getByRole('button', { name: /log in/i }).click();
+
+  // Wait for dialog to appear
+  await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+  // Fill login form inside the modal
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel(/email/i).fill('demo-alice@reasonbridge.demo');
+  await dialog.getByLabel(/password/i).fill('DemoAlice2026!');
+
+  // Submit login
+  const loginButton = dialog.getByRole('button', { name: /^log in$/i });
+  await loginButton.click();
+
+  // Wait for login to complete and modal to close
+  await expect(dialog).not.toBeVisible({ timeout: 10000 });
+
+  // Wait for authenticated content (topics list or dashboard)
+  await page.waitForURL(/(\/$|\/topics|\/dashboard)/, { timeout: 5000 });
 }
 
 /**
@@ -38,13 +56,15 @@ async function navigateToTopicComposer(page) {
   // Go to topics page
   await page.goto('/topics');
 
-  // Click on first topic
-  await page
-    .getByRole('link', { name: /Universal Basic Income/i })
-    .first()
-    .click();
+  // Wait for topics to load
+  await page.waitForSelector('[data-testid="topic-card"], article', { timeout: 10000 });
 
-  // Wait for topic detail page
+  // Click on "View Discussion" link for any SEEDING topic
+  // (SEEDING topics allow responses, ACTIVE topics may not depending on state)
+  const viewLink = page.getByRole('link', { name: /view discussion/i }).first();
+  await viewLink.click();
+
+  // Wait for topic detail page with textarea
   await page.waitForSelector('textarea, [contenteditable]', { timeout: 10000 });
 }
 
@@ -315,7 +335,7 @@ test.describe('AI Feedback Consistency @ai', () => {
   test('should give consistent feedback for identical content', async ({ page }) => {
     const content = "These people clearly have no idea what they're talking about.";
 
-    // First analysis
+    // First analysis (fresh, will call Bedrock)
     await typeAndWaitForFeedback(page, content, { waitForAI: true });
 
     const feedbackPanel = page.locator('[role="region"][aria-label*="feedback"]');
@@ -327,13 +347,17 @@ test.describe('AI Feedback Consistency @ai', () => {
     await textarea.fill('Different content temporarily');
     await page.waitForTimeout(1000);
 
-    // Type original content again
-    await typeAndWaitForFeedback(page, content, { waitForAI: true });
+    // Type original content again (should be cached, instant response)
+    await textarea.clear();
+    await textarea.fill(content);
+
+    // Wait for AI badge to appear (cache hit = instant, no "Analyzing" state)
+    await expect(page.getByText(/✨ AI/i)).toBeVisible({ timeout: 10000 });
 
     const secondFeedback = await feedbackPanel.textContent();
 
-    // Should have similar feedback (might not be identical due to AI variation)
-    // But both should flag the issue
+    // Should have identical feedback (cached result)
+    // Both should flag the issue as INFLAMMATORY
     expect(firstFeedback?.toLowerCase()).toMatch(/inflammatory|hostile/);
     expect(secondFeedback?.toLowerCase()).toMatch(/inflammatory|hostile/);
   });
