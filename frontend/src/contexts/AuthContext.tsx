@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
 import { apiClient } from '../lib/api';
-import { useToast } from './ToastContext';
 import { getJWTTimeUntilExpiry } from '../lib/jwt';
 import { SessionExpirationModal } from '../components/auth/SessionExpirationModal';
 import type { UserProfile } from '../types/user';
+import { useToast } from './ToastContext';
 
 /**
  * AuthContext - Global authentication state management

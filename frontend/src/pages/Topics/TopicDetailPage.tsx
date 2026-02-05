@@ -121,7 +121,7 @@ function TopicDetailPage() {
               Topic Not Found
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              The topic you're looking for doesn't exist or has been removed.
+              The topic you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
             <Link to="/topics">
               <Button variant="primary">Back to Topics</Button>

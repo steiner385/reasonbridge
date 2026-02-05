@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { Navigation } from '../../../../src/components/layouts/Navigation';
 
@@ -37,7 +37,7 @@ describe('Navigation Component', () => {
     });
 
     it('should render data-tour attributes for Topics and Notifications', () => {
-      const { container } = renderWithRouter(<Navigation />);
+      renderWithRouter(<Navigation />);
 
       const topicsLink = screen.getByText('Topics').closest('a');
       const notificationsLink = screen.getByText('Notifications').closest('a');

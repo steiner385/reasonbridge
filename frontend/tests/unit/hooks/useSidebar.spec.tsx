@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { useSidebar } from '../../../src/hooks/useSidebar';
 import { SidebarProvider } from '../../../src/contexts/SidebarContext';
-import type { ReactNode } from 'react';
 
 describe('useSidebar hook', () => {
   const wrapper = ({ children }: { children: ReactNode }) => (

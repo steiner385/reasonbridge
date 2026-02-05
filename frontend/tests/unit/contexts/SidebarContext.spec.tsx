@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { SidebarProvider, useSidebarContext } from '../../../src/contexts/SidebarContext';
 import type { ReactNode } from 'react';
+import { SidebarProvider, useSidebarContext } from '../../../src/contexts/SidebarContext';
 
 describe('SidebarContext', () => {
   // Mock localStorage

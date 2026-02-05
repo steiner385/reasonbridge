@@ -3,8 +3,8 @@
  */
 
 import { useState } from 'react';
-import { apiClient } from './api';
 import type { FlagContentRequest, FlagContentResponse } from '../types/moderation';
+import { apiClient } from './api';
 
 export interface UseFlagContentState {
   isLoading: boolean;

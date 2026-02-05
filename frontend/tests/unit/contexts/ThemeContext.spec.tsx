@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { ThemeProvider, useThemeContext } from '../../../src/contexts/ThemeContext';
 import * as useMediaQueryModule from '../../../src/hooks/useMediaQuery';
-import type { ReactNode } from 'react';
 
 // Mock useMediaQuery hook
 vi.mock('../../../src/hooks/useMediaQuery');

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from './api';
 import type { Topic } from '../types/topic';
+import { apiClient } from './api';
 
 /**
  * React Query hook for fetching a single topic by ID

@@ -1,9 +1,9 @@
 import React from 'react';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
+import { LoadingBridge } from '../ui/LoadingBridge';
 import { FeedbackItem } from './FeedbackItem';
 import { ReadyToPostIndicator } from './ReadyToPostIndicator';
 import { SensitivitySelector } from './SensitivitySelector';
-import { LoadingBridge } from '../ui/LoadingBridge';
 
 export interface PreviewFeedbackPanelProps {
   /** Array of feedback items to display */

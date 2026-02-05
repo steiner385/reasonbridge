@@ -6,8 +6,8 @@
  */
 
 import { useResponses } from '../../hooks/useResponses';
-import { ResponseItem } from './ResponseItem';
 import Card from '../ui/Card';
+import { ResponseItem } from './ResponseItem';
 
 export interface ResponseListProps {
   discussionId: string;
