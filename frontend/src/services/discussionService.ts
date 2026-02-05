@@ -93,7 +93,8 @@ export interface ListDiscussionsQuery {
 
 class DiscussionService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('accessToken');
+    // Check both localStorage (remember me) and sessionStorage (current session)
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
