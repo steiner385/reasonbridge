@@ -127,6 +127,7 @@ export async function seedDemoTopics(prisma: PrismaClient): Promise<void> {
         id: topic.id,
         title: topic.title,
         description: topic.description,
+        slug: topic.slug,
         creatorId: topic.creatorId,
         status: topic.status,
         crossCuttingThemes: topic.crossCuttingThemes,
