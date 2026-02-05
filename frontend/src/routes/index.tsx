@@ -7,10 +7,14 @@ import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
-import { FeedbackPreferencesPage } from '../pages/Settings';
+import { FeedbackPreferencesPage, SettingsPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
 import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
 import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
+import DiscussionSimulatorPage from '../pages/DiscussionSimulatorPage';
+import NotificationsPage from '../pages/NotificationsPage';
+import TermsPage from '../pages/TermsPage';
+import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 /**
@@ -61,6 +65,14 @@ export const routes: RouteObject[] = [
     element: <UserProfilePage />,
   },
   {
+    path: '/notifications',
+    element: <NotificationsPage />,
+  },
+  {
+    path: '/settings',
+    element: <SettingsPage />,
+  },
+  {
     path: '/settings/feedback',
     element: <FeedbackPreferencesPage />,
   },
@@ -75,6 +87,18 @@ export const routes: RouteObject[] = [
   {
     path: '/appeals',
     element: <AppealStatusPage />,
+  },
+  {
+    path: '/simulator',
+    element: <DiscussionSimulatorPage />,
+  },
+  {
+    path: '/terms',
+    element: <TermsPage />,
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPage />,
   },
   {
     path: '*',
