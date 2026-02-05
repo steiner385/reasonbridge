@@ -67,19 +67,11 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/profile',
-    element: (
-      <ProtectedRoute>
-        <ProfilePage />
-      </ProtectedRoute>
-    ),
+    element: <ProfilePage />,
   },
   {
     path: '/profile/:id',
-    element: (
-      <ProtectedRoute>
-        <UserProfilePage />
-      </ProtectedRoute>
-    ),
+    element: <UserProfilePage />,
   },
   {
     path: '/notifications',
