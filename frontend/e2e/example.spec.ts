@@ -16,9 +16,9 @@ test.describe('Application Layout', () => {
     const header = page.locator('header');
     await expect(header).toBeVisible();
 
-    // Verify the application title
-    const title = page.locator('h1');
-    await expect(title).toHaveText('ReasonBridge');
+    // Verify the application logo is present (Header uses image logo now)
+    const logo = page.locator('img[alt="ReasonBridge"]').first();
+    await expect(logo).toBeVisible();
 
     // Verify the hero headline is visible
     const heroHeadline = page.getByText('Find Common Ground Through Thoughtful Discussion');
