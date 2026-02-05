@@ -425,7 +425,7 @@ export const DiscussionSimulatorPage: React.FC = () => {
               </div>
 
               <Button
-                variant="success"
+                variant="primary"
                 size="md"
                 onClick={handleGenerateResponse}
                 disabled={loadingResponse || !personaName.trim() || !personaValues.trim()}
