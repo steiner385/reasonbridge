@@ -88,9 +88,10 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
       await login(loginEmail, loginPassword);
       closeModal();
 
-      // Redirect to original page or default to /topics
+      // Redirect to original page or default to /topics with welcome banner
       const from = (location.state as { from?: string })?.from || '/topics';
-      navigate(from);
+      const destination = from === '/topics' ? '/topics?welcome=true' : from;
+      navigate(destination);
     } catch (err) {
       setLoginError(err instanceof Error ? err.message : 'Login failed');
     } finally {
