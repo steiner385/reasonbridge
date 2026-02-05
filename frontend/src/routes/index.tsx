@@ -51,19 +51,11 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/topics',
-    element: (
-      <ProtectedRoute>
-        <TopicsPage />
-      </ProtectedRoute>
-    ),
+    element: <TopicsPage />,
   },
   {
     path: '/topics/:id',
-    element: (
-      <ProtectedRoute>
-        <TopicDetailPage />
-      </ProtectedRoute>
-    ),
+    element: <TopicDetailPage />,
   },
   {
     path: '/profile',

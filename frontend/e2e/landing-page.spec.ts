@@ -94,10 +94,8 @@ test.describe('Landing Page - Unauthenticated User Flow', () => {
   test('should display ReasonBridge branding in header', async ({ page }) => {
     await page.goto('/');
 
-    // Header shows "ReasonBridge" text with "Beta" badge
-    await expect(
-      page.locator('header').getByRole('heading', { name: 'ReasonBridge' }),
-    ).toBeVisible();
+    // Header shows ReasonBridge logo image with "Beta" badge
+    await expect(page.locator('header img[alt="ReasonBridge"]')).toBeVisible();
     await expect(page.locator('header').getByText('Beta')).toBeVisible();
   });
 });
