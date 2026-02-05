@@ -143,15 +143,17 @@ function ProfileEditForm({
   return (
     <Card variant="default" padding="lg" className={className}>
       <CardHeader>
-        <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
-        <p className="mt-2 text-sm text-gray-600">Update your profile information</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Edit Profile</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Update your profile information
+        </p>
       </CardHeader>
 
       <CardBody>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-fallacy-light border border-fallacy-DEFAULT p-4">
-              <p className="text-sm text-fallacy-dark">{error}</p>
+            <div className="rounded-lg bg-fallacy-light dark:bg-red-900/20 border border-fallacy-DEFAULT dark:border-red-700 p-4">
+              <p className="text-sm text-fallacy-dark dark:text-red-300">{error}</p>
             </div>
           )}
 
@@ -170,7 +172,7 @@ function ProfileEditForm({
             autoComplete="username"
           />
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
               variant="primary"

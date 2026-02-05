@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryProvider } from './lib';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { SidebarProvider } from './contexts/SidebarContext';
+import { ToastProvider } from './contexts/ToastContext';
+import ErrorBoundary from './components/error/ErrorBoundary';
 import App from './App.tsx';
 import './index.css';
 
@@ -14,12 +18,20 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <QueryProvider>
-      <NotificationProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </NotificationProvider>
-    </QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
+        <NotificationProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <SidebarProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </SidebarProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </NotificationProvider>
+      </QueryProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

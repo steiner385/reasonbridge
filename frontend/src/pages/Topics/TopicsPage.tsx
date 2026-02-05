@@ -47,9 +47,9 @@ function TopicsPage() {
     return (
       <div className="max-w-6xl mx-auto">
         <Card variant="elevated" padding="lg">
-          <div className="text-center text-fallacy-DEFAULT">
+          <div className="text-center text-fallacy-DEFAULT dark:text-red-400">
             <h2 className="text-xl font-semibold mb-2">Error Loading Topics</h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               {error instanceof Error ? error.message : 'Failed to load topics'}
             </p>
           </div>
@@ -61,28 +61,34 @@ function TopicsPage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Discussion Topics</h1>
-        <p className="text-gray-600">Browse and join rational discussions on various topics</p>
+        <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          Discussion Topics
+        </h1>
+        <p className="text-fluid-base text-gray-600 dark:text-gray-400">
+          Browse and join rational discussions on various topics
+        </p>
       </div>
 
       {/* Welcome Banner */}
       {showWelcomeBanner && (
         <div
           role="status"
-          className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between"
+          className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl">👋</span>
             <div>
-              <p className="font-medium text-blue-900">Welcome back to ReasonBridge!</p>
-              <p className="text-sm text-blue-700">
+              <p className="font-medium text-blue-900 dark:text-blue-200">
+                Welcome back to ReasonBridge!
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
                 Ready to continue exploring discussions and finding common ground?
               </p>
             </div>
           </div>
           <button
             onClick={handleDismissWelcome}
-            className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-100 transition-colors"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-colors"
             aria-label="Dismiss welcome banner"
           >
             <svg
@@ -112,7 +118,7 @@ function TopicsPage() {
 
       {/* Loading State - Skeleton cards (with 100ms delay to prevent flash) */}
       {showSkeleton && (
-        <div className="space-y-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {[1, 2, 3].map((i) => (
             <TopicCardSkeleton key={i} />
           ))}
@@ -122,24 +128,28 @@ function TopicsPage() {
       {/* Topic List */}
       {!showSkeleton && data && data.data && (
         <>
-          <div className="space-y-4 mb-6">
-            {data.data.length === 0 ? (
+          {data.data.length === 0 ? (
+            <div className="mb-6">
               <Card variant="elevated" padding="lg">
-                <div className="text-center text-gray-600">
+                <div className="text-center text-gray-600 dark:text-gray-400">
                   <p className="text-lg">No topics found</p>
                   <p className="text-sm mt-2">Try adjusting your filters</p>
                 </div>
               </Card>
-            ) : (
-              data.data.map((topic) => <TopicCard key={topic.id} topic={topic} />)
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {data.data.map((topic) => (
+                <TopicCard key={topic.id} topic={topic} />
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           {data.meta && data.meta.totalPages > 1 && (
             <Card padding="md">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
                   Showing {(data.meta.page - 1) * data.meta.limit + 1} to{' '}
                   {Math.min(data.meta.page * data.meta.limit, data.meta.total)} of {data.meta.total}{' '}
                   topics
@@ -166,7 +176,7 @@ function TopicsPage() {
                       .map((page, idx, arr) => (
                         <div key={page} className="flex items-center">
                           {idx > 0 && arr[idx - 1] !== page - 1 && (
-                            <span className="px-2 text-gray-400">...</span>
+                            <span className="px-2 text-gray-400 dark:text-gray-600">...</span>
                           )}
                           <Button
                             size="sm"

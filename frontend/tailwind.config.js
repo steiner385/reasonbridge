@@ -1,37 +1,58 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class', // Enable dark mode with class strategy
   theme: {
     extend: {
-      // Design tokens for colors - semantic naming for discussion platform
+      // Design tokens for colors - ReasonBridge brand colors
       colors: {
-        // Primary brand colors
+        // Primary brand color - Teal (#2A9D8F)
         primary: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1', // Main brand color
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#e6f7f5',
+          100: '#ccefeb',
+          200: '#99dfd7',
+          300: '#66cfc3',
+          400: '#33bfaf',
+          500: '#2a9d8f', // Main brand color - Teal
+          600: '#227e72',
+          700: '#1a5e56',
+          800: '#113f39',
+          900: '#091f1d',
+          950: '#040f0e',
         },
-        // Secondary accent colors
+        // Secondary brand color - Soft Blue (#6B9AC4)
         secondary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+          50: '#eef4f9',
+          100: '#dde9f3',
+          200: '#bbd3e7',
+          300: '#99bddb',
+          400: '#77a7cf',
+          500: '#6b9ac4', // Soft Blue
+          600: '#567b9d',
+          700: '#405c76',
+          800: '#2b3e4e',
+          900: '#151f27',
+          950: '#0b0f14',
+        },
+        // Accent brand color - Light Sky (#A8DADC)
+        accent: {
+          50: '#f4fbfb',
+          100: '#e9f7f7',
+          200: '#d3efef',
+          300: '#bde7e7',
+          400: '#a7dfdf',
+          500: '#a8dadc', // Light Sky
+          600: '#86aeb0',
+          700: '#658384',
+          800: '#435758',
+          900: '#222c2c',
+          950: '#111616',
+        },
+        // Brand background colors
+        background: {
+          warm: '#FAFBFC', // Warm white - primary page background
+          pure: '#FFFFFF', // Pure white - card and modal backgrounds
+          cloud: '#F1F5F9', // Cloud - supporting background
         },
         // Semantic colors for discussion context
         rational: {
@@ -74,10 +95,10 @@ export default {
           950: '#0a0a0a',
         },
       },
-      // Typography design tokens
+      // Typography design tokens - ReasonBridge brand fonts
       fontFamily: {
         sans: [
-          'Inter',
+          'Nunito',
           'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
@@ -87,7 +108,7 @@ export default {
           'Arial',
           'sans-serif',
         ],
-        serif: ['Merriweather', 'Georgia', 'serif'],
+        serif: ['Georgia', 'serif'],
         mono: ['Fira Code', 'Monaco', 'Consolas', 'Courier New', 'monospace'],
       },
       fontSize: {
@@ -101,6 +122,16 @@ export default {
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
         '5xl': ['3rem', { lineHeight: '1' }],
         '6xl': ['3.75rem', { lineHeight: '1' }],
+        // Fluid typography - scales smoothly between mobile and desktop
+        'fluid-xs': ['clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)', { lineHeight: '1.4' }],
+        'fluid-sm': ['clamp(0.875rem, 0.8rem + 0.375vw, 1rem)', { lineHeight: '1.5' }],
+        'fluid-base': ['clamp(1rem, 0.9rem + 0.5vw, 1.125rem)', { lineHeight: '1.5' }],
+        'fluid-lg': ['clamp(1.125rem, 1rem + 0.625vw, 1.25rem)', { lineHeight: '1.6' }],
+        'fluid-xl': ['clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)', { lineHeight: '1.4' }],
+        'fluid-2xl': ['clamp(1.5rem, 1.3rem + 1vw, 1.875rem)', { lineHeight: '1.3' }],
+        'fluid-3xl': ['clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem)', { lineHeight: '1.2' }],
+        'fluid-4xl': ['clamp(2.25rem, 1.9rem + 1.75vw, 3rem)', { lineHeight: '1.1' }],
+        'fluid-5xl': ['clamp(3rem, 2.5rem + 2.5vw, 3.75rem)', { lineHeight: '1' }],
       },
       // Spacing design tokens (extending defaults)
       spacing: {
@@ -138,6 +169,8 @@ export default {
         'slide-up': 'slideUp 0.3s ease-out',
         'bounce-slow': 'bounce 2s infinite',
         progress: 'progress 2.5s ease-in-out infinite',
+        shimmer: 'shimmer 2s infinite ease-in-out',
+        'shimmer-fade': 'shimmerFade 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -156,6 +189,14 @@ export default {
           '0%': { transform: 'translateX(-100%)' },
           '50%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(100%)' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        shimmerFade: {
+          '0%, 100%': { opacity: '0.6' },
+          '50%': { opacity: '1' },
         },
       },
       // Breakpoints for responsive design (extending defaults)

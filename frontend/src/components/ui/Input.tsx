@@ -78,14 +78,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       lg: 'h-6 w-6',
     };
 
-    // Base input styles
+    // Base input styles (with dark mode support)
     const baseStyles =
-      'rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed';
+      'rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100';
 
-    // State-based border and ring styles
+    // State-based border and ring styles (with dark mode support)
     const stateStyles = hasError
-      ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20'
-      : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20';
+      ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20 dark:border-red-500 dark:focus:border-red-400'
+      : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20 dark:border-gray-600 dark:focus:border-primary-400';
 
     // Width styles
     const widthStyles = fullWidth ? 'w-full' : '';
@@ -100,15 +100,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor={inputId}
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          >
             {label}
-            {required && <span className="text-fallacy-DEFAULT ml-1">*</span>}
+            {required && <span className="text-fallacy-DEFAULT dark:text-red-400 ml-1">*</span>}
           </label>
         )}
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
               <span className={`flex items-center justify-center ${iconSizeStyles[inputSize]}`}>
                 {leftIcon}
               </span>
@@ -128,7 +131,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
 
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
               <span className={`flex items-center justify-center ${iconSizeStyles[inputSize]}`}>
                 {rightIcon}
               </span>
@@ -137,13 +140,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p id={`${inputId}-error`} className="mt-1.5 text-sm text-fallacy-DEFAULT" role="alert">
+          <p
+            id={`${inputId}-error`}
+            className="mt-1.5 text-sm text-fallacy-DEFAULT dark:text-red-400"
+            role="alert"
+          >
             {error}
           </p>
         )}
 
         {!error && helperText && (
-          <p id={`${inputId}-helper`} className="mt-1.5 text-sm text-gray-500">
+          <p id={`${inputId}-helper`} className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
             {helperText}
           </p>
         )}

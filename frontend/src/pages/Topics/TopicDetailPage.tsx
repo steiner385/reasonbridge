@@ -7,6 +7,7 @@ import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { BridgingSuggestionsSection, ShareButton } from '../../components/common-ground';
+import { MobileActionBar } from '../../components/layouts';
 import ResponseComposer from '../../components/responses/ResponseComposer';
 import TopicDetailSkeleton from '../../components/ui/skeletons/TopicDetailSkeleton';
 import { apiClient } from '../../lib/api';
@@ -203,12 +204,17 @@ function TopicDetailPage() {
         </CardHeader>
 
         <CardBody>
-          <p className="text-gray-700 text-lg mb-6 whitespace-pre-wrap">{topic.description}</p>
+          <p className="text-gray-700 dark:text-gray-300 text-fluid-lg mb-6 whitespace-pre-wrap leading-relaxed prose-reading-width">
+            {topic.description}
+          </p>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-50 rounded-lg p-4" data-testid="participant-count">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
+            <div
+              className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
+              data-testid="participant-count"
+            >
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -219,11 +225,16 @@ function TopicDetailPage() {
                 </svg>
                 <span className="text-sm font-medium">Participants</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{topic.participantCount}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {topic.participantCount}
+              </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4" data-testid="response-count">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
+            <div
+              className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
+              data-testid="response-count"
+            >
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -234,11 +245,13 @@ function TopicDetailPage() {
                 </svg>
                 <span className="text-sm font-medium">Responses</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{topic.responseCount}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {topic.responseCount}
+              </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -249,20 +262,20 @@ function TopicDetailPage() {
                 </svg>
                 <span className="text-sm font-medium">Diversity Score</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {topic.currentDiversityScore != null
                   ? topic.currentDiversityScore.toFixed(1)
                   : 'N/A'}
               </p>
               {topic.currentDiversityScore !== null && topic.minimumDiversityScore != null && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Min required: {topic.minimumDiversityScore.toFixed(1)}
                 </p>
               )}
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-600 mb-1">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -273,7 +286,9 @@ function TopicDetailPage() {
                 </svg>
                 <span className="text-sm font-medium">Evidence</span>
               </div>
-              <p className="text-sm font-semibold text-gray-900 mt-2">{topic.evidenceStandards}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2">
+                {topic.evidenceStandards}
+              </p>
             </div>
           </div>
 
@@ -312,8 +327,8 @@ function TopicDetailPage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
-            <Button variant="primary" size="lg">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button variant="primary" size="lg" fullWidth className="sm:w-auto">
               Join Discussion
             </Button>
             {liveAnalysis && <ShareButton analysis={liveAnalysis} />}
@@ -373,8 +388,10 @@ function TopicDetailPage() {
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">No responses yet</h3>
-              <p className="mt-2 text-gray-600">
+              <h3 className="mt-4 text-fluid-xl font-semibold text-gray-900 dark:text-gray-100">
+                No responses yet
+              </h3>
+              <p className="mt-2 text-fluid-base text-gray-600 dark:text-gray-400">
                 Be the first to share your perspective on this topic.
               </p>
             </div>
@@ -383,9 +400,11 @@ function TopicDetailPage() {
       )}
 
       {/* Response Composer Section */}
-      <div className="mb-6">
+      <div className="mb-6 md:mb-6 pb-20 md:pb-0">
         <Card variant="default" padding="lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Share Your Perspective</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Share Your Perspective
+          </h3>
           <ResponseComposer
             onSubmit={handleSubmitResponse}
             isLoading={isSubmittingResponse}
@@ -394,6 +413,13 @@ function TopicDetailPage() {
           />
         </Card>
       </div>
+
+      {/* Mobile Action Bar - Fixed bottom CTA on mobile */}
+      <MobileActionBar>
+        <Button variant="primary" size="lg" fullWidth>
+          Join Discussion
+        </Button>
+      </MobileActionBar>
     </div>
   );
 }

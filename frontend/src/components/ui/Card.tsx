@@ -44,12 +44,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     // Base styles
     const baseStyles = 'rounded-xl transition-all';
 
-    // Variant styles
+    // Variant styles (with dark mode support)
     const variantStyles = {
-      default: 'bg-white border border-gray-200',
-      outlined: 'bg-white border-2 border-gray-300',
-      elevated: 'bg-white shadow-lg',
-      ghost: 'bg-gray-50 border border-transparent',
+      default: 'bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700',
+      outlined: 'bg-white border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600',
+      elevated: 'bg-white shadow-lg dark:bg-gray-800 dark:shadow-2xl',
+      ghost: 'bg-gray-50 border border-transparent dark:bg-gray-900 dark:border-transparent',
     };
 
     // Padding styles
@@ -60,9 +60,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       lg: 'p-8',
     };
 
-    // Hover styles
+    // Hover styles (with dark mode support)
     const hoverStyles = hoverable
-      ? 'hover:shadow-xl hover:border-primary-200 hover:-translate-y-0.5'
+      ? 'hover:shadow-xl hover:border-primary-200 dark:hover:border-primary-700 hover:-translate-y-0.5'
       : '';
 
     // Clickable styles
@@ -107,8 +107,10 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
     return (
       <div ref={ref} className={`flex items-start justify-between mb-4 ${className}`} {...props}>
         <div className="flex-1">
-          {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
-          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+          {title && (
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+          )}
+          {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
           {children}
         </div>
         {action && <div className="ml-4 flex-shrink-0">{action}</div>}
@@ -142,7 +144,7 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ children, bordered = false, className = '', ...props }, ref) => {
-    const borderStyles = bordered ? 'border-t border-gray-200 pt-4' : '';
+    const borderStyles = bordered ? 'border-t border-gray-200 dark:border-gray-700 pt-4' : '';
 
     return (
       <div ref={ref} className={`mt-4 ${borderStyles} ${className}`} {...props}>
