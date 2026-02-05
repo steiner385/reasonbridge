@@ -14,6 +14,7 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />);
 
       expect(screen.getByText('Topics')).toBeInTheDocument();
+      expect(screen.getByText('Simulator')).toBeInTheDocument();
       expect(screen.getByText('Notifications')).toBeInTheDocument();
       expect(screen.getByText('Settings')).toBeInTheDocument();
     });
@@ -51,8 +52,8 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />, '/topics');
 
       const topicsLink = screen.getByText('Topics').closest('a');
-      expect(topicsLink).toHaveClass('bg-blue-50');
-      expect(topicsLink).toHaveClass('text-blue-700');
+      expect(topicsLink).toHaveClass('bg-primary-50');
+      expect(topicsLink).toHaveClass('text-primary-700');
       expect(topicsLink).toHaveAttribute('aria-current', 'page');
     });
 
@@ -60,8 +61,8 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />, '/notifications');
 
       const notificationsLink = screen.getByText('Notifications').closest('a');
-      expect(notificationsLink).toHaveClass('bg-blue-50');
-      expect(notificationsLink).toHaveClass('text-blue-700');
+      expect(notificationsLink).toHaveClass('bg-primary-50');
+      expect(notificationsLink).toHaveClass('text-primary-700');
       expect(notificationsLink).toHaveAttribute('aria-current', 'page');
     });
 
@@ -69,8 +70,8 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />, '/settings');
 
       const settingsLink = screen.getByText('Settings').closest('a');
-      expect(settingsLink).toHaveClass('bg-blue-50');
-      expect(settingsLink).toHaveClass('text-blue-700');
+      expect(settingsLink).toHaveClass('bg-primary-50');
+      expect(settingsLink).toHaveClass('text-primary-700');
       expect(settingsLink).toHaveAttribute('aria-current', 'page');
     });
 
@@ -138,7 +139,7 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation unreadCount={3} />);
 
       const badge = screen.getByLabelText('3 unread');
-      expect(badge).toHaveClass('bg-blue-600');
+      expect(badge).toHaveClass('bg-primary-600');
       expect(badge).toHaveClass('text-white');
       expect(badge).toHaveClass('rounded-full');
     });
@@ -223,7 +224,7 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />);
 
       const links = screen.getAllByRole('link');
-      expect(links).toHaveLength(3);
+      expect(links).toHaveLength(4); // Topics, Simulator, Notifications, Settings
 
       links.forEach((link) => {
         expect(link.tagName).toBe('A');
@@ -237,10 +238,12 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />);
 
       const topicsLink = screen.getByText('Topics').closest('a');
+      const simulatorLink = screen.getByText('Simulator').closest('a');
       const notificationsLink = screen.getByText('Notifications').closest('a');
       const settingsLink = screen.getByText('Settings').closest('a');
 
       expect(topicsLink).toHaveAttribute('href', '/topics');
+      expect(simulatorLink).toHaveAttribute('href', '/simulator');
       expect(notificationsLink).toHaveAttribute('href', '/notifications');
       expect(settingsLink).toHaveAttribute('href', '/settings');
     });
