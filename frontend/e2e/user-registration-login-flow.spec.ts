@@ -132,6 +132,10 @@ test.describe('User Registration and Login Flow', () => {
 
       // Wait for redirect to authenticated page
       await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+
+      // Wait for network requests to complete and token storage to finish
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(200); // Allow async token storage to complete
     });
 
     // Step 6: Verify successful authentication

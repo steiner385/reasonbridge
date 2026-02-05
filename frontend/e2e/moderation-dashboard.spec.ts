@@ -592,6 +592,9 @@ test.describe('Moderation Dashboard', () => {
 
       // Go to Queue tab
       await page.getByRole('tab', { name: /queue/i }).click();
+      // Wait for tab content to load
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(300); // Allow tab content to render
 
       // Apply a filter if available
       const statusFilter = page.locator('select').first();
@@ -600,7 +603,14 @@ test.describe('Moderation Dashboard', () => {
 
         // Switch to another tab and back
         await page.getByRole('tab', { name: /overview/i }).click();
+        // Wait for Overview tab content to load
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(300);
+
         await page.getByRole('tab', { name: /queue/i }).click();
+        // Wait for Queue tab content to load again
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(300);
 
         // Verify filter state (this depends on implementation)
         // Some implementations reset, some persist

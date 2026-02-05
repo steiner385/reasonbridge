@@ -124,6 +124,9 @@ async function crawlPage(
 
     await page.waitForLoadState('domcontentloaded');
 
+    // Allow page to fully render and stabilize
+    await page.waitForTimeout(200);
+
     // Take screenshot if directory provided
     if (screenshotDir) {
       // Convert URL to safe filename: / -> home, /topics -> topics, /topics/123 -> topics-123
@@ -274,6 +277,8 @@ test.describe('Site Crawler - Comprehensive Validation', () => {
     page,
     baseURL,
   }) => {
+    // Increase timeout for comprehensive site crawl (14 start pages + discovered links)
+    test.setTimeout(120000); // 2 minutes
     const base = baseURL || 'http://localhost:9080';
 
     // Create screenshot directory with timestamp

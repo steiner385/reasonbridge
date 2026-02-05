@@ -34,6 +34,10 @@ test.describe('Dark Mode Accessibility', () => {
     // Wait for navigation to topics
     await page.waitForURL('/topics?welcome=true');
 
+    // Wait for network requests to complete and theme to fully apply
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+
     // Run axe accessibility scan
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -52,6 +56,10 @@ test.describe('Dark Mode Accessibility', () => {
     await dialog.getByRole('button', { name: /^log in$/i }).click();
 
     await page.waitForURL('/topics?welcome=true');
+
+    // Wait for network requests to complete and theme to fully apply
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
 
     // Run axe with specific color-contrast rules
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -93,6 +101,10 @@ test.describe('Dark Mode Accessibility', () => {
     // Navigate to profile
     await page.goto('/profile');
 
+    // Wait for network requests to complete and theme to fully apply
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+
     // Run axe with color-contrast rules
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withRules(['color-contrast'])
@@ -132,6 +144,10 @@ test.describe('Dark Mode Accessibility', () => {
 
     await page.waitForURL('/topics?welcome=true');
 
+    // Wait for network requests to complete and theme to fully apply
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+
     // Tab through navigation items to activate focus states
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
@@ -157,8 +173,9 @@ test.describe('Dark Mode Accessibility', () => {
     // Using UUID from mock data (common in E2E tests)
     await page.goto('/topics/11111111-0000-4000-8000-000000000109');
 
-    // Wait for page to load
+    // Wait for page to load and theme to fully apply
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
 
     // Run axe with color-contrast rules
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -180,8 +197,9 @@ test.describe('Dark Mode Accessibility', () => {
     // Navigate to topic detail page with common ground analysis
     await page.goto('/topics/11111111-0000-4000-8000-000000000109');
 
-    // Wait for page to load
+    // Wait for page to load and theme to fully apply
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
 
     // Check that white backgrounds are not present in dark mode
     // This catches components that don't implement dark mode

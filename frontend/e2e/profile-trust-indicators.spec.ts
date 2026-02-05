@@ -138,6 +138,9 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     // Also ensure API call has completed by waiting for trust score display
     const trustScoreDisplay = page.locator('[data-testid="trust-score-display"]');
     await expect(trustScoreDisplay).toBeVisible({ timeout: 10000 });
+
+    // Allow profile state to fully stabilize (React re-renders, API calls)
+    await page.waitForTimeout(500);
   };
 
   test.describe('TrustBadge Component Display', () => {
