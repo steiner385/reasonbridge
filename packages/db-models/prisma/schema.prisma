@@ -60,6 +60,9 @@ model User {
   // Feature 009: Discussion Participation
   createdDiscussions    Discussion[]
   participantActivities ParticipantActivity[]
+  // Feature 016: Topic Management
+  topicEdits            TopicEdit[]           @relation("TopicEditor")
+  topicMerges           TopicMerge[]          @relation("TopicMerger")
 
   @@index([cognitoSub])
   @@index([email])
@@ -189,6 +192,11 @@ model DiscussionTopic {
   description           String           @db.Text
   creatorId             String           @map("creator_id") @db.Uuid
   status                TopicStatus      @default(SEEDING)
+  // T001: New fields for topic management
+  visibility            TopicVisibility  @default(PUBLIC)
+  slug                  String           @unique @db.VarChar(250)
+  lastActivityAt        DateTime         @default(now()) @map("last_activity_at")
+  lockedAt              DateTime?        @map("locked_at")
   evidenceStandards     EvidenceStandard @default(STANDARD) @map("evidence_standards")
   minimumDiversityScore Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
   currentDiversityScore Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
@@ -213,12 +221,22 @@ model DiscussionTopic {
   commonGroundAnalyses CommonGroundAnalysis[]
   topicInterests       TopicInterest[]
   Discussion           Discussion[]
+  // T002: New relations for topic management
+  editHistory          TopicEdit[]
+  mergesAsTarget       TopicMerge[]           @relation("TargetTopicMerge")
+  // T038: Analytics relation
+  analytics            TopicAnalytics[]
 
   @@index([status])
   @@index([creatorId])
   @@index([createdAt(sort: Desc)])
   @@index([activityLevel])
   @@index([suggestedForNewUsers])
+  // T001: New indexes for topic management
+  @@index([slug])
+  @@index([visibility])
+  @@index([lastActivityAt(sort: Desc)])
+  @@index([status, visibility])
   @@map("discussion_topics")
 }
 
@@ -226,8 +244,18 @@ enum TopicStatus {
   SEEDING
   ACTIVE
   ARCHIVED
+  LOCKED // T001: Added for topic management
 
   @@map("topic_status")
+}
+
+// T001: New enum for topic visibility control
+enum TopicVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+
+  @@map("topic_visibility")
 }
 
 enum EvidenceStandard {
@@ -236,6 +264,102 @@ enum EvidenceStandard {
   RIGOROUS
 
   @@map("evidence_standard")
+}
+
+/// T002: Edit history tracking for topics (Feature 016: Topic Management)
+/// Immutable audit trail - no updates, only inserts
+model TopicEdit {
+  id              String   @id @default(uuid()) @db.Uuid
+  topicId         String   @map("topic_id") @db.Uuid
+  editorId        String   @map("editor_id") @db.Uuid
+  editedAt        DateTime @default(now()) @map("edited_at")
+
+  // Changed fields (null if unchanged)
+  previousTitle       String? @map("previous_title") @db.VarChar(200)
+  newTitle            String? @map("new_title") @db.VarChar(200)
+  previousDescription String? @map("previous_description") @db.Text
+  newDescription      String? @map("new_description") @db.Text
+  previousTags        String[] @default([]) @map("previous_tags")
+  newTags             String[] @default([]) @map("new_tags")
+
+  changeReason    String? @map("change_reason") @db.Text
+  flaggedForReview Boolean @default(false) @map("flagged_for_review")
+
+  // Relations
+  topic  DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  editor User            @relation("TopicEditor", fields: [editorId], references: [id])
+
+  @@index([topicId, editedAt(sort: Desc)])
+  @@index([editorId])
+  @@index([flaggedForReview])
+  @@map("topic_edits")
+}
+
+/// T003: Topic merge operations (Feature 016: Topic Management)
+/// Tracks merge history for rollback and audit purposes
+model TopicMerge {
+  id                String    @id @default(uuid()) @db.Uuid
+  sourceTopicIds    String[]  @map("source_topic_ids") @db.Uuid
+  targetTopicId     String    @map("target_topic_id") @db.Uuid
+  moderatorId       String    @map("moderator_id") @db.Uuid
+  mergeReason       String    @map("merge_reason") @db.Text
+  mergedAt          DateTime  @default(now()) @map("merged_at")
+
+  // Rollback support (30-day window)
+  rolledBackAt      DateTime? @map("rolled_back_at")
+  rollbackReason    String?   @map("rollback_reason") @db.Text
+
+  // Snapshot of merged data for rollback
+  sourceSnapshots   Json      @map("source_snapshots") // Original topic data
+  responsesMoved    Int       @default(0) @map("responses_moved")
+  participantsMerged Int      @default(0) @map("participants_merged")
+
+  // Relations
+  targetTopic DiscussionTopic @relation("TargetTopicMerge", fields: [targetTopicId], references: [id])
+  moderator   User            @relation("TopicMerger", fields: [moderatorId], references: [id])
+
+  @@index([targetTopicId])
+  @@index([moderatorId])
+  @@index([mergedAt])
+  @@index([rolledBackAt])
+  @@map("topic_merges")
+}
+
+/// T038 [US5]: Topic analytics for pre-aggregated metrics (Feature 016)
+/// Stores daily aggregated metrics for efficient analytics queries
+/// Real-time metrics are computed on-demand by TopicsAnalyticsService
+model TopicAnalytics {
+  id              String   @id @default(uuid()) @db.Uuid
+  topicId         String   @map("topic_id") @db.Uuid
+  date            DateTime @db.Date // Aggregation date (daily)
+
+  // View metrics
+  viewCount       Int      @default(0) @map("view_count")
+  uniqueViewers   Int      @default(0) @map("unique_viewers")
+
+  // Participation metrics
+  responseCount   Int      @default(0) @map("response_count")
+  participantCount Int     @default(0) @map("participant_count")
+  newParticipants Int      @default(0) @map("new_participants")
+
+  // Engagement metrics
+  avgResponseLength Int    @default(0) @map("avg_response_length")
+  engagementScore   Decimal @default(0) @map("engagement_score") @db.Decimal(5, 2)
+
+  // Time-based metrics
+  peakActivityHour  Int?   @map("peak_activity_hour") // Hour of day (0-23)
+
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, date])
+  @@index([topicId, date(sort: Desc)])
+  @@index([date])
+  @@map("topic_analytics")
 }
 
 /// Tags for categorizing discussion topics

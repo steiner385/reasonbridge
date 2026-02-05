@@ -1,0 +1,720 @@
+openapi: 3.0.3
+info:
+  title: ReasonBridge Topic Management API
+  description: API endpoints for creating, managing, and discovering discussion topics
+  version: 1.0.0
+  contact:
+    name: ReasonBridge Team
+
+servers:
+  - url: http://localhost:3002/topics
+    description: Local development (discussion-service)
+  - url: https://api.reasonbridge.org/topics
+    description: Production
+
+tags:
+  - name: Topics
+    description: Topic CRUD operations
+  - name: Topic Lifecycle
+    description: Status management (archive, lock, reopen)
+  - name: Topic Discovery
+    description: Search, filtering, and duplicate detection
+  - name: Topic Analytics
+    description: Participation metrics and trends
+  - name: Topic Moderation
+    description: Moderator operations (merge, link, review)
+
+paths:
+  /:
+    get:
+      tags: [Topic Discovery]
+      summary: List topics with filtering and sorting
+      operationId: listTopics
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Active, Archived, Locked]
+            default: Active
+        - name: visibility
+          in: query
+          schema:
+            type: string
+            enum: [Public, Private]
+            default: Public
+        - name: tags
+          in: query
+          description: Comma-separated tag names (OR logic)
+          schema:
+            type: string
+            example: "climate,environment"
+        - name: search
+          in: query
+          description: Full-text search query
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, lastActivityAt, discussionCount]
+            default: lastActivityAt
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Paginated list of topics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TopicSummary'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags: [Topics]
+      summary: Create a new topic
+      operationId: createTopic
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTopicDto'
+      responses:
+        '201':
+          description: Topic created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          description: Duplicate topic detected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "Similar topics found"
+                  similarTopics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TopicSummary'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /search:
+    get:
+      tags: [Topic Discovery]
+      summary: Full-text search topics with duplicate detection
+      operationId: searchTopics
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Search results ranked by relevance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        topic:
+                          $ref: '#/components/schemas/TopicSummary'
+                        score:
+                          type: number
+                          description: Relevance score (0-1)
+
+  /{id}:
+    get:
+      tags: [Topics]
+      summary: Get topic by ID
+      operationId: getTopicById
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      responses:
+        '200':
+          description: Topic details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDetail'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      tags: [Topics]
+      summary: Update topic details
+      operationId: updateTopic
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTopicDto'
+      responses:
+        '200':
+          description: Topic updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /{id}/archive:
+    post:
+      tags: [Topic Lifecycle]
+      summary: Archive a topic
+      operationId: archiveTopic
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      responses:
+        '200':
+          description: Topic archived successfully
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /{id}/lock:
+    post:
+      tags: [Topic Lifecycle]
+      summary: Lock a topic (prevent new discussions)
+      operationId: lockTopic
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+              required: [reason]
+      responses:
+        '200':
+          description: Topic locked successfully
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /{id}/reopen:
+    post:
+      tags: [Topic Lifecycle]
+      summary: Reopen an archived or locked topic
+      operationId: reopenTopic
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      responses:
+        '200':
+          description: Topic reopened successfully
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /{id}/edits:
+    get:
+      tags: [Topics]
+      summary: Get topic edit history
+      operationId: getTopicEditHistory
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Edit history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicEdit'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /{id}/analytics:
+    get:
+      tags: [Topic Analytics]
+      summary: Get topic analytics
+      operationId: getTopicAnalytics
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      responses:
+        '200':
+          description: Topic analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicAnalytics'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /merge:
+    post:
+      tags: [Topic Moderation]
+      summary: Merge two topics
+      operationId: mergeTopics
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MergeTopicsDto'
+      responses:
+        '200':
+          description: Topics merged successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  primaryTopicId:
+                    type: string
+                    format: uuid
+                  discussionsMoved:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          description: Only moderators can merge topics
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Concurrent merge detected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "Another moderator is merging these topics"
+
+  /{id}/links:
+    post:
+      tags: [Topic Moderation]
+      summary: Create a link between related topics
+      operationId: createTopicLink
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TopicId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relatedTopicId:
+                  type: string
+                  format: uuid
+                linkReason:
+                  type: string
+                  maxLength: 500
+              required: [relatedTopicId]
+      responses:
+        '201':
+          description: Topic link created
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          description: Only moderators can create links
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    TopicId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CreateTopicDto:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 10
+          maxLength: 200
+          example: "Should AI development be regulated?"
+        description:
+          type: string
+          minLength: 50
+          maxLength: 5000
+          example: "This topic explores arguments for and against government regulation of artificial intelligence development..."
+        tags:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z0-9-]+$'
+            maxLength: 30
+          minItems: 1
+          maxItems: 5
+          example: ["ai", "regulation", "technology"]
+        visibility:
+          type: string
+          enum: [Public, Private]
+          default: Public
+      required: [title, description, tags]
+
+    UpdateTopicDto:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 10
+          maxLength: 200
+        description:
+          type: string
+          minLength: 50
+          maxLength: 5000
+        tags:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z0-9-]+$'
+            maxLength: 30
+          minItems: 1
+          maxItems: 5
+        changeReason:
+          type: string
+          maxLength: 500
+          description: Optional reason for edit
+
+    MergeTopicsDto:
+      type: object
+      properties:
+        primaryTopicId:
+          type: string
+          format: uuid
+          description: Topic to keep (target for discussions)
+        secondaryTopicId:
+          type: string
+          format: uuid
+          description: Topic to merge and soft-delete
+        mergeReason:
+          type: string
+          maxLength: 1000
+      required: [primaryTopicId, secondaryTopicId, mergeReason]
+
+    TopicSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          maxLength: 200
+          description: Truncated preview
+        slug:
+          type: string
+        status:
+          type: string
+          enum: [Active, Archived, Locked]
+        visibility:
+          type: string
+          enum: [Public, Private]
+        creatorId:
+          type: string
+          format: uuid
+        creatorName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastActivityAt:
+          type: string
+          format: date-time
+        participantCount:
+          type: integer
+        discussionCount:
+          type: integer
+        responseCount:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        editedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    TopicDetail:
+      allOf:
+        - $ref: '#/components/schemas/TopicSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+              description: Full description (not truncated)
+            redirectToId:
+              type: string
+              format: uuid
+              nullable: true
+            relatedTopics:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  title:
+                    type: string
+                  linkReason:
+                    type: string
+                    nullable: true
+
+    TopicEdit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        editorId:
+          type: string
+          format: uuid
+        editorName:
+          type: string
+        editedAt:
+          type: string
+          format: date-time
+        previousTitle:
+          type: string
+          nullable: true
+        newTitle:
+          type: string
+          nullable: true
+        previousDescription:
+          type: string
+          nullable: true
+        newDescription:
+          type: string
+          nullable: true
+        previousTags:
+          type: array
+          items:
+            type: string
+        newTags:
+          type: array
+          items:
+            type: string
+        changeReason:
+          type: string
+          nullable: true
+        flaggedForReview:
+          type: boolean
+
+    TopicAnalytics:
+      type: object
+      properties:
+        topicId:
+          type: string
+          format: uuid
+        calculatedAt:
+          type: string
+          format: date-time
+        participantCount:
+          type: integer
+        discussionCount:
+          type: integer
+        responseCount:
+          type: integer
+        responsesPerDay:
+          type: array
+          items:
+            type: integer
+          description: Response counts for past 30 days (index 0 = today)
+        perspectiveDiversity:
+          type: object
+          properties:
+            progressive:
+              type: number
+            conservative:
+              type: number
+            moderate:
+              type: number
+          nullable: true
+        peakActivityHour:
+          type: integer
+          minimum: 0
+          maximum: 23
+          nullable: true
+        avgResponseLength:
+          type: integer
+          nullable: true
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 400
+              message:
+                type: array
+                items:
+                  type: string
+                example: ["title must be between 10 and 200 characters"]
+              error:
+                type: string
+                example: "Bad Request"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: "Topic not found"
+              error:
+                type: string
+                example: "Not Found"
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 403
+              message:
+                type: string
+                example: "You do not have permission to edit this topic"
+              error:
+                type: string
+                example: "Forbidden"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                example: 429
+              message:
+                type: string
+                example: "Topic creation limit reached (5 per day)"
+              error:
+                type: string
+                example: "Too Many Requests"

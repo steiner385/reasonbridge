@@ -9,6 +9,8 @@ export interface TopicResponseDto {
   description: string;
   creatorId: string;
   status: string;
+  visibility?: string; // PUBLIC | PRIVATE | UNLISTED
+  slug?: string; // URL-friendly identifier
   evidenceStandards: string;
   minimumDiversityScore: number;
   currentDiversityScore: number | null;

@@ -637,9 +637,6 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Active Technologies
 
-- TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS (001-ui-ux-enhancement)
-- N/A (frontend-only feature, uses localStorage for client-side state) (001-ui-ux-enhancement)
-
 - **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
 - **PostgreSQL 15** - Primary database with Prisma ORM
 - **Redis 7** - Caching, sessions, pub/sub messaging
@@ -747,8 +744,6 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 - **Local Reproduction**: Run pipeline stages from `.jenkins/Jenkinsfile` locally
 
 ## Recent Changes
-
-- 001-ui-ux-enhancement: Added TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS
 
 - **2026-02-01**: Consolidated pending PRs into staging branch
 - **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3
