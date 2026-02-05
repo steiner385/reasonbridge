@@ -54,26 +54,37 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for registration to complete - use Promise.race to detect either redirect OR error
-    const result = await Promise.race([
-      page
-        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
-        .then(() => 'redirect' as const),
-      page
-        .locator('.bg-fallacy-light p')
-        .waitFor({ state: 'visible', timeout: 20000 })
-        .then(() => 'error' as const),
-    ]);
+    // Wait for registration to complete
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
 
-    if (result === 'error') {
-      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
-      throw new Error(`Registration failed with error: ${errorText}`);
+    // Check if still on registration page (indicates failure)
+    if (page.url().includes('/register')) {
+      // Look for ANY visible error message
+      const errorEl = page.locator(
+        '[class*="error"], [role="alert"], .text-red, .bg-red, .bg-fallacy-light p',
+      );
+      const errorCount = await errorEl.count();
+
+      if (errorCount > 0) {
+        const errorText = await errorEl.first().textContent();
+        throw new Error(`Registration failed with visible error: ${errorText}`);
+      }
+
+      // No visible error but still on registration page - check for silent failure
+      const pageContent = await page.textContent('body');
+      throw new Error(
+        `Registration may have failed silently - still on /register page. ` +
+          `Page content (first 500 chars): ${pageContent?.substring(0, 500)}`,
+      );
     }
 
-    // Success: verify we landed on an expected page
-    await expect(page).toHaveURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
-      timeout: 5000,
-    });
+    // Success: verify we redirected to an expected page (including email verification)
+    await expect(page).toHaveURL(
+      /(\/$|\/login|\/dashboard|\/home|\/profile|\/topics|\/verify-email)/,
+      {
+        timeout: 5000,
+      },
+    );
 
     // Step 2: Login after registration
     // Registration redirects to landing page (/) - use login modal

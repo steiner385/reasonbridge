@@ -137,13 +137,13 @@ const ShareModal: React.FC<ShareModalProps> = ({
       <div className="space-y-6">
         {/* Copy Link Section */}
         <div data-testid="share-link-section">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Share Link</h3>
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Share Link</h3>
           <div className="flex gap-2">
             <input
               type="text"
               readOnly
               value={shareUrl}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               aria-label="Share URL"
             />
             <Button
@@ -179,7 +179,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
         {/* Social Media Section */}
         <div data-testid="social-section">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Share on Social Media</h3>
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Share on Social Media
+          </h3>
           <div className="flex gap-3">
             <Button
               variant="outline"
@@ -246,12 +248,14 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
         {/* Export Section */}
         <div data-testid="export-section">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Export Analysis</h3>
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Export Analysis
+          </h3>
           <div className="flex gap-2">
             <select
               value={selectedExportFormat}
               onChange={(e) => setSelectedExportFormat(e.target.value as ExportFormat)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               aria-label="Export format"
               data-testid="export-format"
             >
@@ -280,9 +284,14 @@ const ShareModal: React.FC<ShareModalProps> = ({
         </div>
 
         {/* Analysis Summary */}
-        <div className="pt-4 border-t border-gray-200" data-testid="analysis-summary">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Analysis Summary</h3>
-          <div className="text-sm text-gray-600 space-y-1">
+        <div
+          className="pt-4 border-t border-gray-200 dark:border-gray-700"
+          data-testid="analysis-summary"
+        >
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Analysis Summary
+          </h3>
+          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <p data-testid="participant-count">
               <strong>Participants:</strong> {analysis.participantCount ?? 0}
             </p>

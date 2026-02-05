@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
+import { useAuth } from '../../hooks/useAuth';
 import { Navigation } from './Navigation';
 
 /**
@@ -12,16 +13,11 @@ import { Navigation } from './Navigation';
 interface SidebarProps {
   /** Optional unread notification count */
   unreadCount?: number;
-  /** Optional user profile data */
-  user?: {
-    displayName: string;
-    email: string;
-    avatarUrl?: string;
-  } | null;
 }
 
-export function Sidebar({ unreadCount = 0, user }: SidebarProps) {
+export function Sidebar({ unreadCount = 0 }: SidebarProps) {
   const { isCollapsed } = useSidebar();
+  const { user } = useAuth();
 
   return (
     <aside

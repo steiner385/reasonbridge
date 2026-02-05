@@ -6,6 +6,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { AuthProvider } from './contexts/AuthContext';
 import ErrorBoundary from './components/error/ErrorBoundary';
 import App from './App.tsx';
 import './index.css';
@@ -23,11 +24,13 @@ createRoot(rootElement).render(
         <NotificationProvider>
           <ThemeProvider>
             <ToastProvider>
-              <SidebarProvider>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </SidebarProvider>
+              <AuthProvider>
+                <SidebarProvider>
+                  <BrowserRouter>
+                    <App />
+                  </BrowserRouter>
+                </SidebarProvider>
+              </AuthProvider>
             </ToastProvider>
           </ThemeProvider>
         </NotificationProvider>

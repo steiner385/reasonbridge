@@ -16,6 +16,7 @@ import NotificationsPage from '../pages/NotificationsPage';
 import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
+import { ProtectedRoute } from '../components/auth';
 
 /**
  * Route definitions for the ReasonBridge application.
@@ -50,47 +51,91 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/topics',
-    element: <TopicsPage />,
+    element: (
+      <ProtectedRoute>
+        <TopicsPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/topics/:id',
-    element: <TopicDetailPage />,
+    element: (
+      <ProtectedRoute>
+        <TopicDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/profile',
-    element: <ProfilePage />,
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/profile/:id',
-    element: <UserProfilePage />,
+    element: (
+      <ProtectedRoute>
+        <UserProfilePage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/notifications',
-    element: <NotificationsPage />,
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/settings',
-    element: <SettingsPage />,
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/settings/feedback',
-    element: <FeedbackPreferencesPage />,
+    element: (
+      <ProtectedRoute>
+        <FeedbackPreferencesPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/verification',
-    element: <VerificationPage />,
+    element: (
+      <ProtectedRoute>
+        <VerificationPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/admin/moderation',
-    element: <ModerationDashboardPage />,
+    element: (
+      <ProtectedRoute>
+        <ModerationDashboardPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/appeals',
-    element: <AppealStatusPage />,
+    element: (
+      <ProtectedRoute>
+        <AppealStatusPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/simulator',
-    element: <DiscussionSimulatorPage />,
+    element: (
+      <ProtectedRoute>
+        <DiscussionSimulatorPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/terms',

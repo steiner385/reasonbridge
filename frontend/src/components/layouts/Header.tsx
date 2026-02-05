@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobileViewport } from '../../hooks/useMediaQuery';
 import { useTheme } from '../../hooks/useTheme';
+import { useLoginModal } from '../../contexts/LoginModalContext';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * Header Component
@@ -12,17 +14,14 @@ import { useTheme } from '../../hooks/useTheme';
 interface HeaderProps {
   /** Optional unread notification count */
   unreadCount?: number;
-  /** Optional user profile data */
-  user?: {
-    displayName: string;
-    avatarUrl?: string;
-  } | null;
 }
 
-export function Header({ unreadCount = 0, user }: HeaderProps) {
+export function Header({ unreadCount = 0 }: HeaderProps) {
   const { isCollapsed, toggleCollapsed, toggleMobile } = useSidebar();
   const isMobile = useIsMobileViewport();
   const { isDark, toggleTheme } = useTheme();
+  const { openModal: openLoginModal } = useLoginModal();
+  const { user, isLoading } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -78,19 +77,20 @@ export function Header({ unreadCount = 0, user }: HeaderProps) {
           )}
 
           {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-8 w-8 text-blue-600 dark:text-blue-500"
-            >
-              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-            </svg>
-            {!isMobile && <span>ReasonBridge</span>}
+          <Link to="/" className="flex items-center gap-2">
+            {isMobile ? (
+              <img
+                src="/assets/brand/logo-icon.svg"
+                alt="ReasonBridge"
+                className="h-8 w-8 dark:brightness-110"
+              />
+            ) : (
+              <img
+                src="/assets/brand/logo-full.svg"
+                alt="ReasonBridge"
+                className="h-8 dark:brightness-110"
+              />
+            )}
           </Link>
         </div>
 
@@ -101,7 +101,7 @@ export function Header({ unreadCount = 0, user }: HeaderProps) {
               <input
                 type="search"
                 placeholder="Search topics, discussions..."
-                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 aria-label="Search"
               />
               <svg
@@ -193,7 +193,9 @@ export function Header({ unreadCount = 0, user }: HeaderProps) {
           </Link>
 
           {/* Profile button */}
-          {user ? (
+          {isLoading ? (
+            <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
+          ) : user ? (
             <Link
               to="/profile"
               className="flex h-10 items-center gap-2 rounded-lg px-3 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -213,12 +215,12 @@ export function Header({ unreadCount = 0, user }: HeaderProps) {
               )}
             </Link>
           ) : (
-            <Link
-              to="/login"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            <button
+              onClick={openLoginModal}
+              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700"
             >
               Log In
-            </Link>
+            </button>
           )}
         </div>
       </div>

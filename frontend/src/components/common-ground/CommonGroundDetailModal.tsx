@@ -110,30 +110,33 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
           >
             {zone.consensusLevel.toUpperCase()} CONSENSUS
           </span>
-          <span className="text-sm text-gray-600" data-testid="participant-count">
+          <span
+            className="text-sm text-gray-600 dark:text-gray-400"
+            data-testid="participant-count"
+          >
             {zone.participantCount} participants
           </span>
         </div>
-        <p className="text-gray-700 mt-2">{zone.description}</p>
+        <p className="text-gray-700 dark:text-gray-300 mt-2">{zone.description}</p>
       </div>
 
       {/* Propositions */}
       {zone.propositions.length > 0 && (
         <div>
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
             Shared Propositions ({zone.propositions.length})
           </h4>
           <div className="space-y-3">
             {zone.propositions.map((prop) => (
               <div
                 key={prop.id}
-                className="bg-white border border-gray-200 rounded-lg p-4"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
                 data-testid="proposition-item"
               >
                 <p className="text-gray-800 mb-3">{prop.text}</p>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Agreement</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Agreement</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {prop.agreementPercentage}%
                   </span>
                 </div>
@@ -147,7 +150,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
                     aria-valuemax={100}
                   />
                 </div>
-                <div className="mt-3 flex gap-4 text-xs text-gray-500">
+                <div className="mt-3 flex gap-4 text-xs text-gray-500 dark:text-gray-400">
                   <span>
                     <span className="text-green-600 font-medium">
                       {prop.supportingParticipants.length}
@@ -161,7 +164,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
                     opposing
                   </span>
                   <span>
-                    <span className="text-gray-600 font-medium">
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
                       {prop.neutralParticipants.length}
                     </span>{' '}
                     neutral
@@ -189,7 +192,7 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
         <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-purple-100 text-purple-800">
           TERM CONFUSION
         </span>
-        <p className="text-gray-700 mt-3">
+        <p className="text-gray-700 dark:text-gray-300 mt-3">
           Participants are using the term <strong>"{misunderstanding.term}"</strong> with different
           meanings, which may be causing confusion in the discussion.
         </p>
@@ -197,20 +200,20 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
 
       {/* Definitions */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
           Different Definitions ({misunderstanding.definitions.length})
         </h4>
         <div className="space-y-3">
           {misunderstanding.definitions.map((def, idx) => (
             <div
               key={idx}
-              className="bg-white border border-gray-200 rounded-lg p-4"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
               data-testid="definition-item"
             >
               <blockquote className="text-gray-800 italic border-l-4 border-purple-300 pl-3 mb-3">
                 "{def.definition}"
               </blockquote>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -272,46 +275,50 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
         <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-800">
           VALUE DIFFERENCE
         </span>
-        <p className="text-gray-700 mt-3">{disagreement.description}</p>
+        <p className="text-gray-700 dark:text-gray-300 mt-3">{disagreement.description}</p>
       </div>
 
       {/* Positions */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
           Different Positions ({disagreement.positions.length})
         </h4>
         <div className="space-y-4">
           {disagreement.positions.map((position, idx) => (
             <div
               key={idx}
-              className="bg-white border border-gray-200 rounded-lg p-4"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
               data-testid="position-item"
             >
               <div className="flex items-start justify-between mb-3">
-                <h5 className="font-medium text-gray-900">{position.stance}</h5>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                <h5 className="font-medium text-gray-900 dark:text-gray-100">{position.stance}</h5>
+                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 px-2 py-1 rounded">
                   {position.participants.length} participant(s)
                 </span>
               </div>
 
-              <p className="text-gray-700 mb-4">{position.reasoning}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">{position.reasoning}</p>
 
               {(position.underlyingValue || position.underlyingAssumption) && (
                 <div className="border-t border-gray-100 pt-3 space-y-2">
                   {position.underlyingValue && (
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide min-w-[80px]">
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide min-w-[80px]">
                         Core Value
                       </span>
-                      <span className="text-sm text-gray-700">{position.underlyingValue}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {position.underlyingValue}
+                      </span>
                     </div>
                   )}
                   {position.underlyingAssumption && (
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide min-w-[80px]">
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide min-w-[80px]">
                         Assumption
                       </span>
-                      <span className="text-sm text-gray-700">{position.underlyingAssumption}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {position.underlyingAssumption}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -324,10 +331,12 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
       {/* Moral Foundations */}
       {disagreement.moralFoundations && disagreement.moralFoundations.length > 0 && (
         <div
-          className="bg-gray-50 border border-gray-200 rounded-lg p-4"
+          className="bg-gray-50 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
           data-testid="moral-foundations"
         >
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Related Moral Foundations</h4>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            Related Moral Foundations
+          </h4>
           <div className="flex flex-wrap gap-2">
             {disagreement.moralFoundations.map((foundation, idx) => (
               <span
@@ -338,7 +347,7 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
               </span>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-3">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
             These moral foundations may help explain the underlying values driving this
             disagreement.
           </p>

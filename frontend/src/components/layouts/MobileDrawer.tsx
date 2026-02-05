@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
+import { useAuth } from '../../hooks/useAuth';
 import { Navigation } from './Navigation';
 
 /**
@@ -12,16 +13,11 @@ import { Navigation } from './Navigation';
 interface MobileDrawerProps {
   /** Optional unread notification count */
   unreadCount?: number;
-  /** Optional user profile data */
-  user?: {
-    displayName: string;
-    email: string;
-    avatarUrl?: string;
-  } | null;
 }
 
-export function MobileDrawer({ unreadCount = 0, user }: MobileDrawerProps) {
+export function MobileDrawer({ unreadCount = 0 }: MobileDrawerProps) {
   const { isMobileOpen, closeMobile } = useSidebar();
+  const { user } = useAuth();
   const drawerRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 

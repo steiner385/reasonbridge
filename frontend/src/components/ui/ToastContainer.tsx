@@ -42,12 +42,13 @@ export interface ToastContainerProps {
  */
 function ToastContainer({ toasts, onDismiss, position = 'top-right' }: ToastContainerProps) {
   // Position classes mapping
+  // top-20 (5rem = 80px) ensures toasts appear below the 64px header (h-16)
   const positionClasses = {
-    'top-right': 'top-4 right-4',
-    'top-left': 'top-4 left-4',
+    'top-right': 'top-20 right-4',
+    'top-left': 'top-20 left-4',
     'bottom-right': 'bottom-4 right-4',
     'bottom-left': 'bottom-4 left-4',
-    'top-center': 'top-4 left-1/2 -translate-x-1/2',
+    'top-center': 'top-20 left-1/2 -translate-x-1/2',
     'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
   };
 

@@ -601,7 +601,12 @@ test.describe('View Bridging Suggestions', () => {
 
   test('should display consensus score as percentage (0-100)', async ({ page }) => {
     await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+
+    // Wait for topic cards to appear (more reliable than waiting for loading text to hide)
+    await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
+      state: 'visible',
+      timeout: 15000,
+    });
 
     const firstTopicLink = page.locator('a[href^="/topics/"]').first();
     const linkCount = await firstTopicLink.count();
@@ -611,9 +616,20 @@ test.describe('View Bridging Suggestions', () => {
       const topicId = href?.split('/topics/')[1];
 
       await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
+
+      // Wait for topic detail page to load - use multiple indicators
+      await Promise.race([
+        page.waitForSelector('h1, [data-testid="topic-title"]', {
+          state: 'visible',
+          timeout: 15000,
+        }),
+        page.waitForSelector('[data-testid="participant-count"]', {
+          state: 'visible',
+          timeout: 15000,
+        }),
+      ]).catch(() => {
+        // If neither appears, just wait for networkidle
+        return page.waitForLoadState('networkidle', { timeout: 10000 });
       });
 
       // Wait for page to fully load

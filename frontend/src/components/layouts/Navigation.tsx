@@ -27,7 +27,7 @@ function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps
         flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
         ${
           isActive
-            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
             : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
         }
       `}
@@ -37,7 +37,7 @@ function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps
       <span className="flex-1 font-medium">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span
-          className="flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-600 text-white"
+          className="flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary-600 text-white"
           aria-label={`${badge} unread`}
         >
           {badge > 99 ? '99+' : badge}
@@ -80,6 +80,26 @@ export function Navigation({ unreadCount = 0, onNavigate }: NavigationProps) {
           </svg>
         }
         label="Topics"
+      />
+
+      <NavLink
+        to="/simulator"
+        icon={
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+            />
+          </svg>
+        }
+        label="Simulator"
       />
 
       <NavLink

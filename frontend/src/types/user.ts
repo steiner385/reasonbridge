@@ -38,6 +38,7 @@ export interface UserProfile extends User {
   followingCount?: number;
   topicCount?: number;
   responseCount?: number;
+  avatarUrl?: string;
 }
 
 export interface UserSummary {

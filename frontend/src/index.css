@@ -81,11 +81,16 @@
     transition: none;
   }
 
-  /* Respect reduced motion preference */
+  /* Respect reduced motion preference (WCAG 2.1 Level AAA) */
   @media (prefers-reduced-motion: reduce) {
     *,
+    *::before,
+    *::after,
     html {
-      transition-duration: 0ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 
@@ -99,7 +104,28 @@
 }
 
 @layer components {
-  /* Custom component styles will go here */
+  /* Skip navigation link (WCAG 2.4.1 Level A) */
+  .skip-link {
+    @apply absolute left-4 top-4 z-[9999];
+    @apply rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+
+    /* Hidden by default, visible on focus */
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-link:focus {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
 }
 
 @layer utilities {

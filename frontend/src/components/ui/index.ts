@@ -43,3 +43,6 @@ export type { FilterPanelProps } from './FilterPanel';
 
 export { default as TagFilter } from './TagFilter';
 export type { TagFilterProps, Tag } from './TagFilter';
+
+export { default as Breadcrumb } from './Breadcrumb';
+export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb';
