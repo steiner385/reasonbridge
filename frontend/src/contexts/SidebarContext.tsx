@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { SidebarContextType } from '../types/navigation';

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * JWT Utilities
  *
  * Lightweight JWT parsing utilities without external dependencies

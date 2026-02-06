@@ -131,18 +131,18 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
             </span>
           )}
         </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-300">{formattedDate}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Participants:</div>
+          <div className="text-xs text-gray-500 dark:text-gray-300">Participants:</div>
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {item.participantCountAtGeneration}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Responses:</div>
+          <div className="text-xs text-gray-500 dark:text-gray-300">Responses:</div>
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {item.responseCountAtGeneration}
           </div>
@@ -151,7 +151,7 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-600 dark:text-gray-400">Overall Consensus</span>
+          <span className="text-xs text-gray-600 dark:text-gray-300">Overall Consensus</span>
           <span className={`text-sm font-semibold ${consensusColor}`}>
             {Math.round(item.overallConsensusScore * 100)}%
           </span>
@@ -160,20 +160,20 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400"></div>
-            <span className="text-gray-600 dark:text-gray-400">
+            <span className="text-gray-600 dark:text-gray-300">
               {item.agreementZones.length} agreement{item.agreementZones.length === 1 ? '' : 's'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-yellow-500 dark:bg-yellow-400"></div>
-            <span className="text-gray-600 dark:text-gray-400">
+            <span className="text-gray-600 dark:text-gray-300">
               {item.misunderstandings.length} misunderstanding
               {item.misunderstandings.length === 1 ? '' : 's'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400"></div>
-            <span className="text-gray-600 dark:text-gray-400">
+            <span className="text-gray-600 dark:text-gray-300">
               {item.genuineDisagreements.length} disagreement
               {item.genuineDisagreements.length === 1 ? '' : 's'}
             </span>

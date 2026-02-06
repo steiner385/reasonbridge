@@ -9,6 +9,7 @@ This directory contains pre-commit and pre-push hooks that enforce code quality,
 The main pre-commit hook (`pre-commit`) orchestrates all quality checks in two phases:
 
 #### Phase 1: Parallel Security & Quality Checks
+
 These run simultaneously for speed:
 
 - **`pre-commit-secrets-scan`** - Detects sensitive credentials (API keys, tokens, passwords)
@@ -35,6 +36,7 @@ These run simultaneously for speed:
   - Configuration: `.eslintrc` / ESLint config in project root
 
 #### Phase 2: Sequential Quality Checks
+
 These run one after another:
 
 - **TypeScript Type Checking** - Runs `tsc --noEmit`
@@ -80,6 +82,7 @@ These run one after another:
 A wrapper script (`bin/git-commit-wrapper`) prevents accidental bypass attempts:
 
 **Features:**
+
 - ✅ Detects and blocks `--no-verify` or `-n` flags
 - ✅ Provides clear error messages with guidance
 - ✅ Explains why each quality gate is important
@@ -87,6 +90,7 @@ A wrapper script (`bin/git-commit-wrapper`) prevents accidental bypass attempts:
 - ✅ Perfect for agentic coding sessions to ensure code quality
 
 **Usage:**
+
 ```bash
 # Use npm script instead of git commit directly
 npm run commit -- -m "feat: your message"
@@ -94,6 +98,7 @@ npm run commit -- -m "feat: your message"
 ```
 
 **If someone tries to bypass:**
+
 ```bash
 $ npm run commit -- -n -m "message"
 ❌ ERROR: Using --no-verify or -n is not permitted in this repository
@@ -158,12 +163,14 @@ npm run validate:file-size
 ## Configuration Files
 
 ### `.jscpdrc.json` - Duplication Detection
+
 - Threshold: 20% (fails if duplication exceeds this)
 - Min Lines: 10 (minimum lines to count as duplication)
 - Min Tokens: 15 (minimum tokens to count as duplication)
 - Ignores: `node_modules`, `dist`, `coverage`, test files, generated files
 
 ### `.secrets.baseline` - Secrets Scanning
+
 - Baseline for `detect-secrets`
 - Stores known secrets to avoid false positives
 - Update with: `detect-secrets scan --baseline .secrets.baseline --update`
@@ -171,6 +178,7 @@ npm run validate:file-size
 ## Common Issues & Solutions
 
 ### Issue: "detect-secrets not found"
+
 ```bash
 # Solution: Install detect-secrets via pipx
 pipx install detect-secrets
@@ -178,6 +186,7 @@ pipx install detect-secrets
 ```
 
 ### Issue: "jscpd not found"
+
 ```bash
 # Solution: Already installed as devDependency
 pnpm install
@@ -185,7 +194,9 @@ pnpm install
 ```
 
 ### Issue: Hook fails on pre-existing code
+
 **Pre-commit only checks staged files** (not pre-existing code)
+
 - Existing violations in codebase won't block commits
 - Only new violations in staged changes will block
 
@@ -201,11 +212,13 @@ $ npm run commit -- -n -m "message"
 ```
 
 The wrapper script will:
+
 1. **Reject** the bypass attempt
 2. **Explain why** hooks are mandatory
 3. **Guide you** through the proper fix process
 
 **Why these flags are blocked:**
+
 - They bypass secrets detection (can leak API keys, passwords, tokens)
 - They bypass TypeScript checking (can commit broken code)
 - They bypass test validation (can introduce regressions)
@@ -215,6 +228,7 @@ The wrapper script will:
 Contact the team to discuss the issue. Never bypass - always fix the root cause.
 
 ### Issue: Secrets false positive
+
 ```bash
 # Update baseline to ignore known false positives
 detect-secrets scan --baseline .secrets.baseline --update
@@ -223,6 +237,7 @@ git commit -m "chore: update secrets baseline"
 ```
 
 ### Issue: Duplication threshold too strict
+
 ```bash
 # Edit .jscpdrc.json and increase threshold
 # Default is 20, can be increased to 25-30 for larger projects
@@ -249,6 +264,7 @@ FULL_TEST=true npm run commit -- -m "release: v1.0.0"
 ```
 
 **Why use `npm run commit`?**
+
 - Prevents accidental use of `--no-verify` or `-n` flags
 - Provides clear guidance if you try to bypass hooks
 - Ensures consistent commit behavior across the team

@@ -178,7 +178,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
         <div>
           <label
             htmlFor="edit-response-content"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Your Response
             <span className="text-fallacy-DEFAULT ml-1">*</span>
@@ -205,8 +205,8 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
                 !isValid && characterCount > 0
                   ? 'text-fallacy-DEFAULT'
                   : characterCount >= maxLength * 0.9
-                    ? 'text-secondary-600'
-                    : 'text-gray-500'
+                    ? 'text-secondary-600 dark:text-secondary-400'
+                    : 'text-gray-500 dark:text-gray-300'
               }`}
             >
               {characterCount} / {maxLength} characters
@@ -225,7 +225,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
         <div>
           <label
             htmlFor="edit-cited-source"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Cited Sources (Optional)
           </label>
@@ -297,7 +297,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
               disabled={isLoading}
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-            <label htmlFor="edit-contains-opinion" className="ml-2 text-sm text-gray-700">
+            <label
+              htmlFor="edit-contains-opinion"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
               This response contains my opinion
             </label>
           </div>
@@ -310,7 +313,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
               disabled={isLoading}
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-            <label htmlFor="edit-contains-factual-claims" className="ml-2 text-sm text-gray-700">
+            <label
+              htmlFor="edit-contains-factual-claims"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
               This response contains factual claims
             </label>
           </div>

@@ -770,26 +770,22 @@ describe('ResponsesService - Integration Tests', () => {
 ## 7. Implementation Checklist
 
 - [ ] **Schema Migration**
-
   - [ ] Add `version INT DEFAULT 1` column to responses table
   - [ ] Run `prisma migrate dev`
   - [ ] Update `schema.prisma` with version field
 
 - [ ] **Service Layer Updates**
-
   - [ ] Create `ConflictException` class
   - [ ] Update `updateResponse()` method with version-based locking
   - [ ] Add 24-hour edit window validation
   - [ ] Update DTOs to include `expectedVersion` and `version`
 
 - [ ] **API Controller Updates**
-
   - [ ] Accept `expectedVersion` in request body
   - [ ] Return `version` in response DTOs
   - [ ] Handle `ConflictException` in error middleware
 
 - [ ] **Client-Side Updates**
-
   - [ ] Fetch version with response
   - [ ] Send version in update requests
   - [ ] Handle 409 Conflict responses
@@ -797,7 +793,6 @@ describe('ResponsesService - Integration Tests', () => {
   - [ ] Preserve user input on conflict
 
 - [ ] **Testing**
-
   - [ ] Unit tests for version lock logic
   - [ ] Integration tests for concurrent edits
   - [ ] 24-hour window validation tests

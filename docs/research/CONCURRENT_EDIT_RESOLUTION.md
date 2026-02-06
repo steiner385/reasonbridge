@@ -137,27 +137,23 @@ async updateResponse(responseId, userId, updateDto) {
 ### Why This Approach
 
 1. **Optimal for discussion platform dynamics:**
-
    - Many users (high concurrency)
    - Few actual conflicts (edits are spread across different responses)
    - When conflicts do occur, graceful handling is critical
 
 2. **Excellent failure mode:**
-
    - Detects conflicts explicitly
    - Client receives clear error with details
    - User can choose action (refresh, merge, save as reply)
    - Input is preserved (good UX)
 
 3. **Future-proof:**
-
    - Foundation for version history
    - Enables version-based caching strategies
    - Supports audit trails
    - Enables idempotent API design
 
 4. **Minimal implementation cost:**
-
    - Single column addition (~15 min)
    - One migration (~15 min)
    - Service method update (~45 min)
@@ -275,19 +271,16 @@ await api.updateResponse(responseId, {
 When conflict occurs, present user with options:
 
 1. **Refresh & Retry** (Default)
-
    - Fetch latest response
    - User decides whether to try again
    - Clear why edit failed (version mismatch)
 
 2. **View Changes**
-
    - Show diff between their version and current
    - Show who edited it and when
    - Helps user understand what changed
 
 3. **Save as Reply** (Alternative)
-
    - Convert edit into a new reply
    - References original response
    - Preserves user input in new context
@@ -447,7 +440,6 @@ If critical issues discovered:
    - Deployable in 5 minutes
 
 2. **Full rollback:** Revert service code
-
    - Client continues sending `expectedVersion`
    - Server ignores it (backwards compatible)
    - No breaking changes
@@ -537,21 +529,18 @@ Under normal operation (5k users, 100 active):
 Four comprehensive documents have been prepared:
 
 1. **PRISMA_OPTIMISTIC_LOCKING_RESEARCH.md** (16 KB)
-
    - Complete research into all three approaches
    - Detailed pattern explanations with code
    - Performance analysis
    - Migration requirements
 
 2. **OPTIMISTIC_LOCKING_IMPLEMENTATION_GUIDE.md** (12 KB)
-
    - Step-by-step implementation instructions
    - File-by-file changes required
    - Ready-to-use code snippets
    - Deployment checklist
 
 3. **LOCKING_STRATEGY_COMPARISON.md** (14 KB)
-
    - Decision trees and comparison matrices
    - Cost-benefit analysis
    - When to use each approach
@@ -570,7 +559,6 @@ Four comprehensive documents have been prepared:
 ### Immediate Actions (This Week)
 
 1. **Stakeholder approval**
-
    - Share this recommendation
    - Get buy-in on version-based approach
    - Confirm 2.5-hour estimate is acceptable
@@ -583,13 +571,11 @@ Four comprehensive documents have been prepared:
 ### Short-term Actions (Next 1-2 Weeks)
 
 3. **Implementation sprint**
-
    - Follow implementation guide step-by-step
    - Complete schema, service, DTOs, tests
    - Code review with team
 
 4. **Testing & validation**
-
    - Run unit and integration test suite
    - Simulate concurrent edits manually
    - Validate 24-hour window enforcement
@@ -602,7 +588,6 @@ Four comprehensive documents have been prepared:
 ### Medium-term Actions (2-3 Weeks)
 
 6. **Production rollout**
-
    - Deploy to production with monitoring
    - Track conflict rates
    - Brief support team on new error

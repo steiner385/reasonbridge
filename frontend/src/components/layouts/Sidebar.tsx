@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Link } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useAuth } from '../../hooks/useAuth';
@@ -66,7 +71,7 @@ export function Sidebar({ unreadCount = 0 }: SidebarProps) {
                 <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                   {user.displayName}
                 </p>
-                <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                <p className="truncate text-xs text-gray-500 dark:text-gray-300">{user.email}</p>
               </div>
             )}
           </Link>

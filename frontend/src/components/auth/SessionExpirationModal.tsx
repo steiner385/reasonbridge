@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useEffect, useState } from 'react';
 import Modal from '../ui/Modal';
 
@@ -91,7 +96,7 @@ export function SessionExpirationModal({
       }
     >
       <div className="space-y-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
           Your session is about to expire due to inactivity. You'll be automatically logged out in:
         </p>
 
@@ -103,7 +108,7 @@ export function SessionExpirationModal({
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-300">
           Click "Continue Session" to stay logged in, or "Log Out" to end your session now.
         </p>
       </div>

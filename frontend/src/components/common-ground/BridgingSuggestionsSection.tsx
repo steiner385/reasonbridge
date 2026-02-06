@@ -117,6 +117,7 @@ const BridgingSuggestionsSection = ({
               className="bg-primary-600 dark:bg-primary-500 h-3 rounded-full transition-all duration-300"
               style={{ width: `${consensusPercentage}%` }}
               role="progressbar"
+              aria-label="Overall consensus level"
               aria-valuenow={consensusPercentage}
               aria-valuemin={0}
               aria-valuemax={100}
@@ -207,7 +208,7 @@ const BridgingSuggestionsSection = ({
                       {suggestion.sourcePosition}
                     </span>
                     <svg
-                      className="w-4 h-4 text-gray-400 dark:text-gray-500"
+                      className="w-4 h-4 text-gray-400 dark:text-gray-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -270,7 +271,7 @@ const BridgingSuggestionsSection = ({
                   >
                     <div className="flex items-center justify-between">
                       <span
-                        className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500"
+                        className="text-xs text-gray-600 dark:text-gray-300 dark:text-gray-300"
                         data-testid="confidence-score"
                       >
                         Confidence Score: {Math.round(suggestion.confidenceScore * 100)}%
@@ -295,7 +296,7 @@ const BridgingSuggestionsSection = ({
           {/* Show more indicator */}
           {maxSuggestions > 0 && suggestionsList.length > maxSuggestions && (
             <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
+              <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 Showing {maxSuggestions} of {suggestionsList.length} suggestions
               </p>
             </div>
@@ -309,7 +310,7 @@ const BridgingSuggestionsSection = ({
           className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center"
           data-testid="empty-state"
         >
-          <div className="text-gray-400 dark:text-gray-500 mb-3">
+          <div className="text-gray-400 dark:text-gray-300 mb-3">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -327,7 +328,7 @@ const BridgingSuggestionsSection = ({
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
             No Bridging Suggestions Available
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-300 dark:text-gray-300">
             Bridging suggestions will appear here once the discussion has enough diverse viewpoints
             to analyze.
           </p>
@@ -337,7 +338,7 @@ const BridgingSuggestionsSection = ({
       {/* AI Attribution */}
       {showAttribution && hasSuggestions && (
         <div className="text-center" data-testid="ai-attribution">
-          <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300">
             {suggestions.attribution}
           </p>
         </div>

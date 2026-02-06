@@ -21,7 +21,9 @@ export async function createTestModule(): Promise<TestingModule> {
 /**
  * Creates a test module with mocked Prisma for unit tests
  */
-export async function createTestModuleWithMockedPrisma(mockPrismaData: any): Promise<TestingModule> {
+export async function createTestModuleWithMockedPrisma(
+  mockPrismaData: any,
+): Promise<TestingModule> {
   return Test.createTestingModule({
     imports: [AppModule],
   })

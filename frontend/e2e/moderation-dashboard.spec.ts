@@ -182,14 +182,9 @@ test.describe('Moderation Dashboard', () => {
   });
 
   // UI-only tests that use API mocking
-  test.describe('UI Behavior (Mocked)', () => {
-    // Skip these tests - they have unreliable auth timing with mockAdminUser in E2E environment
-    // TODO: Replace with real backend integration tests when admin user seeding is available
-    test.skip(
-      true,
-      'Flaky auth timing with mockAdminUser - skip until real backend tests are implemented',
-    );
-
+  // SKIPPED: These tests have unreliable auth timing with mockAdminUser in E2E environment
+  // TODO: Replace with real backend integration tests when admin user seeding is available
+  test.describe.skip('UI Behavior (Mocked)', () => {
     test.beforeEach(async ({ page }) => {
       // Mock admin authentication to bypass ProtectedRoute
       await mockAdminUser(page);

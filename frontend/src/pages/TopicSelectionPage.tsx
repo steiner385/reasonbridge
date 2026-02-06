@@ -241,7 +241,7 @@ export const TopicSelectionPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Choose Your Interests
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-300">
             Select 2-3 topics you&apos;d like to discuss. We&apos;ll personalize your feed based on
             your choices.
           </p>
@@ -257,7 +257,7 @@ export const TopicSelectionPage: React.FC = () => {
                   ${
                     isValidSelection
                       ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                   }
                 `}
                 aria-label={`${selectedCount} topics selected`}
@@ -273,7 +273,7 @@ export const TopicSelectionPage: React.FC = () => {
             </div>
 
             {!isValidSelection && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">Required: 2-3 topics</span>
+              <span className="text-sm text-gray-500 dark:text-gray-300">Required: 2-3 topics</span>
             )}
           </div>
 
@@ -310,7 +310,7 @@ export const TopicSelectionPage: React.FC = () => {
         {isLoading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading topics...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading topics...</p>
           </div>
         )}
 
@@ -337,7 +337,7 @@ export const TopicSelectionPage: React.FC = () => {
         {/* Empty State */}
         {!isLoading && topics.length === 0 && !error && (
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">No topics available</p>
+            <p className="text-gray-600 dark:text-gray-300">No topics available</p>
             <Button variant="outline" onClick={loadTopics} className="mt-4">
               Retry
             </Button>
@@ -408,10 +408,10 @@ export const TopicSelectionPage: React.FC = () => {
                       <h5 className="font-medium text-gray-900 dark:text-white">
                         {alternative.name}
                       </h5>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         {alternative.description}
                       </p>
-                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-300">
                         {alternative.activeDiscussionCount} active discussions •{' '}
                         {alternative.participantCount.toLocaleString()} participants
                       </div>

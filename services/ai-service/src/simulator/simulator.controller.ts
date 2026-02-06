@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { SimulatorService } from './simulator.service.js';
 import {

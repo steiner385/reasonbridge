@@ -105,7 +105,7 @@ function TopicDetailPage() {
         <Card variant="elevated" padding="lg">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-fallacy-DEFAULT mb-2">Error Loading Topic</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               {error instanceof Error ? error.message : 'Failed to load topic'}
             </p>
             <Link to="/topics">
@@ -125,7 +125,7 @@ function TopicDetailPage() {
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Topic Not Found
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               The topic you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
             <Link to="/topics">
@@ -182,7 +182,7 @@ function TopicDetailPage() {
             </span>
           }
         >
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-2">
+          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-300 mt-2">
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -221,7 +221,7 @@ function TopicDetailPage() {
               className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
               data-testid="participant-count"
             >
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-1">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -241,7 +241,7 @@ function TopicDetailPage() {
               className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
               data-testid="response-count"
             >
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-1">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -258,7 +258,7 @@ function TopicDetailPage() {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-1">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -275,14 +275,14 @@ function TopicDetailPage() {
                   : 'N/A'}
               </p>
               {topic.currentDiversityScore !== null && topic.minimumDiversityScore != null && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-300 dark:text-gray-300 mt-1">
                   Min required: {topic.minimumDiversityScore.toFixed(1)}
                 </p>
               )}
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-1">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -400,7 +400,7 @@ function TopicDetailPage() {
               <h3 className="mt-4 text-fluid-xl font-semibold text-gray-900 dark:text-gray-100">
                 No responses yet
               </h3>
-              <p className="mt-2 text-fluid-base text-gray-600 dark:text-gray-400 dark:text-gray-400">
+              <p className="mt-2 text-fluid-base text-gray-600 dark:text-gray-300 dark:text-gray-300">
                 Be the first to share your perspective on this topic.
               </p>
             </div>

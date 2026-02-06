@@ -1,7 +1,13 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { config, getStages, getThresholds } from '../lib/config.js';
-import { authenticate, authHeaders, randomTopicTitle, randomContent, checkResponse } from '../lib/utils.js';
+import {
+  authenticate,
+  authHeaders,
+  randomTopicTitle,
+  randomContent,
+  checkResponse,
+} from '../lib/utils.js';
 
 /**
  * Topics API Load Test

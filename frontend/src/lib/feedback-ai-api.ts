@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * AI-Powered Feedback API Client
  *
  * API methods for AI-powered preview feedback using AWS Bedrock.

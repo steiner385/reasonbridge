@@ -58,7 +58,7 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
           <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(topic.status)}`}>
             {topic.status}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-gray-500 dark:text-gray-300">
             {new Date(topic.createdAt).toLocaleDateString()}
           </span>
         </div>
@@ -71,7 +71,7 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
           {topic.description}
         </p>
 
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300 mb-4">
           <div className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Navigation state types for hybrid navigation pattern
  * Manages sidebar collapsed/expanded state and mobile drawer state
  */

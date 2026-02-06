@@ -5,7 +5,7 @@
  */
 
 function getLuminance(r, g, b) {
-  const [rs, gs, bs] = [r, g, b].map(c => {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });
@@ -14,11 +14,13 @@ function getLuminance(r, g, b) {
 
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
 function getContrastRatio(color1, color2) {
@@ -38,7 +40,7 @@ const colors = {
 };
 
 const backgrounds = {
-  'white': '#FFFFFF',
+  white: '#FFFFFF',
   'warm white': '#FAFBFC',
 };
 

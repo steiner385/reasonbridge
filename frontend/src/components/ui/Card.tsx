@@ -115,7 +115,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
           {title && (
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
           )}
-          {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">{subtitle}</p>}
           {children}
         </div>
         {action && <div className="ml-4 flex-shrink-0">{action}</div>}

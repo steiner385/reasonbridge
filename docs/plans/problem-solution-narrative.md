@@ -61,25 +61,25 @@ We're seeking seed funding to:
 
 ### Statistics & Data
 
-| Claim | Source | Link |
-|-------|--------|------|
-| 150 political attacks in first half of 2025 (nearly 2x prior year) | University of Maryland via Pew Research, 2025 | https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/ |
-| 14,000 threats against lawmakers annually | U.S. Capitol Police via Pew Research, 2025 | https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/ |
-| Second-highest hate incidents on record (11,679 in 2024) | FBI via Arab American Institute, 2024 | https://www.aaiusa.org/library/2024-hate-crime-data |
-| 28% of Americans trust media (down from 68% in 1972) | Gallup, September 2025 | https://news.gallup.com/poll/695762/trust-media-new-low.aspx |
-| 72% of Republicans and 63% of Democrats view opposing party as "immoral" | Pew Research Center | https://www.pewresearch.org/topic/politics-policy/political-parties-polarization/ |
-| 87% say polarization is a threat to America | Listen First Project | https://www.listenfirstproject.org/toxic-polarization-data |
-| 68% say social media has impacted their relationships | EBSCO Research | https://www.ebsco.com/research-starters/communication-and-mass-media/social-media-and-relationships |
+| Claim                                                                    | Source                                        | Link                                                                                                                                         |
+| ------------------------------------------------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 150 political attacks in first half of 2025 (nearly 2x prior year)       | University of Maryland via Pew Research, 2025 | https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/ |
+| 14,000 threats against lawmakers annually                                | U.S. Capitol Police via Pew Research, 2025    | https://www.pewresearch.org/short-reads/2025/10/23/americans-say-politically-motivated-violence-is-increasing-and-they-see-many-reasons-why/ |
+| Second-highest hate incidents on record (11,679 in 2024)                 | FBI via Arab American Institute, 2024         | https://www.aaiusa.org/library/2024-hate-crime-data                                                                                          |
+| 28% of Americans trust media (down from 68% in 1972)                     | Gallup, September 2025                        | https://news.gallup.com/poll/695762/trust-media-new-low.aspx                                                                                 |
+| 72% of Republicans and 63% of Democrats view opposing party as "immoral" | Pew Research Center                           | https://www.pewresearch.org/topic/politics-policy/political-parties-polarization/                                                            |
+| 87% say polarization is a threat to America                              | Listen First Project                          | https://www.listenfirstproject.org/toxic-polarization-data                                                                                   |
+| 68% say social media has impacted their relationships                    | EBSCO Research                                | https://www.ebsco.com/research-starters/communication-and-mass-media/social-media-and-relationships                                          |
 
 ### Research Foundations
 
-| Framework | Primary Source | Link |
-|-----------|---------------|------|
-| Dual-Process Theory (System 1 / System 2) | Kahneman, D. (2003). "A perspective on judgment and choice." *American Psychologist* | https://pubmed.ncbi.nlm.nih.gov/12212647/ |
-| Moral Foundations Theory | Graham, J., Haidt, J., & Nosek, B. A. (2009). "Liberals and conservatives rely on different sets of moral foundations." *Journal of Personality and Social Psychology* | https://pubmed.ncbi.nlm.nih.gov/19379034/ |
-| Process Model of Emotion Regulation | Gross, J. J. (1998). "The emerging field of emotion regulation: An integrative review." *Review of General Psychology* | https://journals.sagepub.com/doi/10.1037/1089-2680.2.3.271 |
-| Fogg Behavior Model (B=MAT) | Fogg, B. J. (2009). "A Behavior Model for Persuasive Design." Stanford Behavior Design Lab | https://behaviordesign.stanford.edu/resources/fogg-behavior-model |
+| Framework                                 | Primary Source                                                                                                                                                         | Link                                                              |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Dual-Process Theory (System 1 / System 2) | Kahneman, D. (2003). "A perspective on judgment and choice." _American Psychologist_                                                                                   | https://pubmed.ncbi.nlm.nih.gov/12212647/                         |
+| Moral Foundations Theory                  | Graham, J., Haidt, J., & Nosek, B. A. (2009). "Liberals and conservatives rely on different sets of moral foundations." _Journal of Personality and Social Psychology_ | https://pubmed.ncbi.nlm.nih.gov/19379034/                         |
+| Process Model of Emotion Regulation       | Gross, J. J. (1998). "The emerging field of emotion regulation: An integrative review." _Review of General Psychology_                                                 | https://journals.sagepub.com/doi/10.1037/1089-2680.2.3.271        |
+| Fogg Behavior Model (B=MAT)               | Fogg, B. J. (2009). "A Behavior Model for Persuasive Design." Stanford Behavior Design Lab                                                                             | https://behaviordesign.stanford.edu/resources/fogg-behavior-model |
 
 ---
 
-*Last updated: 2026-02-01*
+_Last updated: 2026-02-01_

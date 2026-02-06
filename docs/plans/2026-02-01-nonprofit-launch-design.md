@@ -22,17 +22,17 @@ This document outlines a phased strategy to launch ReasonBridge as a 501(c)(3) n
 
 ## Current Situation
 
-| Factor | Status |
-|--------|--------|
-| Product | Functional MVP, demo-ready |
-| Timeline goal | ASAP (months, not years) |
-| Available budget | $500-2,000 |
-| Network | Unexplored (needs mapping) |
-| Location | Ohio |
-| Scope (Year 1-2) | Product-focused |
-| Available time | 10-20 hours/week alongside full-time job |
-| Current compensation | ~$240k/year ($210k salary + $30k bonus) |
-| Full-time goal | Phased transition over 3-5 years |
+| Factor               | Status                                   |
+| -------------------- | ---------------------------------------- |
+| Product              | Functional MVP, demo-ready               |
+| Timeline goal        | ASAP (months, not years)                 |
+| Available budget     | $500-2,000                               |
+| Network              | Unexplored (needs mapping)               |
+| Location             | Ohio                                     |
+| Scope (Year 1-2)     | Product-focused                          |
+| Available time       | 10-20 hours/week alongside full-time job |
+| Current compensation | ~$240k/year ($210k salary + $30k bonus)  |
+| Full-time goal       | Phased transition over 3-5 years         |
 
 ---
 
@@ -49,13 +49,14 @@ Rather than pursuing direct 501(c)(3) incorporation immediately, starting under 
 
 ### Recommended Fiscal Sponsors
 
-| Sponsor | Fee | Fit | Timeline |
-|---------|-----|-----|----------|
-| **Open Collective Foundation** (recommended) | 10% | Excellent for open-source/civic tech | 1-2 weeks |
-| **Hack Club Bank** | 7% | Tech-focused, very fast | Days |
-| **Social Good Fund** | 7-9% | Broader non-profit focus | 2-3 weeks |
+| Sponsor                                      | Fee  | Fit                                  | Timeline  |
+| -------------------------------------------- | ---- | ------------------------------------ | --------- |
+| **Open Collective Foundation** (recommended) | 10%  | Excellent for open-source/civic tech | 1-2 weeks |
+| **Hack Club Bank**                           | 7%   | Tech-focused, very fast              | Days      |
+| **Social Good Fund**                         | 7-9% | Broader non-profit focus             | 2-3 weeks |
 
 **Open Collective Foundation** is recommended for:
+
 - Strong alignment with open/civic tech missions
 - Transparent public fundraising page built-in
 - Easy expense management and reimbursements
@@ -70,6 +71,7 @@ Rather than pursuing direct 501(c)(3) incorporation immediately, starting under 
 ### Week 1-2: Choose and Apply to Fiscal Sponsor
 
 **Application materials needed**:
+
 1. Mission statement (2-3 sentences)
 2. Project description (1 page)
 3. Budget estimate (rough first-year projections)
@@ -103,13 +105,13 @@ Identify 20-50 people in these categories:
 
 ### Core Materials to Prepare (Week 4-6)
 
-| Material | Purpose | Length |
-|----------|---------|--------|
-| **Mission statement** | Your north star, used everywhere | 2-3 sentences |
-| **Problem/solution narrative** | Why this matters, what you're building | 1 page |
-| **Demo video** | Show the MVP in action | 2-3 minutes |
-| **One-pager** | Leave-behind for potential supporters | 1 page PDF |
-| **Budget & milestones** | What funding enables, concrete goals | 1 page |
+| Material                       | Purpose                                | Length        |
+| ------------------------------ | -------------------------------------- | ------------- |
+| **Mission statement**          | Your north star, used everywhere       | 2-3 sentences |
+| **Problem/solution narrative** | Why this matters, what you're building | 1 page        |
+| **Demo video**                 | Show the MVP in action                 | 2-3 minutes   |
+| **One-pager**                  | Leave-behind for potential supporters  | 1 page PDF    |
+| **Budget & milestones**        | What funding enables, concrete goals   | 1 page        |
 
 ### Credibility Building (Week 5-8)
 
@@ -127,26 +129,29 @@ Identify 20-50 people in these categories:
 
 ### Funding Tiers
 
-| Tier | Amount | Benefits | Target |
-|------|--------|----------|--------|
-| **Supporter** | $25-100 | Updates, name on supporters page | Broad network |
-| **Backer** | $250-500 | Above + early access, input on features | Engaged believers |
-| **Sponsor** | $1,000-2,500 | Above + quarterly calls, logo placement | Tech professionals |
-| **Founding Partner** | $5,000+ | Above + advisory input, founding recognition | High-net-worth individuals, small foundations |
+| Tier                 | Amount       | Benefits                                     | Target                                        |
+| -------------------- | ------------ | -------------------------------------------- | --------------------------------------------- |
+| **Supporter**        | $25-100      | Updates, name on supporters page             | Broad network                                 |
+| **Backer**           | $250-500     | Above + early access, input on features      | Engaged believers                             |
+| **Sponsor**          | $1,000-2,500 | Above + quarterly calls, logo placement      | Tech professionals                            |
+| **Founding Partner** | $5,000+      | Above + advisory input, founding recognition | High-net-worth individuals, small foundations |
 
 ### Launch Sequence
 
 **Week 8 - Soft Launch**
+
 - Share with 20-50 mapped contacts personally
 - Individual messages explaining why you're reaching out to them specifically
 - Not a mass email
 
 **Week 9 - Public Launch**
+
 - Post on social media, Hacker News, relevant subreddits
 - Product Hunt launch for the app itself
 - Press outreach to civic tech publications
 
 **Week 10 - Follow-up Wave**
+
 - Thank early supporters publicly
 - Share momentum ("We've raised $X from Y supporters!")
 - Personal follow-up with warm leads
@@ -186,17 +191,18 @@ Pursue 501(c)(3) independence when you hit 2-3 of these:
 
 A 501(c)(3) requires minimum 3 board members in Ohio.
 
-| Role | Look For | Why |
-|------|----------|-----|
-| **Technical advisor** | Engineer who believes in the mission | Product credibility, technical guidance |
-| **Non-profit veteran** | Someone who's run/served on non-profit boards | Governance, compliance, connections |
-| **Domain expert** | Journalist, mediator, academic | Mission credibility, partnerships |
+| Role                   | Look For                                      | Why                                     |
+| ---------------------- | --------------------------------------------- | --------------------------------------- |
+| **Technical advisor**  | Engineer who believes in the mission          | Product credibility, technical guidance |
+| **Non-profit veteran** | Someone who's run/served on non-profit boards | Governance, compliance, connections     |
+| **Domain expert**      | Journalist, mediator, academic                | Mission credibility, partnerships       |
 
 Build relationships before asking anyone to join.
 
 ### Grant Readiness (Months 9-15)
 
 **Target foundations for civic tech/democracy work**:
+
 - Knight Foundation
 - Mozilla Foundation
 - Craig Newmark Philanthropies
@@ -204,6 +210,7 @@ Build relationships before asking anyone to join.
 - Local community foundations (Ohio)
 
 **Preparation**:
+
 - Document impact (users, testimonials, outcomes)
 - Build relationships with program officers before applying
 - Start with smaller grants ($5,000-15,000) to build track record
@@ -230,42 +237,43 @@ Build relationships before asking anyone to join.
 
 ### Organizational Budget Needed for Full-Time
 
-| Category | Annual Cost |
-|----------|-------------|
-| Founder salary (matching current) | $210,000 |
-| Benefits (health, retirement) | $35,000-50,000 |
-| Operations (tools, hosting, contractors) | $30,000-50,000 |
-| **Total budget needed** | **$275,000-310,000/year** |
+| Category                                 | Annual Cost               |
+| ---------------------------------------- | ------------------------- |
+| Founder salary (matching current)        | $210,000                  |
+| Benefits (health, retirement)            | $35,000-50,000            |
+| Operations (tools, hosting, contractors) | $30,000-50,000            |
+| **Total budget needed**                  | **$275,000-310,000/year** |
 
 ### The Transition Ladder
 
-| Phase | Work Split | Funding Milestone | Income Reality |
-|-------|------------|-------------------|----------------|
-| **A** (Now) | 100% day job + 10-20 hrs/week | $0-25k raised | Full salary, nights/weekends |
-| **B** | 80% day job | $50-75k annual budget | ~$170k salary + $50k stipend |
-| **C** | 60% day job or part-time role | $125-150k annual budget | ~$125k salary + $75-100k |
-| **D** | Full-time ReasonBridge | $275k+ annual budget | $200-240k from non-profit |
+| Phase       | Work Split                    | Funding Milestone       | Income Reality               |
+| ----------- | ----------------------------- | ----------------------- | ---------------------------- |
+| **A** (Now) | 100% day job + 10-20 hrs/week | $0-25k raised           | Full salary, nights/weekends |
+| **B**       | 80% day job                   | $50-75k annual budget   | ~$170k salary + $50k stipend |
+| **C**       | 60% day job or part-time role | $125-150k annual budget | ~$125k salary + $75-100k     |
+| **D**       | Full-time ReasonBridge        | $275k+ annual budget    | $200-240k from non-profit    |
 
 ### Transition Triggers (Proof Points, Not Time)
 
-| Transition | Only When You Have |
-|------------|-------------------|
-| A → B | $50k+ secured for next 12 months, board in place, product launched |
-| B → C | $125k+ secured, major grant ($50k+) confirmed, clear path to more |
-| C → D | $275k+ annual budget, 18+ months runway, multiple funding sources |
+| Transition | Only When You Have                                                 |
+| ---------- | ------------------------------------------------------------------ |
+| A → B      | $50k+ secured for next 12 months, board in place, product launched |
+| B → C      | $125k+ secured, major grant ($50k+) confirmed, clear path to more  |
+| C → D      | $275k+ annual budget, 18+ months runway, multiple funding sources  |
 
 ### Funding Sources at Scale
 
-| Source | Realistic Range | Notes |
-|--------|-----------------|-------|
-| Foundation grants | $100,000-200,000 | Multi-year grants from Knight, Mozilla, Democracy Fund |
-| Corporate sponsorships | $25,000-75,000 | Tech companies with civic missions |
-| Individual donors | $25,000-50,000 | Sustaining base, recurring monthly |
-| Earned revenue (optional) | $0-50,000 | Consulting, workshops, enterprise licensing |
+| Source                    | Realistic Range  | Notes                                                  |
+| ------------------------- | ---------------- | ------------------------------------------------------ |
+| Foundation grants         | $100,000-200,000 | Multi-year grants from Knight, Mozilla, Democracy Fund |
+| Corporate sponsorships    | $25,000-75,000   | Tech companies with civic missions                     |
+| Individual donors         | $25,000-50,000   | Sustaining base, recurring monthly                     |
+| Earned revenue (optional) | $0-50,000        | Consulting, workshops, enterprise licensing            |
 
 ### Financial Safety Net Requirements
 
 Before any transition:
+
 - 6-12 months personal expenses saved (separate from non-profit)
 - Health insurance plan secured (COBRA, ACA, or spouse's plan)
 - Spouse/partner alignment on the risk
@@ -283,19 +291,19 @@ Before any transition:
 
 ### Immediate (Months 1-3)
 
-| Skill | Why | How to Learn |
-|-------|-----|--------------|
-| **Storytelling** | Fundraising is storytelling | Study successful campaigns, practice 2-min pitch |
-| **Basic non-profit finance** | Track income/expenses properly | Free Coursera courses, Candid.org resources |
-| **Donor communication** | Updates, thank-yous, relationships | Follow non-profits you admire |
+| Skill                        | Why                                | How to Learn                                     |
+| ---------------------------- | ---------------------------------- | ------------------------------------------------ |
+| **Storytelling**             | Fundraising is storytelling        | Study successful campaigns, practice 2-min pitch |
+| **Basic non-profit finance** | Track income/expenses properly     | Free Coursera courses, Candid.org resources      |
+| **Donor communication**      | Updates, thank-yous, relationships | Follow non-profits you admire                    |
 
 ### Growth Phase (Months 3-12)
 
-| Skill | Why | How to Learn |
-|-------|-----|--------------|
-| **Grant writing** | Foundations have specific formats | Candid.org courses, read public applications |
-| **Board management** | Effective meetings, leveraging advisors | BoardSource resources, talk to founders |
-| **Legal/compliance** | Annual filings, acknowledgments | Fiscal sponsor guidance, Ohio AG website |
+| Skill                | Why                                     | How to Learn                                 |
+| -------------------- | --------------------------------------- | -------------------------------------------- |
+| **Grant writing**    | Foundations have specific formats       | Candid.org courses, read public applications |
+| **Board management** | Effective meetings, leveraging advisors | BoardSource resources, talk to founders      |
+| **Legal/compliance** | Annual filings, acknowledgments         | Fiscal sponsor guidance, Ohio AG website     |
 
 ### Outsourceable Tasks
 
@@ -309,34 +317,34 @@ Before any transition:
 
 ### Year 1 Costs (Before Independence)
 
-| Category | Low | High |
-|----------|-----|------|
-| Fiscal sponsor fees (10% of donations) | $1,000 | $2,500 |
-| Domain, hosting, tools | $200 | $500 |
-| Marketing/outreach | $0 | $300 |
-| Legal (if needed) | $0 | $500 |
-| **Total** | **$1,200** | **$3,800** |
+| Category                               | Low        | High       |
+| -------------------------------------- | ---------- | ---------- |
+| Fiscal sponsor fees (10% of donations) | $1,000     | $2,500     |
+| Domain, hosting, tools                 | $200       | $500       |
+| Marketing/outreach                     | $0         | $300       |
+| Legal (if needed)                      | $0         | $500       |
+| **Total**                              | **$1,200** | **$3,800** |
 
 ### 501(c)(3) Transition Costs
 
-| Item | Cost |
-|------|------|
-| Ohio incorporation | $99 |
-| IRS Form 1023-EZ | $275 |
-| Ohio AG registration | $0 |
-| Accountant setup | $300-500 |
-| **Total** | **$675-875** |
+| Item                 | Cost         |
+| -------------------- | ------------ |
+| Ohio incorporation   | $99          |
+| IRS Form 1023-EZ     | $275         |
+| Ohio AG registration | $0           |
+| Accountant setup     | $300-500     |
+| **Total**            | **$675-875** |
 
 ### Funding Goals
 
-| Goal | What It Enables |
-|------|-----------------|
-| $5,000 | Covers Year 1 costs, proves concept |
-| $15,000 | + part-time contractor help, marketing |
-| $25,000 | + 501(c)(3) transition, 6-month runway |
-| $50,000 | Phase B transition possible |
-| $125,000 | Phase C transition possible |
-| $275,000+ | Phase D (full-time) viable |
+| Goal      | What It Enables                        |
+| --------- | -------------------------------------- |
+| $5,000    | Covers Year 1 costs, proves concept    |
+| $15,000   | + part-time contractor help, marketing |
+| $25,000   | + 501(c)(3) transition, 6-month runway |
+| $50,000   | Phase B transition possible            |
+| $125,000  | Phase C transition possible            |
+| $275,000+ | Phase D (full-time) viable             |
 
 ---
 
@@ -360,17 +368,17 @@ Year 3-5
 
 ### Key Milestones
 
-| When | Milestone | Success Criteria |
-|------|-----------|------------------|
-| Week 4 | Fiscal sponsorship live | Can accept tax-deductible donations |
-| Week 8 | Materials complete | Mission, demo video, one-pager ready |
-| Week 10 | Public launch | Announced on social, HN, communities |
-| Month 4 | Initial funding | $5,000-10,000 raised |
-| Month 6 | Traction | App launched, early users, $15,000+ |
-| Month 9 | Board forming | 2-3 advisor relationships developing |
-| Month 12 | Sustainability | $25,000+, recurring donors, grants submitted |
-| Month 18 | Independence | 501(c)(3) approved |
-| Year 3-5 | Full-time | $275k+ budget, multiple funding sources |
+| When     | Milestone               | Success Criteria                             |
+| -------- | ----------------------- | -------------------------------------------- |
+| Week 4   | Fiscal sponsorship live | Can accept tax-deductible donations          |
+| Week 8   | Materials complete      | Mission, demo video, one-pager ready         |
+| Week 10  | Public launch           | Announced on social, HN, communities         |
+| Month 4  | Initial funding         | $5,000-10,000 raised                         |
+| Month 6  | Traction                | App launched, early users, $15,000+          |
+| Month 9  | Board forming           | 2-3 advisor relationships developing         |
+| Month 12 | Sustainability          | $25,000+, recurring donors, grants submitted |
+| Month 18 | Independence            | 501(c)(3) approved                           |
+| Year 3-5 | Full-time               | $275k+ budget, multiple funding sources      |
 
 ---
 
@@ -387,16 +395,19 @@ Year 3-5
 ## Resources
 
 ### Learning
+
 - [Candid.org](https://candid.org) - Non-profit management courses
 - [BoardSource](https://boardsource.org) - Board governance resources
 - [Ohio Attorney General](https://www.ohioattorneygeneral.gov/nonprofits) - State compliance guides
 
 ### Fiscal Sponsors
+
 - [Open Collective Foundation](https://opencollective.com/foundation)
 - [Hack Club Bank](https://hackclub.com/fiscal-sponsorship/)
 - [Social Good Fund](https://www.socialgoodfund.org/)
 
 ### Target Foundations
+
 - [Knight Foundation](https://knightfoundation.org)
 - [Mozilla Foundation](https://foundation.mozilla.org)
 - [Craig Newmark Philanthropies](https://craignewmarkphilanthropies.org)
@@ -404,4 +415,4 @@ Year 3-5
 
 ---
 
-*This plan is a living document. Update as circumstances change and milestones are reached.*
+_This plan is a living document. Update as circumstances change and milestones are reached._

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { PropositionClusteringResult, Proposition } from '../../types/common-ground';
 
 export interface PropositionClusterViewProps {
@@ -129,25 +134,25 @@ const PropositionClusterView = ({
               <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {clusteringResult.clusters.length}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Clusters</div>
+              <div className="text-xs text-gray-600 dark:text-gray-300">Clusters</div>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {propositions.size}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Total Propositions</div>
+              <div className="text-xs text-gray-600 dark:text-gray-300">Total Propositions</div>
             </div>
             <div className={`text-center p-3 rounded-lg ${qualityStyles.bg}`}>
               <div className={`text-2xl font-bold ${qualityStyles.color}`}>
                 {qualityPercentage}%
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Quality Score</div>
+              <div className="text-xs text-gray-600 dark:text-gray-300">Quality Score</div>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {confidencePercentage}%
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Confidence</div>
+              <div className="text-xs text-gray-600 dark:text-gray-300">Confidence</div>
             </div>
           </div>
 
@@ -157,7 +162,7 @@ const PropositionClusterView = ({
               <span className="text-xs font-semibold px-2 py-1 rounded bg-indigo-100 text-indigo-800">
                 {clusteringResult.method.toUpperCase()}
               </span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Clustering Method</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Clustering Method</span>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
               {clusteringResult.reasoning}
@@ -206,7 +211,7 @@ const PropositionClusterView = ({
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                         {cluster.theme}
                       </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                         <span>{cluster.size} propositions</span>
                         <span>•</span>
                         <span
@@ -262,7 +267,7 @@ const PropositionClusterView = ({
                             {prop.agreementPercentage}%
                           </span>
                         </div>
-                        <div className="mt-2 flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+                        <div className="mt-2 flex items-center gap-3 text-xs text-gray-600 dark:text-gray-300">
                           <span className="flex items-center gap-1">
                             <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
                             {prop.supportingParticipants.length}
@@ -285,7 +290,7 @@ const PropositionClusterView = ({
                     {maxPropositionsPerCluster > 0 &&
                       clusterPropositions.length > maxPropositionsPerCluster && (
                         <div className="text-center pt-2">
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                          <p className="text-xs text-gray-600 dark:text-gray-300">
                             +{clusterPropositions.length - maxPropositionsPerCluster} more
                             propositions
                           </p>
@@ -305,7 +310,7 @@ const PropositionClusterView = ({
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Unclustered Propositions ({clusteringResult.unclusteredPropositionIds.length})
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
             These propositions don't clearly belong to any cluster and represent unique or outlier
             perspectives.
           </p>
@@ -358,7 +363,7 @@ const PropositionClusterView = ({
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
             No Clusters Found
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-300">
             Clustering analysis will appear here once there are enough propositions to analyze.
           </p>
         </div>

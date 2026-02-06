@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Notifications Page
  * Displays a list of user notifications
  * Includes unread badges, marking as read, and filtering
@@ -35,7 +40,7 @@ export default function NotificationsPage() {
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Notifications</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           Stay updated with your discussions and mentions
         </p>
       </div>
@@ -45,10 +50,10 @@ export default function NotificationsPage() {
         <button className="border-b-2 border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600">
           All
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-200">
           Unread
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-200">
           Mentions
         </button>
       </div>
@@ -137,7 +142,7 @@ export default function NotificationsPage() {
                     >
                       {notification.message}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
                       {notification.timestamp}
                     </p>
                   </div>
@@ -171,7 +176,7 @@ export default function NotificationsPage() {
             />
           </svg>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No notifications</h3>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
             You're all caught up! Check back later for updates.
           </p>
         </div>

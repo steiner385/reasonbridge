@@ -296,7 +296,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
           <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
             Analysis Summary
           </h3>
-          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+          <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
             <p data-testid="participant-count">
               <strong>Participants:</strong> {analysis.participantCount ?? 0}
             </p>

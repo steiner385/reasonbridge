@@ -116,7 +116,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
             {zone.consensusLevel.toUpperCase()} CONSENSUS
           </span>
           <span
-            className="text-sm text-gray-600 dark:text-gray-400"
+            className="text-sm text-gray-600 dark:text-gray-300"
             data-testid="participant-count"
           >
             {zone.participantCount} participants
@@ -140,7 +140,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
               >
                 <p className="text-gray-800 mb-3">{prop.text}</p>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Agreement</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Agreement</span>
                   <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {prop.agreementPercentage}%
                   </span>
@@ -155,7 +155,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
                     aria-valuemax={100}
                   />
                 </div>
-                <div className="mt-3 flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+                <div className="mt-3 flex gap-4 text-xs text-gray-500 dark:text-gray-300">
                   <span>
                     <span className="text-green-600 font-medium">
                       {prop.supportingParticipants.length}
@@ -169,7 +169,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
                     opposing
                   </span>
                   <span>
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">
                       {prop.neutralParticipants.length}
                     </span>{' '}
                     neutral
@@ -218,7 +218,7 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
               <blockquote className="text-gray-800 italic border-l-4 border-purple-300 pl-3 mb-3">
                 "{def.definition}"
               </blockquote>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -297,7 +297,7 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
             >
               <div className="flex items-start justify-between mb-3">
                 <h5 className="font-medium text-gray-900 dark:text-gray-100">{position.stance}</h5>
-                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                <span className="text-xs text-gray-500 dark:text-gray-300 bg-gray-100 px-2 py-1 rounded">
                   {position.participants.length} participant(s)
                 </span>
               </div>
@@ -308,7 +308,7 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
                 <div className="border-t border-gray-100 pt-3 space-y-2">
                   {position.underlyingValue && (
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide min-w-[80px]">
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide min-w-[80px]">
                         Core Value
                       </span>
                       <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -318,7 +318,7 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
                   )}
                   {position.underlyingAssumption && (
                     <div className="flex items-start gap-2">
-                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide min-w-[80px]">
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide min-w-[80px]">
                         Assumption
                       </span>
                       <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -352,7 +352,7 @@ const DisagreementDetail: React.FC<{ disagreement: Disagreement }> = ({ disagree
               </span>
             ))}
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          <p className="text-xs text-gray-500 dark:text-gray-300 mt-3">
             These moral foundations may help explain the underlying values driving this
             disagreement.
           </p>

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
@@ -139,7 +144,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </h1>
 
               {/* Error Message */}
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
                 We're sorry for the inconvenience. An unexpected error occurred while loading this
                 page.
               </p>
@@ -176,7 +181,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </div>
 
               {/* Support Link */}
-              <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-6 text-sm text-gray-500 dark:text-gray-300">
                 If this problem persists, please{' '}
                 <a
                   href="https://github.com/anthropics/claude-code/issues"

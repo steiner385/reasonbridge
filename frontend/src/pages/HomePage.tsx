@@ -12,7 +12,7 @@ function HomePage() {
         <h2 className="text-fluid-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Welcome to ReasonBridge
         </h2>
-        <p className="text-fluid-base text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-fluid-base text-gray-600 dark:text-gray-300 mb-6">
           A platform for fostering rational discussions and meaningful dialogue.
         </p>
         <div className="space-y-4 prose-reading-width">

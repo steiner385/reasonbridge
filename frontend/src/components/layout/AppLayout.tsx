@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Outlet } from 'react-router-dom';
 import { Header } from '../layouts/Header';
 import { Sidebar } from '../layouts/Sidebar';

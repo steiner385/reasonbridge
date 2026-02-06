@@ -2,10 +2,7 @@
   "mcpServers": {
     "jenkins": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-jenkins"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-jenkins"],
       "env": {
         "JENKINS_URL": "https://jenkins.kindash.com",
         "JENKINS_USERNAME": "${JENKINS_USER}",

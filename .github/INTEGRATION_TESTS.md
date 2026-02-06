@@ -17,13 +17,11 @@ Current integration test files:
 Integration tests can use these Docker services (defined in `docker-compose.test.yml`):
 
 - **PostgreSQL 15** (port 5433)
-
   - User: `unite_test`
   - Password: `unite_test`
   - Database: `unite_test`
 
 - **Redis 7** (port 6380)
-
   - Used for caching and session storage
 
 - **LocalStack 3.0** (port 4567)
