@@ -297,7 +297,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
               disabled={isLoading}
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-            <label htmlFor="edit-contains-opinion" className="ml-2 text-sm text-gray-700">
+            <label
+              htmlFor="edit-contains-opinion"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
               This response contains my opinion
             </label>
           </div>
@@ -310,7 +313,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
               disabled={isLoading}
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-            <label htmlFor="edit-contains-factual-claims" className="ml-2 text-sm text-gray-700">
+            <label
+              htmlFor="edit-contains-factual-claims"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
               This response contains factual claims
             </label>
           </div>
