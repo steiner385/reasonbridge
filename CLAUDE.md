@@ -932,12 +932,6 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Active Technologies
 
-- TypeScript 5.7.3 with strict mode enabled + React 18.3.1, React Router 6.x, Tailwind CSS 3.x, react-window 1.x (virtual scrolling), WebSocket client (existing) (001-discussion-page-redesign)
-- Existing PostgreSQL 15 database with Prisma ORM (no schema changes required) (001-discussion-page-redesign)
-
-- TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS (001-ui-ux-enhancement)
-- N/A (frontend-only feature, uses localStorage for client-side state) (001-ui-ux-enhancement)
-
 - **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
 - **PostgreSQL 15** - Primary database with Prisma ORM
 - **Redis 7** - Caching, sessions, pub/sub messaging

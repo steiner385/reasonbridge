@@ -28,7 +28,8 @@ export interface TopicFilterUIProps {
 
 /**
  * Topic filtering UI component
- * Provides controls for filtering topics by status, sort order, and tags
+ * Feature 016: Topic Management (T024)
+ * Provides controls for filtering topics by status, visibility, sort order, tags, and search
  */
 export function TopicFilterUI({
   filters,
@@ -36,13 +37,24 @@ export function TopicFilterUI({
   showTagFilter = true,
 }: TopicFilterUIProps) {
   const [tagInput, setTagInput] = useState(filters.tag || '');
+  const [searchInput, setSearchInput] = useState(filters.search || '');
 
-  const handleStatusFilter = (status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED') => {
+  const handleStatusFilter = (status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED') => {
     const newFilters: GetTopicsParams = { ...filters, page: 1 };
     if (status) {
       newFilters.status = status;
     } else {
       delete newFilters.status;
+    }
+    onFiltersChange(newFilters);
+  };
+
+  const handleVisibilityFilter = (visibility?: 'PUBLIC' | 'PRIVATE' | 'UNLISTED') => {
+    const newFilters: GetTopicsParams = { ...filters, page: 1 };
+    if (visibility) {
+      newFilters.visibility = visibility;
+    } else {
+      delete newFilters.visibility;
     }
     onFiltersChange(newFilters);
   };
@@ -82,9 +94,58 @@ export function TopicFilterUI({
     }
   };
 
+  const handleSearchFilter = () => {
+    const trimmedSearch = searchInput.trim();
+    const newFilters: GetTopicsParams = { ...filters, page: 1 };
+
+    if (trimmedSearch) {
+      newFilters.search = trimmedSearch;
+    } else {
+      delete newFilters.search;
+    }
+
+    onFiltersChange(newFilters);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    const newFilters: GetTopicsParams = { ...filters, page: 1 };
+    delete newFilters.search;
+    onFiltersChange(newFilters);
+  };
+
+  const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchFilter();
+    }
+  };
+
   return (
     <Card padding="md">
       <div className="space-y-4">
+        {/* Search Bar */}
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <Input
+              label="Search topics"
+              placeholder="Search by title or description..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleSearchInputKeyDown}
+              inputSize="md"
+              fullWidth
+            />
+          </div>
+          <Button size="md" variant="primary" onClick={handleSearchFilter}>
+            Search
+          </Button>
+          {filters.search && (
+            <Button size="md" variant="outline" onClick={handleClearSearch}>
+              Clear
+            </Button>
+          )}
+        </div>
+
         {/* Status Filter Row */}
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-2">
@@ -118,6 +179,13 @@ export function TopicFilterUI({
               onClick={() => handleStatusFilter('ARCHIVED')}
             >
               Archived
+            </Button>
+            <Button
+              size="sm"
+              variant={filters.status === 'LOCKED' ? 'primary' : 'outline'}
+              onClick={() => handleStatusFilter('LOCKED')}
+            >
+              Locked
             </Button>
           </div>
 
@@ -173,6 +241,39 @@ export function TopicFilterUI({
           </div>
         </div>
 
+        {/* Visibility Filter Row */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-sm font-medium text-gray-700">Visibility:</span>
+          <Button
+            size="sm"
+            variant={!filters.visibility ? 'primary' : 'outline'}
+            onClick={() => handleVisibilityFilter(undefined)}
+          >
+            All
+          </Button>
+          <Button
+            size="sm"
+            variant={filters.visibility === 'PUBLIC' ? 'primary' : 'outline'}
+            onClick={() => handleVisibilityFilter('PUBLIC')}
+          >
+            Public
+          </Button>
+          <Button
+            size="sm"
+            variant={filters.visibility === 'UNLISTED' ? 'primary' : 'outline'}
+            onClick={() => handleVisibilityFilter('UNLISTED')}
+          >
+            Unlisted
+          </Button>
+          <Button
+            size="sm"
+            variant={filters.visibility === 'PRIVATE' ? 'primary' : 'outline'}
+            onClick={() => handleVisibilityFilter('PRIVATE')}
+          >
+            Private
+          </Button>
+        </div>
+
         {/* Tag Filter Row */}
         {showTagFilter && (
           <div className="flex flex-wrap gap-2 items-end">
@@ -199,12 +300,22 @@ export function TopicFilterUI({
         )}
 
         {/* Active Filters Display */}
-        {(filters.status || filters.tag) && (
+        {(filters.search || filters.status || filters.visibility || filters.tag) && (
           <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-gray-200">
             <span className="text-xs font-medium text-gray-600">Active filters:</span>
+            {filters.search && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
+                Search: "{filters.search}"
+              </span>
+            )}
             {filters.status && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
                 Status: {filters.status}
+              </span>
+            )}
+            {filters.visibility && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
+                Visibility: {filters.visibility}
               </span>
             )}
             {filters.tag && (
