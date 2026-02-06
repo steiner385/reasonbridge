@@ -10,7 +10,10 @@ import { test, expect } from '@playwright/test';
 test.describe('Application Layout', () => {
   test('should display the main header with application title', async ({ page }) => {
     // Navigate to the home page
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Wait for React app to hydrate
+    await page.waitForLoadState('domcontentloaded');
 
     // Check that the header is visible
     const header = page.locator('header');
