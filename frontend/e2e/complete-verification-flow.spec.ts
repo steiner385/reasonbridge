@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * E2E test suite for Complete Verification Flow (US4 - Human Authenticity)
@@ -27,18 +27,44 @@ const generateTestUser = () => {
     email: `verify-test-${timestamp}@example.com`,
     username: `verifyuser${timestamp}`,
     password: 'SecurePassword123!',
+    displayName: `VerifyUser${timestamp}`,
   };
 };
 
 test.describe('Complete Verification Flow', () => {
-  let _testUser: ReturnType<typeof generateTestUser>;
+  let testUser: ReturnType<typeof generateTestUser>;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Helper function to register, login, and navigate
+  const registerAndLogin = async (page: Page) => {
+    // Navigate to registration page
+    await page.goto('/register');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Fill out registration form
+    await page.getByLabel(/email/i).fill(testUser.email);
+    await page.getByLabel(/display name/i).fill(testUser.displayName);
+    await page
+      .getByLabel(/^password/i)
+      .first()
+      .fill(testUser.password);
+    await page.getByLabel(/confirm password/i).fill(testUser.password);
+
+    // Submit registration form
+    const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
+    await registerButton.click();
+
+    // Wait for navigation away from /register (registration success)
+    await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
+  };
+
   test.beforeEach(async ({ page }) => {
-    _testUser = generateTestUser();
+    testUser = generateTestUser();
   });
 
   test('should navigate to verification page directly', async ({ page }) => {
+    // Register and login first (verification page requires authentication)
+    await registerAndLogin(page);
+
     // Navigate directly to verification page
     await page.goto('/verification');
 
@@ -205,6 +231,9 @@ test.describe('Complete Verification Flow', () => {
   });
 
   test('should maintain state during navigation', async ({ page }) => {
+    // Register and login first (verification page requires authentication)
+    await registerAndLogin(page);
+
     // Go to verification page
     const response = await page.goto('/verification');
     expect(response?.status()).toBeLessThan(400);
