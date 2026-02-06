@@ -17,6 +17,8 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
+  /* Skip @ai tests in CI (they require AWS Bedrock credentials) */
+  grep: process.env.CI ? /^(?!.*@ai)/ : undefined,
   /* Retry disabled to prevent crash from accumulated timeout failures */
   retries: 0,
   /* Serialize tests in CI to prevent OOM - single worker uses less peak memory */

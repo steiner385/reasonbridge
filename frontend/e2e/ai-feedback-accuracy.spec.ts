@@ -1,17 +1,32 @@
 /**
- * AI Feedback Accuracy Tests
+ * AI Feedback Accuracy Tests - MANUAL SMOKE TEST ONLY
  *
- * These tests verify that Bedrock-powered AI feedback catches nuanced issues
- * that regex patterns miss. They are NOT meant to run in CI (they use real
- * AWS Bedrock calls and are expensive/slow).
+ * PURPOSE:
+ * These tests verify that Bedrock-powered AI feedback (Claude 3.5 Sonnet) catches
+ * nuanced logical fallacies and cognitive biases that regex patterns miss.
  *
- * Run manually with:
- * E2E_DOCKER=true PLAYWRIGHT_BASE_URL=http://localhost:9080 npx playwright test ai-feedback-accuracy.spec.ts
+ * WHY NOT IN CI:
+ * - Requires AWS Bedrock credentials (not available in CI environment)
+ * - Uses real AWS API calls (expensive, ~$0.01 per test run)
+ * - Slow execution time (~5-10 seconds per test due to LLM inference)
+ * - Tests tagged with @ai are automatically skipped in CI via playwright.config.ts
  *
- * IMPORTANT: These tests require:
- * - AWS credentials configured (~/.aws/credentials)
- * - AI service with Bedrock access (docker-compose.e2e.yml)
- * - Tests marked with @ai tag (skip in CI)
+ * RUNNING MANUALLY:
+ * 1. Ensure AWS credentials are configured:
+ *    - ~/.aws/credentials with valid access key/secret
+ *    - AWS_REGION environment variable (default: us-east-1)
+ * 2. Start E2E Docker environment with AI service:
+ *    docker-compose -f docker-compose.e2e.yml up -d
+ * 3. Run tests:
+ *    E2E_DOCKER=true PLAYWRIGHT_BASE_URL=http://localhost:9080 \
+ *    AWS_REGION=us-east-1 \
+ *    npx playwright test ai-feedback-accuracy.spec.ts
+ *
+ * CI SKIP MECHANISM:
+ * Tests in this file are automatically skipped in CI because:
+ * - playwright.config.ts sets: grep: process.env.CI ? /^(?!.*@ai)/ : undefined
+ * - All tests in this file should be tagged with @ai in their title
+ * - Example: test('should detect straw man fallacy @ai', ...)
  */
 
 import { test, expect } from '@playwright/test';
@@ -102,7 +117,7 @@ test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
     await navigateToTopicComposer(page);
   });
 
-  test('should catch subtle dismissiveness that regex misses', async ({ page }) => {
+  test('should catch subtle dismissiveness that regex misses @ai', async ({ page }) => {
     const dismissiveContent =
       "Clearly you don't understand basic economics. Anyone with half a brain can see that this policy would never work in practice.";
 
@@ -121,7 +136,7 @@ test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
     expect(feedbackText?.toLowerCase()).toMatch(/consider|rephras|focus on/);
   });
 
-  test('should catch condescending language', async ({ page }) => {
+  test('should catch condescending language @ai', async ({ page }) => {
     const condescendingContent =
       "Let me explain this to you in simple terms since you seem confused. The real issue here is something you clearly haven't thought about.";
 
@@ -137,7 +152,7 @@ test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
     expect(feedbackText?.toLowerCase()).toMatch(/tone|condescend|respect/);
   });
 
-  test('should catch third-person attacks with intensifiers', async ({ page }) => {
+  test('should catch third-person attacks with intensifiers @ai', async ({ page }) => {
     const attackContent =
       "These people are really stupid and have absolutely no idea what they're talking about. Their arguments are completely moronic.";
 
@@ -151,7 +166,7 @@ test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
     expect(feedbackText?.toLowerCase()).toMatch(/inflammatory|personal attack/);
   });
 
-  test('should NOT flag respectful disagreement', async ({ page }) => {
+  test('should NOT flag respectful disagreement @ai', async ({ page }) => {
     const respectfulContent =
       'I respectfully disagree with this perspective. While I understand the concerns raised, I believe there are alternative approaches worth considering. Let me explain my reasoning...';
 
@@ -173,7 +188,7 @@ test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
     expect(hasAffirmation).toBeTruthy();
   });
 
-  test('should catch strawman fallacy', async ({ page }) => {
+  test('should catch strawman fallacy @ai', async ({ page }) => {
     const strawmanContent =
       "So you're saying we should just give free money to everyone and let them sit at home doing nothing? That's absurd. Nobody would work anymore and society would collapse.";
 
@@ -189,7 +204,7 @@ test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
     expect(feedbackText?.toLowerCase()).toMatch(/fallacy|strawman|misrepresent/);
   });
 
-  test('should catch unsourced statistical claims', async ({ page }) => {
+  test('should catch unsourced statistical claims @ai', async ({ page }) => {
     const unsourcedContent =
       '75% of economists agree that this policy would fail. Studies have shown that similar programs always increase inflation by at least 20%.';
 
@@ -212,7 +227,7 @@ test.describe('AI vs Regex Performance Comparison @ai', () => {
     await navigateToTopicComposer(page);
   });
 
-  test('regex should be fast (<500ms), AI should be slower but thorough', async ({ page }) => {
+  test('regex should be fast (<500ms), AI should be slower but thorough @ai', async ({ page }) => {
     const testContent = 'these people are really stupid';
 
     // Test regex speed
@@ -239,7 +254,7 @@ test.describe('AI vs Regex Performance Comparison @ai', () => {
     console.log(`Regex time: ${regexTime}ms, AI time: ${aiTime}ms`);
   });
 
-  test('should show regex feedback immediately, then upgrade to AI', async ({ page }) => {
+  test('should show regex feedback immediately, then upgrade to AI @ai', async ({ page }) => {
     const content = 'these people are really stupid and dont know what theyre talking about';
 
     const textarea = page.locator('textarea').first();
@@ -270,7 +285,7 @@ test.describe('AI Feedback Edge Cases @ai', () => {
     await navigateToTopicComposer(page);
   });
 
-  test('should handle sarcasm and passive-aggressiveness', async ({ page }) => {
+  test('should handle sarcasm and passive-aggressiveness @ai', async ({ page }) => {
     const sarcasticContent =
       "Oh sure, because that worked out so well last time. I'm sure this totally brilliant idea will have completely different results.";
 
@@ -283,7 +298,7 @@ test.describe('AI Feedback Edge Cases @ai', () => {
     expect(feedbackText?.toLowerCase()).toMatch(/tone|sarcas|hostil/);
   });
 
-  test('should handle long, well-reasoned arguments', async ({ page }) => {
+  test('should handle long, well-reasoned arguments @ai', async ({ page }) => {
     const longContent = `I appreciate the concerns raised about Universal Basic Income. However, I'd like to present an alternative perspective based on recent pilot programs.
 
 First, the Alaska Permanent Fund has distributed annual dividends since 1982 without reducing employment. Studies show work participation rates remained stable.
@@ -311,7 +326,7 @@ I believe UBI deserves serious consideration, though implementation details matt
     expect(isPositive).toBeTruthy();
   });
 
-  test('should detect false dichotomy fallacy', async ({ page }) => {
+  test('should detect false dichotomy fallacy @ai', async ({ page }) => {
     const falseDichotomyContent =
       "Either we implement UBI immediately or we let people starve in the streets. There's no middle ground here. You're either for helping people or you're not.";
 
@@ -332,7 +347,7 @@ test.describe('AI Feedback Consistency @ai', () => {
     await navigateToTopicComposer(page);
   });
 
-  test('should give consistent feedback for identical content', async ({ page }) => {
+  test('should give consistent feedback for identical content @ai', async ({ page }) => {
     const content = "These people clearly have no idea what they're talking about.";
 
     // First analysis (fresh, will call Bedrock)

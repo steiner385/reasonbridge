@@ -12,23 +12,40 @@ export interface MockUser {
   id: string;
   email: string;
   displayName: string;
-  role: 'user' | 'moderator' | 'admin';
-  avatarUrl?: string;
-  emailVerified?: boolean;
-  phoneVerified?: boolean;
+  verificationLevel: 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN'; // Match actual VerificationLevel enum
+  trustScoreAbility: number;
+  trustScoreBenevolence: number;
+  trustScoreIntegrity: number;
+  status: 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+  createdAt: string;
+  updatedAt: string;
+  avatarUrl?: string | null; // Allow null explicitly
+  followerCount?: number;
+  followingCount?: number;
+  topicCount?: number;
+  responseCount?: number;
 }
 
 /**
  * Default mock user for testing.
- * Has admin role to access all routes.
+ * Has VERIFIED_HUMAN level to access all routes.
  */
 export const DEFAULT_MOCK_USER: MockUser = {
   id: 'test-user-1',
   email: 'test@example.com',
   displayName: 'Test User',
-  role: 'admin',
-  emailVerified: true,
-  phoneVerified: false,
+  verificationLevel: 'VERIFIED_HUMAN', // Fixed: was 'VERIFIED' which is invalid
+  trustScoreAbility: 0.85,
+  trustScoreBenevolence: 0.8,
+  trustScoreIntegrity: 0.9,
+  status: 'ACTIVE',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  avatarUrl: null,
+  followerCount: 0,
+  followingCount: 0,
+  topicCount: 0,
+  responseCount: 0,
 };
 
 /**
@@ -49,11 +66,12 @@ export async function mockAuthenticatedUser(
     ...user,
   };
 
-  // Set auth tokens in localStorage before page loads
-  await page.addInitScript(
+  // Set auth tokens in localStorage before ANY page loads using context-level init script
+  // This ensures localStorage is set BEFORE the page starts loading
+  await page.context().addInitScript(
     ({ user }) => {
-      // Store mock tokens
-      localStorage.setItem('auth_token', 'mock-jwt-token');
+      // Store mock tokens (authToken is used by authService.getAuthToken())
+      localStorage.setItem('authToken', 'mock-jwt-token');
       localStorage.setItem('accessToken', 'mock-access-token');
       localStorage.setItem('refreshToken', 'mock-refresh-token');
 
@@ -72,10 +90,7 @@ export async function mockAuthenticatedUser(
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        user: mockUser,
-        success: true,
-      }),
+      body: JSON.stringify(mockUser),
     });
   });
 
@@ -97,10 +112,7 @@ export async function mockAuthenticatedUser(
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        user: mockUser,
-        success: true,
-      }),
+      body: JSON.stringify(mockUser),
     });
   });
 
@@ -109,10 +121,7 @@ export async function mockAuthenticatedUser(
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        user: mockUser,
-        success: true,
-      }),
+      body: JSON.stringify(mockUser),
     });
   });
 
@@ -120,31 +129,31 @@ export async function mockAuthenticatedUser(
 }
 
 /**
- * Mock a regular (non-admin) user session.
+ * Mock a regular user session with BASIC verification.
  */
 export async function mockRegularUser(page: Page, user?: Partial<MockUser>): Promise<MockUser> {
   return mockAuthenticatedUser(page, {
-    role: 'user',
+    verificationLevel: 'BASIC',
     ...user,
   });
 }
 
 /**
- * Mock a moderator user session.
+ * Mock a moderator user session with VERIFIED status.
  */
 export async function mockModeratorUser(page: Page, user?: Partial<MockUser>): Promise<MockUser> {
   return mockAuthenticatedUser(page, {
-    role: 'moderator',
+    verificationLevel: 'VERIFIED',
     ...user,
   });
 }
 
 /**
- * Mock an admin user session.
+ * Mock an admin user session with ENHANCED verification.
  */
 export async function mockAdminUser(page: Page, user?: Partial<MockUser>): Promise<MockUser> {
   return mockAuthenticatedUser(page, {
-    role: 'admin',
+    verificationLevel: 'ENHANCED',
     ...user,
   });
 }
@@ -155,7 +164,7 @@ export async function mockAdminUser(page: Page, user?: Partial<MockUser>): Promi
  */
 export async function clearMockAuth(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('authToken');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
@@ -249,17 +258,18 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
           id: userId,
           email: 'test@example.com',
           displayName: 'Test User',
-          avatarUrl: null,
-          bio: 'Test user bio',
+          verificationLevel: 'VERIFIED',
+          trustScoreAbility: 0.85,
+          trustScoreBenevolence: 0.8,
+          trustScoreIntegrity: 0.9,
+          status: 'ACTIVE',
           createdAt: new Date().toISOString(),
-          reputation: 100,
-          role: 'admin',
-          trustScore: 0.85,
-          verificationStatus: {
-            email: true,
-            phone: false,
-            identity: false,
-          },
+          updatedAt: new Date().toISOString(),
+          avatarUrl: null,
+          followerCount: 0,
+          followingCount: 0,
+          topicCount: 0,
+          responseCount: 0,
         }),
       });
     } else {

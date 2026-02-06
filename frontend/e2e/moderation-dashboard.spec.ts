@@ -12,6 +12,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { mockAdminUser } from './fixtures/auth-mock.fixture';
 
 // Check if running in E2E Docker mode with full backend
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
@@ -183,8 +184,11 @@ test.describe('Moderation Dashboard', () => {
   // UI-only tests that use API mocking
   test.describe('UI Behavior (Mocked)', () => {
     test.beforeEach(async ({ page }) => {
+      // Mock admin authentication to bypass ProtectedRoute
+      await mockAdminUser(page);
+
       // Mock queue statistics endpoint
-      await page.route('**/moderation/queue/stats', async (route) => {
+      await page.route('**/api/moderation/queue/stats', async (route) => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -193,7 +197,7 @@ test.describe('Moderation Dashboard', () => {
       });
 
       // Mock moderation actions endpoint
-      await page.route('**/moderation/actions*', async (route) => {
+      await page.route('**/api/moderation/actions*', async (route) => {
         if (route.request().method() === 'GET') {
           await route.fulfill({
             status: 200,
@@ -218,7 +222,7 @@ test.describe('Moderation Dashboard', () => {
       });
 
       // Mock appeals endpoint
-      await page.route('**/moderation/appeals*', async (route) => {
+      await page.route('**/api/moderation/appeals*', async (route) => {
         if (route.request().method() === 'GET') {
           await route.fulfill({
             status: 200,
@@ -244,8 +248,22 @@ test.describe('Moderation Dashboard', () => {
     });
 
     test('should display dashboard heading', async ({ page }) => {
-      await page.goto('/admin/moderation');
+      // Navigate to home first to trigger auth initialization
+      await page.goto('/');
       await page.waitForLoadState('networkidle');
+
+      // Wait for auth to complete - look for user menu button or "Test User" text
+      // This ensures AuthContext has loaded the user before we navigate to protected route
+      await page.waitForSelector('text=Test User', { timeout: 10000 }).catch(async () => {
+        // If user menu not found, check if login button exists (auth failed)
+        const hasLogin = await page.locator('text=Log In').isVisible();
+        if (hasLogin) {
+          throw new Error('Authentication failed - login button visible instead of user menu');
+        }
+      });
+
+      // Now navigate to admin page - auth is ready
+      await page.goto('/admin/moderation', { waitUntil: 'networkidle' });
 
       const heading = page.getByRole('heading', { name: /moderation dashboard/i });
       await expect(heading).toBeVisible();
