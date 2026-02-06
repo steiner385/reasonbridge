@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PrismaClient } from '@prisma/client';
 import { seedDemo } from './seed/demo-fixtures';
-
-const prisma = new PrismaClient();
+import { prisma } from '../src/client.js';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
