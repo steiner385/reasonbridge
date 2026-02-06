@@ -255,8 +255,8 @@ importers:
   packages/db-models:
     dependencies:
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
@@ -320,8 +320,8 @@ importers:
         specifier: ^16.1.0
         version: 16.1.0
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
@@ -360,8 +360,8 @@ importers:
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@qdrant/js-client-rest':
         specifier: ^1.7.0
         version: 1.16.2(typescript@5.9.3)
@@ -524,8 +524,8 @@ importers:
         specifier: ^6.5.0
         version: 6.5.0(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(reflect-metadata@0.2.2)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -597,8 +597,8 @@ importers:
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -637,8 +637,8 @@ importers:
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -695,8 +695,8 @@ importers:
         specifier: ^11.1.13
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(@nestjs/platform-socket.io@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -753,8 +753,8 @@ importers:
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -811,8 +811,8 @@ importers:
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
       '@prisma/client':
-        specifier: 6.3.1
-        version: 6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -2252,12 +2252,15 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@prisma/client@6.3.1':
-    resolution: {integrity: sha512-ARAJaPs+eBkemdky/XU3cvGRl+mIPHCN2lCXsl5Vlb0E2gV+R6IN7aCI8CisRGszEZondwIsW9Iz8EJkTdykyA==}
-    engines: {node: '>=18.18'}
+  '@prisma/client-runtime-utils@7.3.0':
+    resolution: {integrity: sha512-dG/ceD9c+tnXATPk8G+USxxYM9E6UdMTnQeQ+1SZUDxTz7SgQcfxEqafqIQHcjdlcNK/pvmmLfSwAs3s2gYwUw==}
+
+  '@prisma/client@7.3.0':
+    resolution: {integrity: sha512-FXBIxirqQfdC6b6HnNgxGmU7ydCPEPk7maHMOduJJfnTP+MuOGa15X4omjR/zpPUUpm8ef/mEFQjJudOGkXFcQ==}
+    engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
-      typescript: '>=5.1.0'
+      typescript: '>=5.4.0'
     peerDependenciesMeta:
       prisma:
         optional: true
@@ -8582,7 +8585,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@prisma/client@6.3.1(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client-runtime-utils@7.3.0': {}
+
+  '@prisma/client@7.3.0(prisma@6.3.1(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@prisma/client-runtime-utils': 7.3.0
     optionalDependencies:
       prisma: 6.3.1(typescript@5.9.3)
       typescript: 5.9.3

@@ -36,7 +36,7 @@
     "db:seed:test": "tsx prisma/seed/test-fixtures.ts"
   },
   "dependencies": {
-    "@prisma/client": "6.3.1"
+    "@prisma/client": "7.3.0"
   },
   "devDependencies": {
     "prisma": "6.3.1",

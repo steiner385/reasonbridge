@@ -23,7 +23,7 @@
     "@nestjs/common": "^11.1.13",
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-fastify": "^11.1.13",
-    "@prisma/client": "6.3.1",
+    "@prisma/client": "7.3.0",
     "@qdrant/js-client-rest": "^1.7.0",
     "@reason-bridge/ai-client": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",

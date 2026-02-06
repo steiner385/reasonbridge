@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@pact-foundation/pact": "^16.1.0",
-    "@prisma/client": "6.3.1",
+    "@prisma/client": "7.3.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "msw": "^2.12.8"

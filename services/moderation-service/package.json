@@ -20,7 +20,7 @@
     "@nestjs/common": "^11.1.13",
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-fastify": "^11.1.13",
-    "@prisma/client": "6.3.1",
+    "@prisma/client": "7.3.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "@reason-bridge/event-schemas": "workspace:*",
