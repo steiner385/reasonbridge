@@ -61,24 +61,20 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const prevIsOpenRef = useRef(isOpen);
+  const prevIsOpenRef = useRef(false); // Start with false to handle initial open
 
-  // Initialize form with response data when modal transitions from closed to open
+  // Initialize form with response data when modal opens (including initial render)
   useEffect(() => {
     if (isOpen && !prevIsOpenRef.current && response) {
-      // Schedule form initialization asynchronously to avoid cascading renders
-      const timer = setTimeout(() => {
-        setContent(response.content);
-        setCitedSources(response.citedSources?.map((s) => s.url) || []);
-        setContainsOpinion(response.containsOpinion);
-        setContainsFactualClaims(response.containsFactualClaims);
-        setError(null);
-      }, 0);
-      prevIsOpenRef.current = isOpen;
-      return () => clearTimeout(timer);
+      // Safe: setState in response to prop change (modal opening), not during render
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setContent(response.content);
+      setCitedSources(response.citedSources?.map((s) => s.url) || []);
+      setContainsOpinion(response.containsOpinion);
+      setContainsFactualClaims(response.containsFactualClaims);
+      setError(null);
     }
     prevIsOpenRef.current = isOpen;
-    return undefined;
   }, [isOpen, response]);
 
   const handleSubmit = async (e: React.FormEvent) => {
