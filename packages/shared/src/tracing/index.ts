@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Distributed Tracing Module
  *
  * Provides AWS X-Ray integration for distributed tracing across services.

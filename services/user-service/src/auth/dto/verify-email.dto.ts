@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Email verification DTOs
  * Matches OpenAPI schema definitions
  */

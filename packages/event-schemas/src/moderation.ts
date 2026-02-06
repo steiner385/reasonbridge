@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Moderation service event definitions
  */
 
@@ -60,11 +65,10 @@ export interface ModerationActionRequestedPayload {
 /**
  * Event published when AI requests a moderation action
  */
-export interface ModerationActionRequestedEvent
-  extends BaseEvent<
-    typeof MODERATION_EVENT_TYPES.ACTION_REQUESTED,
-    ModerationActionRequestedPayload
-  > {
+export interface ModerationActionRequestedEvent extends BaseEvent<
+  typeof MODERATION_EVENT_TYPES.ACTION_REQUESTED,
+  ModerationActionRequestedPayload
+> {
   type: typeof MODERATION_EVENT_TYPES.ACTION_REQUESTED;
 }
 
@@ -106,8 +110,10 @@ export interface UserTrustUpdatedPayload {
 /**
  * Event published when user trust scores are updated
  */
-export interface UserTrustUpdatedEvent
-  extends BaseEvent<typeof MODERATION_EVENT_TYPES.USER_TRUST_UPDATED, UserTrustUpdatedPayload> {
+export interface UserTrustUpdatedEvent extends BaseEvent<
+  typeof MODERATION_EVENT_TYPES.USER_TRUST_UPDATED,
+  UserTrustUpdatedPayload
+> {
   type: typeof MODERATION_EVENT_TYPES.USER_TRUST_UPDATED;
 }
 

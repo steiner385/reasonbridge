@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';

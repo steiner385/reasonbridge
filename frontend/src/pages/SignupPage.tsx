@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmailSignupForm, { type EmailSignupFormData } from '../components/auth/EmailSignupForm';

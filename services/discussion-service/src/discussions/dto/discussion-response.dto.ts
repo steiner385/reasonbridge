@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T019 [P] [US1] - Discussion Response DTO (Feature 009)
  *
  * Response format for discussion queries

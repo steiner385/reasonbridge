@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * SkeletonText component for multi-line text placeholders
  * @module components/ui/Skeleton/SkeletonText
  */

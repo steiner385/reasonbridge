@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useRef, useEffect, useState } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
 

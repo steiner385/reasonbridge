@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -239,10 +244,7 @@ export class ModerationQueueService {
    */
   private calculateActionPriority(action: any): 'high' | 'normal' | 'low' {
     // High priority: consequential actions or high severity
-    if (
-      action.severity === 'CONSEQUENTIAL' ||
-      (action.aiConfidence && action.aiConfidence < 0.7)
-    ) {
+    if (action.severity === 'CONSEQUENTIAL' || (action.aiConfidence && action.aiConfidence < 0.7)) {
       return 'high';
     }
 
@@ -320,19 +322,20 @@ export class ModerationQueueService {
    * Parse ISO 8601 duration to milliseconds
    */
   private parseDuration(iso8601: string): number {
-    const regex = /P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?/;
+    const regex =
+      /P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?/;
     const matches = iso8601.match(regex);
 
     if (!matches) return 0;
 
     const [, years, months, days, hours, minutes, seconds] = matches;
     return (
-      (parseInt(years || '0') * 365 * 24 * 60 * 60 * 1000) +
-      (parseInt(months || '0') * 30 * 24 * 60 * 60 * 1000) +
-      (parseInt(days || '0') * 24 * 60 * 60 * 1000) +
-      (parseInt(hours || '0') * 60 * 60 * 1000) +
-      (parseInt(minutes || '0') * 60 * 1000) +
-      (parseFloat(seconds || '0') * 1000)
+      parseInt(years || '0') * 365 * 24 * 60 * 60 * 1000 +
+      parseInt(months || '0') * 30 * 24 * 60 * 60 * 1000 +
+      parseInt(days || '0') * 24 * 60 * 60 * 1000 +
+      parseInt(hours || '0') * 60 * 60 * 1000 +
+      parseInt(minutes || '0') * 60 * 1000 +
+      parseFloat(seconds || '0') * 1000
     );
   }
 

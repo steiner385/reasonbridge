@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useCallback } from 'react';
 import { useSuggestionActions } from '../../hooks/useSuggestionActions';
 import type {

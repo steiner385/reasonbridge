@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * AppealSubmissionForm - Modal form for submitting appeals against moderation actions
  *
  * Allows users to appeal moderation decisions by providing the moderation action ID

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T043 [P] [US2] - Response List Component (Feature 009)
  *
  * Displays all responses for a discussion in chronological order

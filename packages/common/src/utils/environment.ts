@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Environment detection utilities
  *
  * Provides helpers for detecting demo mode and environment types.

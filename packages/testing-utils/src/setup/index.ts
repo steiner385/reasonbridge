@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Shared Vitest Setup with MSW Handlers
  *
  * This setup file initializes the MSW server and configures global test hooks.

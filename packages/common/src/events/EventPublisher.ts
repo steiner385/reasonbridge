@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * EventPublisher interface and implementations for publishing domain events.
  *
  * This module provides an abstraction for publishing events to various

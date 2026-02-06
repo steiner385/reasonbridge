@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Feedback Preferences Settings Page
  * Allows users to configure their AI feedback preferences
  */

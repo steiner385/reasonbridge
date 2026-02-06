@@ -46,6 +46,7 @@ bash .husky/pre-commit-secrets-scan > "$TEMP_DIR/secrets.log" 2>&1 & PID_SECRETS
 bash .husky/pre-commit-duplication-detection > "$TEMP_DIR/dup.log" 2>&1 & PID_DUP=$!
 bash .husky/pre-commit-root-check > "$TEMP_DIR/root.log" 2>&1 & PID_ROOT=$!
 bash .husky/pre-commit-dependencies-audit > "$TEMP_DIR/deps.log" 2>&1 & PID_DEPS=$!
+bash .husky/pre-commit-license-check > "$TEMP_DIR/license.log" 2>&1 & PID_LICENSE=$!
 
 # ESLint only on staged files to avoid blocking on pre-existing codebase errors
 # Get staged files matching code extensions
@@ -64,6 +65,7 @@ wait $PID_SECRETS 2>/dev/null; EXIT_CODE_SECRETS=$?
 wait $PID_DUP 2>/dev/null; EXIT_CODE_DUP=$?
 wait $PID_ROOT 2>/dev/null; EXIT_CODE_ROOT=$?
 wait $PID_DEPS 2>/dev/null; EXIT_CODE_DEPS=$?
+wait $PID_LICENSE 2>/dev/null; EXIT_CODE_LICENSE=$?
 if [ -n "$PID_LINT" ]; then
   wait $PID_LINT 2>/dev/null; EXIT_CODE_LINT=$?
 fi
@@ -102,6 +104,12 @@ if [ $EXIT_CODE_LINT -ne 0 ]; then
 "
 fi
 
+if [ $EXIT_CODE_LICENSE -ne 0 ]; then
+  PARALLEL_FAILED=1
+  FAILED_CHECKS="${FAILED_CHECKS}❌ SPDX License Headers
+"
+fi
+
 # Report parallel check results
 if [ $PARALLEL_FAILED -eq 1 ]; then
   echo ""
@@ -117,6 +125,7 @@ if [ $PARALLEL_FAILED -eq 1 ]; then
   [ $EXIT_CODE_ROOT -ne 0 ] && { echo "📌 Root Directory Check Details:"; cat "$TEMP_DIR/root.log"; echo ""; }
   [ $EXIT_CODE_DEPS -ne 0 ] && { echo "📌 Dependency Audit Details:"; cat "$TEMP_DIR/deps.log"; echo ""; }
   [ $EXIT_CODE_LINT -ne 0 ] && { echo "📌 ESLint Details:"; cat "$TEMP_DIR/lint.log"; echo ""; }
+  [ $EXIT_CODE_LICENSE -ne 0 ] && { echo "📌 SPDX License Header Details:"; cat "$TEMP_DIR/license.log"; echo ""; }
 
   echo ""
   echo "Commit blocked by pre-commit hook."

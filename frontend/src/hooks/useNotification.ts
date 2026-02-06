@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useContext } from 'react';
 import { NotificationContext, type NotificationContextType } from '../contexts/NotificationContext';
 

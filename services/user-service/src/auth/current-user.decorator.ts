@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 import type { JwtPayload } from './jwt-auth.guard.js';
 

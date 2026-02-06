@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T011 [P] & T012 [P] - Standard error response DTOs (Feature 009)
  *
  * Provides consistent error structure across all endpoints

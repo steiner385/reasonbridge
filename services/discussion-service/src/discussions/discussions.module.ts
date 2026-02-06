@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T016 - Discussion Module (Feature 009)
  *
  * Module for managing discussion threads within topics

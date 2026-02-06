@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import AlignmentInput from '../alignments/AlignmentInput';
 import type { AlignmentStance } from '../alignments/AlignmentInput';

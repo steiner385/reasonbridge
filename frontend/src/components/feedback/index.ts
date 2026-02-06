@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { default as FeedbackDisplayPanel } from './FeedbackDisplayPanel';
 export type { FeedbackDisplayPanelProps } from './FeedbackDisplayPanel';
 export { default as FallacyWarnings } from './FallacyWarnings';

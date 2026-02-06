@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Link } from 'react-router-dom';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';

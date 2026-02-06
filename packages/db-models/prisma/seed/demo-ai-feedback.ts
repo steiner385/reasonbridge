@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo AI Feedback Definitions
  *
  * Defines pre-computed AI feedback instances for demo responses.

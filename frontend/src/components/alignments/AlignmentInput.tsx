@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState } from 'react';
 
 export type AlignmentStance = 'support' | 'oppose' | 'nuanced';

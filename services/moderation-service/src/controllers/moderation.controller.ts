@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Body, Controller, Post, Get, BadRequestException, Param, Query } from '@nestjs/common';
 import type { ScreeningResult } from '../services/content-screening.service.js';
 import { ContentScreeningService } from '../services/content-screening.service.js';

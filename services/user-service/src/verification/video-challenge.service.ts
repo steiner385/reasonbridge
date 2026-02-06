@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';

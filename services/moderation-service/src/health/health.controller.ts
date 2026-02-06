@@ -1,11 +1,14 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Controller, Get, Inject } from '@nestjs/common';
 import { QueueService } from '../queue/queue.service.js';
 
 @Controller('health')
 export class HealthController {
-  constructor(
-    @Inject(QueueService) private readonly queueService?: QueueService,
-  ) {}
+  constructor(@Inject(QueueService) private readonly queueService?: QueueService) {}
 
   @Get()
   check() {

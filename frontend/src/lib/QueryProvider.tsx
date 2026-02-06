@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './queryClient';

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '@prisma/client';
@@ -90,11 +95,7 @@ export class ModerationActionRepository {
   /**
    * Find all moderation actions with optional filters and pagination
    */
-  async findMany(
-    where?: Prisma.ModerationActionWhereInput,
-    limit: number = 20,
-    cursor?: string,
-  ) {
+  async findMany(where?: Prisma.ModerationActionWhereInput, limit: number = 20, cursor?: string) {
     const findManyArgs: Prisma.ModerationActionFindManyArgs = {
       ...(where && { where }),
       include: {
@@ -190,66 +191,42 @@ export class ModerationActionRepository {
    * Find pending moderation actions awaiting approval
    */
   async findPending(limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { status: 'PENDING' },
-      limit,
-      cursor,
-    );
+    return this.findMany({ status: 'PENDING' }, limit, cursor);
   }
 
   /**
    * Find active moderation actions
    */
   async findActive(limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { status: 'ACTIVE' },
-      limit,
-      cursor,
-    );
+    return this.findMany({ status: 'ACTIVE' }, limit, cursor);
   }
 
   /**
    * Find moderation actions that have been appealed
    */
   async findAppealed(limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { status: 'APPEALED' },
-      limit,
-      cursor,
-    );
+    return this.findMany({ status: 'APPEALED' }, limit, cursor);
   }
 
   /**
    * Find moderation actions by severity level
    */
   async findBySeverity(severity: string, limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { severity: severity as any },
-      limit,
-      cursor,
-    );
+    return this.findMany({ severity: severity as any }, limit, cursor);
   }
 
   /**
    * Find moderation actions by action type
    */
   async findByActionType(actionType: string, limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { actionType: actionType as any },
-      limit,
-      cursor,
-    );
+    return this.findMany({ actionType: actionType as any }, limit, cursor);
   }
 
   /**
    * Find AI-recommended moderation actions
    */
   async findAiRecommended(limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { aiRecommended: true, status: 'PENDING' },
-      limit,
-      cursor,
-    );
+    return this.findMany({ aiRecommended: true, status: 'PENDING' }, limit, cursor);
   }
 
   /**
@@ -298,11 +275,7 @@ export class ModerationActionRepository {
    * Find moderation actions by moderator (approved by)
    */
   async findByModerator(moderatorId: string, limit: number = 50, cursor?: string) {
-    return this.findMany(
-      { approvedById: moderatorId },
-      limit,
-      cursor,
-    );
+    return this.findMany({ approvedById: moderatorId }, limit, cursor);
   }
 
   /**

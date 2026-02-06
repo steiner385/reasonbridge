@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { CommonGroundAnalysis } from '../../types/common-ground';
 import ShareButton from './ShareButton';
 

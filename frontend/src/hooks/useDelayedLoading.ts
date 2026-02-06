@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * useDelayedLoading - Hook to prevent skeleton flash on fast loads
  * @module hooks/useDelayedLoading
  *

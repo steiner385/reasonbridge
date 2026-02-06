@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Pact Consumer Testing Utilities
  *
  * Provides utilities for creating and configuring Pact consumer tests.

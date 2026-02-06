@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IsBoolean, IsOptional, IsNumber, Min, Max, IsEnum, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 

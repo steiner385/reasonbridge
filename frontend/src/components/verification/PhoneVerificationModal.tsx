@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * PhoneVerificationModal - Two-step phone verification workflow
  *
  * Step 1: User enters phone number -> sends OTP

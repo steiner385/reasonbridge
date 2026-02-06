@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useCommonGroundHistory } from '../../lib/useCommonGroundHistory';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import type { CommonGround } from '../../types/commonGround';

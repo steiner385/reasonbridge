@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * EventSubscriber base class and implementations for consuming domain events.
  *
  * This module provides abstractions for subscribing to and processing events

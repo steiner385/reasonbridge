@@ -57,6 +57,8 @@ ALLOWED_FILES=(
   "^\\..*"                      # Hidden files/dirs
   "^README.*"                   # README files
   "^LICENSE.*"                  # License files
+  "^CONTRIBUTING\\.md$"         # Contributor guidelines
+  "^NOTICE$"                    # Apache 2.0 attribution file
   "^package.*\\.json$"          # package.json, package-lock.json
   "^package.*\\.yaml$"          # package.yaml
   "^tsconfig.*\\.json$"         # TypeScript configs

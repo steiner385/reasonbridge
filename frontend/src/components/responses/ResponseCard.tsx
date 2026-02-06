@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import Card, { CardHeader, CardBody, CardFooter } from '../ui/Card';
 import type { Response } from '../../types/response';

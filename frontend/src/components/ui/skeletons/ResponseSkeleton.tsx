@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * ResponseSkeleton - Loading placeholder for response cards
  * @module components/ui/skeletons/ResponseSkeleton
  */

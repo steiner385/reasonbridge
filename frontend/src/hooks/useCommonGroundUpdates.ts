@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { CommonGroundAnalysis } from '../types/common-ground';

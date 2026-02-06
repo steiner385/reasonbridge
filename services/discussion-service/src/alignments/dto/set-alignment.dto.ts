@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IsEnum, IsOptional, IsString, MaxLength, ValidateIf } from 'class-validator';
 
 /**

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Controller, Post, Body, Req, Res, Headers } from '@nestjs/common';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';

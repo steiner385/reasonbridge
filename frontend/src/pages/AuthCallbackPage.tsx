@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { AuthResponse } from '../services/authService';

@@ -1,7 +1,14 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useCallback } from 'react';
 
-export interface SearchBarProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
+export interface SearchBarProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'size' | 'onChange'
+> {
   /**
    * Callback function triggered when search is submitted
    */

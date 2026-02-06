@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 import { LoadingBridge } from '../ui/LoadingBridge';

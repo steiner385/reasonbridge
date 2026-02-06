@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T014 [P] - Optimistic Locking Error Handler (Feature 009)
  *
  * Purpose: Detect and handle version conflicts when editing responses

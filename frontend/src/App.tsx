@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useRoutes, useLocation } from 'react-router-dom';
 import { routes } from './routes';
 import { Header } from './components/layouts/Header';

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Phone Verification Form Component
  * Handles phone number input and verification request
  */
@@ -77,7 +82,9 @@ export const PhoneVerificationForm: React.FC<PhoneVerificationFormProps> = ({
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             helperText="Format: +1 (country code) (area) number. Example: +1 2125551234"
-            error={phoneNumber && !isValidPhoneNumber(phoneNumber) ? 'Invalid phone number format' : ''}
+            error={
+              phoneNumber && !isValidPhoneNumber(phoneNumber) ? 'Invalid phone number format' : ''
+            }
             disabled={requestVerification.isPending}
             required
           />

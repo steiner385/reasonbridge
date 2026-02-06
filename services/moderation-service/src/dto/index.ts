@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Moderation Service DTOs
  * Centralized exports for all Data Transfer Objects
  */

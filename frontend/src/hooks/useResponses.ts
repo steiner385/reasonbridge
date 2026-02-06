@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T047 [US2] - TanStack Query hook for response fetching (Feature 009)
  *
  * Provides query for fetching discussion responses with:

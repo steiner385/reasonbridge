@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useMemo } from 'react';
 import type { Response } from '../../types/response';
 import Button from '../ui/Button';

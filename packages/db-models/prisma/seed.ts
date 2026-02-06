@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { PrismaClient } from '@prisma/client';
 import { seedDemo } from './seed/demo-fixtures';
 

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T029 [P] [US1] - Discussion Card Component (Feature 009)
  *
  * Displays a discussion summary in list view

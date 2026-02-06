@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, InfoIcon, XCircle } from 'lucide-react';
 

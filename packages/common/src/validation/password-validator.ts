@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Password validation utility
  * Requirements: minimum 8 characters, mixed case, numbers, special characters
  */

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T011 [P] & T012 [P] - Shared User Summary DTO (Feature 009)
  *
  * Used in both Discussion and Response DTOs to represent user information

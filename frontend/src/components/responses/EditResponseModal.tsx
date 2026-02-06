@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';

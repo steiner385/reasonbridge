@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T036 [P] [US2] - Response Detail DTO (Feature 009)
  *
  * Response format for displaying discussion responses with threading support

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable, Inject, Logger, Optional } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import type { QdrantClient } from '@qdrant/js-client-rest';

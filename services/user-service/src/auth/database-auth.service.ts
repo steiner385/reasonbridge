@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';

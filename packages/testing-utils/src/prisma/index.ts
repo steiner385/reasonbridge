@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Prisma test client factory for integration tests.
  *
  * Provides isolated Prisma clients that connect to the test database

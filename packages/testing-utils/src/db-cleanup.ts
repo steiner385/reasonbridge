@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Database cleanup utility for integration tests.
  *
  * Provides a `cleanDatabase` function that deletes all data from the database

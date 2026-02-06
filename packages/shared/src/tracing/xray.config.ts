@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * AWS X-Ray Tracing Configuration
  *
  * This module provides X-Ray distributed tracing configuration for all services.

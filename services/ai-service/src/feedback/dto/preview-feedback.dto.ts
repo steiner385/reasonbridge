@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IsString, IsNotEmpty, IsEnum, IsOptional, IsUUID, MinLength } from 'class-validator';
 import { FeedbackSensitivity } from './request-feedback.dto.js';
 

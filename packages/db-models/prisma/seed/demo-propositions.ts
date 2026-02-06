@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo Proposition Definitions
  *
  * Defines 33 propositions across 10 topics.

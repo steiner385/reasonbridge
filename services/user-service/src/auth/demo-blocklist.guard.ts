@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo Credential Blocklist Guard
  *
  * Prevents demo credentials from being used in production environments.

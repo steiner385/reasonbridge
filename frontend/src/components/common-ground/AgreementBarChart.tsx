@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Proposition } from '../../types/common-ground';
 
 export interface AgreementBarChartProps {
@@ -83,9 +88,7 @@ const AgreementBarChart = ({
   }
 
   // Apply limit if specified
-  const displayedPropositions = limit
-    ? sortedPropositions.slice(0, limit)
-    : sortedPropositions;
+  const displayedPropositions = limit ? sortedPropositions.slice(0, limit) : sortedPropositions;
 
   if (displayedPropositions.length === 0) {
     return (
@@ -97,9 +100,7 @@ const AgreementBarChart = ({
 
   return (
     <div className={className}>
-      {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-      )}
+      {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
 
       <div className="space-y-4">
         {displayedPropositions.map((proposition) => {
@@ -128,9 +129,7 @@ const AgreementBarChart = ({
             >
               {/* Proposition text */}
               <div className="mb-2 flex items-start justify-between">
-                <p className="text-sm text-gray-800 flex-1 mr-4">
-                  {proposition.text}
-                </p>
+                <p className="text-sm text-gray-800 flex-1 mr-4">{proposition.text}</p>
                 <span className={`text-sm font-semibold ${textColor} whitespace-nowrap`}>
                   {proposition.agreementPercentage}%
                 </span>
@@ -159,27 +158,19 @@ const AgreementBarChart = ({
                 <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
                   <div className="flex items-center gap-1">
                     <span className="inline-block w-3 h-3 rounded-full bg-green-500" />
-                    <span>
-                      {proposition.supportingParticipants.length} support
-                    </span>
+                    <span>{proposition.supportingParticipants.length} support</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="inline-block w-3 h-3 rounded-full bg-red-500" />
-                    <span>
-                      {proposition.opposingParticipants.length} oppose
-                    </span>
+                    <span>{proposition.opposingParticipants.length} oppose</span>
                   </div>
                   {proposition.neutralParticipants.length > 0 && (
                     <div className="flex items-center gap-1">
                       <span className="inline-block w-3 h-3 rounded-full bg-gray-400" />
-                      <span>
-                        {proposition.neutralParticipants.length} neutral
-                      </span>
+                      <span>{proposition.neutralParticipants.length} neutral</span>
                     </div>
                   )}
-                  <div className="ml-auto text-gray-500">
-                    {totalParticipants} total
-                  </div>
+                  <div className="ml-auto text-gray-500">{totalParticipants} total</div>
                 </div>
               )}
             </div>
