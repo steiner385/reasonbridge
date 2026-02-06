@@ -88,7 +88,9 @@ export function TopicFilterUI({
         {/* Status Filter Row */}
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-700 self-center">Status:</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 self-center">
+              Status:
+            </span>
             <Button
               size="sm"
               variant={!filters.status ? 'primary' : 'outline'}
