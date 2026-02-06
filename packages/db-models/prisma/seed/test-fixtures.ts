@@ -15,9 +15,7 @@
  * @module test-fixtures
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../src/client.js';
 
 // ============================================================================
 // DETERMINISTIC IDS

@@ -10,7 +10,7 @@
  * descriptions, and optional anonymity settings.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -61,16 +61,24 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
 
   const { flagContent, isLoading, isSuccess, isError, error } = useFlagContent();
   const notify = useShowNotification();
+  const prevIsOpenRef = useRef(isOpen);
 
-  // Reset form when modal opens
+  // Reset form when modal transitions from closed to open
   useEffect(() => {
-    if (isOpen) {
-      setSelectedCategory('other');
-      setReason('');
-      setDescription('');
-      setIsAnonymous(true);
-      setValidationError(null);
+    if (isOpen && !prevIsOpenRef.current) {
+      // Schedule state updates asynchronously to avoid cascading renders
+      const timer = setTimeout(() => {
+        setSelectedCategory('other');
+        setReason('');
+        setDescription('');
+        setIsAnonymous(true);
+        setValidationError(null);
+      }, 0);
+      prevIsOpenRef.current = isOpen;
+      return () => clearTimeout(timer);
     }
+    prevIsOpenRef.current = isOpen;
+    return undefined;
   }, [isOpen]);
 
   // Close modal and call onSuccess when flag is submitted successfully

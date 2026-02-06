@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -61,16 +61,20 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const prevIsOpenRef = useRef(false); // Start with false to handle initial open
 
-  // Initialize form with response data when modal opens
+  // Initialize form with response data when modal opens (including initial render)
   useEffect(() => {
-    if (isOpen && response) {
+    if (isOpen && !prevIsOpenRef.current && response) {
+      // Safe: setState in response to prop change (modal opening), not during render
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setContent(response.content);
       setCitedSources(response.citedSources?.map((s) => s.url) || []);
       setContainsOpinion(response.containsOpinion);
       setContainsFactualClaims(response.containsFactualClaims);
       setError(null);
     }
+    prevIsOpenRef.current = isOpen;
   }, [isOpen, response]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export interface ReadyToPostIndicatorProps {
   /** Whether content is ready to post (no critical issues). Null means AI is analyzing - pending state. */
@@ -30,23 +30,37 @@ export const ReadyToPostIndicator: React.FC<ReadyToPostIndicatorProps> = ({
   className = '',
 }) => {
   // Track state transitions for animation
-  const [justBecameReady, setJustBecameReady] = useState(false);
-  const [prevReadyToPost, setPrevReadyToPost] = useState(readyToPost);
+  const [animationTriggerTime, setAnimationTriggerTime] = useState<number | null>(null);
+  const prevReadyToPostRef = useRef(readyToPost);
 
   useEffect(() => {
+    const wasReady = prevReadyToPostRef.current;
+    prevReadyToPostRef.current = readyToPost;
+
     // Detect transition from not-ready to ready
-    if (readyToPost && !prevReadyToPost) {
-      setJustBecameReady(true);
-      // Clear the animation state after animation completes
+    if (readyToPost && !wasReady) {
+      // Schedule animation trigger asynchronously
       const timer = setTimeout(() => {
-        setJustBecameReady(false);
-      }, 600); // Match animation duration
-      setPrevReadyToPost(readyToPost);
+        setAnimationTriggerTime(Date.now());
+      }, 0);
+
       return () => clearTimeout(timer);
     }
-    setPrevReadyToPost(readyToPost);
     return undefined;
-  }, [readyToPost, prevReadyToPost]);
+  }, [readyToPost]);
+
+  // Clear animation after duration
+  useEffect(() => {
+    if (animationTriggerTime === null) return undefined;
+
+    const timer = setTimeout(() => {
+      setAnimationTriggerTime(null);
+    }, 600); // Match animation duration
+
+    return () => clearTimeout(timer);
+  }, [animationTriggerTime]);
+
+  const justBecameReady = animationTriggerTime !== null;
 
   if (isLoading) {
     return (

@@ -10,12 +10,32 @@
  * - A singleton Prisma client instance for typical use
  * - A factory function for creating isolated clients (useful for testing)
  * - Graceful disconnect handling
+ *
+ * Prisma 7.x requires using an adapter for database connections.
+ * We use @prisma/adapter-pg for PostgreSQL.
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+// Connection pool for database
+let pool: Pool | null = null;
 
 // Singleton instance
 let prismaInstance: PrismaClient | null = null;
+
+/**
+ * Create a PostgreSQL connection pool
+ */
+function createPool(): Pool {
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env['DATABASE_URL'],
+    });
+  }
+  return pool;
+}
 
 /**
  * Get or create the singleton Prisma client instance.
@@ -23,7 +43,11 @@ let prismaInstance: PrismaClient | null = null;
  */
 export function getPrismaClient(): PrismaClient {
   if (!prismaInstance) {
+    const pgPool = createPool();
+    const adapter = new PrismaPg(pgPool);
+
     prismaInstance = new PrismaClient({
+      adapter,
       log: process.env['NODE_ENV'] === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
   }
@@ -46,7 +70,16 @@ export const prisma = getPrismaClient();
 export function createPrismaClient(
   options?: ConstructorParameters<typeof PrismaClient>[0],
 ): PrismaClient {
-  return new PrismaClient(options);
+  // Create a new pool for this client instance
+  const pgPool = new Pool({
+    connectionString: process.env['DATABASE_URL'],
+  });
+  const adapter = new PrismaPg(pgPool);
+
+  return new PrismaClient({
+    ...options,
+    adapter,
+  });
 }
 
 /**
@@ -57,5 +90,11 @@ export async function disconnectPrisma(): Promise<void> {
   if (prismaInstance) {
     await prismaInstance.$disconnect();
     prismaInstance = null;
+  }
+
+  // Close the connection pool
+  if (pool) {
+    await pool.end();
+    pool = null;
   }
 }

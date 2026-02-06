@@ -35,26 +35,36 @@ import { useState, useEffect, useRef } from 'react';
 export function useDelayedLoading(isLoading: boolean, delayMs: number = 100): boolean {
   const [showLoading, setShowLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevIsLoadingRef = useRef(isLoading);
 
   useEffect(() => {
-    if (isLoading) {
+    const wasLoading = prevIsLoadingRef.current;
+    prevIsLoadingRef.current = isLoading;
+
+    if (isLoading && !wasLoading) {
       // Start timer when loading begins
       timerRef.current = setTimeout(() => {
         setShowLoading(true);
+        timerRef.current = null;
       }, delayMs);
-    } else {
+    } else if (!isLoading && wasLoading) {
       // Clear timer and hide loading when data arrives
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
-      setShowLoading(false);
+      // Schedule state update asynchronously to avoid cascading renders
+      const clearTimer = setTimeout(() => {
+        setShowLoading(false);
+      }, 0);
+      return () => clearTimeout(clearTimer);
     }
 
     // Cleanup on unmount
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
     };
   }, [isLoading, delayMs]);

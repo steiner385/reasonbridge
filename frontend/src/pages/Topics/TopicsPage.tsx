@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTopics } from '../../lib/useTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
@@ -27,12 +27,23 @@ function TopicsPage() {
 
   const { data, isLoading, error } = useTopics(filters);
   const showSkeleton = useDelayedLoading(isLoading);
+  const prevWelcomeParamRef = useRef(searchParams.get('welcome'));
 
   // Check for welcome param and dismissed state
   useEffect(() => {
-    const isWelcome = searchParams.get('welcome') === 'true';
-    const isDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY) === 'true';
-    setShowWelcomeBanner(isWelcome && !isDismissed);
+    const welcomeParam = searchParams.get('welcome');
+    // Only update if welcome param actually changed
+    if (welcomeParam !== prevWelcomeParamRef.current) {
+      const isWelcome = welcomeParam === 'true';
+      const isDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY) === 'true';
+      // Schedule state update asynchronously to avoid cascading renders
+      const timer = setTimeout(() => {
+        setShowWelcomeBanner(isWelcome && !isDismissed);
+      }, 0);
+      prevWelcomeParamRef.current = welcomeParam;
+      return () => clearTimeout(timer);
+    }
+    return undefined;
   }, [searchParams]);
 
   const handleDismissWelcome = () => {
