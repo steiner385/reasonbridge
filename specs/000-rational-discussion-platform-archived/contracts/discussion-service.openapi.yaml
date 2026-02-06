@@ -1,0 +1,1209 @@
+openapi: 3.1.0
+info:
+  title: reasonBridge Discussion Service API
+  description: Topics, propositions, responses, alignments, and common ground analysis
+  version: 1.0.0
+  contact:
+    name: reasonBridge Team
+
+servers:
+  - url: /api/v1/discussions
+    description: Discussion service base path
+
+tags:
+  - name: Topics
+    description: Discussion topic operations
+  - name: Tags
+    description: Tag and theme operations
+  - name: Propositions
+    description: Claim/position operations
+  - name: Responses
+    description: User response operations
+  - name: Alignments
+    description: User stance on propositions
+  - name: Analysis
+    description: Common ground analysis operations
+  - name: TopicLinks
+    description: Cross-topic relationship operations
+
+paths:
+  /topics:
+    get:
+      tags: [Topics]
+      summary: Browse discussion topics
+      operationId: listTopics
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [seeding, active, archived]
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          description: Filter by tag slugs (comma-separated)
+        - name: theme
+          in: query
+          schema:
+            type: string
+          description: Filter by cross-cutting theme
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [recent, activity, diversity]
+            default: recent
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: List of topics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicList'
+
+    post:
+      tags: [Topics]
+      summary: Create a new discussion topic
+      operationId: createTopic
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTopicRequest'
+      responses:
+        '201':
+          description: Topic created (in seeding status)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /topics/{topicId}:
+    get:
+      tags: [Topics]
+      summary: Get topic details
+      operationId: getTopic
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Topic details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /topics/{topicId}/propositions:
+    get:
+      tags: [Propositions]
+      summary: List propositions in a topic
+      operationId: listPropositions
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [consensus, recent, responses]
+            default: consensus
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: List of propositions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Propositions]
+      summary: Create a new proposition
+      operationId: createProposition
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePropositionRequest'
+      responses:
+        '201':
+          description: Proposition created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /topics/{topicId}/responses:
+    get:
+      tags: [Responses]
+      summary: List responses in a topic
+      operationId: listResponses
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: propositionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by proposition
+        - name: authorId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by author (Contributor View)
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [recent, relevant]
+            default: recent
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: List of responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Responses]
+      summary: Submit a response to a discussion
+      operationId: createResponse
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateResponseRequest'
+      responses:
+        '201':
+          description: Response created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /responses/{responseId}:
+    get:
+      tags: [Responses]
+      summary: Get response details
+      operationId: getResponse
+      parameters:
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Response details with feedback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Responses]
+      summary: Update a response (after feedback)
+      operationId: updateResponse
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateResponseRequest'
+      responses:
+        '200':
+          description: Response updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Can only edit own responses
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /propositions/{propositionId}/alignment:
+    put:
+      tags: [Alignments]
+      summary: Set alignment on a proposition
+      operationId: setAlignment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: propositionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAlignmentRequest'
+      responses:
+        '200':
+          description: Alignment set/updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alignment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Alignments]
+      summary: Remove alignment from a proposition
+      operationId: removeAlignment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: propositionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Alignment removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No alignment exists
+
+  /topics/{topicId}/common-ground:
+    get:
+      tags: [Analysis]
+      summary: Get common ground analysis
+      operationId: getCommonGroundAnalysis
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: version
+          in: query
+          schema:
+            type: integer
+          description: Specific version (default latest)
+      responses:
+        '200':
+          description: Common ground analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonGroundAnalysis'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tags:
+    get:
+      tags: [Tags]
+      summary: List all tags
+      operationId: listTags
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [usage, alphabetical]
+            default: usage
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by tag name
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagList'
+
+  /tags/{tagSlug}/topics:
+    get:
+      tags: [Tags]
+      summary: Get topics by tag
+      operationId: getTopicsByTag
+      parameters:
+        - name: tagSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: Topics with this tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /themes:
+    get:
+      tags: [Tags]
+      summary: List cross-cutting themes
+      operationId: listThemes
+      responses:
+        '200':
+          description: List of AI-identified themes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  themes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Theme'
+
+  /topics/{topicId}/links:
+    get:
+      tags: [TopicLinks]
+      summary: Get topic relationships
+      operationId: getTopicLinks
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          schema:
+            type: string
+            enum: [outgoing, incoming, both]
+            default: both
+      responses:
+        '200':
+          description: Related topics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicLinkList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [TopicLinks]
+      summary: Propose a topic link
+      operationId: proposeTopicLink
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposeTopicLinkRequest'
+      responses:
+        '201':
+          description: Link proposed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicLink'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Link already exists
+
+  /topic-links/{linkId}/vote:
+    post:
+      tags: [TopicLinks]
+      summary: Confirm or reject a topic link
+      operationId: voteOnTopicLink
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: linkId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vote]
+              properties:
+                vote:
+                  type: string
+                  enum: [confirm, reject]
+      responses:
+        '200':
+          description: Vote recorded
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /discover:
+    get:
+      tags: [Topics]
+      summary: Get personalized topic recommendations
+      operationId: discoverTopics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [related, perspective_expanding]
+            default: related
+          description: related = similar interests, perspective_expanding = different viewpoints
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        '200':
+          description: Recommended topics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TopicRecommendation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageSize:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    PageCursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Topic:
+      type: object
+      required: [id, title, status, tags, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [seeding, active, archived]
+        evidenceStandards:
+          type: string
+          enum: [minimal, standard, rigorous]
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          minItems: 2
+          maxItems: 5
+        crossCuttingThemes:
+          type: array
+          items:
+            type: string
+        participantCount:
+          type: integer
+        responseCount:
+          type: integer
+        diversityScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        createdAt:
+          type: string
+          format: date-time
+
+    TopicDetail:
+      allOf:
+        - $ref: '#/components/schemas/Topic'
+        - type: object
+          properties:
+            creator:
+              $ref: '#/components/schemas/UserSummary'
+            propositionCount:
+              type: integer
+            latestAnalysisAt:
+              type: string
+              format: date-time
+            relatedTopics:
+              type: array
+              items:
+                $ref: '#/components/schemas/TopicLink'
+
+    CreateTopicRequest:
+      type: object
+      required: [title, description, tagIds]
+      properties:
+        title:
+          type: string
+          minLength: 10
+          maxLength: 200
+        description:
+          type: string
+          minLength: 50
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 2
+          maxItems: 5
+        evidenceStandards:
+          type: string
+          enum: [minimal, standard, rigorous]
+          default: standard
+        initialPropositions:
+          type: array
+          items:
+            type: string
+          description: Initial propositions to seed the discussion
+
+    TopicList:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        nextCursor:
+          type: string
+        totalCount:
+          type: integer
+
+    Tag:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        usageCount:
+          type: integer
+
+    TagList:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        nextCursor:
+          type: string
+
+    Theme:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        topicCount:
+          type: integer
+
+    Proposition:
+      type: object
+      required: [id, statement, source]
+      properties:
+        id:
+          type: string
+          format: uuid
+        statement:
+          type: string
+        source:
+          type: string
+          enum: [ai_identified, user_created]
+        parentPropositionId:
+          type: string
+          format: uuid
+        supportCount:
+          type: integer
+        opposeCount:
+          type: integer
+        nuancedCount:
+          type: integer
+        consensusScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        myAlignment:
+          $ref: '#/components/schemas/Alignment'
+          description: Current user's alignment (if authenticated)
+
+    PropositionList:
+      type: object
+      properties:
+        propositions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Proposition'
+        nextCursor:
+          type: string
+
+    CreatePropositionRequest:
+      type: object
+      required: [statement]
+      properties:
+        statement:
+          type: string
+          minLength: 10
+          maxLength: 1000
+        parentPropositionId:
+          type: string
+          format: uuid
+          description: For sub-propositions
+
+    Response:
+      type: object
+      required: [id, content, authorId, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/UserSummary'
+        citedSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/CitedSource'
+        containsOpinion:
+          type: boolean
+        propositions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseProposition'
+        status:
+          type: string
+          enum: [visible, hidden, removed]
+        revisionCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ResponseDetail:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            feedback:
+              type: array
+              items:
+                $ref: '#/components/schemas/Feedback'
+            factCheckResults:
+              type: array
+              items:
+                $ref: '#/components/schemas/FactCheckResult'
+
+    CreateResponseRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 10
+          maxLength: 10000
+        citedSources:
+          type: array
+          items:
+            type: string
+            format: uri
+        containsOpinion:
+          type: boolean
+          default: false
+        propositionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Propositions this response addresses
+        acknowledgedFeedback:
+          type: boolean
+          default: false
+          description: User acknowledged and overrode AI feedback
+
+    UpdateResponseRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 10
+          maxLength: 10000
+        citedSources:
+          type: array
+          items:
+            type: string
+            format: uri
+        containsOpinion:
+          type: boolean
+
+    ResponseList:
+      type: object
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Response'
+        nextCursor:
+          type: string
+        totalCount:
+          type: integer
+
+    ResponseProposition:
+      type: object
+      properties:
+        propositionId:
+          type: string
+          format: uuid
+        statement:
+          type: string
+        relevanceScore:
+          type: number
+
+    Alignment:
+      type: object
+      required: [stance]
+      properties:
+        id:
+          type: string
+          format: uuid
+        stance:
+          type: string
+          enum: [support, oppose, nuanced]
+        nuanceExplanation:
+          type: string
+          description: Required when stance is nuanced
+        createdAt:
+          type: string
+          format: date-time
+
+    SetAlignmentRequest:
+      type: object
+      required: [stance]
+      properties:
+        stance:
+          type: string
+          enum: [support, oppose, nuanced]
+        nuanceExplanation:
+          type: string
+          maxLength: 500
+          description: Required when stance is nuanced
+
+    CitedSource:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        title:
+          type: string
+        extractedAt:
+          type: string
+          format: date-time
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [fallacy, inflammatory, unsourced, bias, affirmation]
+        subtype:
+          type: string
+        suggestionText:
+          type: string
+        reasoning:
+          type: string
+          description: AI explanation for transparency (FR-014b)
+        educationalResources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+                format: uri
+        userAcknowledged:
+          type: boolean
+        userHelpfulRating:
+          type: string
+          enum: [helpful, not_helpful]
+
+    FactCheckResult:
+      type: object
+      properties:
+        claimText:
+          type: string
+        displayedAs:
+          type: string
+          default: Related Context
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              provider:
+                type: string
+              url:
+                type: string
+                format: uri
+              title:
+                type: string
+              rating:
+                type: string
+        hasConflictingSources:
+          type: boolean
+
+    CommonGroundAnalysis:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        agreementZones:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgreementZone'
+        misunderstandings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Misunderstanding'
+        genuineDisagreements:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenuineDisagreement'
+        overallConsensusScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        participantCountAtGeneration:
+          type: integer
+        responseCountAtGeneration:
+          type: integer
+        generatedAt:
+          type: string
+          format: date-time
+
+    AgreementZone:
+      type: object
+      properties:
+        description:
+          type: string
+        confidence:
+          type: number
+        propositionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        participantPercentage:
+          type: number
+
+    Misunderstanding:
+      type: object
+      properties:
+        description:
+          type: string
+        term:
+          type: string
+        definitions:
+          type: array
+          items:
+            type: object
+            properties:
+              definition:
+                type: string
+              userCount:
+                type: integer
+        affectedPropositions:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    GenuineDisagreement:
+      type: object
+      properties:
+        description:
+          type: string
+        underlyingValues:
+          type: array
+          items:
+            type: string
+        moralFoundations:
+          type: array
+          items:
+            type: string
+            enum: [care, fairness, loyalty, authority, sanctity, liberty]
+        propositionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    TopicLink:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sourceTopic:
+          $ref: '#/components/schemas/TopicSummary'
+        targetTopic:
+          $ref: '#/components/schemas/TopicSummary'
+        relationshipType:
+          type: string
+          enum: [builds_on, responds_to, contradicts, related, shares_proposition]
+        linkSource:
+          type: string
+          enum: [ai_suggested, user_proposed]
+        confirmationStatus:
+          type: string
+          enum: [pending, confirmed, rejected]
+        confirmedByCount:
+          type: integer
+        rejectedByCount:
+          type: integer
+
+    TopicLinkList:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicLink'
+
+    ProposeTopicLinkRequest:
+      type: object
+      required: [targetTopicId, relationshipType]
+      properties:
+        targetTopicId:
+          type: string
+          format: uuid
+        relationshipType:
+          type: string
+          enum: [builds_on, responds_to, contradicts, related, shares_proposition]
+
+    TopicSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+
+    TopicRecommendation:
+      type: object
+      properties:
+        topic:
+          $ref: '#/components/schemas/Topic'
+        reason:
+          type: string
+          description: Why this topic is recommended
+        relevanceScore:
+          type: number
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        verificationLevel:
+          type: string
+          enum: [basic, enhanced, verified_human]
+        trustScores:
+          type: object
+          properties:
+            ability:
+              type: number
+            benevolence:
+              type: number
+            integrity:
+              type: number
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object

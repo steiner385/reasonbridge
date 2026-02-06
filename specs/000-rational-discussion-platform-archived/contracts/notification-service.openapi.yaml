@@ -1,0 +1,433 @@
+openapi: 3.1.0
+info:
+  title: reasonBridge Notification Service API
+  description: Real-time notifications, WebSocket connections, and email delivery
+  version: 1.0.0
+  contact:
+    name: reasonBridge Team
+
+servers:
+  - url: /api/v1/notifications
+    description: Notification service base path
+
+tags:
+  - name: Notifications
+    description: User notification operations
+  - name: Preferences
+    description: Notification preference management
+  - name: WebSocket
+    description: Real-time connection info
+
+paths:
+  /:
+    get:
+      tags: [Notifications]
+      summary: Get user notifications
+      operationId: getNotifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [response, feedback, moderation, common_ground, follow, recommendation]
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageCursor'
+      responses:
+        '200':
+          description: User notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /unread-count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notification count
+      operationId: getUnreadCount
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /{notificationId}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark notification as read
+      operationId: markAsRead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Marked as read
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /read-all:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      operationId: markAllAsRead
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of notifications marked as read
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /preferences:
+    get:
+      tags: [Preferences]
+      summary: Get notification preferences
+      operationId: getPreferences
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Preferences]
+      summary: Update notification preferences
+      operationId: updatePreferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+      responses:
+        '200':
+          description: Preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ws-token:
+    get:
+      tags: [WebSocket]
+      summary: Get WebSocket connection token
+      description: Returns a short-lived token for establishing WebSocket connection
+      operationId: getWsToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: WebSocket token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+                  wsUrl:
+                    type: string
+                    format: uri
+                    description: WebSocket endpoint URL
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /send:
+    post:
+      tags: [Notifications]
+      summary: Send notification (internal)
+      description: Used by other services to send notifications
+      operationId: sendNotification
+      security:
+        - serviceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNotificationRequest'
+      responses:
+        '201':
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /send-bulk:
+    post:
+      tags: [Notifications]
+      summary: Send notifications to multiple users (internal)
+      operationId: sendBulkNotifications
+      security:
+        - serviceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds, notification]
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  maxItems: 1000
+                notification:
+                  $ref: '#/components/schemas/NotificationContent'
+      responses:
+        '200':
+          description: Notifications queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queued:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    serviceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Service-to-service authentication
+
+  parameters:
+    PageSize:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    PageCursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Notification:
+      type: object
+      required: [id, type, title, isRead, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [response, feedback, moderation, common_ground, follow, recommendation]
+        title:
+          type: string
+        body:
+          type: string
+        isRead:
+          type: boolean
+        actionUrl:
+          type: string
+          description: Deep link to related content
+        metadata:
+          type: object
+          description: Type-specific data
+        createdAt:
+          type: string
+          format: date-time
+
+    NotificationList:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        nextCursor:
+          type: string
+        unreadCount:
+          type: integer
+
+    NotificationPreferences:
+      type: object
+      properties:
+        email:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            frequency:
+              type: string
+              enum: [immediate, daily_digest, weekly_digest, never]
+            types:
+              type: object
+              properties:
+                response:
+                  type: boolean
+                feedback:
+                  type: boolean
+                moderation:
+                  type: boolean
+                common_ground:
+                  type: boolean
+                follow:
+                  type: boolean
+                recommendation:
+                  type: boolean
+        push:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            types:
+              type: object
+              properties:
+                response:
+                  type: boolean
+                feedback:
+                  type: boolean
+                moderation:
+                  type: boolean
+                common_ground:
+                  type: boolean
+                follow:
+                  type: boolean
+                recommendation:
+                  type: boolean
+        inApp:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              default: true
+            sound:
+              type: boolean
+              default: true
+
+    SendNotificationRequest:
+      type: object
+      required: [userId, notification]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        notification:
+          $ref: '#/components/schemas/NotificationContent'
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [in_app, email, push]
+          description: Override default channels (uses preferences if not specified)
+
+    NotificationContent:
+      type: object
+      required: [type, title]
+      properties:
+        type:
+          type: string
+          enum: [response, feedback, moderation, common_ground, follow, recommendation]
+        title:
+          type: string
+          maxLength: 100
+        body:
+          type: string
+          maxLength: 500
+        actionUrl:
+          type: string
+        metadata:
+          type: object
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
