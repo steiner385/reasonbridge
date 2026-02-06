@@ -82,9 +82,9 @@ interface UseCommonGroundUpdatesReturn {
    */
   isConnected: boolean;
   /**
-   * The socket instance (for advanced usage)
+   * The socket ref (access .current for the socket instance)
    */
-  socket: Socket | null;
+  socketRef: React.RefObject<Socket | null>;
 }
 
 /**
