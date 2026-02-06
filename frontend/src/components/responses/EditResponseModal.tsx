@@ -178,7 +178,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
         <div>
           <label
             htmlFor="edit-response-content"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Your Response
             <span className="text-fallacy-DEFAULT ml-1">*</span>
