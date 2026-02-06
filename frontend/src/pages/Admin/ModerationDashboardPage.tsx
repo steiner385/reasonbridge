@@ -64,8 +64,8 @@ export default function ModerationDashboardPage() {
         ]);
 
         setStats(statsData);
-        setActions(actionsData.data);
-        setAppeals(appealsData.data);
+        setActions(actionsData.actions);
+        setAppeals(appealsData.appeals);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load moderation data');
       } finally {

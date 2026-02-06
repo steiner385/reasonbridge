@@ -15,21 +15,28 @@ import type { AnalysisResult } from './response-analyzer.service.js';
 export class ToneAnalyzerService {
   // Patterns that indicate inflammatory language
   private readonly inflammatoryPatterns = [
-    // Personal attacks
-    /you('re| are)\s+(stupid|dumb|idiot|moron|fool|ignorant)/gi,
+    // Personal attacks - direct (you)
+    /you('re| are)\s+(stupid|dumb|idiot|moron|fool|ignorant|ridiculous)/gi,
     /shut\s+up/gi,
     /get\s+lost/gi,
 
+    // Personal attacks - third person (they/people/others)
+    // Allow optional adverbs (really, very, so, etc.) between "are" and insult
+    /\b(they|these\s+people|those\s+people|those\s+folks|people\s+like\s+(you|this|that))\s+(are|'re)\s+(really|very|so|completely|totally|absolutely)?\s*(stupid|dumb|idiots?|morons?|fools?|ignorant|ridiculous)/gi,
+    /\b(this|that|these|those)\s+(is|are)\s+(really|very|so|completely|totally|absolutely)?\s*(stupid|dumb|idiotic|moronic|foolish|ignorant|ridiculous)/gi,
+
     // Aggressive language
-    /\b(hate|despise)\s+(you|your)/gi,
+    /\b(hate|despise)\s+(you|your|them|this|these)/gi,
     /you\s+make\s+me\s+(sick|angry)/gi,
+    /\b(makes?|making)\s+me\s+(sick|angry)/gi,
 
     // Dismissive attacks
     /\b(typical|classic)\s+(liberal|conservative|leftist|right-wing)/gi,
     /wake\s+up\s+sheeple/gi,
+    /\b(everyone|anyone)\s+who\s+(thinks?|believes?|says?)\s+(this|that)\s+is\s+(stupid|dumb|an?\s+idiot)/gi,
 
     // Excessive profanity in aggressive context
-    /f\*+ck\s+(you|off|this)/gi,
+    /f\*+ck\s+(you|off|this|that|them)/gi,
     /\bb[s$]+t\b/gi,
 
     // All caps with aggressive intent (3+ words)

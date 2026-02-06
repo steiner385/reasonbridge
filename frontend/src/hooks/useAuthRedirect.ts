@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 
 /**
@@ -21,18 +21,21 @@ export function useAuthRedirect(
   showWelcome: boolean = true,
 ): void {
   const navigate = useNavigate();
-  const location = useLocation();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // Only redirect if user is authenticated
-    if (authService.isAuthenticated()) {
+    // Only redirect once and only if user is authenticated
+    if (!hasRedirected.current && authService.isAuthenticated()) {
+      hasRedirected.current = true;
+
       // Build redirect URL with optional welcome param
       const url = showWelcome ? `${redirectPath}?welcome=true` : redirectPath;
 
       // Replace current history entry so back button doesn't loop
       navigate(url, { replace: true });
     }
-  }, [navigate, redirectPath, showWelcome, location.pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [redirectPath, showWelcome]);
 }
 
 export default useAuthRedirect;

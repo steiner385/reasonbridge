@@ -242,8 +242,8 @@ export const TopicSelectionPage: React.FC = () => {
             Choose Your Interests
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Select 2-3 topics you'd like to discuss. We'll personalize your feed based on your
-            choices.
+            Select 2-3 topics you&apos;d like to discuss. We&apos;ll personalize your feed based on
+            your choices.
           </p>
         </div>
 

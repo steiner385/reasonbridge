@@ -18,7 +18,7 @@ const generateTestUser = () => {
   const processId = process.pid || Math.floor(Math.random() * 10000);
   return {
     email: `e2e-${timestamp}-${processId}-${randomSuffix}@example.com`,
-    username: `e2euser${timestamp}${randomSuffix}`,
+    displayName: `e2euser${timestamp}${randomSuffix}`,
     password: 'SecurePassword123!',
   };
 };
@@ -49,7 +49,7 @@ test.describe('User Registration and Login Flow', () => {
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
     await emailInput.fill(testUser.email);
-    await displayNameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.displayName);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill(testUser.password);
 
@@ -58,26 +58,37 @@ test.describe('User Registration and Login Flow', () => {
     await registerButton.click();
 
     // Step 4: Wait for registration to complete
-    // Use Promise.race to detect either redirect OR error display
-    const result = await Promise.race([
-      page
-        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
-        .then(() => 'redirect' as const),
-      page
-        .locator('.bg-fallacy-light p')
-        .waitFor({ state: 'visible', timeout: 20000 })
-        .then(() => 'error' as const),
-    ]);
+    // Wait for network to settle after submission
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
 
-    if (result === 'error') {
-      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
-      throw new Error(`Registration failed with error: ${errorText}`);
+    // Check if still on registration page (indicates failure)
+    if (page.url().includes('/register')) {
+      // Look for ANY visible error message
+      const errorEl = page.locator(
+        '[class*="error"], [role="alert"], .text-red, .bg-red, .bg-fallacy-light p',
+      );
+      const errorCount = await errorEl.count();
+
+      if (errorCount > 0) {
+        const errorText = await errorEl.first().textContent();
+        throw new Error(`Registration failed with visible error: ${errorText}`);
+      }
+
+      // No visible error but still on registration page - check for silent failure
+      const pageContent = await page.textContent('body');
+      throw new Error(
+        `Registration may have failed silently - still on /register page. ` +
+          `Page content (first 500 chars): ${pageContent?.substring(0, 500)}`,
+      );
     }
 
-    // Success: verify we landed on an expected page
-    await expect(page).toHaveURL(/(\/$|\/login|\/dashboard|\/home|\/profile|\/topics)/, {
-      timeout: 5000,
-    });
+    // Success: verify we redirected to an expected page (including email verification)
+    await expect(page).toHaveURL(
+      /(\/$|\/login|\/dashboard|\/home|\/profile|\/topics|\/verify-email)/,
+      {
+        timeout: 5000,
+      },
+    );
 
     // Step 5: Login after registration
     // Registration redirects to landing page (/) - use login modal
@@ -121,6 +132,10 @@ test.describe('User Registration and Login Flow', () => {
 
       // Wait for redirect to authenticated page
       await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+
+      // Wait for network requests to complete and token storage to finish
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(200); // Allow async token storage to complete
     });
 
     // Step 6: Verify successful authentication
@@ -143,7 +158,7 @@ test.describe('User Registration and Login Flow', () => {
     const confirmPasswordInput = page.getByLabel(/confirm password/i);
 
     await emailInput.fill(testUser.email);
-    await displayNameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.displayName);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill(testUser.password);
 
@@ -151,21 +166,27 @@ test.describe('User Registration and Login Flow', () => {
     await registerButton.click();
 
     // Wait for first registration to complete
-    // Use Promise.race to detect either redirect OR error display
-    const firstResult = await Promise.race([
-      page
-        .waitForURL((url) => !url.pathname.includes('/register'), { timeout: 20000 })
-        .then(() => 'redirect' as const),
-      page
-        .locator('.bg-fallacy-light p')
-        .waitFor({ state: 'visible', timeout: 20000 })
-        .then(() => 'error' as const),
-    ]);
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
 
-    if (firstResult === 'error') {
-      const errorText = await page.locator('.bg-fallacy-light p').first().textContent();
-      throw new Error(`First registration failed: ${errorText}`);
+    // Check if first registration failed
+    if (page.url().includes('/register')) {
+      const errorEl = page.locator(
+        '[class*="error"], [role="alert"], .text-red, .bg-red, .bg-fallacy-light p',
+      );
+      if ((await errorEl.count()) > 0) {
+        const errorText = await errorEl.first().textContent();
+        throw new Error(`First registration failed: ${errorText}`);
+      }
+      throw new Error('First registration may have failed silently - still on /register page');
     }
+
+    // Verify first registration succeeded
+    await expect(page).toHaveURL(
+      /(\/$|\/login|\/dashboard|\/home|\/profile|\/topics|\/verify-email)/,
+      {
+        timeout: 5000,
+      },
+    );
 
     // Attempt second registration with same email
     await page.goto('/register');
@@ -179,7 +200,7 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton2 = page.getByRole('button', { name: /sign up|register|create account/i });
 
     await emailInput2.fill(testUser.email);
-    await displayNameInput2.fill(`different${testUser.username}`);
+    await displayNameInput2.fill(`different${testUser.displayName}`);
     await passwordInput2.fill(testUser.password);
     await confirmPasswordInput2.fill(testUser.password);
 
@@ -207,7 +228,7 @@ test.describe('User Registration and Login Flow', () => {
 
     // Fill form with weak password
     await emailInput.fill(testUser.email);
-    await displayNameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.displayName);
     await passwordInput.fill('weak');
     await confirmPasswordInput.fill('weak');
 
@@ -231,7 +252,7 @@ test.describe('User Registration and Login Flow', () => {
 
     // Fill form with mismatched passwords
     await emailInput.fill(testUser.email);
-    await displayNameInput.fill(testUser.username);
+    await displayNameInput.fill(testUser.displayName);
     await passwordInput.fill(testUser.password);
     await confirmPasswordInput.fill('DifferentPassword123!');
 
@@ -267,17 +288,16 @@ test.describe('User Registration and Login Flow', () => {
     await page.waitForLoadState('networkidle', { timeout: 10000 });
 
     // Should show authentication error within the modal
-    // Error messages include: "Invalid credentials", "Invalid email or password", "Login failed", etc.
-    // The login error is displayed in a div with bg-red-50 containing p.text-red-600
+    // Backend may return different error messages, so cast a wide net
     const errorMessage = dialog
-      .locator('.bg-red-50 p.text-red-600, .text-red-400, [role="alert"]')
+      .locator('[class*="error"], [role="alert"], .text-red, .bg-red-50 p, .bg-fallacy-light p')
       .first();
     await expect(errorMessage).toBeVisible({ timeout: 10000 });
 
-    // Verify the error text is meaningful
+    // Verify the error text is meaningful and indicates authentication failure
     const errorText = await errorMessage.textContent();
     expect(errorText?.toLowerCase()).toMatch(
-      /invalid|failed|error|incorrect|unauthorized|wrong|credentials/i,
+      /invalid|failed|error|incorrect|unauthorized|could not|wrong/i,
     );
   });
 

@@ -4,13 +4,13 @@
  */
 
 import React, { useCallback } from 'react';
-import SuggestionCards from './SuggestionCards';
 import { useSuggestionActions } from '../../hooks/useSuggestionActions';
 import type {
   TagSuggestionsResponse,
   TopicLinkSuggestionsResponse,
   TopicLink,
 } from '../../types/suggestions';
+import SuggestionCards from './SuggestionCards';
 
 export interface SuggestionPanelProps {
   /**

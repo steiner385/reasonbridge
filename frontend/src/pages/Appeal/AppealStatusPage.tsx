@@ -207,7 +207,7 @@ export default function AppealStatusPage() {
         setError(null);
 
         const response = await getAppeals(filterStatus === 'all' ? {} : { status: filterStatus });
-        setAppeals(response.data);
+        setAppeals(response.appeals);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load appeals');
       } finally {

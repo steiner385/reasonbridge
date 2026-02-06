@@ -99,7 +99,7 @@ export default function ModerationQueueView({
 
         const response = await getModerationActions(options);
 
-        let filteredActions = response.data;
+        let filteredActions = response.actions;
 
         // Filter by action type if specified
         if (actionTypeFilter !== 'all') {

@@ -51,6 +51,11 @@ export function TopicFilterUI({
     onFiltersChange({ ...filters, sortBy, page: 1 });
   };
 
+  const handleSortOrderToggle = () => {
+    const newSortOrder = filters.sortOrder === 'desc' ? 'asc' : 'desc';
+    onFiltersChange({ ...filters, sortOrder: newSortOrder, page: 1 });
+  };
+
   const handleTagFilter = () => {
     const trimmedTag = tagInput.trim();
     const newFilters: GetTopicsParams = { ...filters, page: 1 };
@@ -114,23 +119,55 @@ export function TopicFilterUI({
             </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-700 self-center">Sort by:</span>
-            <select
-              data-testid="sort-select"
-              aria-label="Sort by"
-              className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              value={filters.sortBy || 'createdAt'}
-              onChange={(e) =>
-                handleSortChange(
-                  e.target.value as 'createdAt' | 'participantCount' | 'responseCount',
-                )
-              }
-            >
-              <option value="createdAt">Newest First</option>
-              <option value="participantCount">Most Participants</option>
-              <option value="responseCount">Most Responses</option>
-            </select>
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 self-center">
+              Sort by:
+            </span>
+            <div className="flex gap-1">
+              <select
+                data-testid="sort-select"
+                aria-label="Sort by"
+                className="text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                value={filters.sortBy || 'createdAt'}
+                onChange={(e) =>
+                  handleSortChange(
+                    e.target.value as 'createdAt' | 'participantCount' | 'responseCount',
+                  )
+                }
+              >
+                <option value="createdAt">Newest First</option>
+                <option value="participantCount">Most Participants</option>
+                <option value="responseCount">Most Responses</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleSortOrderToggle}
+                className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                aria-label={`Sort order: ${filters.sortOrder === 'desc' ? 'Descending' : 'Ascending'}`}
+                title={
+                  filters.sortOrder === 'desc'
+                    ? 'Sort descending (high to low)'
+                    : 'Sort ascending (low to high)'
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 text-gray-600 dark:text-gray-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  {filters.sortOrder === 'desc' ? (
+                    // Descending icon (arrow down)
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  ) : (
+                    // Ascending icon (arrow up)
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                  )}
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 

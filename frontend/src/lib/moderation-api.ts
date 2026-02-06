@@ -8,7 +8,6 @@
  * Provides methods for interacting with the moderation service
  */
 
-import { apiClient } from './api';
 import type {
   ModerationAction,
   ModerationActionListResponse,
@@ -18,6 +17,7 @@ import type {
   ModerationActionStatus,
   ModerationSeverity,
 } from '../types/moderation';
+import { apiClient } from './api';
 
 /**
  * Get list of moderation actions

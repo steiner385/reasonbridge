@@ -102,8 +102,10 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
   return (
     <div
       className={`border rounded-lg p-4 transition-all ${
-        onClick ? 'cursor-pointer hover:shadow-md hover:border-primary-300' : ''
-      } ${isLatest ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-white'}`}
+        onClick
+          ? 'cursor-pointer hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600'
+          : ''
+      } ${isLatest ? 'border-primary-300 bg-primary-50 dark:border-primary-600 dark:bg-primary-900/20' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'}`}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -120,32 +122,36 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900">Version {item.version}</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Version {item.version}
+          </span>
           {isLatest && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 rounded-full">
+            <span className="px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 rounded-full">
               Latest
             </span>
           )}
         </div>
-        <span className="text-xs text-gray-500">{formattedDate}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-500">Participants:</div>
-          <div className="text-sm font-medium text-gray-900">
+          <div className="text-xs text-gray-500 dark:text-gray-400">Participants:</div>
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {item.participantCountAtGeneration}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-500">Responses:</div>
-          <div className="text-sm font-medium text-gray-900">{item.responseCountAtGeneration}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Responses:</div>
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            {item.responseCountAtGeneration}
+          </div>
         </div>
       </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-600">Overall Consensus</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400">Overall Consensus</span>
           <span className={`text-sm font-semibold ${consensusColor}`}>
             {Math.round(item.overallConsensusScore * 100)}%
           </span>
@@ -153,21 +159,21 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
 
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <span className="text-gray-600">
+            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400"></div>
+            <span className="text-gray-600 dark:text-gray-400">
               {item.agreementZones.length} agreement{item.agreementZones.length === 1 ? '' : 's'}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-            <span className="text-gray-600">
+            <div className="w-2 h-2 rounded-full bg-yellow-500 dark:bg-yellow-400"></div>
+            <span className="text-gray-600 dark:text-gray-400">
               {item.misunderstandings.length} misunderstanding
               {item.misunderstandings.length === 1 ? '' : 's'}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-red-500"></div>
-            <span className="text-gray-600">
+            <div className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400"></div>
+            <span className="text-gray-600 dark:text-gray-400">
               {item.genuineDisagreements.length} disagreement
               {item.genuineDisagreements.length === 1 ? '' : 's'}
             </span>
@@ -179,10 +185,10 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
 }
 
 function getConsensusColor(score: number): string {
-  if (score >= 0.8) return 'text-green-600';
-  if (score >= 0.6) return 'text-blue-600';
-  if (score >= 0.4) return 'text-yellow-600';
-  return 'text-red-600';
+  if (score >= 0.8) return 'text-green-600 dark:text-green-400';
+  if (score >= 0.6) return 'text-blue-600 dark:text-blue-400';
+  if (score >= 0.4) return 'text-yellow-600 dark:text-yellow-400';
+  return 'text-red-600 dark:text-red-400';
 }
 
 export default CommonGroundHistory;

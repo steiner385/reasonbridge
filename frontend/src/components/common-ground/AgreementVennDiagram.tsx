@@ -1,8 +1,3 @@
-/**
- * Copyright 2025 Tony Stein
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import type { Disagreement } from '../../types/common-ground';
 
 export interface AgreementVennDiagramProps {
@@ -73,7 +68,7 @@ const AgreementVennDiagram = ({
   if (positions.length === 0) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <p className="text-sm text-gray-500">No positions to display</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">No positions to display</p>
       </div>
     );
   }
@@ -108,11 +103,13 @@ const AgreementVennDiagram = ({
 
   return (
     <div className={className}>
-      {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
+      )}
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <h4 className="text-md font-medium text-gray-800 mb-3">{disagreement.topic}</h4>
-        <p className="text-sm text-gray-600 mb-6">{disagreement.description}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{disagreement.description}</p>
 
         {/* SVG Venn Diagram */}
         <div className="flex justify-center mb-6">
@@ -187,13 +184,15 @@ const AgreementVennDiagram = ({
                     style={{ backgroundColor: color.stroke }}
                   />
                   <h5 className={`font-medium ${color.text}`}>{position.stance}</h5>
-                  <span className="ml-auto text-xs text-gray-500">
+                  <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
                     {position.participants.length} participant(s)
                   </span>
                 </div>
-                <p className="text-sm text-gray-700 mb-2">{position.reasoning}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                  {position.reasoning}
+                </p>
                 {(position.underlyingValue || position.underlyingAssumption) && (
-                  <div className="text-xs text-gray-600 space-y-1 mt-2 pt-2 border-t border-gray-200">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                     {position.underlyingValue && (
                       <p>
                         <span className="font-medium">Core value:</span> {position.underlyingValue}
@@ -214,8 +213,10 @@ const AgreementVennDiagram = ({
 
         {/* Moral foundations if available */}
         {disagreement.moralFoundations && disagreement.moralFoundations.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-xs font-medium text-gray-700 mb-2">Relevant Moral Foundations:</p>
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Relevant Moral Foundations:
+            </p>
             <div className="flex flex-wrap gap-2">
               {disagreement.moralFoundations.map((foundation) => (
                 <span

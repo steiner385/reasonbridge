@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
+import { loginSchema, type LoginFormData } from '../../schemas/auth';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 
-export interface LoginFormData {
-  email: string;
-  password: string;
-}
+export type { LoginFormData };
 
 export interface LoginFormProps {
   /**
@@ -36,139 +35,47 @@ export interface LoginFormProps {
   className?: string;
 }
 
-interface FormErrors {
-  email?: string;
-  password?: string;
-}
-
 function LoginForm({ onSubmit, isLoading = false, error, className = '' }: LoginFormProps) {
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, touchedFields },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur', // Validate on blur
+    reValidateMode: 'onChange', // Re-validate on change after first blur
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-
-  // Email validation
-  const validateEmail = (email: string): string | undefined => {
-    if (!email) {
-      return 'Email is required';
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return 'Please enter a valid email address';
-    }
-    return undefined;
-  };
-
-  // Password validation (basic check for login - just required)
-  const validatePassword = (password: string): string | undefined => {
-    if (!password) {
-      return 'Password is required';
-    }
-    return undefined;
-  };
-
-  // Validate all fields
-  const validateForm = (): boolean => {
-    const emailError = validateEmail(formData.email);
-    const passwordError = validatePassword(formData.password);
-
-    const newErrors: FormErrors = {};
-    if (emailError) newErrors.email = emailError;
-    if (passwordError) newErrors.password = passwordError;
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Handle input change
-  const handleChange = (field: keyof LoginFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-
-    // Validate on change if field has been touched
-    if (touched[field]) {
-      let fieldError: string | undefined;
-      switch (field) {
-        case 'email':
-          fieldError = validateEmail(value);
-          break;
-        case 'password':
-          fieldError = validatePassword(value);
-          break;
+  // Scroll to first error on submit
+  const handleFormSubmit = async (data: LoginFormData) => {
+    try {
+      await onSubmit(data);
+    } catch {
+      // Error handling is done in parent component
+      // Scroll to first error field if validation errors exist
+      const firstErrorField = Object.keys(errors)[0];
+      if (firstErrorField) {
+        const errorElement = document.getElementById(firstErrorField);
+        errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorElement?.focus();
       }
-      setErrors((prev) => {
-        const updated = { ...prev };
-        if (fieldError) {
-          updated[field] = fieldError;
-        } else {
-          delete updated[field];
-        }
-        return updated;
-      });
     }
-  };
-
-  // Handle input blur
-  const handleBlur = (field: keyof LoginFormData) => () => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-
-    // Validate field on blur
-    let fieldError: string | undefined;
-    switch (field) {
-      case 'email':
-        fieldError = validateEmail(formData.email);
-        break;
-      case 'password':
-        fieldError = validatePassword(formData.password);
-        break;
-    }
-    setErrors((prev) => {
-      const updated = { ...prev };
-      if (fieldError) {
-        updated[field] = fieldError;
-      } else {
-        delete updated[field];
-      }
-      return updated;
-    });
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Mark all fields as touched
-    setTouched({
-      email: true,
-      password: true,
-    });
-
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-
-    // Submit form
-    await onSubmit(formData);
   };
 
   return (
     <Card variant="default" padding="lg" className={className}>
       <CardHeader>
-        <h2 className="text-2xl font-bold text-gray-900">Sign In</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Sign In</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Welcome back! Sign in to continue participating in discussions
         </p>
       </CardHeader>
 
       <CardBody>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4" noValidate>
           {error && (
-            <div className="rounded-lg bg-fallacy-light border border-fallacy-DEFAULT p-4">
-              <p className="text-sm text-fallacy-dark">{error}</p>
+            <div className="rounded-lg bg-fallacy-light dark:bg-red-900/20 border border-fallacy-DEFAULT dark:border-red-700 p-4">
+              <p className="text-sm text-fallacy-dark dark:text-red-300">{error}</p>
             </div>
           )}
 
@@ -176,10 +83,8 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
             label="Email"
             type="email"
             id="email"
-            value={formData.email}
-            onChange={handleChange('email')}
-            onBlur={handleBlur('email')}
-            {...(touched['email'] && errors.email ? { error: errors.email } : {})}
+            {...register('email')}
+            error={touchedFields.email ? errors.email?.message : undefined}
             required
             fullWidth
             placeholder="you@example.com"
@@ -190,10 +95,8 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
             label="Password"
             type="password"
             id="password"
-            value={formData.password}
-            onChange={handleChange('password')}
-            onBlur={handleBlur('password')}
-            {...(touched['password'] && errors.password ? { error: errors.password } : {})}
+            {...register('password')}
+            error={touchedFields.password ? errors.password?.message : undefined}
             required
             fullWidth
             placeholder="Enter your password"
@@ -204,13 +107,13 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
             <label className="flex items-center">
               <input
                 type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded"
               />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
               Forgot password?
             </Link>
@@ -227,9 +130,12 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
 
-          <p className="text-sm text-center text-gray-600">
+          <p className="text-sm text-center text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link
+              to="/register"
+              className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+            >
               Create one
             </Link>
           </p>

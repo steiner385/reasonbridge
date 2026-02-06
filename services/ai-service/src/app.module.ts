@@ -11,6 +11,7 @@ import { FeedbackModule } from './feedback/feedback.module.js';
 import { SuggestionsModule } from './suggestions/suggestions.module.js';
 import { CommonGroundModule } from './common-ground/common-ground.module.js';
 import { DemoAIModule } from './demo/demo-ai.module.js';
+import { SimulatorModule } from './simulator/simulator.module.js';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { DemoAIModule } from './demo/demo-ai.module.js';
     SuggestionsModule,
     CommonGroundModule,
     DemoAIModule,
+    SimulatorModule,
   ],
   controllers: [],
   providers: [],

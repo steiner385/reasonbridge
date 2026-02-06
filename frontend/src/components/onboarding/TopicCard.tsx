@@ -45,7 +45,8 @@ const getActivityBadge = (activityLevel: string) => {
   switch (activityLevel) {
     case 'HIGH':
       return {
-        color: 'bg-green-100 text-green-800 border-green-300',
+        color:
+          'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
         icon: (
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path
@@ -59,7 +60,8 @@ const getActivityBadge = (activityLevel: string) => {
       };
     case 'MEDIUM':
       return {
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        color:
+          'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
         icon: (
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path
@@ -73,7 +75,8 @@ const getActivityBadge = (activityLevel: string) => {
       };
     case 'LOW':
       return {
-        color: 'bg-gray-100 text-gray-600 border-gray-300',
+        color:
+          'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
         icon: (
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path
@@ -87,7 +90,8 @@ const getActivityBadge = (activityLevel: string) => {
       };
     default:
       return {
-        color: 'bg-gray-100 text-gray-600 border-gray-300',
+        color:
+          'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
         icon: null,
         text: 'Unknown',
       };
@@ -114,8 +118,8 @@ export const TopicCard: React.FC<TopicCardProps> = ({
         relative rounded-lg border-2 p-4 cursor-pointer transition-all
         ${
           isSelected
-            ? 'border-blue-500 bg-blue-50 shadow-md'
-            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-700 shadow-md'
+            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm'
         }
       `}
       onClick={onClick}
@@ -133,7 +137,7 @@ export const TopicCard: React.FC<TopicCardProps> = ({
       {/* Priority Badge (top right) */}
       {isSelected && priority && (
         <div
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md"
+          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-sm shadow-md"
           aria-label={`Priority ${priority}`}
         >
           {priority}
@@ -141,10 +145,12 @@ export const TopicCard: React.FC<TopicCardProps> = ({
       )}
 
       {/* Topic Name */}
-      <h3 className="text-lg font-semibold text-gray-900 mb-2 pr-10">{topic.name}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 pr-10">
+        {topic.name}
+      </h3>
 
       {/* Topic Description */}
-      <p className="text-sm text-gray-600 mb-3">{topic.description}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{topic.description}</p>
 
       {/* Activity Badge and Stats */}
       <div className="flex items-center justify-between">
@@ -155,7 +161,7 @@ export const TopicCard: React.FC<TopicCardProps> = ({
           {activityBadge.text}
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-gray-500">
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1" title="Active discussions">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path
@@ -177,8 +183,8 @@ export const TopicCard: React.FC<TopicCardProps> = ({
 
       {/* Priority Selection (when enabled and selected) */}
       {isSelected && enablePrioritySelection && onPrioritySelect && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <label className="block text-xs font-medium text-gray-700 mb-2">
+        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
             Set Priority (1 = highest):
           </label>
           <div className="flex gap-2">
@@ -194,8 +200,8 @@ export const TopicCard: React.FC<TopicCardProps> = ({
                   flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors
                   ${
                     priority === p
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }
                 `}
                 aria-label={`Set priority to ${p}`}
@@ -213,7 +219,7 @@ export const TopicCard: React.FC<TopicCardProps> = ({
         <div
           className={`
             w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
-            ${isSelected ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-300'}
+            ${isSelected ? 'bg-primary-600 border-primary-600' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
           `}
           aria-hidden="true"
         >

@@ -8,8 +8,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from './api';
 import type { UserProfile } from '../types/user';
+import { apiClient } from './api';
 
 /**
  * Fetches the current authenticated user's profile

@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <title>ReasonBridge - Rational Discussion Platform</title>
 
     <!-- Favicon -->
@@ -11,10 +14,34 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png" />
 
-    <!-- Google Fonts - Nunito (Brand Typography) -->
+    <!-- Google Fonts - ReasonBridge Brand Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet" />
+
+    <!-- Dark mode preload script - prevents flash of wrong theme -->
+    <script>
+      (function() {
+        try {
+          const themePreference = localStorage.getItem('theme-preference');
+          const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+          // Apply dark class if:
+          // - User explicitly selected 'dark' mode, OR
+          // - User selected 'auto' mode AND system prefers dark, OR
+          // - No preference stored AND system prefers dark (default to auto)
+          if (
+            themePreference === 'dark' ||
+            (themePreference === 'auto' && systemPrefersDark) ||
+            (!themePreference && systemPrefersDark)
+          ) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          // Fail silently if localStorage is not available
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

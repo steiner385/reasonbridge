@@ -10,15 +10,18 @@ import { test, expect } from '@playwright/test';
 test.describe('Application Layout', () => {
   test('should display the main header with application title', async ({ page }) => {
     // Navigate to the home page
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Wait for React app to hydrate
+    await page.waitForLoadState('domcontentloaded');
 
     // Check that the header is visible
     const header = page.locator('header');
     await expect(header).toBeVisible();
 
-    // Verify the application title
-    const title = page.locator('h1');
-    await expect(title).toHaveText('ReasonBridge');
+    // Verify the application logo is present (Header uses image logo now)
+    const logo = page.locator('img[alt="ReasonBridge"]').first();
+    await expect(logo).toBeVisible();
 
     // Verify the hero headline is visible
     const heroHeadline = page.getByText('Find Common Ground Through Thoughtful Discussion');

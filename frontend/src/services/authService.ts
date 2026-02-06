@@ -155,17 +155,21 @@ class AuthService {
 
   /**
    * Log out the current user
+   * Clears tokens from both localStorage and sessionStorage
    */
   logout(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('refreshToken');
   }
 
   /**
    * Get the current auth token
+   * Checks both localStorage (remember me) and sessionStorage (current session only)
    */
   getAuthToken(): string | null {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
   }
 
   /**
@@ -176,7 +180,8 @@ class AuthService {
   }
 
   /**
-   * Store access and refresh tokens in localStorage
+   * Store access and refresh tokens
+   * Uses localStorage by default (for backward compatibility)
    */
   private storeTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('authToken', accessToken);
@@ -184,10 +189,27 @@ class AuthService {
   }
 
   /**
+   * Move tokens from localStorage to sessionStorage
+   * Used when user logs in without "Remember Me"
+   */
+  moveTokensToSessionStorage(): void {
+    const authToken = localStorage.getItem('authToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (authToken && refreshToken) {
+      sessionStorage.setItem('authToken', authToken);
+      sessionStorage.setItem('refreshToken', refreshToken);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+    }
+  }
+
+  /**
    * Get the refresh token
+   * Checks both localStorage and sessionStorage
    */
   getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
+    return localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
   }
 
   /**

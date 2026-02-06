@@ -153,7 +153,7 @@ const PropositionAlignmentView: React.FC<PropositionAlignmentViewProps> = ({
         {/* Authentication prompt for unauthenticated users */}
         {!isAuthenticated && (
           <div className="pt-2">
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
               Sign in to express your alignment on this proposition
             </p>
           </div>

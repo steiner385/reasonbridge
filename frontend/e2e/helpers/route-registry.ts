@@ -85,23 +85,11 @@ export const ROUTE_REGISTRY: RouteDefinition[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Demo Routes - Feature demonstrations
+  // Tools & Utilities - Discussion simulator and other tools
   // ═══════════════════════════════════════════════════════════════════════════
   {
-    path: '/demo/common-ground',
-    name: 'Demo Common Ground',
-    requiresAuth: false,
-    isDynamic: false,
-  },
-  {
-    path: '/demo/agreement-visualization',
-    name: 'Demo Agreement Visualization',
-    requiresAuth: false,
-    isDynamic: false,
-  },
-  {
-    path: '/demo/credentials',
-    name: 'Demo Credentials',
+    path: '/simulator',
+    name: 'Discussion Simulator',
     requiresAuth: false,
     isDynamic: false,
   },

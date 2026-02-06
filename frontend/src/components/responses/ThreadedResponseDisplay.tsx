@@ -4,10 +4,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import ResponseCard from './ResponseCard';
 import type { Response } from '../../types/response';
 import Button from '../ui/Button';
 import { FlagContentButton } from '../moderation';
+import ResponseCard from './ResponseCard';
 
 export interface ThreadedResponseDisplayProps {
   /**

@@ -12,11 +12,16 @@ import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
 import TopicDetailPage from '../pages/Topics/TopicDetailPage';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
-import { FeedbackPreferencesPage } from '../pages/Settings';
+import { FeedbackPreferencesPage, SettingsPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
 import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
 import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
+import DiscussionSimulatorPage from '../pages/DiscussionSimulatorPage';
+import NotificationsPage from '../pages/NotificationsPage';
+import TermsPage from '../pages/TermsPage';
+import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
+import { ProtectedRoute } from '../components/auth';
 
 /**
  * Route definitions for the ReasonBridge application.
@@ -66,20 +71,68 @@ export const routes: RouteObject[] = [
     element: <UserProfilePage />,
   },
   {
+    path: '/notifications',
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/settings',
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: '/settings/feedback',
-    element: <FeedbackPreferencesPage />,
+    element: (
+      <ProtectedRoute>
+        <FeedbackPreferencesPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/verification',
-    element: <VerificationPage />,
+    element: (
+      <ProtectedRoute>
+        <VerificationPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/admin/moderation',
-    element: <ModerationDashboardPage />,
+    element: (
+      <ProtectedRoute>
+        <ModerationDashboardPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/appeals',
-    element: <AppealStatusPage />,
+    element: (
+      <ProtectedRoute>
+        <AppealStatusPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/simulator',
+    element: (
+      <ProtectedRoute>
+        <DiscussionSimulatorPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/terms',
+    element: <TermsPage />,
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPage />,
   },
   {
     path: '*',

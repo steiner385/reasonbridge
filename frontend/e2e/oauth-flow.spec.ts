@@ -62,6 +62,10 @@ test.describe('OAuth Signup Flow', () => {
         // AuthCallbackPage reads tokens from URL hash and calls /auth/me
         // Wait for redirect away from callback page
         await page.waitForURL(/\/onboarding|\/topics|\/login|\/verify/, { timeout: 15000 });
+
+        // Wait for network requests to complete and token storage to finish
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(200); // Allow async token storage to complete
       });
 
       // Step 4: Verify tokens stored in localStorage
@@ -194,6 +198,10 @@ test.describe('OAuth Signup Flow', () => {
       await test.step('Wait for authentication to complete', async () => {
         // Wait for redirect away from callback page
         await page.waitForURL(/\/onboarding|\/topics|\/login|\/verify/, { timeout: 15000 });
+
+        // Wait for network requests to complete and token storage to finish
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(200); // Allow async token storage to complete
       });
 
       await test.step('Verify authentication tokens stored', async () => {
@@ -257,6 +265,10 @@ test.describe('OAuth Signup Flow', () => {
 
       // Should accept relay email as valid and complete auth
       await page.waitForURL(/\/onboarding|\/topics|\/home|\/verify/, { timeout: 15000 });
+
+      // Wait for network requests to complete and token storage to finish
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(200); // Allow async token storage to complete
 
       // Verify auth token is stored
       const accessToken = await page.evaluate(() => localStorage.getItem('authToken'));

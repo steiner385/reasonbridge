@@ -61,7 +61,7 @@ function Skeleton({
   return (
     <div
       {...A11Y_PROPS}
-      className={`${SKELETON_BASE_CLASSES} ${animationClass} ${shapeClass} ${className}`.trim()}
+      className={`${SKELETON_BASE_CLASSES} ${shapeClass} ${animationClass} ${className}`.trim()}
       style={style}
       data-testid={testId}
     >

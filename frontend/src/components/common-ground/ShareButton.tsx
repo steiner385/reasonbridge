@@ -5,8 +5,8 @@
 
 import React, { useState } from 'react';
 import Button from '../ui/Button';
-import ShareModal from './ShareModal';
 import type { CommonGroundAnalysis } from '../../types/common-ground';
+import ShareModal from './ShareModal';
 
 export interface ShareButtonProps {
   /**

@@ -148,7 +148,7 @@ const Modal: React.FC<ModalProps> = ({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-gray-900 dark:bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"
         onClick={handleBackdropClick}
       />
 
@@ -156,18 +156,18 @@ const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           ref={modalRef}
-          className={`relative bg-white rounded-lg shadow-xl transition-all w-full ${sizeClasses[size]}`}
+          className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-2xl transition-all w-full ${sizeClasses[size]}`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {title}
             </h2>
             {showCloseButton && (
               <button
                 type="button"
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
                 aria-label="Close modal"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,11 +183,13 @@ const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">{children}</div>
+          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto text-gray-900 dark:text-gray-100">
+            {children}
+          </div>
 
           {/* Footer */}
           {footer && (
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
               {footer}
             </div>
           )}

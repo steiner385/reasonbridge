@@ -21,7 +21,7 @@ export const Step1PropositionBased: React.FC = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-3">
           Welcome to Proposition-Based Discussions
         </h2>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400">
           Discussions are built from individual propositions. Vote on each one to show your
           perspective.
         </p>
@@ -54,7 +54,9 @@ export const Step1PropositionBased: React.FC = () => {
                 <p className="text-gray-800 font-medium">
                   Public transit infrastructure must improve before implementing car bans
                 </p>
-                <p className="text-sm text-gray-600 mt-1">73% Agreement</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
+                  73% Agreement
+                </p>
               </div>
             </div>
           </div>
@@ -80,7 +82,9 @@ export const Step1PropositionBased: React.FC = () => {
                 <p className="text-gray-800 font-medium">
                   A hard deadline creates urgency but may be unrealistic for some regions
                 </p>
-                <p className="text-sm text-gray-600 mt-1">Mixed Views (45% Agreement)</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
+                  Mixed Views (45% Agreement)
+                </p>
               </div>
             </div>
           </div>
@@ -102,14 +106,16 @@ export const Step1PropositionBased: React.FC = () => {
                 <p className="text-gray-800 font-medium">
                   Electric vehicle incentives should increase to accelerate adoption
                 </p>
-                <p className="text-sm text-gray-600 mt-1">62% Agreement</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
+                  62% Agreement
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="mt-6 p-4 bg-primary-50 rounded-lg">
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">
             <span className="font-semibold">Your Turn:</span> Vote on each proposition to share your
             perspective. Your votes help identify common ground and areas of disagreement.
           </p>
@@ -127,7 +133,7 @@ export const Step2AIFeedback: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-3">AI-Powered Discussion Insights</h2>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400">
           Our AI analyzes discussions to find areas of agreement and highlight diverse viewpoints.
         </p>
       </div>
@@ -153,7 +159,7 @@ export const Step2AIFeedback: React.FC = () => {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-green-900 mb-1">Common Ground Identified</h4>
-                <p className="text-gray-700 text-sm">
+                <p className="text-gray-700 dark:text-gray-300 dark:text-gray-300 text-sm">
                   Despite different views on the main question, participants broadly agree that
                   infrastructure improvements are a prerequisite for success.
                 </p>
@@ -178,7 +184,7 @@ export const Step2AIFeedback: React.FC = () => {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-blue-900 mb-1">Bridging Opportunity</h4>
-                <p className="text-gray-700 text-sm">
+                <p className="text-gray-700 dark:text-gray-300 dark:text-gray-300 text-sm">
                   Propositions about phased implementation and regional flexibility could bridge
                   perspectives between immediate action advocates and gradual transition supporters.
                 </p>
@@ -203,7 +209,7 @@ export const Step2AIFeedback: React.FC = () => {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-purple-900 mb-1">Diverse Perspectives Valued</h4>
-                <p className="text-gray-700 text-sm">
+                <p className="text-gray-700 dark:text-gray-300 dark:text-gray-300 text-sm">
                   This discussion includes voices from urban planners, environmental scientists, and
                   automotive industry workers, enriching the conversation with varied expertise.
                 </p>
@@ -213,7 +219,7 @@ export const Step2AIFeedback: React.FC = () => {
         </div>
 
         <div className="mt-6 p-4 bg-primary-50 rounded-lg">
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">
             <span className="font-semibold">Remember:</span> AI insights are helpful suggestions to
             improve your thinking, not criticism. They help you see connections and perspectives you
             might have missed.
@@ -232,7 +238,7 @@ export const Step3CommonGround: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-3">Finding Common Ground Together</h2>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400">
           See what percentage of participants agree, and explore the spectrum of opinions.
         </p>
       </div>
@@ -254,12 +260,12 @@ export const Step3CommonGround: React.FC = () => {
               <div className="absolute top-0 left-[70%] w-1 h-full bg-gray-800 opacity-30"></div>
               <div className="absolute top-0 left-[85%] w-1 h-full bg-gray-800 opacity-30"></div>
             </div>
-            <div className="flex justify-between text-xs text-gray-600 mt-2">
+            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-2">
               <span>Strongly Disagree</span>
               <span>Neutral</span>
               <span>Strongly Agree</span>
             </div>
-            <p className="text-sm text-gray-700 mt-3">
+            <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300 mt-3">
               See where other participants stand on each proposition. Clustering shows areas of
               consensus, while spread indicates diverse views.
             </p>
@@ -271,7 +277,9 @@ export const Step3CommonGround: React.FC = () => {
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-700">Strong Agreement</span>
+                  <span className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
+                    Strong Agreement
+                  </span>
                   <span className="font-semibold text-green-600">45%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
@@ -280,7 +288,9 @@ export const Step3CommonGround: React.FC = () => {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-700">Moderate Agreement</span>
+                  <span className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
+                    Moderate Agreement
+                  </span>
                   <span className="font-semibold text-green-400">28%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
@@ -289,7 +299,9 @@ export const Step3CommonGround: React.FC = () => {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-700">Neutral</span>
+                  <span className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
+                    Neutral
+                  </span>
                   <span className="font-semibold text-yellow-500">12%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
@@ -298,7 +310,9 @@ export const Step3CommonGround: React.FC = () => {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-700">Disagreement</span>
+                  <span className="text-gray-700 dark:text-gray-300 dark:text-gray-300">
+                    Disagreement
+                  </span>
                   <span className="font-semibold text-red-400">15%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
@@ -306,7 +320,7 @@ export const Step3CommonGround: React.FC = () => {
                 </div>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mt-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-4">
               <span className="font-semibold">Common Ground Found:</span> 73% of participants agree
               or strongly agree on this proposition.
             </p>
@@ -315,7 +329,7 @@ export const Step3CommonGround: React.FC = () => {
           {/* What This Means */}
           <div className="bg-primary-50 rounded-lg p-5 border border-primary-200">
             <h4 className="font-semibold text-primary-900 mb-2">What This Means For You</h4>
-            <ul className="space-y-2 text-sm text-gray-700">
+            <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">
               <li className="flex items-start">
                 <svg
                   className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0"
@@ -368,7 +382,7 @@ export const Step3CommonGround: React.FC = () => {
         </div>
 
         <div className="mt-6 p-4 bg-primary-50 rounded-lg">
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">
             <span className="font-semibold">Ready to Start:</span> Jump into discussions and add
             your voice. Every perspective helps us understand the full picture.
           </p>

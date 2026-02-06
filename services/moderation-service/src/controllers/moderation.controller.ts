@@ -12,6 +12,8 @@ import type {
 } from '../services/ai-review.service.js';
 import { AIReviewService } from '../services/ai-review.service.js';
 import { ModerationActionsService } from '../services/moderation-actions.service.js';
+import { ModerationQueueService } from '../services/moderation-queue.service.js';
+import type { QueueStats } from '../services/moderation-queue.service.js';
 import type {
   CreateActionRequest,
   ApproveActionRequest,
@@ -48,6 +50,7 @@ export class ModerationController {
     private readonly screeningService: ContentScreeningService,
     private readonly aiReviewService: AIReviewService,
     private readonly actionsService: ModerationActionsService,
+    private readonly queueService: ModerationQueueService,
   ) {}
 
   @Post('screen')
@@ -129,6 +132,11 @@ export class ModerationController {
     approvalRate: number;
   }> {
     return this.aiReviewService.getRecommendationStats();
+  }
+
+  @Get('queue/stats')
+  async getQueueStats(): Promise<QueueStats> {
+    return this.queueService.getQueueStats();
   }
 
   @Get('actions')
@@ -251,6 +259,21 @@ export class ModerationController {
     @Query('cursor') cursor?: string,
   ): Promise<ListAppealResponse> {
     return this.actionsService.getPendingAppeals(limit, cursor);
+  }
+
+  @Get('appeals')
+  async listAppeals(
+    @Query('status') status?: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<ListAppealResponse> {
+    const statusEnum = status?.toUpperCase() as
+      | 'PENDING'
+      | 'UNDER_REVIEW'
+      | 'UPHELD'
+      | 'DENIED'
+      | undefined;
+    return this.actionsService.listAppeals(statusEnum, limit, cursor);
   }
 
   @Post('appeals/:appealId/review')

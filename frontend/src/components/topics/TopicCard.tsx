@@ -33,13 +33,13 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
   const getStatusColor = (status: Topic['status']) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
       case 'SEEDING':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
       case 'ARCHIVED':
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
@@ -58,18 +58,20 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
           <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(topic.status)}`}>
             {topic.status}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {new Date(topic.createdAt).toLocaleDateString()}
           </span>
         </div>
       </CardHeader>
 
       <CardBody>
-        <p className={`text-gray-700 mb-4 ${truncateDescription ? 'line-clamp-2' : ''}`}>
+        <p
+          className={`text-gray-700 dark:text-gray-300 mb-4 ${truncateDescription ? 'line-clamp-2' : ''}`}
+        >
           {topic.description}
         </p>
 
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
           <div className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -114,7 +116,7 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
             {topic.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded"
+                className="text-xs bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 px-2 py-1 rounded"
               >
                 #{tag.name}
               </span>

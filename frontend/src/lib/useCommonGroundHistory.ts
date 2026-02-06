@@ -4,8 +4,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from './api';
 import type { CommonGround } from '../types/commonGround';
+import { apiClient } from './api';
 
 /**
  * React Query hook for fetching common ground analysis for a topic

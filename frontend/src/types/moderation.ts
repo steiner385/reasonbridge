@@ -186,20 +186,18 @@ export interface QueueStats {
  * Moderation Action List Response
  */
 export interface ModerationActionListResponse {
-  data: ModerationAction[];
-  total: number;
-  page: number;
-  pageSize: number;
+  actions: ModerationAction[];
+  nextCursor: string | null;
+  totalCount: number;
 }
 
 /**
  * Appeals List Response
  */
 export interface AppealsListResponse {
-  data: Appeal[];
-  total: number;
-  page: number;
-  pageSize: number;
+  appeals: Appeal[];
+  nextCursor: string | null;
+  totalCount: number;
 }
 
 /**

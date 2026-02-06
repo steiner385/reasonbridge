@@ -13,9 +13,9 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import { requestPhoneVerification, verifyPhoneOTP } from '../../lib/api';
 import PhoneInput from './PhoneInput';
 import OTPInput from './OTPInput';
-import { requestPhoneVerification, verifyPhoneOTP } from '../../lib/api';
 
 export interface PhoneVerificationModalProps {
   /**

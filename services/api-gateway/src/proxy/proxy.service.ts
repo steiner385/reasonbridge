@@ -58,6 +58,7 @@ export class ProxyService {
   private readonly userService: ServiceConfig;
   private readonly discussionService: ServiceConfig;
   private readonly aiService: ServiceConfig;
+  private readonly moderationService: ServiceConfig;
 
   constructor(
     @Inject(HttpService) private readonly httpService: HttpService,
@@ -95,6 +96,12 @@ export class ProxyService {
       timeout: getConfig<number>('AI_SERVICE_TIMEOUT', 30000),
       retryAttempts: getConfig<number>('AI_SERVICE_RETRY_ATTEMPTS', 2),
     };
+
+    this.moderationService = {
+      url: getConfig<string>('MODERATION_SERVICE_URL', getServiceUrl('MODERATION_SERVICE')),
+      timeout: getConfig<number>('MODERATION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      retryAttempts: getConfig<number>('MODERATION_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
+    };
   }
 
   async proxyToUserService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
@@ -107,6 +114,10 @@ export class ProxyService {
 
   async proxyToAiService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
     return this.proxyWithResilience<T>('ai-service', this.aiService, request);
+  }
+
+  async proxyToModerationService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
+    return this.proxyWithResilience<T>('moderation-service', this.moderationService, request);
   }
 
   /**

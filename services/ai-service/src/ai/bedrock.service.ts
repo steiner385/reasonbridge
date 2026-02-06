@@ -325,4 +325,24 @@ Return ONLY a JSON array of values: ["value1", "value2", "value3"]`,
       return `This topic has ${interpretations.length} different interpretations. Consider clarifying key terms to align understanding.`;
     }
   }
+
+  /**
+   * Get a completion from Bedrock using custom prompts
+   * Exposed for advanced use cases that need direct control over the prompt
+   *
+   * @param request - Completion request with system prompt and messages
+   * @returns Completion response with generated content
+   */
+  async complete(request: {
+    systemPrompt: string;
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    maxTokens?: number;
+    temperature?: number;
+  }): Promise<{ content: string }> {
+    if (!this.isConfigured || !this.client) {
+      throw new Error('Bedrock client not configured');
+    }
+
+    return this.client.complete(request);
+  }
 }

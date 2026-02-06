@@ -28,8 +28,13 @@ export default defineConfig({
     // - Sets up MSW server for API mocking
     setupFiles: ['./src/setupTests.ts'],
 
-    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
-    include: ['src/**/*.test.{ts,tsx}'],
+    // Include both .test.ts (existing convention) and .spec.tsx (new test directory structure)
+    // .spec.ts in e2e/ directory is reserved for Playwright E2E tests
+    include: [
+      'src/**/*.test.{ts,tsx}',
+      'tests/unit/**/*.spec.{ts,tsx}',
+      'tests/integration/**/*.spec.{ts,tsx}',
+    ],
 
     // Coverage configuration
     coverage: {
@@ -37,7 +42,12 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       reportsDirectory: '../coverage/frontend',
       // Exclude test files and mocks from coverage
-      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/setupTests.ts'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'tests/**/*.spec.{ts,tsx}',
+        'src/test/**',
+        'src/setupTests.ts',
+      ],
     },
 
     // JUnit XML output for CI/CD

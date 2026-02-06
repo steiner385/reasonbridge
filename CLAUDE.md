@@ -171,6 +171,169 @@ packages/
 - Branch protection via required status checks
 - Allure reporting for test results
 
+### UI/UX Implementation Patterns
+
+The frontend implements a comprehensive set of UI/UX patterns for consistent, accessible, and performant user experiences.
+
+**Component Architecture:**
+
+```
+frontend/src/components/
+├── ui/                      # Base UI primitives
+│   ├── Button.tsx           # Primary interactive element with variants
+│   ├── Input.tsx            # Form inputs with validation display
+│   ├── Card.tsx             # Container with elevation variants
+│   ├── Modal.tsx            # Dialog overlays with focus trap
+│   ├── SearchInput.tsx      # Specialized search with debounce
+│   ├── FilterPanel.tsx      # Collapsible filter container
+│   ├── TagFilter.tsx        # Multi-select tag filtering
+│   ├── LoadingSpinner.tsx   # Loading indicators
+│   ├── ProgressBar.tsx      # Progress visualization
+│   ├── Toast.tsx            # Notification toasts
+│   ├── ErrorState.tsx       # Error display with retry
+│   ├── EmptyState.tsx       # Empty state placeholders
+│   └── Typography.tsx       # Rich text content wrapper
+├── layouts/                 # Layout components
+│   ├── Header.tsx           # Persistent top navigation
+│   ├── Sidebar.tsx          # Collapsible desktop sidebar
+│   ├── MobileDrawer.tsx     # Slide-out mobile menu
+│   ├── Navigation.tsx       # Shared nav content
+│   ├── AppLayout.tsx        # Main application shell
+│   └── MobileActionBar.tsx  # Fixed bottom mobile actions
+├── error/                   # Error handling
+│   └── ErrorBoundary.tsx    # React error boundary
+└── skeletons/               # Loading placeholders
+    ├── SkeletonText.tsx     # Text shimmer
+    ├── SkeletonCard.tsx     # Card shimmer
+    └── TopicCardSkeleton.tsx # Topic-specific skeleton
+```
+
+**Key Patterns:**
+
+1. **Dark Mode Support**
+   - All components use Tailwind's `dark:` modifier for dark mode variants
+   - Theme preference persisted in localStorage via ThemeContext
+   - System preference detection with `prefers-color-scheme` media query
+   - Preload script in index.html prevents dark mode flash on load
+   - 200ms CSS transitions for smooth theme switching
+
+2. **Responsive Design**
+   - Mobile-first approach using Tailwind breakpoints (sm:, md:, lg:)
+   - Touch-friendly 44px+ minimum tap targets (WCAG 2.1 compliance)
+   - Fluid typography using CSS clamp() for smooth text scaling
+   - Safe area support for notched devices (env(safe-area-inset-bottom))
+   - Collapsible navigation on mobile, persistent on desktop
+
+3. **Loading States**
+   - Shimmer animations for skeleton screens (gradient-based)
+   - 100ms delay before showing skeletons (prevents flash)
+   - LoadingSpinner for indeterminate operations
+   - ProgressBar for determinate operations
+   - Skeleton variants match actual content shape
+
+4. **Error Handling**
+   - ErrorBoundary catches JavaScript errors in component tree
+   - Toast notifications for user feedback (success, error, warning, info)
+   - ErrorState component for retry-able errors
+   - EmptyState component for "no data" scenarios
+   - Form validation errors inline with React Hook Form
+
+5. **Form Validation**
+   - React Hook Form for performant form state management
+   - Zod schemas for type-safe validation
+   - Inline error messages below inputs
+   - Real-time validation on blur
+   - Clear validation state indicators
+
+6. **Accessibility**
+   - ARIA attributes on all interactive elements (aria-label, aria-expanded, aria-current)
+   - Keyboard navigation support (Tab, Shift+Tab, Enter, Escape, Arrow keys)
+   - Focus trap in modals and mobile drawer
+   - Body scroll lock when overlays open
+   - WCAG AA color contrast ratios (4.5:1 for text)
+   - Semantic HTML (nav, main, header, button, etc.)
+
+7. **Search & Filtering**
+   - Debounced search input (500ms default delay)
+   - Search with clear button and loading state
+   - FilterPanel with apply/reset actions
+   - TagFilter with multi-select checkboxes
+   - Sort options with direction toggle (asc/desc)
+   - Active filters display with badges
+
+8. **Onboarding**
+   - React Joyride for guided tours
+   - Tour progress tracked in localStorage
+   - Multiple tour types (home, topics, discussion, profile)
+   - data-tour attributes for stable element targeting
+   - Skip, reset, and completion tracking
+
+9. **Typography & Readability**
+   - Reading width constraints (65ch max for prose)
+   - Enhanced line heights (1.7 for paragraphs)
+   - Text wrapping: balance for headings, pretty for paragraphs
+   - Typography component for rich content
+   - Fluid font sizes for responsive text scaling
+
+**Usage Examples:**
+
+```typescript
+// Dark mode-aware button
+import { Button } from '@/components/ui';
+<Button variant="primary" size="md">Save Changes</Button>
+
+// Search with debouncing
+import { SearchInput } from '@/components/ui';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [query, setQuery] = useState('');
+const debouncedQuery = useDebounce(query, 500);
+
+<SearchInput
+  value={query}
+  onChange={setQuery}
+  placeholder="Search topics..."
+  isLoading={isSearching}
+/>
+
+// Toast notifications
+import { useToast } from '@/contexts/ToastContext';
+const toast = useToast();
+toast.success('Saved successfully!');
+toast.error('Failed to save changes');
+
+// Loading states
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import { TopicCardSkeleton } from '@/components/ui/skeletons';
+
+const showSkeleton = useDelayedLoading(isLoading);
+{showSkeleton && <TopicCardSkeleton />}
+{!showSkeleton && data && <TopicCard topic={data} />}
+
+// Form validation
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '@/schemas/auth';
+
+const { register, handleSubmit, formState: { errors } } = useForm({
+  resolver: zodResolver(loginSchema),
+});
+
+<Input
+  label="Email"
+  {...register('email')}
+  error={errors.email?.message}
+/>
+```
+
+**Performance Considerations:**
+
+- Shimmer animations use CSS transforms (GPU-accelerated)
+- Debounced search prevents API spam
+- Delayed loading prevents layout shift
+- Lazy loading for routes and heavy components
+- Bundle size monitoring (<500KB gzipped)
+
 ### Development Workflow
 
 1. **Local Development**:
@@ -474,6 +637,9 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Active Technologies
 
+- TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS (001-ui-ux-enhancement)
+- N/A (frontend-only feature, uses localStorage for client-side state) (001-ui-ux-enhancement)
+
 - **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
 - **PostgreSQL 15** - Primary database with Prisma ORM
 - **Redis 7** - Caching, sessions, pub/sub messaging
@@ -582,8 +748,7 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
+- 001-ui-ux-enhancement: Added TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS
+
 - **2026-02-01**: Consolidated pending PRs into staging branch
 - **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3
-- **2026-01-28**: Added backend microservices and shared packages documentation, fixed Playwright version to v1.58.0
-- **2026-01-24**: Updated CLAUDE.md with implemented architecture (issue #431)
-- **2026-01-24**: Fixed E2E infrastructure issues (OOM, DNS, port conflicts, memory limits)

@@ -75,9 +75,10 @@ export interface ErrorResponse {
 class OnboardingService {
   /**
    * Get authorization header from stored token
+   * Checks both localStorage (remember me) and sessionStorage (current session)
    */
   private getAuthHeader(): HeadersInit {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     if (!token) {
       return {
         'Content-Type': 'application/json',

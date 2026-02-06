@@ -70,9 +70,9 @@ export interface PreviewFeedbackResponse {
 }
 
 /**
- * AI Service base URL - connects directly to ai-service for feedback
+ * AI Service base URL - goes through API gateway like all other endpoints
  */
-const AI_SERVICE_URL = import.meta.env['VITE_AI_SERVICE_URL'] || '/ai';
+const AI_SERVICE_URL = import.meta.env['VITE_AI_SERVICE_URL'] || '/api/ai';
 
 /**
  * Request preview feedback for draft content

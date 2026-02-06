@@ -4,8 +4,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from './api';
 import type { PaginatedTopicsResponse, GetTopicsParams } from '../types/topic';
+import { apiClient } from './api';
 
 /**
  * React Query hook for fetching topics with filtering and pagination

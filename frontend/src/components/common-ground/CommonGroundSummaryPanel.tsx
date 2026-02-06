@@ -49,22 +49,22 @@ export interface CommonGroundSummaryPanelProps {
 const getConsensusStyles = (level: 'high' | 'medium' | 'low') => {
   const styles = {
     high: {
-      bg: 'bg-green-50',
-      border: 'border-green-500',
-      text: 'text-green-800',
-      badge: 'bg-green-100 text-green-800',
+      bg: 'bg-green-50 dark:bg-green-900/30',
+      border: 'border-green-500 dark:border-green-600',
+      text: 'text-green-800 dark:text-green-300',
+      badge: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     },
     medium: {
-      bg: 'bg-yellow-50',
-      border: 'border-yellow-500',
-      text: 'text-yellow-800',
-      badge: 'bg-yellow-100 text-yellow-800',
+      bg: 'bg-yellow-50 dark:bg-yellow-900/30',
+      border: 'border-yellow-500 dark:border-yellow-600',
+      text: 'text-yellow-800 dark:text-yellow-300',
+      badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
     },
     low: {
-      bg: 'bg-orange-50',
-      border: 'border-orange-500',
-      text: 'text-orange-800',
-      badge: 'bg-orange-100 text-orange-800',
+      bg: 'bg-orange-50 dark:bg-orange-900/30',
+      border: 'border-orange-500 dark:border-orange-600',
+      text: 'text-orange-800 dark:text-orange-300',
+      badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     },
   };
 
@@ -102,12 +102,14 @@ const CommonGroundSummaryPanel = ({
   return (
     <div className={`space-y-6 ${className}`} data-testid="common-ground-summary">
       {/* Header with Overall Consensus */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Common Ground Analysis</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Common Ground Analysis
+          </h2>
           <div className="flex items-center gap-3">
             {showLastUpdated && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 Last updated: {new Date(analysis.lastUpdated).toLocaleString()}
               </span>
             )}
@@ -118,14 +120,16 @@ const CommonGroundSummaryPanel = ({
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Overall Consensus</span>
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Overall Consensus
+              </span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 {analysis.overallConsensusScore}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
               <div
-                className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                className="bg-primary-600 dark:bg-primary-500 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${analysis.overallConsensusScore}%` }}
                 role="progressbar"
                 aria-valuenow={analysis.overallConsensusScore}
@@ -135,8 +139,10 @@ const CommonGroundSummaryPanel = ({
             </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{analysis.participantCount}</div>
-            <div className="text-xs text-gray-500">Participants</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {analysis.participantCount}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Participants</div>
           </div>
         </div>
       </div>
@@ -144,10 +150,10 @@ const CommonGroundSummaryPanel = ({
       {/* Agreement Zones */}
       {analysis.agreementZones.length > 0 && (
         <div
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
           data-testid="agreement-zone"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Agreement Zones ({analysis.agreementZones.length})
           </h3>
           <div className="space-y-3">
@@ -163,7 +169,9 @@ const CommonGroundSummaryPanel = ({
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <h4 className={`font-medium ${styles.text}`}>{zone.title}</h4>
-                      <p className="text-sm text-gray-700 mt-1">{zone.description}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                        {zone.description}
+                      </p>
                     </div>
                     <span
                       className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge} ml-2`}
@@ -177,11 +185,11 @@ const CommonGroundSummaryPanel = ({
                       <div key={prop.id} className="text-sm">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-gray-800">{prop.text}</span>
-                          <span className="font-medium text-gray-900 ml-2">
+                          <span className="font-medium text-gray-900 dark:text-gray-100 ml-2">
                             {prop.agreementPercentage}% agree
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div
                             className="bg-green-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${prop.agreementPercentage}%` }}
@@ -199,7 +207,7 @@ const CommonGroundSummaryPanel = ({
                     <button
                       type="button"
                       onClick={() => onViewAgreementZone(zone.id)}
-                      className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
                     >
                       View Details →
                     </button>
@@ -214,37 +222,39 @@ const CommonGroundSummaryPanel = ({
       {/* Misunderstandings */}
       {analysis.misunderstandings.length > 0 && (
         <div
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
           data-testid="misunderstandings"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Identified Misunderstandings ({analysis.misunderstandings.length})
           </h3>
           <div className="space-y-3">
             {analysis.misunderstandings.map((misunderstanding) => (
               <div
                 key={misunderstanding.id}
-                className="p-4 rounded-lg border-l-4 bg-purple-50 border-purple-500"
+                className="p-4 rounded-lg border-l-4 bg-purple-50 dark:bg-purple-900/20 border-purple-500 dark:border-purple-600"
                 role="article"
                 aria-label={`Misunderstanding about term: ${misunderstanding.term}`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-purple-100 text-purple-800">
+                    <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
                       TERM CONFUSION
                     </span>
-                    <h4 className="font-medium text-purple-900 mt-2">"{misunderstanding.term}"</h4>
+                    <h4 className="font-medium text-purple-900 dark:text-purple-300 mt-2">
+                      "{misunderstanding.term}"
+                    </h4>
                   </div>
                 </div>
 
                 <div className="mt-3 space-y-2">
-                  <p className="text-sm text-gray-700 font-medium">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
                     Different definitions being used:
                   </p>
                   {misunderstanding.definitions.map((def, idx) => (
-                    <div key={idx} className="text-sm bg-white rounded p-2">
-                      <p className="text-gray-800 mb-1">{def.definition}</p>
-                      <p className="text-xs text-gray-500">
+                    <div key={idx} className="text-sm bg-white dark:bg-gray-800 rounded p-2">
+                      <p className="text-gray-800 dark:text-gray-200 mb-1">{def.definition}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         Used by {def.participants.length} participant(s)
                       </p>
                     </div>
@@ -252,8 +262,8 @@ const CommonGroundSummaryPanel = ({
                 </div>
 
                 {misunderstanding.clarificationSuggestion && (
-                  <div className="mt-3 pt-3 border-t border-purple-200">
-                    <p className="text-xs text-gray-600">
+                  <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-700">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       <span className="font-medium">Suggestion:</span>{' '}
                       {misunderstanding.clarificationSuggestion}
                     </p>
@@ -264,7 +274,7 @@ const CommonGroundSummaryPanel = ({
                   <button
                     type="button"
                     onClick={() => onViewMisunderstanding(misunderstanding.id)}
-                    className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
                   >
                     View Details →
                   </button>
@@ -278,35 +288,43 @@ const CommonGroundSummaryPanel = ({
       {/* Genuine Disagreements */}
       {analysis.disagreements.length > 0 && (
         <div
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
           data-testid="divergence-points"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Genuine Disagreements ({analysis.disagreements.length})
           </h3>
           <div className="space-y-3">
             {analysis.disagreements.map((disagreement) => (
               <div
                 key={disagreement.id}
-                className="p-4 rounded-lg border-l-4 bg-blue-50 border-blue-500"
+                className="p-4 rounded-lg border-l-4 bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-600"
                 role="article"
                 aria-label={`Disagreement about: ${disagreement.topic}`}
                 data-testid="divergence-point-card"
               >
                 <div className="mb-2">
-                  <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-800">
+                  <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                     VALUE DIFFERENCE
                   </span>
-                  <h4 className="font-medium text-blue-900 mt-2">{disagreement.topic}</h4>
-                  <p className="text-sm text-gray-700 mt-1">{disagreement.description}</p>
+                  <h4 className="font-medium text-blue-900 dark:text-blue-300 mt-2">
+                    {disagreement.topic}
+                  </h4>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                    {disagreement.description}
+                  </p>
                 </div>
 
                 <div className="mt-3 space-y-2">
-                  <p className="text-sm text-gray-700 font-medium">Different positions:</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    Different positions:
+                  </p>
                   {disagreement.positions.map((position, idx) => (
-                    <div key={idx} className="text-sm bg-white rounded p-3">
-                      <p className="font-medium text-gray-800 mb-1">{position.stance}</p>
-                      <p className="text-gray-700 mb-2">{position.reasoning}</p>
+                    <div key={idx} className="text-sm bg-white dark:bg-gray-800 rounded p-3">
+                      <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+                        {position.stance}
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-300 mb-2">{position.reasoning}</p>
                       {(position.underlyingValue || position.underlyingAssumption) && (
                         <div className="text-xs text-gray-600 space-y-1">
                           {position.underlyingValue && (
@@ -323,7 +341,7 @@ const CommonGroundSummaryPanel = ({
                           )}
                         </div>
                       )}
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         {position.participants.length} participant(s)
                       </p>
                     </div>
@@ -343,7 +361,7 @@ const CommonGroundSummaryPanel = ({
                   <button
                     type="button"
                     onClick={() => onViewDisagreement(disagreement.id)}
-                    className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
                   >
                     View Details →
                   </button>
@@ -356,7 +374,7 @@ const CommonGroundSummaryPanel = ({
 
       {/* Empty State */}
       {!hasContent && showEmptyState && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
           <div className="text-gray-400 mb-3">
             <svg
               className="mx-auto h-12 w-12"
@@ -372,8 +390,10 @@ const CommonGroundSummaryPanel = ({
               />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No Analysis Available</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
+            No Analysis Available
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Common ground analysis will appear here once the discussion has enough participants and
             content to analyze.
           </p>

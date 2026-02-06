@@ -8,3 +8,9 @@ export type { RegistrationFormProps, RegistrationFormData } from './Registration
 
 export { default as LoginForm } from './LoginForm';
 export type { LoginFormProps, LoginFormData } from './LoginForm';
+
+export { ProtectedRoute } from './ProtectedRoute';
+export type { ProtectedRouteProps } from './ProtectedRoute';
+
+export { SessionExpirationModal } from './SessionExpirationModal';
+export type { SessionExpirationModalProps } from './SessionExpirationModal';

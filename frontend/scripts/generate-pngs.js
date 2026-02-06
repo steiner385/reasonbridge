@@ -1,4 +1,4 @@
-/* eslint-disable import/no-unresolved, import/order, no-console */
+/* eslint-disable import/no-unresolved, import/order */
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
