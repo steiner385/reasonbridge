@@ -190,8 +190,8 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               !isValid && characterCount > 0
                 ? 'text-fallacy-DEFAULT'
                 : characterCount >= maxLength * 0.9
-                  ? 'text-secondary-600'
-                  : 'text-gray-500'
+                  ? 'text-secondary-600 dark:text-secondary-400'
+                  : 'text-gray-500 dark:text-gray-300'
             }`}
           >
             {characterCount} / {maxLength} characters
@@ -225,7 +225,10 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
 
       {/* Cited Sources */}
       <div>
-        <label htmlFor="cited-source" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label
+          htmlFor="cited-source"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        >
           Cited Sources (Optional)
         </label>
         <div className="flex gap-2">

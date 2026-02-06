@@ -205,8 +205,8 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
                 !isValid && characterCount > 0
                   ? 'text-fallacy-DEFAULT'
                   : characterCount >= maxLength * 0.9
-                    ? 'text-secondary-600'
-                    : 'text-gray-500'
+                    ? 'text-secondary-600 dark:text-secondary-400'
+                    : 'text-gray-500 dark:text-gray-300'
               }`}
             >
               {characterCount} / {maxLength} characters
@@ -225,7 +225,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
         <div>
           <label
             htmlFor="edit-cited-source"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
           >
             Cited Sources (Optional)
           </label>
