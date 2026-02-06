@@ -45,6 +45,8 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
 /**
  * Test database connection URL.
@@ -93,12 +95,16 @@ export async function createTestPrismaClient(
     logLevels = ['query', 'error', 'warn'],
   } = options;
 
+  // Create PostgreSQL connection pool
+  const pool = new Pool({
+    connectionString: databaseUrl,
+  });
+
+  // Create Prisma adapter using the connection pool
+  const adapter = new PrismaPg(pool);
+
   const prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: databaseUrl,
-      },
-    },
+    adapter,
     log: enableLogging ? logLevels : ['error'],
   });
 
@@ -108,6 +114,7 @@ export async function createTestPrismaClient(
     await prisma.$queryRaw`SELECT 1`;
   } catch (error) {
     await prisma.$disconnect();
+    await pool.end();
     throw new Error(
       `Failed to connect to test database at ${databaseUrl}. ` +
         `Ensure docker-compose.test.yml is running (make docker:test-up). ` +
