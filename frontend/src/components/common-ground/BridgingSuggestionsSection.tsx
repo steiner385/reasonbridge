@@ -117,6 +117,7 @@ const BridgingSuggestionsSection = ({
               className="bg-primary-600 dark:bg-primary-500 h-3 rounded-full transition-all duration-300"
               style={{ width: `${consensusPercentage}%` }}
               role="progressbar"
+              aria-label="Overall consensus level"
               aria-valuenow={consensusPercentage}
               aria-valuemin={0}
               aria-valuemax={100}
