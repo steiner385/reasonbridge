@@ -185,13 +185,18 @@ export function useHybridPreviewFeedback(
 
   // When AI data arrives, mark feedback as AI-powered
   useEffect(() => {
-    // Mark as AI feedback only when AI has data AND is not currently fetching
-    if (aiQuery.data && !aiQuery.isFetching) {
-      setIsAIFeedback(true);
-    } else if (aiQuery.isFetching || !aiQuery.data) {
-      // Reset to false when fetching new data or no data
-      setIsAIFeedback(false);
-    }
+    // Schedule state updates asynchronously to avoid cascading renders
+    const timer = setTimeout(() => {
+      // Mark as AI feedback only when AI has data AND is not currently fetching
+      if (aiQuery.data && !aiQuery.isFetching) {
+        setIsAIFeedback(true);
+      } else if (aiQuery.isFetching || !aiQuery.data) {
+        // Reset to false when fetching new data or no data
+        setIsAIFeedback(false);
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [aiQuery.data, aiQuery.isFetching]);
 
   // Determine which data to use: AI if available, otherwise regex

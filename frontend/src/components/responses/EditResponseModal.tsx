@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -61,16 +61,24 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const prevIsOpenRef = useRef(isOpen);
 
-  // Initialize form with response data when modal opens
+  // Initialize form with response data when modal transitions from closed to open
   useEffect(() => {
-    if (isOpen && response) {
-      setContent(response.content);
-      setCitedSources(response.citedSources?.map((s) => s.url) || []);
-      setContainsOpinion(response.containsOpinion);
-      setContainsFactualClaims(response.containsFactualClaims);
-      setError(null);
+    if (isOpen && !prevIsOpenRef.current && response) {
+      // Schedule form initialization asynchronously to avoid cascading renders
+      const timer = setTimeout(() => {
+        setContent(response.content);
+        setCitedSources(response.citedSources?.map((s) => s.url) || []);
+        setContainsOpinion(response.containsOpinion);
+        setContainsFactualClaims(response.containsFactualClaims);
+        setError(null);
+      }, 0);
+      prevIsOpenRef.current = isOpen;
+      return () => clearTimeout(timer);
     }
+    prevIsOpenRef.current = isOpen;
+    return undefined;
   }, [isOpen, response]);
 
   const handleSubmit = async (e: React.FormEvent) => {

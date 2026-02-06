@@ -10,7 +10,7 @@
  * and a reason for their appeal.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import type { ModerationAction } from '../../types/moderation';
@@ -48,14 +48,22 @@ const AppealSubmissionForm: React.FC<AppealSubmissionFormProps> = ({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const { submitAppeal, isLoading, isSuccess, isError, error, appealId, reset } = useSubmitAppeal();
+  const prevIsOpenRef = useRef(isOpen);
 
-  // Reset form when modal opens
+  // Reset form when modal transitions from closed to open
   useEffect(() => {
-    if (isOpen) {
-      setReason('');
-      setValidationError(null);
-      reset();
+    if (isOpen && !prevIsOpenRef.current) {
+      // Schedule form reset asynchronously to avoid cascading renders
+      const timer = setTimeout(() => {
+        setReason('');
+        setValidationError(null);
+        reset();
+      }, 0);
+      prevIsOpenRef.current = isOpen;
+      return () => clearTimeout(timer);
     }
+    prevIsOpenRef.current = isOpen;
+    return undefined;
   }, [isOpen, reset]);
 
   // Close modal and call onSuccess when appeal is submitted successfully

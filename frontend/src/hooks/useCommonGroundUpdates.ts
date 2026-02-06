@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { CommonGroundAnalysis } from '../types/common-ground';
 
@@ -106,7 +106,7 @@ export function useCommonGroundUpdates({
   enabled = true,
 }: UseCommonGroundUpdatesOptions): UseCommonGroundUpdatesReturn {
   const socketRef = useRef<Socket | null>(null);
-  const isConnectedRef = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   /**
    * Transform WebSocket payload to CommonGroundAnalysis
@@ -152,7 +152,7 @@ export function useCommonGroundUpdates({
 
     // Handle connection
     socket.on('connect', () => {
-      isConnectedRef.current = true;
+      setIsConnected(true);
 
       // Subscribe to common ground updates for this topic
       socket.emit('subscribe:common-ground', { topicId });
@@ -177,13 +177,13 @@ export function useCommonGroundUpdates({
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      isConnectedRef.current = false;
+      setIsConnected(false);
     });
 
     // Handle connection errors
     socket.on('connect_error', (error) => {
       console.error('[useCommonGroundUpdates] Connection error:', error);
-      isConnectedRef.current = false;
+      setIsConnected(false);
     });
 
     // Cleanup on unmount
@@ -195,7 +195,7 @@ export function useCommonGroundUpdates({
         // Disconnect socket
         socketRef.current.disconnect();
         socketRef.current = null;
-        isConnectedRef.current = false;
+        setIsConnected(false);
       }
     };
   }, [topicId, enabled, onUpdate, transformPayload]);
@@ -204,10 +204,15 @@ export function useCommonGroundUpdates({
     /**
      * Whether the WebSocket is currently connected
      */
-    isConnected: isConnectedRef.current,
+    isConnected,
     /**
-     * The socket instance (for advanced usage)
+     * The socket ref (access .current for the socket instance)
+     * @example
+     * const { socketRef } = useCommonGroundUpdates(...);
+     * if (socketRef.current) {
+     *   socketRef.current.emit('customEvent', data);
+     * }
      */
-    socket: socketRef.current,
+    socketRef,
   };
 }

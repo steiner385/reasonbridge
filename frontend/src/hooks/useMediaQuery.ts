@@ -27,8 +27,10 @@ export function useMediaQuery(query: string): boolean {
     // Create MediaQueryList object
     const mediaQuery = window.matchMedia(query);
 
-    // Set initial value
-    setMatches(mediaQuery.matches);
+    // Set initial value asynchronously to avoid cascading renders
+    const initTimer = setTimeout(() => {
+      setMatches(mediaQuery.matches);
+    }, 0);
 
     // Create event listener for changes
     const handleChange = (event: MediaQueryListEvent) => {
@@ -45,6 +47,7 @@ export function useMediaQuery(query: string): boolean {
 
     // Cleanup
     return () => {
+      clearTimeout(initTimer);
       if (mediaQuery.removeEventListener) {
         mediaQuery.removeEventListener('change', handleChange);
       } else {
