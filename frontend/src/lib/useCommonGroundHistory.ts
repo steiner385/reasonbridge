@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from './api';
 import type { CommonGround } from '../types/commonGround';
@@ -14,7 +19,7 @@ export function useCommonGround(topicId: string | undefined, version?: number) {
       }
       const params = version ? `?version=${version}` : '';
       const response = await apiClient.get<CommonGround>(
-        `/topics/${topicId}/common-ground${params}`
+        `/topics/${topicId}/common-ground${params}`,
       );
       return response;
     },
@@ -36,9 +41,7 @@ export function useCommonGroundHistory(topicId: string | undefined) {
       }
 
       // Fetch the latest version to know how many versions exist
-      const latest = await apiClient.get<CommonGround>(
-        `/topics/${topicId}/common-ground`
-      );
+      const latest = await apiClient.get<CommonGround>(`/topics/${topicId}/common-ground`);
 
       // If only one version exists, return it
       if (latest.version === 1) {
@@ -46,11 +49,8 @@ export function useCommonGroundHistory(topicId: string | undefined) {
       }
 
       // Fetch all versions
-      const promises = Array.from(
-        { length: latest.version },
-        (_, i) => apiClient.get<CommonGround>(
-          `/topics/${topicId}/common-ground?version=${i + 1}`
-        )
+      const promises = Array.from({ length: latest.version }, (_, i) =>
+        apiClient.get<CommonGround>(`/topics/${topicId}/common-ground?version=${i + 1}`),
       );
 
       const allVersions = await Promise.all(promises);

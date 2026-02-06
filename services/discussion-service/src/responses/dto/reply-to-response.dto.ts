@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T051 [P] [US3] - Reply to Response DTO (Feature 009)
  *
  * Specialized DTO for replying to specific responses in threaded discussions

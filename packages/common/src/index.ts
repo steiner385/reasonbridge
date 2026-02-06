@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * @reason-bridge/common
  *
  * Shared types, utilities, and constants for the reasonBridge platform.

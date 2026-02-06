@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Event publishing and subscribing utilities for the event-driven architecture.
  *
  * This module provides interfaces and implementations for publishing and

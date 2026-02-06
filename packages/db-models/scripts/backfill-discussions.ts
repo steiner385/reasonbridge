@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T007 - Phase 2 Migration Backfill Script (Feature 009)
  *
  * Purpose: Link existing responses to discussions

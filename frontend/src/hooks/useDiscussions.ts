@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T031 [US1] - TanStack Query hook for discussion listing (Feature 009)
  *
  * Provides query for fetching discussions with:

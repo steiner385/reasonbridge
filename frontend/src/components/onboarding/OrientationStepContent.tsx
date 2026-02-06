@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Orientation Step Content Components
  *
  * Visual content for the 3-step orientation overlay explaining how the platform works.

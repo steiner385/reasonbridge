@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T018 [P] [US1] - Create Discussion DTO (Feature 009)
  *
  * Validates discussion creation requests

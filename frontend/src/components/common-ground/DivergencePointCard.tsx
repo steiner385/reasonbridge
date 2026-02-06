@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { DivergencePoint } from '../../types/common-ground';
 
 export interface DivergencePointCardProps {
@@ -161,7 +166,9 @@ const DivergencePointCard = ({
               DIVERGENCE
             </span>
             {showPolarizationScore && (
-              <span className={`${polarizationStyles.badge} ${sizeStyles.badge} font-semibold rounded`}>
+              <span
+                className={`${polarizationStyles.badge} ${sizeStyles.badge} font-semibold rounded`}
+              >
                 {(divergencePoint.polarizationScore * 100).toFixed(0)}%
               </span>
             )}
@@ -219,7 +226,8 @@ const DivergencePointCard = ({
                     {viewpoint.percentage}%
                   </div>
                   <div className="text-xs text-gray-600">
-                    {viewpoint.participantCount} {viewpoint.participantCount === 1 ? 'person' : 'people'}
+                    {viewpoint.participantCount}{' '}
+                    {viewpoint.participantCount === 1 ? 'person' : 'people'}
                   </div>
                 </div>
               </div>

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useState, useCallback } from 'react';
 import type { DismissFeedbackRequest } from '../types/feedback';
 

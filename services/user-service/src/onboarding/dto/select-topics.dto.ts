@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Select topics DTOs for onboarding
  * Matches OpenAPI schema definitions
  */

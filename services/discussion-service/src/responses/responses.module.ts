@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T017 - Response Module (Extended for Feature 009)
  *
  * Existing module will be extended with new functionality:

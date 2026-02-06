@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * MSW Request Handlers for API Mocking
  *
  * This module provides common API mock handlers for testing.

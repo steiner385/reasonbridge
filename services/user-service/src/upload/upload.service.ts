@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { S3Service, type UploadResult } from '../services/s3.service.js';
 

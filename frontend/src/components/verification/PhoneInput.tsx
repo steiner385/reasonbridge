@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 import PhoneInputWithCountry from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';

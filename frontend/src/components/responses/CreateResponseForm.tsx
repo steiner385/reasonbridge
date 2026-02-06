@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T045 [P] [US2] - Create Response Form Component (Feature 009)
  *
  * Form for posting responses to discussions

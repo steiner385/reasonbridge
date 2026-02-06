@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { default as RegistrationForm } from './RegistrationForm';
 export type { RegistrationFormProps, RegistrationFormData } from './RegistrationForm';
 

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Skeleton Loaders - Composite skeleton components for pages
  * @module components/ui/skeletons
  *

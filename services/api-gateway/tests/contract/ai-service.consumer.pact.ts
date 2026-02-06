@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Pact Consumer Contract Tests for AI Service
  *
  * These tests define the consumer expectations for the ai-service API.

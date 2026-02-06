@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable } from '@nestjs/common';
 
 export interface ScreeningResult {
@@ -66,27 +71,27 @@ const AD_HOMINEM_PATTERNS = [
 
 // Common fallacy patterns
 const FALLACY_PATTERNS = {
-  'ad_hominem': {
+  ad_hominem: {
     pattern: /\b(you're|you\s+are)\s+(stupid|dumb|ignorant|blind)/gi,
     description: 'Ad hominem attack - attacking the person instead of the argument',
   },
-  'straw_man': {
+  straw_man: {
     pattern: /\b(so\s+you're\s+saying|so\s+what\s+you\s+mean|in\s+other\s+words)\s+that\s+\w+/gi,
-    description: 'Straw man fallacy - misrepresenting opponent\'s argument',
+    description: "Straw man fallacy - misrepresenting opponent's argument",
   },
-  'appeal_to_authority': {
+  appeal_to_authority: {
     pattern: /\b(experts\s+say|everyone\s+knows|it's\s+common\s+knowledge|obviously)\b/gi,
     description: 'Appeal to authority - relying on authority instead of evidence',
   },
-  'false_dilemma': {
+  false_dilemma: {
     pattern: /\b(either\s+\w+\s+or\s+\w+|you\s+either|there's\s+no\s+middle\s+ground)\b/gi,
     description: 'False dilemma - presenting only two options when more exist',
   },
-  'emotional_appeal': {
+  emotional_appeal: {
     pattern: /\b(think\s+of\s+the\s+children|won't\s+somebody|oh\s+my|my\s+goodness)\b/gi,
     description: 'Emotional appeal - using emotion instead of logic',
   },
-  'generalization': {
+  generalization: {
     pattern: /\b(all\s+\w+|every\s+\w+|never\s+\w+|always\s+\w+)\s+(is|are|do|does)\b/gi,
     description: 'Hasty generalization - making broad claims without sufficient evidence',
   },
@@ -120,10 +125,7 @@ const FACTUAL_CLAIM_PATTERNS = [
 
 @Injectable()
 export class ContentScreeningService {
-  async screenContent(
-    contentId: string,
-    content: string,
-  ): Promise<ScreeningResult> {
+  async screenContent(contentId: string, content: string): Promise<ScreeningResult> {
     const toneAnalysis = this.analyzeTone(content);
     const fallacyDetection = this.detectFallacies(content);
     const claimExtraction = this.extractClaims(content);
@@ -158,9 +160,7 @@ export class ContentScreeningService {
       const matches = content.match(pattern);
       if (matches) {
         inflammatoryCount += matches.length;
-        indicators.push(
-          ...matches.map((m) => `Inflammatory language: "${m}"`),
-        );
+        indicators.push(...matches.map((m) => `Inflammatory language: "${m}"`));
       }
     }
 
@@ -196,9 +196,7 @@ export class ContentScreeningService {
   private detectFallacies(content: string): FallacyDetection {
     const fallacies: Fallacy[] = [];
 
-    for (const [fallacyType, { pattern, description }] of Object.entries(
-      FALLACY_PATTERNS,
-    )) {
+    for (const [fallacyType, { pattern, description }] of Object.entries(FALLACY_PATTERNS)) {
       const matches = content.matchAll(pattern);
       for (const match of matches) {
         fallacies.push({
@@ -340,43 +338,28 @@ export class ContentScreeningService {
     const recommendations: string[] = [];
 
     if (result.overallRiskScore > 0.5) {
-      recommendations.push(
-        'Flag for human moderator review - high risk content detected',
-      );
+      recommendations.push('Flag for human moderator review - high risk content detected');
     } else if (result.overallRiskScore > 0.3) {
       recommendations.push('Monitor content - moderate risk indicators present');
     }
 
     if (result.toneAnalysis.isInflammatory) {
       if (result.toneAnalysis.intensity === 'high') {
-        recommendations.push(
-          'Consider showing cooling-off prompt to encourage reflection',
-        );
+        recommendations.push('Consider showing cooling-off prompt to encourage reflection');
       }
-      recommendations.push(
-        'Educational resources on constructive dialogue recommended',
-      );
+      recommendations.push('Educational resources on constructive dialogue recommended');
     }
 
     if (result.fallacyDetection.total_fallacies > 2) {
-      recommendations.push(
-        'Provide educational feedback on logical reasoning',
-      );
+      recommendations.push('Provide educational feedback on logical reasoning');
     }
 
-    if (
-      result.claimExtraction.needs_fact_check &&
-      result.claimExtraction.claims.length > 0
-    ) {
-      recommendations.push(
-        `Fact-check ${result.claimExtraction.claims.length} factual claim(s)`,
-      );
+    if (result.claimExtraction.needs_fact_check && result.claimExtraction.claims.length > 0) {
+      recommendations.push(`Fact-check ${result.claimExtraction.claims.length} factual claim(s)`);
     }
 
     if (result.responsePattern.predominant_system === 'system1') {
-      recommendations.push(
-        'Encourage System 2 thinking with prompts for evidence-based reasoning',
-      );
+      recommendations.push('Encourage System 2 thinking with prompts for evidence-based reasoning');
     }
 
     return recommendations;

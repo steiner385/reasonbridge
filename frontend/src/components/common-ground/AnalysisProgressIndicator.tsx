@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
 
 export interface AnalysisProgressIndicatorProps {
@@ -108,11 +113,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
             {statusText.idle}
           </p>
         )}
-        {message && (
-          <p className={`mt-1 text-sm text-gray-500 text-center max-w-md`}>
-            {message}
-          </p>
-        )}
+        {message && <p className={`mt-1 text-sm text-gray-500 text-center max-w-md`}>{message}</p>}
       </div>
     );
   }
@@ -172,11 +173,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
           </div>
         )}
 
-        {message && (
-          <p className={`mt-3 text-sm text-gray-600 text-center max-w-md`}>
-            {message}
-          </p>
-        )}
+        {message && <p className={`mt-3 text-sm text-gray-600 text-center max-w-md`}>{message}</p>}
       </div>
     );
   }
@@ -206,11 +203,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
             {statusText.complete}
           </p>
         )}
-        {message && (
-          <p className={`mt-1 text-sm text-gray-600 text-center max-w-md`}>
-            {message}
-          </p>
-        )}
+        {message && <p className={`mt-1 text-sm text-gray-600 text-center max-w-md`}>{message}</p>}
       </div>
     );
   }
@@ -241,9 +234,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
           </p>
         )}
         {(error || message) && (
-          <p className={`mt-1 text-sm text-red-600 text-center max-w-md`}>
-            {error || message}
-          </p>
+          <p className={`mt-1 text-sm text-red-600 text-center max-w-md`}>{error || message}</p>
         )}
         {onRetry && (
           <button
@@ -251,12 +242,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
             onClick={onRetry}
             className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 rounded-lg transition-colors"
           >
-            <svg
-              className="mr-2 h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

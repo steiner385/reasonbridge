@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -90,9 +95,7 @@ export class BotDetectorService {
    * @param topicId - Topic to analyze for coordination patterns
    * @returns Array of detected coordination patterns with affected users
    */
-  async detectCoordinatedPostingPatterns(
-    topicId: string,
-  ): Promise<CoordinationPattern[]> {
+  async detectCoordinatedPostingPatterns(topicId: string): Promise<CoordinationPattern[]> {
     const responses = await this.prisma.response.findMany({
       where: { topicId },
       include: {
@@ -126,9 +129,10 @@ export class BotDetectorService {
   /**
    * Analyze if an account shows rapid posting behavior
    */
-  private analyzePostingSpeed(
-    responses: Array<{ id: string; createdAt: Date }>,
-  ): { isRapid: boolean; riskContribution: number } {
+  private analyzePostingSpeed(responses: Array<{ id: string; createdAt: Date }>): {
+    isRapid: boolean;
+    riskContribution: number;
+  } {
     if (responses.length < 3) {
       return { isRapid: false, riskContribution: 0 };
     }
@@ -164,9 +168,10 @@ export class BotDetectorService {
   /**
    * Analyze if account posts only in narrow topic range (indicator of targeted campaigns)
    */
-  private analyzeTopicConcentration(
-    responses: Array<{ id: string; topicId: string }>,
-  ): { isConcentrated: boolean; riskContribution: number } {
+  private analyzeTopicConcentration(responses: Array<{ id: string; topicId: string }>): {
+    isConcentrated: boolean;
+    riskContribution: number;
+  } {
     const uniqueTopics = new Set(responses.map((r) => r.topicId));
     const concentrationRatio = uniqueTopics.size / responses.length;
 

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Help Menu Component
  *
  * Persistent help menu in main navigation for re-accessing orientation content.

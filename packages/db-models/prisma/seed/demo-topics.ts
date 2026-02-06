@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo Topic Definitions
  *
  * Defines 10 diverse discussion topics (FR-002) covering:

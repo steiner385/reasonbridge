@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * PhoneVerificationButton - Trigger button for phone verification
  *
  * Opens the PhoneVerificationModal when clicked

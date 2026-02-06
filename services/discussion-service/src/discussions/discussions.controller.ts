@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T016 - Discussion Controller (Feature 009)
  *
  * REST API endpoints for discussion operations

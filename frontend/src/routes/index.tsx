@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { RouteObject } from 'react-router-dom';
 import { LandingPage } from '../pages/LandingPage';
 import AboutPage from '../pages/AboutPage';

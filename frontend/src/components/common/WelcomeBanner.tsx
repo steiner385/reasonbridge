@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useEffect } from 'react';
 
 const BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Body, Controller, Post, HttpCode, HttpStatus, Inject, forwardRef } from '@nestjs/common';
 import { UsersService } from '../users/users.service.js';
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';

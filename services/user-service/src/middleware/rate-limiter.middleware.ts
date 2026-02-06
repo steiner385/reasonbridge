@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import type { NestMiddleware } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';

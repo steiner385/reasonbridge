@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Verification Status Indicator Component
  * Compact indicator showing user's verification status
  * Displays as a badge/icon with color-coded status
@@ -75,7 +80,7 @@ const getVerificationTypeLabel = (type: VerificationType): string => {
 };
 
 const getSizeClasses = (
-  size: 'sm' | 'md' | 'lg'
+  size: 'sm' | 'md' | 'lg',
 ): { badge: string; icon: string; text: string } => {
   switch (size) {
     case 'sm':
@@ -179,21 +184,13 @@ export const VerificationStatusGrid: React.FC<VerificationStatusGridProps> = ({
   onIndicatorClick,
 }) => {
   if (verifications.length === 0) {
-    return (
-      <div className={`text-sm text-gray-500 italic ${className}`}>
-        No verifications
-      </div>
-    );
+    return <div className={`text-sm text-gray-500 italic ${className}`}>No verifications</div>;
   }
 
   return (
     <div
       className={`grid gap-2 ${
-        maxColumns === 1
-          ? 'grid-cols-1'
-          : maxColumns === 2
-            ? 'grid-cols-2'
-            : 'grid-cols-3'
+        maxColumns === 1 ? 'grid-cols-1' : maxColumns === 2 ? 'grid-cols-2' : 'grid-cols-3'
       } ${className}`}
     >
       {verifications.map((verification) => (

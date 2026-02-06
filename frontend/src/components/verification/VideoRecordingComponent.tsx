@@ -1,12 +1,24 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useRef, useState, useCallback, useEffect } from 'react';
-import type { VideoChallenge, VideoConstraints, VideoRecorderState } from '../../types/verification';
+import type {
+  VideoChallenge,
+  VideoConstraints,
+  VideoRecorderState,
+} from '../../types/verification';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 
 export interface VideoRecordingComponentProps {
   challenge: VideoChallenge;
   constraints: VideoConstraints;
-  onRecordingComplete: (blob: Blob, metadata: { fileName: string; fileSize: number; mimeType: string; durationSeconds: number }) => Promise<void>;
+  onRecordingComplete: (
+    blob: Blob,
+    metadata: { fileName: string; fileSize: number; mimeType: string; durationSeconds: number },
+  ) => Promise<void>;
   isUploading?: boolean;
   uploadError?: string | null;
   className?: string;
@@ -228,7 +240,8 @@ function VideoRecordingComponent({
 
         {/* Video Preview/Recorder */}
         <div className="space-y-4">
-          {state.isRecording || (!state.recordedVideoUrl && state.isRecording === false && !state.recordedBlob) ? (
+          {state.isRecording ||
+          (!state.recordedVideoUrl && state.isRecording === false && !state.recordedBlob) ? (
             <div className="bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
               <video
                 ref={videoRef}
@@ -240,11 +253,7 @@ function VideoRecordingComponent({
             </div>
           ) : state.recordedVideoUrl ? (
             <div className="bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
-              <video
-                src={state.recordedVideoUrl}
-                controls
-                className="w-full h-full object-cover"
-              />
+              <video src={state.recordedVideoUrl} controls className="w-full h-full object-cover" />
             </div>
           ) : (
             <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
@@ -261,7 +270,9 @@ function VideoRecordingComponent({
                 <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse" />
                 <span className="font-semibold text-red-900">Recording in progress</span>
               </div>
-              <span className="font-mono text-lg font-bold text-red-600">{formatTime(recordingTime)}</span>
+              <span className="font-mono text-lg font-bold text-red-600">
+                {formatTime(recordingTime)}
+              </span>
             </div>
           )}
 
@@ -298,11 +309,7 @@ function VideoRecordingComponent({
                 {state.isRecording ? 'Recording...' : 'Start Recording'}
               </Button>
               {state.isRecording && (
-                <Button
-                  onClick={stopRecording}
-                  variant="danger"
-                  size="md"
-                >
+                <Button onClick={stopRecording} variant="danger" size="md">
                   Stop
                 </Button>
               )}
@@ -338,27 +345,37 @@ function VideoRecordingComponent({
         {state.recordedBlob && (
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
-              <span className={state.recordingDuration >= constraints.minDurationSeconds ? '✓' : '✗'}>
+              <span
+                className={state.recordingDuration >= constraints.minDurationSeconds ? '✓' : '✗'}
+              >
                 {' '}
               </span>
               <span
                 className={
-                  state.recordingDuration >= constraints.minDurationSeconds ? 'text-green-700' : 'text-red-700'
+                  state.recordingDuration >= constraints.minDurationSeconds
+                    ? 'text-green-700'
+                    : 'text-red-700'
                 }
               >
-                Minimum duration: {constraints.minDurationSeconds}s ({state.recordingDuration}s recorded)
+                Minimum duration: {constraints.minDurationSeconds}s ({state.recordingDuration}s
+                recorded)
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={state.recordingDuration <= constraints.maxDurationSeconds ? '✓' : '✗'}>
+              <span
+                className={state.recordingDuration <= constraints.maxDurationSeconds ? '✓' : '✗'}
+              >
                 {' '}
               </span>
               <span
                 className={
-                  state.recordingDuration <= constraints.maxDurationSeconds ? 'text-green-700' : 'text-red-700'
+                  state.recordingDuration <= constraints.maxDurationSeconds
+                    ? 'text-green-700'
+                    : 'text-red-700'
                 }
               >
-                Maximum duration: {constraints.maxDurationSeconds}s ({state.recordingDuration}s recorded)
+                Maximum duration: {constraints.maxDurationSeconds}s ({state.recordingDuration}s
+                recorded)
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -367,7 +384,9 @@ function VideoRecordingComponent({
               </span>
               <span
                 className={
-                  state.recordedBlob.size <= constraints.maxFileSize ? 'text-green-700' : 'text-red-700'
+                  state.recordedBlob.size <= constraints.maxFileSize
+                    ? 'text-green-700'
+                    : 'text-red-700'
                 }
               >
                 File size: {(state.recordedBlob.size / (1024 * 1024)).toFixed(2)}MB /{' '}

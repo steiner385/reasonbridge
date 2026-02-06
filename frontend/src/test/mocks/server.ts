@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * MSW Server Setup for Tests
  *
  * This file configures the Mock Service Worker server for use in Vitest tests.

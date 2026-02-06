@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Mock AI Client Implementation
  *
  * A mock implementation of IAIClient for testing purposes.

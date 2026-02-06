@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo Environment ID Constants
  *
  * Deterministic UUIDs for demo environment data.

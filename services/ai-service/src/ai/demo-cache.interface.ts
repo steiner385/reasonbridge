@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo AI Response Cache Interface
  *
  * Defines the interface for caching pre-computed AI responses

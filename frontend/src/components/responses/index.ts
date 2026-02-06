@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { default as ResponseComposer } from './ResponseComposer';
 export type { ResponseComposerProps } from './ResponseComposer';
 export { default as ResponseCard } from './ResponseCard';

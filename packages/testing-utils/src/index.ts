@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * @reason-bridge/testing-utils
  *
  * Shared test helpers, mocks, and fixtures for the reasonBridge platform.

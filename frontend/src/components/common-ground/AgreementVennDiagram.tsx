@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Disagreement } from '../../types/common-ground';
 
 export interface AgreementVennDiagramProps {
@@ -103,14 +108,10 @@ const AgreementVennDiagram = ({
 
   return (
     <div className={className}>
-      {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-      )}
+      {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
 
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h4 className="text-md font-medium text-gray-800 mb-3">
-          {disagreement.topic}
-        </h4>
+        <h4 className="text-md font-medium text-gray-800 mb-3">{disagreement.topic}</h4>
         <p className="text-sm text-gray-600 mb-6">{disagreement.description}</p>
 
         {/* SVG Venn Diagram */}
@@ -185,9 +186,7 @@ const AgreementVennDiagram = ({
                     className="inline-block w-4 h-4 rounded-full"
                     style={{ backgroundColor: color.stroke }}
                   />
-                  <h5 className={`font-medium ${color.text}`}>
-                    {position.stance}
-                  </h5>
+                  <h5 className={`font-medium ${color.text}`}>{position.stance}</h5>
                   <span className="ml-auto text-xs text-gray-500">
                     {position.participants.length} participant(s)
                   </span>
@@ -197,8 +196,7 @@ const AgreementVennDiagram = ({
                   <div className="text-xs text-gray-600 space-y-1 mt-2 pt-2 border-t border-gray-200">
                     {position.underlyingValue && (
                       <p>
-                        <span className="font-medium">Core value:</span>{' '}
-                        {position.underlyingValue}
+                        <span className="font-medium">Core value:</span> {position.underlyingValue}
                       </p>
                     )}
                     {position.underlyingAssumption && (
@@ -217,9 +215,7 @@ const AgreementVennDiagram = ({
         {/* Moral foundations if available */}
         {disagreement.moralFoundations && disagreement.moralFoundations.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-xs font-medium text-gray-700 mb-2">
-              Relevant Moral Foundations:
-            </p>
+            <p className="text-xs font-medium text-gray-700 mb-2">Relevant Moral Foundations:</p>
             <div className="flex flex-wrap gap-2">
               {disagreement.moralFoundations.map((foundation) => (
                 <span
@@ -238,8 +234,8 @@ const AgreementVennDiagram = ({
       <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-xs text-blue-800">
           <span className="font-medium">Note:</span> Circle size represents the number of
-          participants holding each position. Overlapping areas suggest potential for
-          finding common ground through dialogue.
+          participants holding each position. Overlapping areas suggest potential for finding common
+          ground through dialogue.
         </p>
       </div>
     </div>

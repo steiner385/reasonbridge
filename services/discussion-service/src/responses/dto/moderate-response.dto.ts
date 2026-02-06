@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * DTO for moderating (hiding/removing) a response
  */
 export class ModerateResponseDto {

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Orientation Page Component
  *
  * Displays the orientation overlay for new users after topic selection.

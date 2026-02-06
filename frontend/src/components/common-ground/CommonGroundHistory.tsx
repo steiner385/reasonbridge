@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useCommonGroundHistory } from '../../lib/useCommonGroundHistory';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import type { CommonGround } from '../../types/commonGround';
@@ -11,10 +16,7 @@ export interface CommonGroundHistoryProps {
  * Displays the history of common ground analyses for a topic,
  * showing changes over time as the discussion evolves.
  */
-export function CommonGroundHistory({
-  topicId,
-  onVersionSelect,
-}: CommonGroundHistoryProps) {
+export function CommonGroundHistory({ topicId, onVersionSelect }: CommonGroundHistoryProps) {
   const { data: history, isLoading, error } = useCommonGroundHistory(topicId);
 
   if (isLoading) {
@@ -51,9 +53,7 @@ export function CommonGroundHistory({
         <CardHeader title="Common Ground History" />
         <CardBody>
           <div className="flex items-center justify-center py-8">
-            <div className="text-sm text-gray-500">
-              No common ground analysis available yet.
-            </div>
+            <div className="text-sm text-gray-500">No common ground analysis available yet.</div>
           </div>
         </CardBody>
       </Card>
@@ -120,9 +120,7 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900">
-            Version {item.version}
-          </span>
+          <span className="text-sm font-semibold text-gray-900">Version {item.version}</span>
           {isLatest && (
             <span className="px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 rounded-full">
               Latest
@@ -141,9 +139,7 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
         </div>
         <div className="flex items-center gap-2">
           <div className="text-xs text-gray-500">Responses:</div>
-          <div className="text-sm font-medium text-gray-900">
-            {item.responseCountAtGeneration}
-          </div>
+          <div className="text-sm font-medium text-gray-900">{item.responseCountAtGeneration}</div>
         </div>
       </div>
 
@@ -165,13 +161,15 @@ function HistoryItem({ item, isLatest, onClick }: HistoryItemProps) {
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
             <span className="text-gray-600">
-              {item.misunderstandings.length} misunderstanding{item.misunderstandings.length === 1 ? '' : 's'}
+              {item.misunderstandings.length} misunderstanding
+              {item.misunderstandings.length === 1 ? '' : 's'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-red-500"></div>
             <span className="text-gray-600">
-              {item.genuineDisagreements.length} disagreement{item.genuineDisagreements.length === 1 ? '' : 's'}
+              {item.genuineDisagreements.length} disagreement
+              {item.genuineDisagreements.length === 1 ? '' : 's'}
             </span>
           </div>
         </div>

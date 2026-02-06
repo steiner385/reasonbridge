@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Trust Score Badge Component
  * Displays user's overall trust score and dimensional breakdown
  * Based on Mayer's ABI Model: Ability, Benevolence, Integrity
@@ -57,7 +62,7 @@ const calculateTrustScores = (user: User): TrustScores => {
  * Get color classes based on trust level
  */
 const getTrustLevelColor = (
-  level: 'very_low' | 'low' | 'medium' | 'high' | 'very_high'
+  level: 'very_low' | 'low' | 'medium' | 'high' | 'very_high',
 ): {
   bg: string;
   text: string;
@@ -106,7 +111,9 @@ const getTrustLevelColor = (
 /**
  * Get human-readable label for trust level
  */
-const getTrustLevelLabel = (level: 'very_low' | 'low' | 'medium' | 'high' | 'very_high'): string => {
+const getTrustLevelLabel = (
+  level: 'very_low' | 'low' | 'medium' | 'high' | 'very_high',
+): string => {
   const labels: Record<string, string> = {
     very_high: 'Very High Trust',
     high: 'High Trust',
@@ -121,7 +128,7 @@ const getTrustLevelLabel = (level: 'very_low' | 'low' | 'medium' | 'high' | 'ver
  * Get verification badge color
  */
 const getVerificationColor = (
-  level: VerificationLevel
+  level: VerificationLevel,
 ): {
   bg: string;
   text: string;
@@ -183,11 +190,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
 
   // Full badge with details
   const sizeClasses =
-    size === 'sm'
-      ? 'p-3 text-sm'
-      : size === 'lg'
-        ? 'p-6 text-base'
-        : 'p-4 text-sm';
+    size === 'sm' ? 'p-3 text-sm' : size === 'lg' ? 'p-6 text-base' : 'p-4 text-sm';
 
   return (
     <div
@@ -237,10 +240,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
             <span>Ability</span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 bg-gray-300 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500"
-                  style={{ width: `${scores.ability}%` }}
-                />
+                <div className="h-full bg-blue-500" style={{ width: `${scores.ability}%` }} />
               </div>
               <span className="font-semibold w-10 text-right">{scores.ability}%</span>
             </div>
@@ -249,10 +249,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
             <span>Benevolence</span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 bg-gray-300 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-green-500"
-                  style={{ width: `${scores.benevolence}%` }}
-                />
+                <div className="h-full bg-green-500" style={{ width: `${scores.benevolence}%` }} />
               </div>
               <span className="font-semibold w-10 text-right">{scores.benevolence}%</span>
             </div>
@@ -261,10 +258,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
             <span>Integrity</span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 bg-gray-300 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-500"
-                  style={{ width: `${scores.integrity}%` }}
-                />
+                <div className="h-full bg-purple-500" style={{ width: `${scores.integrity}%` }} />
               </div>
               <span className="font-semibold w-10 text-right">{scores.integrity}%</span>
             </div>

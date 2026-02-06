@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Skeleton component constants and style mappings
  * @module components/ui/Skeleton/constants
  */

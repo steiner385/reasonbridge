@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * DTOs for demo credential hints endpoint
  *
  * Provides credential hints for demo personas without exposing actual passwords.

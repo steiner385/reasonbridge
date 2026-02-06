@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Moderation Queue View Component
  *
  * Displays a comprehensive queue of pending moderation actions with:

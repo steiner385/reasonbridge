@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * SkeletonAvatar component for circular avatar placeholders
  * @module components/ui/Skeleton/SkeletonAvatar
  */

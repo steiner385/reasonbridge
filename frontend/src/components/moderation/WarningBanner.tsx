@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * WarningBanner - Display user warnings and moderation alerts
  *
  * Shows moderation warnings and other alerts to users with appropriate

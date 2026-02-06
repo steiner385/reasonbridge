@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { default as AlignmentInput } from './AlignmentInput';
 export type { AlignmentInputProps, AlignmentStance } from './AlignmentInput';
 export { default as AlignmentSummary } from './AlignmentSummary';

@@ -1,0 +1,49 @@
+#!/bin/bash
+# Pre-commit hook: Check staged TypeScript files for SPDX license headers
+# Exit 0 = pass, Exit 1 = fail (block commit)
+
+# Source colors if available
+if [ -f .husky/colors.sh ]; then
+  source .husky/colors.sh
+fi
+
+# Get staged TypeScript files (excluding tests, node_modules, dist)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' | grep -v node_modules | grep -v dist | grep -v test | grep -v spec || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  # No staged TypeScript files, pass
+  exit 0
+fi
+
+MISSING_HEADER=0
+MISSING_FILES=""
+
+for FILE in $STAGED_FILES; do
+  if [ -f "$FILE" ]; then
+    if ! grep -q "SPDX-License-Identifier: Apache-2.0" "$FILE"; then
+      MISSING_HEADER=1
+      MISSING_FILES="${MISSING_FILES}  - $FILE\n"
+    fi
+  fi
+done
+
+if [ $MISSING_HEADER -eq 1 ]; then
+  echo ""
+  echo "❌ ERROR: Missing SPDX license headers in the following files:"
+  echo ""
+  echo -e "$MISSING_FILES"
+  echo ""
+  echo "Add this header at the top of each file:"
+  echo ""
+  echo "/**"
+  echo " * Copyright 2025 Tony Stein"
+  echo " * SPDX-License-Identifier: Apache-2.0"
+  echo " */"
+  echo ""
+  echo "To add headers automatically, run:"
+  echo "  ./scripts/add-license-headers.sh"
+  echo ""
+  exit 1
+fi
+
+exit 0

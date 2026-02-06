@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T015 [P] - Structured Logging Utility (Feature 009)
  *
  * Purpose: Consistent logging for discussion operations with correlation IDs

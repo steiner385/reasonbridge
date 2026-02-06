@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Discussion service event definitions
  */
 
@@ -39,8 +44,10 @@ export interface ResponseCreatedPayload {
 /**
  * Event published when a new response is created in a discussion
  */
-export interface ResponseCreatedEvent
-  extends BaseEvent<typeof DISCUSSION_EVENT_TYPES.RESPONSE_CREATED, ResponseCreatedPayload> {
+export interface ResponseCreatedEvent extends BaseEvent<
+  typeof DISCUSSION_EVENT_TYPES.RESPONSE_CREATED,
+  ResponseCreatedPayload
+> {
   type: typeof DISCUSSION_EVENT_TYPES.RESPONSE_CREATED;
 }
 
@@ -72,11 +79,10 @@ export interface TopicParticipantJoinedPayload {
 /**
  * Event published when a user joins a discussion topic
  */
-export interface TopicParticipantJoinedEvent
-  extends BaseEvent<
-    typeof DISCUSSION_EVENT_TYPES.TOPIC_PARTICIPANT_JOINED,
-    TopicParticipantJoinedPayload
-  > {
+export interface TopicParticipantJoinedEvent extends BaseEvent<
+  typeof DISCUSSION_EVENT_TYPES.TOPIC_PARTICIPANT_JOINED,
+  TopicParticipantJoinedPayload
+> {
   type: typeof DISCUSSION_EVENT_TYPES.TOPIC_PARTICIPANT_JOINED;
 }
 

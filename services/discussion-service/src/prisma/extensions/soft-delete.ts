@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T013 [P] - Prisma Client Extensions for Soft Delete (Feature 009)
  *
  * Purpose: Conditional soft delete logic for responses

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T028 [P] [US1] - Create Discussion Form Component (Feature 009)
  * T032 [US1] - Form validation for discussion creation
  *

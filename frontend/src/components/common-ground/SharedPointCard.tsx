@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Proposition } from '../../types/common-ground';
 
 export interface SharedPointCardProps {
@@ -205,9 +210,7 @@ const SharedPointCard = ({
             </div>
           )}
           {showSupportingCount && (
-            <div className="ml-auto text-gray-500">
-              {totalParticipants} total
-            </div>
+            <div className="ml-auto text-gray-500">{totalParticipants} total</div>
           )}
         </div>
       )}

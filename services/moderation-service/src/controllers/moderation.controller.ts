@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Body, Controller, Post, Get, BadRequestException, Param, Query } from '@nestjs/common';
 import type { ScreeningResult } from '../services/content-screening.service.js';
 import { ContentScreeningService } from '../services/content-screening.service.js';
@@ -46,13 +51,9 @@ export class ModerationController {
   ) {}
 
   @Post('screen')
-  async screenContent(
-    @Body() request: ScreenContentRequest,
-  ): Promise<ScreenContentResponse> {
+  async screenContent(@Body() request: ScreenContentRequest): Promise<ScreenContentResponse> {
     if (!request.contentId || !request.content) {
-      throw new BadRequestException(
-        'contentId and content are required fields',
-      );
+      throw new BadRequestException('contentId and content are required fields');
     }
 
     if (request.content.trim().length === 0) {
@@ -68,9 +69,7 @@ export class ModerationController {
       request.content,
     );
 
-    const recommendations = this.screeningService.getRecommendations(
-      screening_result,
-    );
+    const recommendations = this.screeningService.getRecommendations(screening_result);
 
     return {
       screening_result,
@@ -84,9 +83,7 @@ export class ModerationController {
   ): Promise<AiRecommendationResponse> {
     // Validate required fields
     if (!request.targetType || !request.targetId || !request.actionType) {
-      throw new BadRequestException(
-        'targetType, targetId, and actionType are required',
-      );
+      throw new BadRequestException('targetType, targetId, and actionType are required');
     }
 
     if (request.reasoning === undefined || request.reasoning.trim().length === 0) {
@@ -104,17 +101,13 @@ export class ModerationController {
     // Validate actionType is valid
     const validActions = ['educate', 'warn', 'hide', 'remove', 'suspend', 'ban'];
     if (!validActions.includes(request.actionType.toLowerCase())) {
-      throw new BadRequestException(
-        `actionType must be one of: ${validActions.join(', ')}`,
-      );
+      throw new BadRequestException(`actionType must be one of: ${validActions.join(', ')}`);
     }
 
     // Validate targetType is valid
     const validTargets = ['response', 'user', 'topic'];
     if (!validTargets.includes(request.targetType.toLowerCase())) {
-      throw new BadRequestException(
-        `targetType must be one of: ${validTargets.join(', ')}`,
-      );
+      throw new BadRequestException(`targetType must be one of: ${validTargets.join(', ')}`);
     }
 
     return this.aiReviewService.submitAiRecommendation(request);
@@ -124,8 +117,7 @@ export class ModerationController {
   async getPendingRecommendations(): Promise<{
     recommendations: AiRecommendationResponse[];
   }> {
-    const recommendations =
-      await this.aiReviewService.getPendingRecommendations(20);
+    const recommendations = await this.aiReviewService.getPendingRecommendations(20);
     return { recommendations };
   }
 
@@ -147,39 +139,22 @@ export class ModerationController {
     @Query('limit') limit: number = 20,
     @Query('cursor') cursor?: string,
   ): Promise<ListActionsResponse> {
-    const targetTypeEnum = targetType?.toUpperCase() as
-      | 'RESPONSE'
-      | 'USER'
-      | 'TOPIC'
-      | undefined;
+    const targetTypeEnum = targetType?.toUpperCase() as 'RESPONSE' | 'USER' | 'TOPIC' | undefined;
     const statusEnum = status?.toUpperCase() as
       | 'PENDING'
       | 'ACTIVE'
       | 'APPEALED'
       | 'REVERSED'
       | undefined;
-    const severityEnum = severity?.toUpperCase() as
-      | 'NON_PUNITIVE'
-      | 'CONSEQUENTIAL'
-      | undefined;
+    const severityEnum = severity?.toUpperCase() as 'NON_PUNITIVE' | 'CONSEQUENTIAL' | undefined;
 
-    return this.actionsService.listActions(
-      targetTypeEnum,
-      statusEnum,
-      severityEnum,
-      limit,
-      cursor,
-    );
+    return this.actionsService.listActions(targetTypeEnum, statusEnum, severityEnum, limit, cursor);
   }
 
   @Post('actions')
-  async createAction(
-    @Body() request: CreateActionRequest,
-  ): Promise<ModerationActionResponse> {
+  async createAction(@Body() request: CreateActionRequest): Promise<ModerationActionResponse> {
     if (!request.targetType || !request.targetId || !request.actionType) {
-      throw new BadRequestException(
-        'targetType, targetId, and actionType are required',
-      );
+      throw new BadRequestException('targetType, targetId, and actionType are required');
     }
 
     if (!request.reasoning || request.reasoning.trim().length === 0) {
@@ -193,9 +168,7 @@ export class ModerationController {
   }
 
   @Get('actions/:actionId')
-  async getAction(
-    @Param('actionId') actionId: string,
-  ): Promise<ModerationActionDetailResponse> {
+  async getAction(@Param('actionId') actionId: string): Promise<ModerationActionDetailResponse> {
     return this.actionsService.getAction(actionId);
   }
 
@@ -329,9 +302,7 @@ export class ModerationController {
   }
 
   @Get('bans/user/:userId/status')
-  async getUserBanStatus(
-    @Param('userId') userId: string,
-  ): Promise<UserBanStatusResponse> {
+  async getUserBanStatus(@Param('userId') userId: string): Promise<UserBanStatusResponse> {
     if (!userId || !userId.trim()) {
       throw new BadRequestException('userId is required');
     }

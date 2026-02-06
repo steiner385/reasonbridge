@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Demo Common Ground Analysis Definitions
  *
  * Defines 21 common ground analyses across topics.

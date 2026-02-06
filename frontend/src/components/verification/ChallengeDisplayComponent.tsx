@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Challenge Display Component
  * Displays video verification challenges to users
  * Shows different UI based on challenge type (phrase, gesture, or timestamp)
@@ -75,9 +80,7 @@ const ChallengeDisplayComponent: React.FC<ChallengeDisplayComponentProps> = ({
             {challenge.randomValue && (
               <div className="p-4 bg-green-50 border-2 border-green-300 rounded-lg">
                 <p className="text-sm text-gray-600 mb-2">Action to perform:</p>
-                <p className="text-lg font-bold text-green-700">
-                  {challenge.randomValue}
-                </p>
+                <p className="text-lg font-bold text-green-700">{challenge.randomValue}</p>
               </div>
             )}
             <div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
@@ -120,16 +123,12 @@ const ChallengeDisplayComponent: React.FC<ChallengeDisplayComponentProps> = ({
   };
 
   return (
-    <Card
-      className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
-    >
+    <Card className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
       <div className="space-y-4">
         {/* Challenge Header */}
         <div className="flex items-center gap-3">
           <span className="text-4xl">{getChallengeIcon()}</span>
-          <h3 className="text-2xl font-bold text-gray-900">
-            {getChallengeTitle()}
-          </h3>
+          <h3 className="text-2xl font-bold text-gray-900">{getChallengeTitle()}</h3>
         </div>
 
         {/* Challenge Content */}
@@ -137,9 +136,7 @@ const ChallengeDisplayComponent: React.FC<ChallengeDisplayComponentProps> = ({
 
         {/* General Instructions */}
         <div className="mt-6 pt-4 border-t border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">
-            Recording Instructions
-          </h4>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">Recording Instructions</h4>
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
               <span className="text-blue-600 font-bold mt-0.5">1</span>

@@ -1,4 +1,18 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Param, NotFoundException } from '@nestjs/common';
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  Param,
+  NotFoundException,
+} from '@nestjs/common';
 import { SuggestionsService } from '../services/suggestions.service.js';
 import { TagSuggestionsRequestDto, TagSuggestionsResponseDto } from './dto/tag-suggestions.dto.js';
 import {

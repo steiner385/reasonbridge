@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
 import {

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Base Skeleton component for loading placeholders
  * @module components/ui/Skeleton/Skeleton
  */

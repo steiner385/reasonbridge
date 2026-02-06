@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * FlagContentButton - Button to open the flag content modal
  *
  * A simple button that triggers the content flagging workflow.

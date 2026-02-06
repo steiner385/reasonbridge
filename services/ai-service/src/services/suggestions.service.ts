@@ -1,10 +1,18 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable } from '@nestjs/common';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
 import {
   TopicLinkSuggester,
   type TopicLinkSuggestionResult,
 } from '../synthesizers/topic-link.suggester.js';
-import { BridgingSuggester, type BridgingSuggestionResult } from '../synthesizers/bridging.suggester.js';
+import {
+  BridgingSuggester,
+  type BridgingSuggestionResult,
+} from '../synthesizers/bridging.suggester.js';
 
 /**
  * Suggestion result from synthesizers

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import type {
   DivergencePoint,
@@ -100,9 +105,7 @@ export class DivergencePointService {
    * @param proposition - Proposition with alignment data
    * @returns DivergencePoint if divergence is found, null otherwise
    */
-  private analyzePropositionDivergence(
-    proposition: PropositionAlignment,
-  ): DivergencePoint | null {
+  private analyzePropositionDivergence(proposition: PropositionAlignment): DivergencePoint | null {
     const totalParticipants =
       proposition.supportCount + proposition.opposeCount + proposition.nuancedCount;
 

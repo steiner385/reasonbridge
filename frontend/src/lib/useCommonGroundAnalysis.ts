@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from './api';
 import type { CommonGroundAnalysis } from '../types/common-ground';
@@ -12,7 +17,9 @@ export function useCommonGroundAnalysis(topicId: string | undefined) {
       if (!topicId) {
         throw new Error('Topic ID is required');
       }
-      const response = await apiClient.get<CommonGroundAnalysis>(`/topics/${topicId}/common-ground-analysis`);
+      const response = await apiClient.get<CommonGroundAnalysis>(
+        `/topics/${topicId}/common-ground-analysis`,
+      );
       return response;
     },
     enabled: !!topicId,

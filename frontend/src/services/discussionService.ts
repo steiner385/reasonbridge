@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Discussion API service for Feature 009
  * Handles discussion creation, listing, and retrieval
  */

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T010 [P] - SSRF Validation Utility (Feature 009)
  *
  * Purpose: Multi-layer defense against Server-Side Request Forgery attacks

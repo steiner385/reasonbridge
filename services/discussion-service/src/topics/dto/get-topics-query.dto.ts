@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Type } from 'class-transformer';
 import { IsOptional, IsInt, Min, Max, IsEnum, IsString, IsUUID } from 'class-validator';
 

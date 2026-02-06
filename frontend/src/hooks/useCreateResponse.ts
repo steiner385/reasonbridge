@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T046 [US2] - TanStack Query hook for response creation (Feature 009)
  *
  * Provides mutation for posting responses with:

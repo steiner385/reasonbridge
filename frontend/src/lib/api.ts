@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * API Client Wrapper with Authentication
  *
  * Provides a centralized HTTP client for making authenticated requests

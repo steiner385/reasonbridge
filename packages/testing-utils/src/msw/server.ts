@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * MSW Server Configuration for Node.js Test Environment
  *
  * This module provides the MSW server setup for API mocking in tests.

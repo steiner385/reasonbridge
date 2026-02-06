@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Verification Page
  * Main page for managing user verification and trust indicators
  */
@@ -61,9 +66,7 @@ export const VerificationPage: React.FC = () => {
                   <h4 className="font-semibold text-gray-900 group-hover:text-blue-600">
                     Phone Verification
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Verify with SMS confirmation
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Verify with SMS confirmation</p>
                 </button>
 
                 <button
@@ -74,9 +77,7 @@ export const VerificationPage: React.FC = () => {
                   <h4 className="font-semibold text-gray-900 group-hover:text-blue-600">
                     Government ID
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Upload ID document
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Upload ID document</p>
                 </button>
 
                 <button
@@ -87,19 +88,13 @@ export const VerificationPage: React.FC = () => {
                   <h4 className="font-semibold text-gray-900 group-hover:text-blue-600">
                     Video Verification
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Record verification video
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Record verification video</p>
                 </button>
 
                 <div className="p-4 border-2 border-gray-200 rounded-lg opacity-50 cursor-not-allowed">
                   <div className="text-2xl mb-2">🧪</div>
-                  <h4 className="font-semibold text-gray-900">
-                    Coming Soon
-                  </h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Additional methods
-                  </p>
+                  <h4 className="font-semibold text-gray-900">Coming Soon</h4>
+                  <p className="text-sm text-gray-600 mt-1">Additional methods</p>
                 </div>
               </div>
             </div>
@@ -133,9 +128,12 @@ export const VerificationPage: React.FC = () => {
               ← Back to Overview
             </button>
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Government ID Verification</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Government ID Verification
+              </h3>
               <p className="text-gray-600 mb-4">
-                This verification method is not yet available. Please check back soon or try another method.
+                This verification method is not yet available. Please check back soon or try another
+                method.
               </p>
             </div>
           </div>
@@ -153,7 +151,8 @@ export const VerificationPage: React.FC = () => {
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Video Verification</h3>
               <p className="text-gray-600 mb-4">
-                This verification method is not yet available. Please check back soon or try another method.
+                This verification method is not yet available. Please check back soon or try another
+                method.
               </p>
             </div>
           </div>

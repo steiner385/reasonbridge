@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T044 [P] [US2] - Response Item Component (Feature 009)
  *
  * Displays an individual response with:

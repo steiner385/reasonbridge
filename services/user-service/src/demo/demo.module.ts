@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Module } from '@nestjs/common';
 import { DemoController } from './demo.controller.js';
 import { DemoService } from './demo.service.js';

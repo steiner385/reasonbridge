@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Library exports for TanStack Query setup and API client
  */
 export { queryClient } from './queryClient';

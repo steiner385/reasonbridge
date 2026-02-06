@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Moderation Action Buttons Component
  *
  * Provides interactive approve/reject buttons for moderation actions with:

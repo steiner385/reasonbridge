@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Queue configuration for moderation service
  * Provides environment-based configuration for AWS SNS/SQS integration
  */

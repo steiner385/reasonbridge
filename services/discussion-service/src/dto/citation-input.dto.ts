@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T020 [P] [US1] - Citation Input DTO (Feature 009)
  *
  * Validates and normalizes citation URLs for responses and discussions

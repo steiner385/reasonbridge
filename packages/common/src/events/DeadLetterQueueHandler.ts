@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Dead Letter Queue (DLQ) handler for processing failed messages.
  *
  * This module provides functionality for:

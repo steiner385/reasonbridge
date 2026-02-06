@@ -1,6 +1,6 @@
 # ReasonBridge
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-green.svg)
 ![pnpm Version](https://img.shields.io/badge/pnpm-%3E%3D9.0.0-blue.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
@@ -275,6 +275,29 @@ We welcome contributions! Please follow these guidelines:
 
 Direct pushes to `main` are blocked by git hooks. All changes must go through pull requests.
 
+## Defensive Publications
+
+To protect our innovations from patent trolling and support the open civic technology ecosystem, we've published white papers documenting our key technical approaches:
+
+1. **[Polarization Measurement and Multi-Axis Common Ground Synthesis](docs/white-papers/01-polarization-common-ground/paper.md)** - Draft complete, pending arXiv submission
+   - First application of Gini impurity to viewpoint polarization
+   - Tri-modal taxonomy: agreement, misunderstanding, and genuine disagreement
+   - Consensus scoring normalization for cross-context comparison
+
+2. **[Moral Foundations Theory Operationalization](docs/white-papers/README.md)** - Planned for Week 2
+   - Computational implementation of Haidt's Moral Foundations Theory
+   - Argument translation across moral foundations
+   - Bridging suggestions for cross-ideological communication
+
+3. **[Pattern-Based Bot Detection and Trust Scoring](docs/white-papers/README.md)** - Planned for Week 3
+   - Multi-factor bot detection without machine learning
+   - Mayer's ABI trust model for individual users
+   - Hierarchical proposition clustering
+
+These publications establish **prior art**, preventing others from patenting these approaches. All white papers are licensed under **CC BY 4.0** (code remains Apache 2.0).
+
+See [docs/white-papers/README.md](docs/white-papers/README.md) for full details.
+
 ## Additional Documentation
 
 - **[Architecture Guide](./docs/ARCHITECTURE.md)** - System architecture, microservices, resilience patterns
@@ -285,7 +308,11 @@ Direct pushes to `main` are blocked by git hooks. All changes must go through pu
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+### Patent Grant
+
+Apache 2.0 includes an express patent grant, protecting contributors and users from patent litigation. By contributing to this project, you grant a patent license for your contributions as specified in the Apache 2.0 license.
 
 ## Support
 

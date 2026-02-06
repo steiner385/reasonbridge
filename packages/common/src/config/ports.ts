@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Single Source of Truth for Service Ports
  *
  * This file defines all service ports for the ReasonBridge platform.

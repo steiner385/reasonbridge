@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Database seeding script for test fixtures
  *
  * Creates deterministic test data for E2E and integration tests.

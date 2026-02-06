@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T035 [P] [US2] - Create Response DTO (Feature 009)
  *
  * Validates response creation requests for discussions

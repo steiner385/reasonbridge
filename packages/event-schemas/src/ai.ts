@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * AI service event definitions
  */
 
@@ -63,8 +68,10 @@ export interface ResponseAnalyzedPayload {
 /**
  * Event published when AI completes analysis of a response
  */
-export interface ResponseAnalyzedEvent
-  extends BaseEvent<typeof AI_EVENT_TYPES.RESPONSE_ANALYZED, ResponseAnalyzedPayload> {
+export interface ResponseAnalyzedEvent extends BaseEvent<
+  typeof AI_EVENT_TYPES.RESPONSE_ANALYZED,
+  ResponseAnalyzedPayload
+> {
   type: typeof AI_EVENT_TYPES.RESPONSE_ANALYZED;
 }
 
@@ -143,8 +150,10 @@ export interface CommonGroundGeneratedPayload {
 /**
  * Event published when common ground analysis is generated
  */
-export interface CommonGroundGeneratedEvent
-  extends BaseEvent<typeof AI_EVENT_TYPES.COMMON_GROUND_GENERATED, CommonGroundGeneratedPayload> {
+export interface CommonGroundGeneratedEvent extends BaseEvent<
+  typeof AI_EVENT_TYPES.COMMON_GROUND_GENERATED,
+  CommonGroundGeneratedPayload
+> {
   type: typeof AI_EVENT_TYPES.COMMON_GROUND_GENERATED;
 }
 
@@ -205,8 +214,10 @@ export interface CommonGroundUpdatedPayload {
 /**
  * Event published when a new version of common ground analysis is generated
  */
-export interface CommonGroundUpdatedEvent
-  extends BaseEvent<typeof AI_EVENT_TYPES.COMMON_GROUND_UPDATED, CommonGroundUpdatedPayload> {
+export interface CommonGroundUpdatedEvent extends BaseEvent<
+  typeof AI_EVENT_TYPES.COMMON_GROUND_UPDATED,
+  CommonGroundUpdatedPayload
+> {
   type: typeof AI_EVENT_TYPES.COMMON_GROUND_UPDATED;
 }
 

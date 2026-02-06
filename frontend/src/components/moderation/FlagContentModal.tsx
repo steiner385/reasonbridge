@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * FlagContentModal - Modal for reporting inappropriate content
  *
  * Provides a form where users can report content with specific reasons,

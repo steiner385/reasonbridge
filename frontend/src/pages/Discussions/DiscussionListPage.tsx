@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T027 [P] [US1] - Discussion List Page (Feature 009)
  *
  * Main page for viewing discussions within a topic

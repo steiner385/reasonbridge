@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useParams, Link } from 'react-router-dom';
 import { useState, useCallback, useEffect } from 'react';
 import { useTopic } from '../../lib/useTopic';

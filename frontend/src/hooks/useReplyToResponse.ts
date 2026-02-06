@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * T062 [US3] - TanStack Query hook for reply posting (Feature 009)
  *
  * Provides mutation for posting threaded replies with:

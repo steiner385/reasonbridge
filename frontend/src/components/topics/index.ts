@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { default as TopicCard } from './TopicCard';
 export type { TopicCardProps } from './TopicCard';
 
