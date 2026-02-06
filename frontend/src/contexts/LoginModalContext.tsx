@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -214,7 +219,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
                   >
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{cred.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{cred.email}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-300">{cred.email}</p>
                     </div>
                     <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded">
                       {cred.role}
@@ -222,14 +227,14 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
                   </button>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+              <p className="mt-3 text-xs text-gray-500 dark:text-gray-300 text-center">
                 Click a demo account to auto-fill credentials
               </p>
             </div>
 
             {/* Sign up link */}
             <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Don't have an account?{' '}
                 <button
                   type="button"

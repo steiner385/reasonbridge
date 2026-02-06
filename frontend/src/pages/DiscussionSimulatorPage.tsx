@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState } from 'react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -170,7 +175,7 @@ export const DiscussionSimulatorPage: React.FC = () => {
         <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Discussion Simulator
         </h1>
-        <p className="text-fluid-base text-gray-600 dark:text-gray-400">
+        <p className="text-fluid-base text-gray-600 dark:text-gray-300">
           Generate AI-driven discussions between different viewpoints to explore topics and test
           arguments.
         </p>
@@ -259,10 +264,10 @@ export const DiscussionSimulatorPage: React.FC = () => {
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                         {positions.positionA.label}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         {positions.positionA.summary}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
                         Suggested persona: {positions.positionA.suggestedPersona}
                       </p>
                     </div>
@@ -286,10 +291,10 @@ export const DiscussionSimulatorPage: React.FC = () => {
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                         {positions.positionB.label}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         {positions.positionB.summary}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
                         Suggested persona: {positions.positionB.suggestedPersona}
                       </p>
                     </div>
@@ -380,7 +385,7 @@ export const DiscussionSimulatorPage: React.FC = () => {
                   onChange={(e) => setReceptiveness(parseFloat(e.target.value))}
                   className="w-full accent-primary-600"
                 />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-300 mt-1">
                   <span>Closed-minded</span>
                   <span>Very open</span>
                 </div>
@@ -491,7 +496,7 @@ export const DiscussionSimulatorPage: React.FC = () => {
             </div>
 
             {discussionHistory.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+              <p className="text-sm text-gray-500 dark:text-gray-300 text-center py-8">
                 No messages yet. Generate responses to build a discussion.
               </p>
             ) : (

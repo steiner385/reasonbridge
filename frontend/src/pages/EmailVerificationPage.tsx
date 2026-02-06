@@ -173,7 +173,7 @@ export const EmailVerificationPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Verify Your Email
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-300">
             We sent a 6-digit code to your email address. Enter it below to continue.
           </p>
         </div>
@@ -242,7 +242,7 @@ export const EmailVerificationPage: React.FC = () => {
 
           {/* Resend Link */}
           <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
               Didn't receive the code?
             </p>
             <button
@@ -267,7 +267,7 @@ export const EmailVerificationPage: React.FC = () => {
               authService.logout();
               navigate('/', { replace: true });
             }}
-            className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:underline"
+            className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none focus:underline"
           >
             ← Back to Home
           </button>

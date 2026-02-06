@@ -17,7 +17,7 @@ This project uses **Jenkins** as the primary CI server, triggered directly via *
 ### GitHub Webhook → Jenkins
 
 - **Events**: Push, Pull Request
-- **Branches**: 
+- **Branches**:
   - **Main branch**: All pushes trigger a build
   - **Pull requests**: All PR updates trigger a build
   - **Feature branches**: Builds are skipped (no CI triggered)

@@ -26,7 +26,7 @@ export const options = {
   thresholds: getThresholds({
     'group_duration{group:::Browse Topics}': ['p(95)<2000'],
     'group_duration{group:::User Session}': ['p(95)<5000'],
-    'http_req_failed': ['rate<0.05'], // Allow 5% failure for full journey
+    http_req_failed: ['rate<0.05'], // Allow 5% failure for full journey
   }),
 };
 
@@ -70,9 +70,12 @@ export default function () {
 
     // View responses on the topic
     if (topicId) {
-      const responsesRes = http.get(`${config.baseUrl}/api/topics/${topicId}/responses?page=1&limit=20`, {
-        tags: { name: 'journey-responses-list' },
-      });
+      const responsesRes = http.get(
+        `${config.baseUrl}/api/topics/${topicId}/responses?page=1&limit=20`,
+        {
+          tags: { name: 'journey-responses-list' },
+        },
+      );
 
       check(responsesRes, {
         'responses loaded': (r) => r.status === 200 || r.status === 404,

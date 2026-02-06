@@ -125,8 +125,8 @@ export const AuthCallbackPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Authentication Failed
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to home page...</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-300">Redirecting to home page...</p>
             <button
               onClick={() => navigate('/', { replace: true })}
               className="mt-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium focus:outline-none focus:underline"
@@ -163,7 +163,7 @@ export const AuthCallbackPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Completing Sign In
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-300">
               Please wait while we set up your account...
             </p>
           </div>

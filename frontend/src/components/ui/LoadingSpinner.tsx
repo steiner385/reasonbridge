@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export interface LoadingSpinnerProps {
   /**
    * Size of the spinner
@@ -103,7 +108,7 @@ function LoadingSpinner({
     >
       {spinnerElement}
       {label && (
-        <span className="text-sm text-gray-600 dark:text-gray-400" aria-live="polite">
+        <span className="text-sm text-gray-600 dark:text-gray-300" aria-live="polite">
           {label}
         </span>
       )}

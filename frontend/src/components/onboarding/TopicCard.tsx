@@ -150,7 +150,7 @@ export const TopicCard: React.FC<TopicCardProps> = ({
       </h3>
 
       {/* Topic Description */}
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{topic.description}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{topic.description}</p>
 
       {/* Activity Badge and Stats */}
       <div className="flex items-center justify-between">
@@ -161,7 +161,7 @@ export const TopicCard: React.FC<TopicCardProps> = ({
           {activityBadge.text}
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-300">
           <span className="flex items-center gap-1" title="Active discussions">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path

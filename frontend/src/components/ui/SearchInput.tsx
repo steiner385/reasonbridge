@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { forwardRef, type InputHTMLAttributes } from 'react';
 
 export interface SearchInputProps extends Omit<
@@ -98,7 +103,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         {/* Search Icon */}
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg
-            className="h-5 w-5 text-gray-400 dark:text-gray-500"
+            className="h-5 w-5 text-gray-400 dark:text-gray-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -139,7 +144,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           {isLoading ? (
             <svg
-              className="h-5 w-5 text-gray-400 dark:text-gray-500 animate-spin"
+              className="h-5 w-5 text-gray-400 dark:text-gray-300 animate-spin"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -163,7 +168,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label="Clear search"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

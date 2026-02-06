@@ -54,7 +54,7 @@ function TopicsPage() {
         <Card variant="elevated" padding="lg">
           <div className="text-center text-fallacy-DEFAULT dark:text-red-400">
             <h2 className="text-xl font-semibold mb-2">Error Loading Topics</h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-300">
               {error instanceof Error ? error.message : 'Failed to load topics'}
             </p>
           </div>
@@ -69,7 +69,7 @@ function TopicsPage() {
         <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Discussion Topics
         </h1>
-        <p className="text-fluid-base text-gray-600 dark:text-gray-400">
+        <p className="text-fluid-base text-gray-600 dark:text-gray-300">
           Browse and join rational discussions on various topics
         </p>
       </div>
@@ -136,7 +136,7 @@ function TopicsPage() {
           {data.data.length === 0 ? (
             <div className="mb-6">
               <Card variant="elevated" padding="lg">
-                <div className="text-center text-gray-600 dark:text-gray-400">
+                <div className="text-center text-gray-600 dark:text-gray-300">
                   <p className="text-lg">No topics found</p>
                   <p className="text-sm mt-2">Try adjusting your filters</p>
                 </div>
@@ -154,7 +154,7 @@ function TopicsPage() {
           {data.meta && data.meta.totalPages > 1 && (
             <Card padding="md">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   Showing {(data.meta.page - 1) * data.meta.limit + 1} to{' '}
                   {Math.min(data.meta.page * data.meta.limit, data.meta.total)} of {data.meta.total}{' '}
                   topics

@@ -21,7 +21,7 @@ export const Step1PropositionBased: React.FC = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-3">
           Welcome to Proposition-Based Discussions
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400">
+        <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
           Discussions are built from individual propositions. Vote on each one to show your
           perspective.
         </p>
@@ -54,7 +54,7 @@ export const Step1PropositionBased: React.FC = () => {
                 <p className="text-gray-800 font-medium">
                   Public transit infrastructure must improve before implementing car bans
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">
                   73% Agreement
                 </p>
               </div>
@@ -82,7 +82,7 @@ export const Step1PropositionBased: React.FC = () => {
                 <p className="text-gray-800 font-medium">
                   A hard deadline creates urgency but may be unrealistic for some regions
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">
                   Mixed Views (45% Agreement)
                 </p>
               </div>
@@ -106,7 +106,7 @@ export const Step1PropositionBased: React.FC = () => {
                 <p className="text-gray-800 font-medium">
                   Electric vehicle incentives should increase to accelerate adoption
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">
                   62% Agreement
                 </p>
               </div>
@@ -133,7 +133,7 @@ export const Step2AIFeedback: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-3">AI-Powered Discussion Insights</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400">
+        <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
           Our AI analyzes discussions to find areas of agreement and highlight diverse viewpoints.
         </p>
       </div>
@@ -238,7 +238,7 @@ export const Step3CommonGround: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-3">Finding Common Ground Together</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 dark:text-gray-400">
+        <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
           See what percentage of participants agree, and explore the spectrum of opinions.
         </p>
       </div>
@@ -260,7 +260,7 @@ export const Step3CommonGround: React.FC = () => {
               <div className="absolute top-0 left-[70%] w-1 h-full bg-gray-800 opacity-30"></div>
               <div className="absolute top-0 left-[85%] w-1 h-full bg-gray-800 opacity-30"></div>
             </div>
-            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-2">
+            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-2">
               <span>Strongly Disagree</span>
               <span>Neutral</span>
               <span>Strongly Agree</span>
@@ -320,7 +320,7 @@ export const Step3CommonGround: React.FC = () => {
                 </div>
               </div>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-4">
               <span className="font-semibold">Common Ground Found:</span> 73% of participants agree
               or strongly agree on this proposition.
             </p>

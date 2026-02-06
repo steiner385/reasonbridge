@@ -39,7 +39,7 @@ function ProfilePage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Unable to Load Profile
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 {error instanceof Error
                   ? error.message
                   : 'An error occurred while loading your profile.'}
@@ -63,7 +63,7 @@ function ProfilePage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Not Logged In
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Please log in to view your profile.
               </p>
               <Link to="/">
@@ -101,12 +101,12 @@ function ProfilePage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {user.displayName}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
+              <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-300">
                   Verification Level
                 </p>
                 <p
@@ -126,11 +126,11 @@ function ProfilePage() {
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-300">Status</p>
                 <p className="text-lg text-gray-900 dark:text-gray-100">{user.status}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Member Since</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-300">Member Since</p>
                 <p className="text-lg text-gray-900 dark:text-gray-100">
                   {formatDate(user.createdAt)}
                 </p>
@@ -217,7 +217,7 @@ function ProfilePage() {
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {user.topicCount}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Topics</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Topics</p>
                 </div>
               )}
               {user.responseCount !== undefined && (
@@ -225,7 +225,7 @@ function ProfilePage() {
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {user.responseCount}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Responses</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Responses</p>
                 </div>
               )}
               {user.followerCount !== undefined && (
@@ -233,7 +233,7 @@ function ProfilePage() {
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {user.followerCount}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Followers</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Followers</p>
                 </div>
               )}
               {user.followingCount !== undefined && (
@@ -241,7 +241,7 @@ function ProfilePage() {
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {user.followingCount}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Following</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Following</p>
                 </div>
               )}
             </div>
@@ -261,7 +261,7 @@ function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-gray-100">Log Out</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Sign out of your account</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Sign out of your account</p>
               </div>
               <Button variant="danger" onClick={handleLogout}>
                 Log Out
@@ -270,7 +270,7 @@ function ProfilePage() {
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-gray-100">Settings</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Manage your account preferences
                 </p>
               </div>

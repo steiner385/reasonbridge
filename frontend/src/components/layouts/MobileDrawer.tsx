@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
@@ -184,7 +189,7 @@ export function MobileDrawer({ unreadCount = 0 }: MobileDrawerProps) {
                 <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                   {user.displayName}
                 </p>
-                <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                <p className="truncate text-xs text-gray-500 dark:text-gray-300">{user.email}</p>
               </div>
             </Link>
           </div>

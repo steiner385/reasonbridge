@@ -20,6 +20,7 @@ if (env.CHANGE_ID || env.BRANCH_NAME == 'main') {
 ```
 
 **Behavior**:
+
 - ✅ All PRs run full CI
 - ✅ Main branch runs full CI
 - ✅ All other branches skip CI completely
@@ -63,12 +64,14 @@ git push origin main
 1. Go to: https://github.com/steiner385/reasonbridge-jenkins-lib/edit/main/vars/reasonbridgeMultibranchPipeline.groovy
 
 2. Find line 17 and change:
+
    ```groovy
    - *   - E2E Tests: End-to-end browser tests with Playwright - 301 tests (all branches except staging/*)
    + *   - E2E Tests: End-to-end browser tests with Playwright - 301 tests (PRs and main branch)
    ```
 
 3. Find lines 217-224 and replace:
+
    ```groovy
    stage('E2E Environment') {
        when {
@@ -80,8 +83,9 @@ git push origin main
        }
        options {
    ```
-   
+
    With:
+
    ```groovy
    stage('E2E Environment') {
        // No 'when' clause - E2E runs for all builds that reach this pipeline
@@ -108,11 +112,11 @@ git push origin main
 
 After applying the jenkins-lib changes:
 
-| Branch Type | Lint | Unit | Integration | E2E | Overall CI |
-|-------------|------|------|-------------|-----|------------|
-| Pull Requests | ✅ | ✅ | ✅ | ✅ **NEW** | ✅ |
-| Main branch | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Other branches | ❌ | ❌ | ❌ | ❌ | ❌ Skipped |
+| Branch Type    | Lint | Unit | Integration | E2E        | Overall CI |
+| -------------- | ---- | ---- | ----------- | ---------- | ---------- |
+| Pull Requests  | ✅   | ✅   | ✅          | ✅ **NEW** | ✅         |
+| Main branch    | ✅   | ✅   | ✅          | ✅         | ✅         |
+| Other branches | ❌   | ❌   | ❌          | ❌         | ❌ Skipped |
 
 ## Rollback Plan
 
@@ -127,7 +131,9 @@ git push origin main
 ## Patch File Location
 
 The complete patch is saved at:
+
 - `/tmp/reasonbridge-jenkins-lib/0001-Enable-E2E-tests-for-all-PRs-and-main-branch.patch`
 
 You can also view the diff at:
+
 - `/tmp/reasonbridge-jenkins-lib` (git diff HEAD^)

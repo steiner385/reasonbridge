@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export interface ProgressBarProps {
   /**
    * Current progress value (0-100)
@@ -107,7 +112,7 @@ function ProgressBar({
             {label || `${Math.round(percentage)}%`}
           </span>
           {showLabel && !label && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-gray-500 dark:text-gray-300">
               {clampedValue} / {max}
             </span>
           )}

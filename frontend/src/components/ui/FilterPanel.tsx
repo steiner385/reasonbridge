@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useState, type ReactNode } from 'react';
 import Button from './Button';
 
@@ -89,7 +94,7 @@ function FilterPanel({
         {/* Mobile toggle button */}
         <button
           onClick={toggleOpen}
-          className="md:hidden text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          className="md:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           aria-label={isOpen ? 'Hide filters' : 'Show filters'}
           aria-expanded={isOpen}
         >

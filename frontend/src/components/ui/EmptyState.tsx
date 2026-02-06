@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { ReactNode } from 'react';
 import Button from './Button';
 import Card from './Card';
@@ -88,7 +93,7 @@ function EmptyState({
       <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
         {icon || (
           <svg
-            className="h-8 w-8 text-gray-400 dark:text-gray-500"
+            className="h-8 w-8 text-gray-400 dark:text-gray-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -108,7 +113,7 @@ function EmptyState({
       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
 
       {/* Message */}
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">{message}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">{message}</p>
 
       {/* Action Button */}
       {showAction && onAction && (

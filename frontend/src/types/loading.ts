@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Loading state types for asynchronous operations
  * Tracks API calls, AI analysis, and other async operations
  */

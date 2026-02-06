@@ -59,7 +59,7 @@ export const SignupPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Create Your Account
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-300">
             Join the discussion platform to participate in thoughtful conversations
           </p>
         </div>
@@ -74,7 +74,7 @@ export const SignupPage: React.FC = () => {
 
           {/* Footer Links */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Already have an account?{' '}
               <button
                 onClick={() => navigate('/')}
@@ -87,7 +87,7 @@ export const SignupPage: React.FC = () => {
 
           {/* Terms and Privacy */}
           <div className="mt-4 text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-300">
               By creating an account, you agree to our{' '}
               <a
                 href="/terms"
@@ -114,7 +114,7 @@ export const SignupPage: React.FC = () => {
         <div className="mt-4 text-center">
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:underline"
+            className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none focus:underline"
           >
             ← Back to Home
           </button>

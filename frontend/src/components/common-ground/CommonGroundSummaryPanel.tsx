@@ -109,7 +109,7 @@ const CommonGroundSummaryPanel = ({
           </h2>
           <div className="flex items-center gap-3">
             {showLastUpdated && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-gray-500 dark:text-gray-300">
                 Last updated: {new Date(analysis.lastUpdated).toLocaleString()}
               </span>
             )}
@@ -142,7 +142,7 @@ const CommonGroundSummaryPanel = ({
             <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {analysis.participantCount}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Participants</div>
+            <div className="text-xs text-gray-500 dark:text-gray-300">Participants</div>
           </div>
         </div>
       </div>
@@ -254,7 +254,7 @@ const CommonGroundSummaryPanel = ({
                   {misunderstanding.definitions.map((def, idx) => (
                     <div key={idx} className="text-sm bg-white dark:bg-gray-800 rounded p-2">
                       <p className="text-gray-800 dark:text-gray-200 mb-1">{def.definition}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-300">
                         Used by {def.participants.length} participant(s)
                       </p>
                     </div>
@@ -263,7 +263,7 @@ const CommonGroundSummaryPanel = ({
 
                 {misunderstanding.clarificationSuggestion && (
                   <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-700">
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
                       <span className="font-medium">Suggestion:</span>{' '}
                       {misunderstanding.clarificationSuggestion}
                     </p>
@@ -341,7 +341,7 @@ const CommonGroundSummaryPanel = ({
                           )}
                         </div>
                       )}
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
                         {position.participants.length} participant(s)
                       </p>
                     </div>
@@ -393,7 +393,7 @@ const CommonGroundSummaryPanel = ({
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
             No Analysis Available
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-300">
             Common ground analysis will appear here once the discussion has enough participants and
             content to analyze.
           </p>

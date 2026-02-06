@@ -43,7 +43,9 @@ describe('DivergencePointService', () => {
       expect(result.participantCount).toBe(10);
 
       const divergence = result.divergencePoints[0]!;
-      expect(divergence.proposition).toBe('Climate change requires immediate government intervention');
+      expect(divergence.proposition).toBe(
+        'Climate change requires immediate government intervention',
+      );
       expect(divergence.propositionId).toBe('prop-1');
       expect(divergence.viewpoints.length).toBe(2);
       expect(divergence.totalParticipants).toBe(10);

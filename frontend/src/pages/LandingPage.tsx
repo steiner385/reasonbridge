@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
@@ -175,7 +180,7 @@ export const LandingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                   AI-Guided Insight
                 </h4>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-300">
                   Our AI analyzes discussions in real-time to identify common ground, highlight
                   agreement, and suggest productive paths forward
                 </p>
@@ -202,7 +207,7 @@ export const LandingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                   Diverse Perspectives
                 </h4>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-300">
                   Engage with people across the political spectrum in structured, proposition-based
                   discussions that encourage understanding
                 </p>
@@ -229,7 +234,7 @@ export const LandingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                   Proven Results
                 </h4>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-300">
                   70%+ of discussions find meaningful common ground. Join thousands discovering
                   shared values across differences
                 </p>
@@ -245,7 +250,7 @@ export const LandingPage: React.FC = () => {
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                 Current Discussions
               </h3>
-              <p className="text-xl text-gray-600 dark:text-gray-400">
+              <p className="text-xl text-gray-600 dark:text-gray-300">
                 Explore active conversations on topics that matter
               </p>
             </div>
@@ -265,7 +270,7 @@ export const LandingPage: React.FC = () => {
 
             {!loading && !error && topics.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-600 dark:text-gray-400">No topics available yet</p>
+                <p className="text-gray-600 dark:text-gray-300">No topics available yet</p>
               </div>
             )}
 
@@ -277,7 +282,7 @@ export const LandingPage: React.FC = () => {
                     className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-gray-500 dark:text-gray-300">
                         {formatDate(topic.createdAt)}
                       </span>
                       <span className="px-2 py-1 text-xs font-medium text-primary-800 bg-primary-100 dark:text-primary-200 dark:bg-primary-900/50 rounded">
@@ -287,10 +292,10 @@ export const LandingPage: React.FC = () => {
                     <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                       {topic.title}
                     </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
                       {topic.description}
                     </p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-300 mb-4">
                       <span>{topic.participantCount} participants</span>
                       <span>•</span>
                       <span>{topic.responseCount} responses</span>
@@ -372,7 +377,7 @@ export const LandingPage: React.FC = () => {
             >
               Join to Participate
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               Create a free account to join discussions, share your perspective, and discover common
               ground with others.
             </p>
@@ -391,7 +396,7 @@ export const LandingPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowJoinModal(false)}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none"
               >
                 Continue Browsing
               </button>

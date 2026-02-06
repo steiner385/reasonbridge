@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Onboarding progress types for interactive tour
  * Tracks user progress through onboarding tour
  */

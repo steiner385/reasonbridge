@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Verification Page
  * Main page for managing user verification and trust indicators
  */
@@ -116,7 +121,7 @@ export const VerificationPage: React.FC = () => {
                   <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     Phone Verification
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Verify with SMS confirmation
                   </p>
                 </button>
@@ -129,7 +134,7 @@ export const VerificationPage: React.FC = () => {
                   <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     Government ID
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Upload ID document
                   </p>
                 </button>
@@ -142,7 +147,7 @@ export const VerificationPage: React.FC = () => {
                   <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     Video Verification
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Record verification video
                   </p>
                 </button>
@@ -150,7 +155,7 @@ export const VerificationPage: React.FC = () => {
                 <div className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg opacity-50 cursor-not-allowed">
                   <div className="text-2xl mb-2">🧪</div>
                   <h4 className="font-semibold text-gray-900 dark:text-white">Coming Soon</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Additional methods
                   </p>
                 </div>
@@ -189,7 +194,7 @@ export const VerificationPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Government ID Verification
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 This verification method is not yet available. Please check back soon or try another
                 method.
               </p>
@@ -210,7 +215,7 @@ export const VerificationPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Video Verification
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 This verification method is not yet available. Please check back soon or try another
                 method.
               </p>
@@ -230,7 +235,7 @@ export const VerificationPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Account Verification
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-300">
           Verify your identity to unlock trust badges and enhanced features in discussions.
         </p>
       </div>

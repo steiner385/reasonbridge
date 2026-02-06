@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
@@ -18,7 +23,7 @@ export function SettingsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           Manage your account preferences and application settings
         </p>
       </div>
@@ -127,7 +132,7 @@ export function SettingsPage() {
                   </span>
                 </button>
               </div>
-              <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-3 text-sm text-gray-500 dark:text-gray-300">
                 {mode === 'auto' ? 'Theme follows your system preference' : `Using ${mode} mode`}
               </p>
             </div>

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useState } from 'react';
 
 export interface Tag {
@@ -122,7 +127,7 @@ function TagFilter({
 
             {/* Count (if provided) */}
             {tag.count !== undefined && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">({tag.count})</span>
+              <span className="text-xs text-gray-500 dark:text-gray-300">({tag.count})</span>
             )}
           </label>
         ))}

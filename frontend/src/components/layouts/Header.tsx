@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Link } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobileViewport } from '../../hooks/useMediaQuery';

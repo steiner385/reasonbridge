@@ -128,8 +128,12 @@ function searchTopics() {
 
 export function handleSummary(data) {
   const totalRequests = data.metrics.http_reqs ? data.metrics.http_reqs.values.count : 0;
-  const failedRequests = data.metrics.http_req_failed ? data.metrics.http_req_failed.values.passes : 0;
-  const avgDuration = data.metrics.http_req_duration ? data.metrics.http_req_duration.values.avg : 0;
+  const failedRequests = data.metrics.http_req_failed
+    ? data.metrics.http_req_failed.values.passes
+    : 0;
+  const avgDuration = data.metrics.http_req_duration
+    ? data.metrics.http_req_duration.values.avg
+    : 0;
 
   console.log('\n=== Soak Test Summary ===');
   console.log(`Total Requests: ${totalRequests}`);

@@ -70,7 +70,7 @@ function RegistrationForm({
     <Card variant="default" padding="lg" className={className}>
       <CardHeader>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Account</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
           Join the discussion platform to participate in thoughtful conversations
         </p>
       </CardHeader>
@@ -144,7 +144,7 @@ function RegistrationForm({
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
 
-          <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-center text-gray-600 dark:text-gray-300">
             Already have an account?{' '}
             <a
               href="/"

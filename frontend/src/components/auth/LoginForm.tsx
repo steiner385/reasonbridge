@@ -66,7 +66,7 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
     <Card variant="default" padding="lg" className={className}>
       <CardHeader>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Sign In</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
           Welcome back! Sign in to continue participating in discussions
         </p>
       </CardHeader>
@@ -109,7 +109,7 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
                 type="checkbox"
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded"
               />
-              <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+              <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Remember me</span>
             </label>
             <Link
               to="/forgot-password"
@@ -130,7 +130,7 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
 
-          <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-center text-gray-600 dark:text-gray-300">
             Don't have an account?{' '}
             <Link
               to="/register"
