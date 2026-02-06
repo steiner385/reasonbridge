@@ -236,14 +236,28 @@ test.describe('Dark Mode Accessibility', () => {
     await page.emulateMedia({ colorScheme: 'light' });
 
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Open login modal
     await page.click('button:has-text("Log In")');
+
+    // Wait for dialog to be visible
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+
+    // Select demo user
     await page.click('button:has-text("Admin Adams")');
+    await page.waitForTimeout(300); // Allow form to update
 
     // Submit login form
-    const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: /^log in$/i }).click();
 
-    await page.waitForURL('/topics?welcome=true');
+    // Wait for redirect to topics page
+    await page.waitForURL('/topics?welcome=true', { timeout: 10000 });
+
+    // Wait for page to fully render before scanning
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow dynamic content to render
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
