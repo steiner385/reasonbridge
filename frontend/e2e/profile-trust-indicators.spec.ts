@@ -54,8 +54,14 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for registration to complete
-    await page.waitForLoadState('networkidle', { timeout: 20000 });
+    // Wait for navigation away from /register page (indicates success)
+    // Use waitForURL with regex to detect URL change (away from /register)
+    try {
+      await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
+    } catch (e) {
+      // If navigation didn't happen, check for error messages
+      // (This is now a true failure, not a timeout waiting for networkidle)
+    }
 
     // Check if still on registration page (indicates failure)
     if (page.url().includes('/register')) {
