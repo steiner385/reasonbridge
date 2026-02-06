@@ -361,6 +361,301 @@ const { register, handleSubmit, formState: { errors } } = useForm({
    - Forbidden imports check
    - Linting and formatting (via lint-staged)
 
+## Implementation Patterns
+
+### Responsive Layout Pattern
+
+The discussion page implements a **three-panel responsive layout** that adapts across devices:
+
+**Pattern**: Grid-based layout with breakpoint-specific behavior
+
+```tsx
+// Desktop: All 3 panels visible side-by-side
+// Tablet: Center + right panels, left panel as overlay
+// Mobile: Center panel only, right panel content moved to accordions
+
+<DiscussionLayout
+  leftPanel={<TopicNavigation />}
+  centerPanel={<ConversationThread />}
+  rightPanel={<Metadata />}
+/>
+```
+
+**Key Components**:
+
+- `DiscussionLayout.tsx` (src/components/discussion-layout/) - Responsive container with breakpoint logic
+- `useBreakpoint.ts` (src/hooks/) - Debounced viewport width detection (mobile <768px, tablet 768-1279px, desktop ≥1280px)
+
+**Accessibility**:
+
+- WCAG 2.1 AA compliant (44px minimum touch targets on mobile)
+- ARIA attributes for overlays, panels, and interactive elements
+- Keyboard navigation (Escape key to close overlays)
+
+### Virtual Scrolling with react-window v2
+
+For handling 500+ items at 60fps, use react-window v2's `List` component:
+
+**Pattern**: Render only visible items + overscan buffer
+
+```tsx
+import { List } from 'react-window';
+
+const Row = useMemo(
+  () =>
+    ({
+      index,
+      style,
+      ariaAttributes,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: {
+        'aria-posinset': number;
+        'aria-setsize': number;
+        role: 'listitem';
+      };
+    }) => (
+      <div style={style} {...ariaAttributes}>
+        <YourItemComponent item={items[index]} />
+      </div>
+    ),
+  [items],
+);
+
+<List<{}> // Explicit generic type for empty rowProps
+  defaultHeight={600}
+  rowCount={items.length}
+  rowHeight={80}
+  overscanCount={5}
+  rowComponent={Row}
+  rowProps={{}} // Required in v2, pass {} if no custom props
+/>;
+```
+
+**react-window v2 API Changes**:
+
+- `FixedSizeList` → `List` (new unified component)
+- Props: `height` → `defaultHeight`, `itemCount` → `rowCount`, `itemSize` → `rowHeight`
+- Render pattern: children render function → `rowComponent` prop
+- `rowProps` is **required** (pass `{}` if no custom props)
+- `ariaAttributes` auto-injected (spread onto row container for accessibility)
+
+**Bundle Impact**: react-window adds only 5.65 KB gzipped (well within performance budget)
+
+### Real-Time Updates with WebSocket
+
+Pattern for subscribing to real-time events:
+
+**Hook**: `useWebSocket.ts` (src/hooks/) - Connection management, reconnection, heartbeat
+
+```tsx
+const { state, isConnected, subscribe } = useWebSocket({
+  autoConnect: true,
+  autoReconnect: true,
+  reconnectDelay: 3000,
+  maxReconnectAttempts: 5,
+});
+
+useEffect(() => {
+  // Subscribe to message types
+  const unsubscribe = subscribe('NEW_RESPONSE', (message) => {
+    // Update UI with new response
+    refetch(); // Trigger react-query refetch
+  });
+  return unsubscribe;
+}, [subscribe, refetch]);
+```
+
+**WebSocket Message Types**:
+
+- `NEW_RESPONSE` - New response posted
+- `COMMON_GROUND_UPDATE` - AI analysis completed
+- `TOPIC_STATUS_CHANGE` - Topic archived/active status change
+- `RESPONSE_DELETED`, `RESPONSE_UPDATED` - Content modifications
+
+**Type Safety**: Use type guards for union message types
+
+```tsx
+subscribe('TOPIC_STATUS_CHANGE', (message) => {
+  // Add type guard to narrow union type
+  if (message.type === 'TOPIC_STATUS_CHANGE' && message.payload.topicId === topic.id) {
+    // TypeScript now knows message.payload structure
+    setTopicStatus(message.payload.newStatus);
+  }
+});
+```
+
+### State Management with React Query
+
+Pattern for server state management:
+
+**Hook Structure**: `useTopics.ts`, `useResponses.ts` (src/hooks/)
+
+```tsx
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+export function useResponses(discussionId: string, options = {}) {
+  const queryClient = useQueryClient();
+
+  // Query with cache key
+  const query = useQuery({
+    queryKey: ['responses', discussionId],
+    queryFn: () => discussionService.getResponses(discussionId),
+    staleTime: 30000, // 30 seconds
+  });
+
+  // Optimistic updates with rollback
+  const createMutation = useMutation({
+    mutationFn: discussionService.createResponse,
+    onMutate: async (newResponse) => {
+      await queryClient.cancelQueries(['responses', discussionId]);
+      const previousData = queryClient.getQueryData(['responses', discussionId]);
+
+      // Optimistic update
+      queryClient.setQueryData(['responses', discussionId], (old) => [
+        ...old,
+        { ...newResponse, id: 'temp-id' },
+      ]);
+
+      return { previousData }; // Rollback context
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      queryClient.setQueryData(['responses', discussionId], context.previousData);
+    },
+    onSuccess: () => {
+      // Invalidate to refetch with real data
+      queryClient.invalidateQueries(['responses', discussionId]);
+    },
+  });
+
+  return { ...query, createResponse: createMutation.mutate };
+}
+```
+
+### URL-Based Navigation
+
+Pattern for client-side navigation without page reloads:
+
+**Hook**: `useTopicNavigation.ts` (src/hooks/)
+
+```tsx
+const { activeTopicId, navigateToTopic, clearTopic } = useTopicNavigation();
+
+// URL pattern: /discussions?topic=<topicId>
+// Updates URL and syncs with React state
+navigateToTopic('topic-123'); // Updates ?topic= param
+```
+
+**Benefits**:
+
+- Browser back/forward work correctly
+- Direct links to specific topics
+- No full page reloads (SPA experience)
+- State synced with URL via `useSearchParams`
+
+### Component Documentation with TSDoc
+
+All new components and hooks include comprehensive TSDoc comments:
+
+**Pattern**:
+
+````tsx
+/**
+ * Brief one-line description
+ *
+ * @remarks
+ * Detailed explanation with:
+ * - **Key Features**: Bullet list of main capabilities
+ * - **Desktop/Tablet/Mobile**: Responsive behavior breakdown
+ * - **Performance**: Optimization notes (virtual scrolling, etc.)
+ *
+ * @param props - Component props
+ * @returns Rendered component
+ *
+ * @example
+ * ```tsx
+ * <DiscussionPage discussionId="disc-123" />
+ * ```
+ */
+````
+
+**Where to Document**:
+
+- Major components: Pages, layouts, complex widgets
+- Custom hooks: State management, data fetching, utilities
+- Shared utilities: Helper functions used across multiple files
+
+**What to Include**:
+
+- Purpose and use case
+- Responsive behavior if applicable
+- Performance characteristics (virtual scrolling, memoization)
+- Integration points (WebSocket, React Query, etc.)
+- Example usage
+
+### TypeScript Strict Mode Practices
+
+**Environment Variables**: Use bracket notation for index signatures
+
+```tsx
+// ❌ Incorrect
+const host = import.meta.env.VITE_WS_HOST;
+
+// ✅ Correct (TypeScript strict mode)
+const host = import.meta.env['VITE_WS_HOST'];
+```
+
+**Unused Variables**: Prefix with underscore if destructured but unused
+
+```tsx
+const { itemHeight, overscanCount: _overscanCount = 3 } = config;
+```
+
+**Union Type Narrowing**: Always use type guards
+
+```tsx
+// For discriminated unions
+if (message.type === 'NEW_RESPONSE') {
+  // TypeScript narrows message.payload type
+  console.log(message.payload.responseId);
+}
+```
+
+### Cross-Panel Interactions
+
+Pattern for coordinating state across multiple panels:
+
+**Approach**: Lift state to common ancestor (DiscussionPage.tsx)
+
+```tsx
+function DiscussionPage() {
+  const [highlightedResponseIds, setHighlightedResponseIds] = useState<Set<string>>(new Set());
+
+  return (
+    <DiscussionLayout
+      leftPanel={<TopicNav />}
+      centerPanel={<ConversationThread highlightedResponseIds={highlightedResponseIds} />}
+      rightPanel={
+        <PropositionList
+          onPropositionClick={(responseIds) => {
+            // Highlight responses in center panel
+            setHighlightedResponseIds(new Set(responseIds));
+          }}
+        />
+      }
+    />
+  );
+}
+```
+
+**Use Cases**:
+
+- Proposition → Response highlighting
+- Preview feedback (composer → metadata panel)
+- Topic selection (left panel → center panel)
+
 ## Speckit Workflow
 
 The project uses a structured feature development process through Claude Code slash commands:
@@ -637,6 +932,9 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Active Technologies
 
+- TypeScript 5.7.3 with strict mode enabled + React 18.3.1, React Router 6.x, Tailwind CSS 3.x, react-window 1.x (virtual scrolling), WebSocket client (existing) (001-discussion-page-redesign)
+- Existing PostgreSQL 15 database with Prisma ORM (no schema changes required) (001-discussion-page-redesign)
+
 - TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS (001-ui-ux-enhancement)
 - N/A (frontend-only feature, uses localStorage for client-side state) (001-ui-ux-enhancement)
 
@@ -748,7 +1046,11 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
-- 001-ui-ux-enhancement: Added TypeScript 5.7.3, React 18.3.1, Node.js 20 LTS
-
+- **2026-02-05**: Completed discussion page redesign implementation (Feature 001)
+  - Three-panel responsive layout (desktop/tablet/mobile breakpoints)
+  - Virtual scrolling with react-window v2.2.6 (5.65 KB gzipped)
+  - Real-time updates via WebSocket (new responses, status changes)
+  - Added comprehensive implementation patterns to CLAUDE.md
+  - All Phase 9 polish tasks complete (TSDoc, bundle validation)
 - **2026-02-01**: Consolidated pending PRs into staging branch
 - **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3

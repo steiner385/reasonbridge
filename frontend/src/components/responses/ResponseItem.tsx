@@ -17,13 +17,27 @@
 import { useState } from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import ResponseComposer from './ResponseComposer';
 import type { ResponseDetail } from '../../services/discussionService';
+import type { CreateResponseRequest } from '../../types/response';
 
 export interface ResponseItemProps {
   response: ResponseDetail;
   discussionId: string;
   showReplies?: boolean;
   depth?: number;
+  /** Callback when Reply button is clicked */
+  onReply?: (responseId: string, parentId?: string) => void;
+  /** Callback when inline reply is submitted */
+  onReplySubmit?: (response: CreateResponseRequest) => Promise<void>;
+  /** Callback for preview feedback changes (for right panel) */
+  onPreviewFeedbackChange?: (
+    feedback: any,
+    readyToPost: boolean,
+    summary: string,
+    isLoading?: boolean,
+    error?: string | null,
+  ) => void;
 }
 
 export function ResponseItem({
@@ -31,8 +45,25 @@ export function ResponseItem({
   discussionId,
   showReplies = false,
   depth = 0,
+  onReply,
+  onReplySubmit,
+  onPreviewFeedbackChange,
 }: ResponseItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
+
+  const handleReplyClick = () => {
+    if (onReply) {
+      onReply(response.id, response.parentResponseId || undefined);
+    }
+    setShowReplyForm(!showReplyForm);
+  };
+
+  const handleReplySubmit = async (replyContent: CreateResponseRequest) => {
+    if (onReplySubmit) {
+      await onReplySubmit({ ...replyContent, parentId: response.id });
+      setShowReplyForm(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -121,7 +152,7 @@ export function ResponseItem({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowReplyForm(!showReplyForm)}
+              onClick={handleReplyClick}
               className="text-gray-600 hover:text-blue-600"
             >
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,12 +171,22 @@ export function ResponseItem({
           )}
         </div>
 
-        {/* Reply Form Placeholder (Phase 5) */}
+        {/* Inline Reply Form */}
         {showReplyForm && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">
-              Reply form will be available in Phase 5 (Threaded Replies)
-            </p>
+          <div className="mt-4">
+            <ResponseComposer
+              inline
+              parentId={response.id}
+              placeholder="Write your reply..."
+              minLength={10}
+              maxLength={10000}
+              onSubmit={handleReplySubmit}
+              onCancel={() => setShowReplyForm(false)}
+              showCancel
+              topicId={discussionId}
+              onPreviewFeedbackChange={onPreviewFeedbackChange}
+              showPreviewFeedbackInline={false}
+            />
           </div>
         )}
       </Card>
@@ -160,6 +201,9 @@ export function ResponseItem({
               discussionId={discussionId}
               showReplies={showReplies}
               depth={depth + 1}
+              onReply={onReply}
+              onReplySubmit={onReplySubmit}
+              onPreviewFeedbackChange={onPreviewFeedbackChange}
             />
           ))}
         </div>

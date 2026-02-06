@@ -3,18 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { PreviewFeedbackPanel } from '../feedback';
-import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
+import { FeedbackDisplayPanel, PreviewFeedbackPanel } from '../feedback';
+import { usePreviewFeedback } from '../../hooks/usePreviewFeedback';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import type { CreateResponseRequest } from '../../types/response';
+import type { FeedbackResponse } from '../../types/feedback';
+import { apiClient } from '../../lib/api';
 
 export interface ResponseComposerProps {
   /**
    * Callback when response is submitted
    */
-  onSubmit: (response: CreateResponseRequest) => void | Promise<void>;
+  onSubmit?: (response: CreateResponseRequest) => void | Promise<void>;
 
   /**
    * Optional parent response ID for threading
@@ -55,6 +58,27 @@ export interface ResponseComposerProps {
    * Optional topic ID for preview feedback context
    */
   topicId?: string;
+
+  /**
+   * Inline mode - compact expandable interface (default: false)
+   */
+  inline?: boolean;
+
+  /**
+   * Callback when preview feedback state changes (for right panel display)
+   */
+  onPreviewFeedbackChange?: (
+    feedback: any,
+    readyToPost: boolean,
+    summary: string,
+    isLoading?: boolean,
+    error?: string | null,
+  ) => void;
+
+  /**
+   * Whether to show preview feedback inline (default: true, set false for right panel integration)
+   */
+  showPreviewFeedbackInline?: boolean;
 }
 
 const ResponseComposer: React.FC<ResponseComposerProps> = ({
@@ -67,6 +91,9 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   onCancel,
   showCancel = false,
   topicId,
+  inline = false,
+  onPreviewFeedbackChange,
+  showPreviewFeedbackInline = true,
 }) => {
   const [content, setContent] = useState('');
   const [citedSources, setCitedSources] = useState<string[]>([]);
@@ -74,19 +101,69 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<FeedbackResponse[]>([]);
+  const [isRequestingFeedback, setIsRequestingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(!inline);
+  const [isMobileFullscreen, setIsMobileFullscreen] = useState(false);
 
-  // Hybrid preview feedback integration (regex + AI)
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === 'mobile';
+
+  // Auto-enter fullscreen mode on mobile when expanded
+  useEffect(() => {
+    if (isMobile && isExpanded && !isMobileFullscreen) {
+      setIsMobileFullscreen(true);
+    } else if (!isMobile && isMobileFullscreen) {
+      setIsMobileFullscreen(false);
+    }
+  }, [isMobile, isExpanded, isMobileFullscreen]);
+
+  const handleBackToConversation = () => {
+    setIsMobileFullscreen(false);
+    setIsExpanded(false);
+    if (inline) {
+      // For inline mode, just collapse
+      setIsExpanded(false);
+    }
+  };
+
+  // Real-time preview feedback integration
   const {
     feedback: previewFeedback,
     readyToPost,
     isLoading: isPreviewLoading,
-    isAILoading,
-    isAIFeedback,
     error: previewError,
     summary: previewSummary,
     sensitivity,
     setSensitivity,
-  } = useHybridPreviewFeedback(content, { topicId });
+  } = usePreviewFeedback(content, { topicId });
+
+  // Notify parent of preview feedback changes for right panel display
+  React.useEffect(() => {
+    if (onPreviewFeedbackChange) {
+      if (content.length >= 20) {
+        onPreviewFeedbackChange(
+          previewFeedback,
+          readyToPost,
+          previewSummary,
+          isPreviewLoading,
+          previewError,
+        );
+      } else if (content.length === 0) {
+        // Clear preview when content is empty
+        onPreviewFeedbackChange([], true, '', false, null);
+      }
+    }
+  }, [
+    previewFeedback,
+    readyToPost,
+    previewSummary,
+    isPreviewLoading,
+    previewError,
+    content.length,
+    onPreviewFeedbackChange,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,15 +195,64 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
     }
 
     try {
-      await onSubmit(response);
+      await onSubmit?.(response);
       // Reset form on successful submission
       setContent('');
       setCitedSources([]);
       setCurrentSource('');
       setContainsOpinion(false);
       setContainsFactualClaims(false);
+      setFeedback([]);
+      setFeedbackError(null);
+      // Collapse inline composer after submission
+      if (inline) {
+        setIsExpanded(false);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit response');
+    }
+  };
+
+  const handleCancel = () => {
+    if (inline) {
+      setIsExpanded(false);
+      // Clear content on cancel in inline mode
+      setContent('');
+      setCitedSources([]);
+      setCurrentSource('');
+      setContainsOpinion(false);
+      setContainsFactualClaims(false);
+      setFeedback([]);
+      setFeedbackError(null);
+      setError(null);
+    }
+    onCancel?.();
+  };
+
+  const handleRequestFeedback = async () => {
+    if (content.trim().length < minLength) {
+      setFeedbackError(`Content must be at least ${minLength} characters to request feedback`);
+      return;
+    }
+
+    setIsRequestingFeedback(true);
+    setFeedbackError(null);
+
+    try {
+      // For now, we'll generate a temporary response ID
+      // In a real implementation, this would come from a draft save or the response after submission
+      const tempResponseId = crypto.randomUUID();
+
+      const response = await apiClient.post<FeedbackResponse>('/feedback/request', {
+        responseId: tempResponseId,
+        content: content.trim(),
+      });
+
+      setFeedback([response]);
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : 'Failed to request feedback');
+    } finally {
+      setIsRequestingFeedback(false);
     }
   };
 
@@ -158,12 +284,28 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const characterCount = content.length;
   const isValid = characterCount >= minLength && characterCount <= maxLength;
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+  // Collapsed state for inline mode
+  if (inline && !isExpanded) {
+    return (
+      <button
+        type="button"
+        onClick={() => setIsExpanded(true)}
+        className="w-full text-left px-4 py-2 border border-gray-300 rounded-lg hover:border-primary-500 hover:bg-gray-50 transition-colors text-gray-500 text-sm"
+      >
+        {placeholder}
+      </button>
+    );
+  }
+
+  const formContent = (
+    <form
+      onSubmit={handleSubmit}
+      className={`space-y-4 ${inline && !isMobileFullscreen ? 'bg-gray-50 p-4 rounded-lg border border-gray-200' : ''}`}
+    >
       <div>
         <label
           htmlFor="response-content"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          className="block text-sm font-medium text-gray-700 mb-1.5"
         >
           Your Response
           <span className="text-fallacy-DEFAULT ml-1">*</span>
@@ -173,7 +315,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y min-h-[120px] ${
+          className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y ${inline ? 'min-h-[80px]' : 'min-h-[120px]'} ${
             error
               ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20'
               : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20'
@@ -182,6 +324,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           disabled={isLoading}
           aria-invalid={!!error}
           aria-describedby={error ? 'response-error' : 'character-count'}
+          autoFocus={inline && isExpanded}
         />
         <div className="flex justify-between items-center mt-1.5">
           <span
@@ -190,8 +333,8 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               !isValid && characterCount > 0
                 ? 'text-fallacy-DEFAULT'
                 : characterCount >= maxLength * 0.9
-                  ? 'text-secondary-600 dark:text-secondary-400'
-                  : 'text-gray-500 dark:text-gray-300'
+                  ? 'text-secondary-600'
+                  : 'text-gray-500'
             }`}
           >
             {characterCount} / {maxLength} characters
@@ -199,13 +342,11 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
           </span>
         </div>
 
-        {/* Hybrid Preview Feedback - shows when content >= 20 chars */}
-        {characterCount >= 20 && (
+        {/* Real-time Preview Feedback - shows when content >= 20 chars and showPreviewFeedbackInline is true */}
+        {characterCount >= 20 && showPreviewFeedbackInline && (
           <PreviewFeedbackPanel
             feedback={previewFeedback}
             isLoading={isPreviewLoading}
-            isAILoading={isAILoading}
-            isAIFeedback={isAIFeedback}
             readyToPost={readyToPost}
             summary={previewSummary}
             error={previewError}
@@ -225,10 +366,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
 
       {/* Cited Sources */}
       <div>
-        <label
-          htmlFor="cited-source"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-        >
+        <label htmlFor="cited-source" className="block text-sm font-medium text-gray-700 mb-1.5">
           Cited Sources (Optional)
         </label>
         <div className="flex gap-2">
@@ -299,10 +437,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
             disabled={isLoading}
             className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
           />
-          <label
-            htmlFor="contains-opinion"
-            className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-          >
+          <label htmlFor="contains-opinion" className="ml-2 text-sm text-gray-700">
             This response contains my opinion
           </label>
         </div>
@@ -315,13 +450,34 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
             disabled={isLoading}
             className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
           />
-          <label
-            htmlFor="contains-factual-claims"
-            className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-          >
+          <label htmlFor="contains-factual-claims" className="ml-2 text-sm text-gray-700">
             This response contains factual claims
           </label>
         </div>
+      </div>
+
+      {/* AI Feedback Request */}
+      <div className="border-t pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-700">AI Feedback (Optional)</h3>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleRequestFeedback}
+            isLoading={isRequestingFeedback}
+            disabled={content.trim().length < minLength || isLoading || isRequestingFeedback}
+          >
+            Request Feedback
+          </Button>
+        </div>
+
+        {feedbackError && (
+          <p className="text-sm text-fallacy-DEFAULT mb-2" role="alert">
+            {feedbackError}
+          </p>
+        )}
+
+        <FeedbackDisplayPanel feedback={feedback} title="" showEmptyState={false} />
       </div>
 
       {/* Action Buttons */}
@@ -334,14 +490,59 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
         >
           {parentId ? 'Post Reply' : 'Post Response'}
         </Button>
-        {showCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
-            Cancel
+        {(showCancel || inline) && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={isMobileFullscreen ? handleBackToConversation : handleCancel}
+            disabled={isLoading}
+          >
+            {isMobileFullscreen ? 'Back to Conversation' : 'Cancel'}
           </Button>
         )}
       </div>
     </form>
   );
+
+  // Mobile fullscreen mode: render as fixed overlay
+  if (isMobileFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white flex flex-col">
+        {/* Header with Back Button */}
+        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 flex items-center gap-3 bg-white sticky top-0">
+          <button
+            type="button"
+            onClick={handleBackToConversation}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Back to conversation"
+          >
+            <svg
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {parentId ? 'Reply to Response' : 'New Response'}
+          </h2>
+        </div>
+
+        {/* Scrollable Form Content */}
+        <div className="flex-1 overflow-y-auto p-4">{formContent}</div>
+      </div>
+    );
+  }
+
+  // Desktop/Tablet mode: render normally
+  return formContent;
 };
 
 export default ResponseComposer;
