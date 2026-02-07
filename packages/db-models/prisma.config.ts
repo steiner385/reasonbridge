@@ -10,18 +10,27 @@
  * In Prisma 7, the datasource.url property is no longer supported in schema.prisma.
  * Instead, connection URLs must be configured here using defineConfig.
  *
+ * The datasource configuration is optional - only required for migrate commands.
+ * During build (prisma generate), DATABASE_URL doesn't need to be set.
+ *
  * @see https://www.prisma.io/docs/orm/reference/prisma-config-reference
  * @see https://www.prisma.io/docs/orm/more/upgrade-guides/upgrading-versions/upgrading-to-prisma-7
  */
 
-import { defineConfig, env } from 'prisma/config';
+import { defineConfig } from 'prisma/config';
 
-export default defineConfig({
+const config: any = {
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
   },
-  datasource: {
-    url: env('DATABASE_URL'),
-  },
-});
+};
+
+// Only add datasource if DATABASE_URL is available (e.g., during migrations)
+if (process.env.DATABASE_URL) {
+  config.datasource = {
+    url: process.env.DATABASE_URL,
+  };
+}
+
+export default defineConfig(config);
