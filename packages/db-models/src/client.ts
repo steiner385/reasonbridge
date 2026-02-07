@@ -15,7 +15,7 @@
  * We use @prisma/adapter-pg for PostgreSQL.
  */
 
-import { PrismaClient } from './generated/client';
+import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
