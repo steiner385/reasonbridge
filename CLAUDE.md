@@ -873,6 +873,27 @@ npx playwright show-report
 - Use `page.screenshot()` to capture state at specific points
 - Review trace files if `trace: 'on-first-retry'` is configured
 
+**E2E Login Wait Pattern:**
+
+When tests perform login via modal and navigate to authenticated pages, always use the 3-line wait pattern to ensure authentication state stabilizes:
+
+```typescript
+// Wait for login to complete and modal to close
+await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+
+// Wait for navigation and authentication state to stabilize
+await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+await page.waitForLoadState('networkidle');
+await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+```
+
+**Why this pattern:**
+1. `waitForURL` - Ensures navigation completed
+2. `waitForLoadState('networkidle')` - Waits for all network requests (including `/users/me` profile fetch)
+3. `waitForTimeout(200)` - Allows async localStorage token writes and React state propagation via `setTimeout(..., 0)`
+
+**Reference**: user-registration-login-flow.spec.ts:135-139
+
 **CI/CD E2E Configuration:**
 
 The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E tests:
