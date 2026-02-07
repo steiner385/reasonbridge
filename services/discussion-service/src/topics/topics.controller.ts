@@ -14,6 +14,7 @@ import {
   Res,
   UseGuards,
   Request,
+  Headers,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { FastifyReply as Response } from 'fastify';
@@ -62,10 +63,11 @@ export class TopicsController {
   // @UseGuards(JwtAuthGuard, ModeratorGuard)
   async mergeTopics(
     @Body() mergeDto: MergeTopicsDto,
+    @Headers('x-user-id') userIdHeader: string | undefined,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // TODO: Extract userId and validate moderator role once auth is integrated
-    const userId = req.user?.id || req.userId;
+    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
+    const userId = userIdHeader || req.user?.id || req.userId;
     const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
 
     if (!userId) {
@@ -92,11 +94,11 @@ export class TopicsController {
   // @UseGuards(JwtAuthGuard)
   async createTopic(
     @Body() createTopicDto: CreateTopicDto,
+    @Headers('x-user-id') userIdHeader: string | undefined,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // TODO: Extract userId from authenticated request once auth is integrated
-    // For now, userId should be passed in request context by auth middleware
-    const userId = req.user?.id || req.userId;
+    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
+    const userId = userIdHeader || req.user?.id || req.userId;
 
     if (!userId) {
       throw new Error('User ID not found in request. Authentication required.');
@@ -118,10 +120,11 @@ export class TopicsController {
   async updateTopicStatus(
     @Param('id') id: string,
     @Body() updateStatusDto: UpdateTopicStatusDto,
+    @Headers('x-user-id') userIdHeader: string | undefined,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // TODO: Extract userId and isModerator from authenticated request once auth is integrated
-    const userId = req.user?.id || req.userId;
+    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
+    const userId = userIdHeader || req.user?.id || req.userId;
     const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
 
     if (!userId) {
@@ -145,10 +148,11 @@ export class TopicsController {
   async updateTopic(
     @Param('id') id: string,
     @Body() updateTopicDto: UpdateTopicDto,
+    @Headers('x-user-id') userIdHeader: string | undefined,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // TODO: Extract userId and isModerator from authenticated request once auth is integrated
-    const userId = req.user?.id || req.userId;
+    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
+    const userId = userIdHeader || req.user?.id || req.userId;
     const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
 
     if (!userId) {

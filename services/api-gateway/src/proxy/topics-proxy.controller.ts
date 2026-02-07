@@ -135,13 +135,17 @@ export class TopicsProxyController {
   async createTopic(
     @Body() body: Record<string, any>,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'POST',
       path: '/topics',
       body,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);
@@ -152,13 +156,17 @@ export class TopicsProxyController {
     @Param('id') id: string,
     @Body() body: Record<string, any>,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'PATCH',
       path: `/topics/${id}`,
       body,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);
@@ -168,12 +176,16 @@ export class TopicsProxyController {
   async deleteTopic(
     @Param('id') id: string,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'DELETE',
       path: `/topics/${id}`,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);
@@ -184,13 +196,17 @@ export class TopicsProxyController {
     @Param('id') id: string,
     @Body() body: Record<string, any>,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'POST',
       path: `/topics/${id}/responses`,
       body,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);

@@ -12,6 +12,7 @@ import { ProxyModule } from './proxy/proxy.module.js';
 import { MetricsModule } from './metrics/metrics.module.js';
 import { ResilienceModule } from './resilience/resilience.module.js';
 import { CorrelationMiddleware } from './middleware/correlation.middleware.js';
+import { JwtUserMiddleware } from './middleware/jwt-user.middleware.js';
 
 @Module({
   imports: [
@@ -58,9 +59,10 @@ import { CorrelationMiddleware } from './middleware/correlation.middleware.js';
 export class AppModule implements NestModule {
   /**
    * Configure global middleware
-   * Correlation ID middleware runs on all routes
+   * - Correlation ID middleware: Generates request IDs for tracing
+   * - JWT User middleware: Extracts user ID from JWT for downstream services
    */
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(CorrelationMiddleware).forRoutes('*');
+    consumer.apply(CorrelationMiddleware, JwtUserMiddleware).forRoutes('*');
   }
 }
