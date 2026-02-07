@@ -383,6 +383,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -416,6 +419,9 @@ importers:
       openai:
         specifier: ^6.18.0
         version: 6.18.0(ws@8.18.3)(zod@4.3.6)
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       redis:
         specifier: ^4.7.0
         version: 4.7.1
@@ -432,6 +438,9 @@ importers:
       '@types/node':
         specifier: 25.2.1
         version: 25.2.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       '@vitest/ui':
         specifier: ^2.1.0
         version: 2.1.9(vitest@2.1.9)
@@ -547,6 +556,9 @@ importers:
       '@nestjs/throttler':
         specifier: ^6.5.0
         version: 6.5.0(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(reflect-metadata@0.2.2)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -574,6 +586,9 @@ importers:
       pdfkit:
         specifier: 0.17.2
         version: 0.17.2
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       redis:
         specifier: ^4
         version: 4.7.1
@@ -593,6 +608,9 @@ importers:
       '@types/pdfkit':
         specifier: 0.17.4
         version: 0.17.4
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       '@types/supertest':
         specifier: ^6.0.3
         version: 6.0.3
@@ -620,6 +638,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -632,6 +653,9 @@ importers:
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -642,6 +666,9 @@ importers:
       '@types/node':
         specifier: 25.2.1
         version: 25.2.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -660,6 +687,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -675,6 +705,9 @@ importers:
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -688,6 +721,9 @@ importers:
       '@types/node':
         specifier: 25.2.1
         version: 25.2.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       '@vitest/ui':
         specifier: ^2.1.0
         version: 2.1.9(vitest@2.1.9)
@@ -718,6 +754,9 @@ importers:
       '@nestjs/websockets':
         specifier: ^11.1.13
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(@nestjs/platform-socket.io@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -733,6 +772,9 @@ importers:
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -749,6 +791,9 @@ importers:
       '@types/node':
         specifier: 25.2.1
         version: 25.2.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       '@types/socket.io':
         specifier: ^3.0.2
         version: 3.0.2
@@ -776,6 +821,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -788,6 +836,9 @@ importers:
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -798,6 +849,9 @@ importers:
       '@types/node':
         specifier: 25.2.1
         version: 25.2.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -834,6 +888,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
@@ -873,6 +930,9 @@ importers:
       libphonenumber-js:
         specifier: ^1.12.36
         version: 1.12.36
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -901,6 +961,9 @@ importers:
       '@types/node':
         specifier: 25.2.1
         version: 25.2.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -2294,7 +2357,6 @@ packages:
   '@pact-foundation/pact-core@18.0.0':
     resolution: {integrity: sha512-21sOzu+28HLivTdsnwOmLAPjHLDaPfUbv/aTxlWqCVmBTXVsxekrbQJkO0ga6COXEXQg0BGKmqLxh22orm//9A==}
     engines: {node: '>=20'}
-    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.1.0':
