@@ -18,6 +18,11 @@ export interface CommonGroundSummaryPanelProps {
   onViewAgreementZone?: (zoneId: string) => void;
 
   /**
+   * Optional callback when user clicks on an agreement zone to highlight related responses
+   */
+  onAgreementZoneClick?: (zoneId: string, relatedResponseIds: string[]) => void;
+
+  /**
    * Optional callback when user wants to view details of a misunderstanding
    */
   onViewMisunderstanding?: (misunderstandingId: string) => void;
@@ -84,6 +89,7 @@ const getConsensusStyles = (level: 'high' | 'medium' | 'low') => {
 const CommonGroundSummaryPanel = ({
   analysis,
   onViewAgreementZone,
+  onAgreementZoneClick,
   onViewMisunderstanding,
   onViewDisagreement,
   className = '',
@@ -159,12 +165,18 @@ const CommonGroundSummaryPanel = ({
           <div className="space-y-3">
             {analysis.agreementZones.map((zone) => {
               const styles = getConsensusStyles(zone.consensusLevel);
+              const handleZoneClick = () => {
+                if (onAgreementZoneClick && zone.relatedResponseIds) {
+                  onAgreementZoneClick(zone.id, zone.relatedResponseIds);
+                }
+              };
               return (
                 <div
                   key={zone.id}
-                  className={`p-4 rounded-lg border-l-4 ${styles.bg} ${styles.border}`}
+                  className={`p-4 rounded-lg border-l-4 ${styles.bg} ${styles.border} ${onAgreementZoneClick && zone.relatedResponseIds ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
                   role="article"
                   aria-label={`Agreement zone: ${zone.title}`}
+                  onClick={handleZoneClick}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">

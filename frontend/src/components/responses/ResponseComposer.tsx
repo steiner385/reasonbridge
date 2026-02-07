@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { PreviewFeedbackPanel } from '../feedback';
 import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
 import type { CreateResponseRequest } from '../../types/response';
+import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 
 export interface ResponseComposerProps {
   /**
@@ -55,6 +56,27 @@ export interface ResponseComposerProps {
    * Optional topic ID for preview feedback context
    */
   topicId?: string;
+
+  /**
+   * Whether this is an inline reply composer
+   */
+  inline?: boolean;
+
+  /**
+   * Callback when preview feedback changes (for right panel display)
+   */
+  onPreviewFeedbackChange?: (
+    feedback: PreviewFeedbackItem[],
+    readyToPost: boolean,
+    summary: string,
+    isLoading?: boolean,
+    error?: string | null,
+  ) => void;
+
+  /**
+   * Whether to show preview feedback inline in the composer
+   */
+  showPreviewFeedbackInline?: boolean;
 }
 
 const ResponseComposer: React.FC<ResponseComposerProps> = ({
@@ -67,6 +89,9 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   onCancel,
   showCancel = false,
   topicId,
+  inline: _inline = false, // Reserved for future inline styling
+  onPreviewFeedbackChange,
+  showPreviewFeedbackInline: _showPreviewFeedbackInline = true, // Reserved for future conditional rendering
 }) => {
   const [content, setContent] = useState('');
   const [citedSources, setCitedSources] = useState<string[]>([]);
@@ -87,6 +112,26 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
     sensitivity,
     setSensitivity,
   } = useHybridPreviewFeedback(content, { topicId });
+
+  // Notify parent component when preview feedback changes
+  useEffect(() => {
+    if (onPreviewFeedbackChange) {
+      onPreviewFeedbackChange(
+        previewFeedback,
+        readyToPost ?? false, // Convert null to false
+        previewSummary,
+        isPreviewLoading,
+        previewError,
+      );
+    }
+  }, [
+    previewFeedback,
+    readyToPost,
+    previewSummary,
+    isPreviewLoading,
+    previewError,
+    onPreviewFeedbackChange,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

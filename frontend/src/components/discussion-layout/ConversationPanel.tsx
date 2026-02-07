@@ -35,6 +35,8 @@ export interface ConversationPanelProps {
   ) => void;
   /** Callback when composition state changes */
   onCompositionStateChange?: (isComposing: boolean) => void;
+  /** Callback when top-level response is submitted */
+  onResponseSubmit?: (response: CreateResponseRequest) => Promise<void>;
   /** Callback when inline reply is submitted */
   onReplySubmit?: (response: CreateResponseRequest) => Promise<void>;
   /** CSS class name */
@@ -52,6 +54,7 @@ export function ConversationPanel({
   height,
   onPreviewFeedbackChange,
   onCompositionStateChange: _onCompositionStateChange,
+  onResponseSubmit,
   onReplySubmit,
   className = '',
 }: ConversationPanelProps) {
@@ -387,6 +390,7 @@ export function ConversationPanel({
         <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50">
           <ResponseComposer
             topicId={topic.id}
+            onSubmit={onResponseSubmit || (() => Promise.resolve())}
             onPreviewFeedbackChange={onPreviewFeedbackChange}
             showPreviewFeedbackInline={false}
           />
