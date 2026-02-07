@@ -15,12 +15,7 @@ import { Navigation } from './Navigation';
  * Includes backdrop overlay and closes on navigation, backdrop click, or Escape key
  */
 
-interface MobileDrawerProps {
-  /** Optional unread notification count */
-  unreadCount?: number;
-}
-
-export function MobileDrawer({ unreadCount = 0 }: MobileDrawerProps) {
+export function MobileDrawer() {
   const { isMobileOpen, closeMobile } = useSidebar();
   const { user } = useAuth();
   const drawerRef = useRef<HTMLElement>(null);
@@ -159,7 +154,7 @@ export function MobileDrawer({ unreadCount = 0 }: MobileDrawerProps) {
 
         {/* Navigation Links */}
         <div className="flex-1 overflow-y-auto p-4">
-          <Navigation unreadCount={unreadCount} onNavigate={closeMobile} />
+          <Navigation onNavigate={closeMobile} />
         </div>
 
         {/* User Profile Section (bottom) */}
