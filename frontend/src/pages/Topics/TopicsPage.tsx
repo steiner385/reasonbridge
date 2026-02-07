@@ -32,6 +32,7 @@ function TopicsPage() {
   useEffect(() => {
     const isWelcome = searchParams.get('welcome') === 'true';
     const isDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY) === 'true';
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronizing external state (localStorage + URL params)
     setShowWelcomeBanner(isWelcome && !isDismissed);
   }, [searchParams]);
 
