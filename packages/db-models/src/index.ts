@@ -12,7 +12,7 @@
  */
 
 // Re-export all Prisma types and enums
-export * from '@prisma/client';
+export * from './generated/client';
 
 // Re-export the client factory
 export { prisma, createPrismaClient, disconnectPrisma } from './client.js';
