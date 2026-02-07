@@ -13,7 +13,7 @@
  * - Change preview before submission
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import type { Topic } from '../../types/topic';
@@ -74,11 +74,11 @@ export function EditTopicModal({
   }, [isOpen, topic]);
 
   // Calculate if edit reason is required (topic older than 24 hours)
-  // Using useMemo to memoize the Date.now() calculation
-  const requiresEditReason = useMemo(() => {
+  // Use useState initializer to calculate once on mount (avoids Date.now() during render)
+  const [requiresEditReason] = useState(() => {
     const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
     return topicAgeHours > 24;
-  }, [topic.createdAt]);
+  });
 
   // Check if there are any changes
   const hasChanges =
