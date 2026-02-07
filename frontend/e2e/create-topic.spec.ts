@@ -189,9 +189,10 @@ test.describe('Create Topic Flow', () => {
     await page.getByRole('button', { name: /create topic/i }).click();
     const modal = page.getByRole('dialog');
 
-    // Fill in valid data
+    // Fill in valid data with unique title to avoid collision with seeded topics
+    const uniqueTitle = `E2E Test Topic: Carbon Tax Policy ${Date.now()}`;
     const titleInput = modal.getByLabel(/title/i);
-    await titleInput.fill('Should we implement carbon taxes to combat climate change?');
+    await titleInput.fill(uniqueTitle);
 
     const descriptionInput = modal.getByLabel(/description/i);
     await descriptionInput.fill(
