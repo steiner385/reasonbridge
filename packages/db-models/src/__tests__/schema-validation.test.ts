@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Prisma } from '../generated/client';
+import { Prisma } from '@prisma/client';
 
 /**
  * Type definition for DMMF model field

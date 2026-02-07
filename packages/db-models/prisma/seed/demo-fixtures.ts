@@ -16,7 +16,7 @@
  * - 21 common ground analyses
  */
 
-import { Prisma, PrismaClient } from '../../src/generated/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { DEMO_PERSONAS } from './demo-personas';
 import { DEMO_TOPICS } from './demo-topics';
 import { DEMO_TAGS } from './demo-tags';
