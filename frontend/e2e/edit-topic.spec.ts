@@ -21,6 +21,11 @@ test.describe('Topic Editing', () => {
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('button', { name: /^log in$/i }).click();
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+
+      // Wait for navigation and authentication state to stabilize
+      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
     });
 
     test('should see Edit button on own topics', async ({ page }) => {
@@ -315,6 +320,11 @@ test.describe('Topic Editing', () => {
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('button', { name: /^log in$/i }).click();
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+
+      // Wait for navigation and authentication state to stabilize
+      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
     });
 
     test('should display edit history after editing', async ({ page }) => {
