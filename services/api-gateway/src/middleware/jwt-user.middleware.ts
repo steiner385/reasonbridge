@@ -7,7 +7,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { NestMiddleware } from '@nestjs/common';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import jwt from 'jsonwebtoken';
-const { verify: jwtVerify } = jwt;
 
 /**
  * JWT User Middleware
@@ -41,7 +40,7 @@ export class JwtUserMiddleware implements NestMiddleware {
       const jwtSecret = process.env['JWT_SECRET'] || 'your-secret-key';
 
       // Decode and verify JWT
-      const decoded = jwtVerify(token, jwtSecret) as {
+      const decoded = jwt.verify(token, jwtSecret) as {
         sub?: string;
         userId?: string;
         id?: string;
