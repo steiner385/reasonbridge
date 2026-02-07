@@ -8,3 +8,9 @@ export type { TopicCardProps } from './TopicCard';
 
 export { TopicFilterUI } from './TopicFilterUI';
 export type { TopicFilterUIProps } from './TopicFilterUI';
+
+export { CreateTopicModal } from './CreateTopicModal';
+export type { CreateTopicModalProps } from './CreateTopicModal';
+
+export { EditTopicModal } from './EditTopicModal';
+export type { EditTopicModalProps } from './EditTopicModal';
