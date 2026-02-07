@@ -42,6 +42,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponseDto, VerificationEmailSentResponseDto } from './dto/auth-response.dto';
 import { UserProfileDto, OnboardingProgressDto } from '../dto/common.dto';
 import { AuthMethod, OnboardingStep } from '@prisma/client';
+import { sign as jwtSign } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -468,17 +469,62 @@ export class AuthService {
   private async generateJwtTokens(
     user: any,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
-    // In production, generate JWT tokens using @nestjs/jwt
-    // For now, return placeholder tokens
-    const jwtSecret = this.configService.get<string>('JWT_SECRET');
-    const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION', '15m');
+    const jwtSecret = this.configService.get<string>('JWT_SECRET') || 'your-secret-key';
+    const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION') || '15m';
 
-    // TODO: Implement actual JWT generation with user payload
+    // Parse expiration to seconds (format: '15m', '1h', '7d')
+    const expiresIn = this.parseExpiration(jwtExpiration);
+
+    // Generate access token with user ID in 'sub' claim (JWT standard)
+    const accessToken = jwtSign(
+      {
+        sub: user.id, // Subject claim - user ID
+        email: user.email,
+        authMethod: user.authMethod,
+      },
+      jwtSecret,
+      { expiresIn: jwtExpiration } as any, // Type assertion for JWT options
+    );
+
+    // Generate refresh token (longer expiration)
+    const refreshToken = jwtSign(
+      {
+        sub: user.id,
+        type: 'refresh',
+      },
+      jwtSecret,
+      { expiresIn: '30d' } as any, // Type assertion for JWT options
+    );
+
     return {
-      accessToken: 'jwt_access_token_placeholder',
-      refreshToken: 'jwt_refresh_token_placeholder',
-      expiresIn: 900, // 15 minutes
+      accessToken,
+      refreshToken,
+      expiresIn, // in seconds
     };
+  }
+
+  /**
+   * Parse JWT expiration string to seconds
+   */
+  private parseExpiration(exp: string): number {
+    const match = exp.match(/^(\d+)([smhd])$/);
+    if (!match || !match[1] || !match[2]) return 900; // Default 15 minutes
+
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+
+    switch (unit) {
+      case 's':
+        return value;
+      case 'm':
+        return value * 60;
+      case 'h':
+        return value * 60 * 60;
+      case 'd':
+        return value * 60 * 60 * 24;
+      default:
+        return 900;
+    }
   }
 
   /**
