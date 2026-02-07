@@ -140,7 +140,7 @@ test.describe('Topic Merging', () => {
         const targetSelect = modal.locator('select');
         if (await targetSelect.isVisible()) {
           // Find option with target title
-          await targetSelect.selectOption({ label: new RegExp(targetTitle) });
+          await targetSelect.selectOption({ label: targetTitle });
         }
 
         // Enter merge reason
