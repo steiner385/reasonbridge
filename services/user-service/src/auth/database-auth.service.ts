@@ -169,8 +169,9 @@ export class DatabaseAuthService implements IAuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
+      // JWT sub claim now contains user.id (UUID), not cognitoSub
       const user = await this.prisma.user.findUnique({
-        where: { cognitoSub: decoded['sub'] as string },
+        where: { id: decoded['sub'] as string },
       });
 
       if (!user) {

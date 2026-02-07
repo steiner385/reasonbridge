@@ -50,8 +50,8 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getCurrentUser(@CurrentUser() jwtPayload: JwtPayload): Promise<UserResponseDto> {
-    // Use the cognitoSub from the JWT token to find the user
-    const user = await this.usersService.findByCognitoSub(jwtPayload.sub);
+    // JWT sub claim now contains user.id (UUID), not cognitoSub
+    const user = await this.usersService.findById(jwtPayload.sub);
     return new UserResponseDto(user);
   }
 
@@ -65,8 +65,8 @@ export class UsersController {
     @CurrentUser() jwtPayload: JwtPayload,
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<UserResponseDto> {
-    // Update the user using cognitoSub from JWT token
-    const updatedUser = await this.usersService.updateProfile(jwtPayload.sub, updateProfileDto);
+    // JWT sub claim now contains user.id (UUID), not cognitoSub
+    const updatedUser = await this.usersService.updateProfileById(jwtPayload.sub, updateProfileDto);
     return new UserResponseDto(updatedUser);
   }
 
@@ -79,7 +79,8 @@ export class UsersController {
   async getFeedbackPreferences(
     @CurrentUser() jwtPayload: JwtPayload,
   ): Promise<FeedbackPreferencesResponseDto> {
-    return this.feedbackPreferencesService.getPreferences(jwtPayload.sub);
+    // JWT sub claim now contains user.id (UUID), not cognitoSub
+    return this.feedbackPreferencesService.getPreferencesById(jwtPayload.sub);
   }
 
   /**
@@ -93,7 +94,8 @@ export class UsersController {
     @CurrentUser() jwtPayload: JwtPayload,
     @Body() updateDto: UpdateFeedbackPreferencesDto,
   ): Promise<FeedbackPreferencesResponseDto> {
-    return this.feedbackPreferencesService.updatePreferences(jwtPayload.sub, updateDto);
+    // JWT sub claim now contains user.id (UUID), not cognitoSub
+    return this.feedbackPreferencesService.updatePreferencesById(jwtPayload.sub, updateDto);
   }
 
   /**
@@ -107,7 +109,8 @@ export class UsersController {
     @CurrentUser() jwtPayload: JwtPayload,
     @Body() toggleDto: FeedbackToggleDto,
   ): Promise<FeedbackPreferencesResponseDto> {
-    return this.feedbackPreferencesService.toggleFeedback(jwtPayload.sub, toggleDto.enabled);
+    // JWT sub claim now contains user.id (UUID), not cognitoSub
+    return this.feedbackPreferencesService.toggleFeedbackById(jwtPayload.sub, toggleDto.enabled);
   }
 
   /**
