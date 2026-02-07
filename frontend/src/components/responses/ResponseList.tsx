@@ -4,22 +4,51 @@
  */
 
 /**
- * T043 [P] [US2] - Response List Component (Feature 009)
+ * T036 [P] [US2] - Response List Component with Virtual Scrolling
  *
  * Displays all responses for a discussion in chronological order
+ * Uses virtual scrolling for efficient rendering of 500+ responses
  * Supports threading display for nested replies (Phase 5)
  */
 
+import { useMemo } from 'react';
+import { List } from 'react-window';
 import { useResponses } from '../../hooks/useResponses';
 import Card from '../ui/Card';
+import type { CreateResponseRequest } from '../../types/response';
+import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { ResponseItem } from './ResponseItem';
 
 export interface ResponseListProps {
   discussionId: string;
   enableThreading?: boolean;
+  /** Height of the list container in pixels (for virtual scrolling) */
+  height?: number;
+  /** Height of each response item in pixels */
+  itemHeight?: number;
+  /** Map of highlighted response IDs (for proposition interaction) */
+  highlightedResponseIds?: Set<string>;
+  /** Callback when inline reply is submitted */
+  onReplySubmit?: (response: CreateResponseRequest) => Promise<void>;
+  /** Callback for preview feedback changes (for right panel) */
+  onPreviewFeedbackChange?: (
+    feedback: PreviewFeedbackItem[],
+    readyToPost: boolean,
+    summary: string,
+    isLoading?: boolean,
+    error?: string | null,
+  ) => void;
 }
 
-export function ResponseList({ discussionId, enableThreading = false }: ResponseListProps) {
+export function ResponseList({
+  discussionId,
+  enableThreading = false,
+  height = 600,
+  itemHeight = 220,
+  highlightedResponseIds = new Set(),
+  onReplySubmit,
+  onPreviewFeedbackChange,
+}: ResponseListProps) {
   const {
     data: responses,
     isLoading,
@@ -88,16 +117,68 @@ export function ResponseList({ discussionId, enableThreading = false }: Response
     );
   }
 
+  // Memoize row renderer to prevent unnecessary re-renders
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- Hook is only called when responses exist (after early returns)
+  const Row = useMemo(() => {
+    const RowComponent = ({
+      index,
+      style,
+      ariaAttributes,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: {
+        'aria-posinset': number;
+        'aria-setsize': number;
+        role: 'listitem';
+      };
+    }) => {
+      const response = responses[index];
+      if (!response) return null;
+
+      const isHighlighted = highlightedResponseIds.has(response.id);
+
+      return (
+        <div style={style} className="px-2" {...ariaAttributes}>
+          <div
+            className={`
+                transition-all duration-300
+                ${isHighlighted ? 'ring-2 ring-primary-500 rounded-lg' : ''}
+              `}
+            data-response-id={response.id}
+          >
+            <ResponseItem
+              response={response}
+              discussionId={discussionId}
+              showReplies={enableThreading}
+              onReplySubmit={onReplySubmit}
+              onPreviewFeedbackChange={onPreviewFeedbackChange}
+            />
+          </div>
+        </div>
+      );
+    };
+    RowComponent.displayName = 'ResponseRow';
+    return RowComponent;
+  }, [
+    responses,
+    discussionId,
+    enableThreading,
+    highlightedResponseIds,
+    onReplySubmit,
+    onPreviewFeedbackChange,
+  ]);
+
   return (
-    <div className="space-y-4">
-      {responses.map((response) => (
-        <ResponseItem
-          key={response.id}
-          response={response}
-          discussionId={discussionId}
-          showReplies={enableThreading}
-        />
-      ))}
+    <div className="response-list" role="list" aria-label="Responses">
+      <List<Record<string, never>>
+        defaultHeight={height}
+        rowCount={responses.length}
+        rowHeight={itemHeight}
+        overscanCount={3}
+        rowComponent={Row}
+        rowProps={{}}
+      />
     </div>
   );
 }

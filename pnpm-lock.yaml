@@ -113,6 +113,12 @@ importers:
       react-router-dom:
         specifier: 7.13.0
         version: 7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react-swipeable:
+        specifier: ^7.0.2
+        version: 7.0.2(react@19.2.4)
+      react-window:
+        specifier: ^2.2.6
+        version: 2.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       socket.io-client:
         specifier: 4.8.3
         version: 4.8.3
@@ -2288,6 +2294,7 @@ packages:
   '@pact-foundation/pact-core@18.0.0':
     resolution: {integrity: sha512-21sOzu+28HLivTdsnwOmLAPjHLDaPfUbv/aTxlWqCVmBTXVsxekrbQJkO0ga6COXEXQg0BGKmqLxh22orm//9A==}
     engines: {node: '>=20'}
+    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.1.0':
@@ -4538,7 +4545,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@13.24.0:
     resolution: {integrity: sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==}
@@ -6031,6 +6038,17 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
+
+  react-swipeable@7.0.2:
+    resolution: {integrity: sha512-v1Qx1l+aC2fdxKa9aKJiaU/ZxmJ5o98RMoFwUqAAzVWUcxgfHFXDDruCKXhw6zIYXm6V64JiHgP9f6mlME5l8w==}
+    peerDependencies:
+      react: ^16.8.3 || ^17 || ^18 || ^19.0.0 || ^19.0.0-rc
+
+  react-window@2.2.6:
+    resolution: {integrity: sha512-v89O08xRdpCaEuf380B39D1C/0KgUDZA59xft6SVAjzjz/xQxSyXrgDWHymIsYI6TMrqE8WO+G0/PB9AGE8VNA==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
   react@19.2.4:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
@@ -13420,6 +13438,15 @@ snapshots:
       react: 19.2.4
       set-cookie-parser: 2.7.2
     optionalDependencies:
+      react-dom: 19.2.4(react@19.2.4)
+
+  react-swipeable@7.0.2(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
+  react-window@2.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
   react@19.2.4: {}

@@ -28,9 +28,9 @@ export default function TermsPage() {
             1. Acceptance of Terms
           </h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
-            By accessing and using ReasonBridge ("the Platform"), you accept and agree to be bound
-            by these Terms of Service. If you do not agree to these terms, please do not use the
-            Platform.
+            By accessing and using ReasonBridge (&quot;the Platform&quot;), you accept and agree to
+            be bound by these Terms of Service. If you do not agree to these terms, please do not
+            use the Platform.
           </p>
         </section>
 
@@ -70,8 +70,8 @@ export default function TermsPage() {
           </h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
             The Platform uses AI to provide features such as bias detection, common ground
-            identification, and claim validation. These AI-generated insights are provided "as is"
-            and should not be considered as absolute truth or professional advice.
+            identification, and claim validation. These AI-generated insights are provided &quot;as
+            is&quot; and should not be considered as absolute truth or professional advice.
           </p>
         </section>
 
@@ -113,9 +113,9 @@ export default function TermsPage() {
             8. Disclaimer of Warranties
           </h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
-            The Platform is provided "as is" without warranties of any kind, either express or
-            implied. We do not guarantee that the Platform will be uninterrupted, secure, or
-            error-free.
+            The Platform is provided &quot;as is&quot; without warranties of any kind, either
+            express or implied. We do not guarantee that the Platform will be uninterrupted, secure,
+            or error-free.
           </p>
         </section>
 
@@ -145,7 +145,7 @@ export default function TermsPage() {
             11. Contact Information
           </h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
-            If you have questions about these Terms, please contact us through the Platform's
+            If you have questions about these Terms, please contact us through the Platform&apos;s
             support system.
           </p>
         </section>

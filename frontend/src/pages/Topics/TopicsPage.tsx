@@ -4,20 +4,23 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTopics } from '../../lib/useTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { TopicCard, TopicFilterUI } from '../../components/topics';
 import TopicCardSkeleton from '../../components/ui/skeletons/TopicCardSkeleton';
+import { CreateTopicModal } from '../../components/topics/CreateTopicModal';
 import type { GetTopicsParams } from '../../types/topic';
 
 const WELCOME_BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
 
 function TopicsPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState<GetTopicsParams>({
     page: 1,
     limit: 10,
@@ -59,6 +62,11 @@ function TopicsPage() {
     setFilters({ ...filters, page });
   };
 
+  const handleCreateSuccess = (topicId: string) => {
+    // Navigate to the newly created topic
+    navigate(`/topics/${topicId}`);
+  };
+
   if (error) {
     return (
       <div className="max-w-6xl mx-auto">
@@ -76,13 +84,26 @@ function TopicsPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Discussion Topics
-        </h1>
-        <p className="text-fluid-base text-gray-600 dark:text-gray-300">
-          Browse and join rational discussions on various topics
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Discussion Topics
+          </h1>
+          <p className="text-fluid-base text-gray-600 dark:text-gray-300">
+            Browse and join rational discussions on various topics
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Create Topic
+        </Button>
       </div>
 
       {/* Welcome Banner */}
@@ -218,6 +239,13 @@ function TopicsPage() {
           )}
         </>
       )}
+
+      {/* Create Topic Modal */}
+      <CreateTopicModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </div>
   );
 }

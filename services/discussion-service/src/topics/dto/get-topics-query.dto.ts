@@ -4,12 +4,20 @@
  */
 
 import { Type } from 'class-transformer';
-import { IsOptional, IsInt, Min, Max, IsEnum, IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsInt, Min, Max, IsEnum, IsString, IsUUID, IsArray } from 'class-validator';
 
+/**
+ * DTO for GET /topics endpoint with filtering and pagination
+ * Feature 016: Topic Management (T021)
+ */
 export class GetTopicsQueryDto {
   @IsOptional()
-  @IsEnum(['SEEDING', 'ACTIVE', 'ARCHIVED'])
-  status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED';
+  @IsEnum(['SEEDING', 'ACTIVE', 'ARCHIVED', 'LOCKED'])
+  status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
+
+  @IsOptional()
+  @IsEnum(['PUBLIC', 'PRIVATE', 'UNLISTED'])
+  visibility?: 'PUBLIC' | 'PRIVATE' | 'UNLISTED';
 
   @IsOptional()
   @IsUUID()
@@ -18,6 +26,15 @@ export class GetTopicsQueryDto {
   @IsOptional()
   @IsString()
   tag?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 
   @IsOptional()
   @Type(() => Number)
