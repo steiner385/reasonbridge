@@ -65,14 +65,13 @@ export function useCreateTopic(options?: UseCreateTopicOptions) {
     mutationFn: (data: CreateTopicRequest) => topicService.createTopic(data),
 
     onSuccess: (newTopic) => {
-      // Optimistically update all topic list caches with the new topic
-      // This ensures the topic is immediately available when navigating to /discussions
+      // Optimistically add the new topic to all topic list caches
       queryClient.setQueriesData<{ data: Topic[]; total: number; page: number; limit: number }>(
         { queryKey: ['topics'] },
         (oldData) => {
           if (!oldData) return oldData;
 
-          // Add new topic at the beginning of the list
+          // Add new topic at the beginning for immediate visibility
           return {
             ...oldData,
             data: [newTopic, ...oldData.data],
@@ -81,7 +80,10 @@ export function useCreateTopic(options?: UseCreateTopicOptions) {
         },
       );
 
-      // Also invalidate to trigger background refetch for accurate data
+      // Also cache the individual topic for direct lookups
+      queryClient.setQueryData(['topic', newTopic.id], newTopic);
+
+      // Invalidate topic lists to trigger background refetch for accurate sorting
       queryClient.invalidateQueries({ queryKey: ['topics'] });
 
       // Call user-provided success callback
