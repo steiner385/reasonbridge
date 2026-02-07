@@ -190,24 +190,26 @@ test.describe('Create Topic Flow', () => {
     const modal = page.getByRole('dialog');
 
     // Fill in valid data with unique title to avoid collision with seeded topics
-    const uniqueTitle = `E2E Test Topic: Carbon Tax Policy ${Date.now()}`;
+    // Use UUID to ensure completely unique title that won't trigger similarity matching
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const uniqueTitle = `Test Topic ${uniqueId}: Quantum Computing Applications`;
     const titleInput = modal.getByLabel(/title/i);
     await titleInput.fill(uniqueTitle);
 
     const descriptionInput = modal.getByLabel(/description/i);
     await descriptionInput.fill(
-      'Carbon taxes are a policy tool that aims to reduce greenhouse gas emissions ' +
-        'by placing a price on carbon dioxide emissions. This discussion explores the ' +
-        'economic, social, and environmental implications of implementing such policies.',
+      'Quantum computing represents a paradigm shift in computational power and capability. ' +
+        'This discussion explores the practical applications of quantum computing in cryptography, ' +
+        'drug discovery, financial modeling, and artificial intelligence optimization.',
     );
 
     // Add tags
     const tagInput = modal.getByLabel(/tags/i);
-    await tagInput.fill('climate');
+    await tagInput.fill('quantum');
     await tagInput.press('Enter');
-    await tagInput.fill('policy');
+    await tagInput.fill('computing');
     await tagInput.press('Enter');
-    await tagInput.fill('economics');
+    await tagInput.fill('technology');
     await tagInput.press('Enter');
 
     // Set visibility
