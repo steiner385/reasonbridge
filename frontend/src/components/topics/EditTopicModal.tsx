@@ -63,8 +63,10 @@ export function EditTopicModal({
   }, [isOpen, topic]);
 
   // Calculate if topic is older than 24 hours
-  const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
-  const requiresEditReason = topicAgeHours > 24;
+  const requiresEditReason = useMemo(() => {
+    const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
+    return topicAgeHours > 24;
+  }, [topic.createdAt]);
 
   // Check if there are any changes
   const hasChanges =

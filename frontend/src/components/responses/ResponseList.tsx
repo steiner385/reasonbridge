@@ -14,9 +14,9 @@
 import { useMemo } from 'react';
 import { List } from 'react-window';
 import { useResponses } from '../../hooks/useResponses';
-import { ResponseItem } from './ResponseItem';
 import Card from '../ui/Card';
 import type { CreateResponseRequest } from '../../types/response';
+import { ResponseItem } from './ResponseItem';
 
 export interface ResponseListProps {
   discussionId: string;

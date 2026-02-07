@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import BridgingSuggestionsSection from './BridgingSuggestionsSection';
 import type { BridgingSuggestionsResponse } from '../../types/common-ground';
+import BridgingSuggestionsSection from './BridgingSuggestionsSection';
 
 describe('BridgingSuggestionsSection', () => {
   const mockSuggestions: BridgingSuggestionsResponse = {
@@ -343,7 +343,7 @@ describe('BridgingSuggestionsSection', () => {
         reasoning: '',
         commonGroundAreas: [],
         conflictAreas: [],
-        suggestions: null as any,
+        suggestions: null as unknown as BridgingSuggestion[],
         attribution: 'Test',
       };
 

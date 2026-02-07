@@ -5,8 +5,8 @@
 
 import React, { useMemo } from 'react';
 import { List } from 'react-window';
-import { TopicListItem } from './TopicListItem';
 import type { Topic } from '../../types/topic';
+import { TopicListItem } from './TopicListItem';
 
 /**
  * TopicList props

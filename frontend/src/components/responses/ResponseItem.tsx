@@ -17,9 +17,9 @@
 import { useState } from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-import ResponseComposer from './ResponseComposer';
 import type { ResponseDetail } from '../../services/discussionService';
 import type { CreateResponseRequest } from '../../types/response';
+import ResponseComposer from './ResponseComposer';
 
 export interface ResponseItemProps {
   response: ResponseDetail;

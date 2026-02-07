@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { usePreviewFeedback } from './usePreviewFeedback';
 import * as feedbackApi from '../lib/feedback-api';
+import { usePreviewFeedback } from './usePreviewFeedback';
 
 // Mock the feedback API
 vi.mock('../lib/feedback-api', () => ({

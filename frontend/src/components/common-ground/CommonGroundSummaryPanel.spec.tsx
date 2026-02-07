@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CommonGroundSummaryPanel from './CommonGroundSummaryPanel';
 import type { CommonGroundAnalysis } from '../../types/common-ground';
+import CommonGroundSummaryPanel from './CommonGroundSummaryPanel';
 
 // Mock ShareButton component
 vi.mock('./ShareButton', () => ({
@@ -210,7 +210,7 @@ describe('CommonGroundSummaryPanel', () => {
 
     it('should make agreement zone clickable when onAgreementZoneClick is provided', () => {
       const handleClick = vi.fn();
-      const { container } = render(
+      render(
         <CommonGroundSummaryPanel analysis={mockAnalysis} onAgreementZoneClick={handleClick} />,
       );
 

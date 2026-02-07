@@ -72,7 +72,10 @@ export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: Discuss
   // Close overlay when breakpoint changes to desktop
   useEffect(() => {
     if (breakpoint === 'desktop') {
-      setIsLeftPanelOverlayOpen(false);
+      // Schedule state update asynchronously to avoid cascading renders
+      setTimeout(() => {
+        setIsLeftPanelOverlayOpen(false);
+      }, 0);
     }
   }, [breakpoint]);
 

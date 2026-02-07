@@ -179,11 +179,14 @@ export function DiscussionPage() {
   // Clear unread status when a topic becomes active
   useEffect(() => {
     if (activeTopicId) {
-      setUnreadMap((prev) => {
-        const newMap = new Map(prev);
-        newMap.delete(activeTopicId);
-        return newMap;
-      });
+      // Schedule state update asynchronously to avoid cascading renders
+      setTimeout(() => {
+        setUnreadMap((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(activeTopicId);
+          return newMap;
+        });
+      }, 0);
     }
   }, [activeTopicId]);
 

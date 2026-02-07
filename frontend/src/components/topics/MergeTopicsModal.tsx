@@ -53,11 +53,14 @@ export function MergeTopicsModal({
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setSelectedSourceIds([]);
-      setTargetTopicId('');
-      setMergeReason('');
-      setShowPreview(false);
-      setErrors({});
+      // Schedule state updates asynchronously to avoid cascading renders
+      setTimeout(() => {
+        setSelectedSourceIds([]);
+        setTargetTopicId('');
+        setMergeReason('');
+        setShowPreview(false);
+        setErrors({});
+      }, 0);
     }
   }, [isOpen]);
 

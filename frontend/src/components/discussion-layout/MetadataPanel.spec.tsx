@@ -1,28 +1,32 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MetadataPanel } from './MetadataPanel';
 import type { Topic } from '../../types/topic';
 import type { PropositionItem } from '../common-ground/PropositionList';
+import { MetadataPanel } from './MetadataPanel';
 
 // Mock child components
 vi.mock('../common-ground/CommonGroundSummaryPanel', () => ({
-  CommonGroundSummaryPanel: ({ analysis }: any) => (
+  CommonGroundSummaryPanel: ({ analysis }: Record<string, unknown>) => (
     <div data-testid="common-ground-summary">
-      Common Ground: {analysis?.consensusLevel || 'N/A'}
+      Common Ground: {(analysis as { consensusLevel?: string })?.consensusLevel || 'N/A'}
     </div>
   ),
 }));
 
 vi.mock('../common-ground/BridgingSuggestionsSection', () => ({
-  BridgingSuggestionsSection: ({ suggestions }: any) => (
+  BridgingSuggestionsSection: ({ suggestions }: Record<string, unknown>) => (
     <div data-testid="bridging-suggestions">
-      Bridging: {suggestions?.suggestions?.length || 0} suggestions
+      Bridging: {(suggestions as { suggestions?: unknown[] })?.suggestions?.length || 0} suggestions
     </div>
   ),
 }));
 
 vi.mock('../common-ground/PropositionList', () => ({
-  PropositionList: ({ propositions, onPropositionHover, onPropositionClick }: any) => (
+  PropositionList: ({
+    propositions,
+    onPropositionHover,
+    onPropositionClick,
+  }: Record<string, unknown>) => (
     <div data-testid="proposition-list">
       Propositions: {propositions.length}
       <button onClick={() => onPropositionHover?.('prop-1')}>Hover Prop 1</button>
@@ -182,7 +186,7 @@ describe('MetadataPanel', () => {
     });
 
     it('should render CommonGroundSummaryPanel when analysis is provided', () => {
-      const mockAnalysis: any = {
+      const mockAnalysis: Record<string, unknown> = {
         consensusLevel: 'high',
         agreementZones: [],
         misunderstandings: [],
@@ -218,7 +222,7 @@ describe('MetadataPanel', () => {
     });
 
     it('should render BridgingSuggestionsSection when suggestions are provided', () => {
-      const mockSuggestions: any = {
+      const mockSuggestions: Record<string, unknown> = {
         suggestions: [{ id: 's1' }, { id: 's2' }],
       };
 

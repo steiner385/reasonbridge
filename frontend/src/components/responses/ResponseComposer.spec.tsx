@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tantml:react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ResponseComposer from './ResponseComposer';
-import type { CreateResponseRequest } from '../../types/response';
 
 // Mock usePreviewFeedback hook
 vi.mock('../../hooks/usePreviewFeedback', () => ({

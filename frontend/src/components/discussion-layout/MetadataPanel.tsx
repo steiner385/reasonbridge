@@ -142,9 +142,12 @@ export function MetadataPanel({
   // Auto-switch to Preview tab when composing starts
   useEffect(() => {
     if (isComposing && activeTab !== 'preview') {
-      setActiveTab('preview');
+      // Schedule state update asynchronously to avoid cascading renders
+      setTimeout(() => {
+        setActiveTab('preview');
+      }, 0);
     }
-  }, [isComposing]);
+  }, [isComposing, activeTab]);
 
   const handleTabClick = (tab: MetadataPanelTab) => {
     setActiveTab(tab);
