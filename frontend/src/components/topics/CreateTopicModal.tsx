@@ -135,7 +135,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             variant="primary"
             onClick={(e) => handleSubmit(e, showDuplicateWarning)}
             disabled={isPending || titleError || descriptionError || tags.length === 0}
-            loading={isPending}
+            isLoading={isPending}
           >
             {showDuplicateWarning ? 'Create Anyway' : 'Create Topic'}
           </Button>

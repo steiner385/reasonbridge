@@ -138,7 +138,7 @@ export function TopicStatusActions({
             label: 'Lock Topic',
             message:
               'Locking this topic will prevent all modifications and new responses. Only moderators can unlock it.',
-            variant: 'destructive' as const,
+            variant: 'danger' as const,
             icon: (
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -182,7 +182,7 @@ export function TopicStatusActions({
             label: 'Lock Topic',
             message:
               'Locking this topic will prevent any future modifications. Only moderators can unlock it.',
-            variant: 'destructive' as const,
+            variant: 'danger' as const,
             icon: (
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -263,7 +263,7 @@ export function TopicStatusActions({
                 variant="primary"
                 onClick={handleConfirm}
                 disabled={isPending}
-                loading={isPending}
+                isLoading={isPending}
               >
                 Confirm
               </Button>

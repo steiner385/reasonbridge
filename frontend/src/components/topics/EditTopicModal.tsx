@@ -13,7 +13,7 @@
  * - Change preview before submission
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import type { Topic } from '../../types/topic';
@@ -32,6 +32,14 @@ export interface EditTopicModalProps {
   isLoading?: boolean;
 }
 
+interface EditTopicErrors {
+  title?: string;
+  description?: string;
+  tags?: string;
+  editReason?: string;
+  form?: string;
+}
+
 export function EditTopicModal({
   topic,
   isOpen,
@@ -41,11 +49,11 @@ export function EditTopicModal({
 }: EditTopicModalProps) {
   const [title, setTitle] = useState(topic.title);
   const [description, setDescription] = useState(topic.description);
-  const [tags, setTags] = useState<string[]>(topic.tags || []);
+  const [tags, setTags] = useState<string[]>((topic.tags || []).map((t) => t.name));
   const [tagInput, setTagInput] = useState('');
   const [editReason, setEditReason] = useState('');
   const [flagForReview, setFlagForReview] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<EditTopicErrors>({});
   const [showPreview, setShowPreview] = useState(false);
 
   // Reset form when topic changes or modal opens
@@ -55,7 +63,7 @@ export function EditTopicModal({
       setTimeout(() => {
         setTitle(topic.title);
         setDescription(topic.description);
-        setTags(topic.tags || []);
+        setTags((topic.tags || []).map((t) => t.name));
         setTagInput('');
         setEditReason('');
         setFlagForReview(false);
@@ -65,14 +73,21 @@ export function EditTopicModal({
     }
   }, [isOpen, topic]);
 
+  // Calculate if edit reason is required (topic older than 24 hours)
+  // Using useMemo to memoize the Date.now() calculation
+  const requiresEditReason = useMemo(() => {
+    const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
+    return topicAgeHours > 24;
+  }, [topic.createdAt]);
+
   // Check if there are any changes
   const hasChanges =
     title !== topic.title ||
     description !== topic.description ||
-    JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).sort());
+    JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).map((t) => t.name).sort());
 
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: EditTopicErrors = {};
 
     // Title validation
     if (title.trim().length < 10) {
@@ -94,10 +109,6 @@ export function EditTopicModal({
     } else if (tags.length > 5) {
       newErrors.tags = 'Maximum 5 tags allowed';
     }
-
-    // Calculate if topic is older than 24 hours (only during validation, not render)
-    const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
-    const requiresEditReason = topicAgeHours > 24;
 
     // Edit reason validation (required if topic is >24h old and there are changes)
     if (requiresEditReason && hasChanges && editReason.trim().length < 10) {
@@ -169,7 +180,9 @@ export function EditTopicModal({
     if (description !== topic.description) {
       updates.description = description;
     }
-    if (JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).sort())) {
+    if (
+      JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).map((t) => t.name).sort())
+    ) {
       updates.tags = tags;
     }
     if (editReason.trim()) {
@@ -210,7 +223,7 @@ export function EditTopicModal({
               variant="primary"
               onClick={handleSubmit}
               disabled={isLoading}
-              loading={isLoading}
+              isLoading={isLoading}
             >
               Confirm & Save
             </Button>
@@ -257,7 +270,8 @@ export function EditTopicModal({
           )}
 
           {/* Tags changes */}
-          {JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).sort()) && (
+          {JSON.stringify(tags.sort()) !==
+            JSON.stringify((topic.tags || []).map((t) => t.name).sort()) && (
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Tags</h4>
               <div className="space-y-2">
@@ -267,8 +281,11 @@ export function EditTopicModal({
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {(topic.tags || []).map((tag) => (
-                      <span key={tag} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">
-                        {tag}
+                      <span
+                        key={tag.id}
+                        className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
+                      >
+                        {tag.name}
                       </span>
                     ))}
                   </div>

@@ -22,7 +22,7 @@ export interface VirtualListConfig {
  */
 export interface UseVirtualListReturn {
   /** Container ref to attach to scrollable element */
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   /** Calculated container height in pixels */
   containerHeight: number;
   /** Total height of all items combined */

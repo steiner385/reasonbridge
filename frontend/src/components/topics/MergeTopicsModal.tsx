@@ -27,6 +27,12 @@ export interface MergeTopicsModalProps {
   onSuccess?: () => void;
 }
 
+interface MergeTopicsErrors {
+  sources?: string;
+  target?: string;
+  reason?: string;
+}
+
 export function MergeTopicsModal({
   availableTopics,
   isOpen,
@@ -37,7 +43,7 @@ export function MergeTopicsModal({
   const [targetTopicId, setTargetTopicId] = useState<string>('');
   const [mergeReason, setMergeReason] = useState('');
   const [showPreview, setShowPreview] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<MergeTopicsErrors>({});
 
   const {
     mutate: mergeTopic,
@@ -65,7 +71,7 @@ export function MergeTopicsModal({
   }, [isOpen]);
 
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: MergeTopicsErrors = {};
 
     if (selectedSourceIds.length === 0) {
       newErrors.sources = 'Select at least one source topic to merge';
@@ -120,9 +126,6 @@ export function MergeTopicsModal({
   const sourceTopics = availableTopics.filter((t) => selectedSourceIds.includes(t.id));
   const targetTopic = availableTopics.find((t) => t.id === targetTopicId);
   const totalResponses = sourceTopics.reduce((sum, t) => sum + (t.responseCount || 0), 0);
-  const _totalParticipants = new Set(
-    sourceTopics.flatMap((_t) => []), // Would need participant data from API
-  ).size;
 
   // Preview View
   if (showPreview) {
@@ -138,10 +141,10 @@ export function MergeTopicsModal({
               Back to Edit
             </Button>
             <Button
-              variant="destructive"
+              variant="danger"
               onClick={handleConfirm}
               disabled={isPending}
-              loading={isPending}
+              isLoading={isPending}
             >
               Confirm Merge
             </Button>

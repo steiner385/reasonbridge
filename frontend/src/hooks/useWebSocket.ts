@@ -198,12 +198,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
    */
   const handleMessage = useCallback((event: MessageEvent) => {
     try {
-      const message = JSON.parse(event.data) as WebSocketMessage;
+      const data = JSON.parse(event.data) as { type: string };
 
       // Ignore PONG responses
-      if (message.type === 'PONG') {
+      if (data.type === 'PONG') {
         return;
       }
+
+      // Cast to WebSocketMessage after PONG check
+      const message = data as WebSocketMessage;
 
       // Route message to subscribed handlers
       const handlers = handlersRef.current.get(message.type);

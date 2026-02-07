@@ -137,9 +137,10 @@ function SimpleLineChart({
 
         {/* X-axis labels (show first, middle, last dates) */}
         {[0, Math.floor(data.length / 2), data.length - 1].map((i) => {
-          if (i >= data.length) return null;
+          const dataPoint = data[i];
+          if (i >= data.length || !dataPoint) return null;
           const x = (i / (data.length - 1 || 1)) * chartWidth + padding.left;
-          const date = new Date(data[i].date);
+          const date = new Date(dataPoint.date);
           const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           return (
             <text

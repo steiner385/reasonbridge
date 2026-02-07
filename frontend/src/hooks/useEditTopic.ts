@@ -57,7 +57,7 @@ export function useEditTopic(options?: UseEditTopicOptions) {
       return response.json();
     },
 
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate topic listings
       queryClient.invalidateQueries({ queryKey: ['topics'] });
 

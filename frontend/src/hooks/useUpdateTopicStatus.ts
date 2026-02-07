@@ -69,7 +69,7 @@ export function useUpdateTopicStatus(options?: UseUpdateTopicStatusOptions) {
       return response.json();
     },
 
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate topic list queries to reflect status change
       queryClient.invalidateQueries({ queryKey: ['topics'] });
 
