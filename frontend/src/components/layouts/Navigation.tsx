@@ -18,10 +18,18 @@ interface NavLinkProps {
   icon: React.ReactNode;
   label: string;
   badge?: number;
+  isCollapsed?: boolean;
   'data-tour'?: string;
 }
 
-function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps) {
+function NavLink({
+  to,
+  icon,
+  label,
+  badge,
+  isCollapsed = false,
+  'data-tour': dataTour,
+}: NavLinkProps) {
   const location = useLocation();
   const isActive = location.pathname === to || location.pathname.startsWith(`${to}/`);
 
@@ -29,8 +37,10 @@ function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps
     <Link
       to={to}
       data-tour={dataTour}
+      title={isCollapsed ? label : undefined}
       className={`
         flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+        ${isCollapsed ? 'justify-center' : ''}
         ${
           isActive
             ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
@@ -38,10 +48,11 @@ function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps
         }
       `}
       aria-current={isActive ? 'page' : undefined}
+      aria-label={isCollapsed ? label : undefined}
     >
       <span className="flex-shrink-0 w-5 h-5">{icon}</span>
-      <span className="flex-1 font-medium">{label}</span>
-      {badge !== undefined && badge > 0 && (
+      {!isCollapsed && <span className="flex-1 font-medium">{label}</span>}
+      {!isCollapsed && badge !== undefined && badge > 0 && (
         <span
           className="flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary-600 text-white"
           aria-label={`${badge} unread`}
@@ -54,11 +65,15 @@ function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps
 }
 
 interface NavigationProps {
+  /** Optional unread notification count */
+  unreadCount?: number;
+  /** Whether the sidebar is collapsed (desktop only) */
+  isCollapsed?: boolean;
   /** Optional click handler for navigation items (useful for mobile drawer) */
   onNavigate?: () => void;
 }
 
-export function Navigation({ onNavigate }: NavigationProps) {
+export function Navigation({ isCollapsed = false, onNavigate }: NavigationProps) {
   const { unreadCount } = useNotifications();
 
   const handleClick = () => {
@@ -70,6 +85,7 @@ export function Navigation({ onNavigate }: NavigationProps) {
       <NavLink
         to="/topics"
         data-tour="nav-topics"
+        isCollapsed={isCollapsed}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -90,6 +106,7 @@ export function Navigation({ onNavigate }: NavigationProps) {
 
       <NavLink
         to="/simulator"
+        isCollapsed={isCollapsed}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -111,6 +128,7 @@ export function Navigation({ onNavigate }: NavigationProps) {
       <NavLink
         to="/notifications"
         data-tour="nav-notifications"
+        isCollapsed={isCollapsed}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -132,6 +150,7 @@ export function Navigation({ onNavigate }: NavigationProps) {
 
       <NavLink
         to="/settings"
+        isCollapsed={isCollapsed}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
