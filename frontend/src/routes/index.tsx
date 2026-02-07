@@ -4,13 +4,16 @@
  */
 
 import type { RouteObject } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { LandingPage } from '../pages/LandingPage';
 import AboutPage from '../pages/AboutPage';
 import { RegisterPage, ForgotPasswordPage } from '../pages/Auth';
 import { SignupPage } from '../pages/SignupPage';
 import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 import TopicsPage from '../pages/Topics';
-import TopicDetailPage from '../pages/Topics/TopicDetailPage';
+// TopicDetailPage temporarily unused - keeping for potential redirects
+// import TopicDetailPage from '../pages/Topics/TopicDetailPage';
+import { DiscussionPage } from '../pages/Topics/DiscussionPage';
 import { ProfilePage, UserProfilePage } from '../pages/Profile';
 import { FeedbackPreferencesPage, SettingsPage } from '../pages/Settings';
 import { VerificationPage } from '../pages/Verification/VerificationPage';
@@ -22,6 +25,15 @@ import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import { ProtectedRoute } from '../components/auth';
+
+/**
+ * Redirect component for /topics/:id -> /discussions?topic=:id
+ * Provides backward compatibility for old topic detail URLs
+ */
+function TopicRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/discussions?topic=${id}`} replace />;
+}
 
 /**
  * Route definitions for the ReasonBridge application.
@@ -60,7 +72,11 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/topics/:id',
-    element: <TopicDetailPage />,
+    element: <TopicRedirect />,
+  },
+  {
+    path: '/discussions',
+    element: <DiscussionPage />,
   },
   {
     path: '/profile',

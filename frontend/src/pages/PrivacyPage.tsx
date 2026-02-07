@@ -26,9 +26,9 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Introduction</h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
-            ReasonBridge ("we," "our," or "us") is committed to protecting your privacy. This
-            Privacy Policy explains how we collect, use, disclose, and safeguard your information
-            when you use our Platform.
+            ReasonBridge (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to
+            protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and
+            safeguard your information when you use our Platform.
           </p>
         </section>
 
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">We use your information to:</p>
           <ul className="mt-3 list-inside list-disc space-y-2 text-gray-700 dark:text-gray-300">
-            <li>Provide and maintain the Platform's functionality</li>
+            <li>Provide and maintain the Platform&apos;s functionality</li>
             <li>Process your discussions, responses, and interactions</li>
             <li>Send notifications about activity relevant to you</li>
             <li>Improve and personalize your experience</li>
@@ -220,7 +220,7 @@ export default function PrivacyPage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            9. Children's Privacy
+            9. Children&apos;s Privacy
           </h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
             The Platform is not intended for users under 13 years of age. We do not knowingly
@@ -255,7 +255,7 @@ export default function PrivacyPage() {
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">12. Contact Us</h2>
           <p className="mt-3 text-gray-700 dark:text-gray-300">
             If you have questions about this Privacy Policy or how we handle your data, please
-            contact us through the Platform's support system.
+            contact us through the Platform&apos;s support system.
           </p>
         </section>
       </div>

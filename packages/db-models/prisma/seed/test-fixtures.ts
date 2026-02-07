@@ -15,9 +15,7 @@
  * @module test-fixtures
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../src/client.js';
 
 // ============================================================================
 // DETERMINISTIC IDS
@@ -234,6 +232,7 @@ async function seedTopics(): Promise<void> {
       title: 'Climate Change: Balancing Economic Growth and Environmental Protection',
       description:
         'A structured discussion exploring the trade-offs between economic development and environmental sustainability. How can we achieve growth while protecting our planet?',
+      slug: 'climate-change-balancing-economic-growth-and-environmental-protection',
       creatorId: TEST_IDS.USER_ALICE,
       status: 'ACTIVE' as const,
       evidenceStandards: 'STANDARD' as const,
@@ -251,6 +250,7 @@ async function seedTopics(): Promise<void> {
       title: 'AI Ethics: Navigating the Future of Artificial Intelligence',
       description:
         'Exploring ethical considerations in AI development, including bias, transparency, job displacement, and the alignment problem.',
+      slug: 'ai-ethics-navigating-the-future-of-artificial-intelligence',
       creatorId: TEST_IDS.USER_BOB,
       status: 'ACTIVE' as const,
       evidenceStandards: 'RIGOROUS' as const,
@@ -268,6 +268,7 @@ async function seedTopics(): Promise<void> {
       title: 'Remote Work: The Future of Employment?',
       description:
         'Examining the pros and cons of remote work for employees, employers, and society. What does the future of work look like?',
+      slug: 'remote-work-the-future-of-employment',
       creatorId: TEST_IDS.USER_CHARLIE,
       status: 'ACTIVE' as const,
       evidenceStandards: 'STANDARD' as const,

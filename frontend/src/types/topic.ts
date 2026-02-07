@@ -5,6 +5,7 @@
 
 /**
  * Topic types matching the backend TopicResponseDto
+ * Feature 016: Topic Management (T024, T025)
  */
 
 export interface Topic {
@@ -12,7 +13,9 @@ export interface Topic {
   title: string;
   description: string;
   creatorId: string;
-  status: 'SEEDING' | 'ACTIVE' | 'ARCHIVED';
+  status: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
+  visibility?: 'PUBLIC' | 'PRIVATE' | 'UNLISTED';
+  slug?: string;
   evidenceStandards: string;
   minimumDiversityScore: number;
   currentDiversityScore: number | null;
@@ -40,9 +43,12 @@ export interface PaginatedTopicsResponse {
 }
 
 export interface GetTopicsParams {
-  status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED';
+  status?: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
+  visibility?: 'PUBLIC' | 'PRIVATE' | 'UNLISTED';
   creatorId?: string;
   tag?: string;
+  tags?: string[];
+  search?: string;
   page?: number;
   limit?: number;
   sortBy?: 'createdAt' | 'participantCount' | 'responseCount';

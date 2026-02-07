@@ -29,6 +29,8 @@ export interface AgreementZone {
   propositions: Proposition[];
   participantCount: number;
   consensusLevel: 'high' | 'medium' | 'low';
+  /** IDs of responses related to this agreement zone */
+  relatedResponseIds?: string[];
 }
 
 /**

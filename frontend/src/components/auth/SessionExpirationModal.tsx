@@ -38,10 +38,18 @@ export function SessionExpirationModal({
 }: SessionExpirationModalProps) {
   const [timeRemaining, setTimeRemaining] = useState(initialTimeRemaining);
 
+  // Reset time remaining when modal opens or initial time changes
+  useEffect(() => {
+    // Schedule state update asynchronously to avoid cascading renders
+    const timer = setTimeout(() => {
+      setTimeRemaining(initialTimeRemaining);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [isOpen, initialTimeRemaining]);
+
   // Update countdown every second
   useEffect(() => {
     if (!isOpen) {
-      setTimeRemaining(initialTimeRemaining);
       return;
     }
 
@@ -61,7 +69,7 @@ export function SessionExpirationModal({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isOpen, initialTimeRemaining, onLogout]);
+  }, [isOpen, onLogout]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);

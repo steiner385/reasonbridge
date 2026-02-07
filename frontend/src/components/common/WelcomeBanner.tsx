@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
 
@@ -27,16 +27,11 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
   message = "Welcome back! You've been redirected from the homepage. Explore active discussions below.",
   onDismiss,
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  // Initialize visibility from localStorage on mount
+  const [isVisible, setIsVisible] = useState(() => {
+    return !localStorage.getItem(BANNER_DISMISSED_KEY);
+  });
   const [isClosing, setIsClosing] = useState(false);
-
-  useEffect(() => {
-    // Check if banner was previously dismissed
-    const wasDismissed = localStorage.getItem(BANNER_DISMISSED_KEY);
-    if (!wasDismissed) {
-      setIsVisible(true);
-    }
-  }, []);
 
   const handleDismiss = () => {
     // Start closing animation

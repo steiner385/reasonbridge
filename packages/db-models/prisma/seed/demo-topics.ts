@@ -28,6 +28,7 @@ export interface DemoTopic {
   id: string;
   title: string;
   description: string;
+  slug: string;
   creatorId: string;
   status: TopicStatus;
   crossCuttingThemes: string[];
@@ -42,6 +43,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should cities implement congestion pricing?',
     description:
       'Explore the pros and cons of charging drivers to enter busy urban areas. Consider environmental impact, economic effects on low-income workers, public transit alternatives, and lessons from cities like London and Stockholm.',
+    slug: 'should-cities-implement-congestion-pricing',
     creatorId: DEMO_USER_IDS.ALICE_ANDERSON,
     status: 'ACTIVE',
     crossCuttingThemes: ['urban planning', 'transportation', 'economics'],
@@ -54,6 +56,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should AI-generated content require disclosure?',
     description:
       'Debate whether content created by artificial intelligence (text, images, videos) should be legally required to carry disclosure labels. Consider implications for journalism, art, marketing, and democratic discourse.',
+    slug: 'should-ai-generated-content-require-disclosure',
     creatorId: DEMO_USER_IDS.BOB_BUILDER,
     status: 'ACTIVE',
     crossCuttingThemes: ['artificial intelligence', 'transparency', 'media'],
@@ -66,6 +69,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should standardized testing be eliminated?',
     description:
       'Discuss the role of standardized tests in education. Are they fair assessments or do they perpetuate inequality? What alternatives exist for measuring student achievement and school effectiveness?',
+    slug: 'should-standardized-testing-be-eliminated',
     creatorId: DEMO_USER_IDS.MOD_MARTINEZ,
     status: 'ACTIVE',
     crossCuttingThemes: ['education', 'equity', 'assessment'],
@@ -78,6 +82,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should companies mandate return-to-office policies?',
     description:
       'Examine the debate over remote work vs. office work. Consider productivity, collaboration, work-life balance, real estate economics, and the varying needs of different industries and roles.',
+    slug: 'should-companies-mandate-return-to-office-policies',
     creatorId: DEMO_USER_IDS.ALICE_ANDERSON,
     status: 'ACTIVE',
     crossCuttingThemes: ['work', 'productivity', 'technology'],
@@ -90,6 +95,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should preventive care be fully covered by insurance?',
     description:
       'Analyze whether health insurance should cover 100% of preventive care costs. Consider long-term healthcare savings, equity of access, insurance economics, and public health outcomes.',
+    slug: 'should-preventive-care-be-fully-covered-by-insurance',
     creatorId: DEMO_USER_IDS.ADMIN_ADAMS,
     status: 'ACTIVE',
     crossCuttingThemes: ['healthcare', 'economics', 'public policy'],
@@ -102,6 +108,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should social media have age verification requirements?',
     description:
       'Debate mandatory age verification for social media platforms. Consider child safety, privacy concerns, implementation challenges, parental responsibility, and potential impacts on free expression.',
+    slug: 'should-social-media-have-age-verification-requirements',
     creatorId: DEMO_USER_IDS.MOD_MARTINEZ,
     status: 'ACTIVE',
     crossCuttingThemes: ['technology', 'children', 'privacy'],
@@ -114,6 +121,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should voting be mandatory in democracies?',
     description:
       'Explore arguments for and against compulsory voting. Consider civic duty, representation, implementation challenges, and examples from countries like Australia and Belgium.',
+    slug: 'should-voting-be-mandatory-in-democracies',
     creatorId: DEMO_USER_IDS.ADMIN_ADAMS,
     status: 'ACTIVE',
     crossCuttingThemes: ['democracy', 'civic engagement', 'rights'],
@@ -126,6 +134,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should AI use in products be disclosed to consumers?',
     description:
       'Discuss whether companies should be required to disclose when their products or services use AI. Consider consumer rights, competitive concerns, and what constitutes meaningful disclosure.',
+    slug: 'should-ai-use-in-products-be-disclosed-to-consumers',
     creatorId: DEMO_USER_IDS.BOB_BUILDER,
     status: 'ACTIVE',
     crossCuttingThemes: ['AI', 'consumer protection', 'business'],
@@ -138,6 +147,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should single-use plastics be banned nationwide?',
     description:
       'Analyze the case for and against a comprehensive ban on single-use plastics. Consider environmental benefits, economic impacts, alternatives availability, and lessons from regional bans.',
+    slug: 'should-single-use-plastics-be-banned-nationwide',
     creatorId: DEMO_USER_IDS.ALICE_ANDERSON,
     status: 'ARCHIVED',
     crossCuttingThemes: ['environment', 'policy', 'industry'],
@@ -150,6 +160,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     title: 'Should gain-of-function research have international oversight?',
     description:
       'Debate the governance of gain-of-function research that enhances pathogen transmissibility or virulence. Balance scientific advancement against biosecurity risks and the need for international coordination.',
+    slug: 'should-gain-of-function-research-have-international-oversight',
     creatorId: DEMO_USER_IDS.ADMIN_ADAMS,
     status: 'ACTIVE',
     crossCuttingThemes: ['science', 'biosecurity', 'international relations'],

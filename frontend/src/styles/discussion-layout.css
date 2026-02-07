@@ -1,0 +1,353 @@
+/**
+ * Discussion Layout Styles
+ * Three-panel chat-style interface with responsive breakpoints
+ */
+
+/* ==========================================================================
+   Base Layout (Desktop ≥1280px)
+   ========================================================================== */
+
+.discussion-layout {
+  display: grid;
+  grid-template-columns: var(--left-panel-width, 320px) 1fr var(--right-panel-width, 400px);
+  grid-template-areas: 'left center right';
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+  color: var(--color-text, #1f2937);
+}
+
+/* ==========================================================================
+   Panel Base Styles
+   ========================================================================== */
+
+.discussion-layout__panel {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  background: var(--color-panel-background, #ffffff);
+  border-right: 1px solid var(--color-border, #e5e7eb);
+}
+
+.discussion-layout__panel:last-child {
+  border-right: none;
+}
+
+/* Left Panel - Topic Navigation */
+.discussion-layout__panel--left {
+  grid-area: left;
+  background: var(--color-panel-left-background, #f9fafb);
+}
+
+.discussion-layout__panel--left.discussion-layout__panel--collapsed {
+  display: none;
+}
+
+/* Center Panel - Conversation */
+.discussion-layout__panel--center {
+  grid-area: center;
+  background: var(--color-panel-center-background, #ffffff);
+  border-right: 1px solid var(--color-border, #e5e7eb);
+  border-left: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* Right Panel - Metadata */
+.discussion-layout__panel--right {
+  grid-area: right;
+  background: var(--color-panel-right-background, #f9fafb);
+}
+
+.discussion-layout__panel--right.discussion-layout__panel--collapsed {
+  display: none;
+}
+
+/* ==========================================================================
+   Panel Resizer Styles
+   ========================================================================== */
+
+.panel-resizer {
+  position: relative;
+  width: 4px;
+  height: 100%;
+  background: var(--color-resizer-background, #e5e7eb);
+  cursor: col-resize;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  z-index: 10;
+}
+
+.panel-resizer:hover,
+.panel-resizer:focus {
+  background: var(--color-resizer-hover, #9ca3af);
+  outline: none;
+}
+
+.panel-resizer--active {
+  background: var(--color-resizer-active, #6366f1);
+}
+
+.panel-resizer__handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 48px;
+  background: var(--color-resizer-handle, #6b7280);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.panel-resizer:hover .panel-resizer__handle,
+.panel-resizer:focus .panel-resizer__handle,
+.panel-resizer--active .panel-resizer__handle {
+  opacity: 1;
+}
+
+/* Left panel resizer positioning */
+.panel-resizer--left {
+  position: absolute;
+  left: var(--left-panel-width, 320px);
+  top: 0;
+}
+
+/* Right panel resizer positioning */
+.panel-resizer--right {
+  position: absolute;
+  right: var(--right-panel-width, 400px);
+  top: 0;
+}
+
+/* ==========================================================================
+   Scrollbar Styling (Webkit)
+   ========================================================================== */
+
+.discussion-layout__panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.discussion-layout__panel::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track, #f1f5f9);
+}
+
+.discussion-layout__panel::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb, #cbd5e1);
+  border-radius: 4px;
+}
+
+.discussion-layout__panel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover, #94a3b8);
+}
+
+/* ==========================================================================
+   Backdrop Overlay (Tablet/Mobile)
+   ========================================================================== */
+
+.discussion-layout__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  animation: fadeIn 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Tablet Layout (768px - 1279px)
+   ========================================================================== */
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .discussion-layout[data-breakpoint='tablet'] {
+    grid-template-columns: 1fr var(--right-panel-width, 360px);
+    grid-template-areas: 'center right';
+  }
+
+  /* Hide left panel on tablet by default */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+    max-width: 85vw;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Show left panel when overlay is open */
+  .discussion-layout[data-breakpoint='tablet']
+    .discussion-layout__panel--left.discussion-layout__panel--overlay-open {
+    transform: translateX(0);
+  }
+
+  /* Adjust right panel width constraint for tablet */
+  .discussion-layout[data-breakpoint='tablet'] {
+    --right-panel-width: clamp(280px, 35vw, 450px);
+  }
+
+  /* Hide left resizer on tablet */
+  .discussion-layout[data-breakpoint='tablet'] .panel-resizer--left {
+    display: none;
+  }
+
+  /* Adjust right resizer position */
+  .discussion-layout[data-breakpoint='tablet'] .panel-resizer--right {
+    right: var(--right-panel-width, 360px);
+  }
+}
+
+/* ==========================================================================
+   Mobile Layout (<768px)
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .discussion-layout[data-breakpoint='mobile'] {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: 'center';
+    height: 100vh;
+  }
+
+  /* Left panel as slide-in overlay on mobile */
+  .discussion-layout[data-breakpoint='mobile'] .discussion-layout__panel--left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 80vw;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid var(--color-border, #e5e7eb);
+    border-bottom: none;
+  }
+
+  /* Show left panel when overlay is open */
+  .discussion-layout[data-breakpoint='mobile']
+    .discussion-layout__panel--left.discussion-layout__panel--overlay-open {
+    transform: translateX(0);
+  }
+
+  /* Center panel takes full screen */
+  .discussion-layout[data-breakpoint='mobile'] .discussion-layout__panel--center {
+    grid-area: center;
+    border-right: none;
+    border-left: none;
+    border-bottom: none;
+  }
+
+  /* Right panel hidden on mobile by default, shown via tab switching */
+  .discussion-layout[data-breakpoint='mobile'] .discussion-layout__panel--right {
+    display: none;
+  }
+
+  /* Hide panel resizers on mobile (touch gestures not supported yet) */
+  .discussion-layout[data-breakpoint='mobile'] .panel-resizer {
+    display: none;
+  }
+
+  /* Increase touch target sizes on mobile (WCAG 2.1 AA requirement) */
+  .discussion-layout[data-breakpoint='mobile'] button,
+  .discussion-layout[data-breakpoint='mobile'] a,
+  .discussion-layout[data-breakpoint='mobile'] [role='button'],
+  .discussion-layout[data-breakpoint='mobile'] [role='tab'],
+  .discussion-layout[data-breakpoint='mobile'] input[type='checkbox'],
+  .discussion-layout[data-breakpoint='mobile'] input[type='radio'] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Ensure tap targets for tab buttons have adequate spacing */
+  .discussion-layout[data-breakpoint='mobile'] [role='tablist'] button {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* Ensure accordion headers have adequate touch targets */
+  .discussion-layout[data-breakpoint='mobile'] .metadata-panel [role='button'] {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+
+  /* Ensure hamburger menu buttons have adequate touch targets */
+  .discussion-layout[data-breakpoint='mobile'] .conversation-panel button[aria-label*='navigation'],
+  .discussion-layout[data-breakpoint='mobile'] .topic-navigation-panel button[aria-label*='navigation'] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px;
+  }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+/* Focus visible styles for keyboard navigation */
+.panel-resizer:focus-visible {
+  outline: 2px solid var(--color-focus, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .panel-resizer,
+  .panel-resizer__handle {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .panel-resizer {
+    background: CanvasText;
+  }
+
+  .discussion-layout__panel {
+    border-color: CanvasText;
+  }
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .discussion-layout {
+    --color-background: #111827;
+    --color-text: #f9fafb;
+    --color-panel-background: #1f2937;
+    --color-panel-left-background: #111827;
+    --color-panel-center-background: #1f2937;
+    --color-panel-right-background: #111827;
+    --color-border: #374151;
+    --color-resizer-background: #374151;
+    --color-resizer-hover: #4b5563;
+    --color-resizer-active: #818cf8;
+    --color-resizer-handle: #9ca3af;
+    --color-scrollbar-track: #1f2937;
+    --color-scrollbar-thumb: #4b5563;
+    --color-scrollbar-thumb-hover: #6b7280;
+    --color-focus: #60a5fa;
+  }
+}
