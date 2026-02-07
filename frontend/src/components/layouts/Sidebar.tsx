@@ -37,7 +37,7 @@ export function Sidebar({ unreadCount = 0 }: SidebarProps) {
     >
       {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto p-4">
-        <Navigation unreadCount={unreadCount} />
+        <Navigation unreadCount={unreadCount} isCollapsed={isCollapsed} />
       </div>
 
       {/* User Profile Section (bottom) */}
@@ -45,12 +45,13 @@ export function Sidebar({ unreadCount = 0 }: SidebarProps) {
         <div className="border-t border-gray-200 p-4 dark:border-gray-800">
           <Link
             to="/profile"
+            title={isCollapsed ? `${user.displayName}\n${user.email}` : undefined}
             className={`
               flex items-center gap-3 rounded-lg p-3 transition-colors
               hover:bg-gray-100 dark:hover:bg-gray-800
               ${isCollapsed ? 'justify-center' : ''}
             `}
-            aria-label="View profile"
+            aria-label={isCollapsed ? `${user.displayName} - ${user.email}` : 'View profile'}
           >
             {/* Avatar */}
             {user.avatarUrl ? (
