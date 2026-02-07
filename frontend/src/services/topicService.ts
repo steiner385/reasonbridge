@@ -59,7 +59,8 @@ export interface TopicCreationError {
 
 class TopicService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('accessToken');
+    // Use 'authToken' key to match apiClient token storage (api.ts line 47)
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
