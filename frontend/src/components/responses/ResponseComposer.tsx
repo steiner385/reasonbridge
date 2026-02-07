@@ -11,6 +11,7 @@ import { usePreviewFeedback } from '../../hooks/usePreviewFeedback';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import type { CreateResponseRequest } from '../../types/response';
 import type { FeedbackResponse } from '../../types/feedback';
+import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { apiClient } from '../../lib/api';
 
 export interface ResponseComposerProps {
@@ -68,7 +69,7 @@ export interface ResponseComposerProps {
    * Callback when preview feedback state changes (for right panel display)
    */
   onPreviewFeedbackChange?: (
-    feedback: any,
+    feedback: PreviewFeedbackItem[],
     readyToPost: boolean,
     summary: string,
     isLoading?: boolean,

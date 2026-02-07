@@ -120,8 +120,8 @@ export function MergeTopicsModal({
   const sourceTopics = availableTopics.filter((t) => selectedSourceIds.includes(t.id));
   const targetTopic = availableTopics.find((t) => t.id === targetTopicId);
   const totalResponses = sourceTopics.reduce((sum, t) => sum + (t.responseCount || 0), 0);
-  const totalParticipants = new Set(
-    sourceTopics.flatMap((t) => []), // Would need participant data from API
+  const _totalParticipants = new Set(
+    sourceTopics.flatMap((_t) => []), // Would need participant data from API
   ).size;
 
   // Preview View

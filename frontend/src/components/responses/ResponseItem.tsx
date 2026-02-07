@@ -19,6 +19,7 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import type { ResponseDetail } from '../../services/discussionService';
 import type { CreateResponseRequest } from '../../types/response';
+import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import ResponseComposer from './ResponseComposer';
 
 export interface ResponseItemProps {
@@ -32,7 +33,7 @@ export interface ResponseItemProps {
   onReplySubmit?: (response: CreateResponseRequest) => Promise<void>;
   /** Callback for preview feedback changes (for right panel) */
   onPreviewFeedbackChange?: (
-    feedback: any,
+    feedback: PreviewFeedbackItem[],
     readyToPost: boolean,
     summary: string,
     isLoading?: boolean,

@@ -16,7 +16,7 @@
 import { useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { useCreateTopic, type TopicCreationError } from '../../hooks/useCreateTopic';
+import { useCreateTopic } from '../../hooks/useCreateTopic';
 import type { DuplicateSuggestion } from '../../services/topicService';
 
 export interface CreateTopicModalProps {

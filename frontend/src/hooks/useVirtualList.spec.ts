@@ -57,7 +57,8 @@ describe('useVirtualList', () => {
       const mockElement = {
         scrollTo: mockScrollTo,
       };
-      (result.current.containerRef as any).current = mockElement;
+      (result.current.containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+        mockElement;
 
       act(() => {
         result.current.scrollToIndex(10);
@@ -88,7 +89,8 @@ describe('useVirtualList', () => {
       const mockElement = {
         scrollTo: mockScrollTo,
       };
-      (result.current.containerRef as any).current = mockElement;
+      (result.current.containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+        mockElement;
 
       act(() => {
         result.current.scrollToTop();
@@ -112,7 +114,8 @@ describe('useVirtualList', () => {
         getBoundingClientRect: () => ({ top: 100 }),
         scrollTo: vi.fn(),
       };
-      (result.current.containerRef as any).current = mockElement;
+      (result.current.containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+        mockElement;
 
       // Change window height
       Object.defineProperty(window, 'innerHeight', {

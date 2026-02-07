@@ -3,6 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import * as feedbackApi from '../lib/feedback-api';
+import type { PreviewFeedbackResponse } from '../lib/feedback-api';
 import { usePreviewFeedback } from './usePreviewFeedback';
 
 // Mock the feedback API
@@ -117,7 +118,9 @@ describe('usePreviewFeedback', () => {
         analysisTimeMs: 100,
       };
 
-      vi.mocked(feedbackApi.previewFeedback).mockResolvedValue(mockResponse as any);
+      vi.mocked(feedbackApi.previewFeedback).mockResolvedValue(
+        mockResponse as PreviewFeedbackResponse,
+      );
 
       const { result } = renderHook(() => usePreviewFeedback(longContent), { wrapper });
 
@@ -154,7 +157,7 @@ describe('usePreviewFeedback', () => {
         readyToPost: true,
         summary: '',
         analysisTimeMs: 0,
-      } as any);
+      } as PreviewFeedbackResponse);
 
       const { result } = renderHook(
         () =>
@@ -203,7 +206,7 @@ describe('usePreviewFeedback', () => {
         readyToPost: true,
         summary: '',
         analysisTimeMs: 0,
-      } as any);
+      } as PreviewFeedbackResponse);
 
       const { result } = renderHook(() => usePreviewFeedback(longContent), { wrapper });
 
@@ -261,12 +264,12 @@ describe('usePreviewFeedback', () => {
       const longContent = 'This is a long enough content for analysis';
 
       // Create a promise we can control
-      let resolvePromise: (value: any) => void;
-      const promise = new Promise((resolve) => {
+      let resolvePromise: (value: PreviewFeedbackResponse) => void;
+      const promise = new Promise<PreviewFeedbackResponse>((resolve) => {
         resolvePromise = resolve;
       });
 
-      vi.mocked(feedbackApi.previewFeedback).mockReturnValue(promise as any);
+      vi.mocked(feedbackApi.previewFeedback).mockReturnValue(promise);
 
       const { result } = renderHook(() => usePreviewFeedback(longContent), { wrapper });
 
@@ -310,7 +313,9 @@ describe('usePreviewFeedback', () => {
         analysisTimeMs: 250,
       };
 
-      vi.mocked(feedbackApi.previewFeedback).mockResolvedValue(mockResponse as any);
+      vi.mocked(feedbackApi.previewFeedback).mockResolvedValue(
+        mockResponse as PreviewFeedbackResponse,
+      );
 
       const { result } = renderHook(() => usePreviewFeedback(longContent), { wrapper });
 

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import type { UsePreviewFeedbackResult } from '../../hooks/usePreviewFeedback';
 import ResponseComposer from './ResponseComposer';
 
 // Mock usePreviewFeedback hook
@@ -20,7 +21,6 @@ vi.mock('../../hooks/usePreviewFeedback', () => ({
 describe('ResponseComposer', () => {
   let queryClient: QueryClient;
   const mockOnSubmit = vi.fn();
-  const mockOnCancel = vi.fn();
   const mockOnPreviewFeedbackChange = vi.fn();
 
   beforeEach(() => {
@@ -119,7 +119,7 @@ describe('ResponseComposer', () => {
         summary: 'Consider adding more evidence',
         sensitivity: 'MEDIUM',
         setSensitivity: vi.fn(),
-      } as any);
+      } as UsePreviewFeedbackResult);
 
       render(
         <ResponseComposer
@@ -180,7 +180,7 @@ describe('ResponseComposer', () => {
         summary: 'Consider adding more evidence',
         sensitivity: 'MEDIUM',
         setSensitivity: vi.fn(),
-      } as any);
+      } as UsePreviewFeedbackResult);
 
       render(
         <ResponseComposer

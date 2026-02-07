@@ -113,7 +113,7 @@ export interface UseWebSocketReturn {
     handler: WebSocketMessageHandler<T>,
   ) => () => void;
   /** Send a message to the server */
-  send: (message: any) => void;
+  send: (message: WebSocketMessage) => void;
 }
 
 /**
@@ -201,7 +201,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       const message = JSON.parse(event.data) as WebSocketMessage;
 
       // Ignore PONG responses
-      if (message.type === ('PONG' as any)) {
+      if (message.type === 'PONG') {
         return;
       }
 
@@ -342,7 +342,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   /**
    * Send message to WebSocket server
    */
-  const send = useCallback((message: any) => {
+  const send = useCallback((message: WebSocketMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     } else {

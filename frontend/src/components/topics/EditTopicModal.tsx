@@ -51,22 +51,19 @@ export function EditTopicModal({
   // Reset form when topic changes or modal opens
   useEffect(() => {
     if (isOpen) {
-      setTitle(topic.title);
-      setDescription(topic.description);
-      setTags(topic.tags || []);
-      setTagInput('');
-      setEditReason('');
-      setFlagForReview(false);
-      setErrors({});
-      setShowPreview(false);
+      // Schedule state updates asynchronously to avoid cascading renders
+      setTimeout(() => {
+        setTitle(topic.title);
+        setDescription(topic.description);
+        setTags(topic.tags || []);
+        setTagInput('');
+        setEditReason('');
+        setFlagForReview(false);
+        setErrors({});
+        setShowPreview(false);
+      }, 0);
     }
   }, [isOpen, topic]);
-
-  // Calculate if topic is older than 24 hours
-  const requiresEditReason = useMemo(() => {
-    const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
-    return topicAgeHours > 24;
-  }, [topic.createdAt]);
 
   // Check if there are any changes
   const hasChanges =
@@ -97,6 +94,10 @@ export function EditTopicModal({
     } else if (tags.length > 5) {
       newErrors.tags = 'Maximum 5 tags allowed';
     }
+
+    // Calculate if topic is older than 24 hours (only during validation, not render)
+    const topicAgeHours = (Date.now() - new Date(topic.createdAt).getTime()) / (1000 * 60 * 60);
+    const requiresEditReason = topicAgeHours > 24;
 
     // Edit reason validation (required if topic is >24h old and there are changes)
     if (requiresEditReason && hasChanges && editReason.trim().length < 10) {

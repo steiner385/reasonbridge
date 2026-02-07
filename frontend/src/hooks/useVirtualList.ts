@@ -80,7 +80,10 @@ export function useVirtualList(itemCount: number, config: VirtualListConfig): Us
   // Update container height on resize if not explicitly set
   useEffect(() => {
     if (configHeight) {
-      setContainerHeight(configHeight);
+      // Schedule state update asynchronously to avoid cascading renders
+      setTimeout(() => {
+        setContainerHeight(configHeight);
+      }, 0);
       return;
     }
 

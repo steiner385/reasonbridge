@@ -52,7 +52,10 @@ export function useTopicNavigation(): UseTopicNavigationReturn {
   // Sync activeTopicId with URL changes (e.g., browser back/forward)
   useEffect(() => {
     const topicId = searchParams.get('topic');
-    setActiveTopicId(topicId);
+    // Schedule state update asynchronously to avoid cascading renders
+    setTimeout(() => {
+      setActiveTopicId(topicId);
+    }, 0);
   }, [searchParams]);
 
   /**

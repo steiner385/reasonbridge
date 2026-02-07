@@ -24,7 +24,7 @@ describe('useTopicNavigation', () => {
     vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
       new URLSearchParams(),
       mockSetSearchParams,
-    ] as any);
+    ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
     vi.mocked(ReactRouter.useNavigate).mockReturnValue(mockNavigate);
   });
@@ -41,7 +41,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -70,7 +70,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -89,7 +89,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -108,7 +108,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -125,7 +125,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -145,7 +145,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -157,7 +157,7 @@ describe('useTopicNavigation', () => {
       vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
         searchParams,
         mockSetSearchParams,
-      ] as any);
+      ] as [URLSearchParams, (params: URLSearchParams) => void]);
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -173,15 +173,14 @@ describe('useTopicNavigation', () => {
 
   describe('URL change detection', () => {
     it('should update activeTopicId when URL changes', () => {
-      const initialParams = new URLSearchParams();
       const { rerender } = renderHook(() => useTopicNavigation());
 
       // Simulate URL change
       const newParams = new URLSearchParams('topic=topic-updated');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        newParams,
-        mockSetSearchParams,
-      ] as any);
+      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([newParams, mockSetSearchParams] as [
+        URLSearchParams,
+        (params: URLSearchParams) => void,
+      ]);
 
       rerender();
 

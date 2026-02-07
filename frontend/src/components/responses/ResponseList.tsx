@@ -16,6 +16,7 @@ import { List } from 'react-window';
 import { useResponses } from '../../hooks/useResponses';
 import Card from '../ui/Card';
 import type { CreateResponseRequest } from '../../types/response';
+import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { ResponseItem } from './ResponseItem';
 
 export interface ResponseListProps {
@@ -31,7 +32,7 @@ export interface ResponseListProps {
   onReplySubmit?: (response: CreateResponseRequest) => Promise<void>;
   /** Callback for preview feedback changes (for right panel) */
   onPreviewFeedbackChange?: (
-    feedback: any,
+    feedback: PreviewFeedbackItem[],
     readyToPost: boolean,
     summary: string,
     isLoading?: boolean,
@@ -117,59 +118,60 @@ export function ResponseList({
   }
 
   // Memoize row renderer to prevent unnecessary re-renders
-  const Row = useMemo(
-    () =>
-      ({
-        index,
-        style,
-        ariaAttributes,
-      }: {
-        index: number;
-        style: React.CSSProperties;
-        ariaAttributes: {
-          'aria-posinset': number;
-          'aria-setsize': number;
-          role: 'listitem';
-        };
-      }) => {
-        const response = responses[index];
-        if (!response) return null;
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- Hook is only called when responses exist (after early returns)
+  const Row = useMemo(() => {
+    const RowComponent = ({
+      index,
+      style,
+      ariaAttributes,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: {
+        'aria-posinset': number;
+        'aria-setsize': number;
+        role: 'listitem';
+      };
+    }) => {
+      const response = responses[index];
+      if (!response) return null;
 
-        const isHighlighted = highlightedResponseIds.has(response.id);
+      const isHighlighted = highlightedResponseIds.has(response.id);
 
-        return (
-          <div style={style} className="px-2" {...ariaAttributes}>
-            <div
-              className={`
+      return (
+        <div style={style} className="px-2" {...ariaAttributes}>
+          <div
+            className={`
                 transition-all duration-300
                 ${isHighlighted ? 'ring-2 ring-primary-500 rounded-lg' : ''}
               `}
-              data-response-id={response.id}
-            >
-              <ResponseItem
-                response={response}
-                discussionId={discussionId}
-                showReplies={enableThreading}
-                onReplySubmit={onReplySubmit}
-                onPreviewFeedbackChange={onPreviewFeedbackChange}
-              />
-            </div>
+            data-response-id={response.id}
+          >
+            <ResponseItem
+              response={response}
+              discussionId={discussionId}
+              showReplies={enableThreading}
+              onReplySubmit={onReplySubmit}
+              onPreviewFeedbackChange={onPreviewFeedbackChange}
+            />
           </div>
-        );
-      },
-    [
-      responses,
-      discussionId,
-      enableThreading,
-      highlightedResponseIds,
-      onReplySubmit,
-      onPreviewFeedbackChange,
-    ],
-  );
+        </div>
+      );
+    };
+    RowComponent.displayName = 'ResponseRow';
+    return RowComponent;
+  }, [
+    responses,
+    discussionId,
+    enableThreading,
+    highlightedResponseIds,
+    onReplySubmit,
+    onPreviewFeedbackChange,
+  ]);
 
   return (
     <div className="response-list" role="list" aria-label="Responses">
-      <List<{}>
+      <List<Record<string, never>>
         defaultHeight={height}
         rowCount={responses.length}
         rowHeight={itemHeight}

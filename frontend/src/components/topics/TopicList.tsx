@@ -43,40 +43,40 @@ export function TopicList({
   className = '',
 }: TopicListProps) {
   // Memoize row renderer to prevent unnecessary re-renders
-  const Row = useMemo(
-    () =>
-      ({
-        index,
-        style,
-        ariaAttributes,
-      }: {
-        index: number;
-        style: React.CSSProperties;
-        ariaAttributes: {
-          'aria-posinset': number;
-          'aria-setsize': number;
-          role: 'listitem';
-        };
-      }) => {
-        const topic = topics[index];
-        if (!topic) return null;
+  const Row = useMemo(() => {
+    const RowComponent = ({
+      index,
+      style,
+      ariaAttributes,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: {
+        'aria-posinset': number;
+        'aria-setsize': number;
+        role: 'listitem';
+      };
+    }) => {
+      const topic = topics[index];
+      if (!topic) return null;
 
-        const isActive = activeTopicId === topic.id;
-        const hasUnread = unreadMap.get(topic.id) || false;
+      const isActive = activeTopicId === topic.id;
+      const hasUnread = unreadMap.get(topic.id) || false;
 
-        return (
-          <div style={style} {...ariaAttributes}>
-            <TopicListItem
-              topic={topic}
-              isActive={isActive}
-              hasUnread={hasUnread}
-              onClick={onTopicClick}
-            />
-          </div>
-        );
-      },
-    [topics, activeTopicId, onTopicClick, unreadMap],
-  );
+      return (
+        <div style={style} {...ariaAttributes}>
+          <TopicListItem
+            topic={topic}
+            isActive={isActive}
+            hasUnread={hasUnread}
+            onClick={onTopicClick}
+          />
+        </div>
+      );
+    };
+    RowComponent.displayName = 'TopicRow';
+    return RowComponent;
+  }, [topics, activeTopicId, onTopicClick, unreadMap]);
 
   // Empty state
   if (topics.length === 0) {
@@ -113,13 +113,13 @@ export function TopicList({
       role="list"
       aria-label="Topic list"
     >
-      <List<{}>
+      <List<Record<string, never>>
         defaultHeight={height}
         rowCount={topics.length}
         rowHeight={itemHeight}
         overscanCount={5}
         rowComponent={Row}
-        rowProps={{}}
+        rowProps={{} as Record<string, never>}
       />
     </div>
   );

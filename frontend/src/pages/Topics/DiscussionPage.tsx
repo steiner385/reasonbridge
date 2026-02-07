@@ -147,7 +147,7 @@ export function DiscussionPage() {
   };
 
   // Handle inline reply submission
-  const handleReplySubmit = async (response: CreateResponseRequest) => {
+  const handleReplySubmit = async (_response: CreateResponseRequest) => {
     // TODO: Implement actual API call to submit reply
     // For now, just placeholder - API integration will be added later
 
