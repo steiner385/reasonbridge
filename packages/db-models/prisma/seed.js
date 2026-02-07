@@ -49,6 +49,7 @@ async function main() {
     (await prisma.discussionTopic.create({
       data: {
         title: 'Should renewable energy be prioritized over fossil fuels?',
+        slug: 'should-renewable-energy-be-prioritized-over-fossil-fuels',
         description:
           'Discuss the transition to renewable energy sources and their impact on the environment and economy.',
         creatorId: testUser1.id,
@@ -64,6 +65,7 @@ async function main() {
     (await prisma.discussionTopic.create({
       data: {
         title: 'Universal Basic Income: Viable or Unsustainable?',
+        slug: 'universal-basic-income-viable-or-unsustainable',
         description:
           'Explore the feasibility and potential impact of implementing universal basic income policies.',
         creatorId: testUser2.id,
@@ -79,6 +81,7 @@ async function main() {
     (await prisma.discussionTopic.create({
       data: {
         title: 'Remote Work: The Future of Employment?',
+        slug: 'remote-work-the-future-of-employment',
         description:
           'Debate the long-term effects of remote work on productivity, work-life balance, and urban development.',
         creatorId: testUser1.id,
