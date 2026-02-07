@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useNotifications } from '../../hooks/useNotifications';
 
 /**
  * Navigation Component
@@ -53,13 +54,13 @@ function NavLink({ to, icon, label, badge, 'data-tour': dataTour }: NavLinkProps
 }
 
 interface NavigationProps {
-  /** Optional unread notification count */
-  unreadCount?: number;
   /** Optional click handler for navigation items (useful for mobile drawer) */
   onNavigate?: () => void;
 }
 
-export function Navigation({ unreadCount = 0, onNavigate }: NavigationProps) {
+export function Navigation({ onNavigate }: NavigationProps) {
+  const { unreadCount } = useNotifications();
+
   const handleClick = () => {
     onNavigate?.();
   };

@@ -15,12 +15,7 @@ import { Navigation } from './Navigation';
  * Hidden on mobile viewports (< 768px)
  */
 
-interface SidebarProps {
-  /** Optional unread notification count */
-  unreadCount?: number;
-}
-
-export function Sidebar({ unreadCount = 0 }: SidebarProps) {
+export function Sidebar() {
   const { isCollapsed } = useSidebar();
   const { user } = useAuth();
 
@@ -37,7 +32,7 @@ export function Sidebar({ unreadCount = 0 }: SidebarProps) {
     >
       {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto p-4">
-        <Navigation unreadCount={unreadCount} />
+        <Navigation />
       </div>
 
       {/* User Profile Section (bottom) */}
