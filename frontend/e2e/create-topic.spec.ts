@@ -25,8 +25,15 @@ test.describe('Create Topic Flow', () => {
     // Wait for login to complete and modal to close
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
 
-    // Navigate to topics page
-    await page.goto('/topics');
+    // Wait for navigation and authentication state to stabilize
+    await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+
+    // Navigate to topics page if not already there
+    if (!page.url().includes('/topics')) {
+      await page.goto('/topics');
+    }
     await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
   });
 
