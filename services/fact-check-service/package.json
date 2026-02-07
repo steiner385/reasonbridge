@@ -24,12 +24,15 @@
     "@reason-bridge/db-models": "workspace:*",
     "fastify": "^5.7.4",
     "reflect-metadata": "^0.2.1",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@prisma/adapter-pg": "^7.3.0",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/node": "25.2.1",
     "tsx": "^4.7.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "@types/pg": "^8.11.10"
   },
   "engines": {
     "node": ">=20.0.0"
