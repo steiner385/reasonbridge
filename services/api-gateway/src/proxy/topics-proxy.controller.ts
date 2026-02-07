@@ -3,7 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Param, Query, Res, Headers, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Query,
+  Res,
+  Headers,
+  Body,
+  Inject,
+} from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -113,6 +125,71 @@ export class TopicsProxyController {
       method: 'GET',
       path: `/topics/${id}/responses`,
       query,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  @Post()
+  async createTopic(
+    @Body() body: Record<string, any>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'POST',
+      path: '/topics',
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  @Patch(':id')
+  async updateTopic(
+    @Param('id') id: string,
+    @Body() body: Record<string, any>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'PATCH',
+      path: `/topics/${id}`,
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  @Delete(':id')
+  async deleteTopic(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'DELETE',
+      path: `/topics/${id}`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  @Post(':id/responses')
+  async createResponse(
+    @Param('id') id: string,
+    @Body() body: Record<string, any>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'POST',
+      path: `/topics/${id}/responses`,
+      body,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
 
