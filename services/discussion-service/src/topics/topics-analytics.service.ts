@@ -14,7 +14,7 @@
  */
 
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@reasonbridge/db-models';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface DailyAnalytics {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -96,7 +96,7 @@ export class TopicsAnalyticsService {
 
     // Combine historical and real-time metrics
     const dailyMetrics: DailyAnalytics[] = [
-      ...historicalMetrics.map((m) => ({
+      ...historicalMetrics.map((m: any) => ({
         date: m.date.toISOString().split('T')[0],
         viewCount: m.viewCount,
         uniqueViewers: m.uniqueViewers,
@@ -153,17 +153,19 @@ export class TopicsAnalyticsService {
 
     // Calculate metrics
     const responseCount = responsesToday.length;
-    const uniqueAuthors = new Set(responsesToday.map((r) => r.authorId));
+    const uniqueAuthors = new Set(responsesToday.map((r: any) => r.authorId));
     const participantCount = uniqueAuthors.size;
 
     const avgResponseLength =
       responseCount > 0
-        ? Math.round(responsesToday.reduce((sum, r) => sum + r.content.length, 0) / responseCount)
+        ? Math.round(
+            responsesToday.reduce((sum: any, r: any) => sum + r.content.length, 0) / responseCount,
+          )
         : 0;
 
     // Calculate peak activity hour
     const hourCounts = new Map<number, number>();
-    responsesToday.forEach((r) => {
+    responsesToday.forEach((r: any) => {
       const hour = r.createdAt.getHours();
       hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
     });
@@ -191,7 +193,7 @@ export class TopicsAnalyticsService {
     );
 
     return {
-      date: today.toISOString().split('T')[0],
+      date: today.toISOString().split('T')[0]!,
       viewCount: estimatedViews,
       uniqueViewers: estimatedUniqueViewers,
       responseCount,
@@ -233,17 +235,19 @@ export class TopicsAnalyticsService {
 
     // Calculate metrics
     const responseCount = responses.length;
-    const uniqueAuthors = new Set(responses.map((r) => r.authorId));
+    const uniqueAuthors = new Set(responses.map((r: any) => r.authorId));
     const participantCount = uniqueAuthors.size;
 
     const avgResponseLength =
       responseCount > 0
-        ? Math.round(responses.reduce((sum, r) => sum + r.content.length, 0) / responseCount)
+        ? Math.round(
+            responses.reduce((sum: any, r: any) => sum + r.content.length, 0) / responseCount,
+          )
         : 0;
 
     // Calculate peak activity hour
     const hourCounts = new Map<number, number>();
-    responses.forEach((r) => {
+    responses.forEach((r: any) => {
       const hour = r.createdAt.getHours();
       hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
     });

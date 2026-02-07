@@ -500,6 +500,19 @@ export class TopicsService {
   }
 
   /**
+   * Invalidate topic-related caches
+   * @param topicId - ID of the topic whose caches should be invalidated
+   */
+  async invalidateTopicCaches(topicId: string): Promise<void> {
+    // Invalidate common ground cache
+    await this.invalidateCommonGroundCache(topicId);
+
+    // Invalidate topic-specific cache keys
+    const topicKey = `topic:${topicId}`;
+    await this.cacheManager.del(topicKey);
+  }
+
+  /**
    * Update topic status with permission checks
    * Feature 016: Topic Management (T027)
    *
@@ -616,8 +629,9 @@ export class TopicsService {
     // Step 6: Invalidate caches
     await this.cacheManager.del('topics:list');
     // Clear all query-based caches for this topic
-    const cacheKeys = await this.cacheManager.store.keys();
-    const topicCacheKeys = cacheKeys.filter((key: string) => key.includes(topicId));
+    const cacheKeys = await this.cacheManager.stores.keys();
+    const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
+    const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
     await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager.del(key)));
 
     return {
@@ -840,8 +854,9 @@ export class TopicsService {
 
     // Step 9: Invalidate caches
     await this.cacheManager.del('topics:list');
-    const cacheKeys = await this.cacheManager.store.keys();
-    const topicCacheKeys = cacheKeys.filter((key: string) => key.includes(topicId));
+    const cacheKeys = await this.cacheManager.stores.keys();
+    const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
+    const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
     await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager.del(key)));
 
     return {

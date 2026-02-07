@@ -26,7 +26,7 @@ export class CreateTopicDto {
   @Length(10, 200, {
     message: 'Title must be between 10 and 200 characters',
   })
-  title: string;
+  title!: string;
 
   /**
    * Topic description (50-5000 characters)
@@ -35,7 +35,7 @@ export class CreateTopicDto {
   @Length(50, 5000, {
     message: 'Description must be between 50 and 5000 characters',
   })
-  description: string;
+  description!: string;
 
   /**
    * Topic tags (1-5 tags, each 2-50 characters, alphanumeric with spaces/hyphens)
@@ -56,7 +56,7 @@ export class CreateTopicDto {
     each: true,
     message: 'Tags can only contain letters, numbers, spaces, and hyphens',
   })
-  tags: string[];
+  tags!: string[];
 
   /**
    * Topic visibility (defaults to PUBLIC)

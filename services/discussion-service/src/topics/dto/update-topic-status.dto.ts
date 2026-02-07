@@ -11,5 +11,5 @@ import { IsEnum } from 'class-validator';
  */
 export class UpdateTopicStatusDto {
   @IsEnum(['SEEDING', 'ACTIVE', 'ARCHIVED', 'LOCKED'])
-  status: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
+  status!: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
 }

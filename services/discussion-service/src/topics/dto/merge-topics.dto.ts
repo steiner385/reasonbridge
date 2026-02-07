@@ -24,7 +24,7 @@ export class MergeTopicsDto {
     each: true,
     message: 'Each source topic ID must be a valid UUID',
   })
-  sourceTopicIds: string[];
+  sourceTopicIds!: string[];
 
   /**
    * Target topic ID (destination topic that will receive merged content)
@@ -32,7 +32,7 @@ export class MergeTopicsDto {
   @IsUUID('4', {
     message: 'Target topic ID must be a valid UUID',
   })
-  targetTopicId: string;
+  targetTopicId!: string;
 
   /**
    * Reason for merge (required for audit trail)
@@ -41,5 +41,5 @@ export class MergeTopicsDto {
   @Length(20, 1000, {
     message: 'Merge reason must be between 20 and 1000 characters',
   })
-  mergeReason: string;
+  mergeReason!: string;
 }

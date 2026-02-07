@@ -60,7 +60,8 @@ export class TopicsSearchService {
       this.logger.debug(`Full-text search for "${query}" returned ${results.length} results`);
       return results;
     } catch (error) {
-      this.logger.error(`Full-text search failed: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Full-text search failed: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -120,7 +121,8 @@ export class TopicsSearchService {
         };
       });
     } catch (error) {
-      this.logger.error(`Trigram similarity search failed: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Trigram similarity search failed: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -193,7 +195,7 @@ export class TopicsSearchService {
     }
 
     const threshold = strictMode ? 0.8 : 0.9;
-    const tooSimilar = duplicates[0].similarityScore >= threshold;
+    const tooSimilar = duplicates[0]!.similarityScore >= threshold;
 
     return {
       isUnique: !tooSimilar,

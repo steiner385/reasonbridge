@@ -166,7 +166,8 @@ export class SlugGeneratorService {
       this.logger.log(`Regenerated slug for topic ${topicId}: ${newSlug}`);
       return newSlug;
     } catch (error) {
-      this.logger.error(`Failed to regenerate slug: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to regenerate slug: ${err.message}`, err.stack);
       throw error;
     }
   }

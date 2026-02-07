@@ -78,7 +78,8 @@ export class TopicsEditService {
 
       return editRecord as TopicEditRecord;
     } catch (error) {
-      this.logger.error(`Failed to create edit record: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to create edit record: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -102,7 +103,8 @@ export class TopicsEditService {
       this.logger.debug(`Retrieved ${history.length} edit records for topic ${topicId}`);
       return history as TopicEditRecord[];
     } catch (error) {
-      this.logger.error(`Failed to retrieve edit history: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to retrieve edit history: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -126,7 +128,8 @@ export class TopicsEditService {
       this.logger.debug(`Retrieved ${history.length} edit records for user ${editorId}`);
       return history as TopicEditRecord[];
     } catch (error) {
-      this.logger.error(`Failed to retrieve user edit history: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to retrieve user edit history: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -149,7 +152,8 @@ export class TopicsEditService {
       this.logger.debug(`Retrieved ${flaggedEdits.length} flagged edit records`);
       return flaggedEdits as TopicEditRecord[];
     } catch (error) {
-      this.logger.error(`Failed to retrieve flagged edits: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to retrieve flagged edits: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -170,7 +174,8 @@ export class TopicsEditService {
 
       return latestEdit as TopicEditRecord | null;
     } catch (error) {
-      this.logger.error(`Failed to retrieve latest edit: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to retrieve latest edit: ${err.message}`, err.stack);
       throw error;
     }
   }
@@ -190,7 +195,8 @@ export class TopicsEditService {
 
       return count;
     } catch (error) {
-      this.logger.error(`Failed to count edits: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Failed to count edits: ${err.message}`, err.stack);
       throw error;
     }
   }
