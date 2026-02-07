@@ -42,7 +42,8 @@ import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponseDto, VerificationEmailSentResponseDto } from './dto/auth-response.dto';
 import { UserProfileDto, OnboardingProgressDto } from '../dto/common.dto';
 import { AuthMethod, OnboardingStep } from '@prisma/client';
-import { sign as jwtSign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { sign: jwtSign } = jwt;
 
 @Injectable()
 export class AuthService {

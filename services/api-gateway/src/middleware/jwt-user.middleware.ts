@@ -6,7 +6,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { NestMiddleware } from '@nestjs/common';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { verify as jwtVerify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { verify: jwtVerify } = jwt;
 
 /**
  * JWT User Middleware
@@ -29,9 +30,11 @@ export class JwtUserMiddleware implements NestMiddleware {
 
   use(req: FastifyRequest, res: FastifyReply, next: () => void) {
     const authHeader = req.headers.authorization;
+    this.logger.error(`[DEBUG] JWT Middleware invoked for ${req.method} ${req.url}`);
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       // No token - continue without user context
+      this.logger.error('[DEBUG] No Authorization header found');
       return next();
     }
 
@@ -52,9 +55,9 @@ export class JwtUserMiddleware implements NestMiddleware {
       if (userId) {
         // Add user ID as custom header for downstream services
         req.headers['x-user-id'] = userId;
-        this.logger.debug(`JWT decoded: User ID ${userId}`);
+        this.logger.error(`[DEBUG] JWT decoded successfully: User ID ${userId}`);
       } else {
-        this.logger.warn('JWT token valid but no user ID found in payload');
+        this.logger.error('[DEBUG] JWT token valid but no user ID found in payload');
       }
     } catch (error: unknown) {
       // Token invalid/expired - log but continue
