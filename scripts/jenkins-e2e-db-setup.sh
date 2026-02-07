@@ -55,8 +55,8 @@ else
   exit 1
 fi
 
-# Seed database
-echo "🌱 Seeding database with test data..."
+# Seed database with demo users for E2E tests
+echo "🌱 Seeding database with demo test data..."
 docker exec "$CONTAINER" sh -c "
   cd /app/packages/db-models && \
   DATABASE_URL='$DB_URL' npx tsx prisma/seed.ts --demo
