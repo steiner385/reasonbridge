@@ -286,13 +286,7 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
     await expect(propositionsPanel).toBeVisible();
   });
 
-  /**
-   * SKIPPED: Propositions feature not fully implemented
-   * DiscussionPage.tsx line 287 hardcodes propositions={[]}
-   * Feature exists in UI but no backend integration or data fetching
-   * TODO: Unskip when propositions API is implemented
-   */
-  test.skip('should highlight proposition on hover', async ({ page }) => {
+  test('should highlight proposition on hover', async ({ page }) => {
     // Wait for propositions to load
     const firstProposition = page.locator('[data-proposition-id]').first();
     await expect(firstProposition).toBeVisible();
@@ -304,13 +298,7 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
     await expect(firstProposition).toHaveClass(/border-primary-500/);
   });
 
-  /**
-   * SKIPPED: Propositions feature not fully implemented
-   * DiscussionPage.tsx line 287 hardcodes propositions={[]}
-   * Feature exists in UI but no backend integration or data fetching
-   * TODO: Unskip when propositions API is implemented
-   */
-  test.skip('should scroll to related responses when proposition is clicked', async ({ page }) => {
+  test('should scroll to related responses when proposition is clicked', async ({ page }) => {
     // Wait for propositions to load
     const firstProposition = page.locator('[data-proposition-id]').first();
     await expect(firstProposition).toBeVisible();
@@ -358,20 +346,20 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
     }
   });
 
-  // Skip: Test doesn't select a topic before checking for composer
-  // ResponseComposer only renders when a topic is selected (ConversationPanel.tsx:424-426)
-  // Without a topic, ConversationPanel returns empty state (lines 138-205) with no composer
-  // Test needs to select a topic from left panel before checking for composer existence
-  test.skip('should display response composer at bottom of conversation', async ({ page }) => {
-    // Response composer should be visible in center panel
-    const conversationPanel = page.locator('.conversation-panel');
+  test('should display response composer at bottom of conversation', async ({ page }) => {
+    // Select a topic first (composer only shows when topic selected)
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
 
-    // Look for the composer textarea (more reliable than border-t class)
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+    // Response composer should now be visible
+    const conversationPanel = page.locator('.conversation-panel');
     const composer = conversationPanel.locator('textarea[placeholder*="perspective"]');
 
-    // Check if composer area exists (might not be visible if user not authenticated)
-    const composerExists = await composer.count();
-    expect(composerExists).toBeGreaterThan(0);
+    await expect(composer).toBeVisible();
   });
 
   test('should maintain independent scrolling between panels', async ({ page }) => {
@@ -652,14 +640,7 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     await expect(hamburgerButton).toBeVisible();
   });
 
-  /**
-   * SKIPPED: Circular dependency issue
-   * - Hamburger button only shows when a topic is selected
-   * - Topics are off-screen on tablet (left panel transformed)
-   * - Cannot click topics to select them until overlay is opened
-   * - Need UX design fix: either left panel visible on load OR alternative topic selection
-   */
-  test.skip('should open left panel overlay when hamburger is clicked', async ({ page }) => {
+  test('should open left panel overlay when hamburger is clicked', async ({ page }) => {
     // Navigate to discussions page
     await page.goto('/discussions');
 
@@ -689,10 +670,7 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     expect(hasOverlayClass).toBe(true);
   });
 
-  /**
-   * SKIPPED: Circular dependency (same as above)
-   */
-  test.skip('should show backdrop when left panel overlay is open', async ({ page }) => {
+  test('should show backdrop when left panel overlay is open', async ({ page }) => {
     // Navigate to discussions page
     await page.goto('/discussions');
 
@@ -718,10 +696,7 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     await expect(backdrop).toBeVisible();
   });
 
-  /**
-   * SKIPPED: Circular dependency (same as above)
-   */
-  test.skip('should close left panel when backdrop is clicked', async ({ page }) => {
+  test('should close left panel when backdrop is clicked', async ({ page }) => {
     // Navigate to discussions page
     await page.goto('/discussions');
 
@@ -752,10 +727,7 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     expect(isBackdropVisible).toBe(false);
   });
 
-  /**
-   * SKIPPED: Circular dependency (same as above)
-   */
-  test.skip('should close left panel when close button is clicked', async ({ page }) => {
+  test('should close left panel when close button is clicked', async ({ page }) => {
     // Navigate to discussions page
     await page.goto('/discussions');
 
@@ -836,12 +808,7 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
     await expect(centerPanel).toBeVisible();
   });
 
-  /**
-   * SKIPPED: Circular dependency (same as tablet tests above)
-   */
-  test.skip('should open left panel overlay when hamburger is clicked on mobile', async ({
-    page,
-  }) => {
+  test('should open left panel overlay when hamburger is clicked on mobile', async ({ page }) => {
     // Navigate to discussions page
     await page.goto('/discussions');
 

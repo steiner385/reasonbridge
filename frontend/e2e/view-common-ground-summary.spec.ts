@@ -254,31 +254,22 @@ test.describe('View Common Ground Summary', () => {
 
   // Skip: Test uses old /topics/:id navigation pattern replaced by discussion page redesign
   // The redesign (Feature 001) introduced a three-panel layout at /discussions?topic=:id
-  // with persistent topic navigation instead of a "back to topics" button.
-  // This test needs complete rewrite to test the new UI patterns.
-  test.skip('should handle empty common ground analysis gracefully', async ({ page }) => {
-    // Navigate directly to a topic detail page
-    // The page should render even if common ground analysis is empty/loading
+  test('should handle empty common ground analysis gracefully', async ({ page }) => {
+    await page.goto('/discussions');
 
-    await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
 
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
+    // Right panel should display feature or error state
+    const rightPanel = page.locator('[role="complementary"]').first();
+    await expect(rightPanel).toBeVisible();
 
-      await page.goto(`/topics/${topicId}`);
-
-      // Page should load without errors even during loading state
-      await page.waitForTimeout(2000);
-
-      // Check that the page is still responsive
-      const backButton = page.getByText(/back to topics/i);
-      await expect(backButton).toBeVisible();
-    }
+    // Page should remain responsive
+    await page.waitForTimeout(1000);
+    await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
   test('should allow viewing agreement details from common ground summary', async ({ page }) => {
@@ -468,40 +459,22 @@ test.describe('View Common Ground Summary', () => {
 
   // Skip: Test uses old /topics/:id navigation pattern replaced by discussion page redesign
   // The redesign (Feature 001) introduced a three-panel layout at /discussions?topic=:id
-  // with persistent topic navigation instead of a "back to topics" button.
-  // This test needs complete rewrite to test the new UI patterns.
-  test.skip('should handle common ground analysis errors gracefully', async ({ page }) => {
-    // Navigate to topic detail page and verify error handling
+  test('should handle common ground analysis errors gracefully', async ({ page }) => {
+    await page.goto('/discussions');
 
-    await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
 
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
+    // Right panel should display feature or error state
+    const rightPanel = page.locator('[role="complementary"]').first();
+    await expect(rightPanel).toBeVisible();
 
-      await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
-      });
-
-      // Page should have error handling for common ground failures
-      // Look for error message or fallback content
-      const errorMessage = page
-        .locator('[data-testid="common-ground-error"]')
-        .or(page.locator('text=/error|failed to load analysis/i').first());
-
-      // If error exists, verify it's displayed gracefully
-      const _hasError = (await errorMessage.count()) > 0;
-
-      // Page should remain functional even with errors
-      const backButton = page.getByText(/back to topics/i);
-      await expect(backButton).toBeVisible();
-    }
+    // Page should remain responsive
+    await page.waitForTimeout(1000);
+    await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
   test('should display participant count and response metrics in common ground summary', async ({

@@ -24,40 +24,32 @@ test.describe('Topic Status Management', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
     });
 
-    // Skip: TopicStatusActions component exists but not integrated into discussion page redesign
-    // Component file: src/components/topics/TopicStatusActions.tsx (not imported anywhere)
-    // After creating topic, navigates to /topics/:id (old pattern) or /discussions?topic=:id (new)
-    // but neither page has status action buttons (Activate, Archive, Lock) integrated.
-    // Feature needs to be integrated into DiscussionPage.tsx metadata panel.
-    test.skip('should create a topic and see status action buttons', async ({ page }) => {
-      // Navigate to topics page
+    test('should create a topic and see status action buttons', async ({ page }) => {
       await page.goto('/topics');
 
-      // Create a new topic
+      // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
       const modal = page.getByRole('dialog');
       await expect(modal).toBeVisible();
 
-      // Fill in topic details
-      await modal.getByLabel(/title/i).fill(`Status Test Topic ${Date.now()}`);
-      await modal
-        .getByLabel(/description/i)
-        .fill(
-          'This is a test topic for status management workflows. We will test archiving, reopening, and other status operations on this topic.',
-        );
+      await modal.getByLabel(/title/i).fill(`Status Test ${Date.now()}`);
+      await modal.getByLabel(/description/i).fill('Test topic for status workflows.');
 
       const tagInput = modal.getByLabel(/tags/i);
       await tagInput.fill('testing');
       await tagInput.press('Enter');
 
-      // Submit
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
 
-      // Wait for navigation or redirect
-      await page.waitForTimeout(1000);
+      // Wait for redirect to discussions page
+      await page.waitForURL(/\/discussions\?topic=/);
+      await expect(page.locator('.conversation-panel h1')).toBeVisible();
 
-      // Should see status action buttons (Activate Topic button for SEEDING status)
+      // Check right panel for Activate button
+      const rightPanel = page.locator('[role="complementary"]').first();
+      await expect(rightPanel).toBeVisible();
+
       await expect(page.getByRole('button', { name: /activate topic/i })).toBeVisible({
         timeout: 5000,
       });
@@ -207,24 +199,20 @@ test.describe('Topic Status Management', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
     });
 
-    // Skip: TopicStatusActions component exists but not integrated into discussion page redesign
-    // Component file: src/components/topics/TopicStatusActions.tsx (not imported anywhere)
-    // Clicking topic card navigates to /discussions?topic=:id but that page doesn't have
-    // status action buttons (Archive, Lock) integrated. Feature needs integration.
-    test.skip('should see Lock button on active topics', async ({ page }) => {
-      // Navigate to topics
-      await page.goto('/topics');
+    test('should see Lock button on active topics', async ({ page }) => {
+      await page.goto('/discussions');
 
-      // Filter by active status
-      await page.getByRole('button', { name: /^Active$/i }).click();
-      await page.waitForTimeout(1000);
+      // Select an active topic from left panel
+      const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+      await expect(firstTopic).toBeVisible();
+      await firstTopic.click();
 
-      const firstTopic = page.locator('[data-testid="topic-card"]').first();
-      if (await firstTopic.isVisible({ timeout: 3000 })) {
-        await firstTopic.click();
-      } else {
-        test.skip(true, 'No active topics available for testing');
-      }
+      // Wait for discussion page to load
+      await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+      // Check right panel for status buttons
+      const rightPanel = page.locator('[role="complementary"]').first();
+      await expect(rightPanel).toBeVisible();
 
       // Moderators should see both Archive and Lock buttons
       await expect(page.getByRole('button', { name: /archive topic/i })).toBeVisible({

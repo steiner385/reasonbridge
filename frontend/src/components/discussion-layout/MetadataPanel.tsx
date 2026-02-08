@@ -8,6 +8,7 @@ import CommonGroundSummaryPanel from '../common-ground/CommonGroundSummaryPanel'
 import BridgingSuggestionsSection from '../common-ground/BridgingSuggestionsSection';
 import { PropositionList, type PropositionItem } from '../common-ground/PropositionList';
 import { PreviewFeedbackPanel } from '../feedback/PreviewFeedbackPanel';
+import { TopicStatusActions } from '../topics/TopicStatusActions';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import type { Topic } from '../../types/topic';
@@ -422,6 +423,16 @@ export function MetadataPanel({
             aria-labelledby="propositions-tab"
             className="p-4"
           >
+            {/* Topic Status Actions */}
+            {topic && (
+              <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  Topic Status
+                </h3>
+                <TopicStatusActions topic={topic} />
+              </div>
+            )}
+
             <PropositionList
               propositions={propositions}
               highlightedPropositionId={highlightedPropositionId}

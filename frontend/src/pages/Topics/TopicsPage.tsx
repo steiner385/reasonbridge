@@ -54,8 +54,10 @@ function TopicsPage() {
   };
 
   const handleCreateSuccess = (topicId: string) => {
-    // Navigate to the newly created topic
-    navigate(`/topics/${topicId}`);
+    // Navigate to the newly created topic after modal closes
+    setTimeout(() => {
+      navigate(`/topics/${topicId}`);
+    }, 300); // Match modal animation
   };
 
   if (error) {

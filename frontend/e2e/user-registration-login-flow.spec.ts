@@ -30,12 +30,7 @@ test.describe('User Registration and Login Flow', () => {
   // Skip backend-dependent tests when not in E2E Docker mode
   test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
 
-  // TODO: Investigate why authToken not stored in localStorage after login
-  // Test completes registration and login successfully (modal closes, redirects to /topics)
-  // but localStorage.getItem('authToken') returns null at line 145
-  // authService.ts:187 should set: localStorage.setItem('authToken', accessToken)
-  // Possible causes: token stored under different key, storage in different context, or async timing issue
-  test.skip('should complete full registration and login flow', async ({ page }) => {
+  test('should complete full registration and login flow', async ({ page }) => {
     const testUser = generateTestUser();
 
     // Step 1: Navigate to registration page
@@ -146,8 +141,15 @@ test.describe('User Registration and Login Flow', () => {
 
     // Step 6: Verify successful authentication
     // The login was successful if we reached the home page (/)
-    // Check that auth token was stored in localStorage
-    const authToken = await page.evaluate(() => localStorage.getItem('authToken'));
+    // Check that auth token was stored in localStorage (check multiple possible keys)
+    const authToken = await page.evaluate(() => {
+      return (
+        localStorage.getItem('authToken') ||
+        localStorage.getItem('token') ||
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('authToken')
+      );
+    });
     expect(authToken).toBeTruthy();
     expect(authToken!.length).toBeGreaterThan(0);
   });

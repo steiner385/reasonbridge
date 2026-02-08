@@ -61,19 +61,19 @@ test.describe('Complete Verification Flow', () => {
     testUser = generateTestUser();
   });
 
-  // TODO: Investigate why verification page heading not found
-  // Test expects heading with "account verification|error|verification" text but element not found
-  // Verification page may not be implemented or heading text different. Requires investigation.
-  test.skip('should navigate to verification page directly', async ({ page }) => {
+  test('should navigate to verification page directly', async ({ page }) => {
     // Register and login first (verification page requires authentication)
     await registerAndLogin(page);
 
     // Navigate directly to verification page
     await page.goto('/verification');
 
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
+
     // Verify we're on the verification page - either showing content or error
     const heading = page.getByRole('heading', { name: /account verification|error|verification/i });
-    await expect(heading).toBeVisible();
+    await expect(heading).toBeVisible({ timeout: 5000 });
   });
 
   test('should display verification page with header', async ({ page }) => {
@@ -233,11 +233,7 @@ test.describe('Complete Verification Flow', () => {
     expect(page.url()).toContain('/verification');
   });
 
-  // TODO: Investigate why this test fails - state management during navigation
-  // Test checks that /verification page doesn't redirect unexpectedly after login.
-  // Possible causes: unexpected redirect, authentication logic, or page doesn't exist.
-  // Requires Docker rebuild to reproduce and debug.
-  test.skip('should maintain state during navigation', async ({ page }) => {
+  test('should maintain state during navigation', async ({ page }) => {
     // Register and login first (verification page requires authentication)
     await registerAndLogin(page);
 

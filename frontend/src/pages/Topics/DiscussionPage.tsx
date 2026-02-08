@@ -12,6 +12,7 @@ import { useTopicNavigation } from '../../hooks/useTopicNavigation';
 import { useTopics } from '../../lib/useTopics';
 import { useTopic } from '../../lib/useTopic';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { usePropositions } from '../../hooks/usePropositions';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 import type { CreateResponseRequest } from '../../types/response';
 
@@ -87,6 +88,9 @@ export function DiscussionPage() {
 
   // Use topic from list, or fall back to individual fetch
   const activeTopic = topicInList || individualTopic || null;
+
+  // Fetch propositions for the active topic
+  const { data: propositions = [] } = usePropositions(activeTopic?.id || null);
 
   // Handle proposition hover - highlight related responses
   const handlePropositionHover = (propositionId: string | null) => {
@@ -284,7 +288,7 @@ export function DiscussionPage() {
         rightPanel={
           <MetadataPanel
             topic={activeTopic}
-            propositions={[]}
+            propositions={propositions}
             commonGroundAnalysis={null}
             bridgingSuggestions={null}
             isLoadingCommonGround={false}
