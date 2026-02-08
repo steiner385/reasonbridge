@@ -160,12 +160,16 @@ test.describe('Discussion Page - Topic Selection Flow', () => {
     // Click the topic
     await firstTopic.click();
 
-    // Center panel should show "Conversation View Coming Soon" (placeholder)
-    await expect(page.getByText(/Conversation View Coming Soon/i)).toBeVisible();
+    // Center panel should show the conversation panel with topic title
+    const conversationPanel = page.locator('.conversation-panel');
+    await expect(conversationPanel).toBeVisible();
 
-    // Should display the topic ID
-    const topicId = await firstTopic.getAttribute('data-topic-id');
-    await expect(page.getByText(new RegExp(`Topic ID: ${topicId}`, 'i'))).toBeVisible();
+    // Should display topic header with title
+    await expect(conversationPanel.locator('h1')).toBeVisible();
+
+    // Should show response list or empty state
+    const responseList = page.locator('.response-list');
+    await expect(responseList.or(page.getByText(/No responses yet/i))).toBeVisible();
   });
 
   test('should display right panel placeholder when topic is selected', async ({ page }) => {
@@ -176,8 +180,13 @@ test.describe('Discussion Page - Topic Selection Flow', () => {
     // Click the topic
     await firstTopic.click();
 
-    // Right panel should show "Metadata Panel Coming Soon" (placeholder)
-    await expect(page.getByText(/Metadata Panel Coming Soon/i)).toBeVisible();
+    // Right panel should show metadata panel with tabs
+    const metadataPanel = page.locator('[role="tablist"]');
+    await expect(metadataPanel).toBeVisible();
+
+    // Should have Propositions and Common Ground tabs
+    await expect(page.getByRole('tab', { name: /propositions/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /common ground/i })).toBeVisible();
   });
 
   test('should support keyboard navigation for topic selection', async ({ page }) => {
@@ -236,11 +245,12 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
 
   test('should display conversation panel with topic details', async ({ page }) => {
     // Topic title should be visible in center panel
-    await expect(page.locator('role=main').locator('h1')).toBeVisible();
+    const conversationPanel = page.locator('.conversation-panel');
+    await expect(conversationPanel.locator('h1')).toBeVisible();
 
     // Topic metadata (participants, responses, diversity) should be visible
-    await expect(page.locator('role=main').getByText(/participants/i)).toBeVisible();
-    await expect(page.locator('role=main').getByText(/responses/i)).toBeVisible();
+    await expect(conversationPanel.getByText(/participants/i)).toBeVisible();
+    await expect(conversationPanel.getByText(/responses/i)).toBeVisible();
   });
 
   test('should display metadata panel tabs', async ({ page }) => {
@@ -302,14 +312,16 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
   });
 
   test('should display response list in center panel', async ({ page }) => {
-    // Response list should be visible
-    const responseList = page.locator('[role="list"][aria-label="Responses"]');
+    // Wait for conversation panel to be fully loaded
+    const conversationPanel = page.locator('.conversation-panel');
+    await expect(conversationPanel).toBeVisible();
 
-    // Either response list exists with responses, or empty state is shown
-    const hasResponses = await responseList.isVisible();
-    const hasEmptyState = await page.getByText(/No responses yet/i).isVisible();
+    // Response list should be visible or empty state should be shown
+    const responseList = page.locator('.response-list');
+    const emptyState = page.getByText(/No responses yet/i);
 
-    expect(hasResponses || hasEmptyState).toBe(true);
+    // Use Playwright's or() to check for either condition
+    await expect(responseList.or(emptyState)).toBeVisible({ timeout: 10000 });
   });
 
   test('should support virtual scrolling for responses', async ({ page }) => {
@@ -336,7 +348,8 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
 
   test('should display response composer at bottom of conversation', async ({ page }) => {
     // Response composer should be visible in center panel
-    const composer = page.locator('role=main').locator('[class*="border-t"]');
+    const conversationPanel = page.locator('.conversation-panel');
+    const composer = conversationPanel.locator('[class*="border-t"]');
 
     // Check if composer area exists (might not be visible if user not authenticated)
     const composerExists = await composer.count();
@@ -344,8 +357,8 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
   });
 
   test('should maintain independent scrolling between panels', async ({ page }) => {
-    // Get initial scroll position of center panel
-    const centerPanel = page.locator('role=main');
+    // Get initial scroll position of center panel - use specific conversation panel selector
+    const centerPanel = page.locator('.conversation-panel');
     const initialCenterScroll = await centerPanel.evaluate((el) => {
       const scrollable = el.querySelector('[class*="overflow"]');
       return scrollable ? scrollable.scrollTop : 0;
