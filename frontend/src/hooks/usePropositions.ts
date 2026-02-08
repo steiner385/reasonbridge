@@ -31,8 +31,8 @@ export function usePropositions(topicId: string | null) {
     queryFn: async () => {
       if (!topicId) return [];
 
-      const response = await apiClient.get<Proposition[]>(`/topics/${topicId}/propositions`);
-      return response.data;
+      const propositions = await apiClient.get<Proposition[]>(`/topics/${topicId}/propositions`);
+      return propositions;
     },
     enabled: !!topicId,
     staleTime: 60000, // 60 seconds

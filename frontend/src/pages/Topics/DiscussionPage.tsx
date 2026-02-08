@@ -90,7 +90,22 @@ export function DiscussionPage() {
   const activeTopic = topicInList || individualTopic || null;
 
   // Fetch propositions for the active topic
-  const { data: propositions = [] } = usePropositions(activeTopic?.id || null);
+  const { data: rawPropositions = [] } = usePropositions(activeTopic?.id || null);
+
+  // Transform propositions to match PropositionItem type expected by MetadataPanel
+  const propositions = useMemo(() => {
+    return rawPropositions.map((p) => ({
+      id: p.id,
+      statement: p.statement,
+      alignmentData: {
+        supportCount: p.supportCount,
+        opposeCount: p.opposeCount,
+        nuancedCount: p.nuancedCount,
+        consensusScore: null, // Not available from backend yet
+      },
+      relatedResponseIds: p.relatedResponses.map((r) => r.responseId),
+    }));
+  }, [rawPropositions]);
 
   // Handle proposition hover - highlight related responses
   const handlePropositionHover = (propositionId: string | null) => {

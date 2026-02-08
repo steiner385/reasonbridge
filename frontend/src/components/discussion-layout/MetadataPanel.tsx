@@ -12,6 +12,7 @@ import { TopicStatusActions } from '../topics/TopicStatusActions';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import type { Topic } from '../../types/topic';
+import { useAuthContext } from '../../contexts/AuthContext';
 import type { CommonGroundAnalysis, BridgingSuggestionsResponse } from '../../types/common-ground';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 
@@ -102,6 +103,11 @@ export function MetadataPanel({
 
   const breakpoint = useBreakpoint();
   const { subscribe } = useWebSocket();
+
+  // Get auth context for creator/moderator checks
+  const { user } = useAuthContext();
+  const isCreator = !!(user && topic && user.id === topic.creatorId);
+  const isModerator = false; // TODO: Add moderator role check when available
 
   const isMobile = breakpoint === 'mobile';
 
@@ -429,7 +435,7 @@ export function MetadataPanel({
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                   Topic Status
                 </h3>
-                <TopicStatusActions topic={topic} />
+                <TopicStatusActions topic={topic} isCreator={isCreator} isModerator={isModerator} />
               </div>
             )}
 
