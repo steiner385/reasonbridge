@@ -59,7 +59,7 @@ fi
 echo "🌱 Seeding database with test data..."
 docker exec "$CONTAINER" sh -c "
   cd /app/packages/db-models && \
-  DATABASE_URL='$DB_URL' node prisma/seed.js
+  DATABASE_URL='$DB_URL' npx tsx prisma/seed.ts --demo
 "
 
 if [ $? -eq 0 ]; then

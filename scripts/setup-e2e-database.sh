@@ -35,7 +35,7 @@ echo "✅ Migrations applied"
 
 # Run seed script
 echo "🌱 Seeding database with test data..."
-DATABASE_URL="$E2E_DATABASE_URL" node prisma/seed.js
+DATABASE_URL="$E2E_DATABASE_URL" npx tsx prisma/seed.ts --demo
 echo "✅ Database seeded"
 
 echo ""
