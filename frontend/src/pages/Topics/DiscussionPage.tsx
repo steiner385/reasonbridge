@@ -68,7 +68,9 @@ export function DiscussionPage() {
     limit: 100,
   });
 
-  const topics = data?.data || [];
+  // Memoize topics array to prevent creating new empty array on every render
+  // This ensures useMemo dependencies remain stable
+  const topics = useMemo(() => data?.data || [], [data?.data]);
   const errorMessage = error ? 'Failed to load topics. Please try again.' : null;
 
   // Find the active topic object in the list

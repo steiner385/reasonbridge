@@ -58,6 +58,8 @@ export function ConversationPanel({
   onReplySubmit,
   className = '',
 }: ConversationPanelProps) {
+  // CRITICAL: All hooks must be called BEFORE any conditional returns
+  // React Error #310 occurs when hooks are called conditionally
   const responseListContainerRef = useRef<HTMLDivElement>(null);
   const { toggleLeftPanelOverlay } = useDiscussionLayout();
   const breakpoint = useBreakpoint();
@@ -131,7 +133,8 @@ export function ConversationPanel({
   const handleDismissStatusChange = useCallback(() => {
     setTopicStatusChange(null);
   }, []);
-  // Empty state when no topic selected
+
+  // Conditional rendering: Empty state when no topic selected
   if (!topic) {
     return (
       <div
