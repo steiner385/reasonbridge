@@ -137,27 +137,59 @@ export function ConversationPanel({
   // Conditional rendering: Empty state when no topic selected
   if (!topic) {
     return (
-      <div
-        className={`conversation-panel flex flex-col items-center justify-center h-full p-8 text-center ${className}`}
-      >
-        <svg
-          className="w-16 h-16 text-gray-400 mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-          />
-        </svg>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Select a topic to start</h2>
-        <p className="text-sm text-gray-600">
-          Choose a topic from the left panel to view the conversation
-        </p>
+      <div className={`conversation-panel flex flex-col h-full ${className}`}>
+        {/* Header with hamburger button for topic selection */}
+        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white">
+          <div className="flex items-center gap-4">
+            {/* Hamburger Menu Button (Tablet/Mobile) */}
+            {showHamburgerMenu && toggleLeftPanelOverlay && (
+              <button
+                type="button"
+                onClick={toggleLeftPanelOverlay}
+                className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 transition-colors xl:hidden"
+                aria-label="Open topic navigation"
+              >
+                <svg
+                  className="w-6 h-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            )}
+            <h1 className="text-2xl font-bold text-gray-900">Discussion</h1>
+          </div>
+        </div>
+
+        {/* Empty state content */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <svg
+            className="w-16 h-16 text-gray-400 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+            />
+          </svg>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Select a topic to start</h2>
+          <p className="text-sm text-gray-600">
+            Choose a topic from the left panel to view the conversation
+          </p>
+        </div>
       </div>
     );
   }

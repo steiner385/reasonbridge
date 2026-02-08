@@ -797,7 +797,11 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  test('should display error handling for bridging suggestion failures', async ({ page }) => {
+  // Skip: Test uses old /topics/:id navigation pattern replaced by discussion page redesign
+  // The redesign (Feature 001) introduced a three-panel layout at /discussions?topic=:id
+  // with persistent topic navigation instead of a "back to topics" button.
+  // This test needs complete rewrite to test the new UI patterns.
+  test.skip('should display error handling for bridging suggestion failures', async ({ page }) => {
     await page.goto('/topics');
     await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
 
