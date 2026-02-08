@@ -20,7 +20,7 @@ const isE2EDocker = process.env.E2E_DOCKER === 'true';
  * but route interception doesn't work reliably in E2E Docker environment:
  *
  * 1. API requests go through Docker network (http://api-gateway:3001)
- * 2. Route pattern `**/ api; /**` doesn't match internal Docker URLs
+ * 2. Route pattern (**/ api; /**) doesn't match internal Docker URLs
  * 3. Without throttling, API requests complete in <100ms
  * 4. useDelayedLoading's 100ms delay means skeletons never render
  * 5. Tests fail because skeleton elements are never found
