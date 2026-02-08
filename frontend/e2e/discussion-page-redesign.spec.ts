@@ -25,8 +25,8 @@ test.describe('Discussion Page - Topic Selection Flow', () => {
     // Check that topic count is displayed
     await expect(page.getByText(/\d+ topics?/i)).toBeVisible();
 
-    // Check that topic search input is present
-    await expect(page.getByPlaceholder(/Search topics/i)).toBeVisible();
+    // Check that topic search input is present (use testid to avoid strict mode violation with global search)
+    await expect(page.getByTestId('topic-search-input')).toBeVisible();
   });
 
   test('should display search filter with status buttons', async ({ page }) => {
