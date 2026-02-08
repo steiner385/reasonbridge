@@ -629,18 +629,28 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
 
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Hamburger menu button should be visible
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Hamburger menu button should be visible (use exact aria-label)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await expect(hamburgerButton).toBeVisible();
   });
 
   test('should open left panel overlay when hamburger is clicked', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    // Navigate to discussions page
+    await page.goto('/discussions');
 
+    // Wait for discussion layout to be ready
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Click hamburger menu
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Select a topic first (hamburger button only shows when topic is selected)
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
+
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+    // Click hamburger menu (use exact aria-label to avoid matching Close button)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
 
     await page.waitForTimeout(500); // Wait for animation
@@ -655,12 +665,22 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
   });
 
   test('should show backdrop when left panel overlay is open', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    // Navigate to discussions page
+    await page.goto('/discussions');
 
+    // Wait for discussion layout to be ready
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Click hamburger menu to open overlay
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Select a topic first (hamburger button only shows when topic is selected)
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
+
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+    // Click hamburger menu to open overlay (use exact aria-label)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
 
     await page.waitForTimeout(300);
@@ -671,12 +691,22 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
   });
 
   test('should close left panel when backdrop is clicked', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    // Navigate to discussions page
+    await page.goto('/discussions');
 
+    // Wait for discussion layout to be ready
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Open the panel
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Select a topic first (hamburger button only shows when topic is selected)
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
+
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+    // Open the panel (use exact aria-label)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
     await page.waitForTimeout(300);
 
@@ -692,12 +722,22 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
   });
 
   test('should close left panel when close button is clicked', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    // Navigate to discussions page
+    await page.goto('/discussions');
 
+    // Wait for discussion layout to be ready
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Open the panel
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Select a topic first (hamburger button only shows when topic is selected)
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
+
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+    // Open the panel (use exact aria-label)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
     await page.waitForTimeout(300);
 
@@ -747,8 +787,8 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
 
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Hamburger menu should be visible
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Hamburger menu should be visible (use exact aria-label)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await expect(hamburgerButton).toBeVisible();
   });
 
@@ -763,12 +803,22 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
   });
 
   test('should open left panel overlay when hamburger is clicked on mobile', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    // Navigate to discussions page
+    await page.goto('/discussions');
 
+    // Wait for discussion layout to be ready
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Click hamburger menu
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Select a topic first (hamburger button only shows when topic is selected)
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
+
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+
+    // Click hamburger menu (use exact aria-label to avoid matching Close button)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
 
     await page.waitForTimeout(500);
@@ -804,8 +854,8 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
 
     await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
 
-    // Check hamburger button dimensions
-    const hamburgerButton = page.locator('button[aria-label*="topic navigation"]').first();
+    // Check hamburger button dimensions (use exact aria-label)
+    const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
 
     if (await hamburgerButton.isVisible()) {
       const box = await hamburgerButton.boundingBox();
