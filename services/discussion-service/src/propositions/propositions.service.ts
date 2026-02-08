@@ -14,7 +14,7 @@ export class PropositionsService {
     return this.prisma.proposition.findMany({
       where: { topicId },
       include: {
-        relatedResponses: {
+        responses: {
           select: { responseId: true },
         },
       },

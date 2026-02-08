@@ -16,7 +16,7 @@ interface Proposition {
   opposeCount: number;
   nuancedCount: number;
   createdAt: string;
-  relatedResponses: Array<{ responseId: string }>;
+  responses: Array<{ responseId: string }>;
 }
 
 /**

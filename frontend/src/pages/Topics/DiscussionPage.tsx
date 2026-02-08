@@ -103,7 +103,7 @@ export function DiscussionPage() {
         nuancedCount: p.nuancedCount,
         consensusScore: null, // Not available from backend yet
       },
-      relatedResponseIds: p.relatedResponses.map((r) => r.responseId),
+      relatedResponseIds: p.responses.map((r) => r.responseId),
     }));
   }, [rawPropositions]);
 
