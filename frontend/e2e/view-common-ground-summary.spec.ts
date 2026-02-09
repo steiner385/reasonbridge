@@ -352,9 +352,7 @@ test.describe('View Common Ground Summary', () => {
     }
   });
 
-  // Skip: WebSocket mock waitForConnection times out in E2E Docker environment
-  // TODO: Fix WebSocket mock infrastructure for real-time update tests
-  test.skip('should update common ground summary in real-time when new responses are added', async ({
+  test('should update common ground summary in real-time when new responses are added', async ({
     page,
   }) => {
     // Setup WebSocket mock

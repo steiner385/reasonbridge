@@ -154,6 +154,12 @@ export function useCommonGroundUpdates({
     socket.on('connect', () => {
       setIsConnected(true);
 
+      // Expose socket for E2E testing when test mode is active
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((window as any).__wsTestMode) {
+        (window as any).__testSocket = socket;
+      }
+
       // Subscribe to common ground updates for this topic
       socket.emit('subscribe:common-ground', { topicId });
     });
@@ -178,6 +184,11 @@ export function useCommonGroundUpdates({
     // Handle disconnection
     socket.on('disconnect', () => {
       setIsConnected(false);
+      // Cleanup test reference
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((window as any).__testSocket) {
+        delete (window as any).__testSocket;
+      }
     });
 
     // Handle connection errors

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Page } from '@playwright/test';
 
 /**
@@ -64,17 +69,13 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
      */
     async waitForConnection(_namespace: string = '/notifications'): Promise<void> {
       // Poll for socket existence in the page context
+      // The useCommonGroundUpdates hook exposes socket as window.__testSocket when __wsTestMode is true
       await page.waitForFunction(
         () => {
-          // Check if socket.io client has connected
-          // This assumes the socket is stored globally or can be accessed
-          const sockets = (window as any).io?.sockets;
-          if (sockets && sockets.size > 0) {
-            return true;
-          }
-          return false;
+          const socket = (window as any).__testSocket;
+          return socket && socket.connected;
         },
-        { timeout: 10000 },
+        { timeout: 30000 }, // Increased timeout for Docker cold starts
       );
 
       // Additional wait for connection to stabilize
@@ -85,25 +86,20 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
      * Emit a Socket.io event to the client by injecting it directly
      */
     async emitEvent(eventName: string, payload: unknown): Promise<void> {
-      // Inject the event into the page context
+      // Inject the event into the page context using the exposed test socket
       await page.evaluate(
         ({ event, data }) => {
-          // Access the socket.io client instance
-          // Socket.io stores socket instances in io.sockets Map
-          const sockets = (window as any).io?.sockets;
-          if (!sockets) {
-            throw new Error('Socket.io client not found');
-          }
-
-          // Get the first socket (there should only be one for /notifications namespace)
-          const socket = Array.from(sockets.values())[0] as any;
+          const socket = (window as any).__testSocket;
           if (!socket) {
-            throw new Error('No socket found');
+            throw new Error('Test socket not found - ensure __wsTestMode is set before navigation');
           }
 
-          // Emit the event on the socket
-          // This triggers all registered event listeners
-          socket.emit(event, data);
+          // Simulate receiving an event FROM the server by triggering registered listeners
+          // Socket.io client stores event listeners in _callbacks with $ prefix
+          const listeners = socket._callbacks?.[`$${event}`];
+          if (listeners) {
+            listeners.forEach((listener: Function) => listener(data));
+          }
         },
         { event: eventName, data: payload },
       );
@@ -153,9 +149,10 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
      * Cleanup and disconnect mock
      */
     async cleanup(): Promise<void> {
-      // Remove test mode flag
+      // Remove test mode flag and test socket reference
       await page.evaluate(() => {
         delete (window as any).__wsTestMode;
+        delete (window as any).__testSocket;
       });
     },
   };
