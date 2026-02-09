@@ -24,6 +24,11 @@ test.describe('Topic Merging', () => {
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('button', { name: /^log in$/i }).click();
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+
+      // Wait for navigation and authentication state to stabilize
+      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
     });
 
     test('should see Merge Topics button on topics page', async ({ page }) => {
@@ -135,7 +140,7 @@ test.describe('Topic Merging', () => {
         const targetSelect = modal.locator('select');
         if (await targetSelect.isVisible()) {
           // Find option with target title
-          await targetSelect.selectOption({ label: new RegExp(targetTitle) });
+          await targetSelect.selectOption({ label: targetTitle });
         }
 
         // Enter merge reason
