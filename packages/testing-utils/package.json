@@ -56,11 +56,11 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
-    "msw": "^2.12.8",
+    "msw": "^2.12.9",
     "pg": "^8.13.1"
   },
   "devDependencies": {
-    "@types/node": "25.2.1",
+    "@types/node": "25.2.2",
     "@types/pg": "^8.11.10",
     "typescript": "5.9.3",
     "vitest": "^2.1.0"
