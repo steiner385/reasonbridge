@@ -114,6 +114,21 @@ export class TopicsProxyController {
     res.status(response.status).send(response.data);
   }
 
+  @Get(':id/propositions')
+  async getTopicPropositions(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'GET',
+      path: `/topics/${id}/propositions`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
   @Get(':id/responses')
   async getTopicResponses(
     @Param('id') id: string,
