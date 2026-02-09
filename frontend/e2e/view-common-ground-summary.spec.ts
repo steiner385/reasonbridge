@@ -17,49 +17,29 @@ import {
  */
 
 test.describe('View Common Ground Summary', () => {
-  // TODO: Flaky test - times out waiting for common-ground-summary element. Needs investigation.
-  test.skip('should display common ground summary panel on topic detail page', async ({ page }) => {
-    // Navigate to topics list first to get a valid topic ID
-    await page.goto('/topics');
+  test('should display common ground summary panel on topic detail page', async ({ page }) => {
+    // Navigate to discussions page (three-panel layout)
+    await page.goto('/discussions');
 
-    // Wait for topics to load
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Wait for topics list to load
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
 
-    // Find and click the first topic link
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+    // Select the first topic
+    await firstTopic.click();
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible({ timeout: 10000 });
 
-      // Navigate directly to topic detail page
-      await page.goto(`/topics/${topicId}`);
+    // Check for Common Ground tab in metadata panel (right panel)
+    const commonGroundTab = page.getByRole('tab', { name: /Common Ground/i });
+    await expect(commonGroundTab).toBeVisible();
 
-      // Wait for topic details to load
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
-      });
+    // Click on Common Ground tab
+    await commonGroundTab.click();
 
-      // Common ground summary panel should be visible if analysis exists
-      const summaryPanel = page
-        .locator('[data-testid="common-ground-summary"]')
-        .or(page.locator('text=Common Ground').first());
-
-      // Panel might not exist if no analysis yet, so we just check it renders without error
-      const hasSummaryPanel = (await summaryPanel.count()) > 0;
-
-      // If panel exists, verify it has key sections
-      if (hasSummaryPanel) {
-        // Should have a heading or title
-        const panelHeading = page
-          .locator('[data-testid="common-ground-summary"]')
-          .locator('h2, h3')
-          .first();
-        await expect(panelHeading).toBeVisible();
-      }
-    }
+    // Verify tab is now selected
+    await expect(commonGroundTab).toHaveAttribute('aria-selected', 'true');
   });
 
   test('should display agreement visualization on common ground summary', async ({ page }) => {
@@ -372,87 +352,90 @@ test.describe('View Common Ground Summary', () => {
     }
   });
 
-  test.skip('should update common ground summary in real-time when new responses are added', async ({
+  test('should update common ground summary in real-time when new responses are added', async ({
     page,
   }) => {
     // Setup WebSocket mock
     const wsMock = await setupWebSocketMock(page);
 
-    await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    // Navigate to discussions page (three-panel layout)
+    await page.goto('/discussions');
 
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+    // Wait for topics list to load
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
-
-      if (!topicId) {
-        throw new Error('Could not extract topic ID from href');
-      }
-
-      await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
-      });
-
-      // Wait for WebSocket connection
-      await wsMock.waitForConnection('/notifications');
-
-      // Get initial state
-      const summaryPanel = page.locator('[data-testid="common-ground-summary"]').first();
-      const initialText = await summaryPanel.textContent().catch(() => '');
-
-      // Create updated common ground with new agreement zone and misunderstanding
-      const newAgreementZone = buildAgreementZone({
-        id: 'agreement-zone-climate',
-        title: 'Climate Science Consensus',
-        description: 'Agreement on basic climate science facts',
-        participantCount: 18,
-        consensusLevel: 'high',
-      });
-
-      const newMisunderstanding = buildMisunderstanding({
-        id: 'misunderstanding-carbon',
-        term: 'carbon neutral',
-        definitions: [
-          {
-            definition: 'Zero net carbon emissions',
-            participants: ['user-1', 'user-2', 'user-3'],
-          },
-          {
-            definition: 'Carbon offset through capture',
-            participants: ['user-4', 'user-5'],
-          },
-        ],
-      });
-
-      // Emit WebSocket event with updated common ground
-      const payload = buildCommonGroundUpdatedPayload({
-        topicId,
-        agreementZones: [newAgreementZone],
-        misunderstandings: [newMisunderstanding],
-        overallConsensusScore: 0.8,
-      });
-
-      await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
-
-      // Wait for React state update and re-render
-      await page.waitForTimeout(1500);
-
-      // Verify UI updated
-      const updatedText = await summaryPanel.textContent().catch(() => '');
-
-      // Verify content changed or contains expected text
-      expect(
-        updatedText !== initialText ||
-          updatedText.includes('Climate') ||
-          updatedText.includes('consensus') ||
-          updatedText.includes('80'),
-      ).toBe(true);
+    // Get topic ID from data attribute
+    const topicId = await firstTopic.getAttribute('data-topic-id');
+    if (!topicId) {
+      throw new Error('Could not get topic ID from data attribute');
     }
+
+    // Select the first topic
+    await firstTopic.click();
+
+    // Wait for conversation panel to load
+    await expect(page.locator('.conversation-panel h1')).toBeVisible({ timeout: 10000 });
+
+    // Wait for WebSocket connection
+    await wsMock.waitForConnection('/notifications');
+
+    // Click on Common Ground tab
+    const commonGroundTab = page.getByRole('tab', { name: /Common Ground/i });
+    await expect(commonGroundTab).toBeVisible();
+    await commonGroundTab.click();
+
+    // Get initial state of the Common Ground content
+    const rightPanel = page.locator('[role="complementary"]').first();
+    const initialText = await rightPanel.textContent().catch(() => '');
+
+    // Create updated common ground with new agreement zone and misunderstanding
+    const newAgreementZone = buildAgreementZone({
+      id: 'agreement-zone-climate',
+      title: 'Climate Science Consensus',
+      description: 'Agreement on basic climate science facts',
+      participantCount: 18,
+      consensusLevel: 'high',
+    });
+
+    const newMisunderstanding = buildMisunderstanding({
+      id: 'misunderstanding-carbon',
+      term: 'carbon neutral',
+      definitions: [
+        {
+          definition: 'Zero net carbon emissions',
+          participants: ['user-1', 'user-2', 'user-3'],
+        },
+        {
+          definition: 'Carbon offset through capture',
+          participants: ['user-4', 'user-5'],
+        },
+      ],
+    });
+
+    // Emit WebSocket event with updated common ground
+    const payload = buildCommonGroundUpdatedPayload({
+      topicId,
+      agreementZones: [newAgreementZone],
+      misunderstandings: [newMisunderstanding],
+      overallConsensusScore: 0.8,
+    });
+
+    await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
+
+    // Wait for React state update and re-render
+    await page.waitForTimeout(1500);
+
+    // Verify UI updated
+    const updatedText = await rightPanel.textContent().catch(() => '');
+
+    // Verify content changed or contains expected text
+    expect(
+      updatedText !== initialText ||
+        updatedText.includes('Climate') ||
+        updatedText.includes('consensus') ||
+        updatedText.includes('80'),
+    ).toBe(true);
 
     await wsMock.cleanup();
   });

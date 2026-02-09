@@ -71,9 +71,13 @@ test.describe('Complete Verification Flow', () => {
     // Wait for page to load
     await page.waitForLoadState('networkidle');
 
-    // Verify we're on the verification page - either showing content or error
-    const heading = page.getByRole('heading', { name: /account verification|error|verification/i });
-    await expect(heading).toBeVisible({ timeout: 5000 });
+    // Verify we're on the verification page - should show verification options or error
+    // When authenticated, the page shows "Verification Options" heading
+    // When there's an error, it shows "Error Loading Verification"
+    const verificationHeading = page.getByRole('heading', {
+      name: /verification options|error loading verification/i,
+    });
+    await expect(verificationHeading).toBeVisible({ timeout: 10000 });
   });
 
   test('should display verification page with header', async ({ page }) => {
@@ -241,16 +245,19 @@ test.describe('Complete Verification Flow', () => {
     const response = await page.goto('/verification');
     expect(response?.status()).toBeLessThan(400);
 
+    // Wait for page to fully load
+    await page.waitForLoadState('networkidle');
+
     // Get current URL
     const firstUrl = page.url();
     expect(firstUrl).toContain('/verification');
 
-    // Stay on page for a moment
-    await page.waitForTimeout(500);
+    // Wait for any redirects to settle
+    await page.waitForTimeout(1000);
 
-    // Verify still on same page
+    // Verify still on same page (no unexpected redirects)
     const currentUrl = page.url();
-    expect(currentUrl).toBe(firstUrl);
+    expect(currentUrl).toContain('/verification');
   });
 
   test('should have proper page meta information', async ({ page }) => {

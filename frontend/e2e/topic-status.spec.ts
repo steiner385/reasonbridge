@@ -29,8 +29,7 @@ test.describe('Topic Status Management', () => {
       await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
     });
 
-    // Skip: Activate topic button not found - TopicStatusActions may not be rendered in MetadataPanel
-    test.skip('should create a topic and see status action buttons', async ({ page }) => {
+    test('should create a topic and see status action buttons', async ({ page }) => {
       await page.goto('/topics');
 
       // Create topic
@@ -61,8 +60,7 @@ test.describe('Topic Status Management', () => {
       });
     });
 
-    // Skip: Activate topic button not found - TopicStatusActions may not be rendered in MetadataPanel
-    test.skip('should activate a topic from SEEDING state', async ({ page }) => {
+    test('should activate a topic from SEEDING state', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
