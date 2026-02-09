@@ -97,10 +97,14 @@ test.describe('Browse Topics and View Details', () => {
     const rightPanel = page.locator('[role="complementary"]').first();
     await expect(rightPanel).toBeVisible();
 
-    // Check for metadata sections
-    const metadataSections = rightPanel.locator('h2, h3');
-    const sectionCount = await metadataSections.count();
-    expect(sectionCount).toBeGreaterThan(0);
+    // Check for metadata panel tabs (Propositions, Common Ground, Bridging)
+    const tablist = rightPanel.locator('[role="tablist"]');
+    await expect(tablist).toBeVisible();
+
+    // Verify at least one tab is present
+    const tabs = rightPanel.locator('[role="tab"]');
+    const tabCount = await tabs.count();
+    expect(tabCount).toBeGreaterThan(0);
   });
 
   // Skip: Timeout waiting for topic-title element - TopicCard may not have data-testid on title
