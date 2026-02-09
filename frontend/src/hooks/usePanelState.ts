@@ -51,12 +51,10 @@ export function usePanelState() {
   const setPanelWidth = useCallback((panel: 'left' | 'right', width: number) => {
     setPanelStateInternal((prev) => {
       // Validate width constraints
-      let validatedWidth = width;
-      if (panel === 'left') {
-        validatedWidth = Math.max(240, Math.min(480, width));
-      } else {
-        validatedWidth = Math.max(280, Math.min(600, width));
-      }
+      const validatedWidth =
+        panel === 'left'
+          ? Math.max(240, Math.min(480, width))
+          : Math.max(280, Math.min(600, width));
 
       return {
         ...prev,

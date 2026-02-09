@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import { fixupPluginRules } from '@eslint/compat';
 import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import importPlugin from 'eslint-plugin-import';
@@ -44,10 +45,10 @@ export default [
       'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
     },
     plugins: {
-      '@typescript-eslint': typescript,
-      import: importPlugin,
-      react,
-      'react-hooks': reactHooks,
+      '@typescript-eslint': fixupPluginRules(typescript),
+      import: fixupPluginRules(importPlugin),
+      react: fixupPluginRules(react),
+      'react-hooks': fixupPluginRules(reactHooks),
       'react-refresh': reactRefresh,
     },
     rules: {
