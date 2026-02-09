@@ -1,13 +1,31 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { Navigation } from '../../../../src/components/layouts/Navigation';
+import * as notificationsHook from '../../../../src/hooks/useNotifications';
 
 describe('Navigation Component', () => {
   const renderWithRouter = (component: React.ReactElement, initialRoute = '/') => {
     return render(<MemoryRouter initialEntries={[initialRoute]}>{component}</MemoryRouter>);
   };
+
+  const mockUseNotifications = (unreadCount: number = 0) => {
+    vi.spyOn(notificationsHook, 'useNotifications').mockReturnValue({
+      notifications: [],
+      unreadCount,
+      isLoading: false,
+      error: null,
+      markAsRead: vi.fn(),
+      markAllAsRead: vi.fn(),
+      refetch: vi.fn(),
+    });
+  };
+
+  beforeEach(() => {
+    // Default mock with 0 unread
+    mockUseNotifications(0);
+  });
 
   describe('rendering', () => {
     it('should render all navigation links', () => {
@@ -95,19 +113,22 @@ describe('Navigation Component', () => {
 
   describe('badge counts', () => {
     it('should not show badge when unreadCount is 0', () => {
-      renderWithRouter(<Navigation unreadCount={0} />);
+      mockUseNotifications(0);
+      renderWithRouter(<Navigation />);
 
       expect(screen.queryByLabelText(/unread/)).not.toBeInTheDocument();
     });
 
     it('should not show badge when unreadCount is undefined', () => {
+      mockUseNotifications(0);
       renderWithRouter(<Navigation />);
 
       expect(screen.queryByLabelText(/unread/)).not.toBeInTheDocument();
     });
 
     it('should show badge with count when unreadCount > 0', () => {
-      renderWithRouter(<Navigation unreadCount={5} />);
+      mockUseNotifications(5);
+      renderWithRouter(<Navigation />);
 
       const badge = screen.getByLabelText('5 unread');
       expect(badge).toBeInTheDocument();
@@ -115,28 +136,32 @@ describe('Navigation Component', () => {
     });
 
     it('should show "99+" when unreadCount > 99', () => {
-      renderWithRouter(<Navigation unreadCount={150} />);
+      mockUseNotifications(150);
+      renderWithRouter(<Navigation />);
 
       const badge = screen.getByLabelText('150 unread');
       expect(badge).toHaveTextContent('99+');
     });
 
     it('should show badge exactly at 99', () => {
-      renderWithRouter(<Navigation unreadCount={99} />);
+      mockUseNotifications(99);
+      renderWithRouter(<Navigation />);
 
       const badge = screen.getByLabelText('99 unread');
       expect(badge).toHaveTextContent('99');
     });
 
     it('should show badge exactly at 100', () => {
-      renderWithRouter(<Navigation unreadCount={100} />);
+      mockUseNotifications(100);
+      renderWithRouter(<Navigation />);
 
       const badge = screen.getByLabelText('100 unread');
       expect(badge).toHaveTextContent('99+');
     });
 
     it('should have proper badge styling', () => {
-      renderWithRouter(<Navigation unreadCount={3} />);
+      mockUseNotifications(3);
+      renderWithRouter(<Navigation />);
 
       const badge = screen.getByLabelText('3 unread');
       expect(badge).toHaveClass('bg-primary-600');
@@ -215,7 +240,8 @@ describe('Navigation Component', () => {
     });
 
     it('should have aria-label for badge counts', () => {
-      renderWithRouter(<Navigation unreadCount={7} />);
+      mockUseNotifications(7);
+      renderWithRouter(<Navigation />);
 
       expect(screen.getByLabelText('7 unread')).toBeInTheDocument();
     });

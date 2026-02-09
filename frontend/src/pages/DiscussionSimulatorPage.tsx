@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { AIOperationsBanner } from '../components/ui/AIOperationsBanner';
+import { PositionCardSkeleton } from '../components/ui/skeletons/PositionCardSkeleton';
+import { ResponseGenerationSkeleton } from '../components/ui/skeletons/ResponseGenerationSkeleton';
+import { useDelayedLoading } from '../hooks/useDelayedLoading';
 import {
   generatePositions,
   generateResponse,
@@ -55,6 +59,34 @@ export const DiscussionSimulatorPage: React.FC = () => {
   const [reasoning, setReasoning] = useState('');
   const [loadingResponse, setLoadingResponse] = useState(false);
   const [responseError, setResponseError] = useState<string | null>(null);
+
+  // Delayed loading states to prevent skeleton flash
+  const showPositionsSkeleton = useDelayedLoading(loadingPositions);
+  const showResponseSkeleton = useDelayedLoading(loadingResponse);
+
+  // Track active AI operations for status banner
+  const aiOperations = useMemo(() => {
+    const ops = [];
+    if (loadingPositions) {
+      ops.push({
+        id: 'positions',
+        label: positionsError
+          ? 'Failed to generate opposing positions'
+          : 'Generating opposing positions...',
+        status: positionsError ? ('error' as const) : ('active' as const),
+      });
+    }
+    if (loadingResponse) {
+      ops.push({
+        id: 'response',
+        label: responseError
+          ? 'Failed to generate AI response'
+          : `Generating response from ${personaName || 'persona'}...`,
+        status: responseError ? ('error' as const) : ('active' as const),
+      });
+    }
+    return ops;
+  }, [loadingPositions, loadingResponse, positionsError, responseError, personaName]);
 
   /**
    * Generate opposing positions for the topic
@@ -170,6 +202,17 @@ export const DiscussionSimulatorPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Screen reader announcements for AI operations */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {loadingPositions && 'Generating opposing positions, this may take 10 to 30 seconds'}
+        {loadingResponse &&
+          `${personaName || 'AI persona'} is generating a response, this may take 10 to 30 seconds`}
+        {positions && !loadingPositions && 'Opposing positions generated successfully'}
+        {currentResponse && !loadingResponse && 'AI response generated successfully'}
+        {positionsError && `Error: ${positionsError}`}
+        {responseError && `Error: ${responseError}`}
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -180,6 +223,9 @@ export const DiscussionSimulatorPage: React.FC = () => {
           arguments.
         </p>
       </div>
+
+      {/* AI Operations Status Banner */}
+      <AIOperationsBanner operations={aiOperations} />
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -242,8 +288,18 @@ export const DiscussionSimulatorPage: React.FC = () => {
             </div>
           </Card>
 
-          {/* Generated Positions */}
-          {positions && (
+          {/* Generated Positions - Loading State */}
+          {showPositionsSkeleton && (
+            <Card variant="elevated" padding="lg">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                2. Select Position
+              </h2>
+              <PositionCardSkeleton />
+            </Card>
+          )}
+
+          {/* Generated Positions - Loaded State */}
+          {!loadingPositions && positions && (
             <Card variant="elevated" padding="lg">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 2. Select Position
@@ -448,8 +504,18 @@ export const DiscussionSimulatorPage: React.FC = () => {
 
         {/* Right Column: Discussion & Results */}
         <div className="space-y-6">
-          {/* Generated Response */}
-          {(currentResponse || reasoning) && (
+          {/* Generated Response - Loading State */}
+          {showResponseSkeleton && (
+            <Card variant="elevated" padding="lg">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Generated Response
+              </h2>
+              <ResponseGenerationSkeleton personaName={personaName} />
+            </Card>
+          )}
+
+          {/* Generated Response - Loaded State */}
+          {!loadingResponse && (currentResponse || reasoning) && (
             <Card variant="elevated" padding="lg">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">

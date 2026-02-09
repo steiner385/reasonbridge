@@ -23,19 +23,16 @@ import { useSidebar } from '../../hooks/useSidebar';
 export const AppLayout: React.FC = () => {
   const { isCollapsed } = useSidebar();
 
-  // TODO: Replace with actual notification count from API
-  const unreadCount = 0;
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
       {/* Header - Fixed at top */}
-      <Header unreadCount={unreadCount} />
+      <Header />
 
       {/* Sidebar - Desktop only, collapsible */}
-      <Sidebar unreadCount={unreadCount} />
+      <Sidebar />
 
       {/* Mobile Drawer - Mobile only, slide-out */}
-      <MobileDrawer unreadCount={unreadCount} />
+      <MobileDrawer />
 
       {/* Main Content - Responsive margin to account for sidebar */}
       <main
