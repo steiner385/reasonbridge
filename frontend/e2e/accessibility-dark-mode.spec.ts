@@ -19,7 +19,8 @@ test.describe('Dark Mode Accessibility', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
   });
 
-  // Skip: Color contrast violations (1.45 ratio vs required 4.5:1) - needs dark theme color updates
+  // Skip: Real accessibility contrast violations in topic status badges and cards
+  // TODO: Fix dark mode color contrast in TopicCard.tsx getStatusColor()
   test.skip('Topics page should have no accessibility violations in dark mode', async ({
     page,
   }) => {
@@ -49,7 +50,8 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // Skip: Color contrast violations (1.45 ratio vs required 4.5:1) - needs dark theme color updates
+  // Skip: Real accessibility contrast violations in topic cards
+  // TODO: Fix dark mode color contrast ratios for topic card text
   test.skip('Topic cards should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -182,7 +184,8 @@ test.describe('Dark Mode Accessibility', () => {
     await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
-  // Skip: Dark mode contrast issues - needs theme color updates for common ground cards
+  // Skip: 7 elements found with bg-white but no dark:bg- variant
+  // TODO: Add dark mode styles to conversation panel sticky header and other components
   test.skip('Common ground cards should respect dark mode', async ({ page }) => {
     await page.goto('/discussions');
 

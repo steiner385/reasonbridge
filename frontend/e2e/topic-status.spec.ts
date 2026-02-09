@@ -29,7 +29,8 @@ test.describe('Topic Status Management', () => {
       await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
     });
 
-    // Skip: Activate topic button not found - TopicStatusActions may not be rendered in MetadataPanel
+    // Skip: isCreator check fails - topic.creatorId not populated correctly after creation
+    // TODO: Ensure createTopic mutation returns topic with creatorId matching current user
     test.skip('should create a topic and see status action buttons', async ({ page }) => {
       await page.goto('/topics');
 
@@ -61,7 +62,8 @@ test.describe('Topic Status Management', () => {
       });
     });
 
-    // Skip: Activate topic button not found - TopicStatusActions may not be rendered in MetadataPanel
+    // Skip: Depends on isCreator check which fails after topic creation
+    // TODO: Fix creatorId population in topic creation flow
     test.skip('should activate a topic from SEEDING state', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');

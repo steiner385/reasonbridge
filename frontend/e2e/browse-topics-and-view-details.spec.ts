@@ -59,10 +59,7 @@ test.describe('Browse Topics and View Details', () => {
     expect(hasTopics || hasNoTopicsMessage || hasError).toBeTruthy();
   });
 
-  // Skip: Timeout waiting for topic-title element - TopicCard may not have data-testid on title
-  test.skip('should navigate to topic in discussion view when clicking on a topic', async ({
-    page,
-  }) => {
+  test('should navigate to topic in discussion view when clicking on a topic', async ({ page }) => {
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -107,7 +104,8 @@ test.describe('Browse Topics and View Details', () => {
     expect(tabCount).toBeGreaterThan(0);
   });
 
-  // Skip: Timeout waiting for topic-title element - TopicCard may not have data-testid on title
+  // Skip: Title matching or timing issue when switching topics
+  // TODO: Fix conversation panel h1 content matching after topic switch
   test.skip('should allow switching between topics using left panel', async ({ page }) => {
     await page.goto('/discussions');
 

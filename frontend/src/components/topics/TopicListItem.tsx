@@ -89,6 +89,7 @@ export function TopicListItem({
         <h3
           className={`text-sm font-medium line-clamp-2 flex-1 ${hasUnread ? 'pl-3' : ''}`}
           title={topic.title}
+          data-testid="topic-title"
         >
           {topic.title}
         </h3>
