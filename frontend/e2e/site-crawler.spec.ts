@@ -18,10 +18,21 @@
  * - React event handlers (onClick props) don't appear as onclick attributes in DOM
  */
 
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 // Check if running in E2E Docker mode with full backend
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
+
+// Generate unique test user credentials for authentication
+const generateTestUser = () => {
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 10);
+  return {
+    email: `crawler-test-${timestamp}-${randomSuffix}@example.com`,
+    displayName: `crawleruser${timestamp}`,
+    password: 'SecurePassword123!',
+  };
+};
 
 interface PageError {
   type: 'console' | 'network' | 'uncaught';
@@ -108,7 +119,7 @@ async function crawlPage(
 
   try {
     const response = await page.goto(url, {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: 15000,
     });
 
@@ -281,6 +292,30 @@ test.describe('Site Crawler - Comprehensive Validation', () => {
     test.setTimeout(120000); // 2 minutes
     const base = baseURL || 'http://localhost:9080';
 
+    // IMPORTANT: Authenticate before crawling to access protected pages
+    // Many pages require authentication (/topics, /profile, /settings, /verification, etc.)
+    const testUser = generateTestUser();
+    await page.goto(base + '/register');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Fill registration form
+    await page.getByLabel(/email/i).fill(testUser.email);
+    await page.getByLabel(/display name/i).fill(testUser.displayName);
+    await page
+      .getByLabel(/^password/i)
+      .first()
+      .fill(testUser.password);
+    await page.getByLabel(/confirm password/i).fill(testUser.password);
+
+    // Submit registration
+    const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
+    await registerButton.click();
+
+    // Wait for registration to complete (redirect away from /register)
+    await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
+
+    console.log(`✅ Authenticated as ${testUser.email} for site crawl`);
+
     // Create screenshot directory with timestamp
     const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
     const screenshotDir = `test-results/site-crawler-screenshots-${timestamp}`;
@@ -308,8 +343,8 @@ test.describe('Site Crawler - Comprehensive Validation', () => {
       '/settings/feedback', // Feedback preferences (authenticated)
       '/notifications', // Notifications page (authenticated)
       '/verification', // Verification page (authenticated)
-      '/admin/moderation', // Moderation dashboard (authenticated, admin only)
-      '/appeals', // Appeal status page (authenticated)
+      // Note: /admin/moderation and /appeals require special privileges (admin/moderator)
+      // and are not tested in standard site crawl
     ];
 
     // First pass: crawl all start pages

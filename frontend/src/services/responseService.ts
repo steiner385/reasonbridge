@@ -86,10 +86,12 @@ class ResponseService {
   }
 
   /**
-   * Get all responses for a discussion
+   * Get all responses for a discussion by topic ID
+   * Note: The parameter is named discussionId but actually accepts a topicId
+   * for backwards compatibility with existing code.
    */
   async getDiscussionResponses(discussionId: string): Promise<ResponseDetail[]> {
-    const response = await fetch(`${API_BASE_URL}/discussions/${discussionId}/responses`, {
+    const response = await fetch(`${API_BASE_URL}/topics/${discussionId}/responses`, {
       method: 'GET',
       headers: this.getAuthHeaders(),
     });

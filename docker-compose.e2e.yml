@@ -113,6 +113,7 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
       USER_SERVICE_URL: http://user-service:3001
       DISCUSSION_SERVICE_URL: http://discussion-service:3007
       AI_SERVICE_URL: http://ai-service:3002

@@ -57,6 +57,58 @@ export function ResponseList({
     buildThreadTree: enableThreading,
   });
 
+  // CRITICAL: Memoize row renderer BEFORE any early returns to maintain consistent hook calls
+  // React Error #310 occurs when hooks are called conditionally (different number between renders)
+  // This useMemo must always be called, even when responses is null/undefined/empty
+  const Row = useMemo(() => {
+    const RowComponent = ({
+      index,
+      style,
+      ariaAttributes,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: {
+        'aria-posinset': number;
+        'aria-setsize': number;
+        role: 'listitem';
+      };
+    }) => {
+      if (!responses || !responses[index]) return null;
+      const response = responses[index];
+      const isHighlighted = highlightedResponseIds.has(response.id);
+
+      return (
+        <div style={style} className="px-2" {...ariaAttributes}>
+          <div
+            className={`
+                transition-all duration-300
+                ${isHighlighted ? 'ring-2 ring-primary-500 rounded-lg' : ''}
+              `}
+            data-response-id={response.id}
+          >
+            <ResponseItem
+              response={response}
+              discussionId={discussionId}
+              showReplies={enableThreading}
+              onReplySubmit={onReplySubmit}
+              onPreviewFeedbackChange={onPreviewFeedbackChange}
+            />
+          </div>
+        </div>
+      );
+    };
+    RowComponent.displayName = 'ResponseRow';
+    return RowComponent;
+  }, [
+    responses,
+    discussionId,
+    enableThreading,
+    highlightedResponseIds,
+    onReplySubmit,
+    onPreviewFeedbackChange,
+  ]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -116,58 +168,6 @@ export function ResponseList({
       </Card>
     );
   }
-
-  // Memoize row renderer to prevent unnecessary re-renders
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- Hook is only called when responses exist (after early returns)
-  const Row = useMemo(() => {
-    const RowComponent = ({
-      index,
-      style,
-      ariaAttributes,
-    }: {
-      index: number;
-      style: React.CSSProperties;
-      ariaAttributes: {
-        'aria-posinset': number;
-        'aria-setsize': number;
-        role: 'listitem';
-      };
-    }) => {
-      const response = responses[index];
-      if (!response) return null;
-
-      const isHighlighted = highlightedResponseIds.has(response.id);
-
-      return (
-        <div style={style} className="px-2" {...ariaAttributes}>
-          <div
-            className={`
-                transition-all duration-300
-                ${isHighlighted ? 'ring-2 ring-primary-500 rounded-lg' : ''}
-              `}
-            data-response-id={response.id}
-          >
-            <ResponseItem
-              response={response}
-              discussionId={discussionId}
-              showReplies={enableThreading}
-              onReplySubmit={onReplySubmit}
-              onPreviewFeedbackChange={onPreviewFeedbackChange}
-            />
-          </div>
-        </div>
-      );
-    };
-    RowComponent.displayName = 'ResponseRow';
-    return RowComponent;
-  }, [
-    responses,
-    discussionId,
-    enableThreading,
-    highlightedResponseIds,
-    onReplySubmit,
-    onPreviewFeedbackChange,
-  ]);
 
   return (
     <div className="response-list" role="list" aria-label="Responses">

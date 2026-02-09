@@ -10,7 +10,9 @@ import { ConversationPanel } from '../../components/discussion-layout/Conversati
 import { MetadataPanel } from '../../components/discussion-layout/MetadataPanel';
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
 import { useTopics } from '../../lib/useTopics';
+import { useTopic } from '../../lib/useTopic';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { usePropositions } from '../../hooks/usePropositions';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 import type { CreateResponseRequest } from '../../types/response';
 
@@ -67,14 +69,43 @@ export function DiscussionPage() {
     limit: 100,
   });
 
-  const topics = data?.data || [];
+  // Memoize topics array to prevent creating new empty array on every render
+  // This ensures useMemo dependencies remain stable
+  const topics = useMemo(() => data?.data || [], [data?.data]);
   const errorMessage = error ? 'Failed to load topics. Please try again.' : null;
 
-  // Find the active topic object
-  const activeTopic = useMemo(() => {
+  // Find the active topic object in the list
+  const topicInList = useMemo(() => {
     if (!activeTopicId) return null;
     return topics.find((t) => t.id === activeTopicId) || null;
   }, [activeTopicId, topics]);
+
+  // Fallback: fetch individual topic if not found in list
+  // This handles newly created topics that might not be in the filtered list yet
+  // Only fetch if we have an activeTopicId but didn't find it in the list
+  const shouldFetchIndividual = !!activeTopicId && !topicInList;
+  const { data: individualTopic } = useTopic(shouldFetchIndividual ? activeTopicId : undefined);
+
+  // Use topic from list, or fall back to individual fetch
+  const activeTopic = topicInList || individualTopic || null;
+
+  // Fetch propositions for the active topic
+  const { data: rawPropositions = [] } = usePropositions(activeTopic?.id || null);
+
+  // Transform propositions to match PropositionItem type expected by MetadataPanel
+  const propositions = useMemo(() => {
+    return rawPropositions.map((p) => ({
+      id: p.id,
+      statement: p.statement,
+      alignmentData: {
+        supportCount: p.supportCount,
+        opposeCount: p.opposeCount,
+        nuancedCount: p.nuancedCount,
+        consensusScore: null, // Not available from backend yet
+      },
+      relatedResponseIds: p.responses.map((r) => r.responseId),
+    }));
+  }, [rawPropositions]);
 
   // Handle proposition hover - highlight related responses
   const handlePropositionHover = (propositionId: string | null) => {
@@ -272,7 +303,7 @@ export function DiscussionPage() {
         rightPanel={
           <MetadataPanel
             topic={activeTopic}
-            propositions={[]}
+            propositions={propositions}
             commonGroundAnalysis={null}
             bridgingSuggestions={null}
             isLoadingCommonGround={false}

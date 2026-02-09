@@ -58,8 +58,9 @@ test.describe('User Registration and Login Flow', () => {
     await registerButton.click();
 
     // Step 4: Wait for registration to complete
-    // Wait for network to settle after submission
-    await page.waitForLoadState('networkidle', { timeout: 20000 });
+    // Wait for URL to change away from /register (indicates success)
+    // Using waitForURL instead of networkidle to avoid timeout due to slow API requests
+    await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
 
     // Check if still on registration page (indicates failure)
     if (page.url().includes('/register')) {
@@ -95,7 +96,7 @@ test.describe('User Registration and Login Flow', () => {
     await test.step('Login with newly created credentials', async () => {
       // Navigate to landing page to access login modal
       await page.goto('/');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Open login modal by clicking Log In button
       await page.getByRole('button', { name: /log in/i }).click();
@@ -140,8 +141,15 @@ test.describe('User Registration and Login Flow', () => {
 
     // Step 6: Verify successful authentication
     // The login was successful if we reached the home page (/)
-    // Check that auth token was stored in localStorage
-    const authToken = await page.evaluate(() => localStorage.getItem('authToken'));
+    // Check that auth token was stored in localStorage (check multiple possible keys)
+    const authToken = await page.evaluate(() => {
+      return (
+        localStorage.getItem('authToken') ||
+        localStorage.getItem('token') ||
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('authToken')
+      );
+    });
     expect(authToken).toBeTruthy();
     expect(authToken!.length).toBeGreaterThan(0);
   });

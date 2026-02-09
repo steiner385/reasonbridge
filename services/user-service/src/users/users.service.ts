@@ -143,6 +143,25 @@ export class UsersService {
   }
 
   /**
+   * Update a user's profile by their user ID
+   * @param id - The user's UUID
+   * @param updateProfileDto - The fields to update
+   * @returns Updated user object
+   */
+  async updateProfileById(id: string, updateProfileDto: UpdateProfileDto) {
+    // First verify the user exists
+    await this.findById(id);
+
+    // Update the user
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: updateProfileDto,
+    });
+
+    return updatedUser;
+  }
+
+  /**
    * Check if a user exhibits suspicious bot patterns
    * Updates verification level if patterns detected
    * @param userId - The user ID to check

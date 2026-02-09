@@ -64,12 +64,30 @@ export function useCreateTopic(options?: UseCreateTopicOptions) {
   return useMutation({
     mutationFn: (data: CreateTopicRequest) => topicService.createTopic(data),
 
-    onSuccess: (data) => {
-      // Invalidate topic list queries to show the new topic
+    onSuccess: (newTopic) => {
+      // Optimistically add the new topic to all topic list caches
+      queryClient.setQueriesData<{ data: Topic[]; total: number; page: number; limit: number }>(
+        { queryKey: ['topics'] },
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          // Add new topic at the beginning for immediate visibility
+          return {
+            ...oldData,
+            data: [newTopic, ...oldData.data],
+            total: oldData.total + 1,
+          };
+        },
+      );
+
+      // Also cache the individual topic for direct lookups
+      queryClient.setQueryData(['topic', newTopic.id], newTopic);
+
+      // Invalidate topic lists to trigger background refetch for accurate sorting
       queryClient.invalidateQueries({ queryKey: ['topics'] });
 
       // Call user-provided success callback
-      options?.onSuccess?.(data);
+      options?.onSuccess?.(newTopic);
     },
 
     onError: (error: TopicCreationError) => {

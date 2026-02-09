@@ -12,6 +12,7 @@ import { ResponsesModule } from './responses/responses.module.js';
 import { VotesModule } from './votes/votes.module.js';
 import { AlignmentsModule } from './alignments/alignments.module.js';
 import { DiscussionsModule } from './discussions/discussions.module.js';
+import { PropositionsModule } from './propositions/propositions.module.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -48,6 +49,7 @@ import { DiscussionsModule } from './discussions/discussions.module.js';
     AlignmentsModule,
     // T016 - Discussion module (Feature 009)
     DiscussionsModule,
+    PropositionsModule,
   ],
   controllers: [],
   providers: [],

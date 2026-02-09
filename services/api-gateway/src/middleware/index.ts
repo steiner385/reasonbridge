@@ -10,3 +10,4 @@ export {
   generateCorrelationId,
   getCorrelationId,
 } from './correlation.middleware.js';
+export { JwtUserMiddleware } from './jwt-user.middleware.js';

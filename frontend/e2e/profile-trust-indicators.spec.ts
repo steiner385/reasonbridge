@@ -234,6 +234,10 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
   test.describe('VerificationPage Navigation and Access', () => {
     test('should navigate to verification page directly', async ({ page }) => {
+      // Register and login first (verification page requires authentication)
+      await registerLoginAndGoToProfile(page);
+
+      // Navigate to verification page
       await page.goto('/verification');
 
       // Should load verification page

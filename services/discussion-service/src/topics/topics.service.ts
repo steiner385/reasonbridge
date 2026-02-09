@@ -331,6 +331,23 @@ export class TopicsService {
       },
     });
 
+    // Step 4.5: Create associated discussion for the topic
+    // This is required for the topic to be fully functional
+    try {
+      await this.prisma.discussion.create({
+        data: {
+          topicId: topic.id,
+          creatorId: userId,
+          title: dto.title,
+          status: 'ACTIVE', // Discussion is active even when topic is seeding
+        },
+      });
+    } catch (error) {
+      // Log error but don't fail topic creation
+      console.error(`Failed to create discussion for topic ${topic.id}:`, error);
+      // In production, you might want to queue this for retry or alert monitoring
+    }
+
     // Step 5: Invalidate topic listing cache
     // Note: With query-based cache keys, specific caches will expire after 5min TTL
     await this.cacheManager.del('topics:list');

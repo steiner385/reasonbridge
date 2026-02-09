@@ -3,22 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTopics } from '../../lib/useTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
+import { useAuthContext } from '../../contexts/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { TopicCard, TopicFilterUI } from '../../components/topics';
+import { TopicCard, TopicFilterUI, CreateTopicModal } from '../../components/topics';
 import TopicCardSkeleton from '../../components/ui/skeletons/TopicCardSkeleton';
-import { CreateTopicModal } from '../../components/topics/CreateTopicModal';
 import type { GetTopicsParams } from '../../types/topic';
 
 const WELCOME_BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
 
 function TopicsPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthContext();
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState<GetTopicsParams>({
@@ -30,23 +31,13 @@ function TopicsPage() {
 
   const { data, isLoading, error } = useTopics(filters);
   const showSkeleton = useDelayedLoading(isLoading);
-  const prevWelcomeParamRef = useRef(searchParams.get('welcome'));
 
   // Check for welcome param and dismissed state
   useEffect(() => {
-    const welcomeParam = searchParams.get('welcome');
-    // Only update if welcome param actually changed
-    if (welcomeParam !== prevWelcomeParamRef.current) {
-      const isWelcome = welcomeParam === 'true';
-      const isDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY) === 'true';
-      // Schedule state update asynchronously to avoid cascading renders
-      const timer = setTimeout(() => {
-        setShowWelcomeBanner(isWelcome && !isDismissed);
-      }, 0);
-      prevWelcomeParamRef.current = welcomeParam;
-      return () => clearTimeout(timer);
-    }
-    return undefined;
+    const isWelcome = searchParams.get('welcome') === 'true';
+    const isDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY) === 'true';
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronizing external state (localStorage + URL params)
+    setShowWelcomeBanner(isWelcome && !isDismissed);
   }, [searchParams]);
 
   const handleDismissWelcome = () => {
@@ -63,8 +54,10 @@ function TopicsPage() {
   };
 
   const handleCreateSuccess = (topicId: string) => {
-    // Navigate to the newly created topic
-    navigate(`/topics/${topicId}`);
+    // Navigate to the newly created topic after modal closes
+    setTimeout(() => {
+      navigate(`/topics/${topicId}`);
+    }, 300); // Match modal animation
   };
 
   if (error) {
@@ -84,26 +77,27 @@ function TopicsPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Discussion Topics
-          </h1>
-          <p className="text-fluid-base text-gray-600 dark:text-gray-300">
-            Browse and join rational discussions on various topics
-          </p>
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <h1 className="text-fluid-3xl font-bold text-gray-900 dark:text-gray-100">
+              Discussion Topics
+            </h1>
+          </div>
+          {isAuthenticated && (
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="shrink-0"
+            >
+              Create Topic
+            </Button>
+          )}
         </div>
-        <Button
-          variant="primary"
-          size="md"
-          onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Create Topic
-        </Button>
+        <p className="text-fluid-base text-gray-600 dark:text-gray-300">
+          Browse and join rational discussions on various topics
+        </p>
       </div>
 
       {/* Welcome Banner */}

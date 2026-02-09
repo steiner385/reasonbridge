@@ -797,32 +797,24 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
+  // Skip: Test uses old /topics/:id navigation pattern replaced by discussion page redesign
+  // The redesign (Feature 001) introduced a three-panel layout at /discussions?topic=:id
   test('should display error handling for bridging suggestion failures', async ({ page }) => {
-    await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    await page.goto('/discussions');
 
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible();
+    await firstTopic.click();
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
+    await expect(page.locator('.conversation-panel h1')).toBeVisible();
 
-      await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
-      });
+    // Right panel should display feature or error state
+    const rightPanel = page.locator('[role="complementary"]').first();
+    await expect(rightPanel).toBeVisible();
 
-      // Look for error message
-      const _errorMessage = page
-        .locator('[data-testid="suggestions-error"]')
-        .or(page.locator('text=/failed to load suggestions|error analyzing bridges/i'));
-
-      // Page should remain functional even with errors
-      const backButton = page.getByText(/back to topics/i);
-      await expect(backButton).toBeVisible();
-    }
+    // Page should remain responsive
+    await page.waitForTimeout(1000);
+    await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
   test('should scroll smoothly to bridging suggestions section', async ({ page }) => {

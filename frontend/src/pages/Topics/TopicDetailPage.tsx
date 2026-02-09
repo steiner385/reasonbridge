@@ -9,9 +9,11 @@ import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import { useCommonGroundUpdates } from '../../hooks/useCommonGroundUpdates';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
+import { useAuthContext } from '../../contexts/AuthContext';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { BridgingSuggestionsSection, ShareButton } from '../../components/common-ground';
+import { EditTopicModal } from '../../components/topics';
 import { MobileActionBar } from '../../components/layouts';
 import ResponseComposer from '../../components/responses/ResponseComposer';
 import TopicDetailSkeleton from '../../components/ui/skeletons/TopicDetailSkeleton';
@@ -21,6 +23,7 @@ import type { CreateResponseRequest } from '../../types/response';
 
 function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuthContext();
   const { data: topic, isLoading, error } = useTopic(id);
   const { data: commonGroundAnalysis } = useCommonGroundAnalysis(id);
   const showSkeleton = useDelayedLoading(isLoading);
@@ -32,6 +35,9 @@ function TopicDetailPage() {
 
   // State for response submission
   const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
+
+  // State for edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // State for bridging suggestions (populated from API or derived from analysis)
   const [bridgingSuggestions, setBridgingSuggestions] =
@@ -64,6 +70,24 @@ function TopicDetailPage() {
       } finally {
         setIsSubmittingResponse(false);
       }
+    },
+    [id],
+  );
+
+  // Handle topic edit submission
+  const handleEditSubmit = useCallback(
+    async (updates: {
+      title?: string;
+      description?: string;
+      tags?: string[];
+      editReason?: string;
+      flagForReview?: boolean;
+    }) => {
+      if (!id) return;
+
+      await apiClient.patch(`/topics/${id}`, updates);
+      // Refresh topic data after successful edit
+      window.location.reload();
     },
     [id],
   );
@@ -175,11 +199,18 @@ function TopicDetailPage() {
         <CardHeader
           title={topic.title}
           action={
-            <span
-              className={`text-sm font-medium px-3 py-1.5 rounded ${getStatusColor(topic.status)}`}
-            >
-              {topic.status}
-            </span>
+            <div className="flex items-center gap-3">
+              {user && user.id === topic.creatorId && (
+                <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+                  Edit Topic
+                </Button>
+              )}
+              <span
+                className={`text-sm font-medium px-3 py-1.5 rounded ${getStatusColor(topic.status)}`}
+              >
+                {topic.status}
+              </span>
+            </div>
           }
         >
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-300 mt-2">
@@ -429,6 +460,16 @@ function TopicDetailPage() {
           Join Discussion
         </Button>
       </MobileActionBar>
+
+      {/* Edit Topic Modal */}
+      {topic && (
+        <EditTopicModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          topic={topic}
+          onSubmit={handleEditSubmit}
+        />
+      )}
     </div>
   );
 }

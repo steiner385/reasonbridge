@@ -64,7 +64,7 @@ docker compose -f docker-compose.e2e.yml exec -T postgres sh -c "
 docker compose -f docker-compose.e2e.yml exec -T discussion-service sh -c "
     cd /app/packages/db-models || { echo 'ERROR: db-models not found at /app/packages/db-models'; exit 1; }
     DATABASE_URL='postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test' npx prisma migrate deploy
-    DATABASE_URL='postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test' node prisma/seed.js
+    DATABASE_URL='postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test' npx tsx prisma/seed.ts --demo
 " || echo "⚠️  Could not run migrations/seed - check that Docker containers are running"
 
 echo ""

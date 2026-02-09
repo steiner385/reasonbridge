@@ -131,6 +131,100 @@ export class FeedbackPreferencesService {
   }
 
   /**
+   * Get feedback preferences for a user by their ID
+   * Returns default preferences if none are set
+   *
+   * @param userId - The user's UUID
+   * @returns FeedbackPreferencesResponseDto with user's preferences
+   * @throws NotFoundException if user not found
+   */
+  async getPreferencesById(userId: string): Promise<FeedbackPreferencesResponseDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        feedbackPreferences: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Return stored preferences or defaults
+    const preferences = user.feedbackPreferences
+      ? this.parsePreferences(user.feedbackPreferences)
+      : FeedbackPreferencesDto.getDefaults();
+
+    return new FeedbackPreferencesResponseDto(user.id, preferences, user.updatedAt);
+  }
+
+  /**
+   * Update feedback preferences for a user by their ID
+   *
+   * @param userId - The user's UUID
+   * @param updateDto - Partial update with fields to change
+   * @returns Updated FeedbackPreferencesResponseDto
+   * @throws NotFoundException if user not found
+   */
+  async updatePreferencesById(
+    userId: string,
+    updateDto: UpdateFeedbackPreferencesDto,
+  ): Promise<FeedbackPreferencesResponseDto> {
+    // Get current preferences
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        feedbackPreferences: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Merge with existing preferences (or defaults)
+    const currentPreferences = user.feedbackPreferences
+      ? this.parsePreferences(user.feedbackPreferences)
+      : FeedbackPreferencesDto.getDefaults();
+
+    const mergedPreferences = this.mergePreferences(currentPreferences, updateDto);
+
+    // Save updated preferences
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        feedbackPreferences: mergedPreferences as object,
+      },
+      select: {
+        id: true,
+        updatedAt: true,
+      },
+    });
+
+    this.logger.log(`Updated feedback preferences for user ${user.id}`);
+
+    return new FeedbackPreferencesResponseDto(user.id, mergedPreferences, updatedUser.updatedAt);
+  }
+
+  /**
+   * Toggle feedback on or off for a user by their ID
+   * Convenience method that only updates the enabled field
+   *
+   * @param userId - The user's UUID
+   * @param enabled - Whether feedback should be enabled
+   * @returns Updated FeedbackPreferencesResponseDto
+   */
+  async toggleFeedbackById(
+    userId: string,
+    enabled: boolean,
+  ): Promise<FeedbackPreferencesResponseDto> {
+    return this.updatePreferencesById(userId, { enabled });
+  }
+
+  /**
    * Parse stored JSON preferences into DTO
    * Handles type coercion and missing fields
    *

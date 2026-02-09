@@ -32,10 +32,10 @@ export interface TopicCardProps {
 function TopicCard({ topic, truncateDescription = true, className = '', onClick }: TopicCardProps) {
   const getStatusColor = (status: Topic['status']) => {
     switch (status) {
-      case 'ACTIVE':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
       case 'SEEDING':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'ACTIVE':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       case 'ARCHIVED':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
       default:

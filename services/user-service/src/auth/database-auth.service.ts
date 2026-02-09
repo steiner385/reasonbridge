@@ -111,12 +111,14 @@ export class DatabaseAuthService implements IAuthService {
     });
 
     // Generate JWT tokens
+    // IMPORTANT: Use user.id (UUID) as sub claim for downstream services
+    // Downstream services expect UUID format, not cognitoSub string
     const now = Math.floor(Date.now() / 1000);
     const expiresIn = 3600; // 1 hour
 
     const accessToken = jwt.sign(
       {
-        sub: user.cognitoSub,
+        sub: user.id, // Use actual user ID (UUID) instead of cognitoSub
         email: user.email,
         token_use: 'access',
         iat: now,
@@ -127,7 +129,7 @@ export class DatabaseAuthService implements IAuthService {
 
     const idToken = jwt.sign(
       {
-        sub: user.cognitoSub,
+        sub: user.id, // Use actual user ID (UUID) instead of cognitoSub
         email: user.email,
         name: user.displayName,
         email_verified: user.emailVerified,
@@ -139,7 +141,7 @@ export class DatabaseAuthService implements IAuthService {
 
     const refreshToken = jwt.sign(
       {
-        sub: user.cognitoSub,
+        sub: user.id, // Use actual user ID (UUID) instead of cognitoSub
         token_use: 'refresh',
         iat: now,
         exp: now + 30 * 24 * 3600, // 30 days
@@ -167,8 +169,9 @@ export class DatabaseAuthService implements IAuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
+      // JWT sub claim now contains user.id (UUID), not cognitoSub
       const user = await this.prisma.user.findUnique({
-        where: { cognitoSub: decoded['sub'] as string },
+        where: { id: decoded['sub'] as string },
       });
 
       if (!user) {
@@ -180,7 +183,7 @@ export class DatabaseAuthService implements IAuthService {
 
       const accessToken = jwt.sign(
         {
-          sub: user.cognitoSub,
+          sub: user.id, // Use actual user ID (UUID) instead of cognitoSub
           email: user.email,
           token_use: 'access',
           iat: now,
@@ -191,7 +194,7 @@ export class DatabaseAuthService implements IAuthService {
 
       const idToken = jwt.sign(
         {
-          sub: user.cognitoSub,
+          sub: user.id, // Use actual user ID (UUID) instead of cognitoSub
           email: user.email,
           name: user.displayName,
           email_verified: user.emailVerified,
