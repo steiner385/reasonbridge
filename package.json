@@ -95,6 +95,11 @@
   "pnpm": {
     "overrides": {
       "@nestjs/platform-fastify@<11.1.10": ">=11.1.11"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "eslint": "10"
+      }
     }
   },
   "license": "Apache-2.0",

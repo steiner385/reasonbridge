@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { chromium, FullConfig } from '@playwright/test';
 
 /**
@@ -59,6 +64,7 @@ async function globalSetup(config: FullConfig) {
         await browser.close();
         throw new Error(
           `Frontend health check failed: ${baseURL} not accessible after ${maxAttempts} attempts`,
+          { cause: error },
         );
       }
 
