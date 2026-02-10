@@ -3,14 +3,70 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registrationSchema, type RegistrationFormData } from '../../schemas/auth';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardBody } from '../ui/Card';
+import BirthDateInput from './BirthDateInput';
+import CountrySelector from './CountrySelector';
 
 export type { RegistrationFormData };
+
+/**
+ * Regional consent ages for determining minor status
+ * Based on COPPA (US), GDPR Article 8 (EU), and other regional laws
+ */
+const CONSENT_AGES: Record<string, number> = {
+  US: 13,
+  GB: 13,
+  AU: 13,
+  CA: 13,
+  IE: 16,
+  DE: 16,
+  NL: 16,
+  FR: 15,
+  ES: 14,
+  IT: 14,
+  AT: 14,
+  BE: 13,
+  DK: 13,
+  SE: 13,
+  FI: 13,
+  NO: 13,
+  PL: 16,
+  PT: 13,
+  CZ: 15,
+  SK: 16,
+  HU: 16,
+};
+
+const DEFAULT_CONSENT_AGE = 16;
+
+/**
+ * Calculate age from birth date
+ */
+function calculateAge(birthDate: Date): number {
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+/**
+ * Check if user is a minor based on birth date and country
+ */
+function isMinor(birthDate: string | undefined, country: string | undefined): boolean {
+  if (!birthDate || !country) return false;
+  const age = calculateAge(new Date(birthDate));
+  const consentAge = CONSENT_AGES[country] || DEFAULT_CONSENT_AGE;
+  return age < consentAge;
+}
 
 export interface RegistrationFormProps {
   /**
@@ -40,15 +96,27 @@ function RegistrationForm({
   error,
   className = '',
 }: RegistrationFormProps) {
+  const [showParentEmail, setShowParentEmail] = useState(false);
+
   const {
     register,
     handleSubmit,
+    control,
+    watch,
     formState: { errors, touchedFields },
   } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     mode: 'onBlur', // Validate on blur
     reValidateMode: 'onChange', // Re-validate on change after first blur
   });
+
+  // Watch birth date and country to determine if parent email should be shown
+  const birthDate = watch('birthDate');
+  const declaredCountry = watch('declaredCountry');
+
+  useEffect(() => {
+    setShowParentEmail(isMinor(birthDate, declaredCountry));
+  }, [birthDate, declaredCountry]);
 
   // Scroll to first error on submit
   const handleFormSubmit = async (data: RegistrationFormData) => {
@@ -65,6 +133,11 @@ function RegistrationForm({
       }
     }
   };
+
+  // Get consent age for the selected country
+  const consentAge = declaredCountry
+    ? CONSENT_AGES[declaredCountry] || DEFAULT_CONSENT_AGE
+    : DEFAULT_CONSENT_AGE;
 
   return (
     <Card variant="default" padding="lg" className={className}>
@@ -132,6 +205,68 @@ function RegistrationForm({
             placeholder="Re-enter your password"
             autoComplete="new-password"
           />
+
+          {/* Child Safety Section (Optional for Phase 1) */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              Age & Location (Optional)
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              Providing this information helps us ensure a safe experience for all users, especially
+              younger members.
+            </p>
+
+            <div className="space-y-4">
+              <Controller
+                name="birthDate"
+                control={control}
+                render={({ field }) => (
+                  <BirthDateInput
+                    id="birthDate"
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    error={touchedFields.birthDate ? errors.birthDate?.message : undefined}
+                  />
+                )}
+              />
+
+              <Controller
+                name="declaredCountry"
+                control={control}
+                render={({ field }) => (
+                  <CountrySelector
+                    id="declaredCountry"
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    error={
+                      touchedFields.declaredCountry ? errors.declaredCountry?.message : undefined
+                    }
+                  />
+                )}
+              />
+
+              {/* Parent Email - shown when user is a minor */}
+              {showParentEmail && (
+                <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 p-4">
+                  <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
+                    Based on your age and location, parental consent is required (under {consentAge}{' '}
+                    years old). Please provide your parent or guardian&apos;s email address so we
+                    can request their consent.
+                  </p>
+                  <Input
+                    label="Parent/Guardian Email"
+                    type="email"
+                    id="parentEmail"
+                    {...register('parentEmail')}
+                    error={touchedFields.parentEmail ? errors.parentEmail?.message : undefined}
+                    helperText="We will send a consent request to this email address"
+                    fullWidth
+                    placeholder="parent@example.com"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
 
           <Button
             type="submit"

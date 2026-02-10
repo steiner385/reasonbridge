@@ -11,6 +11,7 @@ import { UploadModule } from './upload/upload.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { VerificationModule } from './verification/verification.module.js';
+import { ComplianceModule } from './compliance/compliance.module.js';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { VerificationModule } from './verification/verification.module.js';
     AuthModule,
     UsersModule,
     VerificationModule,
+    ComplianceModule,
   ],
   controllers: [],
   providers: [],

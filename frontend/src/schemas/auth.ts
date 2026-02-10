@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { emailSchema, passwordSchema } from './common';
+import { emailSchema, passwordSchema, birthDateSchema, countryCodeSchema } from './common';
 
 /**
  * Authentication Form Validation Schemas
@@ -22,7 +22,17 @@ export const loginSchema = z.object({
 export type LoginFormData = z.infer<typeof loginSchema>;
 
 /**
+ * Parent email validation schema
+ * Used when user indicates they are a minor requiring parental consent
+ */
+export const parentEmailSchema = z
+  .string()
+  .email('Please provide a valid parent/guardian email address')
+  .optional();
+
+/**
  * Registration schema - Email + Password + Confirm Password + Display Name
+ * Optional: birthDate, declaredCountry, and parentEmail for child safety features
  */
 export const registrationSchema = z
   .object({
@@ -35,6 +45,11 @@ export const registrationSchema = z
       .trim(),
     password: passwordSchema,
     confirmPassword: z.string().min(1, 'Please confirm your password'),
+    // Child safety fields (optional for Phase 1)
+    birthDate: birthDateSchema,
+    declaredCountry: countryCodeSchema,
+    // Parent email for minors
+    parentEmail: parentEmailSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

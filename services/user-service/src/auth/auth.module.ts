@@ -14,6 +14,7 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { UsersModule } from '../users/users.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AUTH_SERVICE } from './auth.interface.js';
+import { ComplianceModule } from '../compliance/compliance.module.js';
 
 /**
  * Provides authentication service based on environment configuration.
@@ -58,6 +59,7 @@ const authServiceProvider = {
       signOptions: { algorithm: 'RS256' },
     }),
     forwardRef(() => UsersModule),
+    ComplianceModule,
   ],
   controllers: [AuthController],
   // Note: CognitoService, MockAuthService, DatabaseAuthService are NOT listed here
