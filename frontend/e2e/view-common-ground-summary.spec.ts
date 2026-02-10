@@ -352,8 +352,7 @@ test.describe('View Common Ground Summary', () => {
     }
   });
 
-  // TODO: Flaky in CI - WebSocket mock timing issues. Tracked in issue #677.
-  test.skip('should update common ground summary in real-time when new responses are added', async ({
+  test('should update common ground summary in real-time when new responses are added', async ({
     page,
   }) => {
     // Setup WebSocket mock

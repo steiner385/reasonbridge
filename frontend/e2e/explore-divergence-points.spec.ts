@@ -508,7 +508,7 @@ test.describe('Explore Divergence Points', () => {
     }
   });
 
-  test.skip('should update divergence points in real-time via WebSocket', async ({ page }) => {
+  test('should update divergence points in real-time via WebSocket', async ({ page }) => {
     // Setup WebSocket mock
     const wsMock = await setupWebSocketMock(page);
 
