@@ -73,14 +73,16 @@ function AppealDetailCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
             <div>
-              <div className="font-semibold text-gray-900">Appeal {appeal.id.slice(0, 8)}</div>
-              <div className="text-sm text-gray-600">
+              <div className="font-semibold text-gray-900 dark:text-gray-100">
+                Appeal {appeal.id.slice(0, 8)}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 Submitted {new Date(appeal.createdAt).toLocaleDateString()}
               </div>
             </div>
           </div>
           <StatusBadge status={appeal.status} />
-          <span className="ml-4 text-gray-600">{isExpanded ? '▼' : '▶'}</span>
+          <span className="ml-4 text-gray-600 dark:text-gray-400">{isExpanded ? '▼' : '▶'}</span>
         </div>
       </CardHeader>
 
@@ -89,20 +91,28 @@ function AppealDetailCard({
           <div className="space-y-4">
             {/* Appeal Details */}
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Appeal Details</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Appeal Details
+              </h3>
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <div>
-                  <div className="text-sm text-gray-600">Your Reason for Appeal</div>
-                  <p className="text-gray-900">{appeal.reason}</p>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Your Reason for Appeal
+                  </div>
+                  <p className="text-gray-900 dark:text-gray-100">{appeal.reason}</p>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600">Submitted</div>
-                  <p className="text-gray-900">{new Date(appeal.createdAt).toLocaleString()}</p>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Submitted</div>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {new Date(appeal.createdAt).toLocaleString()}
+                  </p>
                 </div>
                 {appeal.resolvedAt && (
                   <div>
-                    <div className="text-sm text-gray-600">Resolved</div>
-                    <p className="text-gray-900">{new Date(appeal.resolvedAt).toLocaleString()}</p>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Resolved</div>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {new Date(appeal.resolvedAt).toLocaleString()}
+                    </p>
                   </div>
                 )}
               </div>
@@ -111,27 +121,31 @@ function AppealDetailCard({
             {/* Original Moderation Action */}
             {moderationAction && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Original Moderation Action</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Original Moderation Action
+                </h3>
                 <div className="bg-blue-50 p-4 rounded-lg space-y-2 border border-blue-200">
                   <div>
-                    <div className="text-sm text-gray-600">Action Type</div>
-                    <p className="text-gray-900 capitalize">{moderationAction.actionType}</p>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Action Type</div>
+                    <p className="text-gray-900 dark:text-gray-100 capitalize">
+                      {moderationAction.actionType}
+                    </p>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">Severity</div>
-                    <p className="text-gray-900 capitalize">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Severity</div>
+                    <p className="text-gray-900 dark:text-gray-100 capitalize">
                       {moderationAction.severity === 'non_punitive'
                         ? 'Non-Punitive'
                         : 'Consequential'}
                     </p>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">Reasoning</div>
-                    <p className="text-gray-900">{moderationAction.reasoning}</p>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Reasoning</div>
+                    <p className="text-gray-900 dark:text-gray-100">{moderationAction.reasoning}</p>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600">AI Recommended</div>
-                    <p className="text-gray-900">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">AI Recommended</div>
+                    <p className="text-gray-900 dark:text-gray-100">
                       {moderationAction.aiRecommended ? 'Yes' : 'No'}
                       {moderationAction.aiConfidence &&
                         ` (${(moderationAction.aiConfidence * 100).toFixed(0)}% confidence)`}
@@ -146,7 +160,9 @@ function AppealDetailCard({
               appeal.status !== 'under_review' &&
               appeal.decisionReasoning && (
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Moderator Decision</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Moderator Decision
+                  </h3>
                   <div
                     className={`p-4 rounded-lg ${
                       appeal.status === 'upheld'
@@ -155,14 +171,14 @@ function AppealDetailCard({
                     }`}
                   >
                     <div className="mb-2">
-                      <div className="text-sm text-gray-600">Decision</div>
-                      <p className="text-gray-900 font-semibold capitalize">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Decision</div>
+                      <p className="text-gray-900 dark:text-gray-100 font-semibold capitalize">
                         {appeal.status === 'upheld' ? 'Original action upheld' : 'Appeal denied'}
                       </p>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600">Reasoning</div>
-                      <p className="text-gray-900">{appeal.decisionReasoning}</p>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Reasoning</div>
+                      <p className="text-gray-900 dark:text-gray-100">{appeal.decisionReasoning}</p>
                     </div>
                   </div>
                 </div>
@@ -240,7 +256,7 @@ export default function AppealStatusPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-gray-600">Loading appeals...</div>
+        <div className="text-center text-gray-600 dark:text-gray-400">Loading appeals...</div>
       </div>
     );
   }
@@ -249,8 +265,10 @@ export default function AppealStatusPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Appeal Status</h1>
-        <p className="text-gray-600">Track the status of your appeals against moderation actions</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Appeal Status</h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Track the status of your appeals against moderation actions
+        </p>
       </div>
 
       {error && (
@@ -284,7 +302,7 @@ export default function AppealStatusPage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <p className="text-gray-600 mb-2">No appeals found</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">No appeals found</p>
               <p className="text-sm text-gray-500">
                 {filterStatus === 'all'
                   ? 'You have not submitted any appeals.'

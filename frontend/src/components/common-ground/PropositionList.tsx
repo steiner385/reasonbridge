@@ -41,7 +41,7 @@ export interface PropositionListProps {
  * Get consensus badge color based on score
  */
 function getConsensusColor(score: number | null): string {
-  if (score === null) return 'bg-gray-100 text-gray-700';
+  if (score === null) return 'bg-gray-100 text-gray-700 dark:text-gray-300';
   if (score >= 0.7) return 'bg-green-100 text-green-800';
   if (score >= 0.4) return 'bg-yellow-100 text-yellow-800';
   return 'bg-red-100 text-red-800';
@@ -88,7 +88,7 @@ export function PropositionList({
   if (propositions.length === 0) {
     return (
       <div className={`proposition-list ${className}`}>
-        <div className="text-center py-8 text-gray-600">
+        <div className="text-center py-8 text-gray-600 dark:text-gray-400">
           <svg
             className="w-10 h-10 mx-auto mb-3 text-gray-400"
             fill="none"
@@ -104,7 +104,7 @@ export function PropositionList({
             />
           </svg>
           <p className="text-sm font-medium">No propositions yet</p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Propositions will appear as the discussion develops
           </p>
         </div>
@@ -126,7 +126,7 @@ export function PropositionList({
               ${
                 isHighlighted
                   ? 'border-primary-500 bg-primary-50 shadow-md'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:border-gray-600 hover:shadow-sm'
               }
             `}
             role="button"
@@ -139,7 +139,7 @@ export function PropositionList({
             data-proposition-id={proposition.id}
           >
             {/* Proposition Statement */}
-            <p className="text-sm text-gray-900 font-medium mb-2 line-clamp-3">
+            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium mb-2 line-clamp-3">
               {proposition.statement}
             </p>
 
@@ -213,7 +213,7 @@ export function PropositionList({
 
             {/* Related Responses Count */}
             {proposition.relatedResponseIds && proposition.relatedResponseIds.length > 0 && (
-              <div className="mt-2 text-xs text-gray-500">
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 {proposition.relatedResponseIds.length} related{' '}
                 {proposition.relatedResponseIds.length === 1 ? 'response' : 'responses'}
               </div>

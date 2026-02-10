@@ -76,7 +76,7 @@ const getActivityBadge = (activityLevel: string) => {
     case 'LOW':
       return {
         color:
-          'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
+          'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
         icon: (
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path
@@ -91,7 +91,7 @@ const getActivityBadge = (activityLevel: string) => {
     default:
       return {
         color:
-          'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
+          'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
         icon: null,
         text: 'Unknown',
       };

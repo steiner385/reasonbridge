@@ -225,14 +225,14 @@ function VideoRecordingComponent({
           <h3 className="font-semibold text-blue-900 mb-2">Verification Challenge</h3>
           <p className="text-blue-800 mb-3">{challenge.instruction}</p>
           {challenge.randomValue && (
-            <div className="bg-white border-l-4 border-blue-600 pl-3 py-2">
-              <p className="text-sm text-gray-600">Say this phrase:</p>
+            <div className="bg-white dark:bg-gray-800 border-l-4 border-blue-600 pl-3 py-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Say this phrase:</p>
               <p className="font-mono font-bold text-lg text-blue-600">{challenge.randomValue}</p>
             </div>
           )}
           {challenge.timestamp && (
-            <div className="bg-white border-l-4 border-blue-600 pl-3 py-2">
-              <p className="text-sm text-gray-600">Display this timestamp:</p>
+            <div className="bg-white dark:bg-gray-800 border-l-4 border-blue-600 pl-3 py-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Display this timestamp:</p>
               <p className="font-mono font-bold text-lg text-blue-600">{challenge.timestamp}</p>
             </div>
           )}
@@ -258,7 +258,7 @@ function VideoRecordingComponent({
           ) : (
             <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
               <div className="text-center">
-                <p className="text-gray-600">Camera preview will appear here</p>
+                <p className="text-gray-600 dark:text-gray-400">Camera preview will appear here</p>
               </div>
             </div>
           )}
@@ -277,7 +277,7 @@ function VideoRecordingComponent({
           )}
 
           {/* Duration Constraints Info */}
-          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
+          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 dark:text-gray-300">
             <p>
               Duration: {constraints.minDurationSeconds}-{constraints.maxDurationSeconds} seconds (
               {state.recordedBlob && `${state.recordingDuration}s recorded`})

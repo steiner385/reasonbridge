@@ -192,7 +192,9 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
         {/* Content Type Info */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-500">Content Type</p>
-          <p className="text-sm font-medium text-gray-900 mt-1 capitalize">{contentType}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1 capitalize">
+            {contentType}
+          </p>
         </div>
 
         {/* Category Selection */}

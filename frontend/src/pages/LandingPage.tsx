@@ -103,7 +103,7 @@ export const LandingPage: React.FC = () => {
             <nav className="flex items-center gap-3">
               <button
                 onClick={openModal}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
               >
                 Log In
               </button>
@@ -279,7 +279,7 @@ export const LandingPage: React.FC = () => {
                 {topics.map((topic) => (
                   <div
                     key={topic.id}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg dark:shadow-gray-900/50 transition-shadow"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs text-gray-500 dark:text-gray-300">
@@ -396,7 +396,7 @@ export const LandingPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowJoinModal(false)}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 transition-colors focus:outline-none"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:text-gray-200 dark:hover:text-gray-200 transition-colors focus:outline-none"
               >
                 Continue Browsing
               </button>

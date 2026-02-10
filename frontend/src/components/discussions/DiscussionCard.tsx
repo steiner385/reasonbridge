@@ -39,22 +39,22 @@ export function DiscussionCard({ discussion }: DiscussionCardProps) {
       <Card
         variant="elevated"
         padding="lg"
-        className="transition-all hover:shadow-lg hover:border-blue-300"
+        className="transition-all hover:shadow-lg dark:shadow-gray-900/50 hover:border-blue-300"
       >
         {/* Title */}
-        <h3 className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 hover:text-blue-600 transition-colors">
           {discussion.title}
         </h3>
 
         {/* Creator info */}
-        <div className="text-sm text-gray-600 mb-4">
+        <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           Started by <span className="font-medium">{discussion.creator.displayName}</span>
           <span className="mx-1">·</span>
           <time dateTime={discussion.createdAt}>{formatDate(discussion.createdAt)}</time>
         </div>
 
         {/* Metrics */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
           {/* Response Count */}
           <div className="flex items-center gap-1">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -35,7 +35,7 @@ function EditDiff({ edit }: { edit: TopicEdit }) {
       {/* Title changes */}
       {edit.newTitle !== undefined && (
         <div className="border border-gray-200 rounded-lg p-3">
-          <h5 className="text-xs font-semibold text-gray-600 mb-2">Title</h5>
+          <h5 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Title</h5>
           <div className="space-y-2">
             {edit.previousTitle && (
               <div className="bg-red-50 border-l-4 border-red-400 p-2">
@@ -58,7 +58,9 @@ function EditDiff({ edit }: { edit: TopicEdit }) {
       {/* Description changes */}
       {edit.newDescription !== undefined && (
         <div className="border border-gray-200 rounded-lg p-3">
-          <h5 className="text-xs font-semibold text-gray-600 mb-2">Description</h5>
+          <h5 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+            Description
+          </h5>
           <div className="space-y-2">
             {edit.previousDescription && (
               <div className="bg-red-50 border-l-4 border-red-400 p-2">
@@ -81,7 +83,7 @@ function EditDiff({ edit }: { edit: TopicEdit }) {
       {/* Tags changes */}
       {edit.newTags !== undefined && (
         <div className="border border-gray-200 rounded-lg p-3">
-          <h5 className="text-xs font-semibold text-gray-600 mb-2">Tags</h5>
+          <h5 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Tags</h5>
           <div className="space-y-2">
             {edit.previousTags && edit.previousTags.length > 0 && (
               <div className="bg-red-50 border-l-4 border-red-400 p-2">
@@ -151,7 +153,7 @@ function EditHistoryItem({ edit }: { edit: TopicEdit }) {
                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
               />
             </svg>
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {edit.editor?.name || `User ${edit.editorId}`}
             </p>
             <span className="text-xs text-gray-500">{relativeTime}</span>
@@ -159,7 +161,9 @@ function EditHistoryItem({ edit }: { edit: TopicEdit }) {
 
           {/* Edit reason */}
           {edit.changeReason && (
-            <p className="text-sm text-gray-600 mt-1 italic">"{edit.changeReason}"</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
+              "{edit.changeReason}"
+            </p>
           )}
 
           {/* Moderation flag */}
@@ -258,7 +262,7 @@ export function TopicEditHistory({ topicId, limit = 50 }: TopicEditHistoryProps)
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Edit History</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit History</h3>
         <span className="text-sm text-gray-500">
           {data.total} {data.total === 1 ? 'edit' : 'edits'}
         </span>

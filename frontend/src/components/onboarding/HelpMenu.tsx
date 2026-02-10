@@ -95,16 +95,18 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 py-2 z-50">
           <div className="px-4 py-2 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-900">Help & Resources</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Help & Resources
+            </h3>
           </div>
 
           <div className="py-1">
             {/* Reopen Orientation */}
             <button
               onClick={handleReopenOrientation}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
             >
               <svg
                 className="h-5 w-5 text-primary-600 flex-shrink-0"
@@ -121,17 +123,19 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
               </svg>
               <div>
                 <div className="font-medium">View Orientation</div>
-                <div className="text-xs text-gray-500">Review how to use the platform</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Review how to use the platform
+                </div>
               </div>
             </button>
 
             {/* Documentation */}
             <a
               href="/docs"
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
             >
               <svg
-                className="h-5 w-5 text-gray-500 flex-shrink-0"
+                className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -145,17 +149,17 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
               </svg>
               <div>
                 <div className="font-medium">Documentation</div>
-                <div className="text-xs text-gray-500">Full platform guide</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Full platform guide</div>
               </div>
             </a>
 
             {/* FAQs */}
             <a
               href="/faq"
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
             >
               <svg
-                className="h-5 w-5 text-gray-500 flex-shrink-0"
+                className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -169,17 +173,17 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
               </svg>
               <div>
                 <div className="font-medium">FAQs</div>
-                <div className="text-xs text-gray-500">Common questions</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Common questions</div>
               </div>
             </a>
 
             {/* Contact Support */}
             <a
               href="/support"
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
             >
               <svg
-                className="h-5 w-5 text-gray-500 flex-shrink-0"
+                className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -193,15 +197,20 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
               </svg>
               <div>
                 <div className="font-medium">Contact Support</div>
-                <div className="text-xs text-gray-500">Get help from our team</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Get help from our team
+                </div>
               </div>
             </a>
           </div>
 
           {/* Keyboard shortcut hint */}
           <div className="px-4 py-2 border-t border-gray-100 mt-1">
-            <p className="text-xs text-gray-500">
-              Press <kbd className="px-1 py-0.5 bg-gray-100 rounded border border-gray-300">?</kbd>{' '}
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Press{' '}
+              <kbd className="px-1 py-0.5 bg-gray-100 rounded border border-gray-300 dark:border-gray-600">
+                ?
+              </kbd>{' '}
               for keyboard shortcuts
             </p>
           </div>

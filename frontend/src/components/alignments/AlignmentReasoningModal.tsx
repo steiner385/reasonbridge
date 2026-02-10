@@ -182,7 +182,7 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
             type="button"
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
@@ -212,14 +212,19 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
                   : 'Nuanced Position'}
             </p>
             {propositionText && (
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{propositionText}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                {propositionText}
+              </p>
             )}
           </div>
         </div>
 
         {/* Reasoning input */}
         <div>
-          <label htmlFor="reasoning" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="reasoning"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Your Reasoning {reasoningRequired && <span className="text-red-500">*</span>}
           </label>
           <textarea
@@ -234,20 +239,20 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
               disabled:bg-gray-100 disabled:cursor-not-allowed
               resize-y
-              ${error ? 'border-red-300' : 'border-gray-300'}
+              ${error ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'}
             `}
           />
           <div className="flex items-center justify-between mt-2">
             <div>
               {error && <p className="text-sm text-red-600">{error}</p>}
               {!error && reasoningRequired && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Minimum {minReasoningLength} characters required
                 </p>
               )}
             </div>
             <p
-              className={`text-sm ${characterCount >= minReasoningLength ? 'text-gray-500' : 'text-gray-400'}`}
+              className={`text-sm ${characterCount >= minReasoningLength ? 'text-gray-500 dark:text-gray-400' : 'text-gray-400'}`}
             >
               {characterCount} characters
             </p>
@@ -255,11 +260,11 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
         </div>
 
         {/* Helpful tips */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-gray-900 mb-2">
+        <div className="bg-gray-50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Tips for effective reasoning:
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
             <li>Be specific about which aspects you agree or disagree with</li>
             <li>Provide evidence or examples when possible</li>
             <li>Acknowledge valid points from other perspectives</li>

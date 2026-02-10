@@ -73,7 +73,7 @@ const getAgreementStyles = (percentage: number) => {
   return {
     border: 'border-gray-500',
     bg: 'bg-gray-50',
-    badge: 'bg-gray-100 text-gray-800',
+    badge: 'bg-gray-100 text-gray-800 dark:text-gray-200',
     text: 'text-gray-700',
   };
 };
@@ -155,7 +155,9 @@ const SharedPointCard = ({
       {/* Header with agreement badge */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
-          <p className={`${sizeStyles.text} text-gray-900 font-medium leading-relaxed`}>
+          <p
+            className={`${sizeStyles.text} text-gray-900 dark:text-gray-100 font-medium leading-relaxed`}
+          >
             {proposition.text}
           </p>
         </div>
@@ -192,7 +194,9 @@ const SharedPointCard = ({
 
       {/* Participant details */}
       {showParticipants && (
-        <div className={`mt-3 flex items-center gap-3 ${sizeStyles.participants} text-gray-600`}>
+        <div
+          className={`mt-3 flex items-center gap-3 ${sizeStyles.participants} text-gray-600 dark:text-gray-400`}
+        >
           <div className="flex items-center gap-1.5">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
             <span>{proposition.supportingParticipants.length} support</span>

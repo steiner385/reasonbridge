@@ -105,7 +105,7 @@ export function Dropdown({
             absolute z-50 mt-2 w-80 max-h-96 overflow-y-auto
             bg-white dark:bg-gray-800
             border border-gray-200 dark:border-gray-700
-            rounded-lg shadow-lg
+            rounded-lg shadow-lg dark:shadow-gray-900/50
             ${align === 'right' ? 'right-0' : 'left-0'}
             ${className}
           `}

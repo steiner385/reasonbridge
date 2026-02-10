@@ -121,7 +121,7 @@ function TagFilter({
             />
 
             {/* Tag Name */}
-            <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+            <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100 transition-colors">
               {tag.name}
             </span>
 

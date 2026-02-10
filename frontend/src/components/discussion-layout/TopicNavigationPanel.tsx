@@ -91,7 +91,7 @@ export function TopicNavigationPanel({
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Topics</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Topics</h2>
           <p className="text-xs text-gray-500 mt-0.5">
             {filteredTopics.length} {filteredTopics.length === 1 ? 'topic' : 'topics'}
           </p>
@@ -105,7 +105,7 @@ export function TopicNavigationPanel({
             aria-label="Close topic navigation"
           >
             <svg
-              className="w-6 h-6 text-gray-600"
+              className="w-6 h-6 text-gray-600 dark:text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -149,7 +149,7 @@ export function TopicNavigationPanel({
                 className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
                 aria-hidden="true"
               />
-              <p className="text-sm text-gray-600">Loading topics...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Loading topics...</p>
             </div>
           </div>
         )}
@@ -170,7 +170,7 @@ export function TopicNavigationPanel({
       {(searchQuery || statusFilter) && (
         <div className="flex-shrink-0 px-4 py-2 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-600 font-medium">Active filters:</span>
+            <span className="text-gray-600 dark:text-gray-400 font-medium">Active filters:</span>
             {searchQuery && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 rounded-full">
                 Search: "{searchQuery.substring(0, 20)}

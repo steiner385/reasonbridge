@@ -313,7 +313,9 @@ export function EditTopicModal({
           {editReason.trim() && (
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Edit Reason</h4>
-              <p className="text-sm text-gray-600 whitespace-pre-wrap">{editReason}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                {editReason}
+              </p>
             </div>
           )}
 

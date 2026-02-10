@@ -294,13 +294,13 @@ export function TopicStatusActions({
           <p className="text-gray-700">{pendingAction.message}</p>
 
           <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               <strong>Topic:</strong> {topic.title}
             </p>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               <strong>Current Status:</strong> {topic.status}
             </p>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               <strong>New Status:</strong> {pendingAction.status}
             </p>
           </div>

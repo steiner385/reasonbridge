@@ -62,8 +62,10 @@ const AILoadingBanner: React.FC = () => (
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-base font-semibold text-gray-900 mb-1">AI Analysis in Progress</h4>
-        <p className="text-sm text-gray-600 mb-3">
+        <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+          AI Analysis in Progress
+        </h4>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
           Claude is analyzing your response for nuanced tone, fallacies, and unsourced claims...
         </p>
 
@@ -77,7 +79,7 @@ const AILoadingBanner: React.FC = () => (
           />
         </div>
 
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
           This usually takes 2-5 seconds • Using AWS Bedrock Claude 3.5 Sonnet
         </p>
       </div>
@@ -128,7 +130,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
 
   return (
     <div
-      className={`mt-3 rounded-lg border bg-white shadow-sm ${isAILoading ? 'ring-2 ring-blue-200 ring-opacity-50' : ''} ${className}`}
+      className={`mt-3 rounded-lg border bg-white dark:bg-gray-800 shadow-sm ${isAILoading ? 'ring-2 ring-blue-200 ring-opacity-50' : ''} ${className}`}
       role="region"
       aria-label="Preview feedback"
       aria-live="polite"
@@ -138,7 +140,9 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
       <div className="px-4 py-3 border-b bg-gray-50 rounded-t-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium text-gray-900">Feedback Preview</h3>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Feedback Preview
+            </h3>
             {isAIFeedback && !isAILoading && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200">
                 ✨ AI-Enhanced
@@ -156,7 +160,9 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
             {!error && <ReadyToPostIndicator readyToPost={readyToPost} isLoading={anyLoading} />}
           </div>
         </div>
-        {summary && !error && <p className="mt-1 text-sm text-gray-600">{summary}</p>}
+        {summary && !error && (
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{summary}</p>
+        )}
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
 
@@ -176,7 +182,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
         {/* Show existing feedback while AI is loading (regex results) */}
         {isAILoading && feedback.length > 0 && (
           <div className="space-y-3 opacity-60">
-            <div className="text-xs text-gray-500 font-medium mb-2 italic">
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-2 italic">
               Quick check results (AI refining below...)
             </div>
             {feedback.map((item, index) => (
@@ -188,7 +194,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
         {/* Error state */}
         {error && !anyLoading && (
           <div className="text-center py-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Unable to analyze content. Your response can still be posted.
             </p>
           </div>
@@ -207,7 +213,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
         {!anyLoading && !error && feedback.length === 0 && showEmpty && (
           <div className="text-center py-4">
             <span className="text-2xl mb-2 block">✨</span>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               No suggestions. Your response looks constructive!
             </p>
           </div>

@@ -96,7 +96,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
     >
       <CardHeader action={actions} className="mb-3">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-900">
+          <span className="font-semibold text-gray-900 dark:text-gray-100">
             {response.author?.displayName || 'Anonymous'}
           </span>
           <span className="text-gray-400">•</span>
@@ -113,7 +113,9 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
       </CardHeader>
 
       <CardBody>
-        <div className="text-gray-800 whitespace-pre-wrap break-words">{displayContent}</div>
+        <div className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
+          {displayContent}
+        </div>
 
         {isTruncated && (
           <button
@@ -192,7 +194,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                   key={prop.id}
                   className="text-sm bg-gray-50 rounded-lg p-2 border border-gray-200"
                 >
-                  <p className="text-gray-800">{prop.statement}</p>
+                  <p className="text-gray-800 dark:text-gray-200">{prop.statement}</p>
                   {prop.relevanceScore !== undefined && (
                     <span className="text-xs text-gray-500 mt-1 block">
                       Relevance: {(prop.relevanceScore * 100).toFixed(0)}%

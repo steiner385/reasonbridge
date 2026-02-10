@@ -65,7 +65,7 @@ export const ReadyToPostIndicator: React.FC<ReadyToPostIndicatorProps> = ({
   if (isLoading) {
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 ${className}`}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:text-gray-400 ${className}`}
         role="status"
         aria-live="polite"
       >

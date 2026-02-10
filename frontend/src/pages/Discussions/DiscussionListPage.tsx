@@ -61,7 +61,7 @@ export function DiscussionListPage() {
         <Card variant="elevated" padding="lg">
           <div className="text-center text-fallacy-DEFAULT">
             <h2 className="text-xl font-semibold mb-2">Error Loading Discussions</h2>
-            <p className="text-gray-600">{error.message}</p>
+            <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
           </div>
         </Card>
       </div>
@@ -74,8 +74,12 @@ export function DiscussionListPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Discussions</h1>
-            <p className="text-gray-600">Join rational discussions and share your perspectives</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Discussions
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Join rational discussions and share your perspectives
+            </p>
           </div>
           <Button
             variant="primary"
@@ -91,7 +95,9 @@ export function DiscussionListPage() {
       {showCreateForm && topicId && (
         <Card variant="elevated" padding="lg" className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Start a New Discussion</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Start a New Discussion
+            </h2>
             <button
               onClick={() => setShowCreateForm(false)}
               className="text-gray-500 hover:text-gray-700"
@@ -132,7 +138,7 @@ export function DiscussionListPage() {
               <option value="responseCount">Most Responses</option>
             </select>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             {data && `${data.meta.totalItems} discussion${data.meta.totalItems !== 1 ? 's' : ''}`}
           </div>
         </div>
@@ -163,7 +169,7 @@ export function DiscussionListPage() {
           <div className="space-y-4 mb-6">
             {data.data.length === 0 ? (
               <Card variant="elevated" padding="lg">
-                <div className="text-center text-gray-600 py-8">
+                <div className="text-center text-gray-600 dark:text-gray-400 py-8">
                   <svg
                     className="mx-auto h-12 w-12 text-gray-400 mb-4"
                     fill="none"
@@ -195,7 +201,7 @@ export function DiscussionListPage() {
           {data.meta.totalPages > 1 && (
             <Card padding="md">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
                   Page {data.meta.currentPage} of {data.meta.totalPages}
                 </div>
                 <div className="flex gap-2">

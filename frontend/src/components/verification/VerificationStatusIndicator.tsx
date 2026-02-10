@@ -32,7 +32,7 @@ const getStatusColor = (status: VerificationStatus): string => {
     case VerificationStatus.EXPIRED:
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-300';
+      return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-300';
   }
 };
 
@@ -137,7 +137,7 @@ export const VerificationStatusIndicator: React.FC<VerificationStatusIndicatorPr
   if (!verification) {
     return (
       <span
-        className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-full border bg-gray-100 text-gray-600 border-gray-300 ${className}`}
+        className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-full border bg-gray-100 text-gray-600 dark:text-gray-400 border-gray-300 ${className}`}
       >
         <span className="text-base">○</span>
         {showLabel && <span>Not Verified</span>}

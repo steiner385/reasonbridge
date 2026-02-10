@@ -137,7 +137,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
       aria-live="polite"
       aria-atomic="true"
       className={`
-        flex items-start gap-3 p-4 rounded-lg border-l-4 shadow-lg
+        flex items-start gap-3 p-4 rounded-lg border-l-4 shadow-lg dark:shadow-gray-900/50
         animate-slide-up
         ${variantClasses[variant]}
       `}
@@ -151,7 +151,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
       {/* Dismiss Button */}
       <button
         onClick={() => onDismiss(id)}
-        className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+        className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
         aria-label="Dismiss notification"
       >
         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

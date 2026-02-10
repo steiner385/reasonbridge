@@ -207,9 +207,9 @@ export default function ModerationQueueView({
       case 'appealed':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'reversed':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -250,7 +250,7 @@ export default function ModerationQueueView({
             <div>
               <label
                 htmlFor="queue-status-filter"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Status
               </label>
@@ -261,7 +261,7 @@ export default function ModerationQueueView({
                   setStatusFilter(e.target.value as ModerationActionStatus | 'all');
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
               >
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
@@ -275,7 +275,7 @@ export default function ModerationQueueView({
             <div>
               <label
                 htmlFor="queue-severity-filter"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Severity
               </label>
@@ -286,7 +286,7 @@ export default function ModerationQueueView({
                   setSeverityFilter(e.target.value as ModerationSeverity | 'all');
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
               >
                 <option value="all">All</option>
                 <option value="non_punitive">Non-Punitive</option>
@@ -298,7 +298,7 @@ export default function ModerationQueueView({
             <div>
               <label
                 htmlFor="queue-action-type-filter"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Action Type
               </label>
@@ -309,7 +309,7 @@ export default function ModerationQueueView({
                   setActionTypeFilter(e.target.value as ModerationActionType | 'all');
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
               >
                 <option value="all">All</option>
                 <option value="educate">Educate</option>
@@ -329,7 +329,7 @@ export default function ModerationQueueView({
         <CardHeader>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Moderation Queue</h2>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               {actions.length} action{actions.length !== 1 ? 's' : ''} shown
             </div>
           </div>
@@ -338,10 +338,12 @@ export default function ModerationQueueView({
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
-              <p className="text-gray-600 mt-3">Loading queue...</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-3">Loading queue...</p>
             </div>
           ) : actions.length === 0 ? (
-            <p className="text-center text-gray-500 py-12">No actions to review</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 py-12">
+              No actions to review
+            </p>
           ) : (
             <div className="space-y-3">
               {/* Sort Controls */}
@@ -351,7 +353,7 @@ export default function ModerationQueueView({
                   className={`px-3 py-1 text-sm rounded-md border transition-colors ${
                     sortField === 'createdAt'
                       ? 'bg-primary-50 border-primary-300 text-primary-700'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   Date {sortField === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -361,7 +363,7 @@ export default function ModerationQueueView({
                   className={`px-3 py-1 text-sm rounded-md border transition-colors ${
                     sortField === 'severity'
                       ? 'bg-primary-50 border-primary-300 text-primary-700'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   Severity {sortField === 'severity' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -373,7 +375,7 @@ export default function ModerationQueueView({
                 {actions.map((action) => (
                   <div
                     key={action.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex flex-wrap gap-2">
@@ -382,7 +384,7 @@ export default function ModerationQueueView({
                         >
                           {action.severity.replace('_', ' ')}
                         </span>
-                        <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
+                        <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700">
                           {formatActionType(action.actionType)}
                         </span>
                         <span
@@ -397,16 +399,16 @@ export default function ModerationQueueView({
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500 flex-shrink-0">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                         {formatDate(action.createdAt)}
                       </span>
                     </div>
 
                     <div className="mb-3">
-                      <p className="text-sm text-gray-900 font-medium mb-1">
+                      <p className="text-sm text-gray-900 dark:text-gray-100 font-medium mb-1">
                         Target: {action.targetType}
                       </p>
-                      <p className="text-sm text-gray-700">{action.reasoning}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{action.reasoning}</p>
                     </div>
 
                     {action.status === 'pending' && (
@@ -452,7 +454,7 @@ export default function ModerationQueueView({
           >
             Previous
           </Button>
-          <span className="px-4 py-2 text-sm text-gray-600">Page {page}</span>
+          <span className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">Page {page}</span>
           <Button
             size="sm"
             variant="outline"

@@ -29,8 +29,10 @@ function UserProfilePage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Profile</h2>
-              <p className="text-gray-600 mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Unable to Load Profile
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 {error instanceof Error
                   ? error.message
                   : 'An error occurred while loading this profile.'}
@@ -51,8 +53,12 @@ function UserProfilePage() {
         <Card>
           <CardBody>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">User Not Found</h2>
-              <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                User Not Found
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                The user you're looking for doesn't exist.
+              </p>
               <Link to="/">
                 <Button variant="primary">Go to Home</Button>
               </Link>
@@ -80,14 +86,19 @@ function UserProfilePage() {
       {/* Profile Header */}
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold text-gray-900">{user.displayName}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {user.displayName}
+          </h1>
         </CardHeader>
         <CardBody>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Verification Level</p>
-                <p className="text-lg text-gray-900" data-testid="verification-level">
+                <p
+                  className="text-lg text-gray-900 dark:text-gray-100"
+                  data-testid="verification-level"
+                >
                   {user.verificationLevel?.replace('_', ' ') || 'Unknown'}
                 </p>
                 {user.verificationLevel === 'VERIFIED_HUMAN' && (
@@ -102,7 +113,9 @@ function UserProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Member Since</p>
-                <p className="text-lg text-gray-900">{formatDate(user.createdAt)}</p>
+                <p className="text-lg text-gray-900 dark:text-gray-100">
+                  {formatDate(user.createdAt)}
+                </p>
               </div>
             </div>
           </div>
@@ -112,7 +125,7 @@ function UserProfilePage() {
       {/* Trust Scores */}
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold text-gray-900">Trust Scores</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Trust Scores</h2>
         </CardHeader>
         <CardBody>
           <div className="space-y-4" data-testid="trust-score-display">
@@ -171,32 +184,40 @@ function UserProfilePage() {
         user.followingCount !== undefined) && (
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900">Activity</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Activity</h2>
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {user.topicCount !== undefined && (
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{user.topicCount}</p>
-                  <p className="text-sm text-gray-600">Topics</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {user.topicCount}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Topics</p>
                 </div>
               )}
               {user.responseCount !== undefined && (
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{user.responseCount}</p>
-                  <p className="text-sm text-gray-600">Responses</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {user.responseCount}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Responses</p>
                 </div>
               )}
               {user.followerCount !== undefined && (
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{user.followerCount}</p>
-                  <p className="text-sm text-gray-600">Followers</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {user.followerCount}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Followers</p>
                 </div>
               )}
               {user.followingCount !== undefined && (
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{user.followingCount}</p>
-                  <p className="text-sm text-gray-600">Following</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {user.followingCount}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Following</p>
                 </div>
               )}
             </div>

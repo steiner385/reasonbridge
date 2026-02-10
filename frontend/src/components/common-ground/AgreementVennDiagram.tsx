@@ -113,7 +113,9 @@ const AgreementVennDiagram = ({
       )}
 
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h4 className="text-md font-medium text-gray-800 mb-3">{disagreement.topic}</h4>
+        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-3">
+          {disagreement.topic}
+        </h4>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">{disagreement.description}</p>
 
         {/* SVG Venn Diagram */}

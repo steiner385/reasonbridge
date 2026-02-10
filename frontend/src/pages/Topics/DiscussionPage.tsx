@@ -251,11 +251,14 @@ export function DiscussionPage() {
           aria-labelledby="unsaved-changes-title"
           aria-modal="true"
         >
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 id="unsaved-changes-title" className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900/50 max-w-md w-full mx-4 p-6">
+            <h2
+              id="unsaved-changes-title"
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2"
+            >
               Unsaved Changes
             </h2>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               You have unsaved changes in your response. Are you sure you want to leave? Your
               changes will be lost.
             </p>
@@ -263,7 +266,7 @@ export function DiscussionPage() {
               <button
                 type="button"
                 onClick={handleCancelLeave}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
               >
                 Cancel
               </button>

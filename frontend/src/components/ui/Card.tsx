@@ -53,7 +53,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const variantStyles = {
       default: 'bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700',
       outlined: 'bg-white border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600',
-      elevated: 'bg-white shadow-lg dark:bg-gray-800 dark:shadow-2xl',
+      elevated:
+        'bg-white shadow-lg dark:shadow-gray-900/50 dark:bg-gray-800 dark:shadow-2xl dark:shadow-gray-900/50',
       ghost: 'bg-gray-50 border border-transparent dark:bg-gray-900 dark:border-transparent',
     };
 
@@ -67,7 +68,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     // Hover styles (with dark mode support)
     const hoverStyles = hoverable
-      ? 'hover:shadow-xl hover:border-primary-200 dark:hover:border-primary-700 hover:-translate-y-0.5'
+      ? 'hover:shadow-xl dark:shadow-gray-900/50 hover:border-primary-200 dark:hover:border-primary-700 hover:-translate-y-0.5'
       : '';
 
     // Clickable styles

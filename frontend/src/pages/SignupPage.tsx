@@ -65,7 +65,7 @@ export const SignupPage: React.FC = () => {
         </div>
 
         {/* Card Container */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/50 p-8">
           {/* Email Signup Form */}
           <EmailSignupForm onSubmit={handleEmailSignup} isLoading={isLoading} error={error} />
 
@@ -114,7 +114,7 @@ export const SignupPage: React.FC = () => {
         <div className="mt-4 text-center">
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none focus:underline"
+            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none focus:underline"
           >
             ← Back to Home
           </button>

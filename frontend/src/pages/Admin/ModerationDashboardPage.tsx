@@ -161,9 +161,9 @@ export default function ModerationDashboardPage() {
       case 'appealed':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'reversed':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -179,7 +179,7 @@ export default function ModerationDashboardPage() {
       case 'denied':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -202,15 +202,19 @@ export default function ModerationDashboardPage() {
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Moderation Dashboard</h1>
-        <p className="text-gray-600">Monitor and manage moderation actions and appeals</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          Moderation Dashboard
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Monitor and manage moderation actions and appeals
+        </p>
       </div>
 
       {/* Tab Navigation */}
       <div
         role="tablist"
         aria-label="Moderation dashboard sections"
-        className="flex gap-2 mb-6 border-b border-gray-200"
+        className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700"
       >
         <button
           role="tab"
@@ -221,7 +225,7 @@ export default function ModerationDashboardPage() {
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'overview'
               ? 'border-primary-500 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100'
           }`}
         >
           Overview
@@ -235,7 +239,7 @@ export default function ModerationDashboardPage() {
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'queue'
               ? 'border-primary-500 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100'
           }`}
         >
           Queue
@@ -249,7 +253,7 @@ export default function ModerationDashboardPage() {
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'actions'
               ? 'border-primary-500 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100'
           }`}
         >
           Actions
@@ -263,7 +267,7 @@ export default function ModerationDashboardPage() {
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             activeTab === 'appeals'
               ? 'border-primary-500 text-primary-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100'
           }`}
         >
           Appeals
@@ -283,7 +287,7 @@ export default function ModerationDashboardPage() {
               <CardBody>
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
-                  <p className="text-gray-600 mt-3">Loading dashboard...</p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-3">Loading dashboard...</p>
                 </div>
               </CardBody>
             </Card>
@@ -294,10 +298,10 @@ export default function ModerationDashboardPage() {
                 <Card>
                   <CardBody>
                     <div className="text-center">
-                      <p className="text-4xl font-bold text-gray-900 mb-1">
+                      <p className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                         {stats.totalPending ?? 0}
                       </p>
-                      <p className="text-sm text-gray-600">Pending Actions</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Pending Actions</p>
                     </div>
                   </CardBody>
                 </Card>
@@ -307,19 +311,21 @@ export default function ModerationDashboardPage() {
                       <p className="text-4xl font-bold text-red-600 mb-1">
                         {stats.criticalActions ?? 0}
                       </p>
-                      <p className="text-sm text-gray-600">Critical Actions</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Critical Actions</p>
                     </div>
                   </CardBody>
                 </Card>
                 <Card>
                   <CardBody>
                     <div className="text-center">
-                      <p className="text-4xl font-bold text-gray-900 mb-1">
+                      <p className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                         {stats.avgReviewTimeMinutes != null
                           ? Math.round(stats.avgReviewTimeMinutes)
                           : 'N/A'}
                       </p>
-                      <p className="text-sm text-gray-600">Avg Review Time (min)</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Avg Review Time (min)
+                      </p>
                     </div>
                   </CardBody>
                 </Card>
@@ -336,10 +342,12 @@ export default function ModerationDashboardPage() {
                       {Object.entries(stats.pendingByType).map(([type, count]) => (
                         <div key={type}>
                           <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-700">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                               {formatActionType(type)}
                             </span>
-                            <span className="text-sm font-semibold text-gray-900">{count}</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {count}
+                            </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
@@ -363,11 +371,16 @@ export default function ModerationDashboardPage() {
                 </CardHeader>
                 <CardBody>
                   {actions.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No pending actions</p>
+                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      No pending actions
+                    </p>
                   ) : (
                     <div className="space-y-4">
                       {actions.slice(0, 5).map((action) => (
-                        <div key={action.id} className="p-4 border border-gray-200 rounded-lg">
+                        <div
+                          key={action.id}
+                          className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                        >
                           <div className="flex items-start justify-between mb-2">
                             <div>
                               <span
@@ -375,15 +388,17 @@ export default function ModerationDashboardPage() {
                               >
                                 {action.severity}
                               </span>
-                              <span className="ml-2 text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
+                              <span className="ml-2 text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700">
                                 {formatActionType(action.actionType)}
                               </span>
                             </div>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatDate(action.createdAt)}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-700 mb-3">{action.reasoning}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                            {action.reasoning}
+                          </p>
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -416,22 +431,29 @@ export default function ModerationDashboardPage() {
                 </CardHeader>
                 <CardBody>
                   {appeals.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No pending appeals</p>
+                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      No pending appeals
+                    </p>
                   ) : (
                     <div className="space-y-4">
                       {appeals.slice(0, 5).map((appeal) => (
-                        <div key={appeal.id} className="p-4 border border-gray-200 rounded-lg">
+                        <div
+                          key={appeal.id}
+                          className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                        >
                           <div className="flex items-start justify-between mb-2">
                             <span
                               className={`text-xs font-semibold px-2 py-1 rounded-full border ${getAppealStatusColor(appeal.status)}`}
                             >
                               {appeal.status}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatDate(appeal.createdAt)}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-700 mb-3">{appeal.reason}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                            {appeal.reason}
+                          </p>
                           {appeal.status === 'pending' && (
                             <div className="flex gap-2">
                               <Button
@@ -484,7 +506,7 @@ export default function ModerationDashboardPage() {
                   onChange={(e) =>
                     setActionFilter(e.target.value as ModerationActionStatus | 'all')
                   }
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
                 >
                   <option value="all">All</option>
                   <option value="pending">Pending</option>
@@ -498,16 +520,18 @@ export default function ModerationDashboardPage() {
               {loading ? (
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
-                  <p className="text-gray-600 mt-3">Loading actions...</p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-3">Loading actions...</p>
                 </div>
               ) : actions.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No actions found</p>
+                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  No actions found
+                </p>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {actions.map((action) => (
                     <div
                       key={action.id}
-                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex gap-2">
@@ -516,7 +540,7 @@ export default function ModerationDashboardPage() {
                           >
                             {action.severity}
                           </span>
-                          <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 border-gray-200">
+                          <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700">
                             {formatActionType(action.actionType)}
                           </span>
                           <span
@@ -525,11 +549,13 @@ export default function ModerationDashboardPage() {
                             {action.status}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(action.createdAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-700 line-clamp-2">{action.reasoning}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                        {action.reasoning}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -550,16 +576,18 @@ export default function ModerationDashboardPage() {
               {loading ? (
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
-                  <p className="text-gray-600 mt-3">Loading appeals...</p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-3">Loading appeals...</p>
                 </div>
               ) : appeals.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No appeals found</p>
+                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  No appeals found
+                </p>
               ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {appeals.map((appeal) => (
                     <div
                       key={appeal.id}
-                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <span
@@ -567,11 +595,13 @@ export default function ModerationDashboardPage() {
                         >
                           {appeal.status}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(appeal.createdAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-700 line-clamp-2">{appeal.reason}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                        {appeal.reason}
+                      </p>
                     </div>
                   ))}
                 </div>

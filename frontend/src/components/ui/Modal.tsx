@@ -156,7 +156,7 @@ const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           ref={modalRef}
-          className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-2xl transition-all w-full ${sizeClasses[size]}`}
+          className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-2xl dark:shadow-gray-900/50 transition-all w-full ${sizeClasses[size]}`}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">

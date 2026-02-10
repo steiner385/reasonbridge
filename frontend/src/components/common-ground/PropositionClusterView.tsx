@@ -262,7 +262,9 @@ const PropositionClusterView = ({
                         tabIndex={onPropositionClick ? 0 : undefined}
                       >
                         <div className="flex items-start justify-between">
-                          <p className="text-sm text-gray-800 flex-1">{prop.text}</p>
+                          <p className="text-sm text-gray-800 dark:text-gray-200 flex-1">
+                            {prop.text}
+                          </p>
                           <span className="ml-2 text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-800">
                             {prop.agreementPercentage}%
                           </span>
@@ -330,7 +332,7 @@ const PropositionClusterView = ({
                   tabIndex={onPropositionClick ? 0 : undefined}
                 >
                   <div className="flex items-start justify-between">
-                    <p className="text-sm text-gray-800 flex-1">{prop.text}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 flex-1">{prop.text}</p>
                     <span className="ml-2 text-xs font-semibold px-2 py-1 rounded bg-gray-200 text-gray-700 dark:text-gray-300">
                       {prop.agreementPercentage}%
                     </span>

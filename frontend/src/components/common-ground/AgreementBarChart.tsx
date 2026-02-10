@@ -100,7 +100,9 @@ const AgreementBarChart = ({
 
   return (
     <div className={className}>
-      {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
+      )}
 
       <div className="space-y-4">
         {displayedPropositions.map((proposition) => {
@@ -129,7 +131,9 @@ const AgreementBarChart = ({
             >
               {/* Proposition text */}
               <div className="mb-2 flex items-start justify-between">
-                <p className="text-sm text-gray-800 flex-1 mr-4">{proposition.text}</p>
+                <p className="text-sm text-gray-800 dark:text-gray-200 flex-1 mr-4">
+                  {proposition.text}
+                </p>
                 <span className={`text-sm font-semibold ${textColor} whitespace-nowrap`}>
                   {proposition.agreementPercentage}%
                 </span>
@@ -155,7 +159,7 @@ const AgreementBarChart = ({
 
               {/* Participant breakdown */}
               {showParticipantCounts && (
-                <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
+                <div className="mt-2 flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <span className="inline-block w-3 h-3 rounded-full bg-green-500" />
                     <span>{proposition.supportingParticipants.length} support</span>
@@ -184,23 +188,23 @@ const AgreementBarChart = ({
         <div className="flex flex-wrap gap-3 text-xs">
           <div className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded bg-green-500" />
-            <span className="text-gray-600">High (80%+)</span>
+            <span className="text-gray-600 dark:text-gray-400">High (80%+)</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded bg-blue-500" />
-            <span className="text-gray-600">Good (60-79%)</span>
+            <span className="text-gray-600 dark:text-gray-400">Good (60-79%)</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded bg-yellow-500" />
-            <span className="text-gray-600">Moderate (40-59%)</span>
+            <span className="text-gray-600 dark:text-gray-400">Moderate (40-59%)</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded bg-orange-500" />
-            <span className="text-gray-600">Low (20-39%)</span>
+            <span className="text-gray-600 dark:text-gray-400">Low (20-39%)</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded bg-red-500" />
-            <span className="text-gray-600">Very Low (&lt;20%)</span>
+            <span className="text-gray-600 dark:text-gray-400">Very Low (&lt;20%)</span>
           </div>
         </div>
       </div>

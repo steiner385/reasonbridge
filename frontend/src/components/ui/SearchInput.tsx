@@ -168,7 +168,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
               aria-label="Clear search"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

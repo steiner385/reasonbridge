@@ -146,7 +146,7 @@ const ToneIndicator: React.FC<ToneIndicatorProps> = ({
           {config.label}
         </span>
         {showConfidence && (
-          <span className={`${sizeConfig.fontSize} text-gray-500`}>
+          <span className={`${sizeConfig.fontSize} text-gray-500 dark:text-gray-400`}>
             {Math.round(tone.confidenceScore * 100)}%
           </span>
         )}
@@ -157,7 +157,7 @@ const ToneIndicator: React.FC<ToneIndicatorProps> = ({
   // Render full gauge variant
   return (
     <div
-      className={`${sizeConfig.padding} rounded-lg bg-white shadow-sm border border-gray-200 ${className}`}
+      className={`${sizeConfig.padding} rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}
       role="region"
       aria-label="Tone analysis indicator"
     >
@@ -170,7 +170,7 @@ const ToneIndicator: React.FC<ToneIndicatorProps> = ({
           </span>
         </div>
         {showConfidence && (
-          <span className={`${sizeConfig.fontSize} text-gray-500`}>
+          <span className={`${sizeConfig.fontSize} text-gray-500 dark:text-gray-400`}>
             {Math.round(tone.confidenceScore * 100)}% confident
           </span>
         )}
@@ -191,7 +191,7 @@ const ToneIndicator: React.FC<ToneIndicatorProps> = ({
         <div
           className={`
             absolute top-1/2 -translate-y-1/2 ${sizeConfig.markerSize}
-            rounded-full bg-white border-2 ${config.borderColor}
+            rounded-full bg-white dark:bg-gray-800 border-2 ${config.borderColor}
             shadow-md transition-all duration-300
           `}
           style={{
@@ -206,7 +206,7 @@ const ToneIndicator: React.FC<ToneIndicatorProps> = ({
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between text-xs text-gray-500 mb-3">
+      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
         <span>Calm</span>
         <span>Neutral</span>
         <span>Assertive</span>
@@ -215,12 +215,14 @@ const ToneIndicator: React.FC<ToneIndicatorProps> = ({
       </div>
 
       {/* Description */}
-      <p className={`${sizeConfig.fontSize} text-gray-600 mb-2`}>{config.description}</p>
+      <p className={`${sizeConfig.fontSize} text-gray-600 dark:text-gray-400 mb-2`}>
+        {config.description}
+      </p>
 
       {/* Suggestion */}
       {showSuggestion && tone.suggestion && (
         <div className="mt-3 pt-3 border-t border-gray-100">
-          <p className={`${sizeConfig.fontSize} text-gray-700`}>
+          <p className={`${sizeConfig.fontSize} text-gray-700 dark:text-gray-300`}>
             <span className="font-medium">Suggestion: </span>
             {tone.suggestion}
           </p>
