@@ -33,13 +33,13 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
   const getStatusColor = (status: Topic['status']) => {
     switch (status) {
       case 'SEEDING':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'ARCHIVED':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   };
 

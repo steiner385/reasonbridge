@@ -12,6 +12,10 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 import type { Topic } from '../../types/topic';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import type { CreateResponseRequest } from '../../types/response';
+import { EditTopicModal } from '../topics/EditTopicModal';
+import { useAuth } from '../../hooks/useAuth';
+import { apiClient } from '../../lib/api';
+import { useToast } from '../../contexts/ToastContext';
 
 /**
  * ConversationPanel props
@@ -64,12 +68,16 @@ export function ConversationPanel({
   const { toggleLeftPanelOverlay } = useDiscussionLayout();
   const breakpoint = useBreakpoint();
   const { subscribe } = useWebSocket();
+  const { user } = useAuth();
+  const toast = useToast();
 
   const [newResponseCount, setNewResponseCount] = useState(0);
   const [topicStatusChange, setTopicStatusChange] = useState<{
     oldStatus: string;
     newStatus: string;
   } | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditLoading, setIsEditLoading] = useState(false);
 
   const showHamburgerMenu = breakpoint === 'tablet' || breakpoint === 'mobile';
 
@@ -109,6 +117,35 @@ export function ConversationPanel({
     }
   }, []);
 
+  // Check if current user can edit the topic (is creator or moderator)
+  const canEditTopic = topic && user && user.id === topic.creatorId;
+
+  // Handle topic edit submission
+  const handleEditSubmit = useCallback(
+    async (updates: {
+      title?: string;
+      description?: string;
+      tags?: string[];
+      editReason?: string;
+      flagForReview?: boolean;
+    }) => {
+      if (!topic) return;
+      setIsEditLoading(true);
+      try {
+        await apiClient.patch(`/topics/${topic.id}`, updates);
+        toast.success('Topic updated successfully');
+        setIsEditModalOpen(false);
+        // Note: Topic data will refresh via WebSocket or page reload
+      } catch (error) {
+        toast.error('Failed to update topic');
+        throw error;
+      } finally {
+        setIsEditLoading(false);
+      }
+    },
+    [topic, toast],
+  );
+
   // Wrap onReplySubmit to add auto-scroll after submission
   const handleReplySubmitWithScroll = useCallback(
     async (response: CreateResponseRequest) => {
@@ -139,7 +176,7 @@ export function ConversationPanel({
     return (
       <div className={`conversation-panel flex flex-col h-full ${className}`}>
         {/* Header with hamburger button for topic selection */}
-        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white">
+        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
           <div className="flex items-center gap-4">
             {/* Hamburger Menu Button (Tablet/Mobile) */}
             {showHamburgerMenu && toggleLeftPanelOverlay && (
@@ -150,7 +187,7 @@ export function ConversationPanel({
                 aria-label="Open topic navigation"
               >
                 <svg
-                  className="w-6 h-6 text-gray-600"
+                  className="w-6 h-6 text-gray-600 dark:text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -165,7 +202,7 @@ export function ConversationPanel({
                 </svg>
               </button>
             )}
-            <h1 className="text-2xl font-bold text-gray-900">Discussion</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Discussion</h1>
           </div>
         </div>
 
@@ -186,7 +223,7 @@ export function ConversationPanel({
             />
           </svg>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Select a topic to start</h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Choose a topic from the left panel to view the conversation
           </p>
         </div>
@@ -197,7 +234,7 @@ export function ConversationPanel({
   return (
     <div className={`conversation-panel flex flex-col h-full ${className}`}>
       {/* Topic Header */}
-      <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+      <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700 sticky top-0 z-10">
         <div className="flex items-start justify-between gap-4">
           {/* Hamburger Menu Button (Tablet/Mobile) */}
           {showHamburgerMenu && toggleLeftPanelOverlay && (
@@ -208,7 +245,7 @@ export function ConversationPanel({
               aria-label="Open topic navigation"
             >
               <svg
-                className="w-6 h-6 text-gray-600"
+                className="w-6 h-6 text-gray-600 dark:text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -229,27 +266,51 @@ export function ConversationPanel({
             <p className="text-sm text-gray-600 line-clamp-2">{topic.description}</p>
           </div>
 
-          {/* Topic Status Badge */}
-          <div className="flex-shrink-0">
+          {/* Topic Status Badge and Actions */}
+          <div className="flex-shrink-0 flex items-center gap-2">
             <span
               className={`
                 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
                 ${
                   topic.status === 'ACTIVE'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                     : topic.status === 'SEEDING'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
                 }
               `}
             >
               {topic.status}
             </span>
+            {/* Edit Topic Button - only shown for topic creator */}
+            {canEditTopic && (
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Edit topic"
+                title="Edit topic"
+              >
+                <svg
+                  className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Topic Metadata */}
-        <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
+        <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-1.5">
             <svg
               className="w-4 h-4"
@@ -430,6 +491,17 @@ export function ConversationPanel({
             showPreviewFeedbackInline={false}
           />
         </div>
+      )}
+
+      {/* Edit Topic Modal */}
+      {topic && (
+        <EditTopicModal
+          topic={topic}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleEditSubmit}
+          isLoading={isEditLoading}
+        />
       )}
     </div>
   );

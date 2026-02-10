@@ -10,21 +10,7 @@ import { test, expect } from '@playwright/test';
  * - Permission checks (only creator/moderator can edit)
  */
 
-/**
- * SKIPPED: Edit Topic feature not integrated into UI
- *
- * Issue: EditTopicModal component exists but the "Edit Topic" button that opens it
- * is not integrated into any page (TopicsPage or DiscussionPage).
- *
- * Required work to unskip:
- * 1. Add Edit button to ConversationPanel topic header
- * 2. Add permission checks (only show for topic creator/moderator)
- * 3. Wire up EditTopicModal state management
- * 4. Handle edit submission and modal closing
- *
- * Related component: src/components/topics/EditTopicModal.tsx
- */
-test.describe.skip('Topic Editing', () => {
+test.describe('Topic Editing', () => {
   test.describe('As Topic Creator', () => {
     test.beforeEach(async ({ page }) => {
       // Login as regular user (Alice Anderson)
