@@ -49,6 +49,8 @@ services:
     environment:
       SERVICES: s3,sqs,sns
       DEBUG: 0
+      # Disable telemetry to prevent DNS failures in CI environments
+      DISABLE_EVENTS: 1
       DATA_DIR: ''
     # Host port removed to prevent CI conflicts - services communicate via Docker network
     # For local debugging, uncomment: ports: ['4568:4566']
