@@ -55,15 +55,18 @@ test.describe('Complete Verification Flow', () => {
 
     // Wait for navigation away from /register (registration success)
     await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
+
+    // Wait for authentication state to stabilize
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300); // Allow token storage and state propagation
   };
 
   test.beforeEach(async ({ page }) => {
     testUser = generateTestUser();
   });
 
-  // Skip: Registration flow timing issue prevents verification page from loading correctly
-  // TODO: Investigate registration and auth state before navigating to verification
-  test.skip('should navigate to verification page directly', async ({ page }) => {
+  // Fixed: Added auth state waits to registerAndLogin helper
+  test('should navigate to verification page directly', async ({ page }) => {
     // Register and login first (verification page requires authentication)
     await registerAndLogin(page);
 
@@ -239,9 +242,8 @@ test.describe('Complete Verification Flow', () => {
     expect(page.url()).toContain('/verification');
   });
 
-  // Skip: Registration flow timing issue in test setup
-  // TODO: Fix authentication state persistence after registration
-  test.skip('should maintain state during navigation', async ({ page }) => {
+  // Fixed: Auth state now properly stabilizes after registration
+  test('should maintain state during navigation', async ({ page }) => {
     // Register and login first (verification page requires authentication)
     await registerAndLogin(page);
 
