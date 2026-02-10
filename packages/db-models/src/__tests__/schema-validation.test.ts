@@ -2,13 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { Prisma } from '@prisma/client';
 
 /**
- * Type definition for DMMF model field
+ * Type definition for DMMF model field (Prisma 7+)
+ * Note: Prisma 7 simplified the runtime DMMF - isRequired/hasDefaultValue
+ * are no longer exposed at runtime. We can verify field existence and type.
  */
 interface DMMFField {
   name: string;
+  kind: string;
   type: string;
-  isRequired: boolean;
-  hasDefaultValue: boolean;
+  dbName: string | null;
 }
 
 /**
@@ -29,12 +31,10 @@ function getPrismaDMMF(): { datamodel: { models: DMMFModel[] } } {
   return (Prisma as any).dmmf;
 }
 
-// TODO: Update these tests for Prisma 7 DMMF structure changes
-// Prisma 7 no longer exposes isRequired/hasDefaultValue in runtime DMMF
-describe.skip('Prisma Schema - OTP Fields', () => {
+describe('Prisma Schema - OTP Fields', () => {
   const dmmf = getPrismaDMMF();
 
-  it('should have otpCode field with correct type and nullability', () => {
+  it('should have otpCode field with correct type', () => {
     const verificationModel = dmmf.datamodel.models.find(
       (m: DMMFModel) => m.name === 'VerificationRecord',
     );
@@ -42,10 +42,11 @@ describe.skip('Prisma Schema - OTP Fields', () => {
     const otpCodeField = verificationModel?.fields.find((f: DMMFField) => f.name === 'otpCode');
     expect(otpCodeField, 'otpCode field should exist').toBeDefined();
     expect(otpCodeField?.type).toBe('String');
-    expect(otpCodeField?.isRequired).toBe(false); // nullable
+    expect(otpCodeField?.kind).toBe('scalar');
+    expect(otpCodeField?.dbName).toBe('otp_code');
   });
 
-  it('should have otpExpiresAt field with correct type and nullability', () => {
+  it('should have otpExpiresAt field with correct type', () => {
     const verificationModel = dmmf.datamodel.models.find(
       (m: DMMFModel) => m.name === 'VerificationRecord',
     );
@@ -55,10 +56,11 @@ describe.skip('Prisma Schema - OTP Fields', () => {
     );
     expect(otpExpiresAtField, 'otpExpiresAt field should exist').toBeDefined();
     expect(otpExpiresAtField?.type).toBe('DateTime');
-    expect(otpExpiresAtField?.isRequired).toBe(false);
+    expect(otpExpiresAtField?.kind).toBe('scalar');
+    expect(otpExpiresAtField?.dbName).toBe('otp_expires_at');
   });
 
-  it('should have otpAttempts field with correct type, required, and default', () => {
+  it('should have otpAttempts field with correct type', () => {
     const verificationModel = dmmf.datamodel.models.find(
       (m: DMMFModel) => m.name === 'VerificationRecord',
     );
@@ -68,11 +70,11 @@ describe.skip('Prisma Schema - OTP Fields', () => {
     );
     expect(otpAttemptsField, 'otpAttempts field should exist').toBeDefined();
     expect(otpAttemptsField?.type).toBe('Int');
-    expect(otpAttemptsField?.isRequired).toBe(true);
-    expect(otpAttemptsField?.hasDefaultValue).toBe(true);
+    expect(otpAttemptsField?.kind).toBe('scalar');
+    expect(otpAttemptsField?.dbName).toBe('otp_attempts');
   });
 
-  it('should have phoneNumber field with correct type and nullability', () => {
+  it('should have phoneNumber field with correct type', () => {
     const verificationModel = dmmf.datamodel.models.find(
       (m: DMMFModel) => m.name === 'VerificationRecord',
     );
@@ -82,7 +84,8 @@ describe.skip('Prisma Schema - OTP Fields', () => {
     );
     expect(phoneNumberField, 'phoneNumber field should exist').toBeDefined();
     expect(phoneNumberField?.type).toBe('String');
-    expect(phoneNumberField?.isRequired).toBe(false);
+    expect(phoneNumberField?.kind).toBe('scalar');
+    expect(phoneNumberField?.dbName).toBe('phone_number');
   });
 
   it('should have phoneNumber field on VerificationRecord model', () => {
