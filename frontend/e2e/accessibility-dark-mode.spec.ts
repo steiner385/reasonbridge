@@ -178,9 +178,9 @@ test.describe('Dark Mode Accessibility', () => {
     await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
-  // Skip: 7 elements found with bg-white but no dark:bg- variant
-  // TODO: Add dark mode styles to conversation panel sticky header and other components
-  test.skip('Common ground cards should respect dark mode', async ({ page }) => {
+  // Fixed: Added dark mode variants to conversation panel and metadata panel
+  // Dark mode styles added in PR #826
+  test('Common ground cards should respect dark mode', async ({ page }) => {
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();

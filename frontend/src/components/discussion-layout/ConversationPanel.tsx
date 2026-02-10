@@ -183,7 +183,7 @@ export function ConversationPanel({
               <button
                 type="button"
                 onClick={toggleLeftPanelOverlay}
-                className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 transition-colors xl:hidden"
+                className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors xl:hidden"
                 aria-label="Open topic navigation"
               >
                 <svg
@@ -222,7 +222,9 @@ export function ConversationPanel({
               d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
             />
           </svg>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Select a topic to start</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Select a topic to start
+          </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Choose a topic from the left panel to view the conversation
           </p>
@@ -241,7 +243,7 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={toggleLeftPanelOverlay}
-              className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
+              className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
               aria-label="Open topic navigation"
             >
               <svg
@@ -262,8 +264,12 @@ export function ConversationPanel({
           )}
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{topic.title}</h1>
-            <p className="text-sm text-gray-600 line-clamp-2">{topic.description}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              {topic.title}
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+              {topic.description}
+            </p>
           </div>
 
           {/* Topic Status Badge and Actions */}
@@ -374,7 +380,7 @@ export function ConversationPanel({
             {topic.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300"
               >
                 #{tag.name}
               </span>
@@ -483,7 +489,7 @@ export function ConversationPanel({
 
       {/* Response Composer (sticky bottom) */}
       {showComposer && (
-        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <ResponseComposer
             topicId={topic.id}
             onSubmit={onResponseSubmit || (() => Promise.resolve())}

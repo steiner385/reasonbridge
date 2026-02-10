@@ -211,14 +211,14 @@ export function MetadataPanel({
     const isExpanded = expandedSections.has(section);
 
     return (
-      <div key={section} className="border-b border-gray-200">
+      <div key={section} className="border-b border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={() => toggleSection(section)}
-          className="flex items-center justify-between w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+          className="flex items-center justify-between w-full px-4 py-3 text-left bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-expanded={isExpanded}
         >
-          <span className="text-sm font-medium text-gray-900">{title}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{title}</span>
           <svg
             className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
@@ -228,7 +228,7 @@ export function MetadataPanel({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        {isExpanded && <div className="p-4 bg-white">{content}</div>}
+        {isExpanded && <div className="p-4 bg-white dark:bg-gray-900">{content}</div>}
       </div>
     );
   };
@@ -341,7 +341,7 @@ export function MetadataPanel({
   return (
     <div className={`metadata-panel flex flex-col h-full ${className}`}>
       {/* Tab Header */}
-      <div className="flex-shrink-0 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex" role="tablist" aria-label="Discussion metadata">
           <button
             type="button"
