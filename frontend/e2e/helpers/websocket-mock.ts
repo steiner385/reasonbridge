@@ -27,14 +27,14 @@ export interface WebSocketMock {
    * @param topicId - Topic ID
    * @param analysis - Common ground analysis data
    */
-  emitCommonGroundGenerated(topicId: string, analysis: any): Promise<void>;
+  emitCommonGroundGenerated(topicId: string, analysis: unknown): Promise<void>;
 
   /**
    * Emit common-ground:updated event
    * @param topicId - Topic ID
    * @param analysis - Updated common ground analysis data
    */
-  emitCommonGroundUpdated(topicId: string, analysis: any): Promise<void>;
+  emitCommonGroundUpdated(topicId: string, analysis: unknown): Promise<void>;
 
   /**
    * Cleanup and disconnect mock
@@ -44,7 +44,8 @@ export interface WebSocketMock {
 
 /**
  * Setup WebSocket mock for Playwright E2E tests
- * Injects events directly into the page's Socket.io client
+ * Creates a fake Socket.io client that bypasses the real WebSocket server.
+ * This is necessary because the E2E environment may not have a WebSocket server running.
  *
  * @param page - Playwright page instance
  * @returns WebSocketMock instance
@@ -58,47 +59,115 @@ export interface WebSocketMock {
  * ```
  */
 export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
-  // Inject a global flag to signal the mock is active
-  await page.evaluate(() => {
+  // Inject mock mode flag and create a mock socket object BEFORE the app connects
+  // This allows us to bypass the real WebSocket server entirely
+  await page.addInitScript(() => {
+    // Mark test mode
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__wsTestMode = true;
+
+    // Create a mock socket that mimics Socket.io client API
+    const mockSocket = {
+      connected: true,
+      id: 'mock-socket-id',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      _callbacks: {} as Record<string, ((...args: any[]) => void)[]>,
+
+      // Socket.io on() method to register event listeners
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      on(event: string, callback: (...args: any[]) => void) {
+        const key = `$${event}`;
+        if (!this._callbacks[key]) {
+          this._callbacks[key] = [];
+        }
+        this._callbacks[key].push(callback);
+        return this;
+      },
+
+      // Socket.io emit() method (for client -> server, no-op in mock)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+      emit(_event: string, _data?: any) {
+        return this;
+      },
+
+      // Socket.io off() method
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      off(event: string, callback?: (...args: any[]) => void) {
+        const key = `$${event}`;
+        if (callback && this._callbacks[key]) {
+          this._callbacks[key] = this._callbacks[key].filter((cb) => cb !== callback);
+        } else {
+          delete this._callbacks[key];
+        }
+        return this;
+      },
+
+      // Disconnect method (no-op in mock)
+      disconnect() {
+        this.connected = false;
+        return this;
+      },
+    };
+
+    // Expose the mock socket for tests to inject events
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__testSocket = mockSocket;
+
+    // Also expose a function to trigger 'connect' event after hook subscribes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__triggerSocketConnect = () => {
+      const listeners = mockSocket._callbacks['$connect'];
+      if (listeners) {
+        listeners.forEach((fn) => fn());
+      }
+    };
   });
 
   return {
     /**
-     * Wait for WebSocket connection to establish
+     * Wait for WebSocket connection to establish (mock is instant)
      */
     async waitForConnection(_namespace: string = '/notifications'): Promise<void> {
-      // Poll for socket existence in the page context
-      // The useCommonGroundUpdates hook exposes socket as window.__testSocket when __wsTestMode is true
+      // Wait for the mock socket to be available (set by addInitScript)
       await page.waitForFunction(
         () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const socket = (window as any).__testSocket;
           return socket && socket.connected;
         },
-        { timeout: 30000 }, // Increased timeout for Docker cold starts
+        { timeout: 10000 },
       );
 
-      // Additional wait for connection to stabilize
-      await page.waitForTimeout(500);
+      // Trigger the connect event so any listeners are notified
+      await page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((window as any).__triggerSocketConnect) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (window as any).__triggerSocketConnect();
+        }
+      });
+
+      // Small wait for React to process
+      await page.waitForTimeout(100);
     },
 
     /**
-     * Emit a Socket.io event to the client by injecting it directly
+     * Emit a Socket.io event to the client by triggering registered listeners
      */
     async emitEvent(eventName: string, payload: unknown): Promise<void> {
-      // Inject the event into the page context using the exposed test socket
       await page.evaluate(
         ({ event, data }) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const socket = (window as any).__testSocket;
           if (!socket) {
-            throw new Error('Test socket not found - ensure __wsTestMode is set before navigation');
+            throw new Error('Test socket not found - ensure setupWebSocketMock was called');
           }
 
-          // Simulate receiving an event FROM the server by triggering registered listeners
-          // Socket.io client stores event listeners in _callbacks with $ prefix
+          // Trigger all registered listeners for this event
           const listeners = socket._callbacks?.[`$${event}`];
           if (listeners) {
-            listeners.forEach((listener: Function) => listener(data));
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            listeners.forEach((listener: any) => listener(data));
           }
         },
         { event: eventName, data: payload },
@@ -111,7 +180,7 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
     /**
      * Emit common-ground:generated event
      */
-    async emitCommonGroundGenerated(topicId: string, analysis: any): Promise<void> {
+    async emitCommonGroundGenerated(topicId: string, analysis: unknown): Promise<void> {
       const payload = {
         topicId,
         version: 1,
@@ -125,7 +194,7 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
     /**
      * Emit common-ground:updated event
      */
-    async emitCommonGroundUpdated(topicId: string, analysis: any): Promise<void> {
+    async emitCommonGroundUpdated(topicId: string, analysis: unknown): Promise<void> {
       const payload = {
         topicId,
         previousVersion: 1,
@@ -149,10 +218,13 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
      * Cleanup and disconnect mock
      */
     async cleanup(): Promise<void> {
-      // Remove test mode flag and test socket reference
       await page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (window as any).__wsTestMode;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (window as any).__testSocket;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (window as any).__triggerSocketConnect;
       });
     },
   };

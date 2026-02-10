@@ -135,35 +135,46 @@ export function useCommonGroundUpdates({
       return;
     }
 
-    // Use same-origin for WebSocket (nginx proxies /socket.io/)
-    const wsUrl = import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || '';
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    // Check if we're in E2E test mode with a mock socket
+    const isTestMode = (window as any).__wsTestMode === true;
+    const mockSocket = (window as any).__testSocket;
 
-    // Create Socket.io connection
-    const socket = io(`${wsUrl}/notifications`, {
-      path: '/socket.io',
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
-    });
+    let socket: Socket | typeof mockSocket;
+    let usingMockSocket = false;
 
-    socketRef.current = socket;
+    if (isTestMode && mockSocket) {
+      // Use the mock socket from E2E tests - don't create a real connection
+      socket = mockSocket;
+      usingMockSocket = true;
+      // Schedule the state update for after the effect completes to avoid cascading renders
+      queueMicrotask(() => setIsConnected(true));
+    } else {
+      // Use same-origin for WebSocket (nginx proxies /socket.io/)
+      const wsUrl = import.meta.env['VITE_NOTIFICATION_SERVICE_URL'] || '';
 
-    // Handle connection
-    socket.on('connect', () => {
-      setIsConnected(true);
+      // Create Socket.io connection
+      socket = io(`${wsUrl}/notifications`, {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+      });
+    }
 
-      // Expose socket for E2E testing when test mode is active
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      if ((window as any).__wsTestMode) {
-        (window as any).__testSocket = socket;
-      }
-      /* eslint-enable @typescript-eslint/no-explicit-any */
+    socketRef.current = socket as Socket;
 
-      // Subscribe to common ground updates for this topic
-      socket.emit('subscribe:common-ground', { topicId });
-    });
+    // Handle connection (only for real sockets)
+    if (!usingMockSocket) {
+      socket.on('connect', () => {
+        setIsConnected(true);
+
+        // Subscribe to common ground updates for this topic
+        socket.emit('subscribe:common-ground', { topicId });
+      });
+    }
 
     // Handle subscription confirmation
     socket.on('subscription:confirmed', () => {
@@ -182,34 +193,29 @@ export function useCommonGroundUpdates({
       onUpdate(analysis, true);
     });
 
-    // Handle disconnection
-    socket.on('disconnect', () => {
-      setIsConnected(false);
-      // Cleanup test reference
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      if ((window as any).__testSocket) {
-        delete (window as any).__testSocket;
-      }
-      /* eslint-enable @typescript-eslint/no-explicit-any */
-    });
+    // Handle disconnection (only for real sockets)
+    if (!usingMockSocket) {
+      socket.on('disconnect', () => {
+        setIsConnected(false);
+      });
 
-    // Handle connection errors
-    socket.on('connect_error', (error) => {
-      console.error('[useCommonGroundUpdates] Connection error:', error);
-      setIsConnected(false);
-    });
+      // Handle connection errors
+      socket.on('connect_error', (error: Error) => {
+        console.error('[useCommonGroundUpdates] Connection error:', error);
+        setIsConnected(false);
+      });
+    }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     // Cleanup on unmount
     return () => {
-      if (socketRef.current) {
-        // Unsubscribe from common ground updates
+      if (socketRef.current && !usingMockSocket) {
+        // Only cleanup real sockets - mock sockets are managed by the test
         socketRef.current.emit('unsubscribe:common-ground', { topicId });
-
-        // Disconnect socket
         socketRef.current.disconnect();
-        socketRef.current = null;
-        setIsConnected(false);
       }
+      socketRef.current = null;
+      setIsConnected(false);
     };
   }, [topicId, enabled, onUpdate, transformPayload]);
 
