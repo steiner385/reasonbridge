@@ -15,32 +15,39 @@ datasource db {
 
 /// User account with trust scores and verification status
 model User {
-  id                     String            @id @default(uuid()) @db.Uuid
-  email                  String            @unique
-  displayName            String?           @map("display_name") @db.VarChar(50)
-  cognitoSub             String            @unique @map("cognito_sub")
+  id                     String              @id @default(uuid()) @db.Uuid
+  email                  String              @unique
+  displayName            String?             @map("display_name") @db.VarChar(50)
+  cognitoSub             String              @unique @map("cognito_sub")
   // Onboarding fields
-  authMethod             AuthMethod        @map("auth_method")
-  emailVerified          Boolean           @default(false) @map("email_verified")
-  passwordHash           String?           @map("password_hash")
-  accountStatus          AccountStatus     @default(ACTIVE) @map("account_status")
-  lastLoginAt            DateTime?         @map("last_login_at")
+  authMethod             AuthMethod          @map("auth_method")
+  emailVerified          Boolean             @default(false) @map("email_verified")
+  passwordHash           String?             @map("password_hash")
+  accountStatus          AccountStatus       @default(ACTIVE) @map("account_status")
+  lastLoginAt            DateTime?           @map("last_login_at")
   // Phone verification
-  phoneNumber            String?           @map("phone_number")
-  phoneVerified          Boolean           @default(false) @map("phone_verified")
+  phoneNumber            String?             @map("phone_number")
+  phoneVerified          Boolean             @default(false) @map("phone_verified")
   // Trust & verification
-  verificationLevel      VerificationLevel @default(BASIC) @map("verification_level")
-  trustScoreAbility      Decimal           @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
-  trustScoreBenevolence  Decimal           @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
-  trustScoreIntegrity    Decimal           @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
-  moralFoundationProfile Json?             @map("moral_foundation_profile")
-  positionFingerprint    Json?             @map("position_fingerprint")
-  topicAffinities        Json?             @map("topic_affinities")
+  verificationLevel      VerificationLevel   @default(BASIC) @map("verification_level")
+  trustScoreAbility      Decimal             @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
+  trustScoreBenevolence  Decimal             @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
+  trustScoreIntegrity    Decimal             @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
+  moralFoundationProfile Json?               @map("moral_foundation_profile")
+  positionFingerprint    Json?               @map("position_fingerprint")
+  topicAffinities        Json?               @map("topic_affinities")
   // AI Feedback preferences (T117)
-  feedbackPreferences    Json?             @map("feedback_preferences")
-  status                 UserStatus        @default(ACTIVE)
-  createdAt              DateTime          @default(now()) @map("created_at")
-  updatedAt              DateTime          @updatedAt @map("updated_at")
+  feedbackPreferences    Json?               @map("feedback_preferences")
+  // Child safety fields (Feature: Child-Friendly Mode)
+  birthDate              DateTime?           @map("birth_date") @db.Date
+  isMinor                Boolean             @default(false) @map("is_minor")
+  declaredCountry        String?             @map("declared_country") @db.VarChar(2) // ISO 3166-1 alpha-2
+  regionalConsentAge     Int?                @map("regional_consent_age")
+  parentEmail            String?             @map("parent_email")
+  parentConsentStatus    ParentConsentStatus @default(NOT_REQUIRED) @map("parent_consent_status")
+  status                 UserStatus          @default(ACTIVE)
+  createdAt              DateTime            @default(now()) @map("created_at")
+  updatedAt              DateTime            @updatedAt @map("updated_at")
 
   // Relations
   verificationRecords   VerificationRecord[]
@@ -63,6 +70,8 @@ model User {
   // Feature 016: Topic Management
   topicEdits            TopicEdit[]           @relation("TopicEditor")
   topicMerges           TopicMerge[]          @relation("TopicMerger")
+  // Feature: Child-Friendly Mode
+  parentalConsent       ParentalConsent?
 
   @@index([cognitoSub])
   @@index([email])
@@ -70,6 +79,8 @@ model User {
   @@index([emailVerified])
   @@index([phoneNumber])
   @@index([createdAt])
+  @@index([isMinor])
+  @@index([parentConsentStatus])
   @@map("users")
 }
 
@@ -207,6 +218,8 @@ model DiscussionTopic {
   activityLevel         ActivityLevel    @default(LOW) @map("activity_level")
   suggestedForNewUsers  Boolean          @default(false) @map("suggested_for_new_users")
   crossCuttingThemes    String[]         @map("cross_cutting_themes")
+  // Child safety fields (Feature: Child-Friendly Mode)
+  isMatureContent       Boolean          @default(false) @map("is_mature_content")
   createdAt             DateTime         @default(now()) @map("created_at")
   activatedAt           DateTime?        @map("activated_at")
   archivedAt            DateTime?        @map("archived_at")
@@ -237,6 +250,7 @@ model DiscussionTopic {
   @@index([visibility])
   @@index([lastActivityAt(sort: Desc)])
   @@index([status, visibility])
+  @@index([isMatureContent])
   @@map("discussion_topics")
 }
 
@@ -269,20 +283,20 @@ enum EvidenceStandard {
 /// T002: Edit history tracking for topics (Feature 016: Topic Management)
 /// Immutable audit trail - no updates, only inserts
 model TopicEdit {
-  id              String   @id @default(uuid()) @db.Uuid
-  topicId         String   @map("topic_id") @db.Uuid
-  editorId        String   @map("editor_id") @db.Uuid
-  editedAt        DateTime @default(now()) @map("edited_at")
+  id       String   @id @default(uuid()) @db.Uuid
+  topicId  String   @map("topic_id") @db.Uuid
+  editorId String   @map("editor_id") @db.Uuid
+  editedAt DateTime @default(now()) @map("edited_at")
 
   // Changed fields (null if unchanged)
-  previousTitle       String? @map("previous_title") @db.VarChar(200)
-  newTitle            String? @map("new_title") @db.VarChar(200)
-  previousDescription String? @map("previous_description") @db.Text
-  newDescription      String? @map("new_description") @db.Text
+  previousTitle       String?  @map("previous_title") @db.VarChar(200)
+  newTitle            String?  @map("new_title") @db.VarChar(200)
+  previousDescription String?  @map("previous_description") @db.Text
+  newDescription      String?  @map("new_description") @db.Text
   previousTags        String[] @default([]) @map("previous_tags")
   newTags             String[] @default([]) @map("new_tags")
 
-  changeReason    String? @map("change_reason") @db.Text
+  changeReason     String? @map("change_reason") @db.Text
   flaggedForReview Boolean @default(false) @map("flagged_for_review")
 
   // Relations
@@ -298,21 +312,21 @@ model TopicEdit {
 /// T003: Topic merge operations (Feature 016: Topic Management)
 /// Tracks merge history for rollback and audit purposes
 model TopicMerge {
-  id                String    @id @default(uuid()) @db.Uuid
-  sourceTopicIds    String[]  @map("source_topic_ids") @db.Uuid
-  targetTopicId     String    @map("target_topic_id") @db.Uuid
-  moderatorId       String    @map("moderator_id") @db.Uuid
-  mergeReason       String    @map("merge_reason") @db.Text
-  mergedAt          DateTime  @default(now()) @map("merged_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  sourceTopicIds String[] @map("source_topic_ids") @db.Uuid
+  targetTopicId  String   @map("target_topic_id") @db.Uuid
+  moderatorId    String   @map("moderator_id") @db.Uuid
+  mergeReason    String   @map("merge_reason") @db.Text
+  mergedAt       DateTime @default(now()) @map("merged_at")
 
   // Rollback support (30-day window)
-  rolledBackAt      DateTime? @map("rolled_back_at")
-  rollbackReason    String?   @map("rollback_reason") @db.Text
+  rolledBackAt   DateTime? @map("rolled_back_at")
+  rollbackReason String?   @map("rollback_reason") @db.Text
 
   // Snapshot of merged data for rollback
-  sourceSnapshots   Json      @map("source_snapshots") // Original topic data
-  responsesMoved    Int       @default(0) @map("responses_moved")
-  participantsMerged Int      @default(0) @map("participants_merged")
+  sourceSnapshots    Json @map("source_snapshots") // Original topic data
+  responsesMoved     Int  @default(0) @map("responses_moved")
+  participantsMerged Int  @default(0) @map("participants_merged")
 
   // Relations
   targetTopic DiscussionTopic @relation("TargetTopicMerge", fields: [targetTopicId], references: [id])
@@ -329,29 +343,29 @@ model TopicMerge {
 /// Stores daily aggregated metrics for efficient analytics queries
 /// Real-time metrics are computed on-demand by TopicsAnalyticsService
 model TopicAnalytics {
-  id              String   @id @default(uuid()) @db.Uuid
-  topicId         String   @map("topic_id") @db.Uuid
-  date            DateTime @db.Date // Aggregation date (daily)
+  id      String   @id @default(uuid()) @db.Uuid
+  topicId String   @map("topic_id") @db.Uuid
+  date    DateTime @db.Date // Aggregation date (daily)
 
   // View metrics
-  viewCount       Int      @default(0) @map("view_count")
-  uniqueViewers   Int      @default(0) @map("unique_viewers")
+  viewCount     Int @default(0) @map("view_count")
+  uniqueViewers Int @default(0) @map("unique_viewers")
 
   // Participation metrics
-  responseCount   Int      @default(0) @map("response_count")
-  participantCount Int     @default(0) @map("participant_count")
-  newParticipants Int      @default(0) @map("new_participants")
+  responseCount    Int @default(0) @map("response_count")
+  participantCount Int @default(0) @map("participant_count")
+  newParticipants  Int @default(0) @map("new_participants")
 
   // Engagement metrics
-  avgResponseLength Int    @default(0) @map("avg_response_length")
+  avgResponseLength Int     @default(0) @map("avg_response_length")
   engagementScore   Decimal @default(0) @map("engagement_score") @db.Decimal(5, 2)
 
   // Time-based metrics
-  peakActivityHour  Int?   @map("peak_activity_hour") // Hour of day (0-23)
+  peakActivityHour Int? @map("peak_activity_hour") // Hour of day (0-23)
 
   // Timestamps
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
@@ -946,6 +960,41 @@ enum AccountStatus {
   DELETED
 
   @@map("account_status")
+}
+
+// ============================================================================
+// CHILD SAFETY ENTITIES (Feature: Child-Friendly Mode)
+// ============================================================================
+
+/// Parent consent status for minor users
+enum ParentConsentStatus {
+  NOT_REQUIRED // Adult user (age >= regional consent age)
+  PENDING // Minor awaiting parent verification
+  VERIFIED // Parent has consented
+  WITHDRAWN // Parent withdrew consent
+
+  @@map("parent_consent_status")
+}
+
+/// Parental consent record for minor users
+model ParentalConsent {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @unique @map("user_id") @db.Uuid
+  parentEmail    String    @map("parent_email")
+  consentToken   String    @unique @map("consent_token")
+  tokenExpiresAt DateTime  @map("token_expires_at")
+  verifiedAt     DateTime? @map("verified_at")
+  ipAddress      String?   @map("ip_address")
+  withdrawnAt    DateTime? @map("withdrawn_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([consentToken])
+  @@index([parentEmail])
+  @@index([tokenExpiresAt])
+  @@map("parental_consents")
 }
 
 /// Email verification token for signup flow

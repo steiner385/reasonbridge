@@ -3,7 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsOptional,
+  IsISO8601,
+  Length,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -26,6 +36,31 @@ export class RegisterDto {
   @MinLength(2, { message: 'Display name must be at least 2 characters' })
   @MaxLength(50, { message: 'Display name must be at most 50 characters' })
   displayName!: string;
+
+  /**
+   * User's date of birth in ISO 8601 format (YYYY-MM-DD)
+   * Optional for Phase 1 - will be required in later phases
+   */
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  birthDate?: string;
+
+  /**
+   * User's declared country of residence (ISO 3166-1 alpha-2)
+   * Examples: 'US', 'GB', 'DE', 'FR'
+   */
+  @IsOptional()
+  @IsString()
+  @Length(2, 2, { message: 'Country code must be exactly 2 characters (ISO 3166-1 alpha-2)' })
+  declaredCountry?: string;
+
+  /**
+   * Parent/guardian email address for consent
+   * Required when birthDate indicates user is a minor
+   */
+  @IsOptional()
+  @IsEmail({}, { message: 'Please provide a valid parent/guardian email address' })
+  parentEmail?: string;
 }
 
 export class RegisterResponseDto {
@@ -34,4 +69,10 @@ export class RegisterResponseDto {
   displayName!: string;
   message!: string;
   requiresEmailVerification!: boolean;
+  /** Whether parental consent is required (true for minors) */
+  requiresParentalConsent?: boolean;
+  /** The regional consent age that applies to this user */
+  consentAge?: number;
+  /** Whether the consent email was sent */
+  consentEmailSent?: boolean;
 }

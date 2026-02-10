@@ -95,3 +95,34 @@ export const phoneSchema = z
  */
 export const confirmationSchema = (fieldName: string, _matchField: string) =>
   z.string().min(1, `${fieldName} is required`);
+
+/**
+ * Birth date validation schema
+ * Validates ISO 8601 date format (YYYY-MM-DD) and ensures reasonable age range
+ * Optional for Phase 1 - will be required in later phases
+ */
+export const birthDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+  .refine(
+    (date) => {
+      const parsed = new Date(date);
+      const now = new Date();
+      const minDate = new Date(now.getFullYear() - 120, now.getMonth(), now.getDate());
+      const maxDate = now;
+      return parsed >= minDate && parsed <= maxDate;
+    },
+    { message: 'Please enter a valid date of birth' },
+  )
+  .optional();
+
+/**
+ * Country code validation schema (ISO 3166-1 alpha-2)
+ * Validates 2-letter country codes like 'US', 'GB', 'DE'
+ * Optional for Phase 1 - will be required in later phases
+ */
+export const countryCodeSchema = z
+  .string()
+  .length(2, 'Country code must be exactly 2 characters')
+  .regex(/^[A-Z]{2}$/, 'Country code must be uppercase letters (e.g., US, GB, DE)')
+  .optional();

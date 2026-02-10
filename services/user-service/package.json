@@ -20,6 +20,7 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.985.0",
     "@aws-sdk/client-s3": "^3.985.0",
+    "@aws-sdk/client-ses": "^3.985.0",
     "@aws-sdk/s3-request-presigner": "^3.985.0",
     "@nestjs/common": "^11.1.13",
     "@nestjs/config": "^4.0.3",
@@ -27,6 +28,7 @@
     "@nestjs/jwt": "11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-fastify": "^11.1.13",
+    "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "7.3.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
@@ -40,11 +42,10 @@
     "jsonwebtoken": "9.0.3",
     "jwks-rsa": "3.2.2",
     "libphonenumber-js": "^1.12.36",
+    "pg": "^8.13.1",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
-    "uuid": "^13.0.0",
-    "@prisma/adapter-pg": "^7.3.0",
-    "pg": "^8.13.1"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.13",
@@ -53,11 +54,11 @@
     "@types/jsonwebtoken": "9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "25.2.2",
+    "@types/pg": "^8.11.10",
     "@types/uuid": "^11.0.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
-    "vitest": "^2.1.9",
-    "@types/pg": "^8.11.10"
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.0.0"
