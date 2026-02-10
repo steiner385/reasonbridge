@@ -104,9 +104,8 @@ test.describe('Browse Topics and View Details', () => {
     expect(tabCount).toBeGreaterThan(0);
   });
 
-  // Skip: Title matching or timing issue when switching topics
-  // TODO: Fix conversation panel h1 content matching after topic switch
-  test.skip('should allow switching between topics using left panel', async ({ page }) => {
+  // Fixed: Added proper waits after topic clicks for content to update
+  test('should allow switching between topics using left panel', async ({ page }) => {
     await page.goto('/discussions');
 
     await expect(page.locator('[data-testid="topic-list-item"]').first()).toBeVisible();
@@ -123,14 +122,20 @@ test.describe('Browse Topics and View Details', () => {
     const firstTopicTitle = await firstTopic.locator('[data-testid="topic-title"]').textContent();
     await firstTopic.click();
 
-    await expect(page.locator('.conversation-panel h1')).toContainText(firstTopicTitle!.trim());
+    // Wait for conversation panel to load with topic content
+    await page.waitForLoadState('networkidle');
+    const h1 = page.locator('.conversation-panel h1');
+    await expect(h1).toBeVisible();
+    await expect(h1).toContainText(firstTopicTitle!.trim(), { timeout: 5000 });
 
     // Select second topic
     const secondTopic = topics.nth(1);
     const secondTopicTitle = await secondTopic.locator('[data-testid="topic-title"]').textContent();
     await secondTopic.click();
 
-    await expect(page.locator('.conversation-panel h1')).toContainText(secondTopicTitle!.trim());
+    // Wait for content to update after topic switch
+    await page.waitForLoadState('networkidle');
+    await expect(h1).toContainText(secondTopicTitle!.trim(), { timeout: 5000 });
 
     // Left panel should still be visible
     await expect(page.locator('[role="navigation"]').first()).toBeVisible();
