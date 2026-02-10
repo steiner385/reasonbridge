@@ -115,7 +115,7 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
       {/* Total Count */}
       <div className="flex items-center justify-between">
         <span className={`font-semibold ${currentSize.heading}`}>Alignment Summary</span>
-        <span className={`${currentSize.text} text-gray-600`}>
+        <span className={`${currentSize.text} text-gray-600 dark:text-gray-400`}>
           {totalCount} {totalCount === 1 ? 'alignment' : 'alignments'}
         </span>
       </div>
@@ -161,7 +161,9 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 bg-green-500 rounded-sm flex-shrink-0" />
                 <div className="flex flex-col">
-                  <span className="font-medium text-gray-900">{supportCount}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {supportCount}
+                  </span>
                   <span className="text-gray-500">Support</span>
                 </div>
               </div>
@@ -170,7 +172,9 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 bg-red-500 rounded-sm flex-shrink-0" />
                 <div className="flex flex-col">
-                  <span className="font-medium text-gray-900">{opposeCount}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {opposeCount}
+                  </span>
                   <span className="text-gray-500">Oppose</span>
                 </div>
               </div>
@@ -179,7 +183,9 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 bg-blue-500 rounded-sm flex-shrink-0" />
                 <div className="flex flex-col">
-                  <span className="font-medium text-gray-900">{nuancedCount}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {nuancedCount}
+                  </span>
                   <span className="text-gray-500">Nuanced</span>
                 </div>
               </div>

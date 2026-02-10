@@ -18,7 +18,7 @@ export const Step1PropositionBased: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
           Welcome to Proposition-Based Discussions
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
@@ -27,8 +27,8 @@ export const Step1PropositionBased: React.FC = () => {
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 border-2 border-primary-200">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-2 border-primary-200">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           How It Works: Breaking Down Complex Topics
         </h3>
 
@@ -51,7 +51,7 @@ export const Step1PropositionBased: React.FC = () => {
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-gray-800 font-medium">
+                <p className="text-gray-800 dark:text-gray-200 font-medium">
                   Public transit infrastructure must improve before implementing car bans
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">
@@ -79,7 +79,7 @@ export const Step1PropositionBased: React.FC = () => {
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-gray-800 font-medium">
+                <p className="text-gray-800 dark:text-gray-200 font-medium">
                   A hard deadline creates urgency but may be unrealistic for some regions
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">
@@ -103,7 +103,7 @@ export const Step1PropositionBased: React.FC = () => {
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-gray-800 font-medium">
+                <p className="text-gray-800 dark:text-gray-200 font-medium">
                   Electric vehicle incentives should increase to accelerate adoption
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-300 mt-1">
@@ -132,14 +132,18 @@ export const Step2AIFeedback: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">AI-Powered Discussion Insights</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          AI-Powered Discussion Insights
+        </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
           Our AI analyzes discussions to find areas of agreement and highlight diverse viewpoints.
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 border-2 border-primary-200">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Sample AI Insights</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-2 border-primary-200">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Sample AI Insights
+        </h3>
 
         <div className="space-y-6">
           {/* Common Ground Finding */}
@@ -237,21 +241,25 @@ export const Step3CommonGround: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">Finding Common Ground Together</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          Finding Common Ground Together
+        </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300 dark:text-gray-300">
           See what percentage of participants agree, and explore the spectrum of opinions.
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 border-2 border-primary-200">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border-2 border-primary-200">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           Visualizing Agreement and Disagreement
         </h3>
 
         <div className="space-y-6">
           {/* Agreement Spectrum Visualization */}
-          <div className="bg-gradient-to-r from-red-50 via-yellow-50 to-green-50 rounded-lg p-5 border border-gray-200">
-            <h4 className="font-semibold text-gray-800 mb-3">Agreement Spectrum</h4>
+          <div className="bg-gradient-to-r from-red-50 via-yellow-50 to-green-50 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              Agreement Spectrum
+            </h4>
             <div className="relative h-8 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full">
               {/* Sample distribution markers */}
               <div className="absolute top-0 left-[15%] w-1 h-full bg-gray-800 opacity-30"></div>
@@ -272,8 +280,10 @@ export const Step3CommonGround: React.FC = () => {
           </div>
 
           {/* Voting Results Example */}
-          <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-            <h4 className="font-semibold text-gray-800 mb-3">Example: Discussion Results</h4>
+          <div className="bg-gray-50 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+            <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              Example: Discussion Results
+            </h4>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">

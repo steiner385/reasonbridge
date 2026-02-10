@@ -57,7 +57,10 @@ export const SensitivitySelector: React.FC<SensitivitySelectorProps> = ({
 }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <label htmlFor="sensitivity-selector" className="text-xs text-gray-500 whitespace-nowrap">
+      <label
+        htmlFor="sensitivity-selector"
+        className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap"
+      >
         Sensitivity:
       </label>
       <select
@@ -65,7 +68,7 @@ export const SensitivitySelector: React.FC<SensitivitySelectorProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value as FeedbackSensitivity)}
         disabled={disabled}
-        className="text-xs border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
         aria-label="Feedback sensitivity level"
         aria-describedby="sensitivity-description"
       >

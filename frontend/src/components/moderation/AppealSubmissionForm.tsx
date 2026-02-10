@@ -163,19 +163,21 @@ const AppealSubmissionForm: React.FC<AppealSubmissionFormProps> = ({
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
           <div>
             <p className="text-xs text-gray-500">Action Type</p>
-            <p className="text-sm font-medium text-gray-900 mt-1 capitalize">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1 capitalize">
               {moderationAction.actionType}
             </p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Severity</p>
-            <p className="text-sm font-medium text-gray-900 mt-1 capitalize">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1 capitalize">
               {moderationAction.severity}
             </p>
           </div>
           <div>
             <p className="text-xs text-gray-500">Reason</p>
-            <p className="text-sm font-medium text-gray-900 mt-1">{moderationAction.reasoning}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">
+              {moderationAction.reasoning}
+            </p>
           </div>
         </div>
 

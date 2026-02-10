@@ -110,7 +110,7 @@ const OrientationPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-600">Loading orientation...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading orientation...</p>
         </div>
       </div>
     );
@@ -120,7 +120,7 @@ const OrientationPage: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-900/50 rounded-lg p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
             <svg
               className="h-6 w-6 text-red-600"
@@ -136,10 +136,10 @@ const OrientationPage: React.FC = () => {
               />
             </svg>
           </div>
-          <h3 className="mt-4 text-lg font-semibold text-gray-900 text-center">
+          <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
             Something went wrong
           </h3>
-          <p className="mt-2 text-sm text-gray-600 text-center">{error}</p>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center">{error}</p>
           <div className="mt-6 flex gap-3">
             <button
               onClick={fetchProgress}
@@ -149,7 +149,7 @@ const OrientationPage: React.FC = () => {
             </button>
             <button
               onClick={() => navigate('/')}
-              className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              className="flex-1 bg-gray-200 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
             >
               Go Home
             </button>
@@ -164,15 +164,17 @@ const OrientationPage: React.FC = () => {
       {/* Main content - visible underneath overlay with blur */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to ReasonBridge</h1>
-          <p className="text-xl text-gray-600">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Welcome to ReasonBridge
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400">
             Let's take a quick tour of how our platform helps you engage in meaningful discussions.
           </p>
         </div>
 
         {/* Placeholder content showing platform features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="h-6 w-6 text-primary-600"
@@ -188,15 +190,15 @@ const OrientationPage: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
               Proposition-Based Discussions
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Break down complex topics into clear, votable propositions.
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="h-6 w-6 text-blue-600"
@@ -212,13 +214,15 @@ const OrientationPage: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">AI-Powered Insights</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              AI-Powered Insights
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
               Get helpful feedback to improve your arguments and find common ground.
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="h-6 w-6 text-green-600"
@@ -234,8 +238,10 @@ const OrientationPage: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Find Common Ground</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Find Common Ground
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
               Visualize where participants agree and discover shared values.
             </p>
           </div>

@@ -109,7 +109,9 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
           </svg>
         </div>
         {showStatusText && (
-          <p className={`mt-3 font-medium text-gray-600 ${textSizeStyles[size]}`}>
+          <p
+            className={`mt-3 font-medium text-gray-600 dark:text-gray-400 ${textSizeStyles[size]}`}
+          >
             {statusText.idle}
           </p>
         )}
@@ -148,7 +150,9 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
         </div>
 
         {showStatusText && (
-          <p className={`mt-3 font-medium text-gray-900 ${textSizeStyles[size]}`}>
+          <p
+            className={`mt-3 font-medium text-gray-900 dark:text-gray-100 ${textSizeStyles[size]}`}
+          >
             {statusText.processing}
           </p>
         )}
@@ -157,8 +161,10 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
         {typeof progress === 'number' && (
           <div className="w-full max-w-md mt-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-gray-600">Progress</span>
-              <span className="text-sm font-medium text-gray-900">{progress}%</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Progress</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {progress}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
@@ -173,7 +179,11 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
           </div>
         )}
 
-        {message && <p className={`mt-3 text-sm text-gray-600 text-center max-w-md`}>{message}</p>}
+        {message && (
+          <p className={`mt-3 text-sm text-gray-600 dark:text-gray-400 text-center max-w-md`}>
+            {message}
+          </p>
+        )}
       </div>
     );
   }
@@ -203,7 +213,11 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
             {statusText.complete}
           </p>
         )}
-        {message && <p className={`mt-1 text-sm text-gray-600 text-center max-w-md`}>{message}</p>}
+        {message && (
+          <p className={`mt-1 text-sm text-gray-600 dark:text-gray-400 text-center max-w-md`}>
+            {message}
+          </p>
+        )}
       </div>
     );
   }

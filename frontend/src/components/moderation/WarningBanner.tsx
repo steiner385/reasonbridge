@@ -115,13 +115,13 @@ const getTextColors = (
 ): { title: string; text: string; button: string } => {
   if (severity === 'non_punitive') {
     return {
-      title: 'text-gray-900',
+      title: 'text-gray-900 dark:text-gray-100',
       text: 'text-gray-700',
-      button: 'hover:bg-gray-200 text-gray-600',
+      button: 'hover:bg-gray-200 text-gray-600 dark:text-gray-400',
     };
   }
   return {
-    title: 'text-gray-900',
+    title: 'text-gray-900 dark:text-gray-100',
     text: 'text-gray-700',
     button: 'hover:bg-gray-300 text-gray-700',
   };

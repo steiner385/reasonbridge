@@ -55,7 +55,7 @@ function MobileActionBar({ children, show = true, className = '' }: MobileAction
           bg-white dark:bg-gray-900
           border-t border-gray-200 dark:border-gray-700
           px-4 py-3
-          shadow-lg
+          shadow-lg dark:shadow-gray-900/50
           transition-transform duration-200 ease-out
         "
         style={{

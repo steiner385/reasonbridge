@@ -173,7 +173,9 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
         <span className={`${sizeConfig.fontSize} ${config.color} font-semibold`}>
           {scorePercent}%
         </span>
-        <span className={`${sizeConfig.fontSize} text-gray-500`}>{config.label}</span>
+        <span className={`${sizeConfig.fontSize} text-gray-500 dark:text-gray-400`}>
+          {config.label}
+        </span>
       </button>
     );
   }
@@ -181,7 +183,7 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
   // Render detailed variant
   return (
     <div
-      className={`${sizeConfig.padding} rounded-lg bg-white shadow-sm border border-gray-200 ${className}`}
+      className={`${sizeConfig.padding} rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}
       role="region"
       aria-label="Clarity score analysis"
     >
@@ -216,14 +218,18 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
               </span>
             )}
           </div>
-          <p className={`${sizeConfig.fontSize} text-gray-600`}>{config.description}</p>
+          <p className={`${sizeConfig.fontSize} text-gray-600 dark:text-gray-400`}>
+            {config.description}
+          </p>
         </div>
       </div>
 
       {/* Factor breakdown */}
       {showFactors && clarity.factors && Object.keys(clarity.factors).length > 0 && (
         <div className="mb-4">
-          <h4 className={`${sizeConfig.fontSize} font-medium text-gray-700 mb-2`}>
+          <h4
+            className={`${sizeConfig.fontSize} font-medium text-gray-700 dark:text-gray-300 mb-2`}
+          >
             Clarity Factors
           </h4>
           <div className="space-y-2">
@@ -231,7 +237,7 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
               .filter(([, value]) => value !== undefined)
               .map(([factor, value]) => (
                 <div key={factor} className="flex items-center gap-2">
-                  <span className={`${sizeConfig.fontSize} text-gray-600 w-20`}>
+                  <span className={`${sizeConfig.fontSize} text-gray-600 dark:text-gray-400 w-20`}>
                     {FACTOR_LABELS[factor]}
                   </span>
                   <div
@@ -246,7 +252,9 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
                       aria-valuemax={100}
                     />
                   </div>
-                  <span className={`${sizeConfig.fontSize} text-gray-500 w-10 text-right`}>
+                  <span
+                    className={`${sizeConfig.fontSize} text-gray-500 dark:text-gray-400 w-10 text-right`}
+                  >
                     {Math.round((value ?? 0) * 100)}%
                   </span>
                 </div>
@@ -258,7 +266,9 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
       {/* Issues list */}
       {showIssues && clarity.issues && clarity.issues.length > 0 && (
         <div className="mb-4">
-          <h4 className={`${sizeConfig.fontSize} font-medium text-gray-700 mb-2`}>
+          <h4
+            className={`${sizeConfig.fontSize} font-medium text-gray-700 dark:text-gray-300 mb-2`}
+          >
             Issues Detected ({clarity.issues.length})
           </h4>
           <ul className="space-y-2">
@@ -277,12 +287,14 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
                       {issueConfig.icon}
                     </span>
                     <div className="flex-1">
-                      <p className="text-gray-800">{issue.description}</p>
+                      <p className="text-gray-800 dark:text-gray-200">{issue.description}</p>
                       {issue.example && (
-                        <p className="text-gray-500 italic mt-1">&quot;{issue.example}&quot;</p>
+                        <p className="text-gray-500 dark:text-gray-400 italic mt-1">
+                          &quot;{issue.example}&quot;
+                        </p>
                       )}
                       {showSuggestions && (
-                        <p className="text-gray-600 mt-1">
+                        <p className="text-gray-600 dark:text-gray-400 mt-1">
                           <span className="font-medium">Tip:</span> {issue.suggestion}
                         </p>
                       )}
@@ -298,7 +310,7 @@ const ClarityScoreDisplay: React.FC<ClarityScoreDisplayProps> = ({
       {/* General suggestion */}
       {showSuggestions && clarity.suggestion && (
         <div className="pt-3 border-t border-gray-100">
-          <p className={`${sizeConfig.fontSize} text-gray-700`}>
+          <p className={`${sizeConfig.fontSize} text-gray-700 dark:text-gray-300`}>
             <span className="font-medium">Overall suggestion: </span>
             {clarity.suggestion}
           </p>

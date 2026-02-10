@@ -162,7 +162,7 @@ export function CreateDiscussionForm({ topicId, onSuccess, onCancel }: CreateDis
         <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
           Initial Response <span className="text-red-500">*</span>
         </label>
-        <p className="text-sm text-gray-600 mb-2">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
           Share your perspective on this topic. Be thoughtful and substantive.
         </p>
         <textarea
@@ -185,7 +185,9 @@ export function CreateDiscussionForm({ topicId, onSuccess, onCancel }: CreateDis
       {/* Citations Section */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Citations (Optional)</label>
-        <p className="text-sm text-gray-600 mb-3">Add sources to support your argument (max 10)</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          Add sources to support your argument (max 10)
+        </p>
 
         {/* Existing Citations */}
         {citations.length > 0 && (
@@ -193,9 +195,13 @@ export function CreateDiscussionForm({ topicId, onSuccess, onCancel }: CreateDis
             {citations.map((citation, index) => (
               <div key={index} className="flex items-start gap-2 p-3 bg-gray-50 rounded-md">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{citation.url}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {citation.url}
+                  </p>
                   {citation.title && (
-                    <p className="text-sm text-gray-600 truncate">{citation.title}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {citation.title}
+                    </p>
                   )}
                 </div>
                 <button

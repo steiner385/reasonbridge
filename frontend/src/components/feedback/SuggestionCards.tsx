@@ -84,7 +84,7 @@ const getRelationshipTypeStyles = (relationshipType: string) => {
       icon: '?',
     },
     relates_to: {
-      badge: 'bg-gray-100 text-gray-800',
+      badge: 'bg-gray-100 text-gray-800 dark:text-gray-200',
       icon: '~',
     },
   };
@@ -126,7 +126,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
   if (!hasSuggestions && showEmptyState) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <p className="text-sm text-gray-500">{emptyStateMessage}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyStateMessage}</p>
       </div>
     );
   }
@@ -140,11 +140,13 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
 
   return (
     <div className={className}>
-      {title && <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>}
+      {title && (
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{title}</h3>
+      )}
 
       {/* Confidence and attribution info */}
       <div className="mb-3 flex items-center justify-between text-xs">
-        <span className="text-gray-500">
+        <span className="text-gray-500 dark:text-gray-400">
           AI Confidence: {Math.round(suggestions.confidenceScore * 100)}%
         </span>
         <span className="text-gray-400 italic">{suggestions.attribution}</span>
@@ -188,7 +190,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                       <button
                         type="button"
                         onClick={() => onDismiss(tag)}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors"
                         aria-label={`Dismiss tag ${tag}`}
                       >
                         <svg
@@ -214,7 +216,9 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
 
           {/* Reasoning */}
           {tagSuggestions.reasoning && (
-            <p className="text-xs text-gray-600 italic mt-3">{tagSuggestions.reasoning}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic mt-3">
+              {tagSuggestions.reasoning}
+            </p>
           )}
         </div>
       )}
@@ -228,7 +232,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
             return (
               <div
                 key={index}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:border-primary-200 transition-colors"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-primary-200 transition-colors"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -236,7 +240,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                       <span className="mr-1">{styles.icon}</span>
                       {link.relationshipType.replace('_', ' ').toUpperCase()}
                     </span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       Topic: {link.targetTopicId.slice(0, 8)}...
                     </span>
                   </div>
@@ -269,7 +273,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                         <button
                           type="button"
                           onClick={() => onDismiss(link)}
-                          className="text-gray-400 hover:text-gray-600 transition-colors"
+                          className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors"
                           aria-label="Dismiss topic link suggestion"
                         >
                           <svg
@@ -291,15 +295,15 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                   )}
                 </div>
 
-                <p className="text-sm text-gray-700">{link.reasoning}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">{link.reasoning}</p>
               </div>
             );
           })}
 
           {/* Overall reasoning */}
           {topicLinkSuggestions.reasoning && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <p className="text-xs text-gray-600 italic">
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs text-gray-600 dark:text-gray-400 italic">
                 <span className="font-medium">Overall Analysis:</span>{' '}
                 {topicLinkSuggestions.reasoning}
               </p>

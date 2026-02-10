@@ -170,15 +170,19 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
                   {duplicates.slice(0, 3).map((duplicate) => (
                     <div
                       key={duplicate.id}
-                      className="bg-white rounded p-3 border border-yellow-100"
+                      className="bg-white dark:bg-gray-800 rounded p-3 border border-yellow-100"
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <h5 className="font-medium text-sm text-gray-900">{duplicate.title}</h5>
+                        <h5 className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                          {duplicate.title}
+                        </h5>
                         <span className="text-xs text-yellow-600 font-medium">
                           {Math.round(duplicate.similarityScore * 100)}% match
                         </span>
                       </div>
-                      <p className="text-xs text-gray-600 line-clamp-2">{duplicate.description}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                        {duplicate.description}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -214,7 +218,10 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
 
         {/* Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Title <span className="text-red-500">*</span>
           </label>
           <input
@@ -223,7 +230,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-              titleError ? 'border-red-300' : 'border-gray-300'
+              titleError ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="E.g., Should we implement carbon taxes to combat climate change?"
             minLength={10}
@@ -231,20 +238,25 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             required
           />
           <div className="flex justify-between mt-1">
-            <p className={`text-xs ${titleError ? 'text-red-600' : 'text-gray-500'}`}>
+            <p
+              className={`text-xs ${titleError ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'}`}
+            >
               {titleError
                 ? title.length < 10
                   ? `${10 - title.length} more characters needed`
                   : 'Title too long'
                 : '10-200 characters'}
             </p>
-            <p className="text-xs text-gray-500">{title.length}/200</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{title.length}/200</p>
           </div>
         </div>
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Description <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -252,7 +264,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-              descriptionError ? 'border-red-300' : 'border-gray-300'
+              descriptionError ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="Provide context, background, and specific questions you'd like to explore..."
             rows={6}
@@ -261,22 +273,27 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             required
           />
           <div className="flex justify-between mt-1">
-            <p className={`text-xs ${descriptionError ? 'text-red-600' : 'text-gray-500'}`}>
+            <p
+              className={`text-xs ${descriptionError ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'}`}
+            >
               {descriptionError
                 ? description.length < 50
                   ? `${50 - description.length} more characters needed`
                   : 'Description too long'
                 : '50-5000 characters'}
             </p>
-            <p className="text-xs text-gray-500">{description.length}/5000</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{description.length}/5000</p>
           </div>
         </div>
 
         {/* Tags */}
         <div>
-          <label htmlFor="tag-input" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="tag-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Tags <span className="text-red-500">*</span>{' '}
-            <span className="text-gray-500 font-normal">(1-5 tags)</span>
+            <span className="text-gray-500 dark:text-gray-400 font-normal">(1-5 tags)</span>
           </label>
           <div className="flex gap-2 mb-2">
             <input
@@ -290,7 +307,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
                   handleAddTag();
                 }
               }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="e.g., climate, policy, economics"
               disabled={tags.length >= 5}
               maxLength={50}
@@ -328,14 +345,17 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
 
         {/* Visibility */}
         <div>
-          <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="visibility"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
             Visibility
           </label>
           <select
             id="visibility"
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as 'PUBLIC' | 'PRIVATE' | 'UNLISTED')}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="PUBLIC">Public - Anyone can view and participate</option>
             <option value="UNLISTED">Unlisted - Only those with link can view</option>
@@ -347,7 +367,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
         <div>
           <label
             htmlFor="evidence-standards"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Evidence Standards
           </label>
@@ -357,7 +377,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             onChange={(e) =>
               setEvidenceStandards(e.target.value as 'MINIMAL' | 'STANDARD' | 'RIGOROUS')
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="MINIMAL">Minimal - Informal discussion</option>
             <option value="STANDARD">Standard - Claims should be sourced</option>

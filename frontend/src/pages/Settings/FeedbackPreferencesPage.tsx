@@ -122,18 +122,22 @@ function FeedbackPreferencesPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold text-gray-900">Feedback Preferences</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Feedback Preferences
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Configure how AI-generated feedback is displayed in your responses
           </p>
         </CardHeader>
         <CardBody>
           <div className="space-y-6">
             {/* Global Enable/Disable */}
-            <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Enable Feedback</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  Enable Feedback
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Show AI-generated feedback on your responses
                 </p>
               </div>
@@ -147,7 +151,7 @@ function FeedbackPreferencesPage() {
                 aria-checked={preferences.enabled}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white dark:bg-gray-800 transition-transform ${
                     preferences.enabled ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
@@ -155,9 +159,11 @@ function FeedbackPreferencesPage() {
             </div>
 
             {/* Sensitivity Level */}
-            <div className="pb-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Sensitivity Level</h3>
-              <p className="text-sm text-gray-600 mb-4">
+            <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+                Sensitivity Level
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Control how often feedback is shown based on AI confidence
               </p>
               <div className="space-y-2">
@@ -169,14 +175,14 @@ function FeedbackPreferencesPage() {
                       value={level}
                       checked={preferences.sensitivity === level}
                       onChange={() => handleSensitivityChange(level)}
-                      className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                      className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"
                       disabled={!preferences.enabled}
                     />
                     <div className="ml-3">
-                      <span className="block text-sm font-medium text-gray-900 capitalize">
+                      <span className="block text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
                         {level}
                       </span>
-                      <span className="block text-sm text-gray-600">
+                      <span className="block text-sm text-gray-600 dark:text-gray-400">
                         {SENSITIVITY_CONFIGS[level].description}
                       </span>
                     </div>
@@ -186,9 +192,11 @@ function FeedbackPreferencesPage() {
             </div>
 
             {/* Feedback Types */}
-            <div className="pb-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Feedback Types</h3>
-              <p className="text-sm text-gray-600 mb-4">
+            <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+                Feedback Types
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Choose which types of feedback to display
               </p>
               <div className="space-y-3">
@@ -208,32 +216,34 @@ function FeedbackPreferencesPage() {
                       onChange={() =>
                         handleToggleType(key as keyof typeof preferences.enabledTypes)
                       }
-                      className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      className="h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                       disabled={!preferences.enabled}
                     />
-                    <span className="ml-3 text-sm text-gray-900">{label}</span>
+                    <span className="ml-3 text-sm text-gray-900 dark:text-gray-100">{label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             {/* Additional Options */}
-            <div className="pb-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Additional Options</h3>
+            <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+                Additional Options
+              </h3>
               <div className="space-y-3">
                 <label className="flex items-start cursor-pointer">
                   <input
                     type="checkbox"
                     checked={preferences.showEducationalResources}
                     onChange={handleToggleEducationalResources}
-                    className="mt-0.5 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="mt-0.5 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                     disabled={!preferences.enabled}
                   />
                   <div className="ml-3">
-                    <span className="block text-sm font-medium text-gray-900">
+                    <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                       Show Educational Resources
                     </span>
-                    <span className="block text-sm text-gray-600">
+                    <span className="block text-sm text-gray-600 dark:text-gray-400">
                       Display links to articles and resources related to feedback
                     </span>
                   </div>
@@ -244,14 +254,14 @@ function FeedbackPreferencesPage() {
                     type="checkbox"
                     checked={preferences.autoDismissLowConfidence}
                     onChange={handleToggleAutoDismiss}
-                    className="mt-0.5 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="mt-0.5 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
                     disabled={!preferences.enabled}
                   />
                   <div className="ml-3">
-                    <span className="block text-sm font-medium text-gray-900">
+                    <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                       Auto-dismiss Low Confidence Feedback
                     </span>
-                    <span className="block text-sm text-gray-600">
+                    <span className="block text-sm text-gray-600 dark:text-gray-400">
                       Automatically hide feedback below your sensitivity threshold after viewing
                     </span>
                   </div>

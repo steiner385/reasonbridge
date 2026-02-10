@@ -191,7 +191,7 @@ export function MergeTopicsModal({
 
             {/* Source Topics */}
             <div className="mb-4">
-              <p className="text-xs font-medium text-gray-600 mb-2">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                 Source Topics (will be archived):
               </p>
               <div className="space-y-2">
@@ -208,7 +208,7 @@ export function MergeTopicsModal({
 
             {/* Target Topic */}
             <div className="mb-4">
-              <p className="text-xs font-medium text-gray-600 mb-2">
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                 Target Topic (receives all content):
               </p>
               {targetTopic && (
@@ -228,7 +228,9 @@ export function MergeTopicsModal({
 
             {/* Merge Reason */}
             <div>
-              <p className="text-xs font-medium text-gray-600 mb-2">Merge Reason:</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                Merge Reason:
+              </p>
               <div className="bg-gray-50 border border-gray-200 rounded p-3">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{mergeReason}</p>
               </div>
@@ -321,7 +323,9 @@ export function MergeTopicsModal({
                       className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{topic.title}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {topic.title}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {topic.responseCount} responses · {topic.participantCount} participants ·{' '}
                         {topic.status}

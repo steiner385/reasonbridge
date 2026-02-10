@@ -181,7 +181,7 @@ const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
         {/* Step 1: Phone Number Entry */}
         {step === 'phone' && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               We'll send a 6-digit verification code to your phone number via SMS.
             </p>
             <PhoneInput
@@ -199,7 +199,7 @@ const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
         {/* Step 2: OTP Entry */}
         {step === 'otp' && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Enter the 6-digit code sent to <strong>{phoneNumber}</strong>
             </p>
             <OTPInput value={otpCode} onChange={setOtpCode} length={6} />
@@ -238,8 +238,10 @@ const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900">Phone Number Verified!</h3>
-              <p className="text-sm text-gray-600 mt-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                Phone Number Verified!
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 Your phone number has been successfully verified.
               </p>
             </div>

@@ -35,7 +35,7 @@ export function DiscussionDetailPage() {
         <Card variant="elevated" padding="lg">
           <div className="text-center text-red-600">
             <h2 className="text-xl font-semibold mb-2">Error Loading Discussion</h2>
-            <p className="text-gray-600">{error.message}</p>
+            <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
           </div>
         </Card>
       </div>
@@ -85,9 +85,11 @@ export function DiscussionDetailPage() {
 
       {/* Discussion Header */}
       <Card variant="elevated" padding="lg" className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{discussion.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          {discussion.title}
+        </h1>
 
-        <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
           <div className="flex items-center gap-4">
             <div>
               Started by <span className="font-medium">{discussion.creator.displayName}</span>
@@ -149,7 +151,9 @@ export function DiscussionDetailPage() {
       {/* Response Form */}
       {showResponseForm && (
         <Card variant="elevated" padding="lg" className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Your Response</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Add Your Response
+          </h2>
           <CreateResponseForm
             discussionId={discussionId!}
             onSuccess={() => setShowResponseForm(false)}
@@ -160,7 +164,7 @@ export function DiscussionDetailPage() {
 
       {/* Responses Section */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Responses ({discussion.responseCount})
         </h2>
         <ResponseList discussionId={discussionId!} />

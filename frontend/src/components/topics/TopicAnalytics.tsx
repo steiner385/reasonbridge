@@ -36,15 +36,15 @@ function SummaryCard({
       ? 'text-green-600'
       : growth < 0
         ? 'text-red-600'
-        : 'text-gray-600'
-    : 'text-gray-600';
+        : 'text-gray-600 dark:text-gray-400'
+    : 'text-gray-600 dark:text-gray-400';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{value}</p>
           {growth !== undefined && (
             <p className={`text-xs ${growthColor} mt-1`}>
               {growth > 0 ? '+' : ''}
@@ -105,8 +105,8 @@ function SimpleLineChart({
   });
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h4 className="text-sm font-semibold text-gray-700 mb-3">{label}</h4>
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{label}</h4>
       <svg
         width="100%"
         height={height}
@@ -266,7 +266,7 @@ export function TopicAnalytics({ topicId }: TopicAnalyticsProps) {
       default:
         return (
           <svg
-            className="w-5 h-5 text-gray-600"
+            className="w-5 h-5 text-gray-600 dark:text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -281,11 +281,11 @@ export function TopicAnalytics({ topicId }: TopicAnalyticsProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Topic Analytics</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Topic Analytics</h3>
         <select
           value={daysBack}
           onChange={(e) => setDaysBack(Number(e.target.value))}
-          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>

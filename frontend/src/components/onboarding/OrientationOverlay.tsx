@@ -133,18 +133,21 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
         <div
           ref={contentRef}
-          className="relative bg-white rounded-xl shadow-2xl transition-all w-full max-w-4xl"
+          className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl dark:shadow-gray-900/50 transition-all w-full max-w-4xl"
         >
           {/* Header with progress */}
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-              <h2 id="orientation-title" className="text-xl font-semibold text-gray-900">
+              <h2
+                id="orientation-title"
+                className="text-xl font-semibold text-gray-900 dark:text-gray-100"
+              >
                 Platform Orientation
               </h2>
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
+                className="text-gray-400 hover:text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
                 aria-label="Dismiss orientation"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +164,7 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
             {/* Progress bar */}
             <div className="relative">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
                   Step {currentStep} of {TOTAL_STEPS}
                 </span>
                 <span className="text-sm font-medium text-primary-600">
@@ -187,7 +190,7 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
           </div>
 
           {/* Footer - Navigation buttons */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50">
             <div className="flex gap-3">
               {/* Skip to End button */}
               <Button

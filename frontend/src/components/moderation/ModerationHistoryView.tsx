@@ -181,9 +181,9 @@ export default function ModerationHistoryView({
       case 'appealed':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'reversed':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -203,7 +203,7 @@ export default function ModerationHistoryView({
       case 'ban':
         return 'bg-red-50 text-red-900 border-red-200';
       default:
-        return 'bg-gray-50 text-gray-900 border-gray-200';
+        return 'bg-gray-50 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -231,7 +231,9 @@ export default function ModerationHistoryView({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Search
+              </label>
               <input
                 type="text"
                 value={searchTerm}
@@ -240,20 +242,22 @@ export default function ModerationHistoryView({
                   setPage(1);
                 }}
                 placeholder="Search actions..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Status
+              </label>
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value as ModerationActionStatus | 'all');
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
@@ -265,14 +269,16 @@ export default function ModerationHistoryView({
 
             {/* Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Type
+              </label>
               <select
                 value={typeFilter}
                 onChange={(e) => {
                   setTypeFilter(e.target.value as ModerationActionType | 'all');
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="all">All</option>
                 <option value="educate">Educate</option>
@@ -286,14 +292,16 @@ export default function ModerationHistoryView({
 
             {/* Severity Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Severity</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Severity
+              </label>
               <select
                 value={severityFilter}
                 onChange={(e) => {
                   setSeverityFilter(e.target.value as ModerationSeverity | 'all');
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="all">All</option>
                 <option value="non_punitive">Non-Punitive</option>
@@ -303,12 +311,14 @@ export default function ModerationHistoryView({
 
             {/* Sort */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Sort By
+              </label>
               <div className="flex gap-2">
                 <select
                   value={sortField}
                   onChange={(e) => setSortField(e.target.value as SortField)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="date">Date</option>
                   <option value="type">Type</option>
@@ -317,7 +327,7 @@ export default function ModerationHistoryView({
                 </select>
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                 >
                   {sortOrder === 'asc' ? '↑' : '↓'}
@@ -339,16 +349,18 @@ export default function ModerationHistoryView({
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
-              <p className="text-gray-600 mt-3">Loading history...</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-3">Loading history...</p>
             </div>
           ) : actions.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No moderation actions found</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+              No moderation actions found
+            </p>
           ) : (
             <div className="space-y-3">
               {actions.map((action) => (
                 <div
                   key={action.id}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
                     <div className="flex flex-wrap gap-2">
@@ -374,33 +386,41 @@ export default function ModerationHistoryView({
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                       {formatDate(action.createdAt)}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Target</p>
-                      <p className="text-sm text-gray-800">
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                        Target
+                      </p>
+                      <p className="text-sm text-gray-800 dark:text-gray-200">
                         {action.targetType}: {action.targetId}
                       </p>
                     </div>
                     {action.approvedById && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-600 mb-1">Approved By</p>
-                        <p className="text-sm text-gray-800">{action.approvedById}</p>
+                        <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                          Approved By
+                        </p>
+                        <p className="text-sm text-gray-800 dark:text-gray-200">
+                          {action.approvedById}
+                        </p>
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-gray-600 mb-1">Reasoning</p>
-                    <p className="text-sm text-gray-700">{action.reasoning}</p>
+                    <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                      Reasoning
+                    </p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{action.reasoning}</p>
                   </div>
 
                   {action.executedAt && (
-                    <div className="mt-2 text-xs text-gray-500">
+                    <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                       Executed: {formatDate(action.executedAt)}
                     </div>
                   )}
@@ -414,21 +434,21 @@ export default function ModerationHistoryView({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Page {page} of {totalPages}
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

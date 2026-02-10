@@ -50,10 +50,12 @@ function OAuthButtons({ onError, className = '' }: OAuthButtonsProps) {
     <div className={`space-y-3 ${className}`}>
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-gray-300 dark:border-gray-600" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+            Or continue with
+          </span>
         </div>
       </div>
 
@@ -66,7 +68,7 @@ function OAuthButtons({ onError, className = '' }: OAuthButtonsProps) {
           onClick={() => handleOAuthClick('google')}
           isLoading={loadingProvider === 'google'}
           disabled={loadingProvider !== null}
-          className="border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           leftIcon={
             !loadingProvider && (
               <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -102,7 +104,7 @@ function OAuthButtons({ onError, className = '' }: OAuthButtonsProps) {
           onClick={() => handleOAuthClick('apple')}
           isLoading={loadingProvider === 'apple'}
           disabled={loadingProvider !== null}
-          className="border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           leftIcon={
             !loadingProvider && (
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

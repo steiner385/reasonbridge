@@ -196,7 +196,7 @@ const CommonGroundSummaryPanel = ({
                     {zone.propositions.map((prop) => (
                       <div key={prop.id} className="text-sm">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-800">{prop.text}</span>
+                          <span className="text-gray-800 dark:text-gray-200">{prop.text}</span>
                           <span className="font-medium text-gray-900 dark:text-gray-100 ml-2">
                             {prop.agreementPercentage}% agree
                           </span>
@@ -338,7 +338,7 @@ const CommonGroundSummaryPanel = ({
                       </p>
                       <p className="text-gray-700 dark:text-gray-300 mb-2">{position.reasoning}</p>
                       {(position.underlyingValue || position.underlyingAssumption) && (
-                        <div className="text-xs text-gray-600 space-y-1">
+                        <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                           {position.underlyingValue && (
                             <p>
                               <span className="font-medium">Core value:</span>{' '}
@@ -361,8 +361,8 @@ const CommonGroundSummaryPanel = ({
                 </div>
 
                 {disagreement.moralFoundations && disagreement.moralFoundations.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-blue-200">
-                    <p className="text-xs text-gray-600">
+                  <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       <span className="font-medium">Moral foundations:</span>{' '}
                       {disagreement.moralFoundations.join(', ')}
                     </p>

@@ -50,10 +50,10 @@ export default function NotificationsPage() {
         <button className="border-b-2 border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600">
           All
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-200">
+        <button className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-200">
           Unread
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-200">
+        <button className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-200">
           Mentions
         </button>
       </div>
@@ -79,7 +79,7 @@ export default function NotificationsPage() {
                         ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'
                         : notification.type === 'mention'
                           ? 'bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                          : 'bg-gray-100 text-gray-600 dark:text-gray-400 dark:bg-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {notification.type === 'comment' && (

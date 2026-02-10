@@ -103,7 +103,7 @@ export function TopicSearchFilter({
           className="
             w-full py-2 pl-10 pr-10 text-sm
             bg-transparent outline-none
-            placeholder-gray-400 text-gray-900
+            placeholder-gray-400 text-gray-900 dark:text-gray-100
           "
           aria-label="Search topics"
           data-testid="topic-search-input"

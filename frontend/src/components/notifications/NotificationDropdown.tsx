@@ -101,7 +101,7 @@ export function NotificationDropdown() {
         {/* Empty state */}
         {!isLoading && !hasNotifications && (
           <div className="flex flex-col items-center justify-center py-8 px-4">
-            <Bell className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+            <Bell className="h-12 w-12 text-gray-300 dark:text-gray-600 dark:text-gray-400 mb-3" />
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
               No notifications yet
             </p>

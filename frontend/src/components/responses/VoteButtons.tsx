@@ -114,7 +114,11 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
 
   // Vote count color based on value
   const voteCountColor =
-    voteCount > 0 ? 'text-primary-700' : voteCount < 0 ? 'text-red-700' : 'text-gray-600';
+    voteCount > 0
+      ? 'text-primary-700'
+      : voteCount < 0
+        ? 'text-red-700'
+        : 'text-gray-600 dark:text-gray-400';
 
   const handleUpvote = () => {
     if (!disabled && onUpvote) {

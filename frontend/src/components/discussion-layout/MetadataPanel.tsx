@@ -197,7 +197,7 @@ export function MetadataPanel({
             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
           />
         </svg>
-        <p className="text-sm text-gray-600">Select a topic to view metadata</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Select a topic to view metadata</p>
       </div>
     );
   }
@@ -211,16 +211,16 @@ export function MetadataPanel({
     const isExpanded = expandedSections.has(section);
 
     return (
-      <div key={section} className="border-b border-gray-200">
+      <div key={section} className="border-b border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={() => toggleSection(section)}
-          className="flex items-center justify-between w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+          className="flex items-center justify-between w-full px-4 py-3 text-left bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-expanded={isExpanded}
         >
-          <span className="text-sm font-medium text-gray-900">{title}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{title}</span>
           <svg
-            className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -228,7 +228,7 @@ export function MetadataPanel({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        {isExpanded && <div className="p-4 bg-white">{content}</div>}
+        {isExpanded && <div className="p-4 bg-white dark:bg-gray-900">{content}</div>}
       </div>
     );
   };
@@ -261,13 +261,15 @@ export function MetadataPanel({
                     className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
                     aria-hidden="true"
                   />
-                  <p className="text-sm text-gray-600">Analyzing common ground...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Analyzing common ground...
+                  </p>
                 </div>
               </div>
             )}
 
             {!isLoadingCommonGround && !commonGroundAnalysis && (
-              <div className="text-center py-8 text-gray-600">
+              <div className="text-center py-8 text-gray-600 dark:text-gray-400">
                 <p className="text-sm font-medium">No common ground analysis yet</p>
                 <p className="text-xs text-gray-500 mt-1">
                   Analysis will appear once the discussion has enough responses
@@ -296,13 +298,15 @@ export function MetadataPanel({
                     className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
                     aria-hidden="true"
                   />
-                  <p className="text-sm text-gray-600">Generating bridging suggestions...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Generating bridging suggestions...
+                  </p>
                 </div>
               </div>
             )}
 
             {!isLoadingBridging && !bridgingSuggestions && (
-              <div className="text-center py-8 text-gray-600">
+              <div className="text-center py-8 text-gray-600 dark:text-gray-400">
                 <p className="text-sm font-medium">No bridging suggestions yet</p>
                 <p className="text-xs text-gray-500 mt-1">
                   Suggestions will appear to help bridge disagreements
@@ -341,7 +345,7 @@ export function MetadataPanel({
   return (
     <div className={`metadata-panel flex flex-col h-full ${className}`}>
       {/* Tab Header */}
-      <div className="flex-shrink-0 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex" role="tablist" aria-label="Discussion metadata">
           <button
             type="button"
@@ -354,7 +358,7 @@ export function MetadataPanel({
               ${
                 activeTab === 'propositions'
                   ? 'border-primary-600 text-primary-700'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
               }
             `}
           >
@@ -371,7 +375,7 @@ export function MetadataPanel({
               ${
                 activeTab === 'commonGround'
                   ? 'border-primary-600 text-primary-700'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
               }
             `}
           >
@@ -388,7 +392,7 @@ export function MetadataPanel({
               ${
                 activeTab === 'bridging'
                   ? 'border-primary-600 text-primary-700'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
               }
             `}
           >
@@ -406,7 +410,7 @@ export function MetadataPanel({
                 ${
                   activeTab === 'preview'
                     ? 'border-primary-600 text-primary-700'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
                 }
               `}
             >
@@ -494,13 +498,15 @@ export function MetadataPanel({
                     className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
                     aria-hidden="true"
                   />
-                  <p className="text-sm text-gray-600">Analyzing common ground...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Analyzing common ground...
+                  </p>
                 </div>
               </div>
             )}
 
             {!isLoadingCommonGround && !commonGroundAnalysis && (
-              <div className="text-center py-12 text-gray-600">
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                 <svg
                   className="w-12 h-12 mx-auto mb-3 text-gray-400"
                   fill="none"
@@ -541,13 +547,15 @@ export function MetadataPanel({
                     className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
                     aria-hidden="true"
                   />
-                  <p className="text-sm text-gray-600">Generating bridging suggestions...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Generating bridging suggestions...
+                  </p>
                 </div>
               </div>
             )}
 
             {!isLoadingBridging && !bridgingSuggestions && (
-              <div className="text-center py-12 text-gray-600">
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                 <svg
                   className="w-12 h-12 mx-auto mb-3 text-gray-400"
                   fill="none"

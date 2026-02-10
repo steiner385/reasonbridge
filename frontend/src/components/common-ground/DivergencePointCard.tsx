@@ -173,7 +173,9 @@ const DivergencePointCard = ({
               </span>
             )}
           </div>
-          <p className={`${sizeStyles.text} text-gray-900 font-medium leading-relaxed mt-2`}>
+          <p
+            className={`${sizeStyles.text} text-gray-900 dark:text-gray-100 font-medium leading-relaxed mt-2`}
+          >
             {divergencePoint.proposition}
           </p>
         </div>
@@ -182,7 +184,9 @@ const DivergencePointCard = ({
       {/* Polarization indicator bar */}
       <div className="mt-3 mb-4">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-600">{polarizationStyles.label}</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400">
+            {polarizationStyles.label}
+          </span>
           <span className="text-xs text-gray-500">
             {divergencePoint.totalParticipants} participants
           </span>
@@ -225,7 +229,7 @@ const DivergencePointCard = ({
                   <div className={`${sizeStyles.viewpoint} ${viewpointColor.text} font-semibold`}>
                     {viewpoint.percentage}%
                   </div>
-                  <div className="text-xs text-gray-600">
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
                     {viewpoint.participantCount}{' '}
                     {viewpoint.participantCount === 1 ? 'person' : 'people'}
                   </div>
@@ -234,7 +238,9 @@ const DivergencePointCard = ({
 
               {showReasoning && viewpoint.reasoning.length > 0 && (
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs text-gray-600 font-medium">Key reasoning:</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                    Key reasoning:
+                  </p>
                   <ul className="text-xs text-gray-700 space-y-0.5 pl-3">
                     {viewpoint.reasoning.map((reason, idx) => (
                       <li key={idx} className="list-disc">
@@ -254,7 +260,9 @@ const DivergencePointCard = ({
         divergencePoint.underlyingValues &&
         divergencePoint.underlyingValues.length > 0 && (
           <div className="mt-4 pt-3 border-t border-gray-300">
-            <p className="text-xs text-gray-600 font-medium mb-2">Underlying values:</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2">
+              Underlying values:
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {divergencePoint.underlyingValues.map((value, idx) => (
                 <span

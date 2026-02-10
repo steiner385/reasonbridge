@@ -139,7 +139,7 @@ export function ResponseList({
       <Card variant="elevated" padding="lg">
         <div className="text-center text-red-600">
           <p className="font-medium">Failed to load responses</p>
-          <p className="text-sm text-gray-600 mt-1">{error.message}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{error.message}</p>
         </div>
       </Card>
     );
@@ -148,7 +148,7 @@ export function ResponseList({
   if (!responses || responses.length === 0) {
     return (
       <Card variant="outlined" padding="lg">
-        <div className="text-center text-gray-600 py-8">
+        <div className="text-center text-gray-600 dark:text-gray-400 py-8">
           <svg
             className="mx-auto h-12 w-12 text-gray-400 mb-4"
             fill="none"

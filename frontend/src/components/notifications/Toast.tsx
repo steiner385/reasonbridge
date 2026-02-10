@@ -80,7 +80,7 @@ export function Toast({ id, type, title, message, duration = 5000, action, onClo
 
   return (
     <div
-      className={`${styles.bg} border ${styles.border} rounded-lg p-4 shadow-lg flex items-start gap-3 animate-in fade-in slide-in-from-right-5 duration-300`}
+      className={`${styles.bg} border ${styles.border} rounded-lg p-4 shadow-lg dark:shadow-gray-900/50 flex items-start gap-3 animate-in fade-in slide-in-from-right-5 duration-300`}
       role="alert"
       aria-live="assertive"
     >

@@ -111,7 +111,7 @@ export const FeedbackItem: React.FC<FeedbackItemProps> = ({
       </div>
 
       {/* Suggestion text */}
-      <p className="text-sm text-gray-800 mb-2">{item.suggestionText}</p>
+      <p className="text-sm text-gray-800 dark:text-gray-200 mb-2">{item.suggestionText}</p>
 
       {/* Expandable reasoning section */}
       <button
@@ -130,14 +130,16 @@ export const FeedbackItem: React.FC<FeedbackItemProps> = ({
         >
           {/* Reasoning */}
           <div className="mb-2">
-            <span className="text-xs font-medium text-gray-600">Why:</span>
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Why:</span>
             <p className="text-xs text-gray-700 mt-0.5">{item.reasoning}</p>
           </div>
 
           {/* Educational resources */}
           {hasResources && (
             <div>
-              <span className="text-xs font-medium text-gray-600">Learn more:</span>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Learn more:
+              </span>
               <ul className="mt-1 space-y-1">
                 {item.educationalResources!.links!.map((link, index) => (
                   <li key={index}>

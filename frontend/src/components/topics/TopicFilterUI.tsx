@@ -302,7 +302,9 @@ export function TopicFilterUI({
         {/* Active Filters Display */}
         {(filters.search || filters.status || filters.visibility || filters.tag) && (
           <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-gray-200">
-            <span className="text-xs font-medium text-gray-600">Active filters:</span>
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              Active filters:
+            </span>
             {filters.search && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
                 Search: "{filters.search}"

@@ -193,10 +193,10 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
           />
         </svg>
-        <h3 className="text-sm font-semibold text-gray-800">
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
           Potential Logical {fallacyFeedback.length === 1 ? 'Fallacy' : 'Fallacies'} Detected
         </h3>
-        <span className="text-xs text-gray-500">AI-powered analysis</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">AI-powered analysis</span>
       </div>
 
       <div className="space-y-3">
@@ -225,14 +225,14 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {Math.round(item.confidenceScore * 100)}% confident
                   </span>
                   {onDismiss && (
                     <button
                       type="button"
                       onClick={() => onDismiss(item.id)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                      className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors p-1"
                       aria-label="Dismiss warning"
                     >
                       <svg
@@ -254,12 +254,12 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
               </div>
 
               {/* Suggestion Text - "Curious peer" voice */}
-              <p className="text-sm text-gray-800 mb-2">{item.suggestionText}</p>
+              <p className="text-sm text-gray-800 dark:text-gray-200 mb-2">{item.suggestionText}</p>
 
               {/* Expandable Section */}
               <button
                 onClick={() => toggleExpanded(item.id)}
-                className="text-xs font-medium text-gray-600 underline hover:no-underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 rounded"
+                className="text-xs font-medium text-gray-600 dark:text-gray-400 underline hover:no-underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 rounded"
                 aria-expanded={isExpanded}
                 aria-controls={`fallacy-details-${item.id}`}
               >
@@ -269,33 +269,37 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
               {isExpanded && (
                 <div
                   id={`fallacy-details-${item.id}`}
-                  className="mt-3 pt-3 border-t border-gray-200"
+                  className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700"
                 >
                   {/* What is this fallacy? */}
                   <div className="mb-3">
-                    <h4 className="text-xs font-semibold text-gray-700 mb-1">
+                    <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                       What is {getFallacyName(item.subtype)}?
                     </h4>
-                    <p className="text-xs text-gray-600">{getFallacyDescription(item.subtype)}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {getFallacyDescription(item.subtype)}
+                    </p>
                   </div>
 
                   {/* AI Reasoning */}
                   {item.reasoning && (
                     <div className="mb-3">
-                      <h4 className="text-xs font-semibold text-gray-700 mb-1">
+                      <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         Why this was flagged
                       </h4>
-                      <p className="text-xs text-gray-600 italic">{item.reasoning}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 italic">
+                        {item.reasoning}
+                      </p>
                     </div>
                   )}
 
                   {/* Educational Resources */}
                   {showEducationalResources && item.educationalResources && (
                     <div className="mb-3">
-                      <h4 className="text-xs font-semibold text-gray-700 mb-1">
+                      <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         Educational Resources
                       </h4>
-                      <div className="text-xs text-gray-600">
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
                         {Object.entries(item.educationalResources).map(([key, value]) => (
                           <div key={key} className="mb-1">
                             <span className="font-medium">{key}:</span>{' '}
@@ -310,7 +314,7 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
                   {onAcknowledge && (
                     <button
                       onClick={() => onAcknowledge(item.id)}
-                      className="text-xs px-3 py-1.5 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors font-medium text-gray-700"
+                      className="text-xs px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-gray-700 dark:text-gray-300"
                       aria-label="Acknowledge this feedback"
                     >
                       I understand

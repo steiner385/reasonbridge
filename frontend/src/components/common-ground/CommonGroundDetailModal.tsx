@@ -138,7 +138,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
                 data-testid="proposition-item"
               >
-                <p className="text-gray-800 mb-3">{prop.text}</p>
+                <p className="text-gray-800 dark:text-gray-200 mb-3">{prop.text}</p>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-600 dark:text-gray-300">Agreement</span>
                   <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -215,7 +215,7 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
               data-testid="definition-item"
             >
-              <blockquote className="text-gray-800 italic border-l-4 border-purple-300 pl-3 mb-3">
+              <blockquote className="text-gray-800 dark:text-gray-200 italic border-l-4 border-purple-300 pl-3 mb-3">
                 "{def.definition}"
               </blockquote>
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">

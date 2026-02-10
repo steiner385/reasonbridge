@@ -78,7 +78,9 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
     );
 
     if (pending.length === 0) {
-      return <p className="text-sm text-gray-500 italic">No pending verifications</p>;
+      return (
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic">No pending verifications</p>
+      );
     }
 
     return (
@@ -87,10 +89,10 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
           <div key={verification.id} className="p-4 border border-blue-200 rounded-lg bg-blue-50">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">
+                <h4 className="font-medium text-gray-900 dark:text-gray-100">
                   {getVerificationTypeLabel(verification.type)}
                 </h4>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {getTimeRemaining(verification.expiresAt)}
                 </p>
               </div>
@@ -105,15 +107,21 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
   };
 
   return (
-    <Card className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <Card
+      className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 ${className}`}
+    >
       <div className="space-y-6">
         {/* Current Verification Level */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Current Verification Level</h3>
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Status</p>
-            <p className="text-2xl font-bold text-gray-900">{currentVerificationLevel}</p>
-            <p className="text-xs text-gray-500 mt-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            Current Verification Level
+          </h3>
+          <div className="p-4 bg-gray-50 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Status</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {currentVerificationLevel}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Upgrade your verification level to unlock enhanced features and increase trust within
               the community.
             </p>
@@ -122,14 +130,18 @@ export const VerificationStatusDisplay: React.FC<VerificationStatusDisplayProps>
 
         {/* Pending Verifications */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Pending Verifications</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            Pending Verifications
+          </h3>
           {renderPendingVerifications()}
         </div>
 
         {/* Verification Benefits */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Verification Benefits</h3>
-          <ul className="space-y-2 text-sm text-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            Verification Benefits
+          </h3>
+          <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <li className="flex items-start gap-3">
               <span className="text-green-600 font-bold mt-0.5">✓</span>
               <span>Build trust within the community</span>

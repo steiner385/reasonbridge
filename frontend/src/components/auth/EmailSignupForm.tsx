@@ -281,7 +281,7 @@ function EmailSignupForm({
         {formData.password && (
           <div className="mt-2" id="password-strength" aria-live="polite">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-gray-600">Password strength</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">Password strength</span>
               <span className={`text-xs font-medium ${currentStrength.textColor}`}>
                 {currentStrength.text}
               </span>

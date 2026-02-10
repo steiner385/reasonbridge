@@ -207,7 +207,9 @@ function TopicsPage() {
                       .map((page, idx, arr) => (
                         <div key={page} className="flex items-center">
                           {idx > 0 && arr[idx - 1] !== page - 1 && (
-                            <span className="px-2 text-gray-400 dark:text-gray-600">...</span>
+                            <span className="px-2 text-gray-400 dark:text-gray-600 dark:text-gray-400">
+                              ...
+                            </span>
                           )}
                           <Button
                             size="sm"

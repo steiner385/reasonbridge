@@ -124,7 +124,11 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
                   <span className={`text-xs font-semibold px-2 py-1 rounded ${styles.badge}`}>
                     {item.type}
                   </span>
-                  {item.subtype && <span className="text-xs text-gray-600">({item.subtype})</span>}
+                  {item.subtype && (
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      ({item.subtype})
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">
@@ -134,7 +138,7 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => onDismiss(item.id)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors"
                       aria-label="Dismiss feedback"
                     >
                       <svg
@@ -155,14 +159,16 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
                 </div>
               </div>
 
-              <p className="text-sm text-gray-800 mb-2">{item.suggestionText}</p>
+              <p className="text-sm text-gray-800 dark:text-gray-200 mb-2">{item.suggestionText}</p>
 
-              {item.reasoning && <p className="text-xs text-gray-600 italic">{item.reasoning}</p>}
+              {item.reasoning && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 italic">{item.reasoning}</p>
+              )}
 
               {item.educationalResources && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <p className="text-xs text-gray-500 mb-1">Educational Resources:</p>
-                  <div className="text-xs text-gray-600">
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
                     {Object.entries(item.educationalResources).map(([key, value]) => (
                       <div key={key} className="mb-1">
                         <span className="font-medium">{key}:</span>{' '}

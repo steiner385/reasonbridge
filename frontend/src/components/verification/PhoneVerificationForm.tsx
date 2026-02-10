@@ -66,10 +66,14 @@ export const PhoneVerificationForm: React.FC<PhoneVerificationFormProps> = ({
   const isValid = isValidPhoneNumber(phoneNumber);
 
   return (
-    <Card className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <Card
+      className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 ${className}`}
+    >
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Phone Verification</h3>
-        <p className="text-sm text-gray-600">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Phone Verification
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Enter your phone number to receive a verification code via SMS
         </p>
       </div>

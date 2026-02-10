@@ -103,7 +103,9 @@ export function ResponseItem({
           {/* Author and Timestamp */}
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="font-semibold text-gray-900">{response.author.displayName}</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                {response.author.displayName}
+              </span>
               <span className="text-sm text-gray-500">
                 <time dateTime={response.createdAt}>{formatDate(response.createdAt)}</time>
               </span>
@@ -119,7 +121,7 @@ export function ResponseItem({
 
         {/* Content */}
         <div className="prose prose-sm max-w-none mb-4">
-          <p className="text-gray-800 whitespace-pre-wrap">{response.content}</p>
+          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{response.content}</p>
         </div>
 
         {/* Citations */}
@@ -154,7 +156,7 @@ export function ResponseItem({
               variant="ghost"
               size="sm"
               onClick={handleReplyClick}
-              className="text-gray-600 hover:text-blue-600"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600"
             >
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

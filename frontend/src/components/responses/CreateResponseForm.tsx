@@ -193,9 +193,13 @@ export function CreateResponseForm({
           {citations.map((citation, index) => (
             <div key={index} className="flex items-start gap-2 p-2 bg-gray-50 rounded-md">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{citation.url}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                  {citation.url}
+                </p>
                 {citation.title && (
-                  <p className="text-sm text-gray-600 truncate">{citation.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                    {citation.title}
+                  </p>
                 )}
               </div>
               <button

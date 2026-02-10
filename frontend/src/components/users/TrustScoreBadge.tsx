@@ -151,7 +151,7 @@ const getVerificationColor = (
     default:
       return {
         bg: 'bg-gray-100',
-        text: 'text-gray-900',
+        text: 'text-gray-900 dark:text-gray-100',
         border: 'border-gray-300',
       };
   }
