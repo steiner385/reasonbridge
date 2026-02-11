@@ -13,7 +13,10 @@ import {
   ArrayMaxSize,
   Matches,
   IsBoolean,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { InitialPropositionDto } from '../../propositions/dto/create-proposition.dto.js';
 
 /**
  * DTO for creating a new discussion topic
@@ -84,4 +87,18 @@ export class CreateTopicDto {
   @IsOptional()
   @IsBoolean()
   isMatureContent?: boolean;
+
+  /**
+   * Initial propositions to create with the topic (0-10 propositions)
+   * Each proposition is a statement that frames a key position or claim
+   * Feature 016: Topic Management - Initial Propositions (T213)
+   */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10, {
+    message: 'Maximum 10 initial propositions allowed',
+  })
+  @ValidateNested({ each: true })
+  @Type(() => InitialPropositionDto)
+  initialPropositions?: InitialPropositionDto[];
 }
