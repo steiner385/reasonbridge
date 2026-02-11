@@ -23,6 +23,7 @@ import { MergeTopicsDto } from './dto/merge-topics.dto.js';
 import { TopicsSearchService } from './topics-search.service.js';
 import { SlugGeneratorService } from './slug-generator.service.js';
 import { TopicsEditService } from './topics-edit.service.js';
+import { PropositionsService } from '../propositions/propositions.service.js';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -33,6 +34,7 @@ export class TopicsService {
     private searchService: TopicsSearchService,
     private slugGenerator: SlugGeneratorService,
     private editService: TopicsEditService,
+    private propositionsService: PropositionsService,
   ) {}
 
   /**
@@ -355,6 +357,19 @@ export class TopicsService {
       // Log error but don't fail topic creation
       console.error(`Failed to create discussion for topic ${topic.id}:`, error);
       // In production, you might want to queue this for retry or alert monitoring
+    }
+
+    // Step 4.6: Create initial propositions if provided
+    // Feature 016: Topic Management - Initial Propositions (T213)
+    if (dto.initialPropositions && dto.initialPropositions.length > 0) {
+      try {
+        const statements = dto.initialPropositions.map((p) => p.statement);
+        await this.propositionsService.createInitialPropositions(topic.id, userId, statements);
+      } catch (error) {
+        // Log error but don't fail topic creation
+        console.error(`Failed to create initial propositions for topic ${topic.id}:`, error);
+        // In production, you might want to queue this for retry or alert monitoring
+      }
     }
 
     // Step 5: Invalidate topic listing cache
