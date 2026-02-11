@@ -21,6 +21,8 @@ import {
   TopicLinkDto,
 } from './dto/topic-link-suggestions.dto.js';
 import { BridgingSuggestionsResponseDto } from './dto/bridging-suggestions.dto.js';
+import { FramingSuggestionsRequestDto } from './dto/framing-suggestions.dto.js';
+import type { FramingSuggestionsResponseDto } from './dto/framing-suggestions.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -125,6 +127,40 @@ export class SuggestionsController {
       overallConsensusScore: result.overallConsensusScore,
       conflictAreas: result.conflictAreas,
       commonGroundAreas: result.commonGroundAreas,
+      confidenceScore: result.confidenceScore,
+      reasoning: result.reasoning,
+      attribution: 'AI Assistant',
+    };
+  }
+
+  /**
+   * Get framing suggestions for a topic
+   * POST /suggest/framing
+   *
+   * Analyzes title and description to suggest more neutral, clear, and inclusive framings
+   * Feature 016: Topic Management - AI Framing Suggestions (T215)
+   *
+   * @param dto Request containing title, description, and optional context
+   * @returns Framing suggestions with neutrality, clarity, and inclusivity scores
+   */
+  @Post('framing')
+  @HttpCode(HttpStatus.OK)
+  async suggestFraming(
+    @Body() dto: FramingSuggestionsRequestDto,
+  ): Promise<FramingSuggestionsResponseDto> {
+    const result = await this.suggestionsService.generateFramingSuggestions(
+      dto.title,
+      dto.description,
+      dto.context,
+    );
+
+    return {
+      originalTitle: result.originalTitle,
+      suggestedTitle: result.suggestedTitle,
+      suggestions: result.suggestions,
+      neutralityScore: result.neutralityScore,
+      clarityScore: result.clarityScore,
+      inclusivityScore: result.inclusivityScore,
       confidenceScore: result.confidenceScore,
       reasoning: result.reasoning,
       attribution: 'AI Assistant',

@@ -9,16 +9,23 @@ import { SuggestionsService } from '../services/suggestions.service.js';
 import { TagSuggester } from '../synthesizers/tag.suggester.js';
 import { TopicLinkSuggester } from '../synthesizers/topic-link.suggester.js';
 import { BridgingSuggester } from '../synthesizers/bridging.suggester.js';
+import { FramingSuggester } from '../synthesizers/framing.suggester.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 
 /**
  * Module for AI-powered suggestions functionality
- * Provides tag, topic-link, and bridging suggestion capabilities
+ * Provides tag, topic-link, bridging, and framing suggestion capabilities
  */
 @Module({
   imports: [PrismaModule],
   controllers: [SuggestionsController],
-  providers: [SuggestionsService, TagSuggester, TopicLinkSuggester, BridgingSuggester],
+  providers: [
+    SuggestionsService,
+    TagSuggester,
+    TopicLinkSuggester,
+    BridgingSuggester,
+    FramingSuggester,
+  ],
   exports: [SuggestionsService],
 })
 export class SuggestionsModule {}

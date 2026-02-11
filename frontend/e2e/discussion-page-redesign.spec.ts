@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
 
 /**
  * E2E tests for Discussion Page Redesign (User Story 1)
@@ -209,6 +210,9 @@ test.describe('Discussion Page - Topic Selection Flow', () => {
   });
 
   test('should redirect from /topics/:id to /discussions?topic=:id', async ({ page }) => {
+    // Mock API endpoints for this test since we use a fake topic ID
+    await mockAuthenticatedEndpoints(page);
+
     // Navigate to old topic detail URL
     await page.goto('/topics/test-topic-123');
 
@@ -616,6 +620,11 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     viewport: { width: 1024, height: 768 },
   });
 
+  test.beforeEach(async ({ page }) => {
+    // Mock API endpoints to avoid hitting real backend with fake topic IDs
+    await mockAuthenticatedEndpoints(page);
+  });
+
   test('should hide left panel by default on tablet', async ({ page }) => {
     await page.goto('/discussions?topic=test-topic-1');
 
@@ -756,6 +765,11 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
     viewport: { width: 375, height: 667 },
   });
 
+  test.beforeEach(async ({ page }) => {
+    // Mock API endpoints to avoid hitting real backend with fake topic IDs
+    await mockAuthenticatedEndpoints(page);
+  });
+
   test('should hide left panel by default on mobile', async ({ page }) => {
     await page.goto('/discussions?topic=test-topic-1');
 
@@ -878,6 +892,11 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
 });
 
 test.describe('Discussion Page - Real-Time Updates', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock API endpoints to avoid hitting real backend with fake topic IDs
+    await mockAuthenticatedEndpoints(page);
+  });
+
   test('should display new response notification banner when WebSocket message arrives', async ({
     page,
   }) => {
@@ -979,6 +998,11 @@ test.describe('Discussion Page - Real-Time Updates', () => {
 });
 
 test.describe('Discussion Page - Unsaved Changes', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock API endpoints to avoid hitting real backend with fake topic IDs
+    await mockAuthenticatedEndpoints(page);
+  });
+
   test('should warn when switching topics with unsaved changes', async ({ page }) => {
     await page.goto('/discussions?topic=test-topic-1');
 
@@ -1027,6 +1051,11 @@ test.describe('Discussion Page - Unsaved Changes', () => {
 });
 
 test.describe('Discussion Page - Keyboard Navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock API endpoints to avoid hitting real backend with fake topic IDs
+    await mockAuthenticatedEndpoints(page);
+  });
+
   test('should support Escape key to close modals and overlays', async ({ page }) => {
     await page.goto('/discussions?topic=test-topic-1');
 

@@ -13,6 +13,10 @@ import {
   BridgingSuggester,
   type BridgingSuggestionResult,
 } from '../synthesizers/bridging.suggester.js';
+import {
+  FramingSuggester,
+  type FramingSuggestionResult,
+} from '../synthesizers/framing.suggester.js';
 
 /**
  * Suggestion result from synthesizers
@@ -33,6 +37,7 @@ export class SuggestionsService {
     private readonly tagSuggester: TagSuggester,
     private readonly topicLinkSuggester: TopicLinkSuggester,
     private readonly bridgingSuggester: BridgingSuggester,
+    private readonly framingSuggester: FramingSuggester,
   ) {}
 
   /**
@@ -70,5 +75,22 @@ export class SuggestionsService {
    */
   async generateBridgingSuggestions(topicId: string): Promise<BridgingSuggestionResult> {
     return this.bridgingSuggester.suggest(topicId);
+  }
+
+  /**
+   * Generate framing suggestions for a topic
+   * Analyzes title and description to suggest more neutral, clear, and inclusive framings
+   * Feature 016: Topic Management - AI Framing Suggestions (T215)
+   * @param title The topic title to analyze
+   * @param description The topic description to analyze
+   * @param context Optional context about the topic
+   * @returns Framing suggestions with scores
+   */
+  async generateFramingSuggestions(
+    title: string,
+    description: string,
+    context?: string,
+  ): Promise<FramingSuggestionResult> {
+    return this.framingSuggester.suggest(title, description, context);
   }
 }
