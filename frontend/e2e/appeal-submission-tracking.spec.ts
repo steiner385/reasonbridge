@@ -1,4 +1,18 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * E2E Tests for Appeal Submission and Tracking
+ *
+ * Tests the complete appeal workflow:
+ * 1. Viewing appeal status on the appeals page
+ * 2. Filtering appeals by status
+ * 3. Viewing appeal details (expanding cards)
+ *
+ * Note: These tests require the full backend environment (E2E_DOCKER=true)
+ * because they test protected routes that require authentication.
  * T210 - E2E test for appeal submission and tracking
  *
  * Tests the complete user journey for submitting and tracking moderation appeals:
