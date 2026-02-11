@@ -15,7 +15,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { VerificationService } from './verification.service.js';
 import { VideoUploadService } from './video-upload.service.js';
@@ -72,9 +72,10 @@ export class VerificationController {
    */
   @Post('request')
   async requestVerification(
-    @CurrentUser() userId: string,
+    @CurrentUser() jwtPayload: JwtPayload,
     @Body() request: VerificationRequestDto,
   ): Promise<VerificationResponseDto> {
+    const userId = jwtPayload.sub;
     this.logger.debug(`Verification request from user ${userId}: type=${request.type}`);
     return this.verificationService.requestVerification(userId, request);
   }
@@ -106,9 +107,10 @@ export class VerificationController {
    */
   @Post('phone/request')
   async requestPhoneVerification(
-    @CurrentUser() userId: string,
+    @CurrentUser() jwtPayload: JwtPayload,
     @Body() dto: PhoneVerificationRequestDto,
   ) {
+    const userId = jwtPayload.sub;
     this.logger.debug(`Phone verification request from user ${userId}: phone=${dto.phoneNumber}`);
     return this.verificationService.requestPhoneVerification(userId, dto);
   }
@@ -140,7 +142,11 @@ export class VerificationController {
    * }
    */
   @Post('phone/verify')
-  async verifyPhoneOTP(@CurrentUser() userId: string, @Body() dto: PhoneVerificationVerifyDto) {
+  async verifyPhoneOTP(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Body() dto: PhoneVerificationVerifyDto,
+  ) {
+    const userId = jwtPayload.sub;
     this.logger.debug(
       `Phone verification attempt from user ${userId}: verification=${dto.verificationId}`,
     );
@@ -181,7 +187,11 @@ export class VerificationController {
    * }
    */
   @Post('video-upload-complete')
-  async confirmVideoUpload(@CurrentUser() userId: string, @Body() dto: VideoUploadCompleteDto) {
+  async confirmVideoUpload(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Body() dto: VideoUploadCompleteDto,
+  ) {
+    const userId = jwtPayload.sub;
     this.logger.debug(
       `Video upload confirmation from user ${userId}: verification=${dto.verificationId}`,
     );
@@ -200,8 +210,9 @@ export class VerificationController {
   @Get(':verificationId')
   async getVerificationStatus(
     @Param('verificationId') verificationId: string,
-    @CurrentUser() userId: string,
+    @CurrentUser() jwtPayload: JwtPayload,
   ) {
+    const userId = jwtPayload.sub;
     this.logger.debug(`User ${userId} checking verification status for ${verificationId}`);
 
     const verification = await this.verificationService.getVerification(verificationId);
@@ -230,7 +241,8 @@ export class VerificationController {
    * @returns Array of pending verification records
    */
   @Get('user/pending')
-  async getPendingVerifications(@CurrentUser() userId: string) {
+  async getPendingVerifications(@CurrentUser() jwtPayload: JwtPayload) {
+    const userId = jwtPayload.sub;
     this.logger.debug(`Fetching pending verifications for user ${userId}`);
     return this.verificationService.getPendingVerifications(userId);
   }
@@ -247,8 +259,9 @@ export class VerificationController {
   @Patch(':verificationId/complete')
   async completeVerification(
     @Param('verificationId') verificationId: string,
-    @CurrentUser() userId: string,
+    @CurrentUser() jwtPayload: JwtPayload,
   ) {
+    const userId = jwtPayload.sub;
     this.logger.debug(`Completing verification ${verificationId} for user ${userId}`);
     return this.verificationService.completeVerification(verificationId, userId);
   }
@@ -265,7 +278,11 @@ export class VerificationController {
    */
   @Post(':verificationId/re-verify')
   @HttpCode(HttpStatus.CREATED)
-  async reVerify(@Param('verificationId') verificationId: string, @CurrentUser() userId: string) {
+  async reVerify(
+    @Param('verificationId') verificationId: string,
+    @CurrentUser() jwtPayload: JwtPayload,
+  ) {
+    const userId = jwtPayload.sub;
     this.logger.debug(`User ${userId} initiating re-verification for ${verificationId}`);
 
     // Get original verification to determine type
@@ -288,7 +305,8 @@ export class VerificationController {
    * @returns Array of verification records
    */
   @Get('user/history')
-  async getVerificationHistory(@CurrentUser() userId: string) {
+  async getVerificationHistory(@CurrentUser() jwtPayload: JwtPayload) {
+    const userId = jwtPayload.sub;
     this.logger.debug(`Fetching verification history for user ${userId}`);
     return this.verificationService.getVerificationHistory(userId);
   }
