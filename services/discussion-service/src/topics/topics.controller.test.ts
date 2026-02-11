@@ -7,6 +7,7 @@ const createMockTopicsService = () => ({
   searchTopics: vi.fn(),
   getTopicById: vi.fn(),
   getCommonGroundAnalysis: vi.fn(),
+  createTopic: vi.fn(),
 });
 
 const createMockExportService = () => ({
@@ -239,6 +240,77 @@ describe('TopicsController', () => {
       } else {
         process.env['APP_BASE_URL'] = originalEnv;
       }
+    });
+  });
+
+  describe('createTopic', () => {
+    const createTopicDto = {
+      title: 'New Discussion Topic',
+      description: 'A detailed description of the topic',
+      tags: ['environment', 'policy'],
+    };
+
+    const createdTopic = {
+      id: 'new-topic-1',
+      title: 'New Discussion Topic',
+      description: 'A detailed description of the topic',
+      slug: 'new-discussion-topic',
+      creatorId: 'user-1',
+      status: 'SEEDING',
+      tags: [{ id: 'tag-1', name: 'environment', slug: 'environment' }],
+    };
+
+    it('should create a topic with user ID from header', async () => {
+      mockTopicsService.createTopic.mockResolvedValue(createdTopic);
+
+      const result = await controller.createTopic(createTopicDto as any, 'user-123', {});
+
+      expect(result).toEqual(createdTopic);
+      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-123', createTopicDto);
+    });
+
+    it('should create a topic with user ID from request object', async () => {
+      mockTopicsService.createTopic.mockResolvedValue(createdTopic);
+
+      const result = await controller.createTopic(createTopicDto as any, undefined, {
+        user: { id: 'user-456' },
+      });
+
+      expect(result).toEqual(createdTopic);
+      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-456', createTopicDto);
+    });
+
+    it('should prefer header user ID over request user ID', async () => {
+      mockTopicsService.createTopic.mockResolvedValue(createdTopic);
+
+      const result = await controller.createTopic(createTopicDto as any, 'header-user', {
+        user: { id: 'request-user' },
+      });
+
+      expect(result).toEqual(createdTopic);
+      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('header-user', createTopicDto);
+    });
+
+    it('should throw error when no user ID is available', async () => {
+      await expect(controller.createTopic(createTopicDto as any, undefined, {})).rejects.toThrow(
+        'User ID not found in request. Authentication required.',
+      );
+      expect(mockTopicsService.createTopic).not.toHaveBeenCalled();
+    });
+
+    it('should pass DTO to service correctly', async () => {
+      const fullDto = {
+        title: 'Test Topic',
+        description: 'Test description',
+        tags: ['tag1', 'tag2'],
+        visibility: 'PUBLIC',
+        evidenceStandards: 'STANDARD',
+      };
+      mockTopicsService.createTopic.mockResolvedValue(createdTopic);
+
+      await controller.createTopic(fullDto as any, 'user-1', {});
+
+      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-1', fullDto);
     });
   });
 });
