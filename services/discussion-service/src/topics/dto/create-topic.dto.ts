@@ -12,6 +12,7 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   Matches,
+  IsBoolean,
 } from 'class-validator';
 
 /**
@@ -75,4 +76,12 @@ export class CreateTopicDto {
     message: 'Evidence standards must be MINIMAL, STANDARD, or RIGOROUS',
   })
   evidenceStandards?: 'MINIMAL' | 'STANDARD' | 'RIGOROUS';
+
+  /**
+   * Flag for mature content (violence, sensitive topics)
+   * Defaults to false
+   */
+  @IsOptional()
+  @IsBoolean()
+  isMatureContent?: boolean;
 }

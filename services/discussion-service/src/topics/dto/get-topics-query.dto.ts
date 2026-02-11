@@ -3,8 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Type } from 'class-transformer';
-import { IsOptional, IsInt, Min, Max, IsEnum, IsString, IsUUID, IsArray } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsEnum,
+  IsString,
+  IsUUID,
+  IsArray,
+  IsBoolean,
+} from 'class-validator';
 
 /**
  * DTO for GET /topics endpoint with filtering and pagination
@@ -56,4 +66,13 @@ export class GetTopicsQueryDto {
   @IsOptional()
   @IsEnum(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc';
+
+  /**
+   * Exclude mature content topics from results
+   * Used for filtering content for minor users
+   */
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  excludeMatureContent?: boolean;
 }
