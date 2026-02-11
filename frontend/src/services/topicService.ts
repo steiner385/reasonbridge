@@ -34,6 +34,10 @@ export interface Topic {
   activatedAt: string | null;
   archivedAt: string | null;
   tags: Tag[];
+  /**
+   * Flag for mature content (violence, sensitive topics)
+   */
+  isMatureContent?: boolean;
 }
 
 export interface CreateTopicRequest {
@@ -42,6 +46,10 @@ export interface CreateTopicRequest {
   tags: string[];
   visibility?: 'PUBLIC' | 'PRIVATE' | 'UNLISTED';
   evidenceStandards?: 'MINIMAL' | 'STANDARD' | 'RIGOROUS';
+  /**
+   * Flag for mature content (violence, sensitive topics)
+   */
+  isMatureContent?: boolean;
 }
 
 export interface DuplicateSuggestion {

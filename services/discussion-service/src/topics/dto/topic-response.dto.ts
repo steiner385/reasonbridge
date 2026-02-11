@@ -25,6 +25,11 @@ export interface TopicResponseDto {
     name: string;
     slug: string;
   }[];
+  /**
+   * Flag indicating the topic contains mature content
+   * Used for content filtering for minor users
+   */
+  isMatureContent?: boolean;
 }
 
 export interface PaginatedTopicsResponseDto {

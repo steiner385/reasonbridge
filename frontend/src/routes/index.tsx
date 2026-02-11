@@ -25,7 +25,11 @@ import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import { ProtectedRoute } from '../components/auth';
-import { ConsentPendingPage, ConsentVerifyPage } from '../pages/ParentalConsent';
+import {
+  ConsentPendingPage,
+  ConsentVerifyPage,
+  ParentalDashboardPage,
+} from '../pages/ParentalConsent';
 
 /**
  * Redirect component for /topics/:id -> /discussions?topic=:id
@@ -131,6 +135,10 @@ export const routes: RouteObject[] = [
   {
     path: '/parental-consent/verify/:token',
     element: <ConsentVerifyPage />,
+  },
+  {
+    path: '/parental-dashboard/:token',
+    element: <ParentalDashboardPage />,
   },
   {
     path: '/admin/moderation',

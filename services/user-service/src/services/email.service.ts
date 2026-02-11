@@ -60,16 +60,19 @@ export class EmailService {
    */
   async sendParentalConsentEmail(params: ParentalConsentEmailParams): Promise<void> {
     const consentUrl = `${this.appBaseUrl}/parental-consent/verify/${params.consentToken}`;
+    const dashboardUrl = `${this.appBaseUrl}/parental-dashboard/${params.consentToken}`;
     const expiresFormatted = this.formatDate(params.expiresAt);
 
     const htmlBody = this.buildConsentEmailHtml(
       params.childDisplayName,
       consentUrl,
+      dashboardUrl,
       expiresFormatted,
     );
     const textBody = this.buildConsentEmailText(
       params.childDisplayName,
       consentUrl,
+      dashboardUrl,
       expiresFormatted,
     );
 
@@ -117,6 +120,7 @@ export class EmailService {
   private buildConsentEmailHtml(
     childDisplayName: string,
     consentUrl: string,
+    dashboardUrl: string,
     expiresFormatted: string,
   ): string {
     const currentYear = new Date().getFullYear();
@@ -158,6 +162,10 @@ export class EmailService {
         <li>You can withdraw consent at any time by contacting us</li>
       </ul>
     </div>
+    <h3>Parental Dashboard</h3>
+    <p>After granting consent, you can monitor your child's activity at any time:</p>
+    <p><a href="${dashboardUrl}" style="color: #4F46E5;">View Parental Dashboard</a></p>
+    <p>From the dashboard, you can also withdraw consent if needed.</p>
     <p>If you did not expect this email, please disregard this message.</p>
     <p>Best regards,<br>The ReasonBridge Team</p>
   </div>
@@ -172,6 +180,7 @@ export class EmailService {
   private buildConsentEmailText(
     childDisplayName: string,
     consentUrl: string,
+    dashboardUrl: string,
     expiresFormatted: string,
   ): string {
     const currentYear = new Date().getFullYear();
@@ -198,6 +207,11 @@ IMPORTANT:
 - This link expires on ${expiresFormatted}
 - Only click this link if you approve of ${childDisplayName} using ReasonBridge
 - You can withdraw consent at any time by contacting us
+
+PARENTAL DASHBOARD:
+After granting consent, you can monitor your child's activity at any time:
+${dashboardUrl}
+From the dashboard, you can also withdraw consent if needed.
 
 If you did not expect this email, please disregard this message.
 

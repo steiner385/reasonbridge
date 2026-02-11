@@ -275,4 +275,106 @@ export class ParentalConsentService {
 
     this.logger.log(`Parental consent withdrawn for user ${userId}`);
   }
+
+  /**
+   * Get child's activity summary by consent token
+   *
+   * @param token - The consent token from the parental consent email
+   * @returns Child activity summary including account info and activity stats
+   *
+   * @remarks
+   * This allows parents to view their child's activity without needing to log in.
+   * The token serves as authentication.
+   */
+  async getChildActivitySummary(
+    token: string,
+  ): Promise<import('./dto/child-activity.dto.js').ChildActivitySummaryDto> {
+    const consent = await this.prisma.parentalConsent.findUnique({
+      where: { consentToken: token },
+      include: {
+        user: {
+          select: {
+            id: true,
+            displayName: true,
+            createdAt: true,
+            parentConsentStatus: true,
+          },
+        },
+      },
+    });
+
+    if (!consent) {
+      throw new NotFoundException('Invalid consent token');
+    }
+
+    // Get activity statistics for the child
+    const [topicsParticipated, responsesPosted] = await Promise.all([
+      // Count unique topics where the child has posted responses
+      this.prisma.response
+        .groupBy({
+          by: ['topicId'],
+          where: { authorId: consent.userId },
+        })
+        .then((groups) => groups.length),
+      // Count total responses posted by the child
+      this.prisma.response.count({
+        where: { authorId: consent.userId },
+      }),
+    ]);
+
+    // Get last activity time from most recent response
+    const lastResponse = await this.prisma.response.findFirst({
+      where: { authorId: consent.userId },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+
+    return {
+      childDisplayName: consent.user.displayName || 'Anonymous User',
+      accountCreatedAt: consent.user.createdAt.toISOString(),
+      consentStatus: consent.user.parentConsentStatus as 'VERIFIED' | 'PENDING' | 'WITHDRAWN',
+      consentVerifiedAt: consent.verifiedAt?.toISOString(),
+      lastActivityAt: lastResponse?.createdAt?.toISOString(),
+      activitySummary: {
+        topicsParticipated,
+        responsesPosted,
+      },
+    };
+  }
+
+  /**
+   * Withdraw parental consent by token
+   *
+   * @param token - The consent token from the parental consent email
+   *
+   * @remarks
+   * This allows parents to withdraw consent without needing to log in.
+   * The token serves as authentication.
+   * After withdrawal, the child's access will be restricted.
+   */
+  async withdrawConsentByToken(token: string): Promise<void> {
+    const consent = await this.prisma.parentalConsent.findUnique({
+      where: { consentToken: token },
+      include: { user: { select: { id: true } } },
+    });
+
+    if (!consent) {
+      throw new NotFoundException('Invalid consent token');
+    }
+
+    this.logger.log(`Withdrawing parental consent via token for user ${consent.userId}`);
+
+    await this.prisma.$transaction([
+      this.prisma.parentalConsent.update({
+        where: { id: consent.id },
+        data: { withdrawnAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: consent.userId },
+        data: { parentConsentStatus: ParentConsentStatus.WITHDRAWN },
+      }),
+    ]);
+
+    this.logger.log(`Parental consent withdrawn via token for user ${consent.userId}`);
+  }
 }

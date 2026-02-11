@@ -36,6 +36,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
   );
   const [duplicates, setDuplicates] = useState<DuplicateSuggestion[]>([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [isMatureContent, setIsMatureContent] = useState(false);
 
   const {
     mutate: createTopic,
@@ -62,6 +63,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
     setEvidenceStandards('STANDARD');
     setDuplicates([]);
     setShowDuplicateWarning(false);
+    setIsMatureContent(false);
   };
 
   const handleAddTag = () => {
@@ -104,6 +106,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
       tags,
       visibility,
       evidenceStandards,
+      isMatureContent,
     });
   };
 
@@ -383,6 +386,30 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             <option value="STANDARD">Standard - Claims should be sourced</option>
             <option value="RIGOROUS">Rigorous - Academic-level citations required</option>
           </select>
+        </div>
+
+        {/* Mature Content Flag */}
+        <div className="flex items-start gap-3 mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+          <input
+            type="checkbox"
+            id="matureContent"
+            checked={isMatureContent}
+            onChange={(e) => setIsMatureContent(e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-orange-600 focus:ring-orange-500"
+          />
+          <div>
+            <label
+              htmlFor="matureContent"
+              className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer"
+            >
+              This topic contains mature content
+            </label>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Content involving violence, sensitive topics, or themes that may not be appropriate
+              for younger users. Mature content will be hidden from minors without verified parental
+              consent.
+            </p>
+          </div>
         </div>
       </form>
     </Modal>
