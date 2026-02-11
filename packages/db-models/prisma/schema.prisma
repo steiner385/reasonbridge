@@ -70,6 +70,7 @@ model User {
   // Feature 016: Topic Management
   topicEdits            TopicEdit[]           @relation("TopicEditor")
   topicMerges           TopicMerge[]          @relation("TopicMerger")
+  topicDrafts           TopicDraft[]          @relation("TopicDrafts")
   // Feature: Child-Friendly Mode
   parentalConsent       ParentalConsent?
 
@@ -252,6 +253,30 @@ model DiscussionTopic {
   @@index([status, visibility])
   @@index([isMatureContent])
   @@map("discussion_topics")
+}
+
+/// T212: Topic draft saving (Feature 016: Topic Management)
+/// Allows users to save work-in-progress topics before publishing
+model TopicDraft {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @map("user_id") @db.Uuid
+  title             String           @default("") @db.VarChar(200)
+  description       String           @default("") @db.Text
+  tags              String[]         @default([])
+  visibility        TopicVisibility  @default(PUBLIC)
+  evidenceStandards EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  isMatureContent   Boolean          @default(false) @map("is_mature_content")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  expiresAt         DateTime?        @map("expires_at") // Optional auto-deletion after 30 days
+
+  // Relations
+  user User @relation("TopicDrafts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([updatedAt(sort: Desc)])
+  @@index([expiresAt])
+  @@map("topic_drafts")
 }
 
 enum TopicStatus {
