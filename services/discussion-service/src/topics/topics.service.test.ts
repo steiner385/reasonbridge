@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TopicsService } from './topics.service.js';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 
 // Mock Prisma models with Decimal conversion
 const createMockPrismaService = () => ({
@@ -9,11 +9,33 @@ const createMockPrismaService = () => ({
     findMany: vi.fn(),
     findUnique: vi.fn(),
     count: vi.fn(),
+    create: vi.fn(),
   },
   commonGroundAnalysis: {
     findFirst: vi.fn(),
   },
+  tag: {
+    findFirst: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  discussion: {
+    create: vi.fn(),
+  },
 });
+
+// Mock Search Service
+const createMockSearchService = () => ({
+  isUniqueEnough: vi.fn().mockResolvedValue({ isUnique: true, suggestions: [] }),
+});
+
+// Mock Slug Generator
+const createMockSlugGenerator = () => ({
+  generateUniqueSlug: vi.fn().mockResolvedValue('test-topic-slug'),
+});
+
+// Mock Edit Service
+const createMockEditService = () => ({});
 
 // Mock Cache Manager
 const createMockCacheManager = () => ({
@@ -45,12 +67,24 @@ describe('TopicsService', () => {
   let service: TopicsService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockCacheManager: ReturnType<typeof createMockCacheManager>;
+  let mockSearchService: ReturnType<typeof createMockSearchService>;
+  let mockSlugGenerator: ReturnType<typeof createMockSlugGenerator>;
+  let mockEditService: ReturnType<typeof createMockEditService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockCacheManager = createMockCacheManager();
-    service = new TopicsService(mockPrisma as any, mockCacheManager as any);
+    mockSearchService = createMockSearchService();
+    mockSlugGenerator = createMockSlugGenerator();
+    mockEditService = createMockEditService();
+    service = new TopicsService(
+      mockPrisma as any,
+      mockCacheManager as any,
+      mockSearchService as any,
+      mockSlugGenerator as any,
+      mockEditService as any,
+    );
   });
 
   describe('getTopics', () => {
@@ -352,6 +386,145 @@ describe('TopicsService', () => {
       await service.invalidateCommonGroundCache('topic-1');
 
       expect(mockCacheManager.del).toHaveBeenCalledWith('common-ground:topic:topic-1:latest');
+    });
+  });
+
+  describe('createTopic', () => {
+    const createTopicDto = {
+      title: 'New Discussion Topic',
+      description: 'A detailed description of the topic',
+      tags: ['environment', 'policy'],
+    };
+
+    const createdTopic = {
+      id: 'new-topic-1',
+      title: 'New Discussion Topic',
+      description: 'A detailed description of the topic',
+      slug: 'new-discussion-topic',
+      creatorId: 'user-1',
+      status: 'SEEDING',
+      visibility: 'PUBLIC',
+      evidenceStandards: 'STANDARD',
+      minimumDiversityScore: { toNumber: () => 0.5 },
+      currentDiversityScore: null,
+      participantCount: 0,
+      responseCount: 0,
+      crossCuttingThemes: [],
+      createdAt: new Date('2026-02-10'),
+      activatedAt: null,
+      archivedAt: null,
+      lastActivityAt: new Date('2026-02-10'),
+      tags: [
+        { tag: { id: 'tag-1', name: 'environment', slug: 'environment' } },
+        { tag: { id: 'tag-2', name: 'policy', slug: 'policy' } },
+      ],
+    };
+
+    it('should create a topic successfully with new tags', async () => {
+      mockSearchService.isUniqueEnough.mockResolvedValue({ isUnique: true, suggestions: [] });
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('new-discussion-topic');
+      mockPrisma.tag.findFirst.mockResolvedValue(null);
+      mockPrisma.tag.create
+        .mockResolvedValueOnce({ id: 'tag-1', name: 'environment', slug: 'environment' })
+        .mockResolvedValueOnce({ id: 'tag-2', name: 'policy', slug: 'policy' });
+      mockPrisma.discussionTopic.create.mockResolvedValue(createdTopic);
+      mockPrisma.discussion.create.mockResolvedValue({ id: 'discussion-1' });
+
+      const result = await service.createTopic('user-1', createTopicDto);
+
+      expect(result.id).toBe('new-topic-1');
+      expect(result.title).toBe('New Discussion Topic');
+      expect(result.status).toBe('SEEDING');
+      expect(result.tags).toHaveLength(2);
+      expect(mockSearchService.isUniqueEnough).toHaveBeenCalledWith(
+        createTopicDto.title,
+        createTopicDto.description,
+        true,
+      );
+      expect(mockSlugGenerator.generateUniqueSlug).toHaveBeenCalledWith(createTopicDto.title);
+      expect(mockCacheManager.del).toHaveBeenCalledWith('topics:list');
+    });
+
+    it('should throw ConflictException when duplicate topics exist', async () => {
+      const duplicateSuggestions = [{ id: 'existing-1', title: 'Similar Topic', similarity: 0.85 }];
+      mockSearchService.isUniqueEnough.mockResolvedValue({
+        isUnique: false,
+        suggestions: duplicateSuggestions,
+      });
+
+      await expect(service.createTopic('user-1', createTopicDto)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(mockPrisma.discussionTopic.create).not.toHaveBeenCalled();
+    });
+
+    it('should reuse existing tags instead of creating new ones', async () => {
+      const existingTag = { id: 'existing-tag', name: 'environment', slug: 'environment' };
+      mockSearchService.isUniqueEnough.mockResolvedValue({ isUnique: true, suggestions: [] });
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('new-discussion-topic');
+      mockPrisma.tag.findFirst.mockResolvedValue(existingTag);
+      mockPrisma.discussionTopic.create.mockResolvedValue(createdTopic);
+      mockPrisma.discussion.create.mockResolvedValue({ id: 'discussion-1' });
+
+      await service.createTopic('user-1', createTopicDto);
+
+      expect(mockPrisma.tag.create).not.toHaveBeenCalled();
+      expect(mockPrisma.tag.update).toHaveBeenCalledWith({
+        where: { id: existingTag.id },
+        data: { usageCount: { increment: 1 } },
+      });
+    });
+
+    it('should handle discussion creation failure gracefully', async () => {
+      mockSearchService.isUniqueEnough.mockResolvedValue({ isUnique: true, suggestions: [] });
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('new-discussion-topic');
+      mockPrisma.tag.findFirst.mockResolvedValue(null);
+      mockPrisma.tag.create.mockResolvedValue({
+        id: 'tag-1',
+        name: 'environment',
+        slug: 'environment',
+      });
+      mockPrisma.discussionTopic.create.mockResolvedValue(createdTopic);
+      mockPrisma.discussion.create.mockRejectedValue(new Error('Discussion creation failed'));
+
+      // Topic creation should still succeed even if discussion creation fails
+      const result = await service.createTopic('user-1', createTopicDto);
+
+      expect(result.id).toBe('new-topic-1');
+    });
+
+    it('should invalidate cache after successful creation', async () => {
+      mockSearchService.isUniqueEnough.mockResolvedValue({ isUnique: true, suggestions: [] });
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('new-discussion-topic');
+      mockPrisma.tag.findFirst.mockResolvedValue(null);
+      mockPrisma.tag.create.mockResolvedValue({ id: 'tag-1', name: 'test', slug: 'test' });
+      mockPrisma.discussionTopic.create.mockResolvedValue(createdTopic);
+      mockPrisma.discussion.create.mockResolvedValue({ id: 'discussion-1' });
+
+      await service.createTopic('user-1', createTopicDto);
+
+      expect(mockCacheManager.del).toHaveBeenCalledWith('topics:list');
+    });
+
+    it('should use default values when optional fields not provided', async () => {
+      mockSearchService.isUniqueEnough.mockResolvedValue({ isUnique: true, suggestions: [] });
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('new-discussion-topic');
+      mockPrisma.tag.findFirst.mockResolvedValue(null);
+      mockPrisma.tag.create.mockResolvedValue({ id: 'tag-1', name: 'test', slug: 'test' });
+      mockPrisma.discussionTopic.create.mockResolvedValue(createdTopic);
+      mockPrisma.discussion.create.mockResolvedValue({ id: 'discussion-1' });
+
+      await service.createTopic('user-1', createTopicDto);
+
+      expect(mockPrisma.discussionTopic.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'SEEDING',
+            visibility: 'PUBLIC',
+            evidenceStandards: 'STANDARD',
+          }),
+        }),
+      );
     });
   });
 });
