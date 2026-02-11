@@ -5,7 +5,9 @@
 
 import { Module } from '@nestjs/common';
 import { TopicsController } from './topics.controller.js';
+import { TopicDraftsController } from './topic-drafts.controller.js';
 import { TopicsService } from './topics.service.js';
+import { TopicDraftsService } from './topic-drafts.service.js';
 import { CommonGroundExportService } from '../services/common-ground-export.service.js';
 import { TopicsSearchService } from './topics-search.service.js';
 import { SlugGeneratorService } from './slug-generator.service.js';
@@ -16,15 +18,16 @@ import { CacheModule } from '../cache/cache.module.js';
 
 @Module({
   imports: [PrismaModule, CacheModule],
-  controllers: [TopicsController],
+  controllers: [TopicsController, TopicDraftsController],
   providers: [
     TopicsService,
+    TopicDraftsService,
     CommonGroundExportService,
     TopicsSearchService,
     SlugGeneratorService,
     TopicsEditService,
     TopicsAnalyticsService,
   ],
-  exports: [TopicsService],
+  exports: [TopicsService, TopicDraftsService],
 })
 export class TopicsModule {}
