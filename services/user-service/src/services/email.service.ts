@@ -60,16 +60,19 @@ export class EmailService {
    */
   async sendParentalConsentEmail(params: ParentalConsentEmailParams): Promise<void> {
     const consentUrl = `${this.appBaseUrl}/parental-consent/verify/${params.consentToken}`;
+    const dashboardUrl = `${this.appBaseUrl}/parental-dashboard/${params.consentToken}`;
     const expiresFormatted = this.formatDate(params.expiresAt);
 
     const htmlBody = this.buildConsentEmailHtml(
       params.childDisplayName,
       consentUrl,
+      dashboardUrl,
       expiresFormatted,
     );
     const textBody = this.buildConsentEmailText(
       params.childDisplayName,
       consentUrl,
+      dashboardUrl,
       expiresFormatted,
     );
 
@@ -204,6 +207,11 @@ IMPORTANT:
 - This link expires on ${expiresFormatted}
 - Only click this link if you approve of ${childDisplayName} using ReasonBridge
 - You can withdraw consent at any time by contacting us
+
+PARENTAL DASHBOARD:
+After granting consent, you can monitor your child's activity at any time:
+${dashboardUrl}
+From the dashboard, you can also withdraw consent if needed.
 
 If you did not expect this email, please disregard this message.
 
