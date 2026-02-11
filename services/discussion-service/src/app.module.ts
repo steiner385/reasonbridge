@@ -13,6 +13,7 @@ import { VotesModule } from './votes/votes.module.js';
 import { AlignmentsModule } from './alignments/alignments.module.js';
 import { DiscussionsModule } from './discussions/discussions.module.js';
 import { PropositionsModule } from './propositions/propositions.module.js';
+import { TagsModule } from './tags/tags.module.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -50,6 +51,8 @@ import { PropositionsModule } from './propositions/propositions.module.js';
     // T016 - Discussion module (Feature 009)
     DiscussionsModule,
     PropositionsModule,
+    // T216 - Tag management (Feature 016)
+    TagsModule,
   ],
   controllers: [],
   providers: [],
