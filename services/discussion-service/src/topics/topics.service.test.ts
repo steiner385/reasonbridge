@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TopicsService } from './topics.service.js';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 
 // Mock Prisma models with Decimal conversion
 const createMockPrismaService = () => ({
@@ -10,6 +10,7 @@ const createMockPrismaService = () => ({
     findUnique: vi.fn(),
     count: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
   },
   commonGroundAnalysis: {
     findFirst: vi.fn(),
@@ -18,6 +19,10 @@ const createMockPrismaService = () => ({
     findFirst: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+  },
+  topicTag: {
+    deleteMany: vi.fn(),
+    createMany: vi.fn(),
   },
   discussion: {
     create: vi.fn(),
@@ -35,13 +40,18 @@ const createMockSlugGenerator = () => ({
 });
 
 // Mock Edit Service
-const createMockEditService = () => ({});
+const createMockEditService = () => ({
+  createEditRecord: vi.fn().mockResolvedValue({ id: 'edit-1' }),
+});
 
 // Mock Cache Manager
 const createMockCacheManager = () => ({
   get: vi.fn().mockResolvedValue(null),
   set: vi.fn().mockResolvedValue(undefined),
   del: vi.fn().mockResolvedValue(undefined),
+  stores: {
+    keys: vi.fn().mockReturnValue([]),
+  },
 });
 
 const createMockTopic = (overrides = {}) => ({
@@ -50,6 +60,8 @@ const createMockTopic = (overrides = {}) => ({
   description: 'Test Description',
   creatorId: 'user-1',
   status: 'ACTIVE',
+  visibility: 'PUBLIC',
+  slug: 'test-topic',
   evidenceStandards: 'STANDARD',
   minimumDiversityScore: { toNumber: () => 0.5 },
   currentDiversityScore: { toNumber: () => 0.7 },
@@ -59,6 +71,8 @@ const createMockTopic = (overrides = {}) => ({
   createdAt: new Date('2026-01-01'),
   activatedAt: new Date('2026-01-02'),
   archivedAt: null,
+  lastActivityAt: new Date('2026-01-02'),
+  isMatureContent: false,
   tags: [{ tag: { id: 'tag-1', name: 'Politics', slug: 'politics' } }],
   ...overrides,
 });
@@ -525,6 +539,228 @@ describe('TopicsService', () => {
           }),
         }),
       );
+    });
+  });
+
+  describe('updateTopic', () => {
+    const updateTopicDto = {
+      title: 'Updated Topic Title',
+      description: 'Updated description for the topic that is at least 50 characters long',
+      editReason: 'Fixing typos and improving clarity',
+    };
+
+    it('should update topic title and description', async () => {
+      const existingTopic = createMockTopic();
+      const updatedTopic = createMockTopic({
+        title: 'Updated Topic Title',
+        description: 'Updated description for the topic that is at least 50 characters long',
+        slug: 'updated-topic-title',
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('updated-topic-title');
+
+      const result = await service.updateTopic('topic-1', 'user-1', updateTopicDto, false);
+
+      expect(result.title).toBe('Updated Topic Title');
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalled();
+      expect(mockEditService.createEditRecord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          topicId: 'topic-1',
+          editorId: 'user-1',
+          previousTitle: 'Test Topic',
+          newTitle: 'Updated Topic Title',
+        }),
+      );
+    });
+
+    it('should throw NotFoundException when topic does not exist', async () => {
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.updateTopic('nonexistent-topic', 'user-1', updateTopicDto, false),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when non-owner/non-moderator tries to edit', async () => {
+      const existingTopic = createMockTopic({ creatorId: 'other-user' });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+
+      await expect(service.updateTopic('topic-1', 'user-1', updateTopicDto, false)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should allow moderator to edit any topic', async () => {
+      const existingTopic = createMockTopic({ creatorId: 'other-user' });
+      const updatedTopic = createMockTopic({
+        creatorId: 'other-user',
+        title: 'Updated Topic Title',
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('updated-topic-title');
+
+      const result = await service.updateTopic('topic-1', 'moderator-user', updateTopicDto, true);
+
+      expect(result.title).toBe('Updated Topic Title');
+    });
+
+    it('should throw BadRequestException when editing locked topic without moderator role', async () => {
+      const lockedTopic = createMockTopic({ status: 'LOCKED' });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(lockedTopic);
+
+      await expect(service.updateTopic('topic-1', 'user-1', updateTopicDto, false)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should allow moderator to edit locked topic', async () => {
+      const lockedTopic = createMockTopic({ status: 'LOCKED' });
+      const updatedTopic = createMockTopic({ status: 'LOCKED', title: 'Updated Topic Title' });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(lockedTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('updated-topic-title');
+
+      const result = await service.updateTopic('topic-1', 'user-1', updateTopicDto, true);
+
+      expect(result.title).toBe('Updated Topic Title');
+    });
+
+    it('should require edit reason for topics older than 24 hours', async () => {
+      const oldTopic = createMockTopic({
+        createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
+      });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(oldTopic);
+
+      await expect(
+        service.updateTopic('topic-1', 'user-1', { title: 'New Title' }, false),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should not require edit reason for topics less than 24 hours old', async () => {
+      const newTopic = createMockTopic({
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+      });
+      const updatedTopic = createMockTopic({ title: 'New Title' });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(newTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('new-title');
+
+      const result = await service.updateTopic('topic-1', 'user-1', { title: 'New Title' }, false);
+
+      expect(result.title).toBe('New Title');
+    });
+
+    it('should regenerate slug when title changes', async () => {
+      const existingTopic = createMockTopic();
+      const updatedTopic = createMockTopic({
+        title: 'Completely Different Title',
+        slug: 'completely-different-title',
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('completely-different-title');
+
+      await service.updateTopic(
+        'topic-1',
+        'user-1',
+        { title: 'Completely Different Title', editReason: 'Changing title' },
+        false,
+      );
+
+      expect(mockSlugGenerator.generateUniqueSlug).toHaveBeenCalledWith(
+        'Completely Different Title',
+      );
+    });
+
+    it('should update visibility', async () => {
+      const existingTopic = createMockTopic();
+      const updatedTopic = createMockTopic({ visibility: 'PRIVATE' });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+
+      const result = await service.updateTopic(
+        'topic-1',
+        'user-1',
+        { visibility: 'PRIVATE', editReason: 'Making private' },
+        false,
+      );
+
+      expect(result.visibility).toBe('PRIVATE');
+    });
+
+    it('should handle tag updates', async () => {
+      const existingTopic = createMockTopic();
+      const updatedTopic = createMockTopic({
+        tags: [
+          { tag: { id: 'tag-2', name: 'science', slug: 'science' } },
+          { tag: { id: 'tag-3', name: 'technology', slug: 'technology' } },
+        ],
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.tag.findFirst.mockResolvedValue(null);
+      mockPrisma.tag.create
+        .mockResolvedValueOnce({ id: 'tag-2', name: 'science', slug: 'science' })
+        .mockResolvedValueOnce({ id: 'tag-3', name: 'technology', slug: 'technology' });
+      mockPrisma.topicTag.deleteMany.mockResolvedValue({ count: 1 });
+      mockPrisma.topicTag.createMany.mockResolvedValue({ count: 2 });
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+
+      const result = await service.updateTopic(
+        'topic-1',
+        'user-1',
+        { tags: ['science', 'technology'], editReason: 'Updating tags' },
+        false,
+      );
+
+      expect(result.tags).toHaveLength(2);
+      expect(mockPrisma.topicTag.deleteMany).toHaveBeenCalledWith({
+        where: { topicId: 'topic-1' },
+      });
+    });
+
+    it('should invalidate cache after update', async () => {
+      const existingTopic = createMockTopic();
+      const updatedTopic = createMockTopic({ title: 'Updated Title' });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(updatedTopic);
+      mockSlugGenerator.generateUniqueSlug.mockResolvedValue('updated-title');
+
+      await service.updateTopic(
+        'topic-1',
+        'user-1',
+        { title: 'Updated Title', editReason: 'Updating' },
+        false,
+      );
+
+      expect(mockCacheManager.del).toHaveBeenCalledWith('topics:list');
+    });
+
+    it('should not create edit record when no changes are made', async () => {
+      const existingTopic = createMockTopic();
+      const sameTopic = createMockTopic();
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(existingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(sameTopic);
+
+      // Explicitly provide same visibility to avoid false-positive change detection
+      await service.updateTopic(
+        'topic-1',
+        'user-1',
+        { title: 'Test Topic', visibility: 'PUBLIC', editReason: 'No real changes' },
+        false,
+      );
+
+      expect(mockEditService.createEditRecord).not.toHaveBeenCalled();
     });
   });
 });
