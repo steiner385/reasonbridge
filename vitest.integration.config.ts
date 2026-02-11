@@ -35,8 +35,6 @@ export default defineConfig({
         __dirname,
         'packages/testing-utils/dist/msw/index.js',
       ),
-      // Prisma client alias - let Node resolve it from node_modules
-      '@prisma/client': resolve(__dirname, 'node_modules/@prisma/client'),
     },
   },
   optimizeDeps: {
@@ -59,6 +57,7 @@ export default defineConfig({
           /^@reason-bridge\//,
           // Prisma client - needs inlining for proper ESM resolution
           '@prisma/client',
+          '.prisma/client',
         ],
       },
     },
