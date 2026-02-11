@@ -19,6 +19,11 @@ export enum UserStatus {
   BANNED = 'BANNED',
 }
 
+/**
+ * Parental consent status for minor users
+ */
+export type ParentConsentStatus = 'NOT_REQUIRED' | 'PENDING' | 'VERIFIED' | 'WITHDRAWN';
+
 export interface User {
   id: string;
   email: string;
@@ -44,6 +49,16 @@ export interface UserProfile extends User {
   topicCount?: number;
   responseCount?: number;
   avatarUrl?: string;
+
+  /**
+   * Whether the user is a minor (under age of consent in their region)
+   */
+  isMinor?: boolean;
+
+  /**
+   * Parental consent status for minor users
+   */
+  parentConsentStatus?: ParentConsentStatus;
 }
 
 export interface UserSummary {

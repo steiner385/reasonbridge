@@ -117,6 +117,7 @@ export class EmailService {
   private buildConsentEmailHtml(
     childDisplayName: string,
     consentUrl: string,
+    dashboardUrl: string,
     expiresFormatted: string,
   ): string {
     const currentYear = new Date().getFullYear();
@@ -158,6 +159,10 @@ export class EmailService {
         <li>You can withdraw consent at any time by contacting us</li>
       </ul>
     </div>
+    <h3>Parental Dashboard</h3>
+    <p>After granting consent, you can monitor your child's activity at any time:</p>
+    <p><a href="${dashboardUrl}" style="color: #4F46E5;">View Parental Dashboard</a></p>
+    <p>From the dashboard, you can also withdraw consent if needed.</p>
     <p>If you did not expect this email, please disregard this message.</p>
     <p>Best regards,<br>The ReasonBridge Team</p>
   </div>
@@ -172,6 +177,7 @@ export class EmailService {
   private buildConsentEmailText(
     childDisplayName: string,
     consentUrl: string,
+    dashboardUrl: string,
     expiresFormatted: string,
   ): string {
     const currentYear = new Date().getFullYear();

@@ -30,6 +30,11 @@ export interface Topic {
     name: string;
     slug: string;
   }[];
+  /**
+   * Flag indicating the topic contains mature content
+   * Hidden from minors without verified parental consent
+   */
+  isMatureContent?: boolean;
 }
 
 export interface PaginatedTopicsResponse {
@@ -53,4 +58,9 @@ export interface GetTopicsParams {
   limit?: number;
   sortBy?: 'createdAt' | 'participantCount' | 'responseCount';
   sortOrder?: 'asc' | 'desc';
+  /**
+   * Exclude mature content topics from results
+   * Used for content filtering for minor users
+   */
+  excludeMatureContent?: boolean;
 }

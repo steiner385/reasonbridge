@@ -58,6 +58,11 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
           <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(topic.status)}`}>
             {topic.status}
           </span>
+          {topic.isMatureContent && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+              Mature
+            </span>
+          )}
           <span className="text-xs text-gray-500 dark:text-gray-300">
             {new Date(topic.createdAt).toLocaleDateString()}
           </span>

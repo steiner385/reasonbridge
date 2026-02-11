@@ -10,6 +10,7 @@ import { ComplianceService } from './compliance.service.js';
 import { AgeVerificationService } from './age-verification.service.js';
 import { ParentalConsentService } from './parental-consent.service.js';
 import { ParentalConsentController } from './parental-consent.controller.js';
+import { ParentalDashboardController } from './parental-dashboard.controller.js';
 import { EmailService } from '../services/email.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
  * - Minor status determination
  * - Parental consent tracking and verification
  * - Consent email sending via SES
+ * - Parental dashboard for viewing child activity
  */
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
       signOptions: { algorithm: 'RS256' },
     }),
   ],
-  controllers: [ParentalConsentController],
+  controllers: [ParentalConsentController, ParentalDashboardController],
   providers: [
     ComplianceService,
     AgeVerificationService,

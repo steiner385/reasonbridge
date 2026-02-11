@@ -12,7 +12,7 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   Matches,
-  ValidateIf,
+  IsBoolean,
 } from 'class-validator';
 
 /**
@@ -89,4 +89,11 @@ export class UpdateTopicDto {
    */
   @IsOptional()
   flagForReview?: boolean;
+
+  /**
+   * Flag for mature content (violence, sensitive topics)
+   */
+  @IsOptional()
+  @IsBoolean()
+  isMatureContent?: boolean;
 }

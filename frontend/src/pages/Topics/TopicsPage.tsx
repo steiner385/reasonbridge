@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useTopics } from '../../lib/useTopics';
+import { useFilteredTopics } from '../../lib/useFilteredTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import { useAuthContext } from '../../contexts/AuthContext';
 import Card from '../../components/ui/Card';
@@ -29,7 +29,7 @@ function TopicsPage() {
     sortOrder: 'desc',
   });
 
-  const { data, isLoading, error } = useTopics(filters);
+  const { data, isLoading, error } = useFilteredTopics(filters);
   const showSkeleton = useDelayedLoading(isLoading);
 
   // Check for welcome param and dismissed state

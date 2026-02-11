@@ -51,6 +51,7 @@ export class TopicsService {
       limit = 20,
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      excludeMatureContent,
     } = query;
 
     // Generate cache key based on query parameters
@@ -75,6 +76,11 @@ export class TopicsService {
 
     if (creatorId) {
       where.creatorId = creatorId;
+    }
+
+    // Filter out mature content if requested (for minor users)
+    if (excludeMatureContent === true) {
+      where.isMatureContent = false;
     }
 
     // Handle single tag or multiple tags
@@ -175,6 +181,7 @@ export class TopicsService {
       activatedAt: topic.activatedAt,
       archivedAt: topic.archivedAt,
       tags: topic.tags.map((tt) => tt.tag),
+      isMatureContent: topic.isMatureContent,
     }));
 
     const result = {
@@ -233,6 +240,7 @@ export class TopicsService {
       activatedAt: topic.activatedAt,
       archivedAt: topic.archivedAt,
       tags: topic.tags.map((tt) => tt.tag),
+      isMatureContent: topic.isMatureContent,
     };
   }
 
@@ -309,6 +317,7 @@ export class TopicsService {
         visibility: dto.visibility || 'PUBLIC',
         evidenceStandards: dto.evidenceStandards || 'STANDARD',
         lastActivityAt: new Date(),
+        isMatureContent: dto.isMatureContent || false,
         tags: {
           create: tagRecords.map((tag) => ({
             tagId: tag.id,
@@ -370,6 +379,7 @@ export class TopicsService {
       activatedAt: topic.activatedAt,
       archivedAt: topic.archivedAt,
       tags: topic.tags.map((tt) => tt.tag),
+      isMatureContent: topic.isMatureContent,
     };
   }
 
@@ -432,6 +442,7 @@ export class TopicsService {
       activatedAt: topic.activatedAt,
       archivedAt: topic.archivedAt,
       tags: topic.tags.map((tt) => tt.tag),
+      isMatureContent: topic.isMatureContent,
     }));
 
     return {
@@ -669,6 +680,7 @@ export class TopicsService {
       activatedAt: updatedTopic.activatedAt,
       archivedAt: updatedTopic.archivedAt,
       tags: updatedTopic.tags.map((tt) => tt.tag),
+      isMatureContent: updatedTopic.isMatureContent,
     };
   }
 
@@ -894,6 +906,7 @@ export class TopicsService {
       activatedAt: updatedTopic.activatedAt,
       archivedAt: updatedTopic.archivedAt,
       tags: updatedTopic.tags.map((tt) => tt.tag),
+      isMatureContent: updatedTopic.isMatureContent,
     };
   }
 

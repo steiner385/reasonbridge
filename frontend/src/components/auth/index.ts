@@ -12,5 +12,7 @@ export type { LoginFormProps, LoginFormData } from './LoginForm';
 export { ProtectedRoute } from './ProtectedRoute';
 export type { ProtectedRouteProps } from './ProtectedRoute';
 
+export { ConsentRequiredRoute } from './ConsentRequiredRoute';
+
 export { SessionExpirationModal } from './SessionExpirationModal';
 export type { SessionExpirationModalProps } from './SessionExpirationModal';
