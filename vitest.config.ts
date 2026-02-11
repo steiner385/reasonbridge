@@ -110,9 +110,5 @@ export default defineConfig({
     outputFile: {
       junit: './coverage/junit.xml',
     },
-    // Handle pnpm workspace symlinks and Prisma client resolution
-    deps: {
-      inline: ['@prisma/client', /^@reason-bridge\/.*/],
-    },
   },
 });

@@ -20,20 +20,47 @@ import { resolve } from 'path';
 export default defineConfig({
   resolve: {
     alias: {
-      // Workspace packages - resolve to source for better test experience
-      '@reason-bridge/common': resolve(__dirname, 'packages/common/src'),
-      '@reason-bridge/shared': resolve(__dirname, 'packages/shared/src'),
-      '@reason-bridge/db-models': resolve(__dirname, 'packages/db-models/src'),
-      '@reason-bridge/event-schemas': resolve(__dirname, 'packages/event-schemas/src'),
-      '@reason-bridge/ai-client': resolve(__dirname, 'packages/ai-client/src'),
-      '@reason-bridge/testing-utils': resolve(__dirname, 'packages/testing-utils/src'),
+      // Workspace packages - resolve to dist for proper module resolution
+      '@reason-bridge/common': resolve(__dirname, 'packages/common/dist/index.js'),
+      '@reason-bridge/shared': resolve(__dirname, 'packages/shared/dist/index.js'),
+      '@reason-bridge/db-models': resolve(__dirname, 'packages/db-models/dist/index.js'),
+      '@reason-bridge/event-schemas': resolve(__dirname, 'packages/event-schemas/dist/index.js'),
+      '@reason-bridge/ai-client': resolve(__dirname, 'packages/ai-client/dist/index.js'),
+      '@reason-bridge/testing-utils': resolve(__dirname, 'packages/testing-utils/dist/index.js'),
+      '@reason-bridge/testing-utils/setup': resolve(
+        __dirname,
+        'packages/testing-utils/dist/setup/index.js',
+      ),
+      '@reason-bridge/testing-utils/msw': resolve(
+        __dirname,
+        'packages/testing-utils/dist/msw/index.js',
+      ),
     },
+  },
+  optimizeDeps: {
+    include: ['@prisma/client'],
+  },
+  ssr: {
+    // Don't externalize these packages - bundle them
+    noExternal: [/^@reason-bridge\//, '@prisma/client'],
   },
   test: {
     globals: true,
     environment: 'node',
     // Load test environment variables
     envFile: '.env.test',
+    // Vitest 2.x: Inline dependencies for proper module resolution in pnpm workspaces
+    server: {
+      deps: {
+        inline: [
+          // Workspace packages
+          /^@reason-bridge\//,
+          // Prisma client - needs inlining for proper ESM resolution
+          '@prisma/client',
+          '.prisma/client',
+        ],
+      },
+    },
     include: [
       'packages/**/tests/integration/**/*.test.ts',
       'services/**/tests/integration/**/*.test.ts',
