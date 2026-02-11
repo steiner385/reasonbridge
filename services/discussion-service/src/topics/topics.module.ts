@@ -18,7 +18,7 @@ import { CacheModule } from '../cache/cache.module.js';
 import { PropositionsModule } from '../propositions/propositions.module.js';
 
 @Module({
-  imports: [PrismaModule, CacheModule],
+  imports: [PrismaModule, CacheModule, PropositionsModule],
   controllers: [TopicsController, TopicDraftsController],
   providers: [
     TopicsService,
