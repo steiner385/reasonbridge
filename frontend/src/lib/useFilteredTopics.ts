@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
-import { useTopics } from './useTopics';
-import { useAuthContext } from '../contexts/AuthContext';
 import type { GetTopicsParams } from '../types/topic';
+import { useMemo } from 'react';
+import { useAuthContext } from '../contexts/AuthContext';
+import { useTopics } from './useTopics';
 
 /**
  * Hook that wraps useTopics with automatic mature content filtering for minors
