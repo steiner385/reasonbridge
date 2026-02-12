@@ -13,7 +13,7 @@
  * - Visibility and evidence standards selection
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { useCreateTopic } from '../../hooks/useCreateTopic';
@@ -40,7 +40,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
   const [duplicates, setDuplicates] = useState<DuplicateSuggestion[]>([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const [isMatureContent, setIsMatureContent] = useState(false);
-  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [draftPromptDismissed, setDraftPromptDismissed] = useState(false);
 
   // Draft auto-save functionality
   const { hasDraft, saveStatus, lastSavedAt, updateDraft, clearDraft, restoreDraft } =
@@ -63,12 +63,11 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
       },
     });
 
-  // Check for existing draft when modal opens
-  useEffect(() => {
-    if (isOpen && hasDraft) {
-      setShowDraftPrompt(true);
-    }
-  }, [isOpen, hasDraft]);
+  // Derive draft prompt visibility from existing state (avoids setState in effect)
+  const showDraftPrompt = useMemo(
+    () => isOpen && hasDraft && !draftPromptDismissed,
+    [isOpen, hasDraft, draftPromptDismissed],
+  );
 
   // Update draft when form fields change
   useEffect(() => {
@@ -112,18 +111,18 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
     setDuplicates([]);
     setShowDuplicateWarning(false);
     setIsMatureContent(false);
-    setShowDraftPrompt(false);
+    setDraftPromptDismissed(false);
     clearDraft();
   };
 
   const handleRestoreDraft = () => {
     restoreDraft();
-    setShowDraftPrompt(false);
+    setDraftPromptDismissed(true);
   };
 
   const handleDiscardDraft = () => {
     clearDraft();
-    setShowDraftPrompt(false);
+    setDraftPromptDismissed(true);
   };
 
   const handleSubmit = (e: React.FormEvent, ignoreWarning = false) => {
@@ -279,7 +278,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
                   ))}
                 </div>
                 <p className="text-xs text-yellow-600 mt-3">
-                  If your topic is truly unique, click "Create Anyway" to proceed.
+                  If your topic is truly unique, click &quot;Create Anyway&quot; to proceed.
                 </p>
               </div>
             </div>

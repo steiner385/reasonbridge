@@ -131,8 +131,14 @@ export function useTopicDraft(options: UseTopicDraftOptions = {}): UseTopicDraft
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Track if draft exists in storage
-  const [hasDraft, setHasDraft] = useState(false);
+  // Track if draft exists in storage (lazy initialization)
+  const [hasDraft, setHasDraft] = useState(() => {
+    try {
+      return localStorage.getItem(storageKey) !== null;
+    } catch {
+      return false;
+    }
+  });
 
   // Ref to track initial mount
   const isInitialMount = useRef(true);
@@ -140,17 +146,9 @@ export function useTopicDraft(options: UseTopicDraftOptions = {}): UseTopicDraft
   // Debounce draft data for auto-save
   const debouncedDraft = useDebounce(draftData, debounceDelay);
 
-  // Check for existing draft on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      setHasDraft(saved !== null);
-    } catch {
-      setHasDraft(false);
-    }
-  }, [storageKey]);
-
   // Auto-save when debounced draft changes
+  // Note: setState in effect is intentional for auto-save status updates
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     // Skip initial mount
     if (isInitialMount.current) {
@@ -193,6 +191,7 @@ export function useTopicDraft(options: UseTopicDraftOptions = {}): UseTopicDraft
       return undefined;
     }
   }, [debouncedDraft, storageKey, minContentLength]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /**
    * Update draft data (triggers debounced save)

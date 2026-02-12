@@ -449,7 +449,7 @@ export function TagSelector({
                             d="M12 4v16m8-8H4"
                           />
                         </svg>
-                        Create "{option.name}"
+                        Create &quot;{option.name}&quot;
                       </span>
                     ) : (
                       <span className="flex items-center justify-between">

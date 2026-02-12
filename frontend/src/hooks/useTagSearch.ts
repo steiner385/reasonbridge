@@ -10,8 +10,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Tag } from '../types/tag';
-import { useDebounce } from './useDebounce';
 import { tagService } from '../services/tagService';
+import { useDebounce } from './useDebounce';
 
 export interface UseTagSearchOptions {
   /** Minimum characters before triggering search (default: 2) */
