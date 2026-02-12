@@ -43,9 +43,11 @@ const createWrapper = () => {
   });
   // Clear any cached queries
   queryClient.clear();
-  return ({ children }: { children: ReactNode }) => (
+  const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'TestQueryClientWrapper';
+  return Wrapper;
 };
 
 const createMockTopicData = (overrides: Partial<TopicFeedbackData> = {}): TopicFeedbackData => ({
