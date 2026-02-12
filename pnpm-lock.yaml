@@ -842,6 +842,12 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
+      class-validator:
+        specifier: ^0.14.2
+        version: 0.14.3
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
