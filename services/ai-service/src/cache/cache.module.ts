@@ -96,6 +96,6 @@ const logger = new Logger('CacheModule');
     RedisCacheService,
     SemanticCacheService,
   ],
-  exports: [SemanticCacheService, RedisCacheService, NestCacheModule],
+  exports: [EmbeddingService, SemanticCacheService, RedisCacheService, NestCacheModule],
 })
 export class CacheModule {}
