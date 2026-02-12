@@ -12,7 +12,11 @@ ARGS="$@"
 # and vitest runs tests in parallel across all workspaces
 if [ -f "packages/db-models/prisma/schema.prisma" ]; then
     echo "Ensuring Prisma client is generated..."
-    pnpm --filter @reason-bridge/db-models exec prisma generate 2>/dev/null || true
+    # Try pnpm filter first, fallback to running from the package directory
+    if ! pnpm --filter @reason-bridge/db-models exec prisma generate; then
+        echo "pnpm filter failed, trying direct approach..."
+        (cd packages/db-models && npx prisma generate) || echo "Prisma generate failed, tests may fail"
+    fi
 fi
 
 echo "Running unit tests via Vitest workspaces..."
