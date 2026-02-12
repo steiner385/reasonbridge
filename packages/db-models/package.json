@@ -24,6 +24,7 @@
     "clean": "rm -rf dist .tsbuildinfo",
     "typecheck": "tsc --noEmit",
     "dev": "tsc --watch",
+    "pretest": "prisma generate 2>/dev/null || true",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
