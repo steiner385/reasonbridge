@@ -20,6 +20,7 @@
     "prisma"
   ],
   "scripts": {
+    "postinstall": "prisma generate",
     "build": "prisma generate && tsc --build",
     "clean": "rm -rf dist .tsbuildinfo",
     "typecheck": "tsc --noEmit",
