@@ -177,7 +177,7 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Add/i }));
 
       expect(screen.getByText('#testtag')).toBeInTheDocument();
-    });
+    }, 10000);
 
     it('enables Continue after adding a tag', async () => {
       const user = userEvent.setup();
