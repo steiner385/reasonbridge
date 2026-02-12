@@ -763,4 +763,226 @@ describe('TopicsService', () => {
       expect(mockEditService.createEditRecord).not.toHaveBeenCalled();
     });
   });
+
+  describe('updateTopicStatus', () => {
+    it('should update topic status from SEEDING to ACTIVE as creator', async () => {
+      const seedingTopic = createMockTopic({
+        status: 'SEEDING',
+        activatedAt: null,
+      });
+      const activeTopic = createMockTopic({
+        status: 'ACTIVE',
+        activatedAt: new Date(),
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(seedingTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(activeTopic);
+
+      const result = await service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false);
+
+      expect(result.status).toBe('ACTIVE');
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'ACTIVE',
+            activatedAt: expect.any(Date),
+          }),
+        }),
+      );
+    });
+
+    it('should update topic status from ACTIVE to ARCHIVED as creator', async () => {
+      const activeTopic = createMockTopic({ status: 'ACTIVE' });
+      const archivedTopic = createMockTopic({
+        status: 'ARCHIVED',
+        archivedAt: new Date(),
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(archivedTopic);
+
+      const result = await service.updateTopicStatus('topic-1', 'user-1', 'ARCHIVED', false);
+
+      expect(result.status).toBe('ARCHIVED');
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'ARCHIVED',
+            archivedAt: expect.any(Date),
+          }),
+        }),
+      );
+    });
+
+    it('should update topic status from ARCHIVED to ACTIVE as creator (unarchive)', async () => {
+      const archivedTopic = createMockTopic({
+        status: 'ARCHIVED',
+        archivedAt: new Date(),
+      });
+      const activeTopic = createMockTopic({
+        status: 'ACTIVE',
+        archivedAt: null,
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(archivedTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(activeTopic);
+
+      const result = await service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false);
+
+      expect(result.status).toBe('ACTIVE');
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'ACTIVE',
+            archivedAt: null,
+          }),
+        }),
+      );
+    });
+
+    it('should allow moderator to lock a topic', async () => {
+      const activeTopic = createMockTopic({ status: 'ACTIVE' });
+      const lockedTopic = createMockTopic({
+        status: 'LOCKED',
+        lockedAt: new Date(),
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(lockedTopic);
+
+      const result = await service.updateTopicStatus('topic-1', 'moderator-1', 'LOCKED', true);
+
+      expect(result.status).toBe('LOCKED');
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'LOCKED',
+            lockedAt: expect.any(Date),
+          }),
+        }),
+      );
+    });
+
+    it('should allow moderator to unlock a topic', async () => {
+      const lockedTopic = createMockTopic({
+        status: 'LOCKED',
+        lockedAt: new Date(),
+      });
+      const activeTopic = createMockTopic({
+        status: 'ACTIVE',
+        lockedAt: null,
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(lockedTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(activeTopic);
+
+      const result = await service.updateTopicStatus('topic-1', 'moderator-1', 'ACTIVE', true);
+
+      expect(result.status).toBe('ACTIVE');
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'ACTIVE',
+            lockedAt: null,
+          }),
+        }),
+      );
+    });
+
+    it('should throw NotFoundException when topic does not exist', async () => {
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.updateTopicStatus('nonexistent-topic', 'user-1', 'ACTIVE', false),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when non-creator/non-moderator tries to change status', async () => {
+      const topic = createMockTopic({ creatorId: 'user-1' });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(topic);
+
+      await expect(
+        service.updateTopicStatus('topic-1', 'other-user', 'ARCHIVED', false),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when creator tries to lock topic', async () => {
+      const topic = createMockTopic({ status: 'ACTIVE' });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(topic);
+
+      await expect(service.updateTopicStatus('topic-1', 'user-1', 'LOCKED', false)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException when creator tries to unlock locked topic', async () => {
+      const lockedTopic = createMockTopic({ status: 'LOCKED' });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(lockedTopic);
+
+      await expect(service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException when creator tries to revert to SEEDING', async () => {
+      const activeTopic = createMockTopic({ status: 'ACTIVE' });
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
+
+      await expect(
+        service.updateTopicStatus('topic-1', 'user-1', 'SEEDING', false),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should not set activatedAt if topic was already activated before', async () => {
+      const archivedTopic = createMockTopic({
+        status: 'ARCHIVED',
+        activatedAt: new Date('2026-01-01'),
+        archivedAt: new Date('2026-01-15'),
+      });
+      const reactivatedTopic = createMockTopic({
+        status: 'ACTIVE',
+        activatedAt: new Date('2026-01-01'),
+        archivedAt: null,
+      });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(archivedTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(reactivatedTopic);
+
+      await service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false);
+
+      // Should NOT include activatedAt since it was already set
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.not.objectContaining({
+            activatedAt: expect.any(Date),
+          }),
+        }),
+      );
+    });
+
+    it('should invalidate cache after status update', async () => {
+      const topic = createMockTopic({ status: 'ACTIVE' });
+      const archivedTopic = createMockTopic({ status: 'ARCHIVED' });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(topic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(archivedTopic);
+
+      await service.updateTopicStatus('topic-1', 'user-1', 'ARCHIVED', false);
+
+      expect(mockCacheManager.del).toHaveBeenCalledWith('topics:list');
+    });
+
+    it('should allow moderator to make any status transition', async () => {
+      const activeTopic = createMockTopic({ status: 'ACTIVE' });
+      const seedingTopic = createMockTopic({ status: 'SEEDING' });
+
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
+      mockPrisma.discussionTopic.update.mockResolvedValue(seedingTopic);
+
+      // Moderators can revert to SEEDING (unlike creators)
+      const result = await service.updateTopicStatus('topic-1', 'moderator-1', 'SEEDING', true);
+
+      expect(result.status).toBe('SEEDING');
+    });
+  });
 });
