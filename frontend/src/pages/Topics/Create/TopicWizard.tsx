@@ -72,18 +72,22 @@ export function TopicWizard({ isOpen, onClose, onSuccess }: TopicWizardProps) {
   // currentStepIndex is always within bounds due to navigation guards
   const currentStep = WIZARD_STEPS[currentStepIndex]!;
 
-  // Load draft from localStorage on mount
+  // Load draft from localStorage when modal opens
   useEffect(() => {
     if (isOpen) {
-      const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (savedDraft) {
-        try {
-          const parsed = JSON.parse(savedDraft);
-          setData({ ...INITIAL_WIZARD_DATA, ...parsed });
-        } catch {
-          // Invalid draft, ignore
+      // Use queueMicrotask to avoid synchronous setState warning
+      // This defers the update to the next microtask, preventing cascading renders
+      queueMicrotask(() => {
+        const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (savedDraft) {
+          try {
+            const parsed = JSON.parse(savedDraft);
+            setData({ ...INITIAL_WIZARD_DATA, ...parsed });
+          } catch {
+            // Invalid draft, ignore
+          }
         }
-      }
+      });
     }
   }, [isOpen]);
 

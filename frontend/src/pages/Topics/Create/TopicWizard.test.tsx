@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TopicWizard } from './TopicWizard';
@@ -258,7 +258,7 @@ describe('TopicWizard', () => {
       });
     });
 
-    it('loads draft from localStorage on open', () => {
+    it('loads draft from localStorage on open', async () => {
       const draftData = JSON.stringify({
         title: 'Saved draft title',
         description: 'Saved draft description',
@@ -267,7 +267,10 @@ describe('TopicWizard', () => {
 
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
-      expect(screen.getByLabelText(/Title/i)).toHaveValue('Saved draft title');
+      // Wait for async draft loading (queueMicrotask defers the state update)
+      await waitFor(() => {
+        expect(screen.getByLabelText(/Title/i)).toHaveValue('Saved draft title');
+      });
     });
   });
 });
