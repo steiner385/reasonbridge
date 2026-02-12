@@ -94,7 +94,7 @@ export function PreviewStep({ data, duplicates, showDuplicateWarning }: PreviewS
                 ))}
               </div>
               <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-3">
-                If your topic is truly unique, click "Create Anyway" to proceed.
+                If your topic is truly unique, click &quot;Create Anyway&quot; to proceed.
               </p>
             </div>
           </div>
