@@ -15,10 +15,11 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 
 export default async function setup() {
-  // Check if Prisma client exists
-  const prismaClientDir = join(__dirname, '../../node_modules/@prisma/client');
+  // Check if the GENERATED Prisma client exists (not just the @prisma/client package)
+  // The generated client lives in .prisma/client which is created by `prisma generate`
+  const generatedClientDir = join(__dirname, '../../node_modules/.prisma/client');
 
-  if (!existsSync(prismaClientDir)) {
+  if (!existsSync(generatedClientDir)) {
     // Generate Prisma client if not found
     try {
       execFileSync('npx', ['prisma', 'generate'], {
