@@ -79,7 +79,7 @@ const QualityBadge: React.FC<{
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${styles[quality] || styles.unknown}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${styles[quality] || styles['unknown']}`}
     >
       <span>{icons[quality] || '?'}</span>
       {label}

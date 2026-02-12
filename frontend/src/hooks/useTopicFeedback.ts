@@ -12,7 +12,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useState, useCallback, useMemo } from 'react';
-import type { TopicProposition } from '../components/topics/PropositionInputSection';
 import {
   previewFeedback,
   MIN_CONTENT_LENGTH,
@@ -20,6 +19,18 @@ import {
   type FeedbackSensitivity,
 } from '../lib/feedback-api';
 import { useDebouncedValue } from './useDebouncedValue';
+
+/**
+ * Proposition type for topic creation
+ */
+export interface TopicProposition {
+  /** Unique identifier */
+  id: string;
+  /** Proposition text */
+  text: string;
+  /** Type of proposition */
+  type: 'thesis' | 'antithesis' | 'synthesis';
+}
 
 /**
  * Topic data for feedback analysis
