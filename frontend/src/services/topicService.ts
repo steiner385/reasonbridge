@@ -40,6 +40,15 @@ export interface Topic {
   isMatureContent?: boolean;
 }
 
+/**
+ * Initial proposition for topic creation
+ * T226: Proposition input section support
+ */
+export interface InitialPropositionDto {
+  /** Proposition statement (10-1000 characters) */
+  statement: string;
+}
+
 export interface CreateTopicRequest {
   title: string;
   description: string;
@@ -50,6 +59,11 @@ export interface CreateTopicRequest {
    * Flag for mature content (violence, sensitive topics)
    */
   isMatureContent?: boolean;
+  /**
+   * Initial propositions to seed the topic discussion (0-10)
+   * T226: Proposition input section support
+   */
+  initialPropositions?: InitialPropositionDto[];
 }
 
 export interface DuplicateSuggestion {
