@@ -25,4 +25,8 @@ echo "Using: vitest.workspace.ts"
 # Run all workspace tests - Vitest will use each project's vitest.config.ts
 pnpm exec vitest run --passWithNoTests $ARGS
 
+# Run db-models tests separately (excluded from workspace because it needs prisma generate)
+echo "Running db-models tests..."
+pnpm --filter @reason-bridge/db-models test
+
 echo "All unit tests completed successfully!"
