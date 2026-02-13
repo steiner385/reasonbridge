@@ -106,8 +106,10 @@ describe('TopicWizard', () => {
       // Click Continue
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
-      // Should show step 2 content
-      expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+      // Should show step 2 content (wait for navigation to complete)
+      await waitFor(() => {
+        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+      });
     });
 
     it('shows Back button on step 2', async () => {
@@ -122,7 +124,10 @@ describe('TopicWizard', () => {
       );
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
-      // Should show Back button
+      // Wait for step 2 to render, then check for Back button
+      await waitFor(() => {
+        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+      });
       expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument();
     });
 
@@ -138,11 +143,18 @@ describe('TopicWizard', () => {
       );
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
+      // Wait for step 2 to render
+      await waitFor(() => {
+        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+      });
+
       // Click Back
       await user.click(screen.getByRole('button', { name: /Back/i }));
 
-      // Should show step 1 content again
-      expect(screen.getByText('What would you like to discuss?')).toBeInTheDocument();
+      // Should show step 1 content again (wait for navigation to complete)
+      await waitFor(() => {
+        expect(screen.getByText('What would you like to discuss?')).toBeInTheDocument();
+      });
     });
   });
 
@@ -154,6 +166,11 @@ describe('TopicWizard', () => {
         'This is a valid description that has at least fifty characters to pass validation.',
       );
       await user.click(screen.getByRole('button', { name: /Continue/i }));
+
+      // Wait for step 2 to render before proceeding
+      await waitFor(() => {
+        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+      });
     }
 
     it('Continue is disabled without tags', async () => {
@@ -204,11 +221,21 @@ describe('TopicWizard', () => {
       );
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
+      // Wait for step 2 to render
+      await waitFor(() => {
+        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+      });
+
       // Step 2
       const tagInput = screen.getByPlaceholderText(/climate, policy/i);
       await user.type(tagInput, 'testtag');
       await user.click(screen.getByRole('button', { name: /Add/i }));
       await user.click(screen.getByRole('button', { name: /Continue/i }));
+
+      // Wait for step 3 to render
+      await waitFor(() => {
+        expect(screen.getByText('Review your topic')).toBeInTheDocument();
+      });
     }
 
     it('shows preview content', async () => {
