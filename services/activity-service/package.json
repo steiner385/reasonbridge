@@ -1,0 +1,46 @@
+{
+  "name": "@reason-bridge/activity-service",
+  "version": "0.1.0",
+  "description": "Activity feed service for showing followed users' activities",
+  "type": "module",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "start:dev": "tsx watch src/main.ts",
+    "start:prod": "node dist/main.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@reason-bridge/common": "workspace:*",
+    "@reason-bridge/db-models": "workspace:*",
+    "@nestjs/common": "^11.1.13",
+    "@nestjs/core": "^11.1.13",
+    "@nestjs/platform-fastify": "^11.1.13",
+    "@prisma/client": "7.3.0",
+    "@prisma/adapter-pg": "^7.3.0",
+    "pg": "^8.13.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "fastify": "^5.7.4",
+    "reflect-metadata": "^0.2.1",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "25.2.2",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.7.0",
+    "typescript": "5.9.3",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "Apache-2.0",
+  "author": "Tony Stein"
+}
