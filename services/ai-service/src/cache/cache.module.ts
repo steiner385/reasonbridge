@@ -87,6 +87,8 @@ const logger = new Logger('CacheModule');
         return new QdrantClient({
           url,
           apiKey: process.env['QDRANT_API_KEY'] || undefined,
+          // Skip version check - client v1.16.x works with server v1.7.x for our use case
+          checkCompatibility: false,
         });
       },
     },

@@ -25,7 +25,7 @@ export class DatabaseAuthService implements IAuthService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.jwtSecret = this.configService.get<string>(
+    this.jwtSecret = this.configService?.get<string>(
       'JWT_SECRET',
       'local-jwt-secret-for-development',
     );

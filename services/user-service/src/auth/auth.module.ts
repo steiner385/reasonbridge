@@ -5,7 +5,7 @@
 
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthController } from './auth.controller.js';
 import { CognitoService } from './cognito.service.js';
 import { MockAuthService } from './mock-auth.service.js';
@@ -64,7 +64,16 @@ const authServiceProvider = {
   controllers: [AuthController],
   // Note: CognitoService, MockAuthService, DatabaseAuthService are NOT listed here
   // because they are manually instantiated by authServiceProvider based on AUTH_MODE
-  providers: [authServiceProvider, JwtAuthGuard],
+  providers: [
+    authServiceProvider,
+    // Factory provider for JwtAuthGuard to bypass NestJS's reflection-based DI issues
+    {
+      provide: JwtAuthGuard,
+      useFactory: (jwtService: JwtService, configService: ConfigService) =>
+        new JwtAuthGuard(jwtService, configService),
+      inject: [JwtService, ConfigService],
+    },
+  ],
   exports: [AUTH_SERVICE, JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}

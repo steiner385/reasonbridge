@@ -4,8 +4,8 @@
  */
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ComplianceService } from './compliance.service.js';
 import { AgeVerificationService } from './age-verification.service.js';
 import { ParentalConsentService } from './parental-consent.service.js';
@@ -32,9 +32,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     PrismaModule,
     ConfigModule,
     JwtModule.register({
-      // JWT verification is done using Cognito's public keys (or mock secret in test mode)
-      // JwtAuthGuard handles both production (RS256/JWKS) and test (HS256/secret) modes
-      signOptions: { algorithm: 'RS256' },
+      // JWT secret is required for JwtService to work properly
+      // JwtAuthGuard will use this for mock/database auth modes
+      secret: process.env['JWT_SECRET'] || 'default-dev-secret',
+      signOptions: { algorithm: 'HS256' },
     }),
   ],
   controllers: [ParentalConsentController, ParentalDashboardController],
@@ -43,8 +44,15 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     AgeVerificationService,
     ParentalConsentService,
     EmailService,
-    JwtAuthGuard,
+    // Factory provider that explicitly injects dependencies
+    // This bypasses NestJS's reflection-based DI which can hang with @Optional() decorators
+    {
+      provide: JwtAuthGuard,
+      useFactory: (jwtService: JwtService, configService: ConfigService) =>
+        new JwtAuthGuard(jwtService, configService),
+      inject: [JwtService, ConfigService],
+    },
   ],
-  exports: [ComplianceService, AgeVerificationService, ParentalConsentService],
+  exports: [ComplianceService, AgeVerificationService, ParentalConsentService, JwtAuthGuard],
 })
 export class ComplianceModule {}

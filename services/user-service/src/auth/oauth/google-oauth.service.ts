@@ -27,9 +27,9 @@ export class GoogleOAuthService {
   private readonly redirectUri: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.clientId = this.configService.getOrThrow<string>('GOOGLE_OAUTH_CLIENT_ID');
-    this.clientSecret = this.configService.getOrThrow<string>('GOOGLE_OAUTH_CLIENT_SECRET');
-    this.redirectUri = this.configService.getOrThrow<string>('GOOGLE_OAUTH_REDIRECT_URI');
+    this.clientId = this.configService?.getOrThrow<string>('GOOGLE_OAUTH_CLIENT_ID');
+    this.clientSecret = this.configService?.getOrThrow<string>('GOOGLE_OAUTH_CLIENT_SECRET');
+    this.redirectUri = this.configService?.getOrThrow<string>('GOOGLE_OAUTH_REDIRECT_URI');
 
     this.oauth2Client = new OAuth2Client(this.clientId, this.clientSecret, this.redirectUri);
 

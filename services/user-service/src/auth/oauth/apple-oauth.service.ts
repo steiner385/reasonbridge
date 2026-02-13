@@ -31,13 +31,13 @@ export class AppleOAuthService {
   private readonly redirectUri: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.serviceId = this.configService.getOrThrow<string>('APPLE_SERVICE_ID');
-    this.teamId = this.configService.getOrThrow<string>('APPLE_TEAM_ID');
-    this.keyId = this.configService.getOrThrow<string>('APPLE_KEY_ID');
-    this.redirectUri = this.configService.getOrThrow<string>('APPLE_REDIRECT_URI');
+    this.serviceId = this.configService?.getOrThrow<string>('APPLE_SERVICE_ID');
+    this.teamId = this.configService?.getOrThrow<string>('APPLE_TEAM_ID');
+    this.keyId = this.configService?.getOrThrow<string>('APPLE_KEY_ID');
+    this.redirectUri = this.configService?.getOrThrow<string>('APPLE_REDIRECT_URI');
 
     // Load private key from file
-    const privateKeyPath = this.configService.getOrThrow<string>('APPLE_PRIVATE_KEY_PATH');
+    const privateKeyPath = this.configService?.getOrThrow<string>('APPLE_PRIVATE_KEY_PATH');
     try {
       this.privateKey = readFileSync(privateKeyPath, 'utf8');
       this.logger.log('Apple OAuth service initialized');

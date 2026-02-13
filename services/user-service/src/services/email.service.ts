@@ -36,8 +36,9 @@ export class EmailService {
   private readonly appBaseUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    const region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
-    const endpoint = this.configService.get<string>('AWS_ENDPOINT');
+    // Defensive check for ConfigService availability (handles edge cases during module initialization)
+    const region = this.configService?.get<string>('AWS_REGION') || 'us-east-1';
+    const endpoint = this.configService?.get<string>('AWS_ENDPOINT');
 
     this.sesClient = new SESClient({
       region,
@@ -45,8 +46,8 @@ export class EmailService {
     });
 
     this.fromAddress =
-      this.configService.get<string>('EMAIL_FROM_ADDRESS') || 'noreply@reasonbridge.org';
-    this.appBaseUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
+      this.configService?.get<string>('EMAIL_FROM_ADDRESS') || 'noreply@reasonbridge.org';
+    this.appBaseUrl = this.configService?.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     this.logger.log(
       `EmailService initialized with region: ${region}, endpoint: ${endpoint || 'AWS default'}`,
