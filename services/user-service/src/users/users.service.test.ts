@@ -1,11 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UsersService } from './users.service.js';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 
 const createMockPrismaService = () => ({
   user: {
     findUnique: vi.fn(),
     update: vi.fn(),
+  },
+  userFollow: {
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
   },
 });
 
@@ -141,6 +147,191 @@ describe('UsersService', () => {
       expect(consoleSpy).toHaveBeenCalled();
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('followUser', () => {
+    const validFollowerId = '12345678-1234-1234-1234-123456789012';
+    const validFollowedId = '87654321-4321-4321-4321-210987654321';
+
+    it('should create follow relationship successfully', async () => {
+      const mockFollow = {
+        id: 'follow-123',
+        followerId: validFollowerId,
+        followedId: validFollowedId,
+        createdAt: new Date(),
+      };
+      mockPrisma.user.findUnique.mockResolvedValue({ id: validFollowedId });
+      mockPrisma.userFollow.findUnique.mockResolvedValue(null);
+      mockPrisma.userFollow.create.mockResolvedValue(mockFollow);
+
+      const result = await service.followUser(validFollowerId, validFollowedId);
+
+      expect(mockPrisma.userFollow.create).toHaveBeenCalledWith({
+        data: {
+          followerId: validFollowerId,
+          followedId: validFollowedId,
+        },
+      });
+      expect(result.followerId).toBe(validFollowerId);
+      expect(result.followedId).toBe(validFollowedId);
+    });
+
+    it('should throw BadRequestException when trying to follow yourself', async () => {
+      await expect(service.followUser(validFollowerId, validFollowerId)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.followUser(validFollowerId, validFollowerId)).rejects.toThrow(
+        'Cannot follow yourself',
+      );
+    });
+
+    it('should throw BadRequestException for invalid follower UUID', async () => {
+      await expect(service.followUser('invalid-uuid', validFollowedId)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException for invalid followed UUID', async () => {
+      await expect(service.followUser(validFollowerId, 'invalid-uuid')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw NotFoundException when user to follow does not exist', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.followUser(validFollowerId, validFollowedId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ConflictException when already following', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: validFollowedId });
+      mockPrisma.userFollow.findUnique.mockResolvedValue({
+        id: 'existing-follow',
+        followerId: validFollowerId,
+        followedId: validFollowedId,
+      });
+
+      await expect(service.followUser(validFollowerId, validFollowedId)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.followUser(validFollowerId, validFollowedId)).rejects.toThrow(
+        'Already following this user',
+      );
+    });
+  });
+
+  describe('unfollowUser', () => {
+    const validFollowerId = '12345678-1234-1234-1234-123456789012';
+    const validFollowedId = '87654321-4321-4321-4321-210987654321';
+
+    it('should delete follow relationship successfully', async () => {
+      mockPrisma.userFollow.findUnique.mockResolvedValue({
+        id: 'follow-123',
+        followerId: validFollowerId,
+        followedId: validFollowedId,
+      });
+      mockPrisma.userFollow.delete.mockResolvedValue({});
+
+      await service.unfollowUser(validFollowerId, validFollowedId);
+
+      expect(mockPrisma.userFollow.delete).toHaveBeenCalledWith({
+        where: {
+          followerId_followedId: {
+            followerId: validFollowerId,
+            followedId: validFollowedId,
+          },
+        },
+      });
+    });
+
+    it('should throw BadRequestException when trying to unfollow yourself', async () => {
+      await expect(service.unfollowUser(validFollowerId, validFollowerId)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw NotFoundException when not following the user', async () => {
+      mockPrisma.userFollow.findUnique.mockResolvedValue(null);
+
+      await expect(service.unfollowUser(validFollowerId, validFollowedId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.unfollowUser(validFollowerId, validFollowedId)).rejects.toThrow(
+        'Not following this user',
+      );
+    });
+  });
+
+  describe('isFollowing', () => {
+    const validFollowerId = '12345678-1234-1234-1234-123456789012';
+    const validFollowedId = '87654321-4321-4321-4321-210987654321';
+
+    it('should return true when following', async () => {
+      mockPrisma.userFollow.findUnique.mockResolvedValue({
+        id: 'follow-123',
+        followerId: validFollowerId,
+        followedId: validFollowedId,
+      });
+
+      const result = await service.isFollowing(validFollowerId, validFollowedId);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when not following', async () => {
+      mockPrisma.userFollow.findUnique.mockResolvedValue(null);
+
+      const result = await service.isFollowing(validFollowerId, validFollowedId);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false for invalid UUIDs', async () => {
+      const result = await service.isFollowing('invalid', validFollowedId);
+
+      expect(result).toBe(false);
+      expect(mockPrisma.userFollow.findUnique).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getFollowerCount', () => {
+    const validUserId = '12345678-1234-1234-1234-123456789012';
+
+    it('should return follower count', async () => {
+      mockPrisma.userFollow.count.mockResolvedValue(42);
+
+      const result = await service.getFollowerCount(validUserId);
+
+      expect(mockPrisma.userFollow.count).toHaveBeenCalledWith({
+        where: { followedId: validUserId },
+      });
+      expect(result).toBe(42);
+    });
+
+    it('should throw BadRequestException for invalid UUID', async () => {
+      await expect(service.getFollowerCount('invalid-uuid')).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('getFollowingCount', () => {
+    const validUserId = '12345678-1234-1234-1234-123456789012';
+
+    it('should return following count', async () => {
+      mockPrisma.userFollow.count.mockResolvedValue(15);
+
+      const result = await service.getFollowingCount(validUserId);
+
+      expect(mockPrisma.userFollow.count).toHaveBeenCalledWith({
+        where: { followerId: validUserId },
+      });
+      expect(result).toBe(15);
+    });
+
+    it('should throw BadRequestException for invalid UUID', async () => {
+      await expect(service.getFollowingCount('invalid-uuid')).rejects.toThrow(BadRequestException);
     });
   });
 });

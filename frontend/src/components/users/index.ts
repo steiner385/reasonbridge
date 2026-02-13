@@ -8,3 +8,4 @@
  */
 
 export { default as TrustScoreBadge } from './TrustScoreBadge';
+export { FollowButton, type FollowButtonProps } from './FollowButton';
