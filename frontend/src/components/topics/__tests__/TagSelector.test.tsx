@@ -208,12 +208,15 @@ describe('TagSelector', () => {
 
       await user.click(screen.getByText(/create "newtag"/i));
 
-      expect(onChange).toHaveBeenCalledWith([
-        expect.objectContaining({
-          name: 'newtag',
-          slug: 'newtag',
-        }),
-      ]);
+      // Wait for React to process state updates from handleSelectTag and clear()
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith([
+          expect.objectContaining({
+            name: 'newtag',
+            slug: 'newtag',
+          }),
+        ]);
+      });
     });
 
     it('should not show create option for existing tag', async () => {
