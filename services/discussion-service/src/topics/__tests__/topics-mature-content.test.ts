@@ -74,6 +74,14 @@ const createMockEditService = () => ({
   getTopicEditHistory: vi.fn(),
 });
 
+const createMockPropositionsService = () => ({
+  createInitialPropositions: vi.fn().mockResolvedValue([]),
+});
+
+const createMockActivityClient = () => ({
+  createEvent: vi.fn().mockResolvedValue(undefined),
+});
+
 describe('TopicsService - Mature Content Filtering', () => {
   let service: TopicsService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
@@ -81,6 +89,8 @@ describe('TopicsService - Mature Content Filtering', () => {
   let mockSearchService: ReturnType<typeof createMockSearchService>;
   let mockSlugGenerator: ReturnType<typeof createMockSlugGenerator>;
   let mockEditService: ReturnType<typeof createMockEditService>;
+  let mockPropositionsService: ReturnType<typeof createMockPropositionsService>;
+  let mockActivityClient: ReturnType<typeof createMockActivityClient>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -89,6 +99,8 @@ describe('TopicsService - Mature Content Filtering', () => {
     mockSearchService = createMockSearchService();
     mockSlugGenerator = createMockSlugGenerator();
     mockEditService = createMockEditService();
+    mockPropositionsService = createMockPropositionsService();
+    mockActivityClient = createMockActivityClient();
 
     service = new TopicsService(
       mockPrisma as any,
@@ -96,6 +108,8 @@ describe('TopicsService - Mature Content Filtering', () => {
       mockSearchService as any,
       mockSlugGenerator as any,
       mockEditService as any,
+      mockPropositionsService as any,
+      mockActivityClient as any,
     );
   });
 

@@ -372,6 +372,64 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@25.2.2)(@vitest/ui@2.1.9)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))
 
+  services/activity-service:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^11.1.13
+        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^11.1.13
+        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/websockets@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-fastify':
+        specifier: ^11.1.13
+        version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
+      '@prisma/client':
+        specifier: 7.3.0
+        version: 7.3.0(prisma@7.3.0(@types/react@19.2.13)(magicast@0.3.5)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+      '@reason-bridge/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@reason-bridge/db-models':
+        specifier: workspace:*
+        version: link:../../packages/db-models
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
+      class-validator:
+        specifier: ^0.14.2
+        version: 0.14.3
+      fastify:
+        specifier: ^5.7.4
+        version: 5.7.4
+      pg:
+        specifier: ^8.13.1
+        version: 8.18.0
+      reflect-metadata:
+        specifier: ^0.2.1
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+    devDependencies:
+      '@types/node':
+        specifier: 25.2.2
+        version: 25.2.2
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
+      tsx:
+        specifier: ^4.7.0
+        version: 4.21.0
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@25.2.2)(@vitest/ui@2.1.9)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))
+
   services/ai-service:
     dependencies:
       '@nestjs/cache-manager':
@@ -2365,7 +2423,6 @@ packages:
   '@pact-foundation/pact-core@18.0.0':
     resolution: {integrity: sha512-21sOzu+28HLivTdsnwOmLAPjHLDaPfUbv/aTxlWqCVmBTXVsxekrbQJkO0ga6COXEXQg0BGKmqLxh22orm//9A==}
     engines: {node: '>=20'}
-    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.1.0':

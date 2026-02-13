@@ -123,6 +123,7 @@ services:
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
       RECOMMENDATION_SERVICE_URL: http://recommendation-service:3004
       FACT_CHECK_SERVICE_URL: http://fact-check-service:3006
+      ACTIVITY_SERVICE_URL: http://activity-service:3008
     ports:
       - '3000:3000'
     depends_on:
@@ -222,6 +223,7 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
+      ACTIVITY_SERVICE_URL: http://activity-service:3008
     ports:
       - '3007:3007'
     depends_on:
@@ -333,6 +335,30 @@ services:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
+    mem_limit: 192m
+    networks:
+      - reasonbridge-e2e
+
+  activity-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    image: reasonbridge-e2e/activity-service:latest
+    command: ['node', 'services/activity-service/dist/main.js']
+    environment:
+      PORT: 3008
+      NODE_ENV: test
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '3008:3008'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seed:
+        condition: service_completed_successfully
     mem_limit: 192m
     networks:
       - reasonbridge-e2e

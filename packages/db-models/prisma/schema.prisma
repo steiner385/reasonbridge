@@ -73,6 +73,8 @@ model User {
   topicDrafts           TopicDraft[]          @relation("TopicDrafts")
   // Feature: Child-Friendly Mode
   parentalConsent       ParentalConsent?
+  // Feature 245: Activity Feed
+  activityEvents        ActivityEvent[]       @relation("UserActivities")
 
   @@index([cognitoSub])
   @@index([email])
@@ -1084,4 +1086,53 @@ model VisitorSession {
   @@index([convertedToUserId])
   @@index([lastActivityAt])
   @@map("visitor_sessions")
+}
+
+// ============================================================================
+// ACTIVITY SERVICE ENTITIES
+// ============================================================================
+
+/// Activity events for feed generation
+/// Denormalized table capturing user activities for efficient feed queries
+model ActivityEvent {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  activityType ActivityType @map("activity_type")
+
+  // Target entity reference
+  targetId   String     @map("target_id") @db.Uuid
+  targetType TargetType @map("target_type")
+
+  /// Denormalized title from target entity for display (copy, not updated if source changes)
+  /// Activity events are immutable - no updatedAt field by design
+  targetTitle String? @map("target_title") @db.VarChar(200)
+  /// Denormalized slug from target entity for URL generation
+  targetSlug  String? @map("target_slug") @db.VarChar(250)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation("UserActivities", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("activity_events")
+}
+
+/// Types of activity events
+enum ActivityType {
+  TOPIC_CREATED
+  RESPONSE_POSTED
+  DISCUSSION_JOINED
+
+  @@map("activity_type")
+}
+
+/// Target entity types for activity events
+enum TargetType {
+  TOPIC
+  RESPONSE
+  DISCUSSION
+
+  @@map("target_type")
 }

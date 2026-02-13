@@ -25,6 +25,7 @@ import { TopicsSearchService } from './topics-search.service.js';
 import { SlugGeneratorService } from './slug-generator.service.js';
 import { TopicsEditService } from './topics-edit.service.js';
 import { PropositionsService } from '../propositions/propositions.service.js';
+import { ActivityClientService } from '../clients/activity-client.service.js';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -36,6 +37,7 @@ export class TopicsService {
     private slugGenerator: SlugGeneratorService,
     private editService: TopicsEditService,
     private propositionsService: PropositionsService,
+    private activityClient: ActivityClientService,
   ) {}
 
   /**
@@ -376,6 +378,17 @@ export class TopicsService {
     // Step 5: Invalidate topic listing cache
     // Note: With query-based cache keys, specific caches will expire after 5min TTL
     await this.cacheManager?.del('topics:list');
+
+    // Step 6: Create activity event (fire-and-forget)
+    // Issue #245: Activity feed from followed users
+    this.activityClient.createEvent({
+      userId: userId,
+      activityType: 'TOPIC_CREATED',
+      targetId: topic.id,
+      targetType: 'TOPIC',
+      targetTitle: topic.title,
+      targetSlug: topic.slug,
+    });
 
     return {
       id: topic.id,
