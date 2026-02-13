@@ -13,11 +13,14 @@
  * - Visibility and evidence standards selection
  */
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { useCreateTopic } from '../../hooks/useCreateTopic';
+import { useTopicDraft, type TopicDraftData } from '../../hooks/useTopicDraft';
 import type { DuplicateSuggestion } from '../../services/topicService';
+import type { Tag, TagValidation } from '../../types/tag';
+import { TagSelector } from './TagSelector';
 
 export interface CreateTopicModalProps {
   isOpen: boolean;
@@ -28,8 +31,8 @@ export interface CreateTopicModalProps {
 export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [tagValidation, setTagValidation] = useState<TagValidation | null>(null);
   const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE' | 'UNLISTED'>('PUBLIC');
   const [evidenceStandards, setEvidenceStandards] = useState<'MINIMAL' | 'STANDARD' | 'RIGOROUS'>(
     'STANDARD',
@@ -37,6 +40,50 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
   const [duplicates, setDuplicates] = useState<DuplicateSuggestion[]>([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const [isMatureContent, setIsMatureContent] = useState(false);
+  const [draftPromptDismissed, setDraftPromptDismissed] = useState(false);
+
+  // Draft auto-save functionality
+  const { hasDraft, saveStatus, lastSavedAt, updateDraft, clearDraft, restoreDraft } =
+    useTopicDraft({
+      storageKey: 'create-topic-draft',
+      onDraftRestored: (draft: TopicDraftData) => {
+        setTitle(draft.title);
+        setDescription(draft.description);
+        // Convert tag names back to Tag objects (temporary IDs for restored tags)
+        setTags(
+          draft.tags.map((name, index) => ({
+            id: `restored-${index}`,
+            name,
+            slug: name.toLowerCase().replace(/\s+/g, '-'),
+          })),
+        );
+        setVisibility(draft.visibility);
+        setEvidenceStandards(draft.evidenceStandards);
+        setIsMatureContent(draft.isMatureContent);
+      },
+    });
+
+  // Derive draft prompt visibility from existing state (avoids setState in effect)
+  const showDraftPrompt = useMemo(
+    () => isOpen && hasDraft && !draftPromptDismissed,
+    [isOpen, hasDraft, draftPromptDismissed],
+  );
+
+  // Update draft when form fields change
+  useEffect(() => {
+    updateDraft({
+      title,
+      description,
+      tags: tags.map((t) => t.name),
+      visibility,
+      evidenceStandards,
+      isMatureContent,
+    });
+  }, [title, description, tags, visibility, evidenceStandards, isMatureContent, updateDraft]);
+
+  const handleTagValidationChange = useCallback((validation: TagValidation) => {
+    setTagValidation(validation);
+  }, []);
 
   const {
     mutate: createTopic,
@@ -57,25 +104,25 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setTagInput('');
     setTags([]);
+    setTagValidation(null);
     setVisibility('PUBLIC');
     setEvidenceStandards('STANDARD');
     setDuplicates([]);
     setShowDuplicateWarning(false);
     setIsMatureContent(false);
+    setDraftPromptDismissed(false);
+    clearDraft();
   };
 
-  const handleAddTag = () => {
-    const trimmedTag = tagInput.trim();
-    if (trimmedTag && tags.length < 5 && !tags.includes(trimmedTag)) {
-      setTags([...tags, trimmedTag]);
-      setTagInput('');
-    }
+  const handleRestoreDraft = () => {
+    restoreDraft();
+    setDraftPromptDismissed(true);
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+  const handleDiscardDraft = () => {
+    clearDraft();
+    setDraftPromptDismissed(true);
   };
 
   const handleSubmit = (e: React.FormEvent, ignoreWarning = false) => {
@@ -96,14 +143,17 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
       return; // Handled by HTML5 validation
     }
 
-    if (tags.length < 1 || tags.length > 5) {
-      return; // Handled by button state
+    if (!tagValidation?.isValid) {
+      return; // Handled by TagSelector validation
     }
+
+    // Convert Tag objects to tag names for API
+    const tagNames = tags.map((tag) => tag.name);
 
     createTopic({
       title,
       description,
-      tags,
+      tags: tagNames,
       visibility,
       evidenceStandards,
       isMatureContent,
@@ -112,6 +162,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
 
   const titleError = title && (title.length < 10 || title.length > 200);
   const descriptionError = description && (description.length < 50 || description.length > 5000);
+  const tagsValid = tagValidation?.isValid ?? false;
 
   return (
     <Modal
@@ -137,7 +188,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
           <Button
             variant="primary"
             onClick={(e) => handleSubmit(e, showDuplicateWarning)}
-            disabled={isPending || titleError || descriptionError || tags.length === 0}
+            disabled={isPending || titleError || descriptionError || !tagsValid}
             isLoading={isPending}
           >
             {showDuplicateWarning ? 'Create Anyway' : 'Create Topic'}
@@ -146,6 +197,43 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
       }
     >
       <form onSubmit={(e) => handleSubmit(e, showDuplicateWarning)} className="space-y-6">
+        {/* Draft Restoration Prompt */}
+        {showDraftPrompt && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <svg
+                className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">
+                  Unsaved Draft Found
+                </h4>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                  You have an unsaved draft from a previous session. Would you like to restore it?
+                </p>
+                <div className="flex gap-2">
+                  <Button type="button" variant="primary" size="sm" onClick={handleRestoreDraft}>
+                    Restore Draft
+                  </Button>
+                  <Button type="button" variant="secondary" size="sm" onClick={handleDiscardDraft}>
+                    Start Fresh
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Duplicate Warning */}
         {showDuplicateWarning && duplicates.length > 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -190,7 +278,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
                   ))}
                 </div>
                 <p className="text-xs text-yellow-600 mt-3">
-                  If your topic is truly unique, click "Create Anyway" to proceed.
+                  If your topic is truly unique, click &quot;Create Anyway&quot; to proceed.
                 </p>
               </div>
             </div>
@@ -290,61 +378,13 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
         </div>
 
         {/* Tags */}
-        <div>
-          <label
-            htmlFor="tag-input"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Tags <span className="text-red-500">*</span>{' '}
-            <span className="text-gray-500 dark:text-gray-400 font-normal">(1-5 tags)</span>
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              id="tag-input"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddTag();
-                }
-              }}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="e.g., climate, policy, economics"
-              disabled={tags.length >= 5}
-              maxLength={50}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleAddTag}
-              disabled={!tagInput.trim() || tags.length >= 5}
-            >
-              Add
-            </Button>
-          </div>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                >
-                  #{tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="hover:text-primary-900"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-          {tags.length === 0 && <p className="text-xs text-red-600">At least 1 tag is required</p>}
-        </div>
+        <TagSelector
+          selectedTags={tags}
+          onChange={setTags}
+          onValidationChange={handleTagValidationChange}
+          disabled={isPending}
+          id="topic-tags"
+        />
 
         {/* Visibility */}
         <div>
@@ -387,6 +427,58 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             <option value="RIGOROUS">Rigorous - Academic-level citations required</option>
           </select>
         </div>
+
+        {/* Save Status Indicator */}
+        {(saveStatus === 'saving' || saveStatus === 'saved') && (
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            {saveStatus === 'saving' && (
+              <>
+                <svg
+                  className="w-3.5 h-3.5 animate-spin"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Saving draft...</span>
+              </>
+            )}
+            {saveStatus === 'saved' && lastSavedAt && (
+              <>
+                <svg
+                  className="w-3.5 h-3.5 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span>
+                  Draft saved at{' '}
+                  {lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Mature Content Flag */}
         <div className="flex items-start gap-3 mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
