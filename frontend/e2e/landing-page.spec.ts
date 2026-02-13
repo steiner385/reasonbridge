@@ -104,7 +104,27 @@ test.describe('Landing Page - Unauthenticated User Flow', () => {
 });
 
 test.describe('Landing Page - Authenticated User Redirect', () => {
+  // Mock user for authenticated tests
+  const mockUser = {
+    id: 'test-user-id',
+    email: 'test@example.com',
+    displayName: 'Test User',
+    avatarUrl: null,
+    role: 'user',
+    createdAt: new Date().toISOString(),
+  };
+
   test.beforeEach(async ({ page }) => {
+    // Mock the /api/users/me endpoint to prevent AuthContext from logging out
+    // when it tries to fetch user profile with the fake token
+    await page.route('**/api/users/me', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockUser),
+      });
+    });
+
     // Start at /about to load the React app and clear auth state
     await page.goto('/about');
     await page.evaluate(() => {
