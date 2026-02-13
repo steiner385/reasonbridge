@@ -4,10 +4,27 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TopicWizard } from './TopicWizard';
+
+// Test data constants
+const VALID_TITLE = 'A valid topic title that is long enough';
+const VALID_DESCRIPTION =
+  'This is a valid description that has at least fifty characters to pass validation.';
+
+/**
+ * Helper to fill step 1 form fields quickly using fireEvent.change
+ * instead of user.type() to avoid CI timeouts with long strings
+ */
+function fillStep1Form() {
+  const titleInput = screen.getByLabelText(/Title/i);
+  const descriptionInput = screen.getByLabelText(/Description/i);
+
+  fireEvent.change(titleInput, { target: { value: VALID_TITLE } });
+  fireEvent.change(descriptionInput, { target: { value: VALID_DESCRIPTION } });
+}
 
 // Mock the useCreateTopic hook
 const mockCreateTopic = vi.fn();
@@ -75,18 +92,10 @@ describe('TopicWizard', () => {
     });
 
     it('enables Continue button when step 1 is valid', async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
-      const titleInput = screen.getByLabelText(/Title/i);
-      const descriptionInput = screen.getByLabelText(/Description/i);
-
-      // Fill with valid data (title >= 10 chars, description >= 50 chars)
-      await user.type(titleInput, 'A valid topic title that is long enough');
-      await user.type(
-        descriptionInput,
-        'This is a valid description that has at least fifty characters to pass validation.',
-      );
+      // Fill with valid data using fireEvent for speed
+      fillStep1Form();
 
       const continueButton = screen.getByRole('button', { name: /Continue/i });
       expect(continueButton).not.toBeDisabled();
@@ -96,12 +105,8 @@ describe('TopicWizard', () => {
       const user = userEvent.setup();
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
-      // Fill step 1
-      await user.type(screen.getByLabelText(/Title/i), 'A valid topic title that is long enough');
-      await user.type(
-        screen.getByLabelText(/Description/i),
-        'This is a valid description that has at least fifty characters to pass validation.',
-      );
+      // Fill step 1 using fireEvent for speed
+      fillStep1Form();
 
       // Click Continue
       await user.click(screen.getByRole('button', { name: /Continue/i }));
@@ -117,11 +122,7 @@ describe('TopicWizard', () => {
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       // Navigate to step 2
-      await user.type(screen.getByLabelText(/Title/i), 'A valid topic title that is long enough');
-      await user.type(
-        screen.getByLabelText(/Description/i),
-        'This is a valid description that has at least fifty characters to pass validation.',
-      );
+      fillStep1Form();
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render, then check for Back button
@@ -136,11 +137,7 @@ describe('TopicWizard', () => {
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       // Navigate to step 2
-      await user.type(screen.getByLabelText(/Title/i), 'A valid topic title that is long enough');
-      await user.type(
-        screen.getByLabelText(/Description/i),
-        'This is a valid description that has at least fifty characters to pass validation.',
-      );
+      fillStep1Form();
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render
@@ -160,11 +157,7 @@ describe('TopicWizard', () => {
 
   describe('step 2 (Classification)', () => {
     async function navigateToStep2(user: ReturnType<typeof userEvent.setup>) {
-      await user.type(screen.getByLabelText(/Title/i), 'A valid topic title that is long enough');
-      await user.type(
-        screen.getByLabelText(/Description/i),
-        'This is a valid description that has at least fifty characters to pass validation.',
-      );
+      fillStep1Form();
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render before proceeding
@@ -213,12 +206,8 @@ describe('TopicWizard', () => {
 
   describe('step 3 (Preview)', () => {
     async function navigateToStep3(user: ReturnType<typeof userEvent.setup>) {
-      // Step 1
-      await user.type(screen.getByLabelText(/Title/i), 'A valid topic title that is long enough');
-      await user.type(
-        screen.getByLabelText(/Description/i),
-        'This is a valid description that has at least fifty characters to pass validation.',
-      );
+      // Step 1 - use fireEvent for speed
+      fillStep1Form();
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render
@@ -245,7 +234,7 @@ describe('TopicWizard', () => {
       await navigateToStep3(user);
 
       expect(screen.getByText('Review your topic')).toBeInTheDocument();
-      expect(screen.getByText('A valid topic title that is long enough')).toBeInTheDocument();
+      expect(screen.getByText(VALID_TITLE)).toBeInTheDocument();
     });
 
     it('shows Create Topic button on preview step', async () => {

@@ -11,3 +11,9 @@ export type {
 } from './useSuggestionActions';
 export { useNotification, useShowNotification } from './useNotification';
 export { useModerationNotifications } from './useModerationNotifications';
+export { useDraftAutoSave } from './useDraftAutoSave';
+export type {
+  DraftSaveStatus,
+  UseDraftAutoSaveOptions,
+  UseDraftAutoSaveResult,
+} from './useDraftAutoSave';
