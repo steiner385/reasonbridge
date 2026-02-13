@@ -20,6 +20,8 @@ export const USER_EVENT_TYPES = {
   USER_VERIFIED_HUMAN_STATUS_CHANGED: 'user.verified_human_status_changed',
   BOT_PATTERN_DETECTED: 'bot_pattern.detected',
   USER_FLAGGED_FOR_REVIEW: 'user.flagged_for_review',
+  USER_FOLLOWED: 'user.followed',
+  USER_UNFOLLOWED: 'user.unfollowed',
 } as const;
 
 /**
@@ -244,6 +246,54 @@ export interface UserFlaggedForReviewEvent extends BaseEvent<
 }
 
 /**
+ * Payload for user.followed event
+ * Published when a user follows another user
+ */
+export interface UserFollowedPayload {
+  /** ID of the follow relationship */
+  followId: string;
+  /** ID of the user who initiated the follow */
+  followerId: string;
+  /** ID of the user being followed */
+  followedId: string;
+  /** When the follow occurred */
+  followedAt: string;
+}
+
+/**
+ * Event published when a user follows another user
+ */
+export interface UserFollowedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.USER_FOLLOWED,
+  UserFollowedPayload
+> {
+  type: typeof USER_EVENT_TYPES.USER_FOLLOWED;
+}
+
+/**
+ * Payload for user.unfollowed event
+ * Published when a user unfollows another user
+ */
+export interface UserUnfollowedPayload {
+  /** ID of the user who initiated the unfollow */
+  followerId: string;
+  /** ID of the user being unfollowed */
+  followedId: string;
+  /** When the unfollow occurred */
+  unfollowedAt: string;
+}
+
+/**
+ * Event published when a user unfollows another user
+ */
+export interface UserUnfollowedEvent extends BaseEvent<
+  typeof USER_EVENT_TYPES.USER_UNFOLLOWED,
+  UserUnfollowedPayload
+> {
+  type: typeof USER_EVENT_TYPES.USER_UNFOLLOWED;
+}
+
+/**
  * Union type of all user service events
  */
 export type UserEvent =
@@ -253,4 +303,6 @@ export type UserEvent =
   | VerificationExpiredEvent
   | UserVerifiedHumanStatusChangedEvent
   | BotPatternDetectedEvent
-  | UserFlaggedForReviewEvent;
+  | UserFlaggedForReviewEvent
+  | UserFollowedEvent
+  | UserUnfollowedEvent;

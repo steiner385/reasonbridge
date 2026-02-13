@@ -6,9 +6,12 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Patch,
+  Delete,
   Param,
+  Query,
   UseGuards,
   Body,
   Logger,
@@ -25,6 +28,12 @@ import {
   FeedbackToggleDto,
   FeedbackPreferencesResponseDto,
 } from './dto/feedback-preferences.dto.js';
+import {
+  FollowResponseDto,
+  FollowStatusDto,
+  FollowersResponseDto,
+  FollowingResponseDto,
+} from './dto/follow.dto.js';
 
 /**
  * Validates that a string is a valid UUID v4 format
@@ -137,5 +146,145 @@ export class UsersController {
     this.logger.debug(`Fetching user by ID: ${id}`);
     const user = await this.usersService.findById(id);
     return new PublicUserResponseDto(user);
+  }
+
+  /**
+   * POST /users/:id/follow - Follow a user
+   * Requires Bearer token in Authorization header
+   */
+  @Post(':id/follow')
+  @UseGuards(JwtAuthGuard)
+  async followUser(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Param('id') followedId: string,
+  ): Promise<FollowResponseDto> {
+    // Validate UUID format
+    if (!isValidUUID(followedId)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${followedId.substring(0, 50)}${followedId.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    const follow = await this.usersService.followUser(jwtPayload.sub, followedId);
+
+    return new FollowResponseDto({
+      success: true,
+      message: 'Successfully followed user',
+      isFollowing: true,
+      followedUserId: followedId,
+      followedAt: follow.createdAt,
+    });
+  }
+
+  /**
+   * DELETE /users/:id/follow - Unfollow a user
+   * Requires Bearer token in Authorization header
+   */
+  @Delete(':id/follow')
+  @UseGuards(JwtAuthGuard)
+  async unfollowUser(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Param('id') followedId: string,
+  ): Promise<FollowResponseDto> {
+    // Validate UUID format
+    if (!isValidUUID(followedId)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${followedId.substring(0, 50)}${followedId.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    await this.usersService.unfollowUser(jwtPayload.sub, followedId);
+
+    return new FollowResponseDto({
+      success: true,
+      message: 'Successfully unfollowed user',
+      isFollowing: false,
+      followedUserId: followedId,
+    });
+  }
+
+  /**
+   * GET /users/:id/follow - Check follow status for a user
+   * Requires Bearer token in Authorization header
+   * Returns follow status and counts
+   */
+  @Get(':id/follow')
+  @UseGuards(JwtAuthGuard)
+  async getFollowStatus(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Param('id') userId: string,
+  ): Promise<FollowStatusDto> {
+    // Validate UUID format
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${userId.substring(0, 50)}${userId.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    const [isFollowing, followerCount, followingCount] = await Promise.all([
+      this.usersService.isFollowing(jwtPayload.sub, userId),
+      this.usersService.getFollowerCount(userId),
+      this.usersService.getFollowingCount(userId),
+    ]);
+
+    return new FollowStatusDto({
+      isFollowing,
+      followerCount,
+      followingCount,
+    });
+  }
+
+  /**
+   * GET /users/:id/followers - Get a user's followers
+   * Public endpoint - no authentication required
+   * Supports pagination via limit and offset query params
+   */
+  @Get(':id/followers')
+  async getFollowers(
+    @Param('id') userId: string,
+    @Query('limit') limitStr?: string,
+    @Query('offset') offsetStr?: string,
+  ): Promise<FollowersResponseDto> {
+    // Validate UUID format
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${userId.substring(0, 50)}${userId.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    // Parse pagination params with defaults
+    const limit = Math.min(Math.max(parseInt(limitStr || '20', 10) || 20, 1), 100);
+    const offset = Math.max(parseInt(offsetStr || '0', 10) || 0, 0);
+
+    const result = await this.usersService.getFollowers(userId, { limit, offset });
+
+    return new FollowersResponseDto(result);
+  }
+
+  /**
+   * GET /users/:id/following - Get users a user is following
+   * Public endpoint - no authentication required
+   * Supports pagination via limit and offset query params
+   */
+  @Get(':id/following')
+  async getFollowing(
+    @Param('id') userId: string,
+    @Query('limit') limitStr?: string,
+    @Query('offset') offsetStr?: string,
+  ): Promise<FollowingResponseDto> {
+    // Validate UUID format
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${userId.substring(0, 50)}${userId.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    // Parse pagination params with defaults
+    const limit = Math.min(Math.max(parseInt(limitStr || '20', 10) || 20, 1), 100);
+    const offset = Math.max(parseInt(offsetStr || '0', 10) || 0, 0);
+
+    const result = await this.usersService.getFollowing(userId, { limit, offset });
+
+    return new FollowingResponseDto(result);
   }
 }

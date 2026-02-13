@@ -278,4 +278,64 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       `Broadcasted user.trust.updated event for user ${event.payload.userId} to room ${room}`,
     );
   }
+
+  /**
+   * Subscribe to personal notifications for a specific user
+   * Clients should call this after authenticating to receive follow notifications, etc.
+   */
+  @SubscribeMessage('subscribe:personal')
+  async handleSubscribePersonal(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const { userId } = data;
+    const room = `user:${userId}:notifications`;
+
+    await client.join(room);
+    this.logger.log(`Client ${client.id} subscribed to personal notifications for user ${userId}`);
+
+    client.emit('subscription:confirmed', {
+      type: 'personal',
+      userId,
+      room,
+    });
+  }
+
+  /**
+   * Unsubscribe from personal notifications
+   */
+  @SubscribeMessage('unsubscribe:personal')
+  async handleUnsubscribePersonal(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const { userId } = data;
+    const room = `user:${userId}:notifications`;
+
+    await client.leave(room);
+    this.logger.log(
+      `Client ${client.id} unsubscribed from personal notifications for user ${userId}`,
+    );
+
+    client.emit('unsubscription:confirmed', {
+      type: 'personal',
+      userId,
+      room,
+    });
+  }
+
+  /**
+   * Emit an event to a specific user's notification room
+   * Used by handlers to send personalized notifications
+   */
+  emitToUser(userId: string, eventType: string, payload: Record<string, unknown>): void {
+    const room = `user:${userId}:notifications`;
+
+    this.server.to(room).emit(eventType, {
+      ...payload,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(`Emitted ${eventType} to user ${userId} in room ${room}`);
+  }
 }
