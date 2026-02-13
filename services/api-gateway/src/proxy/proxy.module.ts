@@ -13,6 +13,7 @@ import { DemoProxyController } from './demo-proxy.controller.js';
 import { AiProxyController } from './ai-proxy.controller.js';
 import { ModerationProxyController } from './moderation-proxy.controller.js';
 import { VerificationProxyController } from './verification-proxy.controller.js';
+import { ActivityProxyController } from './activity-proxy.controller.js';
 import { ProxyService } from './proxy.service.js';
 
 @Module({
@@ -32,6 +33,7 @@ import { ProxyService } from './proxy.service.js';
     AiProxyController,
     ModerationProxyController,
     VerificationProxyController,
+    ActivityProxyController,
   ],
   providers: [ProxyService],
   exports: [ProxyService],
