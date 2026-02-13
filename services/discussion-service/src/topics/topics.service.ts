@@ -29,11 +29,9 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TopicsService {
-  private cacheManager: Cache | null = null; // Temporarily disabled to debug hang
-
   constructor(
     private prisma: PrismaService,
-    // @Optional() @Inject(CACHE_MANAGER) private cacheManager: Cache | null,
+    @Optional() @Inject(CACHE_MANAGER) private cacheManager: Cache | null,
     private searchService: TopicsSearchService,
     private slugGenerator: SlugGeneratorService,
     private editService: TopicsEditService,
