@@ -30,6 +30,61 @@ export interface FollowButtonProps {
 }
 
 /**
+ * Loading spinner icon
+ */
+const LoadingSpinner = () => (
+  <svg
+    className="animate-spin h-4 w-4"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    />
+  </svg>
+);
+
+/**
+ * Follow icon (user with plus)
+ */
+const FollowIcon = ({ compact }: { compact: boolean }) => (
+  <svg
+    className={compact ? 'h-4 w-4' : 'h-4 w-4 mr-1.5'}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+    />
+  </svg>
+);
+
+/**
+ * Following icon (checkmark)
+ */
+const FollowingIcon = ({ compact }: { compact: boolean }) => (
+  <svg
+    className={compact ? 'h-4 w-4' : 'h-4 w-4 mr-1.5'}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+/**
  * FollowButton Component
  *
  * A button that allows users to follow/unfollow other users.
@@ -117,61 +172,6 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
       : // Not following state: filled primary style
         'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400';
 
-    // Loading spinner
-    const LoadingSpinner = () => (
-      <svg
-        className="animate-spin h-4 w-4"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
-    );
-
-    // Icons
-    const FollowIcon = () => (
-      <svg
-        className={compact ? 'h-4 w-4' : 'h-4 w-4 mr-1.5'}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-        />
-      </svg>
-    );
-
-    const FollowingIcon = () => (
-      <svg
-        className={compact ? 'h-4 w-4' : 'h-4 w-4 mr-1.5'}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    );
-
     // Button text
     const getButtonText = () => {
       if (compact) return null;
@@ -181,6 +181,17 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
 
     // Aria label for accessibility
     const ariaLabel = isFollowing ? `Unfollow user` : `Follow user`;
+
+    // Render appropriate icon
+    const renderIcon = () => {
+      if (isLoading) {
+        return <LoadingSpinner />;
+      }
+      if (isFollowing) {
+        return <FollowingIcon compact={compact} />;
+      }
+      return <FollowIcon compact={compact} />;
+    };
 
     return (
       <button
@@ -193,7 +204,7 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
         aria-pressed={isFollowing}
         data-testid="follow-button"
       >
-        {isLoading ? <LoadingSpinner /> : isFollowing ? <FollowingIcon /> : <FollowIcon />}
+        {renderIcon()}
         {getButtonText()}
       </button>
     );

@@ -5,8 +5,8 @@
 
 import { Link } from 'react-router-dom';
 import type { FollowUser } from '../../services/userService';
-import { FollowButton } from './FollowButton';
 import { useAuth } from '../../hooks/useAuth';
+import { FollowButton } from './FollowButton';
 
 /**
  * Props for UserListItem component
