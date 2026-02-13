@@ -274,4 +274,71 @@ describe('Navigation Component', () => {
       expect(settingsLink).toHaveAttribute('href', '/settings');
     });
   });
+
+  describe('collapsed state', () => {
+    it('should hide text labels when collapsed', () => {
+      renderWithRouter(<Navigation isCollapsed={true} />);
+
+      // Text labels should not be visible when collapsed
+      expect(screen.queryByText('Topics')).not.toBeInTheDocument();
+      expect(screen.queryByText('Simulator')).not.toBeInTheDocument();
+      expect(screen.queryByText('Notifications')).not.toBeInTheDocument();
+      expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+    });
+
+    it('should show icons when collapsed', () => {
+      renderWithRouter(<Navigation isCollapsed={true} />);
+
+      // All links should still have icons
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(4);
+      links.forEach((link) => {
+        expect(link.querySelector('svg')).toBeInTheDocument();
+      });
+    });
+
+    it('should show title attribute (tooltip) when collapsed', () => {
+      renderWithRouter(<Navigation isCollapsed={true} />);
+
+      const links = screen.getAllByRole('link');
+      expect(links[0]).toHaveAttribute('title', 'Topics');
+      expect(links[1]).toHaveAttribute('title', 'Simulator');
+      expect(links[2]).toHaveAttribute('title', 'Notifications');
+      expect(links[3]).toHaveAttribute('title', 'Settings');
+    });
+
+    it('should show aria-label for accessibility when collapsed', () => {
+      renderWithRouter(<Navigation isCollapsed={true} />);
+
+      const links = screen.getAllByRole('link');
+      expect(links[0]).toHaveAttribute('aria-label', 'Topics');
+      expect(links[1]).toHaveAttribute('aria-label', 'Simulator');
+      expect(links[2]).toHaveAttribute('aria-label', 'Notifications');
+      expect(links[3]).toHaveAttribute('aria-label', 'Settings');
+    });
+
+    it('should not show title attribute when expanded', () => {
+      renderWithRouter(<Navigation isCollapsed={false} />);
+
+      const topicsLink = screen.getByText('Topics').closest('a');
+      expect(topicsLink).not.toHaveAttribute('title');
+    });
+
+    it('should hide notification badge when collapsed', () => {
+      mockUseNotifications(5);
+      renderWithRouter(<Navigation isCollapsed={true} />);
+
+      // Badge should not be visible when collapsed
+      expect(screen.queryByLabelText('5 unread')).not.toBeInTheDocument();
+    });
+
+    it('should center icons when collapsed', () => {
+      renderWithRouter(<Navigation isCollapsed={true} />);
+
+      const links = screen.getAllByRole('link');
+      links.forEach((link) => {
+        expect(link).toHaveClass('justify-center');
+      });
+    });
+  });
 });
