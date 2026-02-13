@@ -157,7 +157,7 @@ export class CommonGroundTriggerService {
    */
   async invalidateCommonGroundCache(topicId: string): Promise<void> {
     const latestKey = `common-ground:topic:${topicId}:latest`;
-    await this.cacheManager.del(latestKey);
+    await this.cacheManager?.del(latestKey);
     this.logger.debug(`Invalidated cache for topic ${topicId}`);
     // Note: Versioned caches remain valid as analysis versions are immutable
   }
