@@ -104,58 +104,43 @@ test.describe('Landing Page - Unauthenticated User Flow', () => {
 });
 
 test.describe('Landing Page - Authenticated User Redirect', () => {
-  // Mock user for authenticated tests
-  const mockUser = {
-    id: 'test-user-id',
-    email: 'test@example.com',
-    displayName: 'Test User',
-    avatarUrl: null,
-    role: 'user',
-    createdAt: new Date().toISOString(),
-  };
-
   test.beforeEach(async ({ page }) => {
-    // Mock the /api/users/me endpoint to prevent AuthContext from logging out
-    // when it tries to fetch user profile with the fake token
-    await page.route('**/api/users/me', (route) => {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockUser),
-      });
-    });
-
-    // Start at /about to load the React app and clear auth state
-    await page.goto('/about');
+    // Clear welcome banner dismissed state
+    await page.goto('/');
     await page.evaluate(() => {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
       localStorage.removeItem('reasonbridge_welcome_banner_dismissed');
     });
+
+    // Perform real login using demo account
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+
+    // Select demo admin user
+    await page.getByText('Admin Adams').click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: /^log in$/i }).click();
+
+    // Wait for login to complete and modal to close
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+
+    // Wait for navigation and authentication state to stabilize
+    await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(200); // Allow token storage and state propagation
   });
 
   test('should redirect authenticated user to topics page', async ({ page }) => {
-    // Set up auth token
-    await page.evaluate(() => {
-      localStorage.setItem('authToken', 'test-token-12345');
-    });
-
-    // Navigate to landing page via "Home" link (will trigger redirect)
-    await page.getByRole('link', { name: /home/i }).click();
+    // Navigate to landing page - should redirect to topics
+    await page.goto('/');
 
     // Should be redirected to topics with welcome param
-    await expect(page).toHaveURL(/\/topics\?welcome=true/);
+    await expect(page).toHaveURL(/\/topics\?welcome=true/, { timeout: 10000 });
   });
 
   test('should show welcome banner on topics page after redirect', async ({ page }) => {
-    // Set auth token (welcome banner dismissed state already cleared in beforeEach)
-    await page.evaluate(() => {
-      localStorage.setItem('authToken', 'test-token-12345');
-    });
-
-    // Navigate to landing page via "Home" link (will redirect)
-    await page.getByRole('link', { name: /home/i }).click();
-    await expect(page).toHaveURL(/\/topics\?welcome=true/);
+    // Navigate to landing page - should redirect to topics
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/topics\?welcome=true/, { timeout: 10000 });
 
     // Welcome banner should be visible
     await expect(page.getByRole('status')).toBeVisible();
@@ -163,14 +148,9 @@ test.describe('Landing Page - Authenticated User Redirect', () => {
   });
 
   test('should dismiss welcome banner and persist state', async ({ page }) => {
-    // Set auth token (welcome banner dismissed state already cleared in beforeEach)
-    await page.evaluate(() => {
-      localStorage.setItem('authToken', 'test-token-12345');
-    });
-
-    // Navigate to landing via "Home" link - should redirect to /topics?welcome=true
-    await page.getByRole('link', { name: /home/i }).click();
-    await expect(page).toHaveURL(/\/topics\?welcome=true/);
+    // Navigate to landing page - should redirect to topics
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/topics\?welcome=true/, { timeout: 10000 });
 
     // Banner should be visible
     const banner = page.getByRole('status');
@@ -182,11 +162,11 @@ test.describe('Landing Page - Authenticated User Redirect', () => {
     // Banner should be hidden
     await expect(banner).not.toBeVisible();
 
-    // Navigate away by clicking the ReasonBridge logo (goes to landing, redirects back)
+    // Navigate to landing page again (via logo click)
     await page.getByRole('link', { name: /reasonbridge/i }).click();
 
     // Should redirect back to topics (still authenticated)
-    await expect(page).toHaveURL(/\/topics\?welcome=true/);
+    await expect(page).toHaveURL(/\/topics\?welcome=true/, { timeout: 10000 });
 
     // Banner should remain hidden because localStorage remembers dismissal
     await expect(page.getByRole('status')).not.toBeVisible();
