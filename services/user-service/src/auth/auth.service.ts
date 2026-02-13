@@ -470,8 +470,8 @@ export class AuthService {
   private async generateJwtTokens(
     user: any,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
-    const jwtSecret = this.configService.get<string>('JWT_SECRET') || 'your-secret-key';
-    const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION') || '15m';
+    const jwtSecret = this.configService?.get<string>('JWT_SECRET') || 'your-secret-key';
+    const jwtExpiration = this.configService?.get<string>('JWT_EXPIRATION') || '15m';
 
     // Parse expiration to seconds (format: '15m', '1h', '7d')
     const expiresIn = this.parseExpiration(jwtExpiration);

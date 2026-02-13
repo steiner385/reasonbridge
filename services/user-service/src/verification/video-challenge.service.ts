@@ -56,26 +56,27 @@ export class VideoVerificationService {
   private readonly videoUploadUrlExpiresIn: number;
 
   constructor(private readonly configService: ConfigService) {
-    this.region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
+    // Defensive checks for ConfigService availability (handles edge cases during module initialization)
+    this.region = this.configService?.get<string>('AWS_REGION') || 'us-east-1';
     this.videoBucket =
-      this.configService.get<string>('S3_VIDEO_VERIFICATION_BUCKET') ||
+      this.configService?.get<string>('S3_VIDEO_VERIFICATION_BUCKET') ||
       'reason-bridge-video-verifications';
 
     // Video constraints
     this.videoMaxFileSize =
-      this.configService.get<number>('VIDEO_MAX_FILE_SIZE') || 100 * 1024 * 1024; // 100MB default
+      this.configService?.get<number>('VIDEO_MAX_FILE_SIZE') || 100 * 1024 * 1024; // 100MB default
     this.videoMinDurationSeconds =
-      this.configService.get<number>('VIDEO_MIN_DURATION_SECONDS') || 3;
+      this.configService?.get<number>('VIDEO_MIN_DURATION_SECONDS') || 3;
     this.videoMaxDurationSeconds =
-      this.configService.get<number>('VIDEO_MAX_DURATION_SECONDS') || 30;
+      this.configService?.get<number>('VIDEO_MAX_DURATION_SECONDS') || 30;
     this.videoUploadUrlExpiresIn =
-      this.configService.get<number>('VIDEO_UPLOAD_URL_EXPIRES_IN') || 3600; // 1 hour
+      this.configService?.get<number>('VIDEO_UPLOAD_URL_EXPIRES_IN') || 3600; // 1 hour
 
     this.s3Client = new S3Client({
       region: this.region,
       credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
+        accessKeyId: this.configService?.get<string>('AWS_ACCESS_KEY_ID') || '',
+        secretAccessKey: this.configService?.get<string>('AWS_SECRET_ACCESS_KEY') || '',
       },
     });
 

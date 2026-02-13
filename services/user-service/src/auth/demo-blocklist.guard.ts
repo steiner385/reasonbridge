@@ -39,9 +39,9 @@ export class DemoBlocklistGuard implements CanActivate {
   private readonly demoModeEnabled: boolean;
 
   constructor(private readonly configService: ConfigService) {
-    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const nodeEnv = this.configService?.get<string>('NODE_ENV', 'development');
     this.isProduction = nodeEnv === 'production';
-    this.demoModeEnabled = this.configService.get<string>('DEMO_MODE', 'false') === 'true';
+    this.demoModeEnabled = this.configService?.get<string>('DEMO_MODE', 'false') === 'true';
   }
 
   canActivate(context: ExecutionContext): boolean {

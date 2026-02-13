@@ -7,6 +7,7 @@ import {
   Injectable,
   NotFoundException,
   Inject,
+  Optional,
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
@@ -30,7 +31,7 @@ import { Prisma } from '@prisma/client';
 export class TopicsService {
   constructor(
     private prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Optional() @Inject(CACHE_MANAGER) private cacheManager: Cache | null,
     private searchService: TopicsSearchService,
     private slugGenerator: SlugGeneratorService,
     private editService: TopicsEditService,
@@ -60,7 +61,7 @@ export class TopicsService {
     const cacheKey = `topics:list:${JSON.stringify(query)}`;
 
     // Try to get from cache first (5min TTL)
-    const cached = await this.cacheManager.get<PaginatedTopicsResponseDto>(cacheKey);
+    const cached = await this.cacheManager?.get<PaginatedTopicsResponseDto>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -197,7 +198,7 @@ export class TopicsService {
     };
 
     // Cache result with 5min TTL (300000ms)
-    await this.cacheManager.set(cacheKey, result, 300000);
+    await this.cacheManager?.set(cacheKey, result, 300000);
 
     return result;
   }
@@ -374,7 +375,7 @@ export class TopicsService {
 
     // Step 5: Invalidate topic listing cache
     // Note: With query-based cache keys, specific caches will expire after 5min TTL
-    await this.cacheManager.del('topics:list');
+    await this.cacheManager?.del('topics:list');
 
     return {
       id: topic.id,
@@ -481,7 +482,7 @@ export class TopicsService {
       : `common-ground:topic:${topicId}:latest`;
 
     // Try to get from cache first
-    const cached = await this.cacheManager.get<CommonGroundResponseDto>(cacheKey);
+    const cached = await this.cacheManager?.get<CommonGroundResponseDto>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -527,7 +528,7 @@ export class TopicsService {
     };
 
     // Cache the result with a 1-hour TTL
-    await this.cacheManager.set(cacheKey, result, 3600000);
+    await this.cacheManager?.set(cacheKey, result, 3600000);
 
     return result;
   }
@@ -538,7 +539,7 @@ export class TopicsService {
    */
   async invalidateCommonGroundCache(topicId: string): Promise<void> {
     const latestKey = `common-ground:topic:${topicId}:latest`;
-    await this.cacheManager.del(latestKey);
+    await this.cacheManager?.del(latestKey);
     // Note: Versioned caches remain valid as analysis versions are immutable
   }
 
@@ -552,7 +553,7 @@ export class TopicsService {
 
     // Invalidate topic-specific cache keys
     const topicKey = `topic:${topicId}`;
-    await this.cacheManager.del(topicKey);
+    await this.cacheManager?.del(topicKey);
   }
 
   /**
@@ -670,12 +671,14 @@ export class TopicsService {
     });
 
     // Step 6: Invalidate caches
-    await this.cacheManager.del('topics:list');
-    // Clear all query-based caches for this topic
-    const cacheKeys = await this.cacheManager.stores.keys();
-    const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
-    const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
-    await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager.del(key)));
+    if (this.cacheManager) {
+      await this.cacheManager.del('topics:list');
+      // Clear all query-based caches for this topic
+      const cacheKeys = await this.cacheManager.stores.keys();
+      const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
+      const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
+      await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager!.del(key)));
+    }
 
     return {
       id: updatedTopic.id,
@@ -897,11 +900,13 @@ export class TopicsService {
     });
 
     // Step 9: Invalidate caches
-    await this.cacheManager.del('topics:list');
-    const cacheKeys = await this.cacheManager.stores.keys();
-    const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
-    const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
-    await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager.del(key)));
+    if (this.cacheManager) {
+      await this.cacheManager.del('topics:list');
+      const cacheKeys = await this.cacheManager.stores.keys();
+      const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
+      const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
+      await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager!.del(key)));
+    }
 
     return {
       id: updatedTopic.id,

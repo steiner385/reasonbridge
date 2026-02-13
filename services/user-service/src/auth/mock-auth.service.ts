@@ -32,7 +32,7 @@ export class MockAuthService {
 
   constructor(private readonly configService: ConfigService) {
     // Use a simple secret for testing - DO NOT use in production
-    this.jwtSecret = this.configService.get<string>('JWT_SECRET', 'mock-jwt-secret-for-testing');
+    this.jwtSecret = this.configService?.get<string>('JWT_SECRET', 'mock-jwt-secret-for-testing');
   }
 
   /**

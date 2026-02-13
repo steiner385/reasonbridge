@@ -22,14 +22,14 @@ export class CognitoService {
   private readonly clientId: string;
 
   constructor(private readonly configService: ConfigService) {
-    const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
+    const region = this.configService?.get<string>('AWS_REGION', 'us-east-1');
 
     this.cognitoClient = new CognitoIdentityProviderClient({
       region,
     });
 
-    this.userPoolId = this.configService.getOrThrow<string>('COGNITO_USER_POOL_ID');
-    this.clientId = this.configService.getOrThrow<string>('COGNITO_CLIENT_ID');
+    this.userPoolId = this.configService?.getOrThrow<string>('COGNITO_USER_POOL_ID');
+    this.clientId = this.configService?.getOrThrow<string>('COGNITO_CLIENT_ID');
   }
 
   async authenticateUser(email: string, password: string) {
