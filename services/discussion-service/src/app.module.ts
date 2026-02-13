@@ -14,6 +14,7 @@ import { AlignmentsModule } from './alignments/alignments.module.js';
 import { DiscussionsModule } from './discussions/discussions.module.js';
 import { PropositionsModule } from './propositions/propositions.module.js';
 import { TagsModule } from './tags/tags.module.js';
+import { ClientsModule } from './clients/clients.module.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -53,6 +54,8 @@ import { TagsModule } from './tags/tags.module.js';
     PropositionsModule,
     // T216 - Tag management (Feature 016)
     TagsModule,
+    // T249 - Activity feed integration (#245)
+    ClientsModule,
   ],
   controllers: [],
   providers: [],

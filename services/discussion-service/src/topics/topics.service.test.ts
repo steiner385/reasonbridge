@@ -54,6 +54,16 @@ const createMockCacheManager = () => ({
   },
 });
 
+// Mock Propositions Service
+const createMockPropositionsService = () => ({
+  createInitialPropositions: vi.fn().mockResolvedValue([]),
+});
+
+// Mock Activity Client Service
+const createMockActivityClient = () => ({
+  createEvent: vi.fn().mockResolvedValue(undefined),
+});
+
 const createMockTopic = (overrides = {}) => ({
   id: 'topic-1',
   title: 'Test Topic',
@@ -84,6 +94,8 @@ describe('TopicsService', () => {
   let mockSearchService: ReturnType<typeof createMockSearchService>;
   let mockSlugGenerator: ReturnType<typeof createMockSlugGenerator>;
   let mockEditService: ReturnType<typeof createMockEditService>;
+  let mockPropositionsService: ReturnType<typeof createMockPropositionsService>;
+  let mockActivityClient: ReturnType<typeof createMockActivityClient>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -92,12 +104,16 @@ describe('TopicsService', () => {
     mockSearchService = createMockSearchService();
     mockSlugGenerator = createMockSlugGenerator();
     mockEditService = createMockEditService();
+    mockPropositionsService = createMockPropositionsService();
+    mockActivityClient = createMockActivityClient();
     service = new TopicsService(
       mockPrisma as any,
       mockCacheManager as any,
       mockSearchService as any,
       mockSlugGenerator as any,
       mockEditService as any,
+      mockPropositionsService as any,
+      mockActivityClient as any,
     );
   });
 
