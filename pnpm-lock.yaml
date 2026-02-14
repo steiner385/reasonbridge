@@ -742,6 +742,9 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@25.2.2)(@vitest/ui@2.1.9)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))
 
   services/moderation-service:
     dependencies:
@@ -2423,6 +2426,7 @@ packages:
   '@pact-foundation/pact-core@18.0.0':
     resolution: {integrity: sha512-21sOzu+28HLivTdsnwOmLAPjHLDaPfUbv/aTxlWqCVmBTXVsxekrbQJkO0ga6COXEXQg0BGKmqLxh22orm//9A==}
     engines: {node: '>=20'}
+    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.1.0':
