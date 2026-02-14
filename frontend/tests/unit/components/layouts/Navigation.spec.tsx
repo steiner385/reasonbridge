@@ -32,6 +32,7 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />);
 
       expect(screen.getByText('Topics')).toBeInTheDocument();
+      expect(screen.getByText('Activity')).toBeInTheDocument();
       expect(screen.getByText('Simulator')).toBeInTheDocument();
       expect(screen.getByText('Notifications')).toBeInTheDocument();
       expect(screen.getByText('Settings')).toBeInTheDocument();
@@ -54,13 +55,15 @@ describe('Navigation Component', () => {
       });
     });
 
-    it('should render data-tour attributes for Topics and Notifications', () => {
+    it('should render data-tour attributes for Topics, Activity, and Notifications', () => {
       renderWithRouter(<Navigation />);
 
       const topicsLink = screen.getByText('Topics').closest('a');
+      const activityLink = screen.getByText('Activity').closest('a');
       const notificationsLink = screen.getByText('Notifications').closest('a');
 
       expect(topicsLink).toHaveAttribute('data-tour', 'nav-topics');
+      expect(activityLink).toHaveAttribute('data-tour', 'nav-feed');
       expect(notificationsLink).toHaveAttribute('data-tour', 'nav-notifications');
     });
   });
@@ -73,6 +76,15 @@ describe('Navigation Component', () => {
       expect(topicsLink).toHaveClass('bg-primary-50');
       expect(topicsLink).toHaveClass('text-primary-700');
       expect(topicsLink).toHaveAttribute('aria-current', 'page');
+    });
+
+    it('should highlight active link when on Activity feed page', () => {
+      renderWithRouter(<Navigation />, '/feed');
+
+      const activityLink = screen.getByText('Activity').closest('a');
+      expect(activityLink).toHaveClass('bg-primary-50');
+      expect(activityLink).toHaveClass('text-primary-700');
+      expect(activityLink).toHaveAttribute('aria-current', 'page');
     });
 
     it('should highlight active link when on Notifications page', () => {
@@ -183,6 +195,18 @@ describe('Navigation Component', () => {
       expect(onNavigate).toHaveBeenCalledTimes(1);
     });
 
+    it('should call onNavigate for Activity link', async () => {
+      const onNavigate = vi.fn();
+      const user = userEvent.setup();
+
+      renderWithRouter(<Navigation onNavigate={onNavigate} />);
+
+      const activityLink = screen.getByText('Activity');
+      await user.click(activityLink);
+
+      expect(onNavigate).toHaveBeenCalledTimes(1);
+    });
+
     it('should call onNavigate for Notifications link', async () => {
       const onNavigate = vi.fn();
       const user = userEvent.setup();
@@ -250,7 +274,7 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />);
 
       const links = screen.getAllByRole('link');
-      expect(links).toHaveLength(4); // Topics, Simulator, Notifications, Settings
+      expect(links).toHaveLength(5); // Topics, Activity, Simulator, Notifications, Settings
 
       links.forEach((link) => {
         expect(link.tagName).toBe('A');
@@ -264,11 +288,13 @@ describe('Navigation Component', () => {
       renderWithRouter(<Navigation />);
 
       const topicsLink = screen.getByText('Topics').closest('a');
+      const activityLink = screen.getByText('Activity').closest('a');
       const simulatorLink = screen.getByText('Simulator').closest('a');
       const notificationsLink = screen.getByText('Notifications').closest('a');
       const settingsLink = screen.getByText('Settings').closest('a');
 
       expect(topicsLink).toHaveAttribute('href', '/topics');
+      expect(activityLink).toHaveAttribute('href', '/feed');
       expect(simulatorLink).toHaveAttribute('href', '/simulator');
       expect(notificationsLink).toHaveAttribute('href', '/notifications');
       expect(settingsLink).toHaveAttribute('href', '/settings');
@@ -281,6 +307,7 @@ describe('Navigation Component', () => {
 
       // Text labels should not be visible when collapsed
       expect(screen.queryByText('Topics')).not.toBeInTheDocument();
+      expect(screen.queryByText('Activity')).not.toBeInTheDocument();
       expect(screen.queryByText('Simulator')).not.toBeInTheDocument();
       expect(screen.queryByText('Notifications')).not.toBeInTheDocument();
       expect(screen.queryByText('Settings')).not.toBeInTheDocument();
@@ -291,7 +318,7 @@ describe('Navigation Component', () => {
 
       // All links should still have icons
       const links = screen.getAllByRole('link');
-      expect(links).toHaveLength(4);
+      expect(links).toHaveLength(5);
       links.forEach((link) => {
         expect(link.querySelector('svg')).toBeInTheDocument();
       });
@@ -302,9 +329,10 @@ describe('Navigation Component', () => {
 
       const links = screen.getAllByRole('link');
       expect(links[0]).toHaveAttribute('title', 'Topics');
-      expect(links[1]).toHaveAttribute('title', 'Simulator');
-      expect(links[2]).toHaveAttribute('title', 'Notifications');
-      expect(links[3]).toHaveAttribute('title', 'Settings');
+      expect(links[1]).toHaveAttribute('title', 'Activity');
+      expect(links[2]).toHaveAttribute('title', 'Simulator');
+      expect(links[3]).toHaveAttribute('title', 'Notifications');
+      expect(links[4]).toHaveAttribute('title', 'Settings');
     });
 
     it('should show aria-label for accessibility when collapsed', () => {
@@ -312,9 +340,10 @@ describe('Navigation Component', () => {
 
       const links = screen.getAllByRole('link');
       expect(links[0]).toHaveAttribute('aria-label', 'Topics');
-      expect(links[1]).toHaveAttribute('aria-label', 'Simulator');
-      expect(links[2]).toHaveAttribute('aria-label', 'Notifications');
-      expect(links[3]).toHaveAttribute('aria-label', 'Settings');
+      expect(links[1]).toHaveAttribute('aria-label', 'Activity');
+      expect(links[2]).toHaveAttribute('aria-label', 'Simulator');
+      expect(links[3]).toHaveAttribute('aria-label', 'Notifications');
+      expect(links[4]).toHaveAttribute('aria-label', 'Settings');
     });
 
     it('should not show title attribute when expanded', () => {

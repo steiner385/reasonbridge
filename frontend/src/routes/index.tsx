@@ -30,6 +30,7 @@ import {
   ConsentVerifyPage,
   ParentalDashboardPage,
 } from '../pages/ParentalConsent';
+import { ActivityFeedPage } from '../pages/Feed';
 
 /**
  * Redirect component for /topics/:id -> /discussions?topic=:id
@@ -90,6 +91,14 @@ export const routes: RouteObject[] = [
   {
     path: '/profile/:id',
     element: <UserProfilePage />,
+  },
+  {
+    path: '/feed',
+    element: (
+      <ProtectedRoute>
+        <ActivityFeedPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/notifications',
