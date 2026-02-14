@@ -160,7 +160,7 @@ export class GoogleFactCheckClient implements IFactCheckClient {
         return null;
       }
 
-      const data: GoogleFactCheckApiResponse = await response.json();
+      const data = (await response.json()) as GoogleFactCheckApiResponse;
       this.recordSuccess();
 
       if (!data.claims || data.claims.length === 0) {
