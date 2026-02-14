@@ -7,7 +7,7 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
-import { SERVICE_PORTS } from '@reason-bridge/common';
+import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { getCorsConfig, getHelmetConfig } from './config/security.config.js';
 
@@ -72,6 +72,9 @@ async function bootstrap() {
       },
     });
   }
+
+  // Setup graceful shutdown handlers
+  setupGracefulShutdown(app, { serviceName: 'api-gateway' });
 
   const port = process.env['PORT'] || SERVICE_PORTS.API_GATEWAY;
   await app.listen(port, '0.0.0.0');

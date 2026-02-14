@@ -10,3 +10,4 @@
 export * from './assert.js';
 export * from './environment.js';
 export * from './id.js';
+export * from './shutdown.js';

@@ -6,6 +6,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -23,6 +24,9 @@ async function bootstrap() {
       transform: true, // Automatically transform payloads to DTO instances
     }),
   );
+
+  // Setup graceful shutdown handlers
+  setupGracefulShutdown(app, { serviceName: 'user-service' });
 
   const port = process.env['PORT'] || 3001;
   await app.listen(port, '0.0.0.0');
