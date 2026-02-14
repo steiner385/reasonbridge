@@ -5,7 +5,7 @@
 
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { SERVICE_PORTS } from '@reason-bridge/common';
+import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -14,6 +14,9 @@ async function bootstrap() {
     // Only log errors in test mode to prevent memory leaks from verbose logging
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
+
+  // Setup graceful shutdown handlers
+  setupGracefulShutdown(app, { serviceName: 'ai-service' });
 
   const port = process.env['PORT'] || SERVICE_PORTS.AI_SERVICE;
   await app.listen(port, '0.0.0.0');

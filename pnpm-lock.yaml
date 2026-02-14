@@ -257,6 +257,9 @@ importers:
         specifier: workspace:*
         version: link:../event-schemas
     devDependencies:
+      '@nestjs/common':
+        specifier: ^11.0.0
+        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -2426,7 +2429,6 @@ packages:
   '@pact-foundation/pact-core@18.0.0':
     resolution: {integrity: sha512-21sOzu+28HLivTdsnwOmLAPjHLDaPfUbv/aTxlWqCVmBTXVsxekrbQJkO0ga6COXEXQg0BGKmqLxh22orm//9A==}
     engines: {node: '>=20'}
-    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.1.0':

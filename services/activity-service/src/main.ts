@@ -5,7 +5,7 @@
 
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { SERVICE_PORTS } from '@reason-bridge/common';
+import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -13,6 +13,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
+
+  // Setup graceful shutdown handlers
+  setupGracefulShutdown(app, { serviceName: 'activity-service' });
 
   const port = process.env['PORT'] || SERVICE_PORTS.ACTIVITY_SERVICE;
   await app.listen(port, '0.0.0.0');

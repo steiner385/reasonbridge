@@ -41,7 +41,16 @@
     "@aws-sdk/client-sqs": "^3.985.0",
     "@reason-bridge/event-schemas": "workspace:*"
   },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@nestjs/common": "^11.0.0",
     "typescript": "5.9.3"
   },
   "engines": {
