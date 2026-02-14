@@ -21,6 +21,7 @@ import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
 import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
 import DiscussionSimulatorPage from '../pages/DiscussionSimulatorPage';
 import NotificationsPage from '../pages/NotificationsPage';
+import { ActivityFeedPage } from '../pages/Feed';
 import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
@@ -96,6 +97,14 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <NotificationsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/feed',
+    element: (
+      <ProtectedRoute>
+        <ActivityFeedPage />
       </ProtectedRoute>
     ),
   },
