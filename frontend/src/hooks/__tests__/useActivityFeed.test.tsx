@@ -6,11 +6,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useActivityFeed } from '../useActivityFeed';
-import { apiClient } from '../../lib/api';
+import { apiClient, ApiError } from '../../lib/api';
 import type { ActivityFeedResponse } from '../../types/activity';
-
-// Import ApiError for type checking
-import { ApiError } from '../../lib/api';
 
 // Mock the API client
 vi.mock('../../lib/api', async (importOriginal) => {

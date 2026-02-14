@@ -9,8 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ActivityFeedPage } from '../ActivityFeedPage';
 import { useActivityFeed } from '../../../hooks/useActivityFeed';

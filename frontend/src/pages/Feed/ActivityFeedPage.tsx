@@ -5,9 +5,9 @@
 
 import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { LoadingSpinner } from '../../components/ui';
 import { useActivityFeed } from '../../hooks/useActivityFeed';
 import { ActivityFeedItem } from './ActivityFeedItem';
-import { LoadingSpinner } from '../../components/ui';
 
 /**
  * ActivityFeedPage Component

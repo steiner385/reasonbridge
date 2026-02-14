@@ -138,10 +138,49 @@ export function useActivityFeed(options: UseActivityFeedOptions = {}): UseActivi
 
   // Fetch on mount if enabled
   useEffect(() => {
-    if (fetchOnMount) {
-      fetchFeed();
+    if (!fetchOnMount) {
+      return;
     }
-  }, [fetchOnMount, fetchFeed]);
+
+    let cancelled = false;
+
+    const doFetch = async () => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const response = await apiClient.get<ActivityFeedResponse>('/feed', {
+          params: { limit },
+        });
+
+        if (!cancelled) {
+          setState({
+            activities: response.activities,
+            isLoading: false,
+            isLoadingMore: false,
+            error: null,
+            hasMore: response.hasMore,
+            nextCursor: response.nextCursor,
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          const errorMessage =
+            error instanceof ApiError ? error.message : 'Failed to load activity feed';
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: errorMessage,
+          }));
+        }
+      }
+    };
+
+    doFetch();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchOnMount, limit]);
 
   return {
     activities: state.activities,
