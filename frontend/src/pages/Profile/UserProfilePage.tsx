@@ -13,6 +13,7 @@ import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
+import { FollowButton } from '../../components/users';
 
 function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -86,9 +87,12 @@ function UserProfilePage() {
       {/* Profile Header */}
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {user.displayName}
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {user.displayName}
+            </h1>
+            {id && <FollowButton userId={id} />}
+          </div>
         </CardHeader>
         <CardBody>
           <div className="space-y-4">
