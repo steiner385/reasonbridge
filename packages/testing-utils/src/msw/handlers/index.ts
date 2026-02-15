@@ -62,10 +62,53 @@ export {
   type MockResponse,
 } from './discussion-service.js';
 
+// OAuth Providers (T297)
+export {
+  GOOGLE_OAUTH_BASE_URL,
+  GOOGLE_USERINFO_URL,
+  APPLE_OAUTH_BASE_URL,
+  mockGoogleAccessToken,
+  mockGoogleRefreshToken,
+  mockAppleAccessToken,
+  mockAppleRefreshToken,
+  mockGoogleUsers,
+  mockAppleUsers,
+  oauthHandlers,
+  setMockGoogleUser,
+  setMockAppleUser,
+  setMockGoogleTokenValid,
+  setMockAppleTokenValid,
+  resetOAuthMocks,
+  type MockGoogleUser,
+  type MockAppleUser,
+} from './oauth.js';
+
+// AWS Bedrock AI (T298)
+export {
+  BEDROCK_RUNTIME_BASE_URL,
+  MOCK_MODEL_ID,
+  mockCommonGroundAnalyses,
+  mockMoralFoundationAnalyses,
+  mockModerationResults,
+  bedrockHandlers,
+  setMockCommonGroundAnalysis,
+  setMockMoralFoundationAnalysis,
+  setMockModerationResult,
+  setMockBedrockEnabled,
+  setMockBedrockLatency,
+  resetBedrockMocks,
+  type MoralFoundation,
+  type MockCommonGroundAnalysis,
+  type MockMoralFoundationAnalysis,
+  type MockModerationResult,
+} from './bedrock.js';
+
 // Combined service handlers for convenience
 import { factCheckHandlers } from './fact-check.js';
 import { userServiceHandlers } from './user-service.js';
 import { discussionServiceHandlers } from './discussion-service.js';
+import { oauthHandlers } from './oauth.js';
+import { bedrockHandlers } from './bedrock.js';
 import type { RequestHandler } from 'msw';
 
 /**
@@ -77,4 +120,6 @@ export const allServiceHandlers: RequestHandler[] = [
   ...factCheckHandlers,
   ...userServiceHandlers,
   ...discussionServiceHandlers,
+  ...oauthHandlers,
+  ...bedrockHandlers,
 ];
