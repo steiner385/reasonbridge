@@ -3,14 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Body, Controller, Post, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { FactCheckService } from '../services/fact-check.service.js';
-import type { CheckClaimsRequestDto, CheckClaimsResponseDto } from '../dto/check-claims.dto.js';
+import type {
+  CheckClaimsRequestDto,
+  CheckClaimsResponseDto,
+  FactCheckResultDto,
+} from '../dto/check-claims.dto.js';
+
+/**
+ * UUID regex pattern for validation (accepts any valid UUID format)
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Controller for fact-check operations
  *
  * T254: POST /fact-check/check endpoint
+ * T256: GET /fact-check/:id endpoint
  *
  * Exposes endpoints for checking factual claims against external
  * fact-checking databases. Results are presented as "Related Context"
@@ -87,5 +106,35 @@ export class FactCheckController {
     this.logger.log(`Checking ${request.claims.length} claims for response ${request.responseId}`);
 
     return this.factCheckService.checkClaims(request);
+  }
+
+  /**
+   * Get a fact-check result by ID
+   *
+   * GET /fact-check/:id
+   *
+   * T256: Retrieve a previously cached fact-check result
+   *
+   * @param id - Result ID (UUID)
+   * @returns The fact-check result
+   * @throws NotFoundException if result not found or expired
+   * @throws BadRequestException if ID is not a valid UUID
+   */
+  @Get(':id')
+  async getResult(@Param('id') id: string): Promise<FactCheckResultDto> {
+    // Validate UUID format
+    if (!UUID_REGEX.test(id)) {
+      throw new BadRequestException('Invalid fact-check result ID format');
+    }
+
+    this.logger.log(`Retrieving fact-check result: ${id}`);
+
+    const result = await this.factCheckService.getResultById(id);
+
+    if (!result) {
+      throw new NotFoundException(`Fact-check result not found: ${id}`);
+    }
+
+    return result;
   }
 }

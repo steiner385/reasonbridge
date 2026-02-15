@@ -4,20 +4,26 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { FactCheckController } from '../fact-check.controller.js';
 import { FactCheckService } from '../../services/fact-check.service.js';
-import type { CheckClaimsRequestDto, CheckClaimsResponseDto } from '../../dto/check-claims.dto.js';
+import type {
+  CheckClaimsRequestDto,
+  CheckClaimsResponseDto,
+  FactCheckResultDto,
+} from '../../dto/check-claims.dto.js';
 
 describe('FactCheckController', () => {
   let controller: FactCheckController;
   let mockFactCheckService: {
     checkClaims: ReturnType<typeof vi.fn>;
+    getResultById: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     mockFactCheckService = {
       checkClaims: vi.fn(),
+      getResultById: vi.fn(),
     };
     controller = new FactCheckController(mockFactCheckService as unknown as FactCheckService);
   });
@@ -188,6 +194,87 @@ describe('FactCheckController', () => {
       await expect(controller.checkClaims(request)).rejects.toThrow(
         'claims[1].text cannot be empty',
       );
+    });
+  });
+
+  describe('getResult', () => {
+    const validUuid = '123e4567-e89b-12d3-a456-426614174000';
+
+    const mockResult: FactCheckResultDto = {
+      id: validUuid,
+      claimText: 'The Earth is flat',
+      claimStartOffset: 0,
+      claimEndOffset: 17,
+      displayedAs: 'Related Context',
+      sources: [
+        {
+          provider: 'Snopes',
+          url: 'https://snopes.com/earth-flat',
+          title: 'Is the Earth Flat?',
+          publishedAt: '2023-01-01T00:00:00.000Z',
+          rating: 'False',
+          ratingDescription: 'False',
+          credibilityScore: 0.95,
+          retrievedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      hasConflictingSources: false,
+      expiresAt: '2024-01-02T00:00:00.000Z',
+    };
+
+    it('should return fact-check result successfully', async () => {
+      mockFactCheckService.getResultById.mockResolvedValue(mockResult);
+
+      const result = await controller.getResult(validUuid);
+
+      expect(result).toEqual(mockResult);
+      expect(mockFactCheckService.getResultById).toHaveBeenCalledWith(validUuid);
+    });
+
+    it('should throw BadRequestException for invalid UUID format', async () => {
+      const invalidId = 'not-a-valid-uuid';
+
+      await expect(controller.getResult(invalidId)).rejects.toThrow(BadRequestException);
+      await expect(controller.getResult(invalidId)).rejects.toThrow(
+        'Invalid fact-check result ID format',
+      );
+    });
+
+    it('should accept valid UUID v1 format', async () => {
+      // UUID v1 format is also accepted
+      const uuidV1 = '123e4567-e89b-12d3-8456-426614174000';
+      mockFactCheckService.getResultById.mockResolvedValue(mockResult);
+
+      const result = await controller.getResult(uuidV1);
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should throw NotFoundException when result not found', async () => {
+      mockFactCheckService.getResultById.mockResolvedValue(null);
+
+      await expect(controller.getResult(validUuid)).rejects.toThrow(NotFoundException);
+      await expect(controller.getResult(validUuid)).rejects.toThrow(
+        `Fact-check result not found: ${validUuid}`,
+      );
+    });
+
+    it('should accept various valid UUID v4 formats', async () => {
+      mockFactCheckService.getResultById.mockResolvedValue(mockResult);
+
+      // Lowercase
+      await expect(
+        controller.getResult('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'),
+      ).resolves.toBeDefined();
+
+      // Uppercase
+      await expect(
+        controller.getResult('A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11'),
+      ).resolves.toBeDefined();
+
+      // Mixed case
+      await expect(
+        controller.getResult('A0eebc99-9C0B-4ef8-Bb6d-6BB9BD380a11'),
+      ).resolves.toBeDefined();
     });
   });
 });
