@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, Optional } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import type { IFactCheckClient } from '../clients/abstract-fact-check.client.js';
 import { FACT_CHECK_CLIENTS } from '../clients/abstract-fact-check.client.js';
@@ -14,6 +14,7 @@ import type {
   FactCheckSourceDto,
   ClaimDto,
 } from '../dto/check-claims.dto.js';
+import { FactCheckCacheService, computeContentHash } from '../cache/index.js';
 
 /**
  * Service for coordinating fact-checks across multiple providers
@@ -30,9 +31,11 @@ export class FactCheckService {
   constructor(
     @Inject(FACT_CHECK_CLIENTS)
     private readonly factCheckClients: IFactCheckClient[],
+    @Optional()
+    private readonly cacheService?: FactCheckCacheService,
   ) {
     this.logger.log(
-      `FactCheckService initialized with ${this.factCheckClients.length} configured client(s)`,
+      `FactCheckService initialized with ${this.factCheckClients.length} configured client(s), caching: ${this.cacheService ? 'enabled' : 'disabled'}`,
     );
   }
 
@@ -68,8 +71,30 @@ export class FactCheckService {
 
   /**
    * Check a single claim against all configured providers
+   *
+   * Caching strategy:
+   * 1. Compute hash of normalized claim text
+   * 2. Check cache for existing result
+   * 3. On cache miss, query all providers
+   * 4. Store result in cache (async, non-blocking)
    */
   private async checkSingleClaim(claim: ClaimDto): Promise<FactCheckResultDto | null> {
+    const claimHash = computeContentHash(claim.text);
+
+    // Try cache first
+    if (this.cacheService) {
+      const cached = await this.cacheService.get(claimHash);
+      if (cached) {
+        // Return cached result with updated offsets for this specific claim instance
+        return {
+          ...cached,
+          id: randomUUID(), // Generate new ID for this response
+          claimStartOffset: claim.startOffset,
+          claimEndOffset: claim.endOffset,
+        };
+      }
+    }
+
     // Query all clients in parallel
     const clientPromises = this.factCheckClients.map((client) =>
       client.checkClaim({ claim: claim.text }).catch((error) => {
@@ -127,7 +152,7 @@ export class FactCheckService {
       ? 'Multiple fact-checking sources have different assessments for this claim.'
       : undefined;
 
-    return {
+    const result: FactCheckResultDto = {
       id: randomUUID(),
       claimText: claim.text,
       claimStartOffset: claim.startOffset,
@@ -138,6 +163,15 @@ export class FactCheckService {
       conflictSummary,
       expiresAt: latestExpiresAt.toISOString(),
     };
+
+    // Cache the result asynchronously (don't block response)
+    if (this.cacheService) {
+      this.cacheService.set(claimHash, result).catch((error) => {
+        this.logger.warn(`Failed to cache fact-check result: ${error.message}`);
+      });
+    }
+
+    return result;
   }
 
   /**

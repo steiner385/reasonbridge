@@ -699,6 +699,9 @@ importers:
 
   services/fact-check-service:
     dependencies:
+      '@nestjs/cache-manager':
+        specifier: ^3.1.0
+        version: 3.1.0(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(cache-manager@7.2.8)(keyv@5.5.5)(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.1.13
         version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -720,12 +723,21 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      cache-manager:
+        specifier: ^7.2.8
+        version: 7.2.8
+      cache-manager-redis-store:
+        specifier: ^3.0.1
+        version: 3.0.1
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      redis:
+        specifier: ^4.7.0
+        version: 4.7.1
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
