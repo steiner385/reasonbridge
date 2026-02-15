@@ -143,7 +143,7 @@ const ClaimResult: React.FC<{
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-            "{result.claimText}"
+            &ldquo;{result.claimText}&rdquo;
           </p>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-gray-500 dark:text-gray-400">

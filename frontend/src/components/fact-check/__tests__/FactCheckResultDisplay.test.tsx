@@ -76,10 +76,10 @@ describe('FactCheckResultDisplay', () => {
     it('should render all claim texts', () => {
       render(<FactCheckResultDisplay results={mockResults} />);
       expect(
-        screen.getByText('"The Earth is approximately 4.5 billion years old."'),
+        screen.getByText('\u201CThe Earth is approximately 4.5 billion years old.\u201D'),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('"Coffee consumption has increased by 50% globally."'),
+        screen.getByText('\u201CCoffee consumption has increased by 50% globally.\u201D'),
       ).toBeInTheDocument();
     });
 
