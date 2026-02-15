@@ -221,3 +221,7 @@ export class FixtureBuilder {
 export function fixtures(): FixtureBuilder {
   return new FixtureBuilder();
 }
+
+// Re-export domain-specific fixtures
+export * from './feedback.fixture.js';
+export * from './moderation.fixture.js';
