@@ -54,3 +54,41 @@ export {
   defaultHandlers,
   createHandlersWithBaseUrl,
 } from './handlers.js';
+
+// Service-specific handlers (T299, T300, T301)
+export {
+  // Fact-Check Service (T299)
+  FACT_CHECK_BASE_URL,
+  mockFactCheckSources,
+  mockFactCheckResults,
+  factCheckHandlers,
+  addMockFactCheckResult,
+  clearMockFactCheckCache,
+  // User Service (T300)
+  USER_SERVICE_BASE_URL,
+  userServiceMockAuthToken,
+  mockRefreshToken,
+  mockUsers,
+  mockOnboardingProgress,
+  userServiceHandlers,
+  setMockAuthenticatedUser,
+  addMockUser,
+  resetUserServiceMocks,
+  type MockUser,
+  // Discussion Service (T301)
+  DISCUSSION_SERVICE_BASE_URL,
+  mockAuthor,
+  mockTopics,
+  mockResponses,
+  mockPropositions,
+  mockCommonGround,
+  discussionServiceHandlers,
+  addMockTopic,
+  addMockResponse,
+  resetDiscussionServiceMocks,
+  type MockAuthor,
+  type MockTopic,
+  type MockResponse,
+  // Combined
+  allServiceHandlers,
+} from './handlers/index.js';
