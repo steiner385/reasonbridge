@@ -165,13 +165,34 @@ export class FactCheckService {
     };
 
     // Cache the result asynchronously (don't block response)
+    // Store by both claim hash (for cache lookups) and result ID (for direct retrieval)
     if (this.cacheService) {
-      this.cacheService.set(claimHash, result).catch((error) => {
+      Promise.all([
+        this.cacheService.set(claimHash, result),
+        this.cacheService.setById(result.id, result),
+      ]).catch((error) => {
         this.logger.warn(`Failed to cache fact-check result: ${error.message}`);
       });
     }
 
     return result;
+  }
+
+  /**
+   * Get a fact-check result by its ID
+   *
+   * T256: GET /fact-check/:id endpoint implementation
+   *
+   * @param id - Result ID (UUID)
+   * @returns The fact-check result or null if not found
+   */
+  async getResultById(id: string): Promise<FactCheckResultDto | null> {
+    if (!this.cacheService) {
+      this.logger.warn('Cache service not available for ID lookup');
+      return null;
+    }
+
+    return this.cacheService.getById(id);
   }
 
   /**

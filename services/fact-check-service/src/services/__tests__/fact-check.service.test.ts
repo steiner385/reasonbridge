@@ -7,7 +7,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FactCheckService } from '../fact-check.service.js';
 import type { IFactCheckClient } from '../../clients/abstract-fact-check.client.js';
 import type { FactCheckResult, FactCheckClientHealth } from '../../clients/types.js';
-import type { CheckClaimsRequestDto } from '../../dto/check-claims.dto.js';
+import type { CheckClaimsRequestDto, FactCheckResultDto } from '../../dto/check-claims.dto.js';
+import type { FactCheckCacheService } from '../../cache/index.js';
 
 describe('FactCheckService', () => {
   let service: FactCheckService;
@@ -292,6 +293,79 @@ describe('FactCheckService', () => {
       expect(result.providers).toHaveLength(2);
       expect(result.providers[0].isHealthy).toBe(true);
       expect(result.providers[1].isHealthy).toBe(false);
+    });
+  });
+
+  describe('getResultById', () => {
+    const mockResult: FactCheckResultDto = {
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      claimText: 'Test claim',
+      claimStartOffset: 0,
+      claimEndOffset: 10,
+      displayedAs: 'Related Context',
+      sources: [
+        {
+          provider: 'Snopes',
+          url: 'https://snopes.com/test',
+          title: 'Test Fact Check',
+          publishedAt: '2023-01-01T00:00:00.000Z',
+          rating: 'False',
+          credibilityScore: 0.95,
+          retrievedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      hasConflictingSources: false,
+      expiresAt: '2024-01-02T00:00:00.000Z',
+    };
+
+    it('should return null when cache service is not available', async () => {
+      // Service without cache
+      const serviceWithoutCache = new FactCheckService([mockClient as unknown as IFactCheckClient]);
+
+      const result = await serviceWithoutCache.getResultById(
+        '123e4567-e89b-12d3-a456-426614174000',
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('should return cached result when found', async () => {
+      const mockCacheService = {
+        getById: vi.fn().mockResolvedValue(mockResult),
+        setById: vi.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        invalidate: vi.fn(),
+      };
+
+      const serviceWithCache = new FactCheckService(
+        [mockClient as unknown as IFactCheckClient],
+        mockCacheService as unknown as FactCheckCacheService,
+      );
+
+      const result = await serviceWithCache.getResultById('123e4567-e89b-12d3-a456-426614174000');
+
+      expect(result).toEqual(mockResult);
+      expect(mockCacheService.getById).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000');
+    });
+
+    it('should return null when result not found in cache', async () => {
+      const mockCacheService = {
+        getById: vi.fn().mockResolvedValue(null),
+        setById: vi.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        invalidate: vi.fn(),
+      };
+
+      const serviceWithCache = new FactCheckService(
+        [mockClient as unknown as IFactCheckClient],
+        mockCacheService as unknown as FactCheckCacheService,
+      );
+
+      const result = await serviceWithCache.getResultById('123e4567-e89b-12d3-a456-426614174000');
+
+      expect(result).toBeNull();
     });
   });
 });

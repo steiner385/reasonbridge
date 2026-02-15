@@ -9,9 +9,14 @@ import type { Cache } from 'cache-manager';
 import type { FactCheckResultDto } from '../dto/check-claims.dto.js';
 
 /**
- * Cache key prefix for fact-check results
+ * Cache key prefix for fact-check results by claim hash
  */
 const CACHE_KEY_PREFIX = 'fact-check:result:';
+
+/**
+ * Cache key prefix for fact-check results by ID
+ */
+const CACHE_ID_PREFIX = 'fact-check:id:';
 
 /**
  * Default TTL: 24 hours in milliseconds
@@ -105,9 +110,61 @@ export class FactCheckCacheService {
   }
 
   /**
+   * Get cached fact-check result by its ID
+   *
+   * @param id - Result ID (UUID)
+   * @returns Cached result or null if not found/error
+   */
+  async getById(id: string): Promise<FactCheckResultDto | null> {
+    try {
+      const cacheKey = this.buildIdCacheKey(id);
+      const cached = await this.cacheManager.get<FactCheckResultDto>(cacheKey);
+
+      if (cached) {
+        this.logger.debug(`Cache hit for result ID: ${id}`);
+        return cached;
+      }
+
+      this.logger.debug(`Cache miss for result ID: ${id}`);
+      return null;
+    } catch (error) {
+      this.logger.warn(
+        `Cache get error for ID ${id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Store fact-check result in cache by its ID
+   *
+   * @param id - Result ID (UUID)
+   * @param result - Fact-check result to cache
+   */
+  async setById(id: string, result: FactCheckResultDto): Promise<void> {
+    try {
+      const cacheKey = this.buildIdCacheKey(id);
+      await this.cacheManager.set(cacheKey, result, this.ttlMs);
+      this.logger.debug(`Cached result by ID: ${id}`);
+    } catch (error) {
+      this.logger.warn(
+        `Cache set error for ID ${id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      // Graceful degradation: don't throw, just log
+    }
+  }
+
+  /**
    * Build cache key from claim hash
    */
   private buildCacheKey(claimHash: string): string {
     return `${CACHE_KEY_PREFIX}${claimHash}`;
+  }
+
+  /**
+   * Build cache key from result ID
+   */
+  private buildIdCacheKey(id: string): string {
+    return `${CACHE_ID_PREFIX}${id}`;
   }
 }
