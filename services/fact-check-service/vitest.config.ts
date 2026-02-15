@@ -15,5 +15,9 @@ export default defineConfig({
     outputFile: {
       junit: './coverage/junit.xml',
     },
+    deps: {
+      // Inline @nestjs/cache-manager to resolve ESM/CJS module issues
+      inline: ['@nestjs/cache-manager'],
+    },
   },
 });
