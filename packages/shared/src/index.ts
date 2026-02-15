@@ -19,3 +19,6 @@ export function getVersionInfo(): string {
 
 // Export tracing module
 export * from './tracing/index.js';
+
+// Export error handling module
+export * from './errors/index.js';
