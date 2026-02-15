@@ -9,8 +9,8 @@
  * T297: Mock handlers for OAuth authentication flows
  *
  * Mocks:
- * - Google OAuth: token exchange, user info
- * - Apple OAuth: token exchange, user info
+ * - Google OAuth: token exchange, user info, revocation
+ * - Apple OAuth: token exchange, user info, revocation
  * - Support for success and error scenarios
  */
 import { http, HttpResponse, type RequestHandler } from 'msw';
