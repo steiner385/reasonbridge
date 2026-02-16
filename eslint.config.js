@@ -62,6 +62,9 @@ export default [
 
       // Legacy config files
       '.eslintrc.cjs',
+
+      // Git worktrees (separate checkouts with their own configs)
+      '.worktrees/**',
     ],
   },
 
