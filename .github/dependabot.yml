@@ -7,9 +7,6 @@ updates:
       interval: 'weekly'
       day: 'monday'
     open-pull-requests-limit: 10
-    labels:
-      - 'dependencies'
-      - 'automated'
     commit-message:
       prefix: 'deps'
     groups:
@@ -27,6 +24,3 @@ updates:
     schedule:
       interval: 'weekly'
       day: 'monday'
-    labels:
-      - 'dependencies'
-      - 'github-actions'
