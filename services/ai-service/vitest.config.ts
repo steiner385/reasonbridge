@@ -16,6 +16,7 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/*.integration.test.ts', // Run in integration test phase
+      '**/__benchmarks__/**', // Run separately: pnpm test:benchmarks
       // CI: Prisma client module resolution issues
       '**/ai-feedback-analysis.test.ts',
       '**/clarity-analyzer.service.test.ts',

@@ -15,7 +15,8 @@
     "start:prod": "node dist/main.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "test:benchmarks": "vitest run --config vitest.benchmark.config.ts"
   },
   "dependencies": {
     "@reason-bridge/common": "workspace:*",
