@@ -253,9 +253,6 @@ export async function testEnterSpaceActivation(
   element: Locator,
   expectedAction: 'click' | 'submit' | 'navigate' = 'click',
 ): Promise<void> {
-  // Track if action was triggered
-  let actionTriggered = false;
-
   if (expectedAction === 'click') {
     // Listen for click event
     await element.evaluate((el) => {
@@ -273,10 +270,10 @@ export async function testEnterSpaceActivation(
   await page.keyboard.press('Enter');
 
   if (expectedAction === 'click') {
-    actionTriggered = await element.evaluate((el) => {
+    const enterTriggered = await element.evaluate((el) => {
       return (el as HTMLElement & { _clickTriggered?: boolean })._clickTriggered === true;
     });
-    expect(actionTriggered).toBe(true);
+    expect(enterTriggered).toBe(true);
 
     // Reset for Space test
     await element.evaluate((el) => {
@@ -294,10 +291,10 @@ export async function testEnterSpaceActivation(
     await page.keyboard.press('Space');
 
     if (expectedAction === 'click') {
-      actionTriggered = await element.evaluate((el) => {
+      const spaceTriggered = await element.evaluate((el) => {
         return (el as HTMLElement & { _clickTriggered?: boolean })._clickTriggered === true;
       });
-      expect(actionTriggered).toBe(true);
+      expect(spaceTriggered).toBe(true);
     }
   }
 }

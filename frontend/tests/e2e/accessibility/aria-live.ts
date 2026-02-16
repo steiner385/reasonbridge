@@ -18,7 +18,7 @@
  * @see https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA22
  */
 
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
 /**
  * Types of ARIA live regions
@@ -94,15 +94,9 @@ export async function setupAnnouncementCapture(page: Page): Promise<void> {
     (window as unknown as { __ariaAnnouncements: Announcement[] }).__ariaAnnouncements =
       announcements;
 
-    // Find all live regions
-    const liveRegionSelectors = [
-      '[aria-live]',
-      '[role="alert"]',
-      '[role="status"]',
-      '[role="log"]',
-      '[role="marquee"]',
-      '[role="timer"]',
-    ];
+    // Live region roles that trigger announcements
+    // (used internally by the observer to detect live regions)
+    const liveRoles = ['alert', 'status', 'log', 'marquee', 'timer'];
 
     // Create observer for live regions
     const observer = new MutationObserver((mutations) => {
@@ -117,7 +111,7 @@ export async function setupAnnouncementCapture(page: Page): Promise<void> {
           const ariaLive = element.getAttribute('aria-live');
           const role = element.getAttribute('role');
 
-          if (ariaLive || ['alert', 'status', 'log', 'marquee', 'timer'].includes(role || '')) {
+          if (ariaLive || liveRoles.includes(role || '')) {
             liveRegion = element;
             break;
           }
@@ -143,7 +137,9 @@ export async function setupAnnouncementCapture(page: Page): Promise<void> {
               ? `#${liveRegion.id}`
               : liveRegion.getAttribute('data-testid')
                 ? `[data-testid="${liveRegion.getAttribute('data-testid')}"]`
-                : `[role="${role}"]` || '[aria-live]';
+                : role
+                  ? `[role="${role}"]`
+                  : '[aria-live]';
 
             announcements.push({
               text,

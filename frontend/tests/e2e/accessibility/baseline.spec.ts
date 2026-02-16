@@ -16,7 +16,7 @@
 
 import { test, expect } from '@playwright/test';
 import { checkA11y, testKeyboardNavigation, testFocusTrap, testSkipLink } from '../helpers/a11y';
-import { pageConfigs, defaultConfig, createConfig } from './wcag-config';
+import { pageConfigs, createConfig } from './wcag-config';
 import { testTabNavigation, testEscapeKey, findInaccessibleElements } from './keyboard-nav';
 import { setupAnnouncementCapture, cleanupAnnouncementCapture } from './aria-live';
 
