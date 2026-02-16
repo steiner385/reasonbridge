@@ -22,7 +22,7 @@
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-fastify": "^11.1.13",
     "@nestjs/cache-manager": "^3.1.0",
-    "@prisma/client": "7.3.0",
+    "@prisma/client": "7.4.0",
     "@reason-bridge/db-models": "workspace:*",
     "cache-manager": "^7.2.8",
     "cache-manager-redis-store": "^3.0.1",
@@ -30,11 +30,11 @@
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
-    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/adapter-pg": "^7.4.0",
     "pg": "^8.13.1"
   },
   "devDependencies": {
-    "@types/node": "25.2.2",
+    "@types/node": "25.2.3",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
     "@types/pg": "^8.11.10",
