@@ -89,11 +89,18 @@ while IFS= read -r file; do
     continue
   fi
 
+  # Skip e2e/tests/performance/ folder - k6 performance tests need console output
+  if [[ "$file" =~ ^e2e/tests/performance/ ]]; then
+    debug "Skipping performance test file: $file"
+    continue
+  fi
+
   # Get staged content and check for problematic console statements
   STAGED_CONTENT=$(git show ":$file" 2>/dev/null || echo "")
 
   # Check for console.log
-  if echo "$STAGED_CONTENT" | grep -E "console\.(log|debug)" | grep -v "^\s*\/\/" > /dev/null 2>&1; then
+  # Exclude lines starting with // or * (JSDoc/TSDoc comments)
+  if echo "$STAGED_CONTENT" | grep -E "console\.(log|debug)" | grep -v "^\s*\/\/" | grep -v "^\s*\*" > /dev/null 2>&1; then
     VIOLATIONS+=("$file: contains console.log/debug")
   fi
 done <<< "$STAGED_FILES"

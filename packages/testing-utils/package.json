@@ -41,6 +41,10 @@
     "./openapi": {
       "types": "./dist/openapi/index.d.ts",
       "import": "./dist/openapi/index.js"
+    },
+    "./perf": {
+      "types": "./dist/perf/index.d.ts",
+      "import": "./dist/perf/index.js"
     }
   },
   "files": [
