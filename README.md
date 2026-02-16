@@ -302,6 +302,7 @@ See [docs/white-papers/README.md](docs/white-papers/README.md) for full details.
 
 - **[Architecture Guide](./docs/ARCHITECTURE.md)** - System architecture, microservices, resilience patterns
 - **[Developer Guide](./docs/DEVELOPER.md)** - Comprehensive setup and development instructions
+- **[MCP Configuration Guide](./docs/MCP_CONFIGURATION.md)** - GitHub Copilot MCP server setup and usage
 - **[Load Testing Guide](./load-tests/README.md)** - Performance testing with k6
 - **[Frontend README](./frontend/README.md)** - Frontend-specific setup and development
 - **[Feature Specifications](./specs/)** - Detailed feature specifications and design documents
