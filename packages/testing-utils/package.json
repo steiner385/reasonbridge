@@ -37,6 +37,10 @@
     "./pact": {
       "types": "./dist/pact/index.d.ts",
       "import": "./dist/pact/index.js"
+    },
+    "./openapi": {
+      "types": "./dist/openapi/index.d.ts",
+      "import": "./dist/openapi/index.js"
     }
   },
   "files": [
@@ -51,13 +55,16 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "@pact-foundation/pact": "^16.1.0",
     "@prisma/client": "7.3.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "msw": "^2.12.9",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@types/node": "25.2.2",
