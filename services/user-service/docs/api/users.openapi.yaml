@@ -1,0 +1,521 @@
+openapi: 3.0.3
+info:
+  title: User Service API
+  description: |
+    User management endpoints for the ReasonBridge platform.
+    Handles user profiles, authentication states, and follow relationships.
+  version: 1.0.0
+  contact:
+    name: ReasonBridge API Team
+
+servers:
+  - url: http://localhost:3001
+    description: Local development
+  - url: https://api.reasonbridge.org
+    description: Production
+
+tags:
+  - name: Users
+    description: User profile operations
+  - name: Follow
+    description: User follow/unfollow relationships
+  - name: Feedback
+    description: User feedback preferences
+
+paths:
+  /users/me:
+    get:
+      summary: Get current user's profile
+      description: Returns the authenticated user's full profile including private fields
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized - missing or invalid token
+
+    put:
+      summary: Update current user's profile
+      description: Update the authenticated user's profile fields
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileDto'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+
+  /users/{id}:
+    get:
+      summary: Get user's public profile
+      description: Returns a user's public profile (excludes private fields like email)
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUserResponse'
+        '400':
+          description: Invalid UUID format
+        '404':
+          description: User not found
+
+  /users/{id}/follow:
+    get:
+      summary: Get follow status
+      description: Check if the authenticated user follows the specified user
+      tags:
+        - Follow
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Follow status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowStatus'
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+
+    post:
+      summary: Follow a user
+      description: Create a follow relationship with the specified user
+      tags:
+        - Follow
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully followed user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowResponse'
+        '400':
+          description: Invalid request (e.g., cannot follow self)
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found
+
+    delete:
+      summary: Unfollow a user
+      description: Remove follow relationship with the specified user
+      tags:
+        - Follow
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully unfollowed user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: User not found or not following
+
+  /users/{id}/followers:
+    get:
+      summary: Get user's followers
+      description: Retrieve paginated list of users who follow the specified user
+      tags:
+        - Follow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Followers list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowersResponse'
+        '400':
+          description: Invalid UUID format
+        '404':
+          description: User not found
+
+  /users/{id}/following:
+    get:
+      summary: Get users being followed
+      description: Retrieve paginated list of users the specified user follows
+      tags:
+        - Follow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Following list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowingResponse'
+        '400':
+          description: Invalid UUID format
+        '404':
+          description: User not found
+
+  /users/me/feedback:
+    get:
+      summary: Get feedback preferences
+      description: Retrieve the authenticated user's AI feedback preferences
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Feedback preferences retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackPreferencesResponse'
+        '401':
+          description: Unauthorized
+
+    patch:
+      summary: Update feedback preferences
+      description: Partially update the authenticated user's feedback preferences
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFeedbackPreferencesDto'
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackPreferencesResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - displayName
+        - verificationLevel
+        - trustScoreAbility
+        - trustScoreBenevolence
+        - trustScoreIntegrity
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        verificationLevel:
+          type: string
+          enum: [UNVERIFIED, EMAIL_VERIFIED, PHONE_VERIFIED, FULLY_VERIFIED]
+        trustScoreAbility:
+          type: number
+          minimum: 0
+          maximum: 100
+        trustScoreBenevolence:
+          type: number
+          minimum: 0
+          maximum: 100
+        trustScoreIntegrity:
+          type: number
+          minimum: 0
+          maximum: 100
+        moralFoundationProfile:
+          type: object
+          nullable: true
+        positionFingerprint:
+          type: object
+          nullable: true
+        topicAffinities:
+          type: object
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, DELETED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PublicUserResponse:
+      type: object
+      required:
+        - id
+        - displayName
+        - verificationLevel
+        - trustScoreAbility
+        - trustScoreBenevolence
+        - trustScoreIntegrity
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        verificationLevel:
+          type: string
+          enum: [UNVERIFIED, EMAIL_VERIFIED, PHONE_VERIFIED, FULLY_VERIFIED]
+        trustScoreAbility:
+          type: number
+          minimum: 0
+          maximum: 100
+        trustScoreBenevolence:
+          type: number
+          minimum: 0
+          maximum: 100
+        trustScoreIntegrity:
+          type: number
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, DELETED]
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateProfileDto:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 500
+
+    FollowStatus:
+      type: object
+      required:
+        - isFollowing
+        - followerCount
+        - followingCount
+      properties:
+        isFollowing:
+          type: boolean
+        followerCount:
+          type: integer
+          minimum: 0
+        followingCount:
+          type: integer
+          minimum: 0
+
+    FollowResponse:
+      type: object
+      required:
+        - success
+        - message
+        - isFollowing
+        - followedUserId
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        isFollowing:
+          type: boolean
+        followedUserId:
+          type: string
+          format: uuid
+        followedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    FollowersResponse:
+      type: object
+      required:
+        - followers
+        - total
+        - limit
+        - offset
+      properties:
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicUserResponse'
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    FollowingResponse:
+      type: object
+      required:
+        - following
+        - total
+        - limit
+        - offset
+      properties:
+        following:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicUserResponse'
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    FeedbackPreferencesResponse:
+      type: object
+      required:
+        - enabled
+        - types
+      properties:
+        enabled:
+          type: boolean
+        types:
+          type: object
+          properties:
+            tone:
+              type: boolean
+            bias:
+              type: boolean
+            fallacy:
+              type: boolean
+            sources:
+              type: boolean
+
+    UpdateFeedbackPreferencesDto:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        types:
+          type: object
+          properties:
+            tone:
+              type: boolean
+            bias:
+              type: boolean
+            fallacy:
+              type: boolean
+            sources:
+              type: boolean

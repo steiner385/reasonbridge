@@ -9,8 +9,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
-    include: ['src/**/*.test.ts'],
+    // Include unit tests (.test.ts) and contract tests (.spec.ts in tests/contract/)
+    // Note: E2E/Playwright tests are in frontend/e2e/ and use separate config
+    include: ['src/**/*.test.ts', 'tests/contract/**/*.spec.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

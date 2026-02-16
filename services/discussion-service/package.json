@@ -41,14 +41,15 @@
   },
   "devDependencies": {
     "@nestjs/testing": "11.1.13",
+    "@reason-bridge/testing-utils": "workspace:*",
     "@types/node": "25.2.2",
     "@types/pdfkit": "0.17.4",
+    "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.3",
     "supertest": "^7.2.2",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
-    "vitest": "^2.1.9",
-    "@types/pg": "^8.11.10"
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.0.0"
