@@ -5,12 +5,18 @@
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { OpenAPIValidator, createValidator, createOpenAPIMatcher } from '../openapi/validator.js';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// Get directory of this test file (works in both local and CI environments)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Use the actual OpenAPI spec from discussion-service
+// Path from packages/testing-utils/src/__tests__/ to services/discussion-service/docs/api/
 const SPEC_PATH = resolve(
-  process.cwd(),
-  '../../services/discussion-service/docs/api/topics-management.openapi.yaml',
+  __dirname,
+  '../../../../services/discussion-service/docs/api/topics-management.openapi.yaml',
 );
 
 describe('OpenAPIValidator', () => {
