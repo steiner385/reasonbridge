@@ -11,6 +11,12 @@ importers:
 
   .:
     devDependencies:
+      '@eslint/compat':
+        specifier: ^2.0.2
+        version: 2.0.2(eslint@10.0.0(jiti@2.6.1))
+      '@eslint/js':
+        specifier: ^10.0.1
+        version: 10.0.1(eslint@10.0.0(jiti@2.6.1))
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
@@ -62,6 +68,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: 0.5.0
         version: 0.5.0(eslint@10.0.0(jiti@2.6.1))
+      globals:
+        specifier: ^17.3.0
+        version: 17.3.0
       husky:
         specifier: ^9.0.0
         version: 9.1.7
@@ -323,7 +332,7 @@ importers:
         version: link:../db-models
       vitest:
         specifier: ^1.0.0
-        version: 1.6.1(@types/node@25.2.2)(@vitest/ui@2.1.9)(jsdom@28.0.0(@noble/hashes@1.8.0))
+        version: 1.6.1(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jsdom@28.0.0(@noble/hashes@1.8.0))
     devDependencies:
       '@types/node':
         specifier: ^25.2.2
@@ -607,7 +616,7 @@ importers:
         version: 25.2.2
       '@vitest/coverage-v8':
         specifier: ^4.0.18
-        version: 4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -616,7 +625,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
   services/discussion-service:
     dependencies:
@@ -2438,7 +2447,6 @@ packages:
   '@pact-foundation/pact-core@18.0.0':
     resolution: {integrity: sha512-21sOzu+28HLivTdsnwOmLAPjHLDaPfUbv/aTxlWqCVmBTXVsxekrbQJkO0ga6COXEXQg0BGKmqLxh22orm//9A==}
     engines: {node: '>=20'}
-    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.1.0':
@@ -8437,6 +8445,12 @@ snapshots:
     optionalDependencies:
       eslint: 10.0.0(jiti@1.21.7)
 
+  '@eslint/compat@2.0.2(eslint@10.0.0(jiti@2.6.1))':
+    dependencies:
+      '@eslint/core': 1.1.0
+    optionalDependencies:
+      eslint: 10.0.0(jiti@2.6.1)
+
   '@eslint/config-array@0.23.1':
     dependencies:
       '@eslint/object-schema': 3.0.1
@@ -8456,6 +8470,10 @@ snapshots:
   '@eslint/js@10.0.1(eslint@10.0.0(jiti@1.21.7))':
     optionalDependencies:
       eslint: 10.0.0(jiti@1.21.7)
+
+  '@eslint/js@10.0.1(eslint@10.0.0(jiti@2.6.1))':
+    optionalDependencies:
+      eslint: 10.0.0(jiti@2.6.1)
 
   '@eslint/object-schema@3.0.1': {}
 
@@ -9995,7 +10013,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/coverage-v8@4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.0.18
@@ -10007,7 +10025,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/expect@1.6.1':
     dependencies:
@@ -14295,7 +14313,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  vitest@1.6.1(@types/node@25.2.2)(@vitest/ui@2.1.9)(jsdom@28.0.0(@noble/hashes@1.8.0)):
+  vitest@1.6.1(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jsdom@28.0.0(@noble/hashes@1.8.0)):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -14368,7 +14386,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.2.2)(@vitest/ui@2.1.9(vitest@2.1.9))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
       '@vitest/mocker': 4.0.18(msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3))(vite@6.4.1(@types/node@25.2.2)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
