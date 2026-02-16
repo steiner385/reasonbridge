@@ -1,0 +1,388 @@
+openapi: 3.0.3
+info:
+  title: AI Service - Feedback API
+  description: |
+    AI-powered feedback endpoints for the ReasonBridge platform.
+    Provides analysis of discussion responses for fallacies, bias,
+    inflammatory content, and unsourced claims.
+  version: 1.0.0
+  contact:
+    name: ReasonBridge API Team
+
+servers:
+  - url: http://localhost:3003
+    description: Local development
+  - url: https://api.reasonbridge.org
+    description: Production
+
+tags:
+  - name: Feedback
+    description: AI feedback generation and management
+  - name: Preview
+    description: Real-time preview feedback (ephemeral)
+  - name: Analytics
+    description: Feedback effectiveness analytics
+
+paths:
+  /feedback/preview:
+    post:
+      summary: Get preview feedback (regex-based)
+      description: |
+        Fast, regex-based preview feedback for draft content.
+        Returns ephemeral feedback items (not stored in database).
+        Use this for real-time typing feedback.
+      tags:
+        - Preview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewFeedbackDto'
+      responses:
+        '200':
+          description: Preview feedback generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewFeedbackResult'
+
+  /feedback/preview/ai:
+    post:
+      summary: Get AI-powered preview feedback
+      description: |
+        Bedrock-based AI preview feedback for draft content.
+        More accurate but slower than regex-based preview.
+        Returns ephemeral feedback items (not stored in database).
+      tags:
+        - Preview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewFeedbackDto'
+      responses:
+        '200':
+          description: AI preview feedback generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewFeedbackResult'
+
+  /feedback/request:
+    post:
+      summary: Request feedback for a response
+      description: |
+        Generate and store AI feedback for a discussion response.
+        Creates a permanent feedback record in the database.
+      tags:
+        - Feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestFeedbackDto'
+      responses:
+        '201':
+          description: Feedback created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+        '400':
+          description: Validation error
+        '404':
+          description: Response not found
+
+  /feedback/analytics:
+    get:
+      summary: Get feedback analytics
+      description: |
+        Retrieve effectiveness analytics for AI feedback.
+        Includes acceptance rates, dismissal reasons, and trends.
+      tags:
+        - Analytics
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for analytics period
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for analytics period
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [FALLACY, INFLAMMATORY, UNSOURCED, BIAS, AFFIRMATION]
+          description: Filter by feedback type
+      responses:
+        '200':
+          description: Analytics data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackAnalytics'
+
+  /feedback/{id}:
+    get:
+      summary: Get feedback by ID
+      description: Retrieve a specific feedback record by its UUID
+      tags:
+        - Feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Feedback retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+        '404':
+          description: Feedback not found
+
+  /feedback/{id}/dismiss:
+    patch:
+      summary: Dismiss feedback
+      description: |
+        Mark feedback as dismissed by the user.
+        Optionally provide a reason for analytics purposes.
+      tags:
+        - Feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DismissFeedbackDto'
+      responses:
+        '200':
+          description: Feedback dismissed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+        '404':
+          description: Feedback not found
+
+components:
+  schemas:
+    FeedbackType:
+      type: string
+      enum: [FALLACY, INFLAMMATORY, UNSOURCED, BIAS, AFFIRMATION]
+      description: Type of AI feedback
+
+    PreviewFeedbackDto:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: Draft content to analyze
+        context:
+          type: string
+          description: Optional context (topic, previous responses)
+        feedbackTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedbackType'
+          description: Specific feedback types to check (default all)
+
+    PreviewFeedbackResult:
+      type: object
+      required:
+        - items
+        - analyzedAt
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewFeedbackItem'
+        analyzedAt:
+          type: string
+          format: date-time
+        processingTimeMs:
+          type: integer
+          minimum: 0
+
+    PreviewFeedbackItem:
+      type: object
+      required:
+        - type
+        - suggestionText
+        - reasoning
+        - confidenceScore
+      properties:
+        type:
+          $ref: '#/components/schemas/FeedbackType'
+        subtype:
+          type: string
+          nullable: true
+        suggestionText:
+          type: string
+        reasoning:
+          type: string
+        confidenceScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        highlightRange:
+          type: object
+          properties:
+            start:
+              type: integer
+            end:
+              type: integer
+
+    RequestFeedbackDto:
+      type: object
+      required:
+        - responseId
+        - content
+      properties:
+        responseId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        feedbackTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedbackType'
+
+    FeedbackResponse:
+      type: object
+      required:
+        - id
+        - responseId
+        - type
+        - suggestionText
+        - reasoning
+        - confidenceScore
+        - displayedToUser
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        responseId:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/FeedbackType'
+        subtype:
+          type: string
+          nullable: true
+        suggestionText:
+          type: string
+        reasoning:
+          type: string
+        confidenceScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        educationalResources:
+          type: object
+          nullable: true
+        displayedToUser:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        dismissedAt:
+          type: string
+          format: date-time
+          nullable: true
+        dismissReason:
+          type: string
+          nullable: true
+
+    DismissFeedbackDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          enum: [NOT_APPLICABLE, ALREADY_ADDRESSED, DISAGREE, OTHER]
+        details:
+          type: string
+          maxLength: 500
+
+    FeedbackAnalytics:
+      type: object
+      required:
+        - totalGenerated
+        - totalDismissed
+        - acceptanceRate
+        - byType
+      properties:
+        totalGenerated:
+          type: integer
+          minimum: 0
+        totalDismissed:
+          type: integer
+          minimum: 0
+        totalAccepted:
+          type: integer
+          minimum: 0
+        acceptanceRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        averageConfidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        byType:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              count:
+                type: integer
+              dismissed:
+                type: integer
+              acceptanceRate:
+                type: number
+        dismissalReasons:
+          type: object
+          additionalProperties:
+            type: integer
+        dailyTrends:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              generated:
+                type: integer
+              accepted:
+                type: integer
+              dismissed:
+                type: integer
