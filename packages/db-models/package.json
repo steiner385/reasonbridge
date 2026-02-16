@@ -37,13 +37,13 @@
     "db:seed:test": "tsx prisma/seed/test-fixtures.ts"
   },
   "dependencies": {
-    "@prisma/client": "7.3.0",
-    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "7.4.0",
+    "@prisma/adapter-pg": "^7.4.0",
     "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10",
-    "prisma": "7.3.0",
+    "prisma": "7.4.0",
     "tsx": "^4.19.2",
     "typescript": "5.9.3",
     "vitest": "^2.1.8",
