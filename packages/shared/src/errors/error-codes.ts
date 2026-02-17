@@ -68,6 +68,9 @@ export type ErrorCategory =
   | 'RESOURCE'
   | 'RATE_LIMIT'
   | 'BUSINESS'
+  | 'DISCUSSION'
+  | 'AI'
+  | 'MOD'
   | 'EXTERNAL'
   | 'INTERNAL';
 
@@ -206,6 +209,80 @@ export const BUSINESS_ERRORS = {
 } as const;
 
 /**
+ * Discussion Errors (DISCUSSION_XXX)
+ */
+export const DISCUSSION_ERRORS = {
+  /** Topic creation failed due to invalid parameters */
+  DISCUSSION_001: 'DISCUSSION_001',
+  /** Topic has been archived and cannot be modified */
+  DISCUSSION_002: 'DISCUSSION_002',
+  /** Response threading depth limit exceeded */
+  DISCUSSION_003: 'DISCUSSION_003',
+  /** Proposition already linked to this response */
+  DISCUSSION_004: 'DISCUSSION_004',
+  /** Cannot delete a response with existing replies */
+  DISCUSSION_005: 'DISCUSSION_005',
+  /** Discussion participant limit reached */
+  DISCUSSION_006: 'DISCUSSION_006',
+  /** Invalid response type for this discussion format */
+  DISCUSSION_007: 'DISCUSSION_007',
+  /** Citation source is invalid or inaccessible */
+  DISCUSSION_008: 'DISCUSSION_008',
+  /** Topic is locked by a moderator */
+  DISCUSSION_009: 'DISCUSSION_009',
+  /** Duplicate response detected */
+  DISCUSSION_010: 'DISCUSSION_010',
+} as const;
+
+/**
+ * AI Service Errors (AI_XXX)
+ */
+export const AI_ERRORS = {
+  /** AI analysis request failed */
+  AI_001: 'AI_001',
+  /** Bias detection model returned invalid results */
+  AI_002: 'AI_002',
+  /** Common ground analysis timed out */
+  AI_003: 'AI_003',
+  /** AI model rate limit exceeded */
+  AI_004: 'AI_004',
+  /** Content too long for AI analysis */
+  AI_005: 'AI_005',
+  /** AI model version mismatch */
+  AI_006: 'AI_006',
+  /** AI confidence score below acceptable threshold */
+  AI_007: 'AI_007',
+  /** AI provider authentication failed */
+  AI_008: 'AI_008',
+} as const;
+
+/**
+ * Moderation Errors (MOD_XXX)
+ */
+export const MOD_ERRORS = {
+  /** Content flagged by automated moderation */
+  MOD_001: 'MOD_001',
+  /** Content violates community guidelines */
+  MOD_002: 'MOD_002',
+  /** Appeal has already been submitted for this action */
+  MOD_003: 'MOD_003',
+  /** Appeal window has expired */
+  MOD_004: 'MOD_004',
+  /** Moderator action requires higher privilege level */
+  MOD_005: 'MOD_005',
+  /** Content is under active review */
+  MOD_006: 'MOD_006',
+  /** Ban duration exceeds maximum allowed period */
+  MOD_007: 'MOD_007',
+  /** Reported content not found or already removed */
+  MOD_008: 'MOD_008',
+  /** Duplicate report for the same content */
+  MOD_009: 'MOD_009',
+  /** Moderation queue is full */
+  MOD_010: 'MOD_010',
+} as const;
+
+/**
  * External Service Errors (EXTERNAL_XXX)
  */
 export const EXTERNAL_ERRORS = {
@@ -256,6 +333,9 @@ export const ErrorCodes = {
   ...RESOURCE_ERRORS,
   ...RATE_LIMIT_ERRORS,
   ...BUSINESS_ERRORS,
+  ...DISCUSSION_ERRORS,
+  ...AI_ERRORS,
+  ...MOD_ERRORS,
   ...EXTERNAL_ERRORS,
   ...INTERNAL_ERRORS,
 } as const;
@@ -591,6 +671,180 @@ export const ERROR_CODE_METADATA: Record<ErrorCode, ErrorCodeMeta> = {
     httpStatus: HttpStatus.FORBIDDEN,
     logAsError: false,
     category: 'BUSINESS',
+  },
+
+  // Discussion Errors
+  DISCUSSION_001: {
+    message: 'Topic creation failed. Please check the provided parameters.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_002: {
+    message: 'This topic has been archived and can no longer be modified.',
+    httpStatus: HttpStatus.UNPROCESSABLE_ENTITY,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_003: {
+    message: 'Response threading depth limit has been reached.',
+    httpStatus: HttpStatus.UNPROCESSABLE_ENTITY,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_004: {
+    message: 'This proposition is already linked to the response.',
+    httpStatus: HttpStatus.CONFLICT,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_005: {
+    message: 'Cannot delete a response that has existing replies.',
+    httpStatus: HttpStatus.CONFLICT,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_006: {
+    message: 'The discussion participant limit has been reached.',
+    httpStatus: HttpStatus.UNPROCESSABLE_ENTITY,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_007: {
+    message: 'This response type is not valid for the current discussion format.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_008: {
+    message: 'The citation source is invalid or inaccessible.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_009: {
+    message: 'This topic has been locked by a moderator.',
+    httpStatus: HttpStatus.FORBIDDEN,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+  DISCUSSION_010: {
+    message: 'A duplicate response was detected.',
+    httpStatus: HttpStatus.CONFLICT,
+    logAsError: false,
+    category: 'DISCUSSION',
+  },
+
+  // AI Service Errors
+  AI_001: {
+    message: 'AI analysis request failed. Please try again later.',
+    httpStatus: HttpStatus.BAD_GATEWAY,
+    logAsError: true,
+    category: 'AI',
+  },
+  AI_002: {
+    message: 'Bias detection returned invalid results. Please try again.',
+    httpStatus: HttpStatus.INTERNAL_SERVER_ERROR,
+    logAsError: true,
+    category: 'AI',
+  },
+  AI_003: {
+    message: 'Common ground analysis timed out. Please try again later.',
+    httpStatus: HttpStatus.BAD_GATEWAY,
+    logAsError: true,
+    category: 'AI',
+  },
+  AI_004: {
+    message: 'AI model rate limit exceeded. Please wait before trying again.',
+    httpStatus: HttpStatus.TOO_MANY_REQUESTS,
+    logAsError: true,
+    category: 'AI',
+  },
+  AI_005: {
+    message: 'Content exceeds the maximum length for AI analysis.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+    logAsError: false,
+    category: 'AI',
+  },
+  AI_006: {
+    message: 'AI model version mismatch. Please contact support.',
+    httpStatus: HttpStatus.INTERNAL_SERVER_ERROR,
+    logAsError: true,
+    category: 'AI',
+  },
+  AI_007: {
+    message: 'AI confidence score is below the acceptable threshold.',
+    httpStatus: HttpStatus.UNPROCESSABLE_ENTITY,
+    logAsError: false,
+    category: 'AI',
+  },
+  AI_008: {
+    message: 'AI provider authentication failed. Please contact support.',
+    httpStatus: HttpStatus.SERVICE_UNAVAILABLE,
+    logAsError: true,
+    category: 'AI',
+  },
+
+  // Moderation Errors
+  MOD_001: {
+    message: 'This content has been flagged by automated moderation.',
+    httpStatus: HttpStatus.FORBIDDEN,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_002: {
+    message: 'This content violates community guidelines.',
+    httpStatus: HttpStatus.FORBIDDEN,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_003: {
+    message: 'An appeal has already been submitted for this action.',
+    httpStatus: HttpStatus.CONFLICT,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_004: {
+    message: 'The appeal window for this action has expired.',
+    httpStatus: HttpStatus.UNPROCESSABLE_ENTITY,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_005: {
+    message: 'This moderation action requires a higher privilege level.',
+    httpStatus: HttpStatus.FORBIDDEN,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_006: {
+    message: 'This content is currently under active review.',
+    httpStatus: HttpStatus.CONFLICT,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_007: {
+    message: 'The ban duration exceeds the maximum allowed period.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_008: {
+    message: 'The reported content was not found or has already been removed.',
+    httpStatus: HttpStatus.NOT_FOUND,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_009: {
+    message: 'A report has already been submitted for this content.',
+    httpStatus: HttpStatus.CONFLICT,
+    logAsError: false,
+    category: 'MOD',
+  },
+  MOD_010: {
+    message: 'The moderation queue is currently full. Please try again later.',
+    httpStatus: HttpStatus.SERVICE_UNAVAILABLE,
+    logAsError: true,
+    category: 'MOD',
   },
 
   // External Service Errors

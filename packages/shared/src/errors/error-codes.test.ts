@@ -14,6 +14,9 @@ import {
   RESOURCE_ERRORS,
   RATE_LIMIT_ERRORS,
   BUSINESS_ERRORS,
+  DISCUSSION_ERRORS,
+  AI_ERRORS,
+  MOD_ERRORS,
   EXTERNAL_ERRORS,
   INTERNAL_ERRORS,
   getErrorMeta,
@@ -79,6 +82,9 @@ describe('Error Code Taxonomy', () => {
       RESOURCE: 'RESOURCE_',
       RATE_LIMIT: 'RATE_LIMIT_',
       BUSINESS: 'BUSINESS_',
+      DISCUSSION: 'DISCUSSION_',
+      AI: 'AI_',
+      MOD: 'MOD_',
       EXTERNAL: 'EXTERNAL_',
       INTERNAL: 'INTERNAL_',
     };
@@ -110,6 +116,24 @@ describe('Error Code Taxonomy', () => {
     it('should have BUSINESS errors starting with BUSINESS_', () => {
       Object.values(BUSINESS_ERRORS).forEach((code) => {
         expect(code.startsWith('BUSINESS_')).toBe(true);
+      });
+    });
+
+    it('should have DISCUSSION errors starting with DISCUSSION_', () => {
+      Object.values(DISCUSSION_ERRORS).forEach((code) => {
+        expect(code.startsWith('DISCUSSION_')).toBe(true);
+      });
+    });
+
+    it('should have AI errors starting with AI_', () => {
+      Object.values(AI_ERRORS).forEach((code) => {
+        expect(code.startsWith('AI_')).toBe(true);
+      });
+    });
+
+    it('should have MOD errors starting with MOD_', () => {
+      Object.values(MOD_ERRORS).forEach((code) => {
+        expect(code.startsWith('MOD_')).toBe(true);
       });
     });
 
@@ -178,7 +202,14 @@ describe('Error Code Taxonomy', () => {
     });
 
     it('should have human-readable messages (no technical jargon for user-facing errors)', () => {
-      const userFacingCategories: ErrorCategory[] = ['AUTH', 'VALIDATION', 'RESOURCE', 'BUSINESS'];
+      const userFacingCategories: ErrorCategory[] = [
+        'AUTH',
+        'VALIDATION',
+        'RESOURCE',
+        'BUSINESS',
+        'DISCUSSION',
+        'MOD',
+      ];
 
       Object.entries(ERROR_CODE_METADATA)
         .filter(([, meta]) => userFacingCategories.includes(meta.category))
@@ -232,6 +263,49 @@ describe('Error Code Taxonomy', () => {
         .filter(([code]) => code.startsWith('RATE_LIMIT_'))
         .forEach(([, meta]) => {
           expect(meta.httpStatus).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        });
+    });
+
+    it('should use 400, 403, 409, or 422 for DISCUSSION errors', () => {
+      Object.entries(ERROR_CODE_METADATA)
+        .filter(([code]) => code.startsWith('DISCUSSION_'))
+        .forEach(([, meta]) => {
+          expect([
+            HttpStatus.BAD_REQUEST,
+            HttpStatus.FORBIDDEN,
+            HttpStatus.CONFLICT,
+            HttpStatus.UNPROCESSABLE_ENTITY,
+          ]).toContain(meta.httpStatus);
+        });
+    });
+
+    it('should use appropriate status codes for AI errors', () => {
+      Object.entries(ERROR_CODE_METADATA)
+        .filter(([code]) => code.startsWith('AI_'))
+        .forEach(([, meta]) => {
+          expect([
+            HttpStatus.BAD_REQUEST,
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            HttpStatus.TOO_MANY_REQUESTS,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            HttpStatus.BAD_GATEWAY,
+            HttpStatus.SERVICE_UNAVAILABLE,
+          ]).toContain(meta.httpStatus);
+        });
+    });
+
+    it('should use appropriate status codes for MOD errors', () => {
+      Object.entries(ERROR_CODE_METADATA)
+        .filter(([code]) => code.startsWith('MOD_'))
+        .forEach(([, meta]) => {
+          expect([
+            HttpStatus.BAD_REQUEST,
+            HttpStatus.FORBIDDEN,
+            HttpStatus.NOT_FOUND,
+            HttpStatus.CONFLICT,
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            HttpStatus.SERVICE_UNAVAILABLE,
+          ]).toContain(meta.httpStatus);
         });
     });
 
@@ -357,6 +431,9 @@ describe('Error Code Taxonomy', () => {
         expect(isValidErrorCodeFormat('AUTH_001')).toBe(true);
         expect(isValidErrorCodeFormat('BUSINESS_123')).toBe(true);
         expect(isValidErrorCodeFormat('RATE_LIMIT_005')).toBe(true);
+        expect(isValidErrorCodeFormat('DISCUSSION_001')).toBe(true);
+        expect(isValidErrorCodeFormat('AI_001')).toBe(true);
+        expect(isValidErrorCodeFormat('MOD_001')).toBe(true);
       });
 
       it('should reject invalid formats', () => {
@@ -372,6 +449,9 @@ describe('Error Code Taxonomy', () => {
       it('should identify known codes', () => {
         expect(isKnownErrorCode('AUTH_001')).toBe(true);
         expect(isKnownErrorCode('VALIDATION_001')).toBe(true);
+        expect(isKnownErrorCode('DISCUSSION_001')).toBe(true);
+        expect(isKnownErrorCode('AI_001')).toBe(true);
+        expect(isKnownErrorCode('MOD_001')).toBe(true);
       });
 
       it('should reject unknown codes', () => {
@@ -400,6 +480,18 @@ describe('Error Code Taxonomy', () => {
 
     it('should have at least 5 BUSINESS error codes', () => {
       expect(Object.keys(BUSINESS_ERRORS).length).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should have at least 8 DISCUSSION error codes', () => {
+      expect(Object.keys(DISCUSSION_ERRORS).length).toBeGreaterThanOrEqual(8);
+    });
+
+    it('should have at least 5 AI error codes', () => {
+      expect(Object.keys(AI_ERRORS).length).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should have at least 8 MOD error codes', () => {
+      expect(Object.keys(MOD_ERRORS).length).toBeGreaterThanOrEqual(8);
     });
 
     it('should have at least 5 EXTERNAL error codes', () => {
