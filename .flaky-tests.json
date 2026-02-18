@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "lastUpdated": null,
+  "tests": {},
+  "_comment": "This file tracks flaky tests detected by CI. Auto-managed by flakyTestQuarantine.groovy."
+}
