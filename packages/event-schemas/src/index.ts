@@ -19,6 +19,9 @@ export * from './ai.js';
 export * from './moderation.js';
 export * from './user.js';
 
+// AI output schema contracts (Zod schemas for runtime validation)
+export * from './ai-schemas/index.js';
+
 // Import event type constants
 import { DISCUSSION_EVENT_TYPES } from './discussion.js';
 import { AI_EVENT_TYPES } from './ai.js';
