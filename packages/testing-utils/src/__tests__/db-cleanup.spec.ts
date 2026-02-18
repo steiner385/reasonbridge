@@ -250,32 +250,33 @@ describe('Database Cleanup Utility', () => {
   });
 
   describe('Module exports from main index', () => {
-    it('should export cleanDatabase from main index', async () => {
-      const module = await import('../index.js');
+    // Import module once at describe block level to avoid repeated cold imports
+    // which can timeout in CI environments with slower I/O
+    let mainModule: typeof import('../index.js');
 
-      expect(module.cleanDatabase).toBeDefined();
-      expect(typeof module.cleanDatabase).toBe('function');
+    beforeAll(async () => {
+      mainModule = await import('../index.js');
+    }, 30000); // 30s timeout for module loading in CI
+
+    it('should export cleanDatabase from main index', () => {
+      expect(mainModule.cleanDatabase).toBeDefined();
+      expect(typeof mainModule.cleanDatabase).toBe('function');
     });
 
-    it('should export getTableDeletionOrder from main index', async () => {
-      const module = await import('../index.js');
-
-      expect(module.getTableDeletionOrder).toBeDefined();
-      expect(typeof module.getTableDeletionOrder).toBe('function');
+    it('should export getTableDeletionOrder from main index', () => {
+      expect(mainModule.getTableDeletionOrder).toBeDefined();
+      expect(typeof mainModule.getTableDeletionOrder).toBe('function');
     });
 
-    it('should export cleanModels from main index', async () => {
-      const module = await import('../index.js');
-
-      expect(module.cleanModels).toBeDefined();
-      expect(typeof module.cleanModels).toBe('function');
+    it('should export cleanModels from main index', () => {
+      expect(mainModule.cleanModels).toBeDefined();
+      expect(typeof mainModule.cleanModels).toBe('function');
     });
 
-    it('should export CleanDatabaseOptions type', async () => {
+    it('should export CleanDatabaseOptions type', () => {
       // Type exports are verified at compile time
       // This test ensures the module loads without errors
-      const module = await import('../index.js');
-      expect(module).toBeDefined();
+      expect(mainModule).toBeDefined();
     });
   });
 });
