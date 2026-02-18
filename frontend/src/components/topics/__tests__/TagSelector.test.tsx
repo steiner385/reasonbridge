@@ -208,21 +208,17 @@ describe('TagSelector', () => {
 
       await user.click(screen.getByText(/create "newtag"/i));
 
-      // Advance timers to ensure React processes all state updates
-      await vi.advanceTimersByTimeAsync(100);
+      // Flush all pending timers to allow React state updates to complete
+      // Using runAllTimersAsync ensures all setTimeout/setInterval callbacks execute
+      await vi.runAllTimersAsync();
 
-      // Wait for React to process state updates from handleSelectTag and clear()
-      await waitFor(
-        () => {
-          expect(onChange).toHaveBeenCalledWith([
-            expect.objectContaining({
-              name: 'newtag',
-              slug: 'newtag',
-            }),
-          ]);
-        },
-        { timeout: 3000 },
-      );
+      // Assert directly after flushing timers - no waitFor needed
+      expect(onChange).toHaveBeenCalledWith([
+        expect.objectContaining({
+          name: 'newtag',
+          slug: 'newtag',
+        }),
+      ]);
     });
 
     it('should not show create option for existing tag', async () => {
