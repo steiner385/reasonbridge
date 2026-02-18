@@ -3,409 +3,324 @@
  *
  * Tests the complete user journey for posting responses to discussions:
  * - Viewing discussion with existing responses
- * - Opening response form
+ * - Filling response form (ResponseComposer)
  * - Adding citations
  * - Form validation
  * - Successful submission with optimistic updates
  * - Response appearing in the list
+ *
+ * PREREQUISITES TO ENABLE:
+ * 1. E2E environment must be running with seeded data
+ * 2. Seed data must include topics with existing responses
+ * 3. ResponseItem component must have data-testid="response-item"
+ * 4. ResponseComposer must have #response-content, #cited-source inputs
+ *
+ * Current status: Component selectors verified, but tests require full
+ * E2E environment with seeded topics and responses.
+ *
+ * Related issues: #828
  */
 
 import { test, expect } from '@playwright/test';
 
 test.describe('Response Posting Flow', () => {
-  // TODO: All tests skipped until Feature 009 discussion infrastructure is implemented
-  // Requirements:
-  // 1. Discussion entity and database schema (packages/db-models)
-  // 2. Discussion response API endpoints (packages/backend-services)
-  // 3. Discussion detail page route (/discussions/:id)
-  // 4. "Add Response" button and ResponseForm component
-  // See: specs/009-discussion-participation/
-
-  const mockDiscussion = {
-    id: 'discussion-123',
-    topicId: 'topic-456',
-    title: 'Should carbon taxes be increased in 2027?',
-    status: 'ACTIVE',
-    creator: {
-      id: 'user-123',
-      displayName: 'Alice Smith',
-    },
-    responseCount: 3,
-    participantCount: 2,
-    lastActivityAt: new Date().toISOString(),
-    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    updatedAt: new Date().toISOString(),
-  };
-
-  const mockResponses = [
-    {
-      id: 'response-1',
-      discussionId: 'discussion-123',
-      content: 'I believe carbon taxes are essential for addressing climate change.',
-      author: { id: 'user-123', displayName: 'Alice Smith' },
-      parentResponseId: null,
-      citations: [],
-      version: 1,
-      editCount: 0,
-      editedAt: null,
-      deletedAt: null,
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 86400000).toISOString(),
-      replyCount: 0,
-    },
-    {
-      id: 'response-2',
-      discussionId: 'discussion-123',
-      content:
-        'While I understand the concern, I worry about the economic impact on lower-income families.',
-      author: { id: 'user-456', displayName: 'Bob Johnson' },
-      parentResponseId: null,
-      citations: [
-        {
-          id: 'citation-1',
-          originalUrl: 'https://example.com/economic-impact',
-          normalizedUrl: 'https://example.com/economic-impact',
-          title: 'Economic Impact Study',
-          validationStatus: 'UNVERIFIED',
-          validatedAt: null,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      version: 1,
-      editCount: 0,
-      editedAt: null,
-      deletedAt: null,
-      createdAt: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
-      updatedAt: new Date(Date.now() - 43200000).toISOString(),
-      replyCount: 0,
-    },
-  ];
-
-  test.beforeEach(async ({ page }) => {
-    // Mock the discussion detail API
-    await page.route('**/discussions/discussion-123', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockDiscussion),
-      });
-    });
-
-    // Mock the responses API
-    await page.route('**/discussions/discussion-123/responses', async (route) => {
-      if (route.request().method() === 'GET') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(mockResponses),
-        });
-      }
-    });
-
-    // Navigate to discussion detail page
-    await page.goto('/discussions/discussion-123');
-  });
+  // Tests skipped until E2E environment with seeded data is available
+  // The component selectors and test logic are ready for when seed data exists
 
   test.skip('should display discussion title and existing responses', async ({ page }) => {
-    // Discussion title should be visible
-    await expect(
-      page.getByRole('heading', { name: /should carbon taxes be increased/i }),
-    ).toBeVisible();
+    // Navigate to a topic with existing responses in seed data
+    await page.goto('/discussions');
+
+    // Wait for topics to load
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    // Wait for content to load
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
 
     // Existing responses should be visible
-    await expect(page.getByText(/I believe carbon taxes are essential/i)).toBeVisible();
-    await expect(page.getByText(/While I understand the concern/i)).toBeVisible();
-
-    // Should show response count
-    await expect(page.getByText(/3 responses/i)).toBeVisible();
+    await expect(page.locator('[data-testid="response-item"]').first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 
-  test.skip('should display "Add Response" button', async ({ page }) => {
-    const addButton = page.getByRole('button', { name: /add response/i });
-    await expect(addButton).toBeVisible();
+  test.skip('should display response composer at bottom of conversation', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    // Wait for content to load
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Response composer should be visible (it's always visible at the bottom)
+    const composer = page.locator('#response-content');
+    await expect(composer).toBeVisible();
   });
 
-  test.skip('should open response form when clicking "Add Response"', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
+  test.skip('should validate response length (minimum characters)', async ({ page }) => {
+    await page.goto('/discussions');
 
-    // Form should be visible
-    await expect(page.getByText(/add your response/i)).toBeVisible();
-    await expect(page.getByPlaceholder(/share your perspective/i)).toBeVisible();
-  });
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
 
-  test.skip('should validate response length (minimum 50 characters)', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
 
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
+    // Find the response textarea
+    const contentInput = page.locator('#response-content');
     await contentInput.fill('Too short');
 
-    await page.getByRole('button', { name: /post response/i }).click();
-
-    await expect(page.getByText(/response must be at least 50 characters/i)).toBeVisible();
-  });
-
-  test.skip('should validate response length (maximum 25000 characters)', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
-    const longContent = 'A'.repeat(25001);
-    await contentInput.fill(longContent);
-
-    await page.getByRole('button', { name: /post response/i }).click();
-
-    await expect(page.getByText(/response cannot exceed 25,000 characters/i)).toBeVisible();
-  });
-
-  test.skip('should show character counter with minimum requirement hint', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
-    await contentInput.fill('This is a test');
-
-    // Should show how many more characters needed
-    await expect(page.getByText(/more needed/i)).toBeVisible();
-  });
-
-  test.skip('should show green character counter when minimum is met', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
-    const validContent =
-      'This is a sufficiently long response that meets the minimum character requirement.';
-    await contentInput.fill(validContent);
-
-    // Character counter should be visible (checking for the number, not color as color is CSS)
-    await expect(page.getByText(new RegExp(`${validContent.length}`, 'i'))).toBeVisible();
-  });
-
-  test.skip('should disable submit button when content is too short', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
-    await contentInput.fill('Short text');
-
+    // The submit button should be disabled when content is too short
     const submitButton = page.getByRole('button', { name: /post response/i });
     await expect(submitButton).toBeDisabled();
   });
 
-  test.skip('should enable submit button when content meets minimum', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
+  test.skip('should show character counter', async ({ page }) => {
+    await page.goto('/discussions');
 
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Find the response textarea and type some content
+    const contentInput = page.locator('#response-content');
+    await contentInput.fill('This is a test response');
+
+    // Character counter should be visible showing current count
+    await expect(page.getByText(/\d+ \/ \d+ characters/i)).toBeVisible();
+  });
+
+  test.skip('should enable submit button when content meets minimum', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Fill with content that meets minimum length
+    const contentInput = page.locator('#response-content');
     await contentInput.fill(
-      'This is a sufficiently long response that meets the minimum character requirement.',
+      'This is a sufficiently long response that meets the minimum character requirement for posting.',
     );
 
+    // Submit button should be enabled
     const submitButton = page.getByRole('button', { name: /post response/i });
     await expect(submitButton).toBeEnabled();
   });
 
   test.skip('should allow adding citations to response', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
+    await page.goto('/discussions');
 
-    // Click "Add Citation" button to show citation inputs
-    await page.getByRole('button', { name: /add citation/i }).click();
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Find the citation URL input
+    const urlInput = page.locator('#cited-source');
+    await expect(urlInput).toBeVisible();
 
     // Fill citation details
-    const urlInput = page.getByPlaceholder(/https:\/\/example\.com\/source/i);
     await urlInput.fill('https://example.com/carbon-research');
-
-    const titleInput = page.getByPlaceholder(/citation title \(optional\)/i);
-    await titleInput.fill('Carbon Tax Research');
 
     // Click add button
     await page.getByRole('button', { name: /^add$/i }).click();
 
-    // Citation should appear
+    // Citation should appear in the list
     await expect(page.getByText('https://example.com/carbon-research')).toBeVisible();
-    await expect(page.getByText('Carbon Tax Research')).toBeVisible();
   });
 
   test.skip('should allow removing citations', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
 
     // Add a citation
-    await page.getByRole('button', { name: /add citation/i }).click();
-    await page
-      .getByPlaceholder(/https:\/\/example\.com\/source/i)
-      .fill('https://example.com/source1');
+    const urlInput = page.locator('#cited-source');
+    await urlInput.fill('https://example.com/source-to-remove');
     await page.getByRole('button', { name: /^add$/i }).click();
 
     // Verify it was added
-    await expect(page.getByText('https://example.com/source1')).toBeVisible();
+    await expect(page.getByText('https://example.com/source-to-remove')).toBeVisible();
 
-    // Remove it
-    await page.getByRole('button', { name: /remove citation/i }).click();
+    // Find and click remove button
+    const removeButton = page.locator('[aria-label*="Remove source"]').first();
+    await removeButton.click();
 
-    // Should be removed
-    await expect(page.getByText('https://example.com/source1')).not.toBeVisible();
+    // Citation should be removed
+    await expect(page.getByText('https://example.com/source-to-remove')).not.toBeVisible();
   });
 
-  test.skip('should successfully post response with optimistic update', async ({ page }) => {
-    // Mock the response creation API
-    await page.route('**/responses', async (route) => {
-      if (route.request().method() === 'POST') {
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
+  test.skip('should successfully post response', async ({ page }) => {
+    await page.goto('/discussions');
 
-        await route.fulfill({
-          status: 201,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            id: 'response-new',
-            discussionId: 'discussion-123',
-            content:
-              'I agree that we need a balanced approach that considers both environmental and economic factors.',
-            author: { id: 'current-user', displayName: 'Current User' },
-            parentResponseId: null,
-            citations: [],
-            version: 1,
-            editCount: 0,
-            editedAt: null,
-            deletedAt: null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            replyCount: 0,
-          }),
-        });
-      }
-    });
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
 
-    await page.getByRole('button', { name: /add response/i }).click();
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
 
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
+    // Fill in response content
+    const contentInput = page.locator('#response-content');
     await contentInput.fill(
-      'I agree that we need a balanced approach that considers both environmental and economic factors.',
+      'I agree that we need a balanced approach that considers both environmental and economic factors in our carbon policy decisions.',
     );
 
-    await page.getByRole('button', { name: /post response/i }).click();
+    // Submit the response
+    const submitButton = page.getByRole('button', { name: /post response/i });
+    await submitButton.click();
 
-    // Should show posting state
-    await expect(page.getByRole('button', { name: /posting/i })).toBeVisible();
+    // Wait for submission to complete
+    await page.waitForTimeout(500);
 
-    // Response should appear in the list (optimistic update)
-    await expect(page.getByText(/I agree that we need a balanced approach/i)).toBeVisible();
-  });
-
-  test.skip('should allow canceling response creation', async ({ page }) => {
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    // Fill in some data
-    const contentInput = page.getByPlaceholder(/share your perspective/i);
-    await contentInput.fill('This is a test response that will be canceled before posting.');
-
-    // Click cancel
-    await page.getByRole('button', { name: /cancel/i }).click();
-
-    // Form should be closed
-    await expect(page.getByText(/add your response/i)).not.toBeVisible();
-  });
-
-  test.skip('should show error message on API failure', async ({ page }) => {
-    // Mock API error
-    await page.route('**/responses', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 400,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            message: 'Cannot add responses to non-active discussions',
-            statusCode: 400,
-          }),
-        });
-      }
-    });
-
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    await page
-      .getByPlaceholder(/share your perspective/i)
-      .fill('This is a valid response that will trigger an API error for testing purposes.');
-
-    await page.getByRole('button', { name: /post response/i }).click();
-
-    // Should show error message
-    await expect(page.getByText(/cannot add responses to non-active discussions/i)).toBeVisible();
-  });
-
-  test.skip('should show rate limit error when exceeded', async ({ page }) => {
-    // Mock rate limit error
-    await page.route('**/responses', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 429,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            message: 'Rate limit exceeded (10 responses per minute)',
-            statusCode: 429,
-          }),
-        });
-      }
-    });
-
-    await page.getByRole('button', { name: /add response/i }).click();
-
-    await page
-      .getByPlaceholder(/share your perspective/i)
-      .fill('This is a valid response that will trigger a rate limit error for testing purposes.');
-
-    await page.getByRole('button', { name: /post response/i }).click();
-
-    // Should show rate limit error
-    await expect(page.getByText(/rate limit exceeded/i)).toBeVisible();
+    // Form should be cleared after successful submission
+    await expect(contentInput).toHaveValue('');
   });
 
   test.skip('should display citations from existing responses', async ({ page }) => {
-    // Second response has a citation
-    await expect(page.getByText('Economic Impact Study')).toBeVisible();
+    await page.goto('/discussions');
 
-    // Citation should be a link
-    const citationLink = page.getByRole('link', { name: /economic impact study/i });
-    await expect(citationLink).toBeVisible();
-    await expect(citationLink).toHaveAttribute('href', 'https://example.com/economic-impact');
-    await expect(citationLink).toHaveAttribute('target', '_blank');
-  });
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
 
-  test.skip('should clear form after successful submission', async ({ page }) => {
-    // Mock successful response creation
-    await page.route('**/responses', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 201,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            id: 'response-new',
-            discussionId: 'discussion-123',
-            content: 'Test response content',
-            author: { id: 'current-user', displayName: 'Test User' },
-            parentResponseId: null,
-            citations: [],
-            version: 1,
-            editCount: 0,
-            editedAt: null,
-            deletedAt: null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            replyCount: 0,
-          }),
-        });
-      }
+    // Wait for responses to load
+    await expect(page.locator('[data-testid="response-item"]').first()).toBeVisible({
+      timeout: 10000,
     });
 
-    await page.getByRole('button', { name: /add response/i }).click();
+    // Look for citation links in responses
+    const citationLink = page.locator('[data-testid="response-item"] a[href^="http"]').first();
+    await expect(citationLink).toBeVisible();
+  });
 
-    await page
-      .getByPlaceholder(/share your perspective/i)
-      .fill(
-        'This is a test response that will be successfully posted and then the form should clear.',
-      );
+  test.skip('should show response metadata checkboxes', async ({ page }) => {
+    await page.goto('/discussions');
 
-    await page.getByRole('button', { name: /post response/i }).click();
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
 
-    // Wait for success
-    await page.waitForTimeout(1000);
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
 
-    // Form should be closed after successful submission
-    await expect(page.getByText(/add your response/i)).not.toBeVisible();
+    // Opinion checkbox should be visible
+    const opinionCheckbox = page.locator('#contains-opinion');
+    await expect(opinionCheckbox).toBeVisible();
+
+    // Factual claims checkbox should be visible
+    const factualCheckbox = page.locator('#contains-factual-claims');
+    await expect(factualCheckbox).toBeVisible();
+  });
+
+  test.skip('should toggle metadata checkboxes', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Click opinion checkbox
+    const opinionCheckbox = page.locator('#contains-opinion');
+    await opinionCheckbox.check();
+    await expect(opinionCheckbox).toBeChecked();
+
+    // Click factual claims checkbox
+    const factualCheckbox = page.locator('#contains-factual-claims');
+    await factualCheckbox.check();
+    await expect(factualCheckbox).toBeChecked();
+
+    // Uncheck opinion
+    await opinionCheckbox.uncheck();
+    await expect(opinionCheckbox).not.toBeChecked();
+  });
+
+  test.skip('should show response count in topic header', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Should show response count in the metadata area
+    await expect(page.getByText(/\d+ responses?/i)).toBeVisible();
+  });
+
+  test.skip('should show participant count in topic header', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Should show participant count in the metadata area
+    await expect(page.getByText(/\d+ participants?/i)).toBeVisible();
+  });
+
+  test.skip('should display response authors with timestamps', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    // Wait for responses to load
+    await expect(page.locator('[data-testid="response-item"]').first()).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Should show relative timestamp
+    const firstResponse = page.locator('[data-testid="response-item"]').first();
+    await expect(firstResponse.locator('time')).toBeVisible();
+  });
+
+  test.skip('should validate citation URL format', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Try to add invalid URL
+    const urlInput = page.locator('#cited-source');
+    await urlInput.fill('not-a-valid-url');
+    await page.getByRole('button', { name: /^add$/i }).click();
+
+    // Should show error message
+    await expect(page.getByText(/valid url/i)).toBeVisible();
+  });
+
+  test.skip('should focus textarea label', async ({ page }) => {
+    await page.goto('/discussions');
+
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+
+    await expect(page.locator('.conversation-panel')).toBeVisible({ timeout: 10000 });
+
+    // Verify the textarea has proper label
+    const label = page.locator('label[for="response-content"]');
+    await expect(label).toBeVisible();
+    await expect(label).toContainText('Your Response');
   });
 });
