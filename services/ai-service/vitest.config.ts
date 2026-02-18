@@ -9,9 +9,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Include unit tests (.test.ts) and contract tests (.spec.ts in tests/contract/)
+    // Include unit tests (.test.ts), contract tests, snapshot tests, and integration tests
     // Note: E2E/Playwright tests are in frontend/e2e/ and use separate config
-    include: ['src/**/*.test.ts', 'tests/contract/**/*.spec.ts'],
+    include: [
+      'src/**/*.test.ts',
+      'tests/contract/**/*.spec.ts',
+      'tests/snapshots/**/*.snap.ts',
+      'tests/integration/**/*.spec.ts',
+    ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
