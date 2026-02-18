@@ -1,0 +1,20 @@
+{
+  "description": "Clustering with no clear themes returns empty array",
+  "request": {
+    "systemPrompt": "You are an expert at semantic clustering. Group similar texts by meaning.\nReturn ONLY a JSON array of clusters in this exact format:\n[{\"theme\": \"description\", \"members\": [1, 2, 3]}]\nwhere members are the numeric IDs of the texts.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Group these texts by semantic similarity:\n\n1. The weather is nice today"
+      }
+    ]
+  },
+  "response": {
+    "content": "[]",
+    "stopReason": "end_turn"
+  },
+  "metadata": {
+    "latencyMs": 312,
+    "tokensUsed": 89
+  }
+}

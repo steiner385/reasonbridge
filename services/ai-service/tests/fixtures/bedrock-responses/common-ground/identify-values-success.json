@@ -1,0 +1,20 @@
+{
+  "description": "Successful identification of moral values from positions",
+  "request": {
+    "systemPrompt": "You are an expert in moral psychology and value analysis. Identify the core values underlying different positions.\nFocus on fundamental values like: fairness, liberty, loyalty, authority, sanctity, care, harm prevention, etc.\nReturn ONLY a JSON array of values: [\"value1\", \"value2\", \"value3\"]",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Identify the underlying values in these positions:\n\n- We must protect individual freedom above all else\n- Community welfare should come before personal gain\n- Traditional institutions deserve respect"
+      }
+    ]
+  },
+  "response": {
+    "content": "[\"liberty\", \"care\", \"loyalty\", \"authority\"]",
+    "stopReason": "end_turn"
+  },
+  "metadata": {
+    "latencyMs": 401,
+    "tokensUsed": 134
+  }
+}
