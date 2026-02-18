@@ -18,6 +18,7 @@ import {
 /**
  * Service for discussion simulator functionality
  * Generates AI-driven discussion responses and positions
+ * Includes graceful degradation with fallback behavior when AI is unavailable
  */
 @Injectable()
 export class SimulatorService {
@@ -26,11 +27,60 @@ export class SimulatorService {
   constructor(private readonly bedrockService: BedrockService) {}
 
   /**
+   * Check if AI service is available for simulator operations
+   */
+  private async isAIAvailable(): Promise<boolean> {
+    try {
+      return await this.bedrockService.isReady();
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get fallback positions when AI is unavailable
+   */
+  private getFallbackPositions(topicTitle: string): GeneratePositionsResultDto {
+    this.logger.warn(`AI unavailable, using fallback positions for: ${topicTitle}`);
+    return {
+      positionA: {
+        label: 'Pro Position',
+        summary: `This position supports the general premise of "${topicTitle}". Advocates argue for its benefits and importance, emphasizing positive outcomes and potential improvements it could bring.`,
+        suggestedPersona: 'The Advocate',
+      },
+      positionB: {
+        label: 'Critical Position',
+        summary: `This position raises concerns about "${topicTitle}". Critics highlight potential drawbacks, unintended consequences, or alternative approaches that might be more effective.`,
+        suggestedPersona: 'The Skeptic',
+      },
+      degradedMode: true,
+    };
+  }
+
+  /**
+   * Get fallback response when AI is unavailable
+   */
+  private getFallbackResponse(personaName: string): GenerateResponseResultDto {
+    this.logger.warn(`AI unavailable, using fallback response for persona: ${personaName}`);
+    return {
+      content: `[AI temporarily unavailable] As ${personaName}, I would typically provide a thoughtful response here based on my values and perspective. Please try again in a moment, or continue the discussion with your own thoughts.`,
+      reasoning: 'Fallback response due to AI service unavailability',
+      degradedMode: true,
+    };
+  }
+
+  /**
    * Generate opposing positions for a custom topic
    * Analyzes a topic and suggests two contrasting positions
+   * Falls back to generic positions if AI is unavailable
    */
   async generatePositions(dto: GeneratePositionsDto): Promise<GeneratePositionsResultDto> {
     this.logger.log(`Generating positions for topic: ${dto.topicTitle}`);
+
+    // Check AI availability first
+    if (!(await this.isAIAvailable())) {
+      return this.getFallbackPositions(dto.topicTitle);
+    }
 
     const systemPrompt = `You are an expert at identifying genuine philosophical and value-based disagreements on controversial topics.
 Your task is to generate two contrasting positions that represent authentic viewpoints people might hold.
@@ -70,10 +120,10 @@ Return only the JSON object as specified.`;
       });
 
       // Parse JSON from response
-      let jsonMatch = response.content.match(/\{[\s\S]*\}/);
+      const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         this.logger.error(`Failed to parse JSON from response: ${response.content}`);
-        throw new BadRequestException('Failed to parse positions from AI response');
+        return this.getFallbackPositions(dto.topicTitle);
       }
 
       const positions = JSON.parse(jsonMatch[0]);
@@ -83,13 +133,14 @@ Return only the JSON object as specified.`;
         positionB: positions.positionB,
       };
     } catch (error) {
-      this.logger.error('Failed to generate positions', error);
-      throw new BadRequestException('Failed to generate positions');
+      this.logger.error('Failed to generate positions, using fallback', error);
+      return this.getFallbackPositions(dto.topicTitle);
     }
   }
 
   /**
    * Generate an AI agent response based on persona configuration
+   * Falls back to generic response if AI is unavailable
    */
   async generateResponse(dto: GenerateResponseDto): Promise<GenerateResponseResultDto> {
     if (!dto.customPersona) {
@@ -97,6 +148,11 @@ Return only the JSON object as specified.`;
     }
 
     this.logger.log(`Generating response for persona: ${dto.customPersona.name}`);
+
+    // Check AI availability first
+    if (!(await this.isAIAvailable())) {
+      return this.getFallbackResponse(dto.customPersona.name);
+    }
 
     const systemPrompt = this.buildPersonaSystemPrompt(dto);
 
@@ -140,8 +196,8 @@ Revise the draft to address the feedback while maintaining your persona's voice 
         revisedAreas: dto.action === 'revise' ? ['Content revised based on feedback'] : undefined,
       };
     } catch (error) {
-      this.logger.error('Failed to generate response', error);
-      throw new BadRequestException('Failed to generate response');
+      this.logger.error('Failed to generate response, using fallback', error);
+      return this.getFallbackResponse(dto.customPersona.name);
     }
   }
 
