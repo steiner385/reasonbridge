@@ -1,0 +1,16 @@
+{
+  "description": "Rate limit exceeded error",
+  "request": {
+    "systemPrompt": "Any prompt",
+    "messages": [{ "role": "user", "content": "Any content" }]
+  },
+  "error": {
+    "code": "RATE_LIMIT_ERROR",
+    "message": "Rate limit exceeded. Please retry after 60 seconds.",
+    "retryable": true,
+    "retryAfterMs": 60000
+  },
+  "metadata": {
+    "latencyMs": 150
+  }
+}

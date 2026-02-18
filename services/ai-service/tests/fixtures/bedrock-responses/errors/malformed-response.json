@@ -1,0 +1,15 @@
+{
+  "description": "Bedrock returns unparseable JSON",
+  "request": {
+    "systemPrompt": "You are an expert at semantic clustering...",
+    "messages": [{ "role": "user", "content": "Group these texts..." }]
+  },
+  "response": {
+    "content": "I'll help you cluster those texts. Here are my thoughts:\n\n{invalid json[",
+    "stopReason": "end_turn"
+  },
+  "metadata": {
+    "latencyMs": 567,
+    "tokensUsed": 203
+  }
+}
