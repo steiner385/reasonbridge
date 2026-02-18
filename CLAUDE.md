@@ -91,7 +91,8 @@ services/
 ├── moderation-service/  # Content moderation, appeals, reporting
 ├── notification-service/# Real-time notifications, email, push
 ├── fact-check-service/  # Claim verification, source validation
-└── recommendation-service/ # Content recommendations, discovery
+├── recommendation-service/ # Content recommendations, discovery
+└── activity-service/    # Activity feed, user activity tracking
 ```
 
 **Service Communication:**
@@ -967,6 +968,13 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Issue**: `pnpm install` fails with "lockfile is out of date"
 **Solution**: Run `pnpm install --no-frozen-lockfile` locally, commit updated `pnpm-lock.yaml`
 
+**Issue**: Build fails with "Cannot find module" for NestJS packages
+**Solution**:
+
+- Run `pnpm install` to ensure all workspace dependencies are linked
+- Check that service's `package.json` lists the missing dependency
+- Rebuild shared packages: `pnpm -r --filter="@reason-bridge/*" build`
+
 **Issue**: TypeScript errors about missing types
 **Solution**:
 
@@ -1061,6 +1069,12 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
+- **2026-02-18**: Added AI/LLM testing infrastructure and documentation
+  - Bedrock response mock fixtures, prompt snapshot tests, schema validation
+  - Claim extractor service with 7 claim types, golden tests, latency benchmarks
+  - Activity service for user activity feed tracking (port 3008)
+  - Created deployment documentation (docs/DEPLOYMENT.md)
+  - Created quickstart guide (docs/QUICKSTART.md)
 - **2026-02-05**: Completed discussion page redesign implementation (Feature 001)
   - Three-panel responsive layout (desktop/tablet/mobile breakpoints)
   - Virtual scrolling with react-window v2.2.6 (5.65 KB gzipped)
