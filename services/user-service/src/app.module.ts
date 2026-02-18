@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { VerificationModule } from './verification/verification.module.js';
 import { ComplianceModule } from './compliance/compliance.module.js';
+import { MetricsModule } from './observability/index.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ComplianceModule } from './compliance/compliance.module.js';
       envFilePath: ['.env.local', '.env'],
     }),
     PrismaModule,
+    MetricsModule,
     HealthModule,
     UploadModule,
     AuthModule,

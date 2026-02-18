@@ -396,6 +396,12 @@ importers:
 
   services/activity-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/common':
         specifier: ^11.1.13
         version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -405,6 +411,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@prisma/adapter-pg':
         specifier: ^7.4.0
         version: 7.4.0
@@ -417,6 +426,9 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -429,6 +441,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -454,6 +469,12 @@ importers:
 
   services/ai-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/cache-manager':
         specifier: ^3.1.0
         version: 3.1.0(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(cache-manager@7.2.8)(keyv@5.5.5)(rxjs@7.8.2)
@@ -466,6 +487,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@prisma/adapter-pg':
         specifier: ^7.4.0
         version: 7.4.0
@@ -484,6 +508,9 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       cache-manager:
         specifier: ^7.2.8
         version: 7.2.8
@@ -505,6 +532,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       redis:
         specifier: ^5.11.0
         version: 5.11.0
@@ -630,6 +660,12 @@ importers:
 
   services/discussion-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/cache-manager':
         specifier: 3.1.0
         version: 3.1.0(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(cache-manager@7.2.8)(keyv@5.5.5)(rxjs@7.8.2)
@@ -660,6 +696,9 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       cache-manager:
         specifier: 7.2.8
         version: 7.2.8
@@ -681,6 +720,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       redis:
         specifier: ^5
         version: 5.11.0
@@ -724,6 +766,12 @@ importers:
 
   services/fact-check-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/cache-manager':
         specifier: ^3.1.0
         version: 3.1.0(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(cache-manager@7.2.8)(keyv@5.5.5)(rxjs@7.8.2)
@@ -736,6 +784,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@prisma/adapter-pg':
         specifier: ^7.4.0
         version: 7.4.0
@@ -748,6 +799,9 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       cache-manager:
         specifier: ^7.2.8
         version: 7.2.8
@@ -760,6 +814,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       redis:
         specifier: ^5.11.0
         version: 5.11.0
@@ -788,6 +845,12 @@ importers:
 
   services/moderation-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/common':
         specifier: ^11.1.13
         version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -797,6 +860,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@prisma/adapter-pg':
         specifier: ^7.4.0
         version: 7.4.0
@@ -812,12 +878,18 @@ importers:
       '@reason-bridge/event-schemas':
         specifier: workspace:*
         version: link:../../packages/event-schemas
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -849,6 +921,12 @@ importers:
 
   services/notification-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/common':
         specifier: ^11.1.13
         version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -861,6 +939,9 @@ importers:
       '@nestjs/platform-socket.io':
         specifier: ^11.1.13
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/websockets@11.1.13)(rxjs@7.8.2)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@nestjs/websockets':
         specifier: ^11.1.13
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(@nestjs/platform-socket.io@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -879,12 +960,18 @@ importers:
       '@reason-bridge/event-schemas':
         specifier: workspace:*
         version: link:../../packages/event-schemas
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       fastify:
         specifier: ^5.7.4
         version: 5.7.4
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -922,6 +1009,12 @@ importers:
 
   services/recommendation-service:
     dependencies:
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/common':
         specifier: ^11.1.13
         version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -931,6 +1024,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@prisma/adapter-pg':
         specifier: ^7.4.0
         version: 7.4.0
@@ -943,6 +1039,9 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -955,6 +1054,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -989,6 +1091,12 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.991.0
         version: 3.991.0
+      '@fastify/swagger':
+        specifier: ^9.7.0
+        version: 9.7.0
+      '@fastify/swagger-ui':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@nestjs/common':
         specifier: ^11.1.13
         version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1007,6 +1115,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^11.1.13
         version: 11.1.13(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/swagger':
+        specifier: ^11.2.6
+        version: 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       '@prisma/adapter-pg':
         specifier: ^7.4.0
         version: 7.4.0
@@ -1019,6 +1130,9 @@ importers:
       '@reason-bridge/db-models':
         specifier: workspace:*
         version: link:../../packages/db-models
+      '@willsoto/nestjs-prometheus':
+        specifier: ^6.0.2
+        version: 6.0.2(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(prom-client@15.1.3)
       apple-signin-auth:
         specifier: ^2.0.0
         version: 2.0.0
@@ -1052,6 +1166,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -12518,7 +12635,7 @@ snapshots:
 
   junit-report-builder@5.1.1:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       make-dir: 3.1.0
       xmlbuilder: 15.1.1
 
@@ -13039,7 +13156,7 @@ snapshots:
 
   path-scurry@2.0.1:
     dependencies:
-      lru-cache: 11.2.5
+      lru-cache: 11.2.6
       minipass: 7.1.2
 
   path-to-regexp@6.3.0: {}

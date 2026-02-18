@@ -15,6 +15,7 @@ import { DiscussionsModule } from './discussions/discussions.module.js';
 import { PropositionsModule } from './propositions/propositions.module.js';
 import { TagsModule } from './tags/tags.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { MetricsModule } from './observability/index.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -44,6 +45,7 @@ import { ClientsModule } from './clients/clients.module.js';
       },
     ]),
     PrismaModule,
+    MetricsModule,
     HealthModule,
     TopicsModule,
     ResponsesModule,

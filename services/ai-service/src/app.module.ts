@@ -14,10 +14,12 @@ import { DemoAIModule } from './demo/demo-ai.module.js';
 import { SimulatorModule } from './simulator/simulator.module.js';
 import { TopicQualityModule } from './topic-quality/topic-quality.module.js';
 import { TopicDuplicateModule } from './topic-duplicate/topic-duplicate.module.js';
+import { MetricsModule } from './observability/index.js';
 
 @Module({
   imports: [
     PrismaModule,
+    MetricsModule,
     HealthModule,
     AiModule,
     FeedbackModule,
