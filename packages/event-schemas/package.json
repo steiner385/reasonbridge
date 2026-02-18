@@ -29,6 +29,10 @@
     "./base": {
       "types": "./dist/base.d.ts",
       "import": "./dist/base.js"
+    },
+    "./ai-schemas": {
+      "types": "./dist/ai-schemas/index.d.ts",
+      "import": "./dist/ai-schemas/index.js"
     }
   },
   "files": [
@@ -40,7 +44,9 @@
     "typecheck": "tsc --noEmit",
     "dev": "tsc --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "zod": "^4.3.5"
+  },
   "devDependencies": {
     "typescript": "5.9.3"
   },
