@@ -8,9 +8,10 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { HealthModule } from './health/health.module.js';
 import { HandlersModule } from './handlers/handlers.module.js';
 import { GatewaysModule } from './gateways/gateways.module.js';
+import { MetricsModule } from './observability/index.js';
 
 @Module({
-  imports: [PrismaModule, HealthModule, HandlersModule, GatewaysModule],
+  imports: [PrismaModule, MetricsModule, HealthModule, HandlersModule, GatewaysModule],
   controllers: [],
   providers: [],
 })

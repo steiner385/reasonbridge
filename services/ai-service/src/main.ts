@@ -5,8 +5,10 @@
 
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
+import { TracingInterceptor } from './observability/index.js';
 
 async function bootstrap() {
   // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
@@ -14,6 +16,22 @@ async function bootstrap() {
     // Only log errors in test mode to prevent memory leaks from verbose logging
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
+
+  // OpenAPI/Swagger documentation
+  const config = new DocumentBuilder()
+    .setTitle('ReasonBridge AI Service')
+    .setDescription('AI-powered analysis, bias detection, and common ground discovery endpoints')
+    .setVersion('1.0.0')
+    .addBearerAuth()
+    .build();
+
+  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+  const document = SwaggerModule.createDocument(app, config);
+  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+  SwaggerModule.setup('api-docs', app, document);
+
+  // Distributed tracing interceptor
+  app.useGlobalInterceptors(new TracingInterceptor('ai-service'));
 
   // Setup graceful shutdown handlers
   setupGracefulShutdown(app, { serviceName: 'ai-service' });

@@ -8,9 +8,10 @@ import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ActivityEventsModule } from './activity-events/activity-events.module.js';
 import { ActivityFeedModule } from './activity-feed/activity-feed.module.js';
+import { MetricsModule } from './observability/index.js';
 
 @Module({
-  imports: [PrismaModule, HealthModule, ActivityEventsModule, ActivityFeedModule],
+  imports: [PrismaModule, MetricsModule, HealthModule, ActivityEventsModule, ActivityFeedModule],
   controllers: [],
   providers: [],
 })

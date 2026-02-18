@@ -14,3 +14,4 @@ export * from './utils/index.js';
 export * from './events/index.js';
 export * from './validation/index.js';
 export * from './config/index.js';
+export * from './observability/index.js';
