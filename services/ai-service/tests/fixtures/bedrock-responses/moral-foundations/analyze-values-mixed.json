@@ -1,0 +1,20 @@
+{
+  "description": "Multiple moral foundations with moderate scores",
+  "request": {
+    "systemPrompt": "Analyze the moral foundations present in the given text. Identify which of the six moral foundations are expressed: Care/Harm, Fairness/Cheating, Loyalty/Betrayal, Authority/Subversion, Sanctity/Degradation, Liberty/Oppression.\nReturn a JSON object with foundation scores from 0.0 to 1.0.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Analyze: 'Our nation's traditions and institutions have served us well. We should respect our elders and maintain order while also ensuring everyone is treated fairly.'"
+      }
+    ]
+  },
+  "response": {
+    "content": "{\"care\": 0.35, \"fairness\": 0.6, \"loyalty\": 0.7, \"authority\": 0.75, \"sanctity\": 0.5, \"liberty\": 0.2}",
+    "stopReason": "end_turn"
+  },
+  "metadata": {
+    "latencyMs": 478,
+    "tokensUsed": 168
+  }
+}

@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Moral Foundations Prompts > analyzeMoralFoundations prompt > generates correct system prompt for foundation analysis 1`] = `
+"Analyze the moral foundations present in the given text. Identify which of the six moral foundations are expressed: Care/Harm, Fairness/Cheating, Loyalty/Betrayal, Authority/Subversion, Sanctity/Degradation, Liberty/Oppression.
+Return a JSON object with foundation scores from 0.0 to 1.0."
+`;
+
+exports[`Moral Foundations Prompts > analyzeMoralFoundations prompt > generates correct user prompt for comparative analysis 1`] = `
+"Compare the moral foundations in these statements:
+
+1. "Individual liberty must be preserved at all costs."
+2. "The community good outweighs personal preferences."
+
+Return a JSON object with foundations for each statement."
+`;
+
+exports[`Moral Foundations Prompts > analyzeMoralFoundations prompt > generates correct user prompt for single text analysis 1`] = `"Analyze: 'We must protect the vulnerable members of our society.'"`;
+
+exports[`Moral Foundations Prompts > detectFoundationConflicts prompt > generates correct prompt for conflict detection 1`] = `"Identify potential value conflicts between positions based on differing moral foundations."`;
+
+exports[`Moral Foundations Prompts > detectFoundationConflicts prompt > generates correct prompt for conflict detection 2`] = `
+"Positions:
+User A: "Freedom above all else"
+User B: "Safety requires some restrictions"
+
+Identify the underlying moral foundation conflict."
+`;
+
+exports[`Moral Foundations Prompts > mapToFoundations prompt > generates correct prompt for mapping values to foundations 1`] = `
+"Map these values to moral foundations: freedom, fairness, tradition
+
+Return a JSON object mapping each value to its primary moral foundation."
+`;

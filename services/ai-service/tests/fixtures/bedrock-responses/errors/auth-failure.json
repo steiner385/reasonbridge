@@ -1,0 +1,15 @@
+{
+  "description": "Authentication failure - invalid credentials",
+  "request": {
+    "systemPrompt": "Any prompt",
+    "messages": [{ "role": "user", "content": "Any content" }]
+  },
+  "error": {
+    "code": "AUTHENTICATION_ERROR",
+    "message": "Could not load credentials from any providers",
+    "retryable": false
+  },
+  "metadata": {
+    "latencyMs": 89
+  }
+}

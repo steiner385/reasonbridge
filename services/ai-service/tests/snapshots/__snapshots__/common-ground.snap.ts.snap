@@ -1,0 +1,42 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Common Ground Prompts > clusterTexts prompt > generates correct system prompt for clustering 1`] = `
+"You are an expert at semantic clustering. Group similar texts by meaning.
+Return ONLY a JSON array of clusters in this exact format:
+[{"theme": "description", "members": [1, 2, 3]}]
+where members are the numeric IDs of the texts."
+`;
+
+exports[`Common Ground Prompts > clusterTexts prompt > generates correct user prompt for clustering 1`] = `
+"Group these texts by semantic similarity:
+
+1. We need stricter regulations
+2. Free markets solve problems
+3. Government oversight is essential"
+`;
+
+exports[`Common Ground Prompts > generateClarification prompt > generates correct system prompt for clarification 1`] = `"You are a mediator helping clarify misunderstandings. Provide a concise clarification that addresses different interpretations."`;
+
+exports[`Common Ground Prompts > generateClarification prompt > generates correct user prompt for clarification 1`] = `
+"Topic: "Universal Basic Income"
+
+Different interpretations:
+1. UBI means free money for everyone
+2. UBI is a replacement for existing welfare
+3. UBI is meant to supplement existing programs
+
+Provide a brief clarification (2-3 sentences max) that addresses the core misunderstanding."
+`;
+
+exports[`Common Ground Prompts > identifyValues prompt > generates correct system prompt for value identification 1`] = `
+"You are an expert in moral psychology and value analysis. Identify the core values underlying different positions.
+Focus on fundamental values like: fairness, liberty, loyalty, authority, sanctity, care, harm prevention, etc.
+Return ONLY a JSON array of values: ["value1", "value2", "value3"]"
+`;
+
+exports[`Common Ground Prompts > identifyValues prompt > generates correct user prompt for value identification 1`] = `
+"Identify the underlying values in these positions:
+
+- Freedom is the highest value
+- We must protect the vulnerable"
+`;
