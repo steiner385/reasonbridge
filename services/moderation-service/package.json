@@ -17,27 +17,32 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^5.2.5",
     "@nestjs/common": "^11.1.13",
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-fastify": "^11.1.13",
+    "@nestjs/swagger": "^11.2.6",
+    "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "7.4.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "@reason-bridge/event-schemas": "workspace:*",
+    "@willsoto/nestjs-prometheus": "^6.0.2",
     "fastify": "^5.7.4",
+    "pg": "^8.13.1",
+    "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.1",
-    "rxjs": "^7.8.1",
-    "@prisma/adapter-pg": "^7.4.0",
-    "pg": "^8.13.1"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.13",
     "@types/node": "25.2.3",
+    "@types/pg": "^8.11.10",
     "@vitest/ui": "^2.1.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
-    "vitest": "^2.1.0",
-    "@types/pg": "^8.11.10"
+    "vitest": "^2.1.0"
   },
   "engines": {
     "node": ">=20.0.0"
