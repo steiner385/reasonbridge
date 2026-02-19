@@ -71,28 +71,31 @@ pnpm test:unit
 
 ## Common Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start all services |
-| `pnpm test:unit` | Run unit tests |
-| `pnpm lint` | Check code quality |
-| `pnpm format` | Format code |
+| Command          | Description        |
+| ---------------- | ------------------ |
+| `pnpm dev`       | Start all services |
+| `pnpm test:unit` | Run unit tests     |
+| `pnpm lint`      | Check code quality |
+| `pnpm format`    | Format code        |
 
 ## Troubleshooting
 
 **Port in use?**
+
 ```bash
 lsof -i :5173  # Find process
 kill -9 <PID>  # Kill it
 ```
 
 **Database connection failed?**
+
 ```bash
 docker compose ps     # Check services running
 docker compose logs postgres  # View logs
 ```
 
 **Build errors?**
+
 ```bash
 pnpm install          # Reinstall dependencies
 pnpm -r build         # Rebuild packages

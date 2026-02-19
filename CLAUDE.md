@@ -889,6 +889,7 @@ await page.waitForTimeout(200); // Critical: Allow token storage and state propa
 ```
 
 **Why this pattern:**
+
 1. `waitForURL` - Ensures navigation completed
 2. `waitForLoadState('networkidle')` - Waits for all network requests (including `/users/me` profile fetch)
 3. `waitForTimeout(200)` - Allows async localStorage token writes and React state propagation via `setTimeout(..., 0)`

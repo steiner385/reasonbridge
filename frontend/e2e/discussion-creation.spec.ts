@@ -1,48 +1,143 @@
 /**
- * T033 [US1] - E2E test for discussion creation flow (Feature 009)
+ * Discussion Creation Flow E2E Tests (Feature 009)
  *
- * ARCHITECTURE NOTE (2026-02-18):
- * These tests were written for a planned architecture where:
- * - Discussions are children of Topics
- * - Users navigate to /topics/:id and click "Start Discussion"
- * - A CreateDiscussionForm modal opens to create a discussion within that topic
+ * Tests for creating discussions under topics.
  *
- * However, the CURRENT architecture is:
- * - Topics ARE discussions (merged concept)
- * - Users create Topics via TopicWizard at /topics
- * - Responses are posted directly to Topics
- * - The route /topics/:id redirects to /discussions?topic=:id
+ * IMPORTANT: These tests are SKIPPED because the feature is not fully implemented:
+ * - The DiscussionListPage and CreateDiscussionForm components exist
+ * - The backend API (/discussions endpoint) exists
+ * - BUT: No route exposes DiscussionListPage in the UI
  *
- * The CreateDiscussionForm component exists but is not routed.
- * To enable these tests, the following would need to be implemented:
- * 1. Add route /topics/:topicId/discussions -> DiscussionListPage
- * 2. Or integrate CreateDiscussionForm into the current DiscussionPage
+ * Current routing:
+ * - /topics -> TopicsPage (create TOPICS via modal) - tested in create-topic.spec.ts
+ * - /discussions?topic=<id> -> DiscussionPage (view/post responses)
  *
- * For now, topic creation is tested in: create-topic.spec.ts
- * Response posting is tested in: response-posting.spec.ts
+ * When this feature is implemented, it will likely add:
+ * - /topics/:topicId/discussions -> DiscussionListPage
  *
- * These tests remain skipped until a decision is made about the
- * Discussion-as-child-of-Topic architecture.
+ * See also: create-topic.spec.ts for topic creation tests (which IS implemented)
+ *
+ * @see services/discussion-service/src/discussions/discussions.controller.ts
+ * @see frontend/src/pages/Discussions/DiscussionListPage.tsx
+ * @see frontend/src/components/discussions/CreateDiscussionForm.tsx
  */
 
 import { test, expect } from '@playwright/test';
 import { mockAuthenticatedUser, mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
 
 test.describe('Discussion Creation Flow', () => {
-  // Skip entire suite - Discussion-as-child-of-Topic architecture not implemented
-  // See file header for architectural notes
-  test.describe.configure({ mode: 'serial' });
+  /**
+   * NOTE: All tests are skipped because DiscussionListPage is not routed.
+   * The "Start Discussion" button exists in DiscussionListPage but there's
+   * no way to navigate to it from the current routes.
+   *
+   * When implementing this feature:
+   * 1. Add route: /topics/:topicId/discussions -> DiscussionListPage
+   * 2. Update beforeEach to navigate to that route
+   * 3. Remove test.skip() calls
+   */
 
   test.beforeEach(async ({ page }) => {
+    // Set up authentication
     await mockAuthenticatedUser(page);
     await mockAuthenticatedEndpoints(page);
+
+    // Mock topics endpoint for topic detail
+    await page.route('**/api/topics/*', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'test-topic-id',
+            title: 'Climate Change Policy Discussion',
+            description: 'A comprehensive discussion about climate change policies.',
+            status: 'ACTIVE',
+            visibility: 'PUBLIC',
+            evidenceStandards: 'STANDARD',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            participantCount: 25,
+            responseCount: 42,
+            discussionCount: 3,
+            tags: [{ id: 'tag-1', name: 'climate', slug: 'climate' }],
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Mock discussions endpoint
+    await page.route('**/api/discussions*', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            data: [
+              {
+                id: 'discussion-1',
+                title: 'Carbon Tax Implementation',
+                topicId: 'test-topic-id',
+                status: 'ACTIVE',
+                responseCount: 15,
+                participantCount: 8,
+                lastActivityAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                creator: {
+                  id: 'user-1',
+                  displayName: 'Climate Expert',
+                },
+              },
+            ],
+            meta: {
+              currentPage: 1,
+              totalPages: 1,
+              totalItems: 1,
+              itemsPerPage: 20,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            },
+          }),
+        });
+      } else if (route.request().method() === 'POST') {
+        route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'new-discussion-123',
+            topicId: 'test-topic-id',
+            title: 'Should carbon taxes be increased?',
+            status: 'ACTIVE',
+            responseCount: 1,
+            participantCount: 1,
+            lastActivityAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            creator: {
+              id: 'test-user-1',
+              displayName: 'Test User',
+            },
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Navigate to topics page (DiscussionListPage route doesn't exist yet)
+    await page.goto('/topics');
   });
 
-  test.skip('should display the "Start Discussion" button on topic page', async ({ page }) => {
-    // BLOCKED: Requires /topics/:topicId/discussions route with DiscussionListPage
-    // Current architecture redirects /topics/:id to /discussions?topic=:id
-    await page.goto('/topics/test-topic-id');
+  // =============================================================================
+  // SKIPPED TESTS - Awaiting DiscussionListPage route implementation
+  // =============================================================================
 
+  test.skip('should display the "Start Discussion" button on discussion list page', async ({
+    page,
+  }) => {
+    // When implemented: Navigate to /topics/:topicId/discussions
+    // await page.goto('/topics/test-topic-id/discussions');
     const startButton = page.getByRole('button', { name: /start discussion/i });
     await expect(startButton).toBeVisible();
   });
@@ -50,36 +145,36 @@ test.describe('Discussion Creation Flow', () => {
   test.skip('should open discussion creation form when clicking "Start Discussion"', async ({
     page,
   }) => {
-    // BLOCKED: Requires DiscussionListPage to be routed
-    await page.goto('/topics/test-topic-id');
+    // When implemented: Navigate to /topics/:topicId/discussions
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Form should be visible with heading
     await expect(page.getByText(/start a new discussion/i)).toBeVisible();
     await expect(page.getByLabel(/discussion title/i)).toBeVisible();
     await expect(page.getByLabel(/initial response/i)).toBeVisible();
   });
 
   test.skip('should validate title length (minimum 10 characters)', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Enter short title
     const titleInput = page.getByLabel(/discussion title/i);
     await titleInput.fill('Short');
 
+    // Fill valid content to bypass other validation
     const contentInput = page.getByLabel(/initial response/i);
     await contentInput.fill(
       'This is a sufficiently long initial response that meets the minimum character requirement of fifty characters.',
     );
 
+    // Try to submit
     await page.getByRole('button', { name: /publish discussion/i }).click();
 
+    // Should show validation error
     await expect(page.getByText(/title must be at least 10 characters/i)).toBeVisible();
   });
 
   test.skip('should validate title length (maximum 200 characters)', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     const titleInput = page.getByLabel(/discussion title/i);
@@ -97,8 +192,6 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test.skip('should validate initial response length (minimum 50 characters)', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     const titleInput = page.getByLabel(/discussion title/i);
@@ -113,134 +206,112 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test.skip('should show character counter for title', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     const titleInput = page.getByLabel(/discussion title/i);
     await titleInput.fill('Test Title');
 
+    // Should show character count
     await expect(page.getByText(/10\/200/)).toBeVisible();
   });
 
   test.skip('should show character counter for content', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     const contentInput = page.getByLabel(/initial response/i);
-    const testContent = 'This is test content';
+    const testContent = 'This is test content for character counting.';
     await contentInput.fill(testContent);
 
+    // Should show character count
     await expect(page.getByText(new RegExp(`${testContent.length}`, 'i'))).toBeVisible();
   });
 
   test.skip('should allow adding citations', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Find and fill citation URL input
     const citationUrlInput = page.getByPlaceholder(/https:\/\/example\.com\/article/i);
     await citationUrlInput.fill('https://example.com/source1');
 
-    const citationTitleInput = page.getByPlaceholder(/citation title \(optional\)/i);
+    // Find and fill citation title input
+    const citationTitleInput = page.getByPlaceholder(/citation title/i);
     await citationTitleInput.fill('Example Source');
 
+    // Click add citation button
     await page.getByRole('button', { name: /add citation/i }).click();
 
+    // Citation should appear in the list
     await expect(page.getByText('https://example.com/source1')).toBeVisible();
     await expect(page.getByText('Example Source')).toBeVisible();
   });
 
   test.skip('should allow removing citations', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Add a citation
     const citationUrlInput = page.getByPlaceholder(/https:\/\/example\.com\/article/i);
     await citationUrlInput.fill('https://example.com/source1');
     await page.getByRole('button', { name: /add citation/i }).click();
 
+    // Verify it was added
     await expect(page.getByText('https://example.com/source1')).toBeVisible();
 
+    // Remove the citation
     const removeButton = page.getByRole('button', { name: /remove citation/i });
     await removeButton.click();
 
+    // Citation should be removed
     await expect(page.getByText('https://example.com/source1')).not.toBeVisible();
   });
 
   test.skip('should validate citation URL format', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Try to add invalid URL
     const citationUrlInput = page.getByPlaceholder(/https:\/\/example\.com\/article/i);
     await citationUrlInput.fill('not-a-valid-url');
     await page.getByRole('button', { name: /add citation/i }).click();
 
+    // Should show error
     await expect(page.getByText(/invalid url format/i)).toBeVisible();
   });
 
   test.skip('should enforce maximum 10 citations', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Add 10 citations
     for (let i = 1; i <= 10; i++) {
       const citationUrlInput = page.getByPlaceholder(/https:\/\/example\.com\/article/i);
       await citationUrlInput.fill(`https://example.com/source${i}`);
       await page.getByRole('button', { name: /add citation/i }).click();
     }
 
+    // Try to add 11th citation
     const citationUrlInput = page.getByPlaceholder(/https:\/\/example\.com\/article/i);
     await citationUrlInput.fill('https://example.com/source11');
     await page.getByRole('button', { name: /add citation/i }).click();
 
+    // Should show error
     await expect(page.getByText(/maximum 10 citations allowed/i)).toBeVisible();
   });
 
   test.skip('should allow canceling discussion creation', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Fill in some data
     await page.getByLabel(/discussion title/i).fill('Test Discussion');
 
+    // Click cancel
     await page.getByRole('button', { name: /cancel/i }).click();
 
+    // Form should be closed
     await expect(page.getByText(/start a new discussion/i)).not.toBeVisible();
   });
 
-  test.skip('should successfully create a discussion and redirect (mock API)', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.route('**/discussions', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 201,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            id: 'new-discussion-123',
-            topicId: 'test-topic-id',
-            title: 'Should carbon taxes be increased?',
-            status: 'ACTIVE',
-            creator: {
-              id: 'user-123',
-              displayName: 'Test User',
-            },
-            responseCount: 1,
-            participantCount: 1,
-            lastActivityAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            responses: [],
-          }),
-        });
-      }
-    });
-
-    await page.goto('/topics/test-topic-id');
+  test.skip('should successfully create a discussion and redirect', async ({ page }) => {
     await page.getByRole('button', { name: /start discussion/i }).click();
 
+    // Fill valid form
     await page.getByLabel(/discussion title/i).fill('Should carbon taxes be increased?');
     await page
       .getByLabel(/initial response/i)
@@ -248,16 +319,19 @@ test.describe('Discussion Creation Flow', () => {
         'I believe carbon taxes are essential for addressing climate change because they create economic incentives for reducing emissions.',
       );
 
+    // Submit
     await page.getByRole('button', { name: /publish discussion/i }).click();
 
+    // Should show loading state briefly
     await expect(page.getByRole('button', { name: /publishing/i })).toBeVisible();
 
+    // Should redirect to new discussion
     await page.waitForURL('**/discussions/new-discussion-123', { timeout: 5000 });
   });
 
   test.skip('should show error message on API failure', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.route('**/discussions', async (route) => {
+    // Override mock with error response
+    await page.route('**/api/discussions', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 403,
@@ -270,7 +344,6 @@ test.describe('Discussion Creation Flow', () => {
       }
     });
 
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     await page.getByLabel(/discussion title/i).fill('Should carbon taxes be increased?');
@@ -282,12 +355,13 @@ test.describe('Discussion Creation Flow', () => {
 
     await page.getByRole('button', { name: /publish discussion/i }).click();
 
+    // Should show error message
     await expect(page.getByText(/only verified users can create discussions/i)).toBeVisible();
   });
 
   test.skip('should show rate limit error when exceeded', async ({ page }) => {
-    // BLOCKED: Requires DiscussionListPage route
-    await page.route('**/discussions', async (route) => {
+    // Override mock with rate limit error
+    await page.route('**/api/discussions', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 429,
@@ -300,7 +374,6 @@ test.describe('Discussion Creation Flow', () => {
       }
     });
 
-    await page.goto('/topics/test-topic-id');
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     await page.getByLabel(/discussion title/i).fill('Should carbon taxes be increased?');
@@ -312,6 +385,7 @@ test.describe('Discussion Creation Flow', () => {
 
     await page.getByRole('button', { name: /publish discussion/i }).click();
 
+    // Should show rate limit error
     await expect(page.getByText(/rate limit exceeded/i)).toBeVisible();
   });
 });
