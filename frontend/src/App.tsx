@@ -8,6 +8,7 @@ import { routes } from './routes';
 import { Header } from './components/layouts/Header';
 import { Sidebar } from './components/layouts/Sidebar';
 import { MobileDrawer } from './components/layouts/MobileDrawer';
+import { OfflineIndicator } from './components/ui/OfflineIndicator';
 import { LoginModalProvider } from './contexts/LoginModalContext';
 import { useSidebar } from './hooks/useSidebar';
 import { useIsMobileViewport } from './hooks/useMediaQuery';
@@ -29,12 +30,20 @@ function App() {
   );
 
   if (isStandalonePage) {
-    return <LoginModalProvider>{routing}</LoginModalProvider>;
+    return (
+      <LoginModalProvider>
+        <OfflineIndicator />
+        {routing}
+      </LoginModalProvider>
+    );
   }
 
   // App layout with Header + Sidebar for authenticated pages
   return (
     <LoginModalProvider>
+      {/* Offline status indicator */}
+      <OfflineIndicator />
+
       {/* Skip to main content link (WCAG 2.4.1 Level A) */}
       <a href="#main-content" className="skip-link">
         Skip to main content
