@@ -412,7 +412,7 @@ export function EditTopicModal({
             }`}
             placeholder="Enter a clear, descriptive title (10-200 characters)"
           />
-          {errors.title && <p className="text-sm text-red-600 mt-1">{errors.title}</p>}
+          {errors.title && <p className="text-sm text-red-700 mt-1">{errors.title}</p>}
           <p className="text-xs text-gray-500 mt-1">{title.length}/200 characters</p>
         </div>
 
@@ -434,7 +434,7 @@ export function EditTopicModal({
             }`}
             placeholder="Provide detailed context and background (50-5000 characters)"
           />
-          {errors.description && <p className="text-sm text-red-600 mt-1">{errors.description}</p>}
+          {errors.description && <p className="text-sm text-red-700 mt-1">{errors.description}</p>}
           <p className="text-xs text-gray-500 mt-1">{description.length}/5000 characters</p>
         </div>
 
@@ -459,7 +459,7 @@ export function EditTopicModal({
               Add Tag
             </Button>
           </div>
-          {errors.tags && <p className="text-sm text-red-600 mt-1">{errors.tags}</p>}
+          {errors.tags && <p className="text-sm text-red-700 mt-1">{errors.tags}</p>}
           <div className="flex flex-wrap gap-2 mt-2">
             {tags.map((tag) => (
               <span
@@ -505,7 +505,7 @@ export function EditTopicModal({
                 : 'Optional: Explain why you are editing this topic (10-500 characters)'
             }
           />
-          {errors.editReason && <p className="text-sm text-red-600 mt-1">{errors.editReason}</p>}
+          {errors.editReason && <p className="text-sm text-red-700 mt-1">{errors.editReason}</p>}
           <p className="text-xs text-gray-500 mt-1">{editReason.length}/500 characters</p>
         </div>
 

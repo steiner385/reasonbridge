@@ -163,7 +163,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
         {summary && !error && (
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{summary}</p>
         )}
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-sm text-red-700">{error}</p>}
       </div>
 
       {/* Content area */}

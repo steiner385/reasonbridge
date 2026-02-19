@@ -69,7 +69,7 @@ export function FollowingList({
   if (error) {
     return (
       <div className={`p-6 text-center ${className}`} data-testid="following-list-error">
-        <p className="text-red-600 dark:text-red-400 mb-2">{error}</p>
+        <p className="text-red-700 dark:text-red-400 mb-2">{error}</p>
         <button
           onClick={() => window.location.reload()}
           className="text-sm text-blue-600 dark:text-blue-400 hover:underline"

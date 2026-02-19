@@ -33,7 +33,7 @@ export function DiscussionDetailPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Card variant="elevated" padding="lg">
-          <div className="text-center text-red-600">
+          <div className="text-center text-red-700">
             <h2 className="text-xl font-semibold mb-2">Error Loading Discussion</h2>
             <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
           </div>

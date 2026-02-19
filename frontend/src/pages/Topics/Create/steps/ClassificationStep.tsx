@@ -160,7 +160,7 @@ export function ClassificationStep({ data, onChange }: ClassificationStepProps) 
             ))}
           </div>
         ) : (
-          <p className="text-xs text-red-600 dark:text-red-400">At least 1 tag is required</p>
+          <p className="text-xs text-red-700 dark:text-red-400">At least 1 tag is required</p>
         )}
       </div>
 

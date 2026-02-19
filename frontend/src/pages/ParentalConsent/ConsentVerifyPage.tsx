@@ -143,7 +143,7 @@ function ConsentVerifyPage() {
           <div className="flex items-center justify-center mb-4">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
               <svg
-                className="w-8 h-8 text-red-600 dark:text-red-400"
+                className="w-8 h-8 text-red-700 dark:text-red-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

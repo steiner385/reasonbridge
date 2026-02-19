@@ -201,7 +201,7 @@ export function TopicTitleInput({
       <div className="flex justify-between items-start mt-1.5">
         <div className="flex-1">
           {showError ? (
-            <p id={`${id}-error`} className="text-xs text-red-600 dark:text-red-400" role="alert">
+            <p id={`${id}-error`} className="text-xs text-red-700 dark:text-red-400" role="alert">
               {errorMessage}
             </p>
           ) : (

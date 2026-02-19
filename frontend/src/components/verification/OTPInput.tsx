@@ -81,7 +81,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ value, onChange, error, length = 6 
         ))}
       </div>
       {error && (
-        <p className="text-sm text-red-600 text-center" role="alert">
+        <p className="text-sm text-red-700 text-center" role="alert">
           {error}
         </p>
       )}

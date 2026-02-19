@@ -123,7 +123,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               {/* Error Icon */}
               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
                 <svg
-                  className="h-10 w-10 text-red-600 dark:text-red-400"
+                  className="h-10 w-10 text-red-700 dark:text-red-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -156,7 +156,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                     Error Details (Development Only)
                   </summary>
                   <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-auto max-h-64">
-                    <pre className="text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap">
+                    <pre className="text-xs text-red-700 dark:text-red-400 whitespace-pre-wrap">
                       {this.state.error.toString()}
                       {this.state.errorInfo?.componentStack}
                     </pre>
