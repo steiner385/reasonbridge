@@ -5,14 +5,13 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { useOnlineStatus } from '../../../hooks/useOnlineStatus';
 import { OfflineIndicator } from '../OfflineIndicator';
 
 // Mock the useOnlineStatus hook
 vi.mock('../../../hooks/useOnlineStatus', () => ({
   useOnlineStatus: vi.fn(),
 }));
-
-import { useOnlineStatus } from '../../../hooks/useOnlineStatus';
 
 const mockUseOnlineStatus = vi.mocked(useOnlineStatus);
 
