@@ -87,7 +87,13 @@ export function ResponseItem({
   const indentClass = visualDepth > 0 ? `ml-${Math.min(visualDepth * 4, 16)}` : '';
 
   return (
-    <div className={indentClass}>
+    <div
+      className={indentClass}
+      data-testid="response-item"
+      data-response-id={response.id}
+      data-parent-id={response.parentResponseId || undefined}
+      data-depth={depth}
+    >
       <Card
         variant={depth === 0 ? 'elevated' : 'outlined'}
         padding="lg"
@@ -176,7 +182,7 @@ export function ResponseItem({
 
         {/* Inline Reply Form */}
         {showReplyForm && (
-          <div className="mt-4">
+          <div className="mt-4" data-testid="reply-form">
             <ResponseComposer
               inline
               parentId={response.id}

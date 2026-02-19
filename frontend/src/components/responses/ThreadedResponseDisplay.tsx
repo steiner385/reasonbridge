@@ -85,7 +85,13 @@ const ResponseItem: React.FC<ResponseItemProps> = ({
   const indentationClass = `ml-${Math.min(node.depth * 4, 16)}`;
 
   return (
-    <div className={`relative ${node.depth > 0 ? indentationClass : ''}`}>
+    <div
+      className={`relative ${node.depth > 0 ? indentationClass : ''}`}
+      data-testid="response-item"
+      data-response-id={node.id}
+      data-parent-id={node.parentId || undefined}
+      data-depth={node.depth}
+    >
       {/* Threading line indicator */}
       {node.depth > 0 && (
         <div
@@ -93,6 +99,7 @@ const ResponseItem: React.FC<ResponseItemProps> = ({
             isLastChild ? 'h-8' : 'h-full'
           }`}
           style={{ left: '-1rem' }}
+          data-testid="threading-line"
         />
       )}
 
