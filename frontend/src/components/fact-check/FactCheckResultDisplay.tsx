@@ -77,7 +77,7 @@ const SourceCard: React.FC<{ source: FactCheckSource }> = ({ source }) => {
       ? 'text-green-600 dark:text-green-400'
       : source.credibilityScore >= 0.5
         ? 'text-yellow-600 dark:text-yellow-400'
-        : 'text-red-600 dark:text-red-400';
+        : 'text-red-700 dark:text-red-400';
 
   return (
     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">

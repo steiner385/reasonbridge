@@ -123,7 +123,7 @@ const OrientationPage: React.FC = () => {
         <div className="max-w-md w-full bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-900/50 rounded-lg p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
             <svg
-              className="h-6 w-6 text-red-600"
+              className="h-6 w-6 text-red-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

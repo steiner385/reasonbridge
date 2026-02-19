@@ -33,7 +33,7 @@ const typeStyles: Record<ToastType, { bg: string; border: string; icon: React.Re
   error: {
     bg: 'bg-red-50',
     border: 'border-red-200',
-    icon: <XCircle className="w-5 h-5 text-red-600" />,
+    icon: <XCircle className="w-5 h-5 text-red-700" />,
   },
   warning: {
     bg: 'bg-yellow-50',

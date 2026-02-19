@@ -86,7 +86,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
     ),
     error: (
       <svg
-        className="h-5 w-5 text-red-600 dark:text-red-400"
+        className="h-5 w-5 text-red-700 dark:text-red-400"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

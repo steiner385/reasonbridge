@@ -91,7 +91,7 @@ function ErrorState({
       <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">
         {icon || (
           <svg
-            className="h-6 w-6 text-red-600 dark:text-red-400"
+            className="h-6 w-6 text-red-700 dark:text-red-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

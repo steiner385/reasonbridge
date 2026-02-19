@@ -211,7 +211,7 @@ const getIcon = (
   // ban or other severe actions
   return (
     <svg
-      className="w-5 h-5 text-red-600"
+      className="w-5 h-5 text-red-700"
       fill="currentColor"
       viewBox="0 0 24 24"
       aria-hidden="true"

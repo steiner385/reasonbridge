@@ -270,7 +270,7 @@ function VideoRecordingComponent({
                 <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse" />
                 <span className="font-semibold text-red-900">Recording in progress</span>
               </div>
-              <span className="font-mono text-lg font-bold text-red-600">
+              <span className="font-mono text-lg font-bold text-red-700">
                 {formatTime(recordingTime)}
               </span>
             </div>

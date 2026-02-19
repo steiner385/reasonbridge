@@ -80,7 +80,7 @@ function ExternalLinkIcon({ className = 'w-3 h-3' }: { className?: string }) {
  * Get color class based on similarity score
  */
 function getSimilarityColor(score: number): string {
-  if (score >= 0.9) return 'text-red-600 dark:text-red-400';
+  if (score >= 0.9) return 'text-red-700 dark:text-red-400';
   if (score >= 0.7) return 'text-orange-600 dark:text-orange-400';
   return 'text-yellow-600 dark:text-yellow-400';
 }

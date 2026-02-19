@@ -264,7 +264,7 @@ export const LandingPage: React.FC = () => {
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
-                <p className="text-red-600 dark:text-red-400">Unable to load topics: {error}</p>
+                <p className="text-red-700 dark:text-red-400">Unable to load topics: {error}</p>
               </div>
             )}
 

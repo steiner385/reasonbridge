@@ -244,7 +244,7 @@ const AlignmentReasoningModal: React.FC<AlignmentReasoningModalProps> = ({
           />
           <div className="flex items-center justify-between mt-2">
             <div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-red-700">{error}</p>}
               {!error && reasoningRequired && (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Minimum {minReasoningLength} characters required

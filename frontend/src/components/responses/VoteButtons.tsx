@@ -101,7 +101,7 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
     ${
       userVote === 'down'
         ? 'bg-red-100 text-red-700 hover:bg-red-200'
-        : 'text-gray-500 hover:bg-gray-100 hover:text-red-600'
+        : 'text-gray-500 hover:bg-gray-100 hover:text-red-700'
     }
   `;
 

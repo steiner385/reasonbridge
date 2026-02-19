@@ -191,7 +191,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
 
               {loginError && (
                 <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-sm text-red-600 dark:text-red-400">{loginError}</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">{loginError}</p>
                 </div>
               )}
 

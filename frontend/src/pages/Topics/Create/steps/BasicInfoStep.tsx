@@ -67,7 +67,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
         <div className="flex justify-between mt-1.5">
           <p
             className={`text-xs ${
-              titleError ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
+              titleError ? 'text-red-700 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
             }`}
           >
             {titleError
@@ -107,7 +107,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
           <p
             className={`text-xs ${
               descriptionError
-                ? 'text-red-600 dark:text-red-400'
+                ? 'text-red-700 dark:text-red-400'
                 : 'text-gray-500 dark:text-gray-400'
             }`}
           >

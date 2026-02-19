@@ -128,7 +128,7 @@ export function PropositionInput({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             {inputError ? (
-              <p id="proposition-error" className="text-xs text-red-600 dark:text-red-400">
+              <p id="proposition-error" className="text-xs text-red-700 dark:text-red-400">
                 {inputError}
               </p>
             ) : (

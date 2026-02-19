@@ -260,7 +260,7 @@ export default function ActivityFeedPage() {
           <p className="text-red-700 dark:text-red-300">{error}</p>
           <button
             onClick={() => fetchFeed()}
-            className="mt-3 text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+            className="mt-3 text-sm font-medium text-red-700 hover:underline dark:text-red-400"
           >
             Try again
           </button>

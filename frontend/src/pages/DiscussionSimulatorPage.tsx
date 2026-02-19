@@ -283,7 +283,7 @@ export const DiscussionSimulatorPage: React.FC = () => {
               </Button>
 
               {positionsError && (
-                <p className="text-sm text-red-600 dark:text-red-400">{positionsError}</p>
+                <p className="text-sm text-red-700 dark:text-red-400">{positionsError}</p>
               )}
             </div>
           </Card>
@@ -496,7 +496,7 @@ export const DiscussionSimulatorPage: React.FC = () => {
               </Button>
 
               {responseError && (
-                <p className="text-sm text-red-600 dark:text-red-400">{responseError}</p>
+                <p className="text-sm text-red-700 dark:text-red-400">{responseError}</p>
               )}
             </div>
           </Card>

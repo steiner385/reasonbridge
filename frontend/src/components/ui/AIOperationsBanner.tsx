@@ -43,7 +43,7 @@ export function AIOperationsBanner({ operations }: AIOperationsBannerProps) {
     >
       <div className="flex items-start gap-3">
         {hasErrors ? (
-          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-5 w-5 text-red-700 dark:text-red-400 flex-shrink-0 mt-0.5" />
         ) : (
           <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5 animate-spin" />
         )}

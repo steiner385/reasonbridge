@@ -64,7 +64,7 @@ const getSeverityStyles = (severity: FallacySeverity) => {
     high: {
       container: 'bg-red-50 border-red-400',
       badge: 'bg-red-100 text-red-800 border-red-300',
-      icon: 'text-red-600',
+      icon: 'text-red-700',
     },
     medium: {
       container: 'bg-amber-50 border-amber-400',
@@ -180,7 +180,7 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
     <div className={className} role="region" aria-label="Logical fallacy warnings">
       <div className="flex items-center gap-2 mb-3">
         <svg
-          className="w-5 h-5 text-red-600"
+          className="w-5 h-5 text-red-700"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

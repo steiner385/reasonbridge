@@ -156,7 +156,7 @@ export function MergeTopicsModal({
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-start gap-2">
               <svg
-                className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0"
+                className="w-6 h-6 text-red-700 mt-0.5 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -335,7 +335,7 @@ export function MergeTopicsModal({
                 </div>
               ))}
           </div>
-          {errors.sources && <p className="text-sm text-red-600 mt-1">{errors.sources}</p>}
+          {errors.sources && <p className="text-sm text-red-700 mt-1">{errors.sources}</p>}
         </div>
 
         {/* Target Topic Selection */}
@@ -360,7 +360,7 @@ export function MergeTopicsModal({
                 </option>
               ))}
           </select>
-          {errors.target && <p className="text-sm text-red-600 mt-1">{errors.target}</p>}
+          {errors.target && <p className="text-sm text-red-700 mt-1">{errors.target}</p>}
         </div>
 
         {/* Merge Reason */}
@@ -378,7 +378,7 @@ export function MergeTopicsModal({
             }`}
             placeholder="Explain why these topics should be merged (20-1000 characters)"
           />
-          {errors.reason && <p className="text-sm text-red-600 mt-1">{errors.reason}</p>}
+          {errors.reason && <p className="text-sm text-red-700 mt-1">{errors.reason}</p>}
           <p className="text-xs text-gray-500 mt-1">{mergeReason.length}/1000 characters</p>
         </div>
       </div>

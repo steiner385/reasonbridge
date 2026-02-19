@@ -146,7 +146,7 @@ export function ResponseItem({
                     {citation.title || citation.originalUrl}
                   </a>
                   {citation.validationStatus === 'BROKEN' && (
-                    <span className="ml-2 text-xs text-red-600">(broken link)</span>
+                    <span className="ml-2 text-xs text-red-700">(broken link)</span>
                   )}
                 </li>
               ))}

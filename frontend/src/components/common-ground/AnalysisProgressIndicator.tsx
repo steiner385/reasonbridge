@@ -226,7 +226,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
   if (status === 'failed') {
     return (
       <div className={`flex flex-col items-center justify-center py-6 ${className}`}>
-        <div className={`text-red-600 ${sizeStyles[size]}`}>
+        <div className={`text-red-700 ${sizeStyles[size]}`}>
           <svg
             fill="none"
             stroke="currentColor"
@@ -248,7 +248,7 @@ const AnalysisProgressIndicator: React.FC<AnalysisProgressIndicatorProps> = ({
           </p>
         )}
         {(error || message) && (
-          <p className={`mt-1 text-sm text-red-600 text-center max-w-md`}>{error || message}</p>
+          <p className={`mt-1 text-sm text-red-700 text-center max-w-md`}>{error || message}</p>
         )}
         {onRetry && (
           <button
