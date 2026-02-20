@@ -88,8 +88,10 @@ function FilterPanel({
       `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {title}
+        </h3>
 
         {/* Mobile toggle button */}
         <button
@@ -113,14 +115,14 @@ function FilterPanel({
       <div
         className={`
           overflow-hidden transition-all duration-300 ease-in-out
-          ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 md:max-h-[2000px] md:opacity-100'}
+          ${isOpen ? 'max-h-[calc(100vh-200px)] sm:max-h-[calc(100vh-150px)] opacity-100' : 'max-h-0 opacity-0 md:max-h-[calc(100vh-150px)] md:opacity-100'}
         `}
       >
-        <div className="p-4 space-y-4">{children}</div>
+        <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-y-auto">{children}</div>
 
         {/* Actions */}
         {showActions && (onApply || onReset) && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+          <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2 sm:gap-3">
             {onReset && (
               <Button variant="outline" size="sm" onClick={onReset} className="flex-1">
                 Reset

@@ -3,34 +3,90 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable react-refresh/only-export-components */
+// Disable react-refresh warning: This file intentionally exports both
+// lazy-loaded component definitions and helper components (LazyRoute,
+// PageLoadingFallback). This is the standard pattern for route-based
+// code splitting with React.lazy().
+
+import { lazy, Suspense } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { Navigate, useParams } from 'react-router-dom';
+// Eager-loaded components (critical path)
 import { LandingPage } from '../pages/LandingPage';
-import AboutPage from '../pages/AboutPage';
-import { RegisterPage, ForgotPasswordPage } from '../pages/Auth';
-import { SignupPage } from '../pages/SignupPage';
-import { AuthCallbackPage } from '../pages/AuthCallbackPage';
-import TopicsPage from '../pages/Topics';
-// TopicDetailPage temporarily unused - keeping for potential redirects
-// import TopicDetailPage from '../pages/Topics/TopicDetailPage';
-import { DiscussionPage } from '../pages/Topics/DiscussionPage';
-import { ProfilePage, UserProfilePage } from '../pages/Profile';
-import { FeedbackPreferencesPage, SettingsPage } from '../pages/Settings';
-import { VerificationPage } from '../pages/Verification/VerificationPage';
-import ModerationDashboardPage from '../pages/Admin/ModerationDashboardPage';
-import AppealStatusPage from '../pages/Appeal/AppealStatusPage';
-import DiscussionSimulatorPage from '../pages/DiscussionSimulatorPage';
-import NotificationsPage from '../pages/NotificationsPage';
-import { ActivityFeedPage } from '../pages/Feed';
-import TermsPage from '../pages/TermsPage';
-import PrivacyPage from '../pages/PrivacyPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import { ProtectedRoute } from '../components/auth';
-import {
-  ConsentPendingPage,
-  ConsentVerifyPage,
-  ParentalDashboardPage,
-} from '../pages/ParentalConsent';
+// Lazy-loaded page components for code splitting
+const AboutPage = lazy(() => import('../pages/AboutPage'));
+const RegisterPage = lazy(() => import('../pages/Auth').then((m) => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = lazy(() =>
+  import('../pages/Auth').then((m) => ({ default: m.ForgotPasswordPage })),
+);
+const SignupPage = lazy(() =>
+  import('../pages/SignupPage').then((m) => ({ default: m.SignupPage })),
+);
+const AuthCallbackPage = lazy(() =>
+  import('../pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })),
+);
+const TopicsPage = lazy(() => import('../pages/Topics'));
+const DiscussionPage = lazy(() =>
+  import('../pages/Topics/DiscussionPage').then((m) => ({ default: m.DiscussionPage })),
+);
+const ProfilePage = lazy(() =>
+  import('../pages/Profile').then((m) => ({ default: m.ProfilePage })),
+);
+const UserProfilePage = lazy(() =>
+  import('../pages/Profile').then((m) => ({ default: m.UserProfilePage })),
+);
+const FeedbackPreferencesPage = lazy(() =>
+  import('../pages/Settings').then((m) => ({ default: m.FeedbackPreferencesPage })),
+);
+const SettingsPage = lazy(() =>
+  import('../pages/Settings').then((m) => ({ default: m.SettingsPage })),
+);
+const VerificationPage = lazy(() =>
+  import('../pages/Verification/VerificationPage').then((m) => ({ default: m.VerificationPage })),
+);
+const ModerationDashboardPage = lazy(() => import('../pages/Admin/ModerationDashboardPage'));
+const AppealStatusPage = lazy(() => import('../pages/Appeal/AppealStatusPage'));
+const DiscussionSimulatorPage = lazy(() => import('../pages/DiscussionSimulatorPage'));
+const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
+const ActivityFeedPage = lazy(() =>
+  import('../pages/Feed').then((m) => ({ default: m.ActivityFeedPage })),
+);
+const TermsPage = lazy(() => import('../pages/TermsPage'));
+const PrivacyPage = lazy(() => import('../pages/PrivacyPage'));
+const ConsentPendingPage = lazy(() =>
+  import('../pages/ParentalConsent').then((m) => ({ default: m.ConsentPendingPage })),
+);
+const ConsentVerifyPage = lazy(() =>
+  import('../pages/ParentalConsent').then((m) => ({ default: m.ConsentVerifyPage })),
+);
+const ParentalDashboardPage = lazy(() =>
+  import('../pages/ParentalConsent').then((m) => ({ default: m.ParentalDashboardPage })),
+);
+
+/**
+ * Loading fallback for lazy-loaded routes
+ * Uses minimal styling to avoid layout shift
+ */
+function PageLoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+        <span className="text-sm text-gray-500 dark:text-gray-400">Loading...</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Wrapper component for lazy-loaded routes with Suspense
+ */
+function LazyRoute({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoadingFallback />}>{children}</Suspense>;
+}
 
 /**
  * Redirect component for /topics/:id -> /discussions?topic=:id
@@ -46,6 +102,10 @@ function TopicRedirect() {
  *
  * This file defines all routes using React Router v7.
  * Each route maps a URL path to a component.
+ *
+ * Code splitting is implemented using React.lazy() for all pages except:
+ * - LandingPage (critical entry point, must load instantly)
+ * - NotFoundPage (should show immediately for better UX)
  */
 export const routes: RouteObject[] = [
   {
@@ -54,27 +114,51 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/about',
-    element: <AboutPage />,
+    element: (
+      <LazyRoute>
+        <AboutPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/register',
-    element: <RegisterPage />,
+    element: (
+      <LazyRoute>
+        <RegisterPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/forgot-password',
-    element: <ForgotPasswordPage />,
+    element: (
+      <LazyRoute>
+        <ForgotPasswordPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/signup',
-    element: <SignupPage />,
+    element: (
+      <LazyRoute>
+        <SignupPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/auth/callback/:provider',
-    element: <AuthCallbackPage />,
+    element: (
+      <LazyRoute>
+        <AuthCallbackPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/topics',
-    element: <TopicsPage />,
+    element: (
+      <LazyRoute>
+        <TopicsPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/topics/:id',
@@ -82,21 +166,35 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/discussions',
-    element: <DiscussionPage />,
+    element: (
+      <LazyRoute>
+        <DiscussionPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/profile',
-    element: <ProfilePage />,
+    element: (
+      <LazyRoute>
+        <ProfilePage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/profile/:id',
-    element: <UserProfilePage />,
+    element: (
+      <LazyRoute>
+        <UserProfilePage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/notifications',
     element: (
       <ProtectedRoute>
-        <NotificationsPage />
+        <LazyRoute>
+          <NotificationsPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -104,7 +202,9 @@ export const routes: RouteObject[] = [
     path: '/feed',
     element: (
       <ProtectedRoute>
-        <ActivityFeedPage />
+        <LazyRoute>
+          <ActivityFeedPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -112,7 +212,9 @@ export const routes: RouteObject[] = [
     path: '/settings',
     element: (
       <ProtectedRoute>
-        <SettingsPage />
+        <LazyRoute>
+          <SettingsPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -120,7 +222,9 @@ export const routes: RouteObject[] = [
     path: '/settings/feedback',
     element: (
       <ProtectedRoute>
-        <FeedbackPreferencesPage />
+        <LazyRoute>
+          <FeedbackPreferencesPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -128,7 +232,9 @@ export const routes: RouteObject[] = [
     path: '/verification',
     element: (
       <ProtectedRoute>
-        <VerificationPage />
+        <LazyRoute>
+          <VerificationPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -137,23 +243,35 @@ export const routes: RouteObject[] = [
     path: '/parental-consent/pending',
     element: (
       <ProtectedRoute>
-        <ConsentPendingPage />
+        <LazyRoute>
+          <ConsentPendingPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
   {
     path: '/parental-consent/verify/:token',
-    element: <ConsentVerifyPage />,
+    element: (
+      <LazyRoute>
+        <ConsentVerifyPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/parental-dashboard/:token',
-    element: <ParentalDashboardPage />,
+    element: (
+      <LazyRoute>
+        <ParentalDashboardPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/admin/moderation',
     element: (
       <ProtectedRoute>
-        <ModerationDashboardPage />
+        <LazyRoute>
+          <ModerationDashboardPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -161,7 +279,9 @@ export const routes: RouteObject[] = [
     path: '/appeals',
     element: (
       <ProtectedRoute>
-        <AppealStatusPage />
+        <LazyRoute>
+          <AppealStatusPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
@@ -169,17 +289,27 @@ export const routes: RouteObject[] = [
     path: '/simulator',
     element: (
       <ProtectedRoute>
-        <DiscussionSimulatorPage />
+        <LazyRoute>
+          <DiscussionSimulatorPage />
+        </LazyRoute>
       </ProtectedRoute>
     ),
   },
   {
     path: '/terms',
-    element: <TermsPage />,
+    element: (
+      <LazyRoute>
+        <TermsPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/privacy',
-    element: <PrivacyPage />,
+    element: (
+      <LazyRoute>
+        <PrivacyPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '*',
