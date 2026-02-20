@@ -12,7 +12,7 @@ const logger = new Logger('CacheModule');
 /**
  * Cache Module
  *
- * Configures Redis caching for the discussion service.
+ * Configures Redis caching for the user service.
  * Uses AWS ElastiCache in production or local Redis in development.
  *
  * Environment Variables:

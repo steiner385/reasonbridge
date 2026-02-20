@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { TopicRecommendationsService } from './topic-recommendations.service.js';
 import {
   GetTopicRecommendationsDto,
@@ -45,10 +46,13 @@ export class TopicRecommendationsController {
   /**
    * Find topics similar to a given topic.
    * Useful for detecting potential duplicates or related discussions.
+   * Cached for 24 hours (86400 seconds) - similarity results are stable
    *
    * @example GET /topic-recommendations/similar/123e4567-e89b-12d3-a456-426614174000?limit=5
    */
   @Get('similar/:topicId')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(86400000) // 24 hours in ms
   async getSimilarTopics(
     @Param('topicId') topicId: string,
     @Query('limit') limit?: number,
@@ -63,10 +67,13 @@ export class TopicRecommendationsController {
   /**
    * Get trending topics within a time window.
    * Useful for showing creators what's popular.
+   * Cached for 5 minutes (300 seconds) - trending data changes frequently
    *
    * @example GET /topic-recommendations/trending?hours=24&limit=10&tags=politics
    */
   @Get('trending')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(300000) // 5 minutes in ms
   async getTrendingTopics(
     @Query() query: GetTrendingTopicsDto,
   ): Promise<TrendingTopicsResponseDto> {

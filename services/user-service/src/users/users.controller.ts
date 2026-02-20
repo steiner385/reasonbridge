@@ -13,10 +13,12 @@ import {
   Param,
   Query,
   UseGuards,
+  UseInterceptors,
   Body,
   Logger,
   BadRequestException,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { UsersService } from './users.service.js';
@@ -125,8 +127,11 @@ export class UsersController {
   /**
    * GET /users/:id - Get a user's public profile by ID
    * Public endpoint - no authentication required
+   * Cached for 30 minutes (1800 seconds)
    */
   @Get(':id')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1800000) // 30 minutes in ms
   async getUserById(@Param('id') id: string): Promise<PublicUserResponseDto> {
     // Validate UUID format to prevent Prisma errors and aid debugging
     if (!isValidUUID(id)) {
@@ -238,8 +243,11 @@ export class UsersController {
    * GET /users/:id/followers - Get a user's followers
    * Public endpoint - no authentication required
    * Supports pagination via limit and offset query params
+   * Cached for 1 hour (3600 seconds)
    */
   @Get(':id/followers')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600000) // 1 hour in ms
   async getFollowers(
     @Param('id') userId: string,
     @Query('limit') limitStr?: string,
@@ -265,8 +273,11 @@ export class UsersController {
    * GET /users/:id/following - Get users a user is following
    * Public endpoint - no authentication required
    * Supports pagination via limit and offset query params
+   * Cached for 1 hour (3600 seconds)
    */
   @Get(':id/following')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600000) // 1 hour in ms
   async getFollowing(
     @Param('id') userId: string,
     @Query('limit') limitStr?: string,

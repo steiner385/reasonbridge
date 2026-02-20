@@ -6,6 +6,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { CacheModule } from './cache/cache.module.js';
 import { HealthModule } from './health/health.module.js';
 import { UploadModule } from './upload/upload.module.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -21,6 +22,7 @@ import { MetricsModule } from './observability/index.js';
       envFilePath: ['.env.local', '.env'],
     }),
     PrismaModule,
+    CacheModule,
     MetricsModule,
     HealthModule,
     UploadModule,
