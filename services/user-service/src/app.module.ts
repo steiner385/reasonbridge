@@ -4,7 +4,9 @@
  */
 
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { CacheModule } from './cache/cache.module.js';
 import { HealthModule } from './health/health.module.js';
@@ -21,6 +23,14 @@ import { MetricsModule } from './observability/index.js';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    // Rate limiting for brute force protection
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000, // 60 seconds
+        limit: 100, // 100 requests per minute globally
+      },
+    ]),
     PrismaModule,
     CacheModule,
     MetricsModule,
@@ -32,6 +42,12 @@ import { MetricsModule } from './observability/index.js';
     ComplianceModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    // Enable global rate limiting
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
