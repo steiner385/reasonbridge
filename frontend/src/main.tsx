@@ -13,6 +13,7 @@ import { SidebarProvider } from './contexts/SidebarContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import ErrorBoundary from './components/error/ErrorBoundary';
+import { AnalyticsProvider } from './components/analytics';
 import App from './App.tsx';
 import './index.css';
 
@@ -32,7 +33,9 @@ createRoot(rootElement).render(
               <AuthProvider>
                 <SidebarProvider>
                   <BrowserRouter>
-                    <App />
+                    <AnalyticsProvider>
+                      <App />
+                    </AnalyticsProvider>
                   </BrowserRouter>
                 </SidebarProvider>
               </AuthProvider>
