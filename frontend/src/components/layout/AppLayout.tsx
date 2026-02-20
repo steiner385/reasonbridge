@@ -37,7 +37,7 @@ export const AppLayout: React.FC = () => {
       {/* Main Content - Responsive margin to account for sidebar */}
       <main
         className={`
-          flex-1 pt-4 pb-8 px-4
+          flex-1 pt-2 pb-4 px-2 sm:pt-4 sm:pb-8 sm:px-4
           transition-all duration-300 ease-in-out
           md:ml-20 md:pl-4
           ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}
