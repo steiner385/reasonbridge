@@ -14,7 +14,9 @@ import {
   HttpStatus,
   Delete,
   Req,
+  UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ResponsesService } from './responses.service.js';
@@ -45,12 +47,15 @@ export class ResponsesController {
   /**
    * GET /topics/:topicId/responses
    * Get all responses for a discussion topic
+   * Cached for 30 seconds - responses change frequently
    *
    * @param topicId - The ID of the topic to get responses for
    * @returns Array of responses for the topic
    */
   @Get(':topicId/responses')
   @HttpCode(HttpStatus.OK)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000) // 30 seconds in ms
   async getResponsesForTopic(@Param('topicId') topicId: string): Promise<ResponseDto[]> {
     return this.responsesService.getResponsesForTopic(topicId);
   }
@@ -295,6 +300,7 @@ export class ResponsesController {
 
   /**
    * T041 [US2] - Get all responses for a discussion
+   * Cached for 30 seconds - responses change frequently
    *
    * @param discussionId - The ID of the discussion
    * @returns Array of responses for the discussion
@@ -302,6 +308,8 @@ export class ResponsesController {
   @Get('discussions/:discussionId/responses')
   @HttpCode(HttpStatus.OK)
   @SkipThrottle() // No rate limit on read operations
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(30000) // 30 seconds in ms
   @ApiTags('responses')
   @ApiOperation({
     summary: 'Get responses for a discussion',

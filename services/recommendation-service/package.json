@@ -18,6 +18,7 @@
   "dependencies": {
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
+    "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.1.13",
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-fastify": "^11.1.13",
@@ -27,11 +28,14 @@
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "@willsoto/nestjs-prometheus": "^6.0.2",
+    "cache-manager": "^7.2.8",
+    "cache-manager-redis-store": "^3.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "fastify": "^5.7.4",
     "pg": "^8.13.1",
     "prom-client": "^15.1.3",
+    "redis": "^5.11.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1"
   },
