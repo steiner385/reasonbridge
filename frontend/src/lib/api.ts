@@ -320,3 +320,55 @@ export async function verifyPhoneOTP(
     code,
   });
 }
+
+/**
+ * Avatar upload API response types
+ */
+export interface AvatarUploadResponse {
+  success: boolean;
+  data: {
+    key: string;
+    url: string;
+    bucket: string;
+  };
+}
+
+/**
+ * Convert a File to base64 string
+ */
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove the data URL prefix (e.g., "data:image/png;base64,")
+      const parts = result.split(',');
+      const base64 = parts[1] ?? '';
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Upload avatar for a user
+ * @param userId - The user's UUID
+ * @param file - The image file to upload
+ */
+export async function uploadAvatar(userId: string, file: File): Promise<AvatarUploadResponse> {
+  const base64 = await fileToBase64(file);
+
+  return apiClient.post<AvatarUploadResponse>(`/users/${userId}/avatar`, {
+    file: base64,
+    mimetype: file.type,
+  });
+}
+
+/**
+ * Delete avatar for a user
+ * @param userId - The user's UUID
+ */
+export async function deleteAvatar(userId: string): Promise<void> {
+  return apiClient.delete(`/users/${userId}/avatar`);
+}
