@@ -10,7 +10,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.{test,spec}.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**'],
+    // Integration tests require database - run separately in CI
+    exclude: ['**/node_modules/**', '**/dist/**', '**/*.integration.test.ts'],
     reporters: ['default'],
   },
 });

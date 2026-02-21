@@ -48,6 +48,9 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
+// Re-export Pool type for consumers using createTestPool
+export type { Pool } from 'pg';
+
 /**
  * Test database connection URL.
  * Uses the test database from docker-compose.test.yml (port 5433).
@@ -239,6 +242,64 @@ class RollbackError extends Error {
     super('Intentional rollback for test isolation');
     this.name = 'RollbackError';
   }
+}
+
+/**
+ * Create a raw PostgreSQL connection pool for EXPLAIN ANALYZE tests.
+ * This is needed for the query-timing utilities which require direct pg Pool access.
+ *
+ * @param options - Configuration options
+ * @returns Connected pg Pool instance
+ *
+ * @example
+ * ```typescript
+ * import { createTestPool } from '@reason-bridge/testing-utils/prisma';
+ * import { assertQueryTiming } from '@reason-bridge/testing-utils/perf';
+ *
+ * describe('Query Performance', () => {
+ *   let pool: Pool;
+ *
+ *   beforeAll(async () => {
+ *     pool = await createTestPool();
+ *   });
+ *
+ *   afterAll(async () => {
+ *     await pool.end();
+ *   });
+ *
+ *   it('should use index for user lookup', async () => {
+ *     await assertQueryTiming(
+ *       pool,
+ *       'SELECT * FROM users WHERE email = $1',
+ *       ['test@example.com'],
+ *       { requireIndexScan: true }
+ *     );
+ *   });
+ * });
+ * ```
+ */
+export async function createTestPool(options: { databaseUrl?: string } = {}): Promise<Pool> {
+  const { databaseUrl = TEST_DATABASE_URL } = options;
+
+  const pool = new Pool({
+    connectionString: databaseUrl,
+  });
+
+  // Verify connection
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+  } catch (error) {
+    await pool.end();
+    throw new Error(
+      `Failed to create test pool at ${databaseUrl}. ` +
+        `Ensure docker-compose.test.yml is running. ` +
+        `Original error: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  return pool;
 }
 
 /**
