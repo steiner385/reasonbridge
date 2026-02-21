@@ -1,0 +1,1619 @@
+{
+  "consumer": {
+    "name": "api-gateway"
+  },
+  "interactions": [
+    {
+      "description": "a health check request",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the AI service is healthy"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "details": {
+              "ai": {
+                "status": "up"
+              },
+              "database": {
+                "status": "up"
+              }
+            },
+            "error": {},
+            "info": {
+              "ai": {
+                "status": "up"
+              },
+              "database": {
+                "status": "up"
+              }
+            },
+            "status": "ok"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.details": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.ai": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.ai.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.database": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.database.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.ai": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.ai.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.database": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.database.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for bridging suggestions",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "topic with ID 990e8400-e29b-41d4-a716-446655440004 exists with propositions"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/suggest/bridging-suggestions/990e8400-e29b-41d4-a716-446655440004"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "attribution": "AI Assistant",
+            "commonGroundAreas": ["The shared goal of improving outcomes..."],
+            "confidenceScore": 0.75,
+            "conflictAreas": ["The approach to implementation..."],
+            "overallConsensusScore": 0.58,
+            "reasoning": "Analyzed 15 propositions from this topic...",
+            "suggestions": [
+              {
+                "bridgingLanguage": "While there are different views on this topic, both perspectives share concerns about...",
+                "commonGround": "Both positions likely share fundamental values or goals...",
+                "confidenceScore": 0.72,
+                "propositionId": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+                "reasoning": "This proposition has multiple perspectives that could benefit from bridging...",
+                "sourcePosition": "SUPPORT",
+                "targetPosition": "OPPOSE"
+              }
+            ],
+            "topicId": "990e8400-e29b-41d4-a716-446655440004"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.suggestions[*].propositionId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.attribution": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.commonGroundAreas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.commonGroundAreas[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.conflictAreas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.conflictAreas[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.overallConsensusScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.suggestions[*].bridgingLanguage": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions[*].commonGround": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions[*].confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.suggestions[*].propositionId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.suggestions[*].reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions[*].sourcePosition": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions[*].targetPosition": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for bridging suggestions for non-existent topic",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "topic with ID aa0e8400-e29b-41d4-a716-446655440005 does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/suggest/bridging-suggestions/aa0e8400-e29b-41d4-a716-446655440005"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "error": "Not Found",
+            "message": "Topic with ID aa0e8400-e29b-41d4-a716-446655440005 not found",
+            "statusCode": 404
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.statusCode": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for common ground analysis",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "topic with ID 880e8400-e29b-41d4-a716-446655440003 exists with responses"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "topicId": "880e8400-e29b-41d4-a716-446655440003"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/common-ground/analyze"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "agreementZones": [
+              {
+                "agreementPercentage": 85,
+                "participantCount": 12,
+                "proposition": "Both sides agree on the importance of...",
+                "supportingEvidence": ["Evidence point 1"]
+              }
+            ],
+            "attribution": "AI Assistant",
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "genuineDisagreements": [
+              {
+                "proposition": "The approach to solving this issue",
+                "underlyingValues": ["Individual liberty"],
+                "viewpoints": [
+                  {
+                    "participantCount": 8,
+                    "position": "Position A advocates for...",
+                    "reasoning": ["Because..."]
+                  }
+                ]
+              }
+            ],
+            "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "misunderstandings": [
+              {
+                "clarification": "The term actually refers to...",
+                "interpretations": [
+                  {
+                    "interpretation": "Some participants interpret this as...",
+                    "participantCount": 5
+                  }
+                ],
+                "topic": "Definition of key term"
+              }
+            ],
+            "modelVersion": "gpt-4-turbo",
+            "overallConsensusScore": 0.62,
+            "participantCountAtGeneration": 25,
+            "responseCountAtGeneration": 48,
+            "topicId": "880e8400-e29b-41d4-a716-446655440003",
+            "version": 1
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.agreementZones": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.agreementZones[*].agreementPercentage": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.agreementZones[*].participantCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.agreementZones[*].proposition": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.agreementZones[*].supportingEvidence": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.agreementZones[*].supportingEvidence[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.attribution": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.genuineDisagreements": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].proposition": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].underlyingValues": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].underlyingValues[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].viewpoints": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].viewpoints[*].participantCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].viewpoints[*].position": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].viewpoints[*].reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.genuineDisagreements[*].viewpoints[*].reasoning[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.misunderstandings": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.misunderstandings[*].clarification": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.misunderstandings[*].interpretations": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.misunderstandings[*].interpretations[*].interpretation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.misunderstandings[*].interpretations[*].participantCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.misunderstandings[*].topic": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.modelVersion": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.overallConsensusScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.participantCountAtGeneration": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.responseCountAtGeneration": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.version": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for feedback analytics",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "feedback analytics data is available"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/feedback/analytics",
+        "query": {
+          "endDate": ["2024-12-31"],
+          "startDate": ["2024-01-01"]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "averageConfidenceScore": 0.76,
+            "dismissalRate": 0.12,
+            "feedbackByType": {
+              "AFFIRMATION": 15,
+              "BIAS": 45,
+              "FALLACY": 38,
+              "INFLAMMATORY": 22,
+              "UNSOURCED": 30
+            },
+            "periodEnd": "2024-12-31",
+            "periodStart": "2024-01-01",
+            "totalFeedbackCount": 150,
+            "userEngagementRate": 0.68
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.averageConfidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.dismissalRate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.feedbackByType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.feedbackByType.AFFIRMATION": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.feedbackByType.BIAS": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.feedbackByType.FALLACY": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.feedbackByType.INFLAMMATORY": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.feedbackByType.UNSOURCED": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.periodEnd": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.periodStart": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.totalFeedbackCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.userEngagementRate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for feedback on response content",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the AI service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "This is the response content to analyze for bias and fallacies.",
+            "responseId": "550e8400-e29b-41d4-a716-446655440000",
+            "sensitivity": "medium"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.sensitivity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/feedback/request"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "confidenceScore": 0.85,
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "displayedToUser": true,
+            "educationalResources": {
+              "articles": ["https://example.com/bias-article"]
+            },
+            "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "reasoning": "The response shows signs of confirmation bias...",
+            "responseId": "550e8400-e29b-41d4-a716-446655440000",
+            "subtype": "confirmation",
+            "suggestionText": "Consider alternative viewpoints...",
+            "type": "BIAS"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.displayedToUser": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.educationalResources": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.educationalResources.articles": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.subtype": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestionText": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for tag suggestions",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the AI service is available for tag suggestions"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "A comprehensive discussion about various approaches to addressing climate change...",
+            "title": "Climate Change Policy Discussion"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/suggest/tags"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "attribution": "AI Assistant",
+            "confidenceScore": 0.88,
+            "reasoning": "Based on the content and keywords, these tags are most relevant...",
+            "suggestions": ["climate-policy"]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.attribution": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.suggestions[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for topic link suggestions",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the AI service is available and related topics exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "Discussion about how climate policies affect the economy...",
+            "title": "Economic Implications of Climate Policy",
+            "topicId": "bb0e8400-e29b-41d4-a716-446655440006"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/suggest/topic-links"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "attribution": "AI Assistant",
+            "confidenceScore": 0.82,
+            "linkSuggestions": [
+              {
+                "reasoning": "These topics share common themes...",
+                "relationshipType": "RELATED",
+                "targetTopicId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+              }
+            ],
+            "reasoning": "Based on content analysis, these topics are related...",
+            "suggestions": ["Related topic"]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.linkSuggestions[*].targetTopicId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.attribution": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.linkSuggestions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.linkSuggestions[*].reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.linkSuggestions[*].relationshipType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.linkSuggestions[*].targetTopicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.suggestions[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to dismiss feedback",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "feedback with ID 770e8400-e29b-41d4-a716-446655440002 exists and is not dismissed"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "reason": "User disagreed with the analysis"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.reason": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PATCH",
+        "path": "/feedback/770e8400-e29b-41d4-a716-446655440002/dismiss"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "confidenceScore": 0.72,
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "displayedToUser": false,
+            "id": "770e8400-e29b-41d4-a716-446655440002",
+            "reasoning": "The response shows signs of bias...",
+            "responseId": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "suggestionText": "Consider alternative viewpoints...",
+            "type": "BIAS"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.responseId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.displayedToUser": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.suggestionText": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get feedback by ID",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "feedback with ID 660e8400-e29b-41d4-a716-446655440001 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/feedback/660e8400-e29b-41d4-a716-446655440001"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "confidenceScore": 0.78,
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "displayedToUser": true,
+            "id": "660e8400-e29b-41d4-a716-446655440001",
+            "reasoning": "This appears to be a strawman fallacy...",
+            "responseId": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "subtype": "strawman",
+            "suggestionText": "The argument misrepresents the opposing view...",
+            "type": "FALLACY"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.responseId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.confidenceScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.displayedToUser": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.reasoning": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.subtype": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.suggestionText": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "ai-service"
+  }
+}
