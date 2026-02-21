@@ -4,3 +4,4 @@
  */
 
 export { ModePromptBuilder } from './mode-prompt-builder.js';
+export { ArgumentAnalyzerService } from './argument-analyzer.service.js';
