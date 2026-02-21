@@ -53,6 +53,8 @@ export default defineConfig({
           'vendor-router': ['react-router-dom'],
           // TanStack Query - data fetching layer
           'vendor-query': ['@tanstack/react-query'],
+          // UI utilities
+          'vendor-ui': ['lucide-react'],
         },
       },
     },

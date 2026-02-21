@@ -51,16 +51,16 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   size = 'md',
   orientation = 'vertical',
 }) => {
-  // Size classes
+  // Size classes - all sizes maintain 44px minimum touch target for WCAG 2.1 AA compliance
   const sizeClasses = {
     sm: {
-      button: 'w-6 h-6',
+      button: 'w-6 h-6 min-w-[44px] min-h-[44px]',
       icon: 'w-3 h-3',
       text: 'text-xs',
       gap: orientation === 'vertical' ? 'gap-0.5' : 'gap-1',
     },
     md: {
-      button: 'w-8 h-8',
+      button: 'w-8 h-8 min-w-[44px] min-h-[44px]',
       icon: 'w-4 h-4',
       text: 'text-sm',
       gap: orientation === 'vertical' ? 'gap-1' : 'gap-2',

@@ -75,7 +75,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ value, onChange, error, length = 6 
             onChange={(e) => handleChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
-            className="w-12 h-12 text-center text-2xl border-2 rounded-md focus:border-primary-500 focus:outline-none"
+            className="w-10 h-10 sm:w-12 sm:h-12 text-xl sm:text-2xl text-center border-2 rounded-md focus:border-primary-500 focus:outline-none"
             aria-label={`Digit ${index + 1}`}
           />
         ))}
