@@ -68,8 +68,8 @@ describe('User Service Consumer Contract Tests', () => {
             verificationLevel: string('BASIC'),
             status: string('ACTIVE'),
             trustScore: decimal(0.75),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-            updatedAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            updatedAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -127,7 +127,7 @@ describe('User Service Consumer Contract Tests', () => {
             displayName: string('Updated Display Name'),
             verificationLevel: string('BASIC'),
             status: string('ACTIVE'),
-            updatedAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            updatedAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -162,8 +162,8 @@ describe('User Service Consumer Contract Tests', () => {
             verificationLevel: string('VERIFIED'),
             status: string('ACTIVE'),
             trustScore: decimal(0.85),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-            updatedAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            updatedAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -198,7 +198,7 @@ describe('User Service Consumer Contract Tests', () => {
               id: uuid(),
               type: string('PHONE'),
               status: string('VERIFIED'),
-              verifiedAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+              verifiedAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             }),
             canRequestVerification: boolean(true),
             nextVerificationAvailable: like(null),
@@ -231,8 +231,8 @@ describe('User Service Consumer Contract Tests', () => {
             id: uuid(),
             type: string('PHONE'),
             status: string('PENDING'),
-            expiresAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            expiresAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -269,7 +269,7 @@ describe('User Service Consumer Contract Tests', () => {
             id: uuid(verificationId),
             type: string('PHONE'),
             status: string('VERIFIED'),
-            verifiedAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            verifiedAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -316,7 +316,7 @@ describe('User Service Consumer Contract Tests', () => {
               value: decimal(0.85),
               impact: string('positive'),
             }),
-            calculatedAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            calculatedAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -344,7 +344,7 @@ describe('User Service Consumer Contract Tests', () => {
           builder.headers({ 'Content-Type': 'application/json' }).jsonBody({
             followerId: uuid(),
             followedId: uuid(targetUserId),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
