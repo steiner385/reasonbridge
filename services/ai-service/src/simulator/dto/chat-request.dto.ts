@@ -65,10 +65,11 @@ class PersonaConfigDto {
 }
 
 class MessageDto {
-  @IsString()
+  @IsEnum(['user', 'persona'])
   role!: 'user' | 'persona';
 
   @IsString()
+  @IsNotEmpty()
   content!: string;
 }
 
