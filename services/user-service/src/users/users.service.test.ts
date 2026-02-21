@@ -19,8 +19,11 @@ const createMockBotDetectorService = () => ({
   detectNewAccountBotPatterns: vi.fn(),
 });
 
+// Valid UUID v4 format for test user (variant bits 8-b in 4th segment)
+const VALID_USER_ID = '11111111-1111-4111-a111-111111111111';
+
 const createMockUser = (overrides = {}) => ({
-  id: 'user-123',
+  id: VALID_USER_ID,
   cognitoSub: 'cognito-sub-123',
   email: 'test@example.com',
   displayName: 'Test User',
@@ -53,7 +56,7 @@ describe('UsersService', () => {
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { cognitoSub: 'cognito-sub-123' },
       });
-      expect(result.id).toBe('user-123');
+      expect(result.id).toBe(VALID_USER_ID);
       expect(result.email).toBe('test@example.com');
     });
 
@@ -69,18 +72,23 @@ describe('UsersService', () => {
       const mockUser = createMockUser();
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await service.findById('user-123');
+      const result = await service.findById(VALID_USER_ID);
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 'user-123' },
+        where: { id: VALID_USER_ID },
       });
-      expect(result.id).toBe('user-123');
+      expect(result.id).toBe(VALID_USER_ID);
     });
 
     it('should throw NotFoundException when user not found', async () => {
+      const nonexistentId = '99999999-9999-4999-a999-999999999999';
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.findById('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findById(nonexistentId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException for invalid UUID', async () => {
+      await expect(service.findById('nonexistent')).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -123,14 +131,14 @@ describe('UsersService', () => {
       };
       mockBotDetector.detectNewAccountBotPatterns.mockResolvedValue(detectionResult);
 
-      const result = await service.checkAndHandleBotPatterns('user-123');
+      const result = await service.checkAndHandleBotPatterns(VALID_USER_ID);
 
-      expect(mockBotDetector.detectNewAccountBotPatterns).toHaveBeenCalledWith('user-123');
+      expect(mockBotDetector.detectNewAccountBotPatterns).toHaveBeenCalledWith(VALID_USER_ID);
       expect(result.isSuspicious).toBe(false);
       expect(result.riskScore).toBe(0.2);
     });
 
-    it('should log and return detection result for suspicious user', async () => {
+    it('should return detection result for suspicious user', async () => {
       const detectionResult = {
         isSuspicious: true,
         riskScore: 0.8,
@@ -138,21 +146,19 @@ describe('UsersService', () => {
         reasoning: ['Very rapid posting detected', 'Unusually narrow topic focus'],
       };
       mockBotDetector.detectNewAccountBotPatterns.mockResolvedValue(detectionResult);
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-      const result = await service.checkAndHandleBotPatterns('user-123');
+      const result = await service.checkAndHandleBotPatterns(VALID_USER_ID);
 
       expect(result.isSuspicious).toBe(true);
       expect(result.riskScore).toBe(0.8);
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
+      expect(result.patterns).toEqual(['rapid_posting', 'topic_concentration']);
+      expect(result.reasoning).toHaveLength(2);
     });
   });
 
   describe('followUser', () => {
-    const validFollowerId = '12345678-1234-1234-1234-123456789012';
-    const validFollowedId = '87654321-4321-4321-4321-210987654321';
+    const validFollowerId = '12345678-1234-4234-a234-123456789012';
+    const validFollowedId = '87654321-4321-4321-a321-210987654321';
 
     it('should create follow relationship successfully', async () => {
       const mockFollow = {
@@ -224,8 +230,8 @@ describe('UsersService', () => {
   });
 
   describe('unfollowUser', () => {
-    const validFollowerId = '12345678-1234-1234-1234-123456789012';
-    const validFollowedId = '87654321-4321-4321-4321-210987654321';
+    const validFollowerId = '12345678-1234-4234-a234-123456789012';
+    const validFollowedId = '87654321-4321-4321-a321-210987654321';
 
     it('should delete follow relationship successfully', async () => {
       mockPrisma.userFollow.findUnique.mockResolvedValue({
@@ -266,8 +272,8 @@ describe('UsersService', () => {
   });
 
   describe('isFollowing', () => {
-    const validFollowerId = '12345678-1234-1234-1234-123456789012';
-    const validFollowedId = '87654321-4321-4321-4321-210987654321';
+    const validFollowerId = '12345678-1234-4234-a234-123456789012';
+    const validFollowedId = '87654321-4321-4321-a321-210987654321';
 
     it('should return true when following', async () => {
       mockPrisma.userFollow.findUnique.mockResolvedValue({
@@ -298,7 +304,7 @@ describe('UsersService', () => {
   });
 
   describe('getFollowerCount', () => {
-    const validUserId = '12345678-1234-1234-1234-123456789012';
+    const validUserId = '12345678-1234-4234-a234-123456789012';
 
     it('should return follower count', async () => {
       mockPrisma.userFollow.count.mockResolvedValue(42);
@@ -317,7 +323,7 @@ describe('UsersService', () => {
   });
 
   describe('getFollowingCount', () => {
-    const validUserId = '12345678-1234-1234-1234-123456789012';
+    const validUserId = '12345678-1234-4234-a234-123456789012';
 
     it('should return following count', async () => {
       mockPrisma.userFollow.count.mockResolvedValue(15);
