@@ -3,7 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Put, Body, Param, Res, Headers, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Res,
+  Headers,
+  Logger,
+} from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -73,6 +84,63 @@ export class UsersProxyController {
     const response = await this.proxyService.proxyToUserService({
       method: 'GET',
       path: `/users/${id}`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * Upload avatar for a user
+   * Accepts base64-encoded file data in request body
+   */
+  @Post(':id/avatar')
+  async uploadAvatar(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    if (!isValidUUID(id)) {
+      res.status(400).send({
+        statusCode: 400,
+        message: `Invalid user ID format: expected UUID`,
+        error: 'Bad Request',
+      });
+      return;
+    }
+
+    const response = await this.proxyService.proxyToUserService({
+      method: 'POST',
+      path: `/upload/avatar/${id}`,
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * Delete avatar for a user
+   */
+  @Delete(':id/avatar')
+  async deleteAvatar(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    if (!isValidUUID(id)) {
+      res.status(400).send({
+        statusCode: 400,
+        message: `Invalid user ID format: expected UUID`,
+        error: 'Bad Request',
+      });
+      return;
+    }
+
+    const response = await this.proxyService.proxyToUserService({
+      method: 'DELETE',
+      path: `/upload/avatar/${id}`,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });
 
