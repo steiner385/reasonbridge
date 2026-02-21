@@ -48,7 +48,12 @@ describe('ChatService', () => {
       complete: vi.fn(),
     };
     modePromptBuilder = new ModePromptBuilder();
-    service = new ChatService(mockBedrockService as any, modePromptBuilder);
+    service = new ChatService(
+      mockBedrockService as unknown as InstanceType<
+        typeof import('../../ai/bedrock.service.js').BedrockService
+      >,
+      modePromptBuilder,
+    );
   });
 
   describe('generateResponse', () => {
