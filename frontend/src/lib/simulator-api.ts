@@ -210,10 +210,12 @@ export interface PresetPersona {
   position: string;
   /** Communication style/tone */
   tone: PersonaTone;
+  /** How open to opposing viewpoints (0.1 = closed, 1.0 = very open) */
+  receptiveness: number;
+  /** Argumentation style configuration */
+  argumentation: ArgumentationConfig;
   /** Best-suited conversation mode */
   modeAffinity: ConversationMode;
-  /** Template for generating system prompts */
-  systemPromptTemplate: string;
 }
 
 /**
@@ -282,8 +284,10 @@ export interface ChatRequest {
 export interface ChatResponse {
   /** Generated persona response */
   response: string;
-  /** Internal reasoning (for debugging/transparency) */
-  reasoning?: string;
+  /** Name of the persona that generated the response */
+  personaName: string;
+  /** ISO timestamp of when the response was generated */
+  timestamp: string;
 }
 
 /**
