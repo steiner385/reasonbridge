@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useFilteredTopics } from '../../lib/useFilteredTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useAuthContext } from '../../contexts/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -27,6 +28,15 @@ function TopicsPage() {
     limit: 10,
     sortBy: 'createdAt',
     sortOrder: 'desc',
+  });
+
+  // Set SEO meta tags for topics listing
+  useDocumentMeta({
+    title: 'Topics',
+    description:
+      'Browse discussion topics on ReasonBridge. Join evidence-based debates, explore diverse perspectives, and engage in constructive dialogue.',
+    keywords: ['topics', 'discussions', 'debates', 'evidence-based'],
+    canonical: `${window.location.origin}/topics`,
   });
 
   const { data, isLoading, error } = useFilteredTopics(filters);

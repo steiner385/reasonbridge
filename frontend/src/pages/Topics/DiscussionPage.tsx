@@ -9,6 +9,7 @@ import { TopicNavigationPanel } from '../../components/discussion-layout/TopicNa
 import { ConversationPanel } from '../../components/discussion-layout/ConversationPanel';
 import { MetadataPanel } from '../../components/discussion-layout/MetadataPanel';
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useTopics } from '../../lib/useTopics';
 import { useTopic } from '../../lib/useTopic';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -88,6 +89,17 @@ export function DiscussionPage() {
 
   // Use topic from list, or fall back to individual fetch
   const activeTopic = topicInList || individualTopic || null;
+
+  // Update document meta tags for SEO
+  useDocumentMeta({
+    title: activeTopic?.title,
+    description: activeTopic?.description?.substring(0, 160),
+    keywords: activeTopic?.tags?.map((t) => t.name),
+    canonical: activeTopic
+      ? `${window.location.origin}/discussions?topic=${activeTopic.id}`
+      : undefined,
+    ogType: 'article',
+  });
 
   // Fetch propositions for the active topic
   const { data: rawPropositions = [] } = usePropositions(activeTopic?.id || null);
