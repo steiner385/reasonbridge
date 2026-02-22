@@ -13,6 +13,7 @@ import { ConnectionsModule } from './connections/connections.module.js';
 import { ContactsModule } from './contacts/contacts.module.js';
 import { DiscoveryModule } from './discovery/discovery.module.js';
 import { ClientsModule } from './clients/clients.module.js';
+import { InvitationsModule } from './invitations/invitations.module.js';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ClientsModule } from './clients/clients.module.js';
     ConnectionsModule,
     ContactsModule,
     DiscoveryModule,
+    InvitationsModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

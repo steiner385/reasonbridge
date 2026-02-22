@@ -4,6 +4,8 @@
  */
 
 import { Global, Module } from '@nestjs/common';
+import { DiscussionServiceClient } from './discussion-service.client.js';
+import { NotificationServiceClient } from './notification-service.client.js';
 import { UserServiceClient } from './user-service.client.js';
 
 /**
@@ -14,7 +16,7 @@ import { UserServiceClient } from './user-service.client.js';
  */
 @Global()
 @Module({
-  providers: [UserServiceClient],
-  exports: [UserServiceClient],
+  providers: [UserServiceClient, NotificationServiceClient, DiscussionServiceClient],
+  exports: [UserServiceClient, NotificationServiceClient, DiscussionServiceClient],
 })
 export class ClientsModule {}
