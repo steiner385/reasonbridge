@@ -4,22 +4,25 @@
  */
 
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { ContentScreeningService } from './content-screening.service.js';
 import { AIReviewService } from './ai-review.service.js';
 import { ModerationActionsService } from './moderation-actions.service.js';
 import { AppealService } from './appeal.service.js';
 import { ModerationQueueService } from './moderation-queue.service.js';
+import { GroomingClientService } from './grooming-client.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { QueueModule } from '../queue/queue.module.js';
 
 @Module({
-  imports: [PrismaModule, QueueModule],
+  imports: [PrismaModule, QueueModule, HttpModule],
   providers: [
     ContentScreeningService,
     AIReviewService,
     ModerationActionsService,
     AppealService,
     ModerationQueueService,
+    GroomingClientService,
   ],
   exports: [
     ContentScreeningService,
@@ -27,6 +30,7 @@ import { QueueModule } from '../queue/queue.module.js';
     ModerationActionsService,
     AppealService,
     ModerationQueueService,
+    GroomingClientService,
   ],
 })
 export class ModerationModule {}
