@@ -83,6 +83,11 @@ model User {
   topicExpertise        TopicExpertise[]
   credentials           DomainCredential[]    @relation("UserCredentials")
   credentialReviews     DomainCredential[]    @relation("CredentialReviewer")
+  tierAppeals           TierAppeal[]          @relation("UserTierAppeals")
+  tierAppealReviews     TierAppeal[]          @relation("TierAppealReviewer")
+  provisionalAccess     ProvisionalAccess[]   @relation("ProvisionalAccessUser")
+  provisionalGrants     ProvisionalAccess[]   @relation("ProvisionalAccessGranter")
+  canMentor             Boolean               @default(false) @map("can_mentor")
 
   // Social integration fields (Feature: Contact Service)
   discoverableByContacts Boolean @default(false) @map("discoverable_by_contacts")
@@ -161,6 +166,32 @@ enum CredentialStatus {
   EXPIRED
 
   @@map("credential_status")
+}
+
+/// Type of tier appeal (Feature #781)
+enum TierAppealType {
+  GLOBAL_TIER
+  DOMAIN_EXPERTISE
+
+  @@map("tier_appeal_type")
+}
+
+/// Status of tier appeals (Feature #781)
+enum TierAppealStatus {
+  PENDING
+  APPROVED
+  DENIED
+
+  @@map("tier_appeal_status")
+}
+
+/// Status of provisional access grants (Feature #781)
+enum ProvisionalAccessStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+
+  @@map("provisional_access_status")
 }
 
 /// Cached user ranking data, recalculated daily (Feature #781)
@@ -244,6 +275,54 @@ model DomainCredential {
   @@index([status])
   @@index([expiresAt])
   @@map("domain_credentials")
+}
+
+/// Appeals for tier/expertise decisions (Feature #781)
+/// Users can appeal global tier rankings or domain-specific expertise levels
+model TierAppeal {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  appealType     TierAppealType   @map("appeal_type")
+  tagId          String?          @map("tag_id") @db.Uuid
+  requestedLevel Int              @map("requested_level")
+  reason         String           @db.Text
+  status         TierAppealStatus @default(PENDING)
+  reviewedById   String?          @map("reviewed_by_id") @db.Uuid
+  reviewNotes    String?          @map("review_notes") @db.Text
+  createdAt      DateTime         @default(now()) @map("created_at")
+  resolvedAt     DateTime?        @map("resolved_at")
+
+  // Relations
+  user       User  @relation("UserTierAppeals", fields: [userId], references: [id], onDelete: Cascade)
+  tag        Tag?  @relation(fields: [tagId], references: [id])
+  reviewedBy User? @relation("TierAppealReviewer", fields: [reviewedById], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("tier_appeals")
+}
+
+/// Temporary access to tier-restricted topics (Feature #781)
+/// Allows moderators to grant provisional access to users who don't meet tier requirements
+model ProvisionalAccess {
+  id          String                  @id @default(uuid()) @db.Uuid
+  userId      String                  @map("user_id") @db.Uuid
+  topicId     String                  @map("topic_id") @db.Uuid
+  grantedById String                  @map("granted_by_id") @db.Uuid
+  reason      String?                 @db.VarChar(500)
+  expiresAt   DateTime                @map("expires_at")
+  status      ProvisionalAccessStatus @default(ACTIVE)
+  createdAt   DateTime                @default(now()) @map("created_at")
+
+  // Relations
+  user      User            @relation("ProvisionalAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  topic     DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  grantedBy User            @relation("ProvisionalAccessGranter", fields: [grantedById], references: [id])
+
+  @@unique([userId, topicId])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("provisional_access")
 }
 
 /// Tracks user verification records (email, phone, government ID, video)
@@ -385,6 +464,8 @@ model DiscussionTopic {
   mergesAsTarget       TopicMerge[]           @relation("TargetTopicMerge")
   // T038: Analytics relation
   analytics            TopicAnalytics[]
+  // Feature #781: Provisional access for tier-restricted topics
+  provisionalAccess    ProvisionalAccess[]
 
   @@index([status])
   @@index([creatorId])
@@ -563,6 +644,7 @@ model Tag {
   topics      TopicTag[]
   expertise   TopicExpertise[]
   credentials DomainCredential[]
+  tierAppeals TierAppeal[]
 
   @@index([usageCount(sort: Desc)])
   @@map("tags")
