@@ -1145,13 +1145,32 @@ enum TargetType {
 // COMPLIANCE AUDIT ENTITIES (Feature: Child-Friendly Mode)
 // ============================================================================
 
+/// Compliance action types for audit logging
+enum ComplianceAction {
+  AGE_VERIFIED
+  CONSENT_REQUESTED
+  CONSENT_VERIFIED
+  CONSENT_WITHDRAWN
+  DATA_DELETION_REQUESTED
+  DATA_DELETION_COMPLETED
+  ANNUAL_REVERIFICATION
+
+  @@map("compliance_action")
+}
+
 /// Audit log for regulatory compliance (COPPA, GDPR, AADC)
 /// Tracks all compliance-related actions for audit and reporting purposes
 model ComplianceAuditLog {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  action    String   @db.VarChar(50) // AGE_VERIFIED, CONSENT_REQUESTED, CONSENT_VERIFIED, CONSENT_WITHDRAWN, DATA_DELETION_REQUESTED
-  metadata  Json     // region, consentAge, ipAddress, userAgent
+  id     String           @id @default(uuid()) @db.Uuid
+  userId String           @map("user_id") @db.Uuid
+  action ComplianceAction
+
+  /// JSON metadata containing contextual information about the compliance action.
+  /// Expected structure: { region: string, consentAge: number, ipAddress: string, userAgent: string }
+  /// Additional fields may be present depending on the action type.
+  metadata Json
+
+  /// Immutable timestamp of when the action occurred. Never update this field.
   timestamp DateTime @default(now())
 
   // Relations
