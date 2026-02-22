@@ -14,7 +14,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import ErrorBoundary from './components/error/ErrorBoundary';
 import { AnalyticsProvider } from './components/analytics';
-import App from './App.tsx';
+import App from './App';
 import './index.css';
 
 const rootElement = document.getElementById('root');
