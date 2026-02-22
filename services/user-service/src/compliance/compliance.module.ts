@@ -10,6 +10,7 @@ import { ComplianceService } from './compliance.service.js';
 import { AgeVerificationService } from './age-verification.service.js';
 import { ParentalConsentService } from './parental-consent.service.js';
 import { ComplianceAuditService } from './compliance-audit.service.js';
+import { AgeReverificationJob } from './age-reverification.job.js';
 import { ParentalConsentController } from './parental-consent.controller.js';
 import { ParentalDashboardController } from './parental-dashboard.controller.js';
 import { EmailService } from '../services/email.service.js';
@@ -46,6 +47,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     AgeVerificationService,
     ParentalConsentService,
     ComplianceAuditService,
+    AgeReverificationJob,
     EmailService,
     // Factory provider that explicitly injects dependencies
     // This bypasses NestJS's reflection-based DI which can hang with @Optional() decorators
@@ -61,6 +63,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     AgeVerificationService,
     ParentalConsentService,
     ComplianceAuditService,
+    AgeReverificationJob,
     JwtAuthGuard,
   ],
 })
