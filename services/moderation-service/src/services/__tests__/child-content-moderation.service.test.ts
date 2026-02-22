@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChildContentModerationService } from '../child-content-moderation.service.js';
 
@@ -493,6 +495,193 @@ describe('ChildContentModerationService', () => {
       );
 
       await expect(service.getQueueStats()).rejects.toThrow('Database connection failed');
+    });
+  });
+
+  describe('URGENT Escalation Notifications', () => {
+    it('should trigger moderator notification when URGENT item is queued', async () => {
+      const responseId = 'response-urgent-1';
+      const topicId = 'topic-456';
+      const authorId = 'author-789';
+      const content = 'Content with grooming patterns';
+      const aiFlags = {
+        grooming: true,
+        groomingConfidence: 0.95,
+        groomingPatternType: 'isolation_attempt',
+        recommendedAction: 'BLOCK' as const,
+      };
+
+      const mockQueueEntry = {
+        id: 'queue-entry-urgent',
+        responseId,
+        topicId,
+        authorId,
+        content,
+        status: 'PENDING',
+        priority: 'URGENT',
+        aiFlags,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      prismaService.childContentReviewQueue.create.mockResolvedValue(mockQueueEntry);
+
+      // Spy on the notification method
+      const notifySpy = vi.spyOn(service as any, 'notifyModeratorsOfUrgent');
+
+      await service.queueForReview(responseId, topicId, authorId, content, aiFlags);
+
+      // Verify notification was called with correct data
+      expect(notifySpy).toHaveBeenCalledWith({
+        responseId,
+        topicId,
+        content,
+        aiFlags,
+      });
+    });
+
+    it('should NOT trigger moderator notification for non-URGENT items', async () => {
+      const responseId = 'response-normal-1';
+      const topicId = 'topic-456';
+      const authorId = 'author-789';
+      const content = 'Safe content without flags';
+
+      const mockQueueEntry = {
+        id: 'queue-entry-normal',
+        responseId,
+        topicId,
+        authorId,
+        content,
+        status: 'PENDING',
+        priority: 'NORMAL',
+        aiFlags: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      prismaService.childContentReviewQueue.create.mockResolvedValue(mockQueueEntry);
+
+      // Spy on the notification method
+      const notifySpy = vi.spyOn(service as any, 'notifyModeratorsOfUrgent');
+
+      await service.queueForReview(responseId, topicId, authorId, content);
+
+      // Verify notification was NOT called
+      expect(notifySpy).not.toHaveBeenCalled();
+    });
+
+    it('should NOT trigger notification for HIGH priority items (only URGENT)', async () => {
+      const responseId = 'response-high-1';
+      const topicId = 'topic-456';
+      const authorId = 'author-789';
+      const content = 'Content with inappropriate flag';
+      const aiFlags = { inappropriate: true, confidence: 0.7 };
+
+      const mockQueueEntry = {
+        id: 'queue-entry-high',
+        responseId,
+        topicId,
+        authorId,
+        content,
+        status: 'PENDING',
+        priority: 'HIGH',
+        aiFlags,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      prismaService.childContentReviewQueue.create.mockResolvedValue(mockQueueEntry);
+
+      // Spy on the notification method
+      const notifySpy = vi.spyOn(service as any, 'notifyModeratorsOfUrgent');
+
+      await service.queueForReview(responseId, topicId, authorId, content, aiFlags);
+
+      // Verify notification was NOT called (HIGH is not URGENT)
+      expect(notifySpy).not.toHaveBeenCalled();
+    });
+
+    it('should include grooming metadata in notification', async () => {
+      const responseId = 'response-urgent-2';
+      const topicId = 'topic-child-123';
+      const authorId = 'author-suspicious';
+      const content = "Don't tell your parents about this";
+      const aiFlags = {
+        grooming: true,
+        groomingConfidence: 0.88,
+        groomingPatternType: 'secrecy_request',
+        recommendedAction: 'REVIEW' as const,
+      };
+
+      const mockQueueEntry = {
+        id: 'queue-entry-urgent-2',
+        responseId,
+        topicId,
+        authorId,
+        content,
+        status: 'PENDING',
+        priority: 'URGENT',
+        aiFlags,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      prismaService.childContentReviewQueue.create.mockResolvedValue(mockQueueEntry);
+
+      // Spy on the notification method to verify what was passed
+      const notifySpy = vi.spyOn(service as any, 'notifyModeratorsOfUrgent');
+
+      await service.queueForReview(responseId, topicId, authorId, content, aiFlags);
+
+      // Verify notification includes the grooming metadata
+      expect(notifySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          responseId,
+          topicId,
+          content,
+          aiFlags: expect.objectContaining({
+            grooming: true,
+            groomingConfidence: 0.88,
+            groomingPatternType: 'secrecy_request',
+          }),
+        }),
+      );
+    });
+
+    it('should handle notification errors gracefully without failing queue creation', async () => {
+      const responseId = 'response-urgent-3';
+      const topicId = 'topic-456';
+      const authorId = 'author-789';
+      const content = 'Content triggering grooming detection';
+      const aiFlags = { grooming: true, groomingConfidence: 0.9 };
+
+      const mockQueueEntry = {
+        id: 'queue-entry-urgent-3',
+        responseId,
+        topicId,
+        authorId,
+        content,
+        status: 'PENDING',
+        priority: 'URGENT',
+        aiFlags,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      prismaService.childContentReviewQueue.create.mockResolvedValue(mockQueueEntry);
+
+      // Make notification throw an error
+      vi.spyOn(service as any, 'notifyModeratorsOfUrgent').mockRejectedValue(
+        new Error('Notification service unavailable'),
+      );
+
+      // Queue creation should still succeed even if notification fails
+      await expect(
+        service.queueForReview(responseId, topicId, authorId, content, aiFlags),
+      ).resolves.not.toThrow();
+
+      // Verify the queue entry was still created
+      expect(prismaService.childContentReviewQueue.create).toHaveBeenCalled();
     });
   });
 });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { ChildReviewStatus, ReviewPriority } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -41,14 +41,36 @@ export interface ChildQueueItem {
 }
 
 /**
- * AI flags structure for content analysis
+ * Types of grooming patterns that can be detected
+ */
+export type GroomingPatternType =
+  | 'isolation_attempt'
+  | 'secrecy_request'
+  | 'inappropriate_contact'
+  | 'age_probing'
+  | 'gift_offering'
+  | 'excessive_flattery'
+  | 'boundary_testing';
+
+/**
+ * AI flags structure for content analysis.
+ *
+ * @remarks
+ * This interface matches the output format of the GroomingDetectorService
+ * from the ai-service, with additional fields for other content analysis.
  */
 export interface AiFlags {
   /** Whether grooming patterns were detected */
   grooming?: boolean;
+  /** Confidence score for grooming detection (0-1) */
+  groomingConfidence?: number;
+  /** Type of grooming pattern detected */
+  groomingPatternType?: GroomingPatternType | string;
+  /** Recommended action based on AI analysis */
+  recommendedAction?: 'BLOCK' | 'REVIEW' | 'FLAG' | 'ALLOW';
   /** Whether inappropriate content was detected */
   inappropriate?: boolean;
-  /** Confidence score (0-1) */
+  /** General confidence score (0-1) */
   confidence?: number;
   /** Additional flagged categories */
   [key: string]: unknown;
@@ -71,8 +93,20 @@ export interface AiFlags {
  * This service is part of the Child-Friendly Mode feature (Phase 2: Content Safety).
  * It integrates with the ChildContentReviewQueue model defined in the Prisma schema.
  */
+/**
+ * Data structure for urgent notification
+ */
+interface UrgentNotificationData {
+  responseId: string;
+  topicId: string;
+  content: string;
+  aiFlags?: AiFlags;
+}
+
 @Injectable()
 export class ChildContentModerationService {
+  private readonly logger = new Logger(ChildContentModerationService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   /**
@@ -110,6 +144,25 @@ export class ChildContentModerationService {
         ...(aiFlags && { aiFlags: aiFlags as Prisma.InputJsonValue }),
       },
     });
+
+    // Send notification for URGENT priority items (potential grooming detected)
+    if (priority === 'URGENT') {
+      try {
+        await this.notifyModeratorsOfUrgent({
+          responseId,
+          topicId,
+          content,
+          aiFlags,
+        });
+      } catch (error) {
+        // Log but don't fail queue creation if notification fails
+        this.logger.error(`Failed to send URGENT notification for response ${responseId}`, {
+          error: error instanceof Error ? error.message : String(error),
+          responseId,
+          topicId,
+        });
+      }
+    }
   }
 
   /**
@@ -316,5 +369,38 @@ export class ChildContentModerationService {
     }
 
     return 'NORMAL';
+  }
+
+  /**
+   * Send notification to moderators about an URGENT child safety concern.
+   *
+   * @param data - The notification data including response details and AI flags
+   *
+   * @remarks
+   * This method is called automatically when an URGENT priority item is queued.
+   * It logs a warning that can be captured by monitoring systems and will be
+   * extended in the future to send notifications via the notification-service
+   * or pub/sub channels.
+   *
+   * The notification includes:
+   * - Response and topic identifiers for quick access
+   * - Grooming pattern type and confidence for context
+   * - Content for immediate review capability
+   */
+  private async notifyModeratorsOfUrgent(data: UrgentNotificationData): Promise<void> {
+    this.logger.warn(`URGENT: Child safety concern detected`, {
+      responseId: data.responseId,
+      topicId: data.topicId,
+      patternType: data.aiFlags?.groomingPatternType,
+      confidence: data.aiFlags?.groomingConfidence,
+      recommendedAction: data.aiFlags?.recommendedAction,
+    });
+
+    // TODO: Send to notification-service or pub/sub for real-time moderator alerts
+    // Future integrations:
+    // - Push notification to on-call moderators
+    // - Email escalation to senior moderators
+    // - Slack/Teams channel notification
+    // - Dashboard real-time alert
   }
 }
