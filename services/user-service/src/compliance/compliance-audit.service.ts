@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { ComplianceAction } from '@prisma/client';
+import { ComplianceAction, Prisma } from '@prisma/client';
 
 /**
  * Metadata structure for compliance audit logs
@@ -80,7 +80,7 @@ export class ComplianceAuditService {
       data: {
         userId,
         action,
-        metadata,
+        metadata: metadata as Prisma.InputJsonValue,
       },
     });
 
