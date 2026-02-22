@@ -12,6 +12,7 @@ import { HealthModule } from './health/health.module.js';
 import { ConnectionsModule } from './connections/connections.module.js';
 import { ContactsModule } from './contacts/contacts.module.js';
 import { DiscoveryModule } from './discovery/discovery.module.js';
+import { ClientsModule } from './clients/clients.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DiscoveryModule } from './discovery/discovery.module.js';
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60000, limit: 100 }]),
     PrismaModule,
     HealthModule,
+    ClientsModule,
     ConnectionsModule,
     ContactsModule,
     DiscoveryModule,
