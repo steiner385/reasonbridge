@@ -80,6 +80,7 @@ model User {
   activityEvents        ActivityEvent[]       @relation("UserActivities")
   // Ranking system (Feature #781)
   userRank              UserRank?
+  topicExpertise        TopicExpertise[]
 
   // Social integration fields (Feature: Contact Service)
   discoverableByContacts Boolean @default(false) @map("discoverable_by_contacts")
@@ -126,6 +127,18 @@ enum TierLevel {
   @@map("tier_level")
 }
 
+/// Expertise level for domain-specific knowledge (Feature #781)
+/// Score thresholds: NOVICE (0.00-0.24), FAMILIAR (0.25-0.49),
+/// KNOWLEDGEABLE (0.50-0.74), EXPERT (0.75-1.00)
+enum ExpertiseLevel {
+  NOVICE
+  FAMILIAR
+  KNOWLEDGEABLE
+  EXPERT
+
+  @@map("expertise_level")
+}
+
 /// Cached user ranking data, recalculated daily (Feature #781)
 /// Stores composite scores derived from trust scores, verification level,
 /// engagement metrics, quality scores, and tenure bonus
@@ -151,6 +164,31 @@ model UserRank {
   @@index([compositeScore(sort: Desc)])
   @@index([lastCalculated])
   @@map("user_ranks")
+}
+
+/// Per-category expertise scores for users (Feature #781)
+/// Tracks domain-specific knowledge based on response quality and engagement
+model TopicExpertise {
+  id              String         @id @default(uuid()) @db.Uuid
+  userId          String         @map("user_id") @db.Uuid
+  tagId           String         @map("tag_id") @db.Uuid
+  expertiseScore  Decimal        @default(0.00) @map("expertise_score") @db.Decimal(4, 3)
+  expertiseLevel  ExpertiseLevel @default(NOVICE) @map("expertise_level")
+  responseCount   Int            @default(0) @map("response_count")
+  avgQualityScore Decimal        @default(0.00) @map("avg_quality_score") @db.Decimal(4, 3)
+  credentialBoost Decimal        @default(0.00) @map("credential_boost") @db.Decimal(4, 3)
+  lastActive      DateTime?      @map("last_active")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagId])
+  @@index([expertiseLevel])
+  @@index([expertiseScore(sort: Desc)])
+  @@map("topic_expertise")
 }
 
 /// Tracks user verification records (email, phone, government ID, video)
@@ -465,9 +503,10 @@ model Tag {
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  parentTheme Tag?       @relation("TagHierarchy", fields: [parentThemeId], references: [id])
-  childThemes Tag[]      @relation("TagHierarchy")
+  parentTheme Tag?             @relation("TagHierarchy", fields: [parentThemeId], references: [id])
+  childThemes Tag[]            @relation("TagHierarchy")
   topics      TopicTag[]
+  expertise   TopicExpertise[]
 
   @@index([usageCount(sort: Desc)])
   @@map("tags")
