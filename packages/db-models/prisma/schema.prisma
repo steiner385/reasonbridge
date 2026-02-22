@@ -82,6 +82,8 @@ model User {
   parentalConsent       ParentalConsent?
   complianceAuditLogs   ComplianceAuditLog[]
   dataDeletionRequest   DataDeletionRequest?
+  childContentReviewsAsAuthor   ChildContentReviewQueue[] @relation("ChildContentAuthor")
+  childContentReviewsAsReviewer ChildContentReviewQueue[] @relation("ChildContentReviewer")
   // Feature 245: Activity Feed
   activityEvents        ActivityEvent[]       @relation("UserActivities")
 
@@ -251,6 +253,8 @@ model DiscussionTopic {
   mergesAsTarget       TopicMerge[]           @relation("TargetTopicMerge")
   // T038: Analytics relation
   analytics            TopicAnalytics[]
+  // Feature: Child-Friendly Mode - content review queue
+  childContentReviews  ChildContentReviewQueue[]
 
   @@index([status])
   @@index([creatorId])
@@ -588,6 +592,8 @@ model Response {
   votes            Vote[]
   // T002 [P] - NEW: Citations relation (Feature 009)
   citations        Citation[]
+  // Feature: Child-Friendly Mode - content review for child users
+  childContentReview ChildContentReviewQueue?
 
   @@index([topicId])
   // T004 [P] & T005 [P] - NEW: Indexes for soft delete and discussion filtering
@@ -1160,6 +1166,27 @@ enum DeletionStatus {
   @@map("deletion_status")
 }
 
+/// Status of child content review in moderation queue
+enum ChildReviewStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  ESCALATED
+
+  @@map("child_review_status")
+}
+
+/// Priority level for child content review
+enum ReviewPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+
+  @@map("review_priority")
+}
+
 /// Data deletion request for COPPA/GDPR compliance
 /// Created when parental consent is withdrawn or user requests account deletion
 model DataDeletionRequest {
@@ -1176,6 +1203,34 @@ model DataDeletionRequest {
 
   @@index([status, scheduledFor])
   @@map("data_deletion_requests")
+}
+
+/// Queue for moderating content created by child users before publication
+model ChildContentReviewQueue {
+  id              String            @id @default(uuid()) @db.Uuid
+  responseId      String            @unique @map("response_id") @db.Uuid
+  topicId         String            @map("topic_id") @db.Uuid
+  authorId        String            @map("author_id") @db.Uuid
+  content         String            @db.Text
+  status          ChildReviewStatus @default(PENDING)
+  priority        ReviewPriority    @default(NORMAL)
+  aiFlags         Json?             @map("ai_flags")
+  reviewedById    String?           @map("reviewed_by_id") @db.Uuid
+  reviewedAt      DateTime?         @map("reviewed_at")
+  decision        String?           @db.VarChar(20)
+  rejectionReason String?           @map("rejection_reason") @db.Text
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  response Response        @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  topic    DiscussionTopic @relation(fields: [topicId], references: [id])
+  author   User            @relation("ChildContentAuthor", fields: [authorId], references: [id])
+  reviewer User?           @relation("ChildContentReviewer", fields: [reviewedById], references: [id])
+
+  @@index([status, priority, createdAt])
+  @@index([topicId])
+  @@index([authorId])
+  @@map("child_content_review_queue")
 }
 
 /// Compliance action types for audit logging
