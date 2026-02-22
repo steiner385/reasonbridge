@@ -81,6 +81,8 @@ model User {
   // Ranking system (Feature #781)
   userRank              UserRank?
   topicExpertise        TopicExpertise[]
+  credentials           DomainCredential[]    @relation("UserCredentials")
+  credentialReviews     DomainCredential[]    @relation("CredentialReviewer")
 
   // Social integration fields (Feature: Contact Service)
   discoverableByContacts Boolean @default(false) @map("discoverable_by_contacts")
@@ -139,6 +141,28 @@ enum ExpertiseLevel {
   @@map("expertise_level")
 }
 
+/// Credential types for verified domain expertise (Feature #781)
+enum CredentialType {
+  ACADEMIC_DOCTORATE
+  ACADEMIC_MASTERS
+  ACADEMIC_BACHELORS
+  PROFESSIONAL_LICENSE
+  INDUSTRY_CERTIFICATION
+  PUBLICATION
+
+  @@map("credential_type")
+}
+
+/// Status of credential verification (Feature #781)
+enum CredentialStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+
+  @@map("credential_status")
+}
+
 /// Cached user ranking data, recalculated daily (Feature #781)
 /// Stores composite scores derived from trust scores, verification level,
 /// engagement metrics, quality scores, and tenure bonus
@@ -189,6 +213,37 @@ model TopicExpertise {
   @@index([expertiseLevel])
   @@index([expertiseScore(sort: Desc)])
   @@map("topic_expertise")
+}
+
+/// User-submitted credentials for domain expertise (Feature #781)
+/// Verified credentials provide expertise score boosts in relevant topics
+model DomainCredential {
+  id              String           @id @default(uuid()) @db.Uuid
+  userId          String           @map("user_id") @db.Uuid
+  tagId           String           @map("tag_id") @db.Uuid
+  type            CredentialType
+  title           String           @db.VarChar(200)
+  institution     String?          @db.VarChar(200)
+  documentUrl     String?          @map("document_url")
+  verificationUrl String?          @map("verification_url")
+  status          CredentialStatus @default(PENDING)
+  reviewedById    String?          @map("reviewed_by_id") @db.Uuid
+  reviewNotes     String?          @map("review_notes") @db.Text
+  verifiedAt      DateTime?        @map("verified_at")
+  expiresAt       DateTime?        @map("expires_at")
+  boostValue      Decimal          @default(0.00) @map("boost_value") @db.Decimal(3, 2)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  user       User  @relation("UserCredentials", fields: [userId], references: [id], onDelete: Cascade)
+  tag        Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("CredentialReviewer", fields: [reviewedById], references: [id])
+
+  @@index([userId, tagId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("domain_credentials")
 }
 
 /// Tracks user verification records (email, phone, government ID, video)
@@ -503,10 +558,11 @@ model Tag {
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  parentTheme Tag?             @relation("TagHierarchy", fields: [parentThemeId], references: [id])
-  childThemes Tag[]            @relation("TagHierarchy")
+  parentTheme Tag?               @relation("TagHierarchy", fields: [parentThemeId], references: [id])
+  childThemes Tag[]              @relation("TagHierarchy")
   topics      TopicTag[]
   expertise   TopicExpertise[]
+  credentials DomainCredential[]
 
   @@index([usageCount(sort: Desc)])
   @@map("tags")
