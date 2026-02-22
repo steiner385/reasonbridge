@@ -48,6 +48,10 @@ model User {
   regionalConsentAge     Int?                @map("regional_consent_age")
   parentEmail            String?             @map("parent_email")
   parentConsentStatus    ParentConsentStatus @default(NOT_REQUIRED) @map("parent_consent_status")
+  /// Timestamp of last age verification (for annual re-verification)
+  lastAgeVerifiedAt      DateTime?           @map("last_age_verified_at")
+  /// Flag indicating user needs to re-verify age on next login
+  requiresAgeReverification Boolean          @default(false) @map("requires_age_reverification")
   status                 UserStatus          @default(ACTIVE)
   createdAt              DateTime            @default(now()) @map("created_at")
   updatedAt              DateTime            @updatedAt @map("updated_at")
