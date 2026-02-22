@@ -78,6 +78,8 @@ model User {
   parentalConsent       ParentalConsent?
   // Feature 245: Activity Feed
   activityEvents        ActivityEvent[]       @relation("UserActivities")
+  // Ranking system (Feature #781)
+  userRank              UserRank?
 
   // Social integration fields (Feature: Contact Service)
   discoverableByContacts Boolean @default(false) @map("discoverable_by_contacts")
@@ -109,6 +111,46 @@ enum UserStatus {
   BANNED
 
   @@map("user_status")
+}
+
+/// User ranking tier levels for the tiered access system (Feature #781)
+/// Score thresholds: NEWCOMER (0.00-0.19), CONTRIBUTOR (0.20-0.39),
+/// TRUSTED (0.40-0.59), LEADER (0.60-0.79), EXPERT (0.80-1.00)
+enum TierLevel {
+  NEWCOMER
+  CONTRIBUTOR
+  TRUSTED
+  LEADER
+  EXPERT
+
+  @@map("tier_level")
+}
+
+/// Cached user ranking data, recalculated daily (Feature #781)
+/// Stores composite scores derived from trust scores, verification level,
+/// engagement metrics, quality scores, and tenure bonus
+model UserRank {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @unique @map("user_id") @db.Uuid
+  tierLevel         TierLevel @default(NEWCOMER) @map("tier_level")
+  compositeScore    Decimal   @default(0.00) @map("composite_score") @db.Decimal(4, 3)
+  engagementScore   Decimal   @default(0.00) @map("engagement_score") @db.Decimal(4, 3)
+  qualityScore      Decimal   @default(0.00) @map("quality_score") @db.Decimal(4, 3)
+  tenureBonus       Decimal   @default(0.00) @map("tenure_bonus") @db.Decimal(4, 3)
+  badges            Json      @default("[]")
+  lastCalculated    DateTime  @default(now()) @map("last_calculated")
+  nextTierThreshold Decimal   @default(0.20) @map("next_tier_threshold") @db.Decimal(4, 3)
+  lastActivityAt    DateTime? @map("last_activity_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tierLevel])
+  @@index([compositeScore(sort: Desc)])
+  @@index([lastCalculated])
+  @@map("user_ranks")
 }
 
 /// Tracks user verification records (email, phone, government ID, video)
