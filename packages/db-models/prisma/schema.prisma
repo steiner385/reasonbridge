@@ -423,34 +423,40 @@ model UserFollow {
 /// - Requires 2-5 tags (enforced via TopicTag relations)
 /// - Cannot transition to ACTIVE until minimum_diversity_score is met
 model DiscussionTopic {
-  id                    String           @id @default(uuid()) @db.Uuid
-  title                 String           @db.VarChar(200)
-  description           String           @db.Text
-  creatorId             String           @map("creator_id") @db.Uuid
-  status                TopicStatus      @default(SEEDING)
+  id                     String           @id @default(uuid()) @db.Uuid
+  title                  String           @db.VarChar(200)
+  description            String           @db.Text
+  creatorId              String           @map("creator_id") @db.Uuid
+  status                 TopicStatus      @default(SEEDING)
   // T001: New fields for topic management
-  visibility            TopicVisibility  @default(PUBLIC)
-  slug                  String           @unique @db.VarChar(250)
-  lastActivityAt        DateTime         @default(now()) @map("last_activity_at")
-  lockedAt              DateTime?        @map("locked_at")
-  evidenceStandards     EvidenceStandard @default(STANDARD) @map("evidence_standards")
-  minimumDiversityScore Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
-  currentDiversityScore Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
-  participantCount      Int              @default(0) @map("participant_count")
-  responseCount         Int              @default(0) @map("response_count")
+  visibility             TopicVisibility  @default(PUBLIC)
+  // Tier access control (Feature #781)
+  minimumTierLevel       Int?             @map("minimum_tier_level") // null = open to all
+  minimumExpertiseLevel  Int?             @map("minimum_expertise_level")
+  requiredTagId          String?          @map("required_tag_id") @db.Uuid
+  allowProvisionalAccess Boolean          @default(true) @map("allow_provisional_access")
+  slug                   String           @unique @db.VarChar(250)
+  lastActivityAt         DateTime         @default(now()) @map("last_activity_at")
+  lockedAt               DateTime?        @map("locked_at")
+  evidenceStandards      EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  minimumDiversityScore  Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
+  currentDiversityScore  Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
+  participantCount       Int              @default(0) @map("participant_count")
+  responseCount          Int              @default(0) @map("response_count")
   // Onboarding fields
-  activeDiscussionCount Int              @default(0) @map("active_discussion_count")
-  activityLevel         ActivityLevel    @default(LOW) @map("activity_level")
-  suggestedForNewUsers  Boolean          @default(false) @map("suggested_for_new_users")
-  crossCuttingThemes    String[]         @map("cross_cutting_themes")
+  activeDiscussionCount  Int              @default(0) @map("active_discussion_count")
+  activityLevel          ActivityLevel    @default(LOW) @map("activity_level")
+  suggestedForNewUsers   Boolean          @default(false) @map("suggested_for_new_users")
+  crossCuttingThemes     String[]         @map("cross_cutting_themes")
   // Child safety fields (Feature: Child-Friendly Mode)
-  isMatureContent       Boolean          @default(false) @map("is_mature_content")
-  createdAt             DateTime         @default(now()) @map("created_at")
-  activatedAt           DateTime?        @map("activated_at")
-  archivedAt            DateTime?        @map("archived_at")
+  isMatureContent        Boolean          @default(false) @map("is_mature_content")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  activatedAt            DateTime?        @map("activated_at")
+  archivedAt             DateTime?        @map("archived_at")
 
   // Relations
   creator              User                   @relation(fields: [creatorId], references: [id])
+  requiredTag          Tag?                   @relation("TopicRequiredExpertise", fields: [requiredTagId], references: [id])
   tags                 TopicTag[]
   sourceLinks          TopicLink[]            @relation("SourceTopic")
   targetLinks          TopicLink[]            @relation("TargetTopic")
@@ -639,12 +645,13 @@ model Tag {
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  parentTheme Tag?               @relation("TagHierarchy", fields: [parentThemeId], references: [id])
-  childThemes Tag[]              @relation("TagHierarchy")
-  topics      TopicTag[]
-  expertise   TopicExpertise[]
-  credentials DomainCredential[]
-  tierAppeals TierAppeal[]
+  parentTheme      Tag?               @relation("TagHierarchy", fields: [parentThemeId], references: [id])
+  childThemes      Tag[]              @relation("TagHierarchy")
+  topics           TopicTag[]
+  expertise        TopicExpertise[]
+  credentials      DomainCredential[]
+  tierAppeals      TierAppeal[]
+  requiredByTopics DiscussionTopic[]  @relation("TopicRequiredExpertise")
 
   @@index([usageCount(sort: Desc)])
   @@map("tags")
