@@ -508,108 +508,112 @@ test.describe('Explore Divergence Points', () => {
     }
   });
 
-  // TODO(#677): Re-enable when WebSocket mock timing is fixed in CI
-  // Issue: Tests timeout with 'Target page, context or browser has been closed'
-  // The WebSocket mock infrastructure is in place but needs CI debugging
-  test.skip('should update divergence points in real-time via WebSocket', async ({ page }) => {
-    // Setup WebSocket mock
+  // WebSocket real-time update test - uses mock to simulate server events
+  // Uses test.slow() to double timeout for CI environments with slower page loads
+  test('should update divergence points in real-time via WebSocket', async ({ page }) => {
+    test.slow(); // Double the default timeout for this test
+
+    // Setup WebSocket mock before any navigation
     const wsMock = await setupWebSocketMock(page);
 
-    await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    try {
+      await page.goto('/topics');
+      await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 15000 });
 
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+      const firstTopicLink = page.locator('a[href^="/topics/"]').first();
+      const linkCount = await firstTopicLink.count();
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
+      if (linkCount > 0) {
+        const href = await firstTopicLink.getAttribute('href');
+        const topicId = href?.split('/topics/')[1];
 
-      if (!topicId) {
-        throw new Error('Could not extract topic ID from href');
+        if (!topicId) {
+          throw new Error('Could not extract topic ID from href');
+        }
+
+        await page.goto(`/topics/${topicId}`);
+        await page.waitForSelector('text=Loading topic details...', {
+          state: 'hidden',
+          timeout: 15000,
+        });
+
+        // Wait for WebSocket connection (mock should be instant)
+        await wsMock.waitForConnection('/notifications');
+
+        // Get initial state
+        const divergenceSection = page.locator('[data-testid="divergence-points"]');
+        const initialText = await divergenceSection.textContent().catch(() => '');
+
+        // Create new divergence point with unique proposition
+        // Note: buildDivergencePoint is used for reference but payload uses genuineDisagreements format
+        buildDivergencePoint({
+          proposition: 'Nuclear energy should be part of the clean energy mix',
+          propositionId: 'prop-nuclear-energy',
+          viewpoints: [
+            {
+              position: 'Support nuclear as clean energy',
+              participantCount: 5,
+              percentage: 50,
+              reasoning: ['Zero carbon emissions', 'Reliable baseload power'],
+            },
+            {
+              position: 'Oppose nuclear due to risks',
+              participantCount: 5,
+              percentage: 50,
+              reasoning: ['Waste disposal concerns', 'Safety risks'],
+            },
+          ],
+          polarizationScore: 0.9,
+          totalParticipants: 10,
+          underlyingValues: ['Energy security vs Environmental safety'],
+        });
+
+        // Emit WebSocket event with new divergence point
+        const payload = buildCommonGroundUpdatedPayload({
+          topicId,
+          genuineDisagreements: [
+            {
+              id: 'disagreement-nuclear',
+              topic: 'Nuclear energy in clean energy mix',
+              description: 'Disagreement on role of nuclear energy',
+              positions: [
+                {
+                  stance: 'Support nuclear',
+                  reasoning: 'Zero carbon, reliable baseload',
+                  participants: ['user-1', 'user-2', 'user-3', 'user-4', 'user-5'],
+                  underlyingValue: 'Energy security',
+                },
+                {
+                  stance: 'Oppose nuclear',
+                  reasoning: 'Safety and waste concerns',
+                  participants: ['user-6', 'user-7', 'user-8', 'user-9', 'user-10'],
+                  underlyingValue: 'Environmental safety',
+                },
+              ],
+              moralFoundations: ['care-harm', 'liberty-oppression'],
+            },
+          ],
+        });
+
+        await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
+
+        // Wait for React state update and re-render
+        await page.waitForTimeout(500);
+
+        // Verify UI updated with new content
+        const updatedText = await divergenceSection.textContent().catch(() => '');
+
+        // Verify content changed or contains expected text
+        // (exact assertion depends on component implementation)
+        expect(
+          updatedText !== initialText ||
+            updatedText.includes('Nuclear') ||
+            updatedText.includes('disagreement'),
+        ).toBe(true);
       }
-
-      await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
-      });
-
-      // Wait for WebSocket connection
-      await wsMock.waitForConnection('/notifications');
-
-      // Get initial state
-      const divergenceSection = page.locator('[data-testid="divergence-points"]');
-      const initialText = await divergenceSection.textContent().catch(() => '');
-
-      // Create new divergence point with unique proposition
-      const newDivergencePoint = buildDivergencePoint({
-        proposition: 'Nuclear energy should be part of the clean energy mix',
-        propositionId: 'prop-nuclear-energy',
-        viewpoints: [
-          {
-            position: 'Support nuclear as clean energy',
-            participantCount: 5,
-            percentage: 50,
-            reasoning: ['Zero carbon emissions', 'Reliable baseload power'],
-          },
-          {
-            position: 'Oppose nuclear due to risks',
-            participantCount: 5,
-            percentage: 50,
-            reasoning: ['Waste disposal concerns', 'Safety risks'],
-          },
-        ],
-        polarizationScore: 0.9,
-        totalParticipants: 10,
-        underlyingValues: ['Energy security vs Environmental safety'],
-      });
-
-      // Emit WebSocket event with new divergence point
-      const payload = buildCommonGroundUpdatedPayload({
-        topicId,
-        genuineDisagreements: [
-          {
-            id: 'disagreement-nuclear',
-            topic: 'Nuclear energy in clean energy mix',
-            description: 'Disagreement on role of nuclear energy',
-            positions: [
-              {
-                stance: 'Support nuclear',
-                reasoning: 'Zero carbon, reliable baseload',
-                participants: ['user-1', 'user-2', 'user-3', 'user-4', 'user-5'],
-                underlyingValue: 'Energy security',
-              },
-              {
-                stance: 'Oppose nuclear',
-                reasoning: 'Safety and waste concerns',
-                participants: ['user-6', 'user-7', 'user-8', 'user-9', 'user-10'],
-                underlyingValue: 'Environmental safety',
-              },
-            ],
-            moralFoundations: ['care-harm', 'liberty-oppression'],
-          },
-        ],
-      });
-
-      await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
-
-      // Wait for React state update and re-render
-      await page.waitForTimeout(1500);
-
-      // Verify UI updated with new content
-      const updatedText = await divergenceSection.textContent().catch(() => '');
-
-      // Verify content changed or contains expected text
-      // (exact assertion depends on component implementation)
-      expect(
-        updatedText !== initialText ||
-          updatedText.includes('Nuclear') ||
-          updatedText.includes('disagreement'),
-      ).toBe(true);
+    } finally {
+      await wsMock.cleanup();
     }
-
-    await wsMock.cleanup();
   });
 
   test('should be responsive on mobile viewport', async ({ page }) => {

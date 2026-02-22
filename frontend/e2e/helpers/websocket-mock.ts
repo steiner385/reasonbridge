@@ -126,16 +126,18 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
   return {
     /**
      * Wait for WebSocket connection to establish (mock is instant)
+     * Uses shorter timeout since mock should be ready immediately after page load.
      */
     async waitForConnection(_namespace: string = '/notifications'): Promise<void> {
       // Wait for the mock socket to be available (set by addInitScript)
+      // Use shorter timeout (5s) since mock should be instant - longer waits indicate a problem
       await page.waitForFunction(
         () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const socket = (window as any).__testSocket;
           return socket && socket.connected;
         },
-        { timeout: 10000 },
+        { timeout: 5000 },
       );
 
       // Trigger the connect event so any listeners are notified
@@ -147,8 +149,8 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
         }
       });
 
-      // Small wait for React to process
-      await page.waitForTimeout(100);
+      // Brief wait for React to process the connect event
+      await page.waitForTimeout(50);
     },
 
     /**
@@ -173,8 +175,8 @@ export async function setupWebSocketMock(page: Page): Promise<WebSocketMock> {
         { event: eventName, data: payload },
       );
 
-      // Small delay to allow React to process the event
-      await page.waitForTimeout(100);
+      // Brief delay to allow React to process the event
+      await page.waitForTimeout(50);
     },
 
     /**
