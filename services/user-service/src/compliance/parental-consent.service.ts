@@ -7,7 +7,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../services/email.service.js';
-import { ParentConsentStatus } from '@prisma/client';
+import { ComplianceAuditService } from './compliance-audit.service.js';
+import { ParentConsentStatus, ComplianceAction } from '@prisma/client';
 
 /**
  * Result of consent verification
@@ -63,6 +64,7 @@ export class ParentalConsentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    private readonly auditService: ComplianceAuditService,
   ) {}
 
   /**
@@ -86,10 +88,10 @@ export class ParentalConsentService {
     const consentToken = randomBytes(32).toString('base64url');
     const expiresAt = new Date(Date.now() + this.TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
-    // Get child info for email
+    // Get child info for email and audit logging
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { displayName: true },
+      select: { displayName: true, declaredCountry: true },
     });
 
     if (!user) {
@@ -130,6 +132,19 @@ export class ParentalConsentService {
       consentToken,
       expiresAt,
     });
+
+    // Log audit action - audit failure should not fail the main operation
+    try {
+      await this.auditService.logAction(userId, ComplianceAction.CONSENT_REQUESTED, {
+        parentEmail,
+        region: user.declaredCountry,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to log CONSENT_REQUESTED for user ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     this.logger.log(
       `Parental consent initiated for user ${userId}, expires ${expiresAt.toISOString()}`,
@@ -189,6 +204,19 @@ export class ParentalConsentService {
       where: { id: consent.userId },
       data: { parentConsentStatus: ParentConsentStatus.VERIFIED },
     });
+
+    // Log audit action - audit failure should not fail the main operation
+    try {
+      await this.auditService.logAction(consent.userId, ComplianceAction.CONSENT_VERIFIED, {
+        ipAddress,
+        verifiedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to log CONSENT_VERIFIED for user ${consent.userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     this.logger.log(`Parental consent verified for user ${consent.userId}`);
 
@@ -272,6 +300,19 @@ export class ParentalConsentService {
         data: { parentConsentStatus: ParentConsentStatus.WITHDRAWN },
       }),
     ]);
+
+    // Log audit action - audit failure should not fail the main operation
+    try {
+      await this.auditService.logAction(userId, ComplianceAction.CONSENT_WITHDRAWN, {
+        withdrawnAt: new Date().toISOString(),
+        triggersDataDeletion: true,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to log CONSENT_WITHDRAWN for user ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     this.logger.log(`Parental consent withdrawn for user ${userId}`);
   }
