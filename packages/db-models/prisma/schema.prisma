@@ -76,6 +76,7 @@ model User {
   topicDrafts           TopicDraft[]          @relation("TopicDrafts")
   // Feature: Child-Friendly Mode
   parentalConsent       ParentalConsent?
+  complianceAuditLogs   ComplianceAuditLog[]
   // Feature 245: Activity Feed
   activityEvents        ActivityEvent[]       @relation("UserActivities")
 
@@ -1138,4 +1139,25 @@ enum TargetType {
   DISCUSSION
 
   @@map("target_type")
+}
+
+// ============================================================================
+// COMPLIANCE AUDIT ENTITIES (Feature: Child-Friendly Mode)
+// ============================================================================
+
+/// Audit log for regulatory compliance (COPPA, GDPR, AADC)
+/// Tracks all compliance-related actions for audit and reporting purposes
+model ComplianceAuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  action    String   @db.VarChar(50) // AGE_VERIFIED, CONSENT_REQUESTED, CONSENT_VERIFIED, CONSENT_WITHDRAWN, DATA_DELETION_REQUESTED
+  metadata  Json     // region, consentAge, ipAddress, userAgent
+  timestamp DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action, timestamp])
+  @@map("compliance_audit_logs")
 }
