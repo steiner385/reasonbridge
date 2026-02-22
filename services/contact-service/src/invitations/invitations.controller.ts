@@ -11,11 +11,9 @@ import {
   InvitationListQueryDto,
   InvitationListResponseDto,
   AcceptInvitationResponseDto,
+  DeclineInvitationResponseDto,
 } from './dto/invitation-response.dto.js';
-
-interface RequestWithUser {
-  user: { id: string };
-}
+import { AuthenticatedRequest } from '../types/request.js';
 
 @ApiTags('Invitations')
 @ApiBearerAuth()
@@ -29,7 +27,7 @@ export class InvitationsController {
   @ApiOperation({ summary: 'Create a topic invitation' })
   @ApiResponse({ status: 201, type: CreateInvitationResponseDto })
   async createInvitation(
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: CreateInvitationDto,
   ): Promise<CreateInvitationResponseDto> {
     const userId = req.user.id;
@@ -41,7 +39,7 @@ export class InvitationsController {
   @ApiOperation({ summary: 'List sent invitations with pagination' })
   @ApiResponse({ status: 200, type: InvitationListResponseDto })
   async getSentInvitations(
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Query() query: InvitationListQueryDto,
   ): Promise<InvitationListResponseDto> {
     const userId = req.user.id;
@@ -52,7 +50,7 @@ export class InvitationsController {
   @ApiOperation({ summary: 'List received invitations with pagination' })
   @ApiResponse({ status: 200, type: InvitationListResponseDto })
   async getReceivedInvitations(
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Query() query: InvitationListQueryDto,
   ): Promise<InvitationListResponseDto> {
     const userId = req.user.id;
@@ -64,7 +62,7 @@ export class InvitationsController {
   @ApiParam({ name: 'id', description: 'Invitation ID' })
   @ApiResponse({ status: 200, type: AcceptInvitationResponseDto })
   async acceptInvitation(
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Param('id') invitationId: string,
   ): Promise<AcceptInvitationResponseDto> {
     const userId = req.user.id;
@@ -75,11 +73,11 @@ export class InvitationsController {
   @Post(':id/decline')
   @ApiOperation({ summary: 'Decline a topic invitation' })
   @ApiParam({ name: 'id', description: 'Invitation ID' })
-  @ApiResponse({ status: 200, description: 'Invitation declined successfully' })
+  @ApiResponse({ status: 200, type: DeclineInvitationResponseDto })
   async declineInvitation(
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Param('id') invitationId: string,
-  ): Promise<{ success: boolean }> {
+  ): Promise<DeclineInvitationResponseDto> {
     const userId = req.user.id;
     this.logger.log(`User ${userId} declining invitation ${invitationId}`);
     await this.invitationsService.declineInvitation(invitationId, userId);

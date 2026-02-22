@@ -11,12 +11,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateInvitationDto, CreateInvitationResponseDto } from './dto/create-invitation.dto.js';
 import {
   InvitationListQueryDto,
   InvitationListResponseDto,
   AcceptInvitationResponseDto,
+  InvitationStatusDto,
 } from './dto/invitation-response.dto.js';
 
 const INVITATION_EXPIRY_DAYS = 7;
@@ -156,7 +158,7 @@ export class InvitationsService {
     const { status, limit = 50, page = 1 } = query;
     const offset = (page - 1) * limit;
 
-    const where: any = { inviterId: userId };
+    const where: Prisma.TopicInvitationWhereInput = { inviterId: userId };
     if (status) {
       where.status = status;
     }
@@ -178,7 +180,7 @@ export class InvitationsService {
         inviterId: inv.inviterId,
         inviteeUserId: inv.inviteeUserId || undefined,
         inviteeEmail: inv.inviteeEmail || undefined,
-        status: inv.status as any,
+        status: inv.status as InvitationStatusDto,
         message: inv.message || undefined,
         createdAt: inv.createdAt,
         expiresAt: inv.expiresAt,
@@ -196,7 +198,7 @@ export class InvitationsService {
     const { status, limit = 50, page = 1 } = query;
     const offset = (page - 1) * limit;
 
-    const where: any = { inviteeUserId: userId };
+    const where: Prisma.TopicInvitationWhereInput = { inviteeUserId: userId };
     if (status) {
       where.status = status;
     }
@@ -218,7 +220,7 @@ export class InvitationsService {
         inviterId: inv.inviterId,
         inviteeUserId: inv.inviteeUserId || undefined,
         inviteeEmail: inv.inviteeEmail || undefined,
-        status: inv.status as any,
+        status: inv.status as InvitationStatusDto,
         message: inv.message || undefined,
         createdAt: inv.createdAt,
         expiresAt: inv.expiresAt,

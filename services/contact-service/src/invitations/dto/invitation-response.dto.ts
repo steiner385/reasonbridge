@@ -95,3 +95,8 @@ export class AcceptInvitationResponseDto {
   @ApiProperty({ description: 'Redirect URL for the topic' })
   redirectUrl!: string;
 }
+
+export class DeclineInvitationResponseDto {
+  @ApiProperty({ description: 'Whether decline was successful' })
+  success!: boolean;
+}

@@ -3,13 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 import { InvitationsController } from '../invitations.controller.js';
+import { InvitationsService } from '../invitations.service.js';
 import { InvitationStatusDto } from '../dto/invitation-response.dto.js';
+import { AuthenticatedRequest } from '../../types/request.js';
+
+/**
+ * Mock service type with all methods as vi.Mock instances
+ */
+type MockInvitationsService = {
+  [K in keyof InvitationsService]: Mock;
+};
+
+/**
+ * Create a mock authenticated request for testing
+ */
+function createMockRequest(userId: string): AuthenticatedRequest {
+  return {
+    user: { id: userId },
+  } as AuthenticatedRequest;
+}
 
 describe('InvitationsController', () => {
   let controller: InvitationsController;
-  let mockService: any;
+  let mockService: MockInvitationsService;
 
   const mockUserId = 'user-123';
   const mockInvitationId = 'invitation-456';
@@ -22,7 +40,7 @@ describe('InvitationsController', () => {
       getSentInvitations: vi.fn(),
       getReceivedInvitations: vi.fn(),
     };
-    controller = new InvitationsController(mockService);
+    controller = new InvitationsController(mockService as unknown as InvitationsService);
   });
 
   describe('createInvitation', () => {
@@ -41,8 +59,8 @@ describe('InvitationsController', () => {
       };
       mockService.createInvitation.mockResolvedValue(mockResponse);
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.createInvitation(mockRequest as any, dto);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.createInvitation(mockRequest, dto);
 
       expect(mockService.createInvitation).toHaveBeenCalledWith(mockUserId, dto);
       expect(result).toEqual(mockResponse);
@@ -62,8 +80,8 @@ describe('InvitationsController', () => {
       };
       mockService.createInvitation.mockResolvedValue(mockResponse);
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.createInvitation(mockRequest as any, dto);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.createInvitation(mockRequest, dto);
 
       expect(mockService.createInvitation).toHaveBeenCalledWith(mockUserId, dto);
       expect(result.id).toBe(mockInvitationId);
@@ -89,8 +107,8 @@ describe('InvitationsController', () => {
       };
       mockService.getSentInvitations.mockResolvedValue(mockResponse);
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.getSentInvitations(mockRequest as any, query);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.getSentInvitations(mockRequest, query);
 
       expect(mockService.getSentInvitations).toHaveBeenCalledWith(mockUserId, query);
       expect(result.invitations).toHaveLength(1);
@@ -105,8 +123,8 @@ describe('InvitationsController', () => {
         hasMore: false,
       });
 
-      const mockRequest = { user: { id: mockUserId } };
-      await controller.getSentInvitations(mockRequest as any, query);
+      const mockRequest = createMockRequest(mockUserId);
+      await controller.getSentInvitations(mockRequest, query);
 
       expect(mockService.getSentInvitations).toHaveBeenCalledWith(mockUserId, query);
     });
@@ -131,8 +149,8 @@ describe('InvitationsController', () => {
       };
       mockService.getReceivedInvitations.mockResolvedValue(mockResponse);
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.getReceivedInvitations(mockRequest as any, query);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.getReceivedInvitations(mockRequest, query);
 
       expect(mockService.getReceivedInvitations).toHaveBeenCalledWith(mockUserId, query);
       expect(result.invitations).toHaveLength(1);
@@ -146,8 +164,8 @@ describe('InvitationsController', () => {
         hasMore: false,
       });
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.getReceivedInvitations(mockRequest as any, query);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.getReceivedInvitations(mockRequest, query);
 
       expect(mockService.getReceivedInvitations).toHaveBeenCalledWith(mockUserId, query);
       expect(result.hasMore).toBe(false);
@@ -163,8 +181,8 @@ describe('InvitationsController', () => {
       };
       mockService.acceptInvitation.mockResolvedValue(mockResponse);
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.acceptInvitation(mockRequest as any, mockInvitationId);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.acceptInvitation(mockRequest, mockInvitationId);
 
       expect(mockService.acceptInvitation).toHaveBeenCalledWith(mockInvitationId, mockUserId);
       expect(result.success).toBe(true);
@@ -176,8 +194,8 @@ describe('InvitationsController', () => {
     it('should decline invitation and return success', async () => {
       mockService.declineInvitation.mockResolvedValue(undefined);
 
-      const mockRequest = { user: { id: mockUserId } };
-      const result = await controller.declineInvitation(mockRequest as any, mockInvitationId);
+      const mockRequest = createMockRequest(mockUserId);
+      const result = await controller.declineInvitation(mockRequest, mockInvitationId);
 
       expect(mockService.declineInvitation).toHaveBeenCalledWith(mockInvitationId, mockUserId);
       expect(result).toEqual({ success: true });
