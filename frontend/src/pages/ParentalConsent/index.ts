@@ -6,3 +6,4 @@
 export { default as ConsentPendingPage } from './ConsentPendingPage';
 export { default as ConsentVerifyPage } from './ConsentVerifyPage';
 export { default as ParentalDashboardPage } from './ParentalDashboardPage';
+export { PrivacyPolicySummary, type RegulationType } from './PrivacyPolicySummary';
