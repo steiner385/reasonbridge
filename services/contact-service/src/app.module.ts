@@ -11,6 +11,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { HealthModule } from './health/health.module.js';
 import { ConnectionsModule } from './connections/connections.module.js';
 import { ContactsModule } from './contacts/contacts.module.js';
+import { DiscoveryModule } from './discovery/discovery.module.js';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ContactsModule } from './contacts/contacts.module.js';
     HealthModule,
     ConnectionsModule,
     ContactsModule,
+    DiscoveryModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
