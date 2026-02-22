@@ -17,6 +17,7 @@ import { ParentalDashboardController } from './parental-dashboard.controller.js'
 import { EmailService } from '../services/email.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { GeoModule } from '../geo/index.js';
 
 /**
  * Module for child safety and compliance features
@@ -30,11 +31,13 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
  * - Consent email sending via SES
  * - Parental dashboard for viewing child activity
  * - Compliance audit logging for regulatory reporting
+ * - GeoIP-based country detection for regional compliance
  */
 @Module({
   imports: [
     PrismaModule,
     ConfigModule,
+    GeoModule,
     JwtModule.register({
       // JWT secret is required for JwtService to work properly
       // JwtAuthGuard will use this for mock/database auth modes
@@ -68,6 +71,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     DataDeletionService,
     AgeReverificationJob,
     JwtAuthGuard,
+    GeoModule,
   ],
 })
 export class ComplianceModule {}
