@@ -8,6 +8,7 @@ import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../services/email.service.js';
 import { ComplianceAuditService } from './compliance-audit.service.js';
+import { DataDeletionService } from './data-deletion.service.js';
 import { ParentConsentStatus, ComplianceAction } from '@prisma/client';
 
 /**
@@ -65,6 +66,7 @@ export class ParentalConsentService {
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
     private readonly auditService: ComplianceAuditService,
+    private readonly dataDeletionService: DataDeletionService,
   ) {}
 
   /**
@@ -137,7 +139,7 @@ export class ParentalConsentService {
     try {
       await this.auditService.logAction(userId, ComplianceAction.CONSENT_REQUESTED, {
         parentEmail,
-        region: user.declaredCountry,
+        region: user.declaredCountry ?? undefined,
       });
     } catch (error) {
       this.logger.error(
@@ -286,6 +288,8 @@ export class ParentalConsentService {
    * @remarks
    * This sets the consent status to WITHDRAWN and records the withdrawal timestamp.
    * The user's access will be restricted after withdrawal.
+   * A data deletion request is automatically created with a 48-hour grace period
+   * per COPPA/GDPR requirements.
    */
   async withdrawConsent(userId: string): Promise<void> {
     this.logger.log(`Withdrawing parental consent for user ${userId}`);
@@ -300,6 +304,18 @@ export class ParentalConsentService {
         data: { parentConsentStatus: ParentConsentStatus.WITHDRAWN },
       }),
     ]);
+
+    // Create data deletion request (48-hour grace period per COPPA/GDPR)
+    try {
+      await this.dataDeletionService.createDeletionRequest(userId, 'PARENT');
+      this.logger.log(`Data deletion request created for user ${userId}`);
+    } catch (error) {
+      // Log error but don't fail - deletion can be manually triggered if needed
+      this.logger.error(
+        `Failed to create data deletion request for user ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     // Log audit action - audit failure should not fail the main operation
     try {
@@ -392,6 +408,8 @@ export class ParentalConsentService {
    * This allows parents to withdraw consent without needing to log in.
    * The token serves as authentication.
    * After withdrawal, the child's access will be restricted.
+   * A data deletion request is automatically created with a 48-hour grace period
+   * per COPPA/GDPR requirements.
    */
   async withdrawConsentByToken(token: string): Promise<void> {
     const consent = await this.prisma.parentalConsent.findUnique({
@@ -415,6 +433,32 @@ export class ParentalConsentService {
         data: { parentConsentStatus: ParentConsentStatus.WITHDRAWN },
       }),
     ]);
+
+    // Create data deletion request (48-hour grace period per COPPA/GDPR)
+    try {
+      await this.dataDeletionService.createDeletionRequest(consent.userId, 'PARENT');
+      this.logger.log(`Data deletion request created for user ${consent.userId}`);
+    } catch (error) {
+      // Log error but don't fail - deletion can be manually triggered if needed
+      this.logger.error(
+        `Failed to create data deletion request for user ${consent.userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+
+    // Log audit action - audit failure should not fail the main operation
+    try {
+      await this.auditService.logAction(consent.userId, ComplianceAction.CONSENT_WITHDRAWN, {
+        withdrawnAt: new Date().toISOString(),
+        triggersDataDeletion: true,
+        viaToken: true,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to log CONSENT_WITHDRAWN for user ${consent.userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     this.logger.log(`Parental consent withdrawn via token for user ${consent.userId}`);
   }

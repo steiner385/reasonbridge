@@ -10,6 +10,7 @@ import { ComplianceService } from './compliance.service.js';
 import { AgeVerificationService } from './age-verification.service.js';
 import { ParentalConsentService } from './parental-consent.service.js';
 import { ComplianceAuditService } from './compliance-audit.service.js';
+import { DataDeletionService } from './data-deletion.service.js';
 import { AgeReverificationJob } from './age-reverification.job.js';
 import { ParentalConsentController } from './parental-consent.controller.js';
 import { ParentalDashboardController } from './parental-dashboard.controller.js';
@@ -47,6 +48,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     AgeVerificationService,
     ParentalConsentService,
     ComplianceAuditService,
+    DataDeletionService,
     AgeReverificationJob,
     EmailService,
     // Factory provider that explicitly injects dependencies
@@ -63,6 +65,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     AgeVerificationService,
     ParentalConsentService,
     ComplianceAuditService,
+    DataDeletionService,
     AgeReverificationJob,
     JwtAuthGuard,
   ],

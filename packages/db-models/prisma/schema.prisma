@@ -81,6 +81,7 @@ model User {
   // Feature: Child-Friendly Mode
   parentalConsent       ParentalConsent?
   complianceAuditLogs   ComplianceAuditLog[]
+  dataDeletionRequest   DataDeletionRequest?
   // Feature 245: Activity Feed
   activityEvents        ActivityEvent[]       @relation("UserActivities")
 
@@ -1148,6 +1149,34 @@ enum TargetType {
 // ============================================================================
 // COMPLIANCE AUDIT ENTITIES (Feature: Child-Friendly Mode)
 // ============================================================================
+
+/// Status of a data deletion request
+enum DeletionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+
+  @@map("deletion_status")
+}
+
+/// Data deletion request for COPPA/GDPR compliance
+/// Created when parental consent is withdrawn or user requests account deletion
+model DataDeletionRequest {
+  id           String         @id @default(uuid()) @db.Uuid
+  userId       String         @unique @map("user_id") @db.Uuid
+  requestedBy  String         @map("requested_by") @db.VarChar(20) // PARENT, USER, SYSTEM
+  requestedAt  DateTime       @default(now()) @map("requested_at")
+  scheduledFor DateTime       @map("scheduled_for") // requestedAt + 48 hours
+  completedAt  DateTime?      @map("completed_at")
+  status       DeletionStatus @default(PENDING)
+  deletionLog  Json?          @map("deletion_log")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledFor])
+  @@map("data_deletion_requests")
+}
 
 /// Compliance action types for audit logging
 enum ComplianceAction {

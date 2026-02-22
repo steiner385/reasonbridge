@@ -21,3 +21,11 @@ export {
 } from './dto/parental-consent.dto.js';
 export { ComplianceAuditService, type AuditMetadata } from './compliance-audit.service.js';
 export { AgeReverificationJob } from './age-reverification.job.js';
+export {
+  DataDeletionService,
+  type CreateDeletionRequestResult,
+  type ExecuteDeletionResult,
+  type DeletionLog,
+  type ProcessDeletionResult,
+  type DeletionRequestor,
+} from './data-deletion.service.js';

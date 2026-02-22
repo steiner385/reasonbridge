@@ -8,6 +8,7 @@ import { ParentalConsentService } from '../parental-consent.service.js';
 import { EmailService } from '../../services/email.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import type { ComplianceAuditService } from '../compliance-audit.service.js';
+import type { DataDeletionService } from '../data-deletion.service.js';
 import { ParentConsentStatus, ComplianceAction } from '@prisma/client';
 
 describe('ParentalConsentService', () => {
@@ -29,6 +30,9 @@ describe('ParentalConsentService', () => {
   };
   let mockAuditService: {
     logAction: ReturnType<typeof vi.fn>;
+  };
+  let mockDataDeletionService: {
+    createDeletionRequest: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -53,10 +57,21 @@ describe('ParentalConsentService', () => {
       logAction: vi.fn().mockResolvedValue({}),
     };
 
+    mockDataDeletionService = {
+      createDeletionRequest: vi.fn().mockResolvedValue({
+        id: 'deletion-request-123',
+        userId: 'user-123',
+        requestedBy: 'PARENT',
+        scheduledFor: new Date(),
+        status: 'PENDING',
+      }),
+    };
+
     service = new ParentalConsentService(
       mockPrisma as unknown as PrismaService,
       mockEmailService as unknown as EmailService,
       mockAuditService as unknown as ComplianceAuditService,
+      mockDataDeletionService as unknown as DataDeletionService,
     );
   });
 
@@ -380,6 +395,35 @@ describe('ParentalConsentService', () => {
       mockAuditService.logAction.mockRejectedValue(new Error('Audit service unavailable'));
 
       // Should not throw despite audit failure
+      await expect(service.withdrawConsent('user-123')).resolves.not.toThrow();
+    });
+
+    it('should create data deletion request when consent is withdrawn', async () => {
+      const mockConsentUpdate = Promise.resolve({});
+      const mockUserUpdate = Promise.resolve({});
+      mockPrisma.parentalConsent.update.mockReturnValue(mockConsentUpdate);
+      mockPrisma.user.update.mockReturnValue(mockUserUpdate);
+      mockPrisma.$transaction.mockResolvedValue([{}, {}]);
+
+      await service.withdrawConsent('user-123');
+
+      expect(mockDataDeletionService.createDeletionRequest).toHaveBeenCalledWith(
+        'user-123',
+        'PARENT',
+      );
+    });
+
+    it('should succeed even when data deletion request creation fails', async () => {
+      const mockConsentUpdate = Promise.resolve({});
+      const mockUserUpdate = Promise.resolve({});
+      mockPrisma.parentalConsent.update.mockReturnValue(mockConsentUpdate);
+      mockPrisma.user.update.mockReturnValue(mockUserUpdate);
+      mockPrisma.$transaction.mockResolvedValue([{}, {}]);
+      mockDataDeletionService.createDeletionRequest.mockRejectedValue(
+        new Error('Deletion service unavailable'),
+      );
+
+      // Should not throw despite deletion request failure
       await expect(service.withdrawConsent('user-123')).resolves.not.toThrow();
     });
   });
