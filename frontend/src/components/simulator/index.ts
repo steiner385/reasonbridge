@@ -14,3 +14,6 @@
 
 export { PersonaSelector, DEFAULT_PRESET_PERSONAS } from './PersonaSelector';
 export type { PersonaSelectorProps } from './PersonaSelector';
+
+export { ArgumentFeedbackPanel } from './ArgumentFeedbackPanel';
+export type { ArgumentFeedbackPanelProps } from './ArgumentFeedbackPanel';
