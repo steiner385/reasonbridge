@@ -41,9 +41,16 @@ export class ResponsesService {
   /**
    * Get all responses for a discussion topic
    * @param topicId - The ID of the topic to get responses for
+   * @param options - Query options
+   * @param options.includePendingReview - Include PENDING_REVIEW responses (for moderators)
    * @returns Array of responses for the topic
    */
-  async getResponsesForTopic(topicId: string): Promise<ResponseDto[]> {
+  async getResponsesForTopic(
+    topicId: string,
+    options: { includePendingReview?: boolean } = {},
+  ): Promise<ResponseDto[]> {
+    const { includePendingReview = false } = options;
+
     // Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },
@@ -54,9 +61,17 @@ export class ResponsesService {
       throw new NotFoundException(`Topic with ID ${topicId} not found`);
     }
 
+    // Build status filter: exclude PENDING_REVIEW unless explicitly included
+    const statusFilter = includePendingReview
+      ? undefined // No filter - include all statuses
+      : { not: 'PENDING_REVIEW' as const };
+
     // Fetch all responses for the topic
     const responses = await this.prisma.response.findMany({
-      where: { topicId },
+      where: {
+        topicId,
+        ...(statusFilter && { status: statusFilter }),
+      },
       include: {
         author: {
           select: {
@@ -148,6 +163,15 @@ export class ResponsesService {
       }));
     }
 
+    // Check if author is a minor for content moderation
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: { isMinor: true },
+    });
+
+    // Set status based on author type: minors get PENDING_REVIEW, adults get VISIBLE
+    const responseStatus = author?.isMinor ? 'PENDING_REVIEW' : 'VISIBLE';
+
     // Create the response
     const response = await this.prisma.response.create({
       data: {
@@ -158,7 +182,7 @@ export class ResponsesService {
         citedSources: citedSourcesJson,
         containsOpinion: createResponseDto.containsOpinion ?? false,
         containsFactualClaims: createResponseDto.containsFactualClaims ?? false,
-        status: 'VISIBLE',
+        status: responseStatus,
         revisionCount: 0,
       },
       include: {
@@ -536,6 +560,15 @@ export class ResponsesService {
       }
     }
 
+    // Check if author is a minor for content moderation
+    const authorInfo = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { isMinor: true },
+    });
+
+    // Set status based on author type: minors get PENDING_REVIEW, adults get VISIBLE
+    const responseStatus = authorInfo?.isMinor ? 'PENDING_REVIEW' : 'VISIBLE';
+
     // Create response and update metrics in transaction
     const result = await this.prisma.$transaction(async (tx) => {
       // Create response
@@ -546,6 +579,7 @@ export class ResponsesService {
           authorId: userId,
           parentId: dto.parentResponseId || null,
           content: dto.content,
+          status: responseStatus,
           version: 1,
           editCount: 0,
         },
@@ -824,14 +858,22 @@ export class ResponsesService {
    *
    * Requirements:
    * - Exclude soft-deleted responses (deletedAt is not null)
+   * - Exclude PENDING_REVIEW responses by default (for regular users)
    * - Include author info and citations
    * - Support pagination (Phase 9)
    * - Order by createdAt ascending (chronological)
    *
    * @param discussionId - The ID of the discussion
+   * @param options - Query options
+   * @param options.includePendingReview - Include PENDING_REVIEW responses (for moderators)
    * @returns Array of responses for the discussion
    */
-  async getDiscussionResponses(discussionId: string): Promise<ResponseDetailDto[]> {
+  async getDiscussionResponses(
+    discussionId: string,
+    options: { includePendingReview?: boolean } = {},
+  ): Promise<ResponseDetailDto[]> {
+    const { includePendingReview = false } = options;
+
     // Verify discussion exists
     const discussion = await this.prisma.discussion.findUnique({
       where: { id: discussionId },
@@ -842,11 +884,17 @@ export class ResponsesService {
       throw new NotFoundException(`Discussion with ID ${discussionId} not found`);
     }
 
+    // Build status filter: exclude PENDING_REVIEW unless explicitly included
+    const statusFilter = includePendingReview
+      ? { not: 'REMOVED' as const } // Only exclude REMOVED, include PENDING_REVIEW
+      : { notIn: ['REMOVED' as const, 'PENDING_REVIEW' as const] };
+
     // Fetch all non-deleted responses
     const responses = await this.prisma.response.findMany({
       where: {
         discussionId,
         deletedAt: null, // Exclude soft-deleted responses
+        status: statusFilter,
       },
       include: {
         author: {

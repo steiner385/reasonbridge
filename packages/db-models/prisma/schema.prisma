@@ -610,6 +610,7 @@ enum ResponseStatus {
   VISIBLE
   HIDDEN
   REMOVED
+  PENDING_REVIEW // Child content awaiting moderator approval
 
   @@map("response_status")
 }
