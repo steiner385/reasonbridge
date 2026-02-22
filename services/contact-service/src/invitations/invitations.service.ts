@@ -153,7 +153,8 @@ export class InvitationsService {
     userId: string,
     query: InvitationListQueryDto,
   ): Promise<InvitationListResponseDto> {
-    const { status, limit = 50, offset = 0 } = query;
+    const { status, limit = 50, page = 1 } = query;
+    const offset = (page - 1) * limit;
 
     const where: any = { inviterId: userId };
     if (status) {
@@ -192,7 +193,8 @@ export class InvitationsService {
     userId: string,
     query: InvitationListQueryDto,
   ): Promise<InvitationListResponseDto> {
-    const { status, limit = 50, offset = 0 } = query;
+    const { status, limit = 50, page = 1 } = query;
+    const offset = (page - 1) * limit;
 
     const where: any = { inviteeUserId: userId };
     if (status) {

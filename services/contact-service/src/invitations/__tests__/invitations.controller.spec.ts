@@ -72,7 +72,7 @@ describe('InvitationsController', () => {
 
   describe('getSentInvitations', () => {
     it('should return paginated sent invitations', async () => {
-      const query = { limit: 20, offset: 0 };
+      const query = { limit: 20, page: 1 };
       const mockResponse = {
         invitations: [
           {
@@ -98,7 +98,7 @@ describe('InvitationsController', () => {
     });
 
     it('should filter by status when provided', async () => {
-      const query = { status: InvitationStatusDto.ACCEPTED, limit: 10, offset: 5 };
+      const query = { status: InvitationStatusDto.ACCEPTED, limit: 10, page: 2 };
       mockService.getSentInvitations.mockResolvedValue({
         invitations: [],
         total: 0,
@@ -114,7 +114,7 @@ describe('InvitationsController', () => {
 
   describe('getReceivedInvitations', () => {
     it('should return paginated received invitations', async () => {
-      const query = { limit: 20, offset: 0 };
+      const query = { limit: 20, page: 1 };
       const mockResponse = {
         invitations: [
           {
@@ -139,7 +139,7 @@ describe('InvitationsController', () => {
     });
 
     it('should handle pagination correctly', async () => {
-      const query = { limit: 50, offset: 100 };
+      const query = { limit: 50, page: 3 };
       mockService.getReceivedInvitations.mockResolvedValue({
         invitations: [],
         total: 150,

@@ -66,12 +66,12 @@ export class InvitationListQueryDto {
   @Type(() => Number)
   limit?: number;
 
-  @ApiProperty({ required: false, default: 0 })
+  @ApiProperty({ required: false, default: 1 })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(1)
   @Type(() => Number)
-  offset?: number;
+  page?: number;
 }
 
 export class InvitationListResponseDto {
