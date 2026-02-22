@@ -14,6 +14,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderHook } from '@testing-library/react';
 import { TagSelector, useTagValidation } from '../TagSelector';
+// eslint-disable-next-line import/order -- Required: mock must be declared before import for hoisting
 import type { Tag } from '../../../types/tag';
 
 // Mock the tag service
