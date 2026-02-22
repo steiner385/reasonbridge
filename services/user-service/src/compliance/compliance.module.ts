@@ -9,6 +9,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ComplianceService } from './compliance.service.js';
 import { AgeVerificationService } from './age-verification.service.js';
 import { ParentalConsentService } from './parental-consent.service.js';
+import { ComplianceAuditService } from './compliance-audit.service.js';
 import { ParentalConsentController } from './parental-consent.controller.js';
 import { ParentalDashboardController } from './parental-dashboard.controller.js';
 import { EmailService } from '../services/email.service.js';
@@ -26,6 +27,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
  * - Parental consent tracking and verification
  * - Consent email sending via SES
  * - Parental dashboard for viewing child activity
+ * - Compliance audit logging for regulatory reporting
  */
 @Module({
   imports: [
@@ -43,6 +45,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
     ComplianceService,
     AgeVerificationService,
     ParentalConsentService,
+    ComplianceAuditService,
     EmailService,
     // Factory provider that explicitly injects dependencies
     // This bypasses NestJS's reflection-based DI which can hang with @Optional() decorators
@@ -53,6 +56,12 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
       inject: [JwtService, ConfigService],
     },
   ],
-  exports: [ComplianceService, AgeVerificationService, ParentalConsentService, JwtAuthGuard],
+  exports: [
+    ComplianceService,
+    AgeVerificationService,
+    ParentalConsentService,
+    ComplianceAuditService,
+    JwtAuthGuard,
+  ],
 })
 export class ComplianceModule {}

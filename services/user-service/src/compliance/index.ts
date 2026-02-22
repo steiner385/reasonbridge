@@ -19,3 +19,4 @@ export {
   VerifyConsentResponseDto,
   ConsentStatusDto,
 } from './dto/parental-consent.dto.js';
+export { ComplianceAuditService, type AuditMetadata } from './compliance-audit.service.js';
