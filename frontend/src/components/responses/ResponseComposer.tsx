@@ -8,8 +8,10 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { PreviewFeedbackPanel } from '../feedback';
 import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
+import { useAuthContext } from '../../contexts/AuthContext';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
+import { PendingResponseNotice } from './PendingResponseNotice';
 
 export interface ResponseComposerProps {
   /**
@@ -99,6 +101,10 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [containsOpinion, setContainsOpinion] = useState(false);
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPendingReviewMessage, setShowPendingReviewMessage] = useState(false);
+
+  const { user } = useAuthContext();
+  const isMinor = user?.isMinor ?? false;
 
   // Hybrid preview feedback integration (regex + AI)
   const {
@@ -170,6 +176,13 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
       setCurrentSource('');
       setContainsOpinion(false);
       setContainsFactualClaims(false);
+
+      // Show pending review message for minor users
+      if (isMinor) {
+        setShowPendingReviewMessage(true);
+        // Auto-hide the message after 10 seconds
+        setTimeout(() => setShowPendingReviewMessage(false), 10000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit response');
     }
@@ -204,188 +217,196 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const isValid = characterCount >= minLength && characterCount <= maxLength;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="response-content"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-        >
-          Your Response
-          <span className="text-fallacy-DEFAULT ml-1">*</span>
-        </label>
-        <textarea
-          id="response-content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder={placeholder}
-          className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y min-h-[120px] ${
-            error
-              ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20'
-              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20'
-          }`}
-          maxLength={maxLength}
-          disabled={isLoading}
-          aria-invalid={!!error}
-          aria-describedby={error ? 'response-error' : 'character-count'}
-        />
-        <div className="flex justify-between items-center mt-1.5">
-          <span
-            id="character-count"
-            className={`text-sm ${
-              !isValid && characterCount > 0
-                ? 'text-fallacy-DEFAULT'
-                : characterCount >= maxLength * 0.9
-                  ? 'text-secondary-600 dark:text-secondary-400'
-                  : 'text-gray-500 dark:text-gray-300'
+    <div className="space-y-4">
+      {/* Pending Review Message for Minor Users */}
+      <PendingResponseNotice
+        show={showPendingReviewMessage}
+        onDismiss={() => setShowPendingReviewMessage(false)}
+      />
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="response-content"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          >
+            Your Response
+            <span className="text-fallacy-DEFAULT ml-1">*</span>
+          </label>
+          <textarea
+            id="response-content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={placeholder}
+            className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y min-h-[120px] ${
+              error
+                ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20'
+                : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20'
             }`}
-          >
-            {characterCount} / {maxLength} characters
-            {characterCount < minLength && characterCount > 0 && ` (minimum ${minLength})`}
-          </span>
+            maxLength={maxLength}
+            disabled={isLoading}
+            aria-invalid={!!error}
+            aria-describedby={error ? 'response-error' : 'character-count'}
+          />
+          <div className="flex justify-between items-center mt-1.5">
+            <span
+              id="character-count"
+              className={`text-sm ${
+                !isValid && characterCount > 0
+                  ? 'text-fallacy-DEFAULT'
+                  : characterCount >= maxLength * 0.9
+                    ? 'text-secondary-600 dark:text-secondary-400'
+                    : 'text-gray-500 dark:text-gray-300'
+              }`}
+            >
+              {characterCount} / {maxLength} characters
+              {characterCount < minLength && characterCount > 0 && ` (minimum ${minLength})`}
+            </span>
+          </div>
+
+          {/* Hybrid Preview Feedback - shows when content >= 20 chars */}
+          {characterCount >= 20 && (
+            <PreviewFeedbackPanel
+              feedback={previewFeedback}
+              isLoading={isPreviewLoading}
+              isAILoading={isAILoading}
+              isAIFeedback={isAIFeedback}
+              readyToPost={readyToPost}
+              summary={previewSummary}
+              error={previewError}
+              sensitivity={sensitivity}
+              onSensitivityChange={setSensitivity}
+              showEmpty={true}
+              aria-label="Preview feedback"
+            />
+          )}
         </div>
 
-        {/* Hybrid Preview Feedback - shows when content >= 20 chars */}
-        {characterCount >= 20 && (
-          <PreviewFeedbackPanel
-            feedback={previewFeedback}
-            isLoading={isPreviewLoading}
-            isAILoading={isAILoading}
-            isAIFeedback={isAIFeedback}
-            readyToPost={readyToPost}
-            summary={previewSummary}
-            error={previewError}
-            sensitivity={sensitivity}
-            onSensitivityChange={setSensitivity}
-            showEmpty={true}
-            aria-label="Preview feedback"
-          />
+        {error && (
+          <p id="response-error" className="text-sm text-fallacy-DEFAULT" role="alert">
+            {error}
+          </p>
         )}
-      </div>
 
-      {error && (
-        <p id="response-error" className="text-sm text-fallacy-DEFAULT" role="alert">
-          {error}
-        </p>
-      )}
+        {/* Cited Sources */}
+        <div>
+          <label
+            htmlFor="cited-source"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          >
+            Cited Sources (Optional)
+          </label>
+          <div className="flex gap-2">
+            <Input
+              id="cited-source"
+              type="url"
+              value={currentSource}
+              onChange={(e) => setCurrentSource(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="https://example.com/source"
+              disabled={isLoading}
+              fullWidth
+            />
+            <Button
+              type="button"
+              onClick={handleAddSource}
+              variant="outline"
+              disabled={!currentSource.trim() || isLoading}
+            >
+              Add
+            </Button>
+          </div>
+          {citedSources.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {citedSources.map((source, index) => (
+                <li
+                  key={index}
+                  className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
+                >
+                  <a
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary-600 hover:text-primary-700 truncate flex-1"
+                  >
+                    {source}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSource(index)}
+                    className="ml-2 text-gray-400 hover:text-fallacy-DEFAULT"
+                    disabled={isLoading}
+                    aria-label={`Remove source ${source}`}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-      {/* Cited Sources */}
-      <div>
-        <label
-          htmlFor="cited-source"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-        >
-          Cited Sources (Optional)
-        </label>
-        <div className="flex gap-2">
-          <Input
-            id="cited-source"
-            type="url"
-            value={currentSource}
-            onChange={(e) => setCurrentSource(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="https://example.com/source"
-            disabled={isLoading}
-            fullWidth
-          />
+        {/* Response Metadata Checkboxes */}
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <input
+              id="contains-opinion"
+              type="checkbox"
+              checked={containsOpinion}
+              onChange={(e) => setContainsOpinion(e.target.checked)}
+              disabled={isLoading}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="contains-opinion"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
+              This response contains my opinion
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              id="contains-factual-claims"
+              type="checkbox"
+              checked={containsFactualClaims}
+              onChange={(e) => setContainsFactualClaims(e.target.checked)}
+              disabled={isLoading}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="contains-factual-claims"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
+              This response contains factual claims
+            </label>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3">
           <Button
-            type="button"
-            onClick={handleAddSource}
-            variant="outline"
-            disabled={!currentSource.trim() || isLoading}
+            type="submit"
+            variant="primary"
+            isLoading={isLoading}
+            disabled={!isValid || isLoading}
           >
-            Add
+            {parentId ? 'Post Reply' : 'Post Response'}
           </Button>
+          {showCancel && (
+            <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
+              Cancel
+            </Button>
+          )}
         </div>
-        {citedSources.length > 0 && (
-          <ul className="mt-2 space-y-1">
-            {citedSources.map((source, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
-              >
-                <a
-                  href={source}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary-600 hover:text-primary-700 truncate flex-1"
-                >
-                  {source}
-                </a>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveSource(index)}
-                  className="ml-2 text-gray-400 hover:text-fallacy-DEFAULT"
-                  disabled={isLoading}
-                  aria-label={`Remove source ${source}`}
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Response Metadata Checkboxes */}
-      <div className="space-y-2">
-        <div className="flex items-center">
-          <input
-            id="contains-opinion"
-            type="checkbox"
-            checked={containsOpinion}
-            onChange={(e) => setContainsOpinion(e.target.checked)}
-            disabled={isLoading}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-          />
-          <label
-            htmlFor="contains-opinion"
-            className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-          >
-            This response contains my opinion
-          </label>
-        </div>
-        <div className="flex items-center">
-          <input
-            id="contains-factual-claims"
-            type="checkbox"
-            checked={containsFactualClaims}
-            onChange={(e) => setContainsFactualClaims(e.target.checked)}
-            disabled={isLoading}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-          />
-          <label
-            htmlFor="contains-factual-claims"
-            className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-          >
-            This response contains factual claims
-          </label>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button
-          type="submit"
-          variant="primary"
-          isLoading={isLoading}
-          disabled={!isValid || isLoading}
-        >
-          {parentId ? 'Post Reply' : 'Post Response'}
-        </Button>
-        {showCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
-            Cancel
-          </Button>
-        )}
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 
