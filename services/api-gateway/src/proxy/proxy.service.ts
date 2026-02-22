@@ -67,6 +67,7 @@ export class ProxyService {
   private readonly aiService: ServiceConfig;
   private readonly moderationService: ServiceConfig;
   private readonly activityService: ServiceConfig;
+  private readonly contactService: ServiceConfig;
 
   constructor(
     @Inject(HttpService) private readonly httpService: HttpService,
@@ -116,6 +117,12 @@ export class ProxyService {
       timeout: getConfig<number>('ACTIVITY_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
       retryAttempts: getConfig<number>('ACTIVITY_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
+
+    this.contactService = {
+      url: getConfig<string>('CONTACT_SERVICE_URL', getServiceUrl('CONTACT_SERVICE')),
+      timeout: getConfig<number>('CONTACT_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      retryAttempts: getConfig<number>('CONTACT_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
+    };
   }
 
   async proxyToUserService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
@@ -136,6 +143,10 @@ export class ProxyService {
 
   async proxyToActivityService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
     return this.proxyWithResilience<T>('activity-service', this.activityService, request);
+  }
+
+  async proxyToContactService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
+    return this.proxyWithResilience<T>('contact-service', this.contactService, request);
   }
 
   /**
