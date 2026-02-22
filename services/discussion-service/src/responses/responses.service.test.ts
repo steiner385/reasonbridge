@@ -19,10 +19,18 @@ const createMockPrismaService = () => ({
     createMany: vi.fn(),
     deleteMany: vi.fn(),
   },
+  user: {
+    findUnique: vi.fn(),
+  },
 });
 
 const createMockCommonGroundTrigger = () => ({
   checkAndTrigger: vi.fn().mockResolvedValue(undefined),
+});
+
+const createMockModerationClient = () => ({
+  screenContentForChildren: vi.fn().mockResolvedValue({ childSafetyRisk: 'none' }),
+  queueChildContent: vi.fn().mockResolvedValue(undefined),
 });
 
 const createMockResponse = (overrides = {}) => ({
@@ -48,12 +56,18 @@ describe('ResponsesService', () => {
   let service: ResponsesService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockCommonGroundTrigger: ReturnType<typeof createMockCommonGroundTrigger>;
+  let mockModerationClient: ReturnType<typeof createMockModerationClient>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockCommonGroundTrigger = createMockCommonGroundTrigger();
-    service = new ResponsesService(mockPrisma as any, mockCommonGroundTrigger as any);
+    mockModerationClient = createMockModerationClient();
+    service = new ResponsesService(
+      mockPrisma as any,
+      mockCommonGroundTrigger as any,
+      mockModerationClient as any,
+    );
   });
 
   describe('getResponsesForTopic', () => {
@@ -158,6 +172,7 @@ describe('ResponsesService', () => {
       mockPrisma.response.create.mockResolvedValue(mockResponse);
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
 
       const result = await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -209,6 +224,7 @@ describe('ResponsesService', () => {
         .mockResolvedValue(mockResponse);
       mockPrisma.response.create.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
 
       const result = await service.createResponse('topic-1', 'user-1', {
         ...validDto,
@@ -229,6 +245,7 @@ describe('ResponsesService', () => {
       mockPrisma.response.create.mockResolvedValue(mockResponse);
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
 
       const result = await service.createResponse('topic-1', 'user-1', {
         ...validDto,
@@ -256,6 +273,7 @@ describe('ResponsesService', () => {
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
       mockPrisma.responseProposition.createMany.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
 
       await service.createResponse('topic-1', 'user-1', {
         ...validDto,
@@ -280,6 +298,7 @@ describe('ResponsesService', () => {
       mockPrisma.response.create.mockResolvedValue(mockResponse);
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -295,6 +314,7 @@ describe('ResponsesService', () => {
       mockPrisma.response.create.mockResolvedValue(mockResponse);
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -302,6 +322,118 @@ describe('ResponsesService', () => {
         where: { id: 'topic-1' },
         data: { responseCount: { increment: 1 } },
       });
+    });
+
+    it('should route child content to moderation queue when author is minor', async () => {
+      const mockResponse = createMockResponse();
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.response.create.mockResolvedValue(mockResponse);
+      mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
+      mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: true });
+
+      await service.createResponse('topic-1', 'minor-user', validDto);
+
+      // Wait for the fire-and-forget call to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockModerationClient.screenContentForChildren).toHaveBeenCalledWith(
+        validDto.content.trim(),
+      );
+      expect(mockModerationClient.queueChildContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          responseId: 'response-1',
+          topicId: 'topic-1',
+          authorId: 'minor-user',
+          content: validDto.content.trim(),
+        }),
+      );
+    });
+
+    it('should not route adult content to moderation queue', async () => {
+      const mockResponse = createMockResponse();
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.response.create.mockResolvedValue(mockResponse);
+      mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
+      mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
+
+      await service.createResponse('topic-1', 'adult-user', validDto);
+
+      // Wait for the fire-and-forget call to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockModerationClient.screenContentForChildren).not.toHaveBeenCalled();
+      expect(mockModerationClient.queueChildContent).not.toHaveBeenCalled();
+    });
+
+    it('should include grooming flags when screening detects concerns', async () => {
+      const mockResponse = createMockResponse();
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.response.create.mockResolvedValue(mockResponse);
+      mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
+      mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: true });
+      mockModerationClient.screenContentForChildren.mockResolvedValue({
+        childSafetyRisk: 'high',
+        groomingDetection: {
+          detected: true,
+          confidence: 0.9,
+          patternType: 'secrecy_request',
+          flaggedPhrases: ["don't tell anyone"],
+          recommendedAction: 'REVIEW',
+          explanation: 'Potential secrecy request detected',
+        },
+      });
+
+      await service.createResponse('topic-1', 'minor-user', validDto);
+
+      // Wait for the fire-and-forget call to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockModerationClient.queueChildContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aiFlags: {
+            grooming: true,
+            groomingConfidence: 0.9,
+            groomingPatternType: 'secrecy_request',
+            recommendedAction: 'REVIEW',
+          },
+        }),
+      );
+    });
+
+    it('should work without moderation client (backwards compatibility)', async () => {
+      // Create service without moderation client
+      const serviceWithoutModeration = new ResponsesService(
+        mockPrisma as any,
+        mockCommonGroundTrigger as any,
+        undefined, // No moderation client
+      );
+
+      const mockResponse = createMockResponse();
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.response.create.mockResolvedValue(mockResponse);
+      mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
+      mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: true });
+
+      // Should not throw even though author is minor and no moderation client
+      await expect(
+        serviceWithoutModeration.createResponse('topic-1', 'minor-user', validDto),
+      ).resolves.not.toThrow();
     });
   });
 

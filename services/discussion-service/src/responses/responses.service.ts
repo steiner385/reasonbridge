@@ -8,9 +8,11 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CommonGroundTriggerService } from '../services/common-ground-trigger.service.js';
+import { ModerationClientService } from '../clients/moderation-client.service.js';
 import { CreateResponseDto } from './dto/create-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
@@ -33,6 +35,7 @@ export class ResponsesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly commonGroundTrigger: CommonGroundTriggerService,
+    @Optional() private readonly moderationClient?: ModerationClientService,
   ) {}
 
   /**
@@ -196,6 +199,19 @@ export class ResponsesService {
       // Error is already logged in the service, but log here too for visibility
       this.logger.error('Failed to check/trigger common ground analysis', error, {
         metadata: { topicId },
+      });
+    });
+
+    // Route child content to moderation queue if author is a minor
+    // This is fire-and-forget - we don't wait for it to complete
+    this.routeChildContentToModeration(
+      response.id,
+      topicId,
+      authorId,
+      createResponseDto.content.trim(),
+    ).catch((error) => {
+      this.logger.error('Failed to route child content to moderation', error, {
+        metadata: { responseId: response.id, topicId, authorId },
       });
     });
 
@@ -613,6 +629,16 @@ export class ResponsesService {
 
     this.logger.responsePosted(result.id, userId, dto.discussionId);
 
+    // Route child content to moderation queue if author is a minor
+    // This is fire-and-forget - we don't wait for it to complete
+    this.routeChildContentToModeration(result.id, discussion.topicId, userId, dto.content).catch(
+      (error) => {
+        this.logger.error('Failed to route child content to moderation', error, {
+          metadata: { responseId: result.id, topicId: discussion.topicId, userId },
+        });
+      },
+    );
+
     // Map to ResponseDetailDto
     return {
       id: result.id,
@@ -862,5 +888,96 @@ export class ResponsesService {
       updatedAt: response.updatedAt.toISOString(),
       replyCount: response._count.replies,
     }));
+  }
+
+  // ==================== Child-Friendly Mode: Phase 2 Content Safety ====================
+
+  /**
+   * Route child-authored content to the moderation queue for review.
+   *
+   * This method checks if the response author is a minor (isMinor=true) and,
+   * if so, screens the content for child safety concerns and queues it for
+   * moderator review before it becomes visible.
+   *
+   * @param responseId - The ID of the created response
+   * @param topicId - The ID of the topic containing the response
+   * @param authorId - The ID of the response author
+   * @param content - The response content text
+   *
+   * @remarks
+   * This is a fire-and-forget operation:
+   * - Response creation should not fail if moderation routing fails
+   * - Errors are logged but do not block the response creation flow
+   * - If ModerationClientService is not available, this method does nothing
+   *
+   * Process:
+   * 1. Check if author is a minor (isMinor=true)
+   * 2. If minor, screen content for grooming patterns via moderation-service
+   * 3. Queue content in moderation queue with AI flags for priority determination
+   *
+   * The moderation queue will:
+   * - Mark URGENT priority if grooming patterns detected
+   * - Mark HIGH priority for other concerning content
+   * - Mark NORMAL priority for clean content
+   */
+  private async routeChildContentToModeration(
+    responseId: string,
+    topicId: string,
+    authorId: string,
+    content: string,
+  ): Promise<void> {
+    // Skip if moderation client is not available (backwards compatibility)
+    if (!this.moderationClient) {
+      return;
+    }
+
+    // Check if author is a minor
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: { isMinor: true },
+    });
+
+    // Only route to moderation if author is a minor
+    if (!author?.isMinor) {
+      return;
+    }
+
+    this.logger.debug('Routing child content to moderation queue', {
+      responseId,
+      userId: authorId,
+      metadata: { topicId },
+    });
+
+    // Screen content for grooming patterns and child safety
+    const screening = await this.moderationClient.screenContentForChildren(content);
+
+    // Build AI flags from screening result
+    const aiFlags = screening.groomingDetection
+      ? {
+          grooming: screening.groomingDetection.detected,
+          groomingConfidence: screening.groomingDetection.confidence,
+          groomingPatternType: screening.groomingDetection.patternType || undefined,
+          recommendedAction: screening.groomingDetection.recommendedAction,
+        }
+      : undefined;
+
+    // Queue content for moderation review
+    await this.moderationClient.queueChildContent({
+      responseId,
+      topicId,
+      authorId,
+      content,
+      aiFlags,
+    });
+
+    this.logger.info('Child content queued for moderation', {
+      responseId,
+      userId: authorId,
+      metadata: {
+        topicId,
+        childSafetyRisk: screening.childSafetyRisk,
+        hasGroomingFlags: !!screening.groomingDetection?.detected,
+      },
+    });
   }
 }
