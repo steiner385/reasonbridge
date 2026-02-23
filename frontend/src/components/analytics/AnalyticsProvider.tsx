@@ -9,6 +9,9 @@
  * Provides analytics context and automatic page view tracking.
  * Wrap your app with this provider to enable analytics.
  *
+ * **Child Safety**: Automatically disables all tracking when the current
+ * user is detected as a minor (COPPA/GDPR-K compliance).
+ *
  * @example
  * ```tsx
  * <AnalyticsProvider>
@@ -19,7 +22,8 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { trackPageView } from '../../lib/analytics';
+import { trackPageView, setMinorUserStatus } from '../../lib/analytics';
+import { useChildSafety } from '../../contexts/ChildSafetyContext';
 
 interface AnalyticsProviderProps {
   children: ReactNode;
@@ -27,8 +31,15 @@ interface AnalyticsProviderProps {
 
 export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   const location = useLocation();
+  const { isChildMode } = useChildSafety();
 
-  // Track page views on route changes
+  // Sync minor status with analytics module
+  // When isChildMode is true, all tracking is disabled at the core level
+  useEffect(() => {
+    setMinorUserStatus(isChildMode);
+  }, [isChildMode]);
+
+  // Track page views on route changes (will be blocked if minor)
   useEffect(() => {
     // Small delay to ensure document.title is updated
     const timeoutId = setTimeout(() => {

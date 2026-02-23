@@ -63,6 +63,30 @@ const defaultConfig: AnalyticsConfig = {
 
 let config: AnalyticsConfig = { ...defaultConfig };
 
+// Child-Friendly Mode: Global flag to disable tracking for minors
+// Set by AnalyticsProvider when user is detected as a minor
+let isMinorUser = false;
+
+/**
+ * Set minor user status for COPPA/GDPR-K compliance
+ * When true, all tracking is disabled regardless of consent
+ *
+ * @param isMinor - Whether the current user is a minor
+ */
+export function setMinorUserStatus(isMinor: boolean): void {
+  isMinorUser = isMinor;
+  if (isMinor && config.debug) {
+    console.info('[Analytics] Tracking disabled for minor user (COPPA/GDPR-K compliance)');
+  }
+}
+
+/**
+ * Check if current user is a minor
+ */
+export function isTrackingDisabledForMinor(): boolean {
+  return isMinorUser;
+}
+
 /**
  * Configure analytics
  */
@@ -113,6 +137,14 @@ export function trackEvent(
  * Core tracking function
  */
 function track(data: AnalyticsEventData): void {
+  // COPPA/GDPR-K: Never track minors, regardless of other settings
+  if (isMinorUser) {
+    if (config.debug) {
+      console.info('[Analytics Debug - Minor User]', 'Tracking disabled for child safety');
+    }
+    return;
+  }
+
   // Check if analytics is enabled
   if (!config.enabled) {
     if (config.debug) {
