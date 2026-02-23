@@ -41,7 +41,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -164,7 +166,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -193,7 +197,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -267,7 +273,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -314,7 +322,9 @@
       ],
       "request": {
         "headers": {
-          "Authorization": ["Bearer valid-jwt-token"]
+          "Authorization": [
+            "Bearer valid-jwt-token"
+          ]
         },
         "method": "GET",
         "path": "/users/me"
@@ -342,7 +352,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -442,7 +454,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -500,7 +514,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -562,7 +578,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -676,7 +694,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -832,7 +852,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -936,7 +958,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -981,7 +1005,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1068,7 +1094,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1099,7 +1127,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {

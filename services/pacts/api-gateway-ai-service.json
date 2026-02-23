@@ -41,7 +41,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -163,9 +165,13 @@
         "body": {
           "content": {
             "attribution": "AI Assistant",
-            "commonGroundAreas": ["The shared goal of improving outcomes..."],
+            "commonGroundAreas": [
+              "The shared goal of improving outcomes..."
+            ],
             "confidenceScore": 0.75,
-            "conflictAreas": ["The approach to implementation..."],
+            "conflictAreas": [
+              "The approach to implementation..."
+            ],
             "overallConsensusScore": 0.58,
             "reasoning": "Analyzed 15 propositions from this topic...",
             "suggestions": [
@@ -192,7 +198,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -366,7 +374,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -417,7 +427,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -443,7 +455,9 @@
                 "agreementPercentage": 85,
                 "participantCount": 12,
                 "proposition": "Both sides agree on the importance of...",
-                "supportingEvidence": ["Evidence point 1"]
+                "supportingEvidence": [
+                  "Evidence point 1"
+                ]
               }
             ],
             "attribution": "AI Assistant",
@@ -451,12 +465,16 @@
             "genuineDisagreements": [
               {
                 "proposition": "The approach to solving this issue",
-                "underlyingValues": ["Individual liberty"],
+                "underlyingValues": [
+                  "Individual liberty"
+                ],
                 "viewpoints": [
                   {
                     "participantCount": 8,
                     "position": "Position A advocates for...",
-                    "reasoning": ["Because..."]
+                    "reasoning": [
+                      "Because..."
+                    ]
                   }
                 ]
               }
@@ -492,7 +510,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -765,8 +785,12 @@
         "method": "GET",
         "path": "/feedback/analytics",
         "query": {
-          "endDate": ["2024-12-31"],
-          "startDate": ["2024-01-01"]
+          "endDate": [
+            "2024-12-31"
+          ],
+          "startDate": [
+            "2024-01-01"
+          ]
         }
       },
       "response": {
@@ -790,7 +814,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -915,7 +941,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -956,7 +984,9 @@
             "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
             "displayedToUser": true,
             "educationalResources": {
-              "articles": ["https://example.com/bias-article"]
+              "articles": [
+                "https://example.com/bias-article"
+              ]
             },
             "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
             "reasoning": "The response shows signs of confirmation bias...",
@@ -976,7 +1006,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1096,7 +1128,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1127,13 +1161,17 @@
             "attribution": "AI Assistant",
             "confidenceScore": 0.88,
             "reasoning": "Based on the content and keywords, these tags are most relevant...",
-            "suggestions": ["climate-policy"]
+            "suggestions": [
+              "climate-policy"
+            ]
           },
           "contentType": "application/json",
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1203,7 +1241,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1250,7 +1290,9 @@
               }
             ],
             "reasoning": "Based on content analysis, these topics are related...",
-            "suggestions": ["Related topic"]
+            "suggestions": [
+              "Related topic"
+            ]
           },
           "contentType": "application/json",
           "encoded": false
@@ -1263,7 +1305,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1365,7 +1409,9 @@
           "encoded": false
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1405,7 +1451,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
@@ -1518,7 +1566,9 @@
           }
         },
         "headers": {
-          "Content-Type": ["application/json"]
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "matchingRules": {
           "body": {
