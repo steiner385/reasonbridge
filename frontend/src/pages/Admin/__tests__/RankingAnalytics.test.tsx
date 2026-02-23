@@ -10,7 +10,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import type { RankingAnalytics } from '../../../types/ranking';
+// eslint-disable-next-line import/order
+import { type RankingAnalytics } from '../../../types/ranking';
 
 // Create mock analytics data
 const createMockAnalytics = (overrides: Partial<RankingAnalytics> = {}): RankingAnalytics => ({

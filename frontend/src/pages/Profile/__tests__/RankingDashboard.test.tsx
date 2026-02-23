@@ -11,8 +11,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
-import type { UserRank, TopicExpertise, Credential } from '../../../types/ranking';
-import type { Appeal } from '../../../types/moderation';
+import { type UserRank, type TopicExpertise, type Credential } from '../../../types/ranking';
+// eslint-disable-next-line import/order
+import { type Appeal } from '../../../types/moderation';
 
 // Test data factories
 const createMockRank = (overrides: Partial<UserRank> = {}): UserRank => ({
