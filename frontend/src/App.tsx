@@ -9,6 +9,7 @@ import { Header } from './components/layouts/Header';
 import { Sidebar } from './components/layouts/Sidebar';
 import { MobileDrawer } from './components/layouts/MobileDrawer';
 import { OfflineIndicator } from './components/ui/OfflineIndicator';
+import { PanicButton } from './components/safety';
 import { LoginModalProvider } from './contexts/LoginModalContext';
 import { useSidebar } from './hooks/useSidebar';
 import { useIsMobileViewport } from './hooks/useMediaQuery';
@@ -33,6 +34,7 @@ function App() {
     return (
       <LoginModalProvider>
         <OfflineIndicator />
+        <PanicButton />
         {routing}
       </LoginModalProvider>
     );
@@ -43,6 +45,9 @@ function App() {
     <LoginModalProvider>
       {/* Offline status indicator */}
       <OfflineIndicator />
+
+      {/* Child safety panic button - only visible to minor users */}
+      <PanicButton />
 
       {/* Skip to main content link (WCAG 2.4.1 Level A) */}
       <a href="#main-content" className="skip-link">
