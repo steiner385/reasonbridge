@@ -9,3 +9,10 @@ export {
   type ActivityItem,
   type ActivityType,
 } from './ActivityTimeline';
+
+export {
+  ChildAccountSettings,
+  type ChildAccountSettingsProps,
+  type ChildSettings,
+  type SettableFeature,
+} from './ChildAccountSettings';
