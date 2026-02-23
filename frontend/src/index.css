@@ -252,6 +252,110 @@
   .child-friendly .encouragement-text {
     @apply text-[var(--color-primary-600)] font-medium;
   }
+
+  /**
+   * Child-Friendly Typography
+   * Larger, more readable text for younger users
+   * Base size increases from 16px to 18px
+   */
+
+  /* Base text size increase */
+  .child-friendly body {
+    font-size: 1.125rem; /* 18px base instead of 16px */
+    line-height: 1.8; /* Increased line height for readability */
+  }
+
+  /* Headings - proportionally larger */
+  .child-friendly h1 {
+    font-size: 2.25rem; /* 36px */
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .child-friendly h2 {
+    font-size: 1.75rem; /* 28px */
+    line-height: 1.35;
+  }
+
+  .child-friendly h3 {
+    font-size: 1.375rem; /* 22px */
+    line-height: 1.4;
+  }
+
+  .child-friendly h4 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.45;
+  }
+
+  /* Paragraph text - more spacious */
+  .child-friendly p {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.9; /* Extra line height for easier reading */
+    letter-spacing: 0.01em;
+  }
+
+  /* Button text - larger touch targets */
+  .child-friendly button,
+  .child-friendly [role="button"],
+  .child-friendly .btn {
+    font-size: 1rem; /* 16px minimum for buttons */
+    min-height: 3rem; /* 48px minimum touch target */
+    padding: 0.75rem 1.25rem;
+  }
+
+  /* Form inputs - larger and easier to read */
+  .child-friendly input,
+  .child-friendly select,
+  .child-friendly textarea {
+    font-size: 1.125rem; /* 18px */
+    padding: 0.875rem 1rem;
+    min-height: 3rem; /* 48px minimum */
+  }
+
+  /* Labels - clearer identification */
+  .child-friendly label {
+    font-size: 1rem; /* 16px */
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Small text - still readable */
+  .child-friendly .text-sm,
+  .child-friendly .text-xs,
+  .child-friendly small {
+    font-size: 0.9375rem !important; /* 15px minimum - never below this */
+    line-height: 1.6;
+  }
+
+  /* Links - more prominent */
+  .child-friendly a:not(.btn) {
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  /* Navigation items */
+  .child-friendly nav a,
+  .child-friendly nav button {
+    font-size: 1.0625rem; /* 17px */
+    padding: 0.75rem 1rem;
+  }
+
+  /* Card content */
+  .child-friendly [class*="CardBody"],
+  .child-friendly .card-content {
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.75;
+  }
+
+  /* Helper/hint text */
+  .child-friendly .helper-text,
+  .child-friendly .hint,
+  .child-friendly [class*="text-gray-500"] {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.5;
+  }
 }
 
 @layer utilities {
