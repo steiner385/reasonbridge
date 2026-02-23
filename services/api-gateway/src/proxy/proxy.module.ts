@@ -5,15 +5,19 @@
 
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { AuthProxyController } from './auth-proxy.controller.js';
-import { UsersProxyController } from './users-proxy.controller.js';
-import { TopicsProxyController } from './topics-proxy.controller.js';
-import { DiscussionsProxyController } from './discussions-proxy.controller.js';
-import { DemoProxyController } from './demo-proxy.controller.js';
-import { AiProxyController } from './ai-proxy.controller.js';
-import { ModerationProxyController } from './moderation-proxy.controller.js';
-import { VerificationProxyController } from './verification-proxy.controller.js';
 import { ActivityProxyController } from './activity-proxy.controller.js';
+import { AiProxyController } from './ai-proxy.controller.js';
+import { AuthProxyController } from './auth-proxy.controller.js';
+import {
+  ContactsProxyController,
+  InvitationsProxyController,
+} from './contacts-proxy.controller.js';
+import { DemoProxyController } from './demo-proxy.controller.js';
+import { DiscussionsProxyController } from './discussions-proxy.controller.js';
+import { ModerationProxyController } from './moderation-proxy.controller.js';
+import { TopicsProxyController } from './topics-proxy.controller.js';
+import { UsersProxyController } from './users-proxy.controller.js';
+import { VerificationProxyController } from './verification-proxy.controller.js';
 import { ProxyService } from './proxy.service.js';
 
 @Module({
@@ -25,15 +29,17 @@ import { ProxyService } from './proxy.service.js';
     }),
   ],
   controllers: [
-    AuthProxyController,
-    UsersProxyController,
-    TopicsProxyController,
-    DiscussionsProxyController,
-    DemoProxyController,
-    AiProxyController,
-    ModerationProxyController,
-    VerificationProxyController,
     ActivityProxyController,
+    AiProxyController,
+    AuthProxyController,
+    ContactsProxyController,
+    DemoProxyController,
+    DiscussionsProxyController,
+    InvitationsProxyController,
+    ModerationProxyController,
+    TopicsProxyController,
+    UsersProxyController,
+    VerificationProxyController,
   ],
   providers: [ProxyService],
   exports: [ProxyService],

@@ -49,6 +49,7 @@ const VerificationPage = lazy(() =>
 );
 const ModerationDashboardPage = lazy(() => import('../pages/Admin/ModerationDashboardPage'));
 const SafetyReportsPage = lazy(() => import('../pages/Admin/SafetyReportsPage'));
+const RankingAnalyticsPage = lazy(() => import('../pages/Admin/RankingAnalytics'));
 const AppealStatusPage = lazy(() => import('../pages/Appeal/AppealStatusPage'));
 const DiscussionSimulatorPage = lazy(() => import('../pages/DiscussionSimulatorPage'));
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
@@ -282,6 +283,16 @@ export const routes: RouteObject[] = [
       <ProtectedRoute>
         <LazyRoute>
           <SafetyReportsPage />
+        </LazyRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/ranking',
+    element: (
+      <ProtectedRoute>
+        <LazyRoute>
+          <RankingAnalyticsPage />
         </LazyRoute>
       </ProtectedRoute>
     ),

@@ -89,6 +89,19 @@ model User {
   // Feature 783: Child-Friendly Mode Safety Reports
   safetyReports                 SafetyReport[]            @relation("SafetyReporter")
   handledSafetyReports          SafetyReport[]            @relation("SafetyReportHandler")
+  // Ranking system (Feature #781)
+  userRank                      UserRank?
+  topicExpertise                TopicExpertise[]
+  credentials                   DomainCredential[]        @relation("UserCredentials")
+  credentialReviews             DomainCredential[]        @relation("CredentialReviewer")
+  tierAppeals                   TierAppeal[]              @relation("UserTierAppeals")
+  tierAppealReviews             TierAppeal[]              @relation("TierAppealReviewer")
+  provisionalAccess             ProvisionalAccess[]       @relation("ProvisionalAccessUser")
+  provisionalGrants             ProvisionalAccess[]       @relation("ProvisionalAccessGranter")
+  canMentor                     Boolean                   @default(false) @map("can_mentor")
+  // Social integration fields (Feature: Contact Service)
+  discoverableByContacts        Boolean                   @default(false) @map("discoverable_by_contacts")
+  emailHash                     String?                   @map("email_hash")
 
   @@index([cognitoSub])
   @@index([email])
@@ -98,6 +111,7 @@ model User {
   @@index([createdAt])
   @@index([isMinor])
   @@index([parentConsentStatus])
+  @@index([emailHash])
   @@map("users")
 }
 
@@ -115,6 +129,210 @@ enum UserStatus {
   BANNED
 
   @@map("user_status")
+}
+
+/// User ranking tier levels for the tiered access system (Feature #781)
+/// Score thresholds: NEWCOMER (0.00-0.19), CONTRIBUTOR (0.20-0.39),
+/// TRUSTED (0.40-0.59), LEADER (0.60-0.79), EXPERT (0.80-1.00)
+enum TierLevel {
+  NEWCOMER
+  CONTRIBUTOR
+  TRUSTED
+  LEADER
+  EXPERT
+
+  @@map("tier_level")
+}
+
+/// Expertise level for domain-specific knowledge (Feature #781)
+/// Score thresholds: NOVICE (0.00-0.24), FAMILIAR (0.25-0.49),
+/// KNOWLEDGEABLE (0.50-0.74), EXPERT (0.75-1.00)
+enum ExpertiseLevel {
+  NOVICE
+  FAMILIAR
+  KNOWLEDGEABLE
+  EXPERT
+
+  @@map("expertise_level")
+}
+
+/// Credential types for verified domain expertise (Feature #781)
+enum CredentialType {
+  ACADEMIC_DOCTORATE
+  ACADEMIC_MASTERS
+  ACADEMIC_BACHELORS
+  PROFESSIONAL_LICENSE
+  INDUSTRY_CERTIFICATION
+  PUBLICATION
+
+  @@map("credential_type")
+}
+
+/// Status of credential verification (Feature #781)
+enum CredentialStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+
+  @@map("credential_status")
+}
+
+/// Type of tier appeal (Feature #781)
+enum TierAppealType {
+  GLOBAL_TIER
+  DOMAIN_EXPERTISE
+
+  @@map("tier_appeal_type")
+}
+
+/// Status of tier appeals (Feature #781)
+enum TierAppealStatus {
+  PENDING
+  APPROVED
+  DENIED
+
+  @@map("tier_appeal_status")
+}
+
+/// Status of provisional access grants (Feature #781)
+enum ProvisionalAccessStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+
+  @@map("provisional_access_status")
+}
+
+/// Cached user ranking data, recalculated daily (Feature #781)
+/// Stores composite scores derived from trust scores, verification level,
+/// engagement metrics, quality scores, and tenure bonus
+model UserRank {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @unique @map("user_id") @db.Uuid
+  tierLevel         TierLevel @default(NEWCOMER) @map("tier_level")
+  compositeScore    Decimal   @default(0.00) @map("composite_score") @db.Decimal(4, 3)
+  engagementScore   Decimal   @default(0.00) @map("engagement_score") @db.Decimal(4, 3)
+  qualityScore      Decimal   @default(0.00) @map("quality_score") @db.Decimal(4, 3)
+  tenureBonus       Decimal   @default(0.00) @map("tenure_bonus") @db.Decimal(4, 3)
+  badges            Json      @default("[]")
+  lastCalculated    DateTime  @default(now()) @map("last_calculated")
+  nextTierThreshold Decimal   @default(0.20) @map("next_tier_threshold") @db.Decimal(4, 3)
+  lastActivityAt    DateTime? @map("last_activity_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tierLevel])
+  @@index([compositeScore(sort: Desc)])
+  @@index([lastCalculated])
+  @@map("user_ranks")
+}
+
+/// Per-category expertise scores for users (Feature #781)
+/// Tracks domain-specific knowledge based on response quality and engagement
+model TopicExpertise {
+  id              String         @id @default(uuid()) @db.Uuid
+  userId          String         @map("user_id") @db.Uuid
+  tagId           String         @map("tag_id") @db.Uuid
+  expertiseScore  Decimal        @default(0.00) @map("expertise_score") @db.Decimal(4, 3)
+  expertiseLevel  ExpertiseLevel @default(NOVICE) @map("expertise_level")
+  responseCount   Int            @default(0) @map("response_count")
+  avgQualityScore Decimal        @default(0.00) @map("avg_quality_score") @db.Decimal(4, 3)
+  credentialBoost Decimal        @default(0.00) @map("credential_boost") @db.Decimal(4, 3)
+  lastActive      DateTime?      @map("last_active")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagId])
+  @@index([expertiseLevel])
+  @@index([expertiseScore(sort: Desc)])
+  @@map("topic_expertise")
+}
+
+/// User-submitted credentials for domain expertise (Feature #781)
+/// Verified credentials provide expertise score boosts in relevant topics
+model DomainCredential {
+  id              String           @id @default(uuid()) @db.Uuid
+  userId          String           @map("user_id") @db.Uuid
+  tagId           String           @map("tag_id") @db.Uuid
+  type            CredentialType
+  title           String           @db.VarChar(200)
+  institution     String?          @db.VarChar(200)
+  documentUrl     String?          @map("document_url")
+  verificationUrl String?          @map("verification_url")
+  status          CredentialStatus @default(PENDING)
+  reviewedById    String?          @map("reviewed_by_id") @db.Uuid
+  reviewNotes     String?          @map("review_notes") @db.Text
+  verifiedAt      DateTime?        @map("verified_at")
+  expiresAt       DateTime?        @map("expires_at")
+  boostValue      Decimal          @default(0.00) @map("boost_value") @db.Decimal(3, 2)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  user       User  @relation("UserCredentials", fields: [userId], references: [id], onDelete: Cascade)
+  tag        Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("CredentialReviewer", fields: [reviewedById], references: [id])
+
+  @@index([userId, tagId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("domain_credentials")
+}
+
+/// Appeals for tier/expertise decisions (Feature #781)
+/// Users can appeal global tier rankings or domain-specific expertise levels
+model TierAppeal {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  appealType     TierAppealType   @map("appeal_type")
+  tagId          String?          @map("tag_id") @db.Uuid
+  requestedLevel Int              @map("requested_level")
+  reason         String           @db.Text
+  status         TierAppealStatus @default(PENDING)
+  reviewedById   String?          @map("reviewed_by_id") @db.Uuid
+  reviewNotes    String?          @map("review_notes") @db.Text
+  createdAt      DateTime         @default(now()) @map("created_at")
+  resolvedAt     DateTime?        @map("resolved_at")
+
+  // Relations
+  user       User  @relation("UserTierAppeals", fields: [userId], references: [id], onDelete: Cascade)
+  tag        Tag?  @relation(fields: [tagId], references: [id])
+  reviewedBy User? @relation("TierAppealReviewer", fields: [reviewedById], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("tier_appeals")
+}
+
+/// Temporary access to tier-restricted topics (Feature #781)
+/// Allows moderators to grant provisional access to users who don't meet tier requirements
+model ProvisionalAccess {
+  id          String                  @id @default(uuid()) @db.Uuid
+  userId      String                  @map("user_id") @db.Uuid
+  topicId     String                  @map("topic_id") @db.Uuid
+  grantedById String                  @map("granted_by_id") @db.Uuid
+  reason      String?                 @db.VarChar(500)
+  expiresAt   DateTime                @map("expires_at")
+  status      ProvisionalAccessStatus @default(ACTIVE)
+  createdAt   DateTime                @default(now()) @map("created_at")
+
+  // Relations
+  user      User            @relation("ProvisionalAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  topic     DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  grantedBy User            @relation("ProvisionalAccessGranter", fields: [grantedById], references: [id])
+
+  @@unique([userId, topicId])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("provisional_access")
 }
 
 /// Tracks user verification records (email, phone, government ID, video)
@@ -215,34 +433,40 @@ model UserFollow {
 /// - Requires 2-5 tags (enforced via TopicTag relations)
 /// - Cannot transition to ACTIVE until minimum_diversity_score is met
 model DiscussionTopic {
-  id                    String           @id @default(uuid()) @db.Uuid
-  title                 String           @db.VarChar(200)
-  description           String           @db.Text
-  creatorId             String           @map("creator_id") @db.Uuid
-  status                TopicStatus      @default(SEEDING)
+  id                     String           @id @default(uuid()) @db.Uuid
+  title                  String           @db.VarChar(200)
+  description            String           @db.Text
+  creatorId              String           @map("creator_id") @db.Uuid
+  status                 TopicStatus      @default(SEEDING)
   // T001: New fields for topic management
-  visibility            TopicVisibility  @default(PUBLIC)
-  slug                  String           @unique @db.VarChar(250)
-  lastActivityAt        DateTime         @default(now()) @map("last_activity_at")
-  lockedAt              DateTime?        @map("locked_at")
-  evidenceStandards     EvidenceStandard @default(STANDARD) @map("evidence_standards")
-  minimumDiversityScore Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
-  currentDiversityScore Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
-  participantCount      Int              @default(0) @map("participant_count")
-  responseCount         Int              @default(0) @map("response_count")
+  visibility             TopicVisibility  @default(PUBLIC)
+  // Tier access control (Feature #781)
+  minimumTierLevel       Int?             @map("minimum_tier_level") // null = open to all
+  minimumExpertiseLevel  Int?             @map("minimum_expertise_level")
+  requiredTagId          String?          @map("required_tag_id") @db.Uuid
+  allowProvisionalAccess Boolean          @default(true) @map("allow_provisional_access")
+  slug                   String           @unique @db.VarChar(250)
+  lastActivityAt         DateTime         @default(now()) @map("last_activity_at")
+  lockedAt               DateTime?        @map("locked_at")
+  evidenceStandards      EvidenceStandard @default(STANDARD) @map("evidence_standards")
+  minimumDiversityScore  Decimal          @default(0.30) @map("minimum_diversity_score") @db.Decimal(3, 2)
+  currentDiversityScore  Decimal?         @map("current_diversity_score") @db.Decimal(3, 2)
+  participantCount       Int              @default(0) @map("participant_count")
+  responseCount          Int              @default(0) @map("response_count")
   // Onboarding fields
-  activeDiscussionCount Int              @default(0) @map("active_discussion_count")
-  activityLevel         ActivityLevel    @default(LOW) @map("activity_level")
-  suggestedForNewUsers  Boolean          @default(false) @map("suggested_for_new_users")
-  crossCuttingThemes    String[]         @map("cross_cutting_themes")
+  activeDiscussionCount  Int              @default(0) @map("active_discussion_count")
+  activityLevel          ActivityLevel    @default(LOW) @map("activity_level")
+  suggestedForNewUsers   Boolean          @default(false) @map("suggested_for_new_users")
+  crossCuttingThemes     String[]         @map("cross_cutting_themes")
   // Child safety fields (Feature: Child-Friendly Mode)
-  isMatureContent       Boolean          @default(false) @map("is_mature_content")
-  createdAt             DateTime         @default(now()) @map("created_at")
-  activatedAt           DateTime?        @map("activated_at")
-  archivedAt            DateTime?        @map("archived_at")
+  isMatureContent        Boolean          @default(false) @map("is_mature_content")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  activatedAt            DateTime?        @map("activated_at")
+  archivedAt             DateTime?        @map("archived_at")
 
   // Relations
   creator              User                      @relation(fields: [creatorId], references: [id])
+  requiredTag          Tag?                      @relation("TopicRequiredExpertise", fields: [requiredTagId], references: [id])
   tags                 TopicTag[]
   sourceLinks          TopicLink[]               @relation("SourceTopic")
   targetLinks          TopicLink[]               @relation("TargetTopic")
@@ -258,6 +482,8 @@ model DiscussionTopic {
   analytics            TopicAnalytics[]
   // Feature: Child-Friendly Mode - content review queue
   childContentReviews  ChildContentReviewQueue[]
+  // Feature #781: Provisional access for tier-restricted topics
+  provisionalAccess    ProvisionalAccess[]
 
   @@index([status])
   @@index([creatorId])
@@ -431,9 +657,13 @@ model Tag {
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  parentTheme Tag?       @relation("TagHierarchy", fields: [parentThemeId], references: [id])
-  childThemes Tag[]      @relation("TagHierarchy")
-  topics      TopicTag[]
+  parentTheme      Tag?               @relation("TagHierarchy", fields: [parentThemeId], references: [id])
+  childThemes      Tag[]              @relation("TagHierarchy")
+  topics           TopicTag[]
+  expertise        TopicExpertise[]
+  credentials      DomainCredential[]
+  tierAppeals      TierAppeal[]
+  requiredByTopics DiscussionTopic[]  @relation("TopicRequiredExpertise")
 
   @@index([usageCount(sort: Desc)])
   @@map("tags")
@@ -1389,4 +1619,81 @@ model CsamReport {
   @@index([ncmecReportId])
   @@index([isLegalHold])
   @@map("csam_reports")
+}
+
+// ============================================================================
+// CONTACT SERVICE ENTITIES (Feature: Social Integration)
+// ============================================================================
+
+/// Social media provider for OAuth connections
+enum SocialProvider {
+  GOOGLE
+  FACEBOOK
+
+  @@map("social_provider")
+}
+
+/// Status of topic invitations
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+
+  @@map("invitation_status")
+}
+
+/// OAuth connection to social media provider for contact import
+model SocialConnection {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  provider       SocialProvider
+  providerUserId String         @map("provider_user_id")
+  accessToken    String         @map("access_token")
+  refreshToken   String?        @map("refresh_token")
+  tokenExpiry    DateTime?      @map("token_expiry")
+  scopes         String[]
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("social_connections")
+}
+
+/// Imported contact from social media provider
+model ImportedContact {
+  id            String         @id @default(uuid()) @db.Uuid
+  ownerId       String         @map("owner_id") @db.Uuid
+  emailHash     String         @map("email_hash")
+  displayName   String?        @map("display_name")
+  provider      SocialProvider
+  matchedUserId String?        @map("matched_user_id") @db.Uuid
+  importedAt    DateTime       @default(now()) @map("imported_at")
+
+  @@unique([ownerId, emailHash])
+  @@index([emailHash])
+  @@index([ownerId])
+  @@map("imported_contacts")
+}
+
+/// Invitation to join a topic discussion
+model TopicInvitation {
+  id            String           @id @default(uuid()) @db.Uuid
+  topicId       String           @map("topic_id") @db.Uuid
+  inviterId     String           @map("inviter_id") @db.Uuid
+  inviteeUserId String?          @map("invitee_user_id") @db.Uuid
+  inviteeEmail  String?          @map("invitee_email")
+  status        InvitationStatus @default(PENDING)
+  token         String           @unique
+  message       String?
+  createdAt     DateTime         @default(now()) @map("created_at")
+  expiresAt     DateTime         @map("expires_at")
+  respondedAt   DateTime?        @map("responded_at")
+
+  @@index([inviteeUserId])
+  @@index([inviteeEmail])
+  @@index([topicId])
+  @@index([token])
+  @@map("topic_invitations")
 }
