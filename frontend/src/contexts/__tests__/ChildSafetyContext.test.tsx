@@ -8,7 +8,7 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { ChildSafetyProvider, useChildSafety, type RestrictedFeature } from '../ChildSafetyContext';
@@ -315,6 +315,68 @@ describe('ChildSafetyContext', () => {
       }).toThrow('useChildSafety must be used within ChildSafetyProvider');
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('child-friendly class on document', () => {
+    afterEach(() => {
+      // Clean up class after each test
+      document.documentElement.classList.remove('child-friendly');
+    });
+
+    it('should add child-friendly class to document when user is minor', () => {
+      mockUseAuthContext.mockReturnValue({
+        user: createMockUser({ isMinor: true }),
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        logout: vi.fn(),
+        refreshUserProfile: vi.fn(),
+      });
+
+      renderHook(() => useChildSafety(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(document.documentElement.classList.contains('child-friendly')).toBe(true);
+    });
+
+    it('should not add child-friendly class when user is not minor', () => {
+      mockUseAuthContext.mockReturnValue({
+        user: createMockUser({ isMinor: false }),
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        logout: vi.fn(),
+        refreshUserProfile: vi.fn(),
+      });
+
+      renderHook(() => useChildSafety(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(document.documentElement.classList.contains('child-friendly')).toBe(false);
+    });
+
+    it('should remove child-friendly class on unmount', () => {
+      mockUseAuthContext.mockReturnValue({
+        user: createMockUser({ isMinor: true }),
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        logout: vi.fn(),
+        refreshUserProfile: vi.fn(),
+      });
+
+      const { unmount } = renderHook(() => useChildSafety(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(document.documentElement.classList.contains('child-friendly')).toBe(true);
+
+      unmount();
+
+      expect(document.documentElement.classList.contains('child-friendly')).toBe(false);
     });
   });
 });

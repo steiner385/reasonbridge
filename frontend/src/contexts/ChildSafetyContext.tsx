@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useEffect, type ReactNode } from 'react';
 import { useAuthContext } from './AuthContext';
 
 /**
@@ -100,6 +100,21 @@ export function ChildSafetyProvider({ children }: ChildSafetyProviderProps) {
       isFeatureRestricted: (feature: RestrictedFeature) => restrictedFeatures.includes(feature),
     };
   }, [user?.isMinor]);
+
+  // Apply/remove 'child-friendly' class to document root for CSS theming
+  useEffect(() => {
+    const root = document.documentElement;
+    if (state.uiTheme === 'child-friendly') {
+      root.classList.add('child-friendly');
+    } else {
+      root.classList.remove('child-friendly');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      root.classList.remove('child-friendly');
+    };
+  }, [state.uiTheme]);
 
   return <ChildSafetyContext.Provider value={state}>{children}</ChildSafetyContext.Provider>;
 }

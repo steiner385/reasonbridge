@@ -128,6 +128,132 @@
   }
 }
 
+@layer components {
+  /**
+   * Child-Friendly Theme
+   * Calming colors and softer UI for minor users
+   * Applied when .child-friendly class is on document root
+   */
+
+  /* Child-friendly color overrides - softer, calmer palette */
+  :root.child-friendly {
+    /* Softer teal primary - more pastel */
+    --color-primary-50: #e8faf8;
+    --color-primary-100: #d1f5f1;
+    --color-primary-200: #a3ebe3;
+    --color-primary-300: #75e1d5;
+    --color-primary-400: #47d7c7;
+    --color-primary-500: #4ecdc4; /* Child-friendly teal */
+    --color-primary-600: #3ea4a2;
+    --color-primary-700: #2f7b79;
+    --color-primary-800: #1f5251;
+    --color-primary-900: #102928;
+
+    /* Warm cream background instead of stark white */
+    --color-bg-warm: #fefdfb;
+    --color-bg-card: #fffefa;
+
+    /* Friendly accent colors */
+    --color-accent-coral: #ff9a8b;
+    --color-accent-lavender: #b8b5ff;
+    --color-accent-mint: #88d8b0;
+    --color-accent-sunshine: #ffeaa7;
+  }
+
+  /* Child-friendly dark mode - softer contrast */
+  :root.child-friendly.dark {
+    --color-bg-warm: #1a1d21;
+    --color-bg-card: #22262b;
+  }
+
+  /* Apply child-friendly colors to common elements */
+  .child-friendly body {
+    @apply bg-[var(--color-bg-warm)];
+  }
+
+  /* Softer primary buttons */
+  .child-friendly .btn-primary,
+  .child-friendly [class*="bg-primary-500"],
+  .child-friendly [class*="bg-primary-600"] {
+    background-color: var(--color-primary-500) !important;
+  }
+
+  .child-friendly .btn-primary:hover,
+  .child-friendly [class*="hover:bg-primary-600"]:hover,
+  .child-friendly [class*="hover:bg-primary-700"]:hover {
+    background-color: var(--color-primary-600) !important;
+  }
+
+  /* Rounder, friendlier corners */
+  .child-friendly button,
+  .child-friendly input,
+  .child-friendly select,
+  .child-friendly textarea,
+  .child-friendly [class*="rounded-lg"],
+  .child-friendly [class*="rounded-md"] {
+    border-radius: 1rem !important;
+  }
+
+  .child-friendly [class*="rounded-full"] {
+    border-radius: 9999px !important;
+  }
+
+  /* Softer shadows - less harsh */
+  .child-friendly [class*="shadow"] {
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Friendly link colors */
+  .child-friendly a:not(.btn) {
+    @apply text-[var(--color-primary-600)];
+  }
+
+  .child-friendly a:not(.btn):hover {
+    @apply text-[var(--color-primary-500)];
+  }
+
+  /* Softer focus rings */
+  .child-friendly *:focus-visible {
+    outline: 3px solid var(--color-primary-400) !important;
+    outline-offset: 2px;
+  }
+
+  /* Safe space indicator styling */
+  .child-friendly .safe-space-badge {
+    @apply bg-[var(--color-accent-mint)] text-gray-800;
+    @apply px-3 py-1.5 rounded-full;
+    @apply text-sm font-medium;
+    @apply flex items-center gap-2;
+  }
+
+  /* Friendly notification styling */
+  .child-friendly .toast-success {
+    @apply bg-[var(--color-accent-mint)] border-[var(--color-accent-mint)];
+  }
+
+  .child-friendly .toast-info {
+    @apply bg-[var(--color-accent-lavender)] border-[var(--color-accent-lavender)];
+  }
+
+  /* Calming card backgrounds */
+  .child-friendly [class*="bg-white"],
+  .child-friendly [class*="bg-gray-50"] {
+    background-color: var(--color-bg-card) !important;
+  }
+
+  /* Friendly hover states - softer transitions */
+  .child-friendly button:hover,
+  .child-friendly a:hover {
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+
+  /* Encouraging text styling */
+  .child-friendly .encouragement-text {
+    @apply text-[var(--color-primary-600)] font-medium;
+  }
+}
+
 @layer utilities {
   /* Reading width constraints for optimal readability (50-75 characters per line) */
   .prose-reading-width {
