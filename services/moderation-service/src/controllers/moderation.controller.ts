@@ -14,6 +14,9 @@ import { AIReviewService } from '../services/ai-review.service.js';
 import { ModerationActionsService } from '../services/moderation-actions.service.js';
 import { ModerationQueueService } from '../services/moderation-queue.service.js';
 import type { QueueStats } from '../services/moderation-queue.service.js';
+import { SafetyReportService } from '../services/safety-report.service.js';
+import type { SafetyReportResponse, SafetyReportStats } from '../services/safety-report.service.js';
+import type { SafetyReportReason, SafetyReportStatus, ReviewPriority } from '@prisma/client';
 import type {
   CreateActionRequest,
   ApproveActionRequest,
@@ -51,6 +54,7 @@ export class ModerationController {
     private readonly aiReviewService: AIReviewService,
     private readonly actionsService: ModerationActionsService,
     private readonly queueService: ModerationQueueService,
+    private readonly safetyReportService: SafetyReportService,
   ) {}
 
   @Post('screen')
@@ -338,5 +342,106 @@ export class ModerationController {
     // TODO: Add auth check to ensure only admin/system can call this
     // This endpoint should typically be called by a scheduled task
     return this.actionsService.autoLiftExpiredBans();
+  }
+
+  // ============================================================================
+  // SAFETY REPORT ENDPOINTS (Child-Friendly Mode Feature #783)
+  // ============================================================================
+
+  @Post('safety-reports')
+  async createSafetyReport(
+    @Body()
+    request: {
+      reporterId: string;
+      reason: SafetyReportReason;
+      additionalInfo?: string;
+      contextUrl?: string;
+      contextTopicId?: string;
+      contextResponseId?: string;
+    },
+  ): Promise<SafetyReportResponse> {
+    if (!request.reporterId) {
+      throw new BadRequestException('reporterId is required');
+    }
+
+    if (!request.reason) {
+      throw new BadRequestException('reason is required');
+    }
+
+    const validReasons: SafetyReportReason[] = [
+      'UNCOMFORTABLE',
+      'SCARY_CONTENT',
+      'STRANGER_CONTACT',
+      'PERSONAL_QUESTIONS',
+      'OTHER',
+    ];
+
+    if (!validReasons.includes(request.reason)) {
+      throw new BadRequestException(`reason must be one of: ${validReasons.join(', ')}`);
+    }
+
+    return this.safetyReportService.createReport(request);
+  }
+
+  @Get('safety-reports')
+  async listSafetyReports(
+    @Query('status') status?: string,
+    @Query('priority') priority?: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<{ reports: SafetyReportResponse[]; nextCursor: string | null }> {
+    const statusEnum = status?.toUpperCase() as SafetyReportStatus | undefined;
+    const priorityEnum = priority?.toUpperCase() as ReviewPriority | undefined;
+
+    return this.safetyReportService.listReports(statusEnum, priorityEnum, limit, cursor);
+  }
+
+  @Get('safety-reports/pending')
+  async getPendingSafetyReports(
+    @Query('limit') limit: number = 20,
+  ): Promise<SafetyReportResponse[]> {
+    return this.safetyReportService.getPendingReports(limit);
+  }
+
+  @Get('safety-reports/stats')
+  async getSafetyReportStats(): Promise<SafetyReportStats> {
+    return this.safetyReportService.getStats();
+  }
+
+  @Get('safety-reports/:reportId')
+  async getSafetyReport(@Param('reportId') reportId: string): Promise<SafetyReportResponse> {
+    const report = await this.safetyReportService.getReport(reportId);
+    if (!report) {
+      throw new BadRequestException('Safety report not found');
+    }
+    return report;
+  }
+
+  @Post('safety-reports/:reportId/resolve')
+  async resolveSafetyReport(
+    @Param('reportId') reportId: string,
+    @Body() request: { notes?: string },
+  ): Promise<SafetyReportResponse> {
+    // TODO: Extract moderator ID from JWT token when auth is implemented
+    const moderatorId = 'system';
+    return this.safetyReportService.resolveReport(reportId, moderatorId, request.notes);
+  }
+
+  @Post('safety-reports/:reportId/escalate')
+  async escalateSafetyReport(
+    @Param('reportId') reportId: string,
+    @Body() request: { notes?: string },
+  ): Promise<SafetyReportResponse> {
+    // TODO: Extract moderator ID from JWT token when auth is implemented
+    const moderatorId = 'system';
+    return this.safetyReportService.escalateReport(reportId, moderatorId, request.notes);
+  }
+
+  @Get('users/:userId/safety-reports')
+  async getUserSafetyReports(
+    @Param('userId') userId: string,
+    @Query('limit') limit: number = 20,
+  ): Promise<SafetyReportResponse[]> {
+    return this.safetyReportService.getReportsByReporter(userId, limit);
   }
 }

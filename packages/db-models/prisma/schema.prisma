@@ -15,77 +15,80 @@ datasource db {
 
 /// User account with trust scores and verification status
 model User {
-  id                     String              @id @default(uuid()) @db.Uuid
-  email                  String              @unique
-  displayName            String?             @map("display_name") @db.VarChar(50)
-  cognitoSub             String              @unique @map("cognito_sub")
+  id                        String              @id @default(uuid()) @db.Uuid
+  email                     String              @unique
+  displayName               String?             @map("display_name") @db.VarChar(50)
+  cognitoSub                String              @unique @map("cognito_sub")
   // Onboarding fields
-  authMethod             AuthMethod          @map("auth_method")
-  emailVerified          Boolean             @default(false) @map("email_verified")
-  passwordHash           String?             @map("password_hash")
-  accountStatus          AccountStatus       @default(ACTIVE) @map("account_status")
-  lastLoginAt            DateTime?           @map("last_login_at")
+  authMethod                AuthMethod          @map("auth_method")
+  emailVerified             Boolean             @default(false) @map("email_verified")
+  passwordHash              String?             @map("password_hash")
+  accountStatus             AccountStatus       @default(ACTIVE) @map("account_status")
+  lastLoginAt               DateTime?           @map("last_login_at")
   // Phone verification
-  phoneNumber            String?             @map("phone_number")
-  phoneVerified          Boolean             @default(false) @map("phone_verified")
+  phoneNumber               String?             @map("phone_number")
+  phoneVerified             Boolean             @default(false) @map("phone_verified")
   // Trust & verification
-  verificationLevel      VerificationLevel   @default(BASIC) @map("verification_level")
-  trustScoreAbility      Decimal             @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
-  trustScoreBenevolence  Decimal             @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
-  trustScoreIntegrity    Decimal             @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
-  moralFoundationProfile Json?               @map("moral_foundation_profile")
-  positionFingerprint    Json?               @map("position_fingerprint")
-  topicAffinities        Json?               @map("topic_affinities")
+  verificationLevel         VerificationLevel   @default(BASIC) @map("verification_level")
+  trustScoreAbility         Decimal             @default(0.50) @map("trust_score_ability") @db.Decimal(3, 2)
+  trustScoreBenevolence     Decimal             @default(0.50) @map("trust_score_benevolence") @db.Decimal(3, 2)
+  trustScoreIntegrity       Decimal             @default(0.50) @map("trust_score_integrity") @db.Decimal(3, 2)
+  moralFoundationProfile    Json?               @map("moral_foundation_profile")
+  positionFingerprint       Json?               @map("position_fingerprint")
+  topicAffinities           Json?               @map("topic_affinities")
   // AI Feedback preferences (T117)
-  feedbackPreferences    Json?               @map("feedback_preferences")
+  feedbackPreferences       Json?               @map("feedback_preferences")
   // Profile photo fields (Issue #785)
-  avatarUrl              String?             @map("avatar_url")
-  avatarS3Key            String?             @map("avatar_s3_key")
+  avatarUrl                 String?             @map("avatar_url")
+  avatarS3Key               String?             @map("avatar_s3_key")
   // Child safety fields (Feature: Child-Friendly Mode)
-  birthDate              DateTime?           @map("birth_date") @db.Date
-  isMinor                Boolean             @default(false) @map("is_minor")
-  declaredCountry        String?             @map("declared_country") @db.VarChar(2) // ISO 3166-1 alpha-2
-  regionalConsentAge     Int?                @map("regional_consent_age")
-  parentEmail            String?             @map("parent_email")
-  parentConsentStatus    ParentConsentStatus @default(NOT_REQUIRED) @map("parent_consent_status")
+  birthDate                 DateTime?           @map("birth_date") @db.Date
+  isMinor                   Boolean             @default(false) @map("is_minor")
+  declaredCountry           String?             @map("declared_country") @db.VarChar(2) // ISO 3166-1 alpha-2
+  regionalConsentAge        Int?                @map("regional_consent_age")
+  parentEmail               String?             @map("parent_email")
+  parentConsentStatus       ParentConsentStatus @default(NOT_REQUIRED) @map("parent_consent_status")
   /// Timestamp of last age verification (for annual re-verification)
-  lastAgeVerifiedAt      DateTime?           @map("last_age_verified_at")
+  lastAgeVerifiedAt         DateTime?           @map("last_age_verified_at")
   /// Flag indicating user needs to re-verify age on next login
-  requiresAgeReverification Boolean          @default(false) @map("requires_age_reverification")
-  status                 UserStatus          @default(ACTIVE)
-  createdAt              DateTime            @default(now()) @map("created_at")
-  updatedAt              DateTime            @updatedAt @map("updated_at")
+  requiresAgeReverification Boolean             @default(false) @map("requires_age_reverification")
+  status                    UserStatus          @default(ACTIVE)
+  createdAt                 DateTime            @default(now()) @map("created_at")
+  updatedAt                 DateTime            @updatedAt @map("updated_at")
 
   // Relations
-  verificationRecords   VerificationRecord[]
-  videoUploads          VideoUpload[]
-  following             UserFollow[]          @relation("Follower")
-  followers             UserFollow[]          @relation("Followed")
-  createdTopics         DiscussionTopic[]
-  responses             Response[]
-  votes                 Vote[]
-  alignments            Alignment[]
-  proposedTopicLinks    TopicLink[]           @relation("LinkProposer")
-  createdPropositions   Proposition[]
-  appeals               Appeal[]
-  moderationApprovals   ModerationAction[]    @relation("ModeratorApproval")
-  appealReviews         Appeal[]              @relation("AppealReviewer")
-  topicInterests        TopicInterest[]
+  verificationRecords           VerificationRecord[]
+  videoUploads                  VideoUpload[]
+  following                     UserFollow[]              @relation("Follower")
+  followers                     UserFollow[]              @relation("Followed")
+  createdTopics                 DiscussionTopic[]
+  responses                     Response[]
+  votes                         Vote[]
+  alignments                    Alignment[]
+  proposedTopicLinks            TopicLink[]               @relation("LinkProposer")
+  createdPropositions           Proposition[]
+  appeals                       Appeal[]
+  moderationApprovals           ModerationAction[]        @relation("ModeratorApproval")
+  appealReviews                 Appeal[]                  @relation("AppealReviewer")
+  topicInterests                TopicInterest[]
   // Feature 009: Discussion Participation
-  createdDiscussions    Discussion[]
-  participantActivities ParticipantActivity[]
+  createdDiscussions            Discussion[]
+  participantActivities         ParticipantActivity[]
   // Feature 016: Topic Management
-  topicEdits            TopicEdit[]           @relation("TopicEditor")
-  topicMerges           TopicMerge[]          @relation("TopicMerger")
-  topicDrafts           TopicDraft[]          @relation("TopicDrafts")
+  topicEdits                    TopicEdit[]               @relation("TopicEditor")
+  topicMerges                   TopicMerge[]              @relation("TopicMerger")
+  topicDrafts                   TopicDraft[]              @relation("TopicDrafts")
   // Feature: Child-Friendly Mode
-  parentalConsent       ParentalConsent?
-  complianceAuditLogs   ComplianceAuditLog[]
-  dataDeletionRequest   DataDeletionRequest?
+  parentalConsent               ParentalConsent?
+  complianceAuditLogs           ComplianceAuditLog[]
+  dataDeletionRequest           DataDeletionRequest?
   childContentReviewsAsAuthor   ChildContentReviewQueue[] @relation("ChildContentAuthor")
   childContentReviewsAsReviewer ChildContentReviewQueue[] @relation("ChildContentReviewer")
   // Feature 245: Activity Feed
-  activityEvents        ActivityEvent[]       @relation("UserActivities")
+  activityEvents                ActivityEvent[]           @relation("UserActivities")
+  // Feature 783: Child-Friendly Mode Safety Reports
+  safetyReports                 SafetyReport[]            @relation("SafetyReporter")
+  handledSafetyReports          SafetyReport[]            @relation("SafetyReportHandler")
 
   @@index([cognitoSub])
   @@index([email])
@@ -239,10 +242,10 @@ model DiscussionTopic {
   archivedAt            DateTime?        @map("archived_at")
 
   // Relations
-  creator              User                   @relation(fields: [creatorId], references: [id])
+  creator              User                      @relation(fields: [creatorId], references: [id])
   tags                 TopicTag[]
-  sourceLinks          TopicLink[]            @relation("SourceTopic")
-  targetLinks          TopicLink[]            @relation("TargetTopic")
+  sourceLinks          TopicLink[]               @relation("SourceTopic")
+  targetLinks          TopicLink[]               @relation("TargetTopic")
   propositions         Proposition[]
   responses            Response[]
   commonGroundAnalyses CommonGroundAnalysis[]
@@ -250,7 +253,7 @@ model DiscussionTopic {
   Discussion           Discussion[]
   // T002: New relations for topic management
   editHistory          TopicEdit[]
-  mergesAsTarget       TopicMerge[]           @relation("TargetTopicMerge")
+  mergesAsTarget       TopicMerge[]              @relation("TargetTopicMerge")
   // T038: Analytics relation
   analytics            TopicAnalytics[]
   // Feature: Child-Friendly Mode - content review queue
@@ -580,18 +583,18 @@ model Response {
   updatedAt             DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  topic            DiscussionTopic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topic              DiscussionTopic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
   // T005 [P] - NEW: Discussion relation (nullable during migration)
-  discussion       Discussion?           @relation("DiscussionResponses", fields: [discussionId], references: [id], onDelete: Cascade)
-  author           User                  @relation(fields: [authorId], references: [id])
-  parent           Response?             @relation("ResponseThreading", fields: [parentId], references: [id], onDelete: Cascade)
-  replies          Response[]            @relation("ResponseThreading")
-  propositions     ResponseProposition[]
-  feedback         Feedback[]
-  factCheckResults FactCheckResult[]
-  votes            Vote[]
+  discussion         Discussion?              @relation("DiscussionResponses", fields: [discussionId], references: [id], onDelete: Cascade)
+  author             User                     @relation(fields: [authorId], references: [id])
+  parent             Response?                @relation("ResponseThreading", fields: [parentId], references: [id], onDelete: Cascade)
+  replies            Response[]               @relation("ResponseThreading")
+  propositions       ResponseProposition[]
+  feedback           Feedback[]
+  factCheckResults   FactCheckResult[]
+  votes              Vote[]
   // T002 [P] - NEW: Citations relation (Feature 009)
-  citations        Citation[]
+  citations          Citation[]
   // Feature: Child-Friendly Mode - content review for child users
   childContentReview ChildContentReviewQueue?
 
@@ -1268,4 +1271,58 @@ model ComplianceAuditLog {
   @@index([userId])
   @@index([action, timestamp])
   @@map("compliance_audit_logs")
+}
+
+/// Reason types for child safety reports
+enum SafetyReportReason {
+  UNCOMFORTABLE // General discomfort
+  SCARY_CONTENT // Saw something scary
+  STRANGER_CONTACT // Someone unknown contacted me
+  PERSONAL_QUESTIONS // Asked personal questions
+  OTHER // Other reason
+
+  @@map("safety_report_reason")
+}
+
+/// Status of a safety report
+enum SafetyReportStatus {
+  PENDING // Awaiting moderator review
+  UNDER_REVIEW // Being actively investigated
+  RESOLVED // Issue has been addressed
+  ESCALATED // Escalated to higher authority
+
+  @@map("safety_report_status")
+}
+
+/// Safety reports from minor users
+/// Stores concerns reported via the Panic Button feature
+model SafetyReport {
+  id                String             @id @default(uuid()) @db.Uuid
+  reporterId        String             @map("reporter_id") @db.Uuid
+  reason            SafetyReportReason
+  additionalInfo    String?            @map("additional_info") @db.Text
+  status            SafetyReportStatus @default(PENDING)
+  priority          ReviewPriority     @default(NORMAL)
+  /// Optional context: current page URL when report was made
+  contextUrl        String?            @map("context_url") @db.VarChar(500)
+  /// Optional context: topic ID if report was made while viewing a topic
+  contextTopicId    String?            @map("context_topic_id") @db.Uuid
+  /// Optional context: response ID if report was about a specific response
+  contextResponseId String?            @map("context_response_id") @db.Uuid
+  /// Moderator notes
+  moderatorNotes    String?            @map("moderator_notes") @db.Text
+  /// ID of moderator who handled the report
+  handledById       String?            @map("handled_by_id") @db.Uuid
+  handledAt         DateTime?          @map("handled_at")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  reporter User  @relation("SafetyReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  handler  User? @relation("SafetyReportHandler", fields: [handledById], references: [id])
+
+  @@index([reporterId])
+  @@index([status, priority, createdAt])
+  @@index([contextTopicId])
+  @@map("safety_reports")
 }
