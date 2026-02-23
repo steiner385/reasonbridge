@@ -227,7 +227,7 @@ describe('CredentialReviewQueue', () => {
 
   describe('Approve Action', () => {
     it('should open confirmation modal when approve button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -245,7 +245,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should call onApprove with credential id when confirmed', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -267,7 +267,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should call onApprove with optional notes when provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -293,7 +293,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should close modal when cancel is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -323,7 +323,7 @@ describe('CredentialReviewQueue', () => {
 
   describe('Reject Action', () => {
     it('should open reject modal when reject button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -341,7 +341,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should require reason for rejection', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -359,7 +359,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should call onReject with credential id and reason', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -385,7 +385,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should enable confirm button when reason is provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -409,7 +409,7 @@ describe('CredentialReviewQueue', () => {
 
   describe('Processing State', () => {
     it('should show processing state during approval', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveApprove: () => void;
       const pendingApprove = new Promise<void>((resolve) => {
         resolveApprove = resolve;
@@ -440,7 +440,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should show processing state during rejection', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveReject: () => void;
       const pendingReject = new Promise<void>((resolve) => {
         resolveReject = resolve;
@@ -475,7 +475,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should disable buttons while processing', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveApprove: () => void;
       const pendingApprove = new Promise<void>((resolve) => {
         resolveApprove = resolve;
@@ -517,7 +517,7 @@ describe('CredentialReviewQueue', () => {
 
   describe('Success Feedback', () => {
     it('should show success feedback after approval', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -538,7 +538,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should show success feedback after rejection', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -562,7 +562,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should close modal after successful action', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -585,7 +585,7 @@ describe('CredentialReviewQueue', () => {
 
   describe('Error Feedback', () => {
     it('should show error feedback on approval failure', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockOnApprove.mockRejectedValue(new Error('Approval failed'));
 
       render(
@@ -608,7 +608,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should show error feedback on rejection failure', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockOnReject.mockRejectedValue(new Error('Rejection failed'));
 
       render(
@@ -634,7 +634,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should allow retry after error', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockOnApprove.mockRejectedValueOnce(new Error('First attempt failed'));
       mockOnApprove.mockResolvedValueOnce(undefined);
 
@@ -693,7 +693,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should have dialog role on modals', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}

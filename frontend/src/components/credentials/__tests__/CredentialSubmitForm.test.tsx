@@ -90,7 +90,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Category Dropdown', () => {
     it('should display all available tags in dropdown', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       const categorySelect = screen.getByLabelText(/category/i);
@@ -103,7 +103,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should allow selecting a category', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       const categorySelect = screen.getByLabelText(/category/i);
@@ -115,7 +115,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Credential Type Selector', () => {
     it('should display all credential types', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       const typeSelect = screen.getByLabelText(/credential type/i);
@@ -130,7 +130,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should allow selecting a credential type', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       const typeSelect = screen.getByLabelText(/credential type/i);
@@ -142,7 +142,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Form Validation', () => {
     it('should keep submit disabled when category is not selected', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill required fields except category
@@ -156,7 +156,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should keep submit disabled when credential type is not selected', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill required fields except type
@@ -170,7 +170,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should keep submit disabled when title is empty', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill required fields except title
@@ -184,7 +184,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should keep submit disabled when institution is empty', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill required fields except institution
@@ -198,7 +198,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should show error for invalid document URL', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill all required fields
@@ -223,7 +223,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should show error for invalid verification URL', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill all required fields
@@ -257,7 +257,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should be enabled when all required fields are valid', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill all required fields
@@ -274,7 +274,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Form Submission', () => {
     it('should call onSubmit with correct data', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill all fields
@@ -307,7 +307,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should call onSubmit with expiration date when provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill required fields
@@ -335,7 +335,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should omit optional fields when not provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill only required fields
@@ -365,7 +365,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Loading State', () => {
     it('should show loading state during submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveSubmit: () => void;
       const pendingSubmit = new Promise<void>((resolve) => {
         resolveSubmit = resolve;
@@ -398,7 +398,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should disable form inputs during submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveSubmit: () => void;
       const pendingSubmit = new Promise<void>((resolve) => {
         resolveSubmit = resolve;
@@ -435,7 +435,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Error State', () => {
     it('should show error state on submission failure', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockOnSubmit.mockRejectedValue(new Error('Submission failed'));
 
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
@@ -455,7 +455,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should allow retry after error', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockOnSubmit.mockRejectedValueOnce(new Error('First attempt failed'));
       mockOnSubmit.mockResolvedValueOnce(undefined);
 
@@ -487,7 +487,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Success Callback', () => {
     it('should call onSuccess after successful submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
       );
@@ -507,7 +507,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should not call onSuccess on submission failure', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockOnSubmit.mockRejectedValue(new Error('Submission failed'));
 
       render(
@@ -530,7 +530,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should reset form after successful submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
       );
@@ -560,7 +560,7 @@ describe('CredentialSubmitForm', () => {
 
   describe('Cancel Action', () => {
     it('should call onCancel when cancel button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />,
       );
@@ -571,7 +571,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should not call onSubmit when cancel is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />,
       );
@@ -631,7 +631,7 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should have aria-invalid on fields with errors', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Type in title field then clear it to trigger validation error
