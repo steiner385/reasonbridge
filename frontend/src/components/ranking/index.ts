@@ -14,3 +14,6 @@ export type { ExpertiseBadgeProps } from './ExpertiseBadge';
 
 export { default as TierGateBanner } from './TierGateBanner';
 export type { TierGateBannerProps } from './TierGateBanner';
+
+export { default as RequestAccessModal } from './RequestAccessModal';
+export type { RequestAccessModalProps } from './RequestAccessModal';
