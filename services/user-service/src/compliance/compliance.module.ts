@@ -12,6 +12,7 @@ import { ParentalConsentService } from './parental-consent.service.js';
 import { ComplianceAuditService } from './compliance-audit.service.js';
 import { ComplianceReportService } from './compliance-report.service.js';
 import { DataDeletionService } from './data-deletion.service.js';
+import { DataDeletionJob } from './data-deletion.job.js';
 import { AgeReverificationJob } from './age-reverification.job.js';
 import { ParentalConsentController } from './parental-consent.controller.js';
 import { ParentalDashboardController } from './parental-dashboard.controller.js';
@@ -56,6 +57,7 @@ import { GeoModule } from '../geo/index.js';
     ComplianceAuditService,
     ComplianceReportService,
     DataDeletionService,
+    DataDeletionJob,
     AgeReverificationJob,
     EmailService,
     AdminGuard,
@@ -75,6 +77,7 @@ import { GeoModule } from '../geo/index.js';
     ComplianceAuditService,
     ComplianceReportService,
     DataDeletionService,
+    DataDeletionJob,
     AgeReverificationJob,
     JwtAuthGuard,
     AdminGuard,

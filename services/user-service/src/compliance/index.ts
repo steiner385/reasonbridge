@@ -35,6 +35,7 @@ export {
 } from './dto/compliance-report.dto.js';
 export { AdminGuard } from './guards/admin.guard.js';
 export { AgeReverificationJob } from './age-reverification.job.js';
+export { DataDeletionJob } from './data-deletion.job.js';
 export {
   DataDeletionService,
   type CreateDeletionRequestResult,
