@@ -16,6 +16,10 @@ import type {
   QueueStats,
   ModerationActionStatus,
   ModerationSeverity,
+  CsamReport,
+  CsamReportsListResponse,
+  CsamReportStatus,
+  SafetyReportsStats,
 } from '../types/moderation';
 import { apiClient } from './api';
 
@@ -132,4 +136,69 @@ export async function reviewAppeal(
  */
 export async function getQueueStats(): Promise<QueueStats> {
   return apiClient.get<QueueStats>('/moderation/queue/stats');
+}
+
+/**
+ * Get list of CSAM reports (restricted to authorized moderators)
+ */
+export async function getCsamReports(
+  options: {
+    status?: CsamReportStatus;
+    pageSize?: number;
+    page?: number;
+  } = {},
+): Promise<CsamReportsListResponse> {
+  const params = new URLSearchParams();
+
+  if (options.status) {
+    params.append('status', options.status);
+  }
+  if (options.pageSize) {
+    params.append('pageSize', String(options.pageSize));
+  }
+  if (options.page) {
+    params.append('page', String(options.page));
+  }
+
+  const queryString = params.toString();
+  const endpoint = queryString
+    ? `/moderation/csam-reports?${queryString}`
+    : '/moderation/csam-reports';
+
+  return apiClient.get<CsamReportsListResponse>(endpoint);
+}
+
+/**
+ * Get CSAM report details
+ */
+export async function getCsamReport(reportId: string): Promise<CsamReport> {
+  return apiClient.get<CsamReport>(`/moderation/csam-reports/${reportId}`);
+}
+
+/**
+ * Update CSAM report status
+ */
+export async function updateCsamReportStatus(
+  reportId: string,
+  status: CsamReportStatus,
+  internalNotes?: string,
+): Promise<CsamReport> {
+  return apiClient.patch<CsamReport>(`/moderation/csam-reports/${reportId}`, {
+    status,
+    internalNotes,
+  });
+}
+
+/**
+ * Submit CSAM report to NCMEC
+ */
+export async function submitToNcmec(reportId: string): Promise<CsamReport> {
+  return apiClient.post<CsamReport>(`/moderation/csam-reports/${reportId}/submit-ncmec`, {});
+}
+
+/**
+ * Get safety reports statistics
+ */
+export async function getSafetyReportsStats(): Promise<SafetyReportsStats> {
+  return apiClient.get<SafetyReportsStats>('/moderation/csam-reports/stats');
 }
