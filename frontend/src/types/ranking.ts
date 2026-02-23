@@ -97,6 +97,313 @@ export interface TierInfo {
 /**
  * Get tier information for display
  */
+/**
+ * Domain-specific expertise levels in the ranking system.
+ * Represents a user's proficiency within a specific topic/tag domain.
+ */
+export type ExpertiseLevel = 'NOVICE' | 'FAMILIAR' | 'KNOWLEDGEABLE' | 'EXPERT';
+
+/**
+ * Score thresholds for each expertise level
+ */
+export const EXPERTISE_THRESHOLDS: Record<ExpertiseLevel, { min: number; max: number }> = {
+  NOVICE: { min: 0.0, max: 0.24 },
+  FAMILIAR: { min: 0.25, max: 0.49 },
+  KNOWLEDGEABLE: { min: 0.5, max: 0.74 },
+  EXPERT: { min: 0.75, max: 1.0 },
+};
+
+/**
+ * User's expertise in a specific topic/tag domain
+ */
+export interface TopicExpertise {
+  /** User ID this expertise belongs to */
+  userId: string;
+
+  /** Tag/topic ID this expertise is for */
+  tagId: string;
+
+  /** Display name of the tag/topic */
+  tagName: string;
+
+  /** Expertise score (0.00 - 1.00) */
+  expertiseScore: number;
+
+  /** Current expertise level */
+  expertiseLevel: ExpertiseLevel;
+
+  /** Number of responses in this domain */
+  responseCount: number;
+
+  /** Progress towards next level as percentage (0-100) */
+  progressToNextLevel: number;
+
+  /** ISO timestamp of last activity in this domain (null if never active) */
+  lastActive: string | null;
+}
+
+/**
+ * Expertise metadata for display purposes
+ */
+export interface ExpertiseInfo {
+  level: ExpertiseLevel;
+  name: string;
+  description: string;
+  color: string;
+  darkColor: string;
+  bgColor: string;
+  darkBgColor: string;
+  borderColor: string;
+  darkBorderColor: string;
+}
+
+/**
+ * Get expertise information for display
+ */
+export const getExpertiseInfo = (level: ExpertiseLevel): ExpertiseInfo => {
+  const expertiseLevels: Record<ExpertiseLevel, ExpertiseInfo> = {
+    NOVICE: {
+      level: 'NOVICE',
+      name: 'Novice',
+      description: 'New to this topic',
+      color: 'text-gray-700',
+      darkColor: 'dark:text-gray-300',
+      bgColor: 'bg-gray-100',
+      darkBgColor: 'dark:bg-gray-800',
+      borderColor: 'border-gray-300',
+      darkBorderColor: 'dark:border-gray-600',
+    },
+    FAMILIAR: {
+      level: 'FAMILIAR',
+      name: 'Familiar',
+      description: 'Gaining familiarity with this topic',
+      color: 'text-teal-700',
+      darkColor: 'dark:text-teal-400',
+      bgColor: 'bg-teal-100',
+      darkBgColor: 'dark:bg-teal-900/30',
+      borderColor: 'border-teal-300',
+      darkBorderColor: 'dark:border-teal-700',
+    },
+    KNOWLEDGEABLE: {
+      level: 'KNOWLEDGEABLE',
+      name: 'Knowledgeable',
+      description: 'Well-versed in this topic',
+      color: 'text-indigo-700',
+      darkColor: 'dark:text-indigo-400',
+      bgColor: 'bg-indigo-100',
+      darkBgColor: 'dark:bg-indigo-900/30',
+      borderColor: 'border-indigo-300',
+      darkBorderColor: 'dark:border-indigo-700',
+    },
+    EXPERT: {
+      level: 'EXPERT',
+      name: 'Expert',
+      description: 'Expert in this topic',
+      color: 'text-amber-700',
+      darkColor: 'dark:text-amber-400',
+      bgColor: 'bg-amber-100',
+      darkBgColor: 'dark:bg-amber-900/30',
+      borderColor: 'border-amber-300',
+      darkBorderColor: 'dark:border-amber-700',
+    },
+  };
+
+  return expertiseLevels[level];
+};
+
+/**
+ * Types of verifiable credentials for domain expertise.
+ * Used to boost a user's expertise score in specific topic domains.
+ */
+export type CredentialType =
+  | 'ACADEMIC_DOCTORATE'
+  | 'ACADEMIC_MASTERS'
+  | 'ACADEMIC_BACHELORS'
+  | 'PROFESSIONAL_LICENSE'
+  | 'INDUSTRY_CERTIFICATION'
+  | 'PUBLICATION';
+
+/**
+ * Display names for credential types
+ */
+export const CREDENTIAL_TYPE_LABELS: Record<CredentialType, string> = {
+  ACADEMIC_DOCTORATE: 'Doctorate (PhD, MD, JD)',
+  ACADEMIC_MASTERS: "Master's Degree",
+  ACADEMIC_BACHELORS: "Bachelor's Degree",
+  PROFESSIONAL_LICENSE: 'Professional License',
+  INDUSTRY_CERTIFICATION: 'Industry Certification',
+  PUBLICATION: 'Publication',
+};
+
+/**
+ * Status of a credential verification request
+ */
+export type CredentialStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
+
+/**
+ * Display names for credential statuses
+ */
+export const CREDENTIAL_STATUS_LABELS: Record<CredentialStatus, string> = {
+  PENDING: 'Pending Review',
+  VERIFIED: 'Verified',
+  REJECTED: 'Rejected',
+  EXPIRED: 'Expired',
+};
+
+/**
+ * A user's credential for domain expertise verification
+ */
+export interface Credential {
+  /** Unique credential ID */
+  id: string;
+
+  /** User ID this credential belongs to */
+  userId: string;
+
+  /** Tag/topic ID this credential is for */
+  tagId: string;
+
+  /** Display name of the tag/topic */
+  tagName: string;
+
+  /** Type of credential */
+  type: CredentialType;
+
+  /** Title of the credential (e.g., "PhD in Clinical Psychology") */
+  title: string;
+
+  /** Institution that issued the credential */
+  institution: string;
+
+  /** URL to uploaded document proof (optional) */
+  documentUrl?: string;
+
+  /** URL to external verification (optional) */
+  verificationUrl?: string;
+
+  /** Current verification status */
+  status: CredentialStatus;
+
+  /** Boost value applied to expertise score when verified */
+  boostValue: number;
+
+  /** ISO timestamp when the credential expires (optional, for certifications) */
+  expiresAt?: string;
+
+  /** ISO timestamp when the credential was submitted */
+  createdAt: string;
+}
+
+/**
+ * Input data for submitting a new credential
+ */
+export interface SubmitCredentialInput {
+  /** Tag/topic ID this credential is for */
+  tagId: string;
+
+  /** Type of credential */
+  type: CredentialType;
+
+  /** Title of the credential */
+  title: string;
+
+  /** Institution that issued the credential */
+  institution: string;
+
+  /** URL to uploaded document proof (optional) */
+  documentUrl?: string;
+
+  /** URL to external verification (optional) */
+  verificationUrl?: string;
+
+  /** ISO timestamp when the credential expires (optional) */
+  expiresAt?: string;
+}
+
+/**
+ * Tier distribution for analytics
+ */
+export interface TierDistribution {
+  /** Tier level */
+  tier: TierLevel;
+  /** Number of users in this tier */
+  count: number;
+  /** Percentage of total users */
+  percentage: number;
+}
+
+/**
+ * Appeals analytics summary
+ */
+export interface AppealsAnalytics {
+  /** Number of pending appeals */
+  pending: number;
+  /** Number of approved appeals */
+  approved: number;
+  /** Number of denied appeals */
+  denied: number;
+  /** Average resolution time in hours */
+  avgResolutionHours: number;
+}
+
+/**
+ * Credential type distribution
+ */
+export interface CredentialTypeCount {
+  /** Credential type */
+  type: CredentialType;
+  /** Number of credentials of this type */
+  count: number;
+}
+
+/**
+ * Credentials analytics summary
+ */
+export interface CredentialsAnalytics {
+  /** Number of pending credentials */
+  pending: number;
+  /** Number of verified credentials */
+  verified: number;
+  /** Number of rejected credentials */
+  rejected: number;
+  /** Distribution by credential type */
+  byType: CredentialTypeCount[];
+}
+
+/**
+ * System health metrics for ranking
+ */
+export interface RankingSystemHealth {
+  /** ISO timestamp of last ranking recalculation */
+  lastRecalculation: string | null;
+  /** Average composite score across all users */
+  avgCompositeScore: number;
+  /** Minimum composite score */
+  minScore: number;
+  /** Maximum composite score */
+  maxScore: number;
+  /** Median composite score */
+  medianScore: number;
+}
+
+/**
+ * Complete ranking analytics response
+ */
+export interface RankingAnalytics {
+  /** Distribution of users across tiers */
+  tierDistribution: TierDistribution[];
+  /** Total number of users in the ranking system */
+  totalUsers: number;
+  /** Appeals analytics summary */
+  appeals: AppealsAnalytics;
+  /** Credentials analytics summary */
+  credentials: CredentialsAnalytics;
+  /** System health metrics */
+  systemHealth: RankingSystemHealth;
+  /** Top contributors by composite score */
+  topContributors: UserRank[];
+}
+
 export const getTierInfo = (tier: TierLevel): TierInfo => {
   const tiers: Record<TierLevel, TierInfo> = {
     NEWCOMER: {

@@ -10,3 +10,4 @@
  */
 export * from './user-rank.dto.js';
 export * from './leaderboard-options.dto.js';
+export * from './ranking-analytics.dto.js';

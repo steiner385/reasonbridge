@@ -11,6 +11,7 @@ import { CognitoService } from './cognito.service.js';
 import { MockAuthService } from './mock-auth.service.js';
 import { DatabaseAuthService } from './database-auth.service.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { AdminGuard } from './guards/admin.guard.js';
 import { UsersModule } from '../users/users.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AUTH_SERVICE } from './auth.interface.js';
@@ -73,7 +74,13 @@ const authServiceProvider = {
         new JwtAuthGuard(jwtService, configService),
       inject: [JwtService, ConfigService],
     },
+    // Factory provider for AdminGuard
+    {
+      provide: AdminGuard,
+      useFactory: (configService: ConfigService) => new AdminGuard(configService),
+      inject: [ConfigService],
+    },
   ],
-  exports: [AUTH_SERVICE, JwtAuthGuard, JwtModule],
+  exports: [AUTH_SERVICE, JwtAuthGuard, AdminGuard, JwtModule],
 })
 export class AuthModule {}
