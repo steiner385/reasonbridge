@@ -12,6 +12,7 @@ import type { SafetyReportReason, ReviewPriority } from '@prisma/client';
 describe('SafetyReportService', () => {
   let service: SafetyReportService;
   let prismaService: any;
+  let queueService: any;
 
   const mockReport = {
     id: 'report-123',
@@ -41,7 +42,11 @@ describe('SafetyReportService', () => {
       },
     };
 
-    service = new SafetyReportService(prismaService);
+    queueService = {
+      publishEvent: vi.fn().mockResolvedValue('message-id'),
+    };
+
+    service = new SafetyReportService(prismaService, queueService);
   });
 
   describe('createReport', () => {
@@ -116,6 +121,42 @@ describe('SafetyReportService', () => {
           priority: 'HIGH',
         }),
       });
+    });
+
+    it('should publish safety.report.created event after creating report', async () => {
+      prismaService.safetyReport.create.mockResolvedValue(mockReport);
+
+      await service.createReport({
+        reporterId: 'user-456',
+        reason: 'UNCOMFORTABLE',
+        additionalInfo: 'Something felt wrong',
+        contextTopicId: 'topic-789',
+      });
+
+      expect(queueService.publishEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'safety.report.created',
+          payload: expect.objectContaining({
+            reportId: 'report-123',
+            reporterId: 'user-456',
+            reason: 'UNCOMFORTABLE',
+            priority: 'NORMAL',
+          }),
+        }),
+      );
+    });
+
+    it('should still return report if event publishing fails', async () => {
+      prismaService.safetyReport.create.mockResolvedValue(mockReport);
+      queueService.publishEvent.mockRejectedValue(new Error('Queue unavailable'));
+
+      const result = await service.createReport({
+        reporterId: 'user-456',
+        reason: 'UNCOMFORTABLE',
+      });
+
+      // Report should still be returned even though event publishing failed
+      expect(result.id).toBe('report-123');
     });
   });
 

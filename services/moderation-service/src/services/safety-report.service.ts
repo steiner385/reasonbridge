@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { QueueService } from '../queue/queue.service.js';
 import type {
   SafetyReport,
   SafetyReportReason,
   SafetyReportStatus,
   ReviewPriority,
 } from '@prisma/client';
+import type { SafetyReportCreatedEvent } from '@reason-bridge/event-schemas/moderation';
 
 export interface CreateSafetyReportRequest {
   reporterId: string;
@@ -69,7 +71,12 @@ export interface SafetyReportStats {
  */
 @Injectable()
 export class SafetyReportService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(SafetyReportService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly queueService: QueueService,
+  ) {}
 
   /**
    * Determines priority based on report reason
@@ -90,7 +97,12 @@ export class SafetyReportService {
   }
 
   /**
-   * Creates a new safety report
+   * Creates a new safety report and publishes real-time notification event
+   *
+   * @remarks
+   * After creating the report, publishes a safety.report.created event
+   * so that moderators receive immediate real-time notifications via WebSocket.
+   * URGENT and HIGH priority reports are treated as immediate alerts.
    */
   async createReport(request: CreateSafetyReportRequest): Promise<SafetyReportResponse> {
     const priority = this.determinePriority(request.reason);
@@ -107,6 +119,46 @@ export class SafetyReportService {
         status: 'PENDING',
       },
     });
+
+    // Publish real-time notification event for moderators
+    try {
+      const event: SafetyReportCreatedEvent = {
+        id: report.id,
+        type: 'safety.report.created',
+        timestamp: report.createdAt.toISOString(),
+        version: 1,
+        payload: {
+          reportId: report.id,
+          reporterId: report.reporterId,
+          reason: report.reason as
+            | 'UNCOMFORTABLE'
+            | 'SCARY_CONTENT'
+            | 'STRANGER_CONTACT'
+            | 'PERSONAL_QUESTIONS'
+            | 'OTHER',
+          priority: report.priority as 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW',
+          additionalInfo: report.additionalInfo ?? undefined,
+          contextUrl: report.contextUrl ?? undefined,
+          contextTopicId: report.contextTopicId ?? undefined,
+          contextResponseId: report.contextResponseId ?? undefined,
+          createdAt: report.createdAt.toISOString(),
+        },
+        metadata: {
+          source: 'moderation-service',
+          userId: report.reporterId,
+        },
+      };
+
+      await this.queueService.publishEvent(event);
+      this.logger.log(
+        `Published safety.report.created event for report ${report.id} (priority: ${priority})`,
+      );
+    } catch (error) {
+      // Log error but don't fail the request - report is still created
+      this.logger.error(
+        `Failed to publish safety report event: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
 
     return this.mapToResponse(report);
   }
@@ -144,7 +196,8 @@ export class SafetyReportService {
 
     const hasMore = reports.length > limit;
     const items = hasMore ? reports.slice(0, -1) : reports;
-    const nextCursor = hasMore ? items[items.length - 1].id : null;
+    const lastItem = items.length > 0 ? items[items.length - 1] : null;
+    const nextCursor = hasMore && lastItem ? lastItem.id : null;
 
     return {
       reports: items.map((r) => this.mapToResponse(r)),

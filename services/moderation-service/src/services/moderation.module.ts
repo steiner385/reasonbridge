@@ -14,6 +14,8 @@ import { ModerationQueueService } from './moderation-queue.service.js';
 import { GroomingClientService } from './grooming-client.service.js';
 import { SafetyReportService } from './safety-report.service.js';
 import { EvidencePreservationService } from './evidence-preservation.service.js';
+import { NCMECReportingService } from './ncmec-reporting.service.js';
+import { ComplianceReportService } from './compliance-report.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { QueueModule } from '../queue/queue.module.js';
 
@@ -28,6 +30,8 @@ import { QueueModule } from '../queue/queue.module.js';
     GroomingClientService,
     SafetyReportService,
     EvidencePreservationService,
+    NCMECReportingService,
+    ComplianceReportService,
   ],
   exports: [
     ContentScreeningService,
@@ -38,6 +42,8 @@ import { QueueModule } from '../queue/queue.module.js';
     GroomingClientService,
     SafetyReportService,
     EvidencePreservationService,
+    NCMECReportingService,
+    ComplianceReportService,
   ],
 })
 export class ModerationModule {}

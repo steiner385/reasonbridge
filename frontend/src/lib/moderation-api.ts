@@ -202,3 +202,49 @@ export async function submitToNcmec(reportId: string): Promise<CsamReport> {
 export async function getSafetyReportsStats(): Promise<SafetyReportsStats> {
   return apiClient.get<SafetyReportsStats>('/moderation/csam-reports/stats');
 }
+
+/**
+ * Safety report request for panic button submissions
+ */
+export interface SubmitSafetyReportRequest {
+  reason: 'UNCOMFORTABLE' | 'SCARY_CONTENT' | 'STRANGER_CONTACT' | 'PERSONAL_QUESTIONS' | 'OTHER';
+  additionalInfo?: string;
+  contextUrl?: string;
+  contextTopicId?: string;
+  contextResponseId?: string;
+}
+
+/**
+ * Safety report response from panic button submission
+ */
+export interface SafetyReportResponse {
+  id: string;
+  reporterId: string;
+  reason: string;
+  priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
+  status: string;
+  createdAt: string;
+}
+
+/**
+ * Submit a safety report from the panic button
+ *
+ * @remarks
+ * This endpoint allows minor users to report safety concerns via the
+ * panic button. Reports are immediately routed to moderators with
+ * appropriate priority based on the reason selected.
+ *
+ * @param request - Safety report data
+ * @returns Created safety report details
+ */
+export async function submitSafetyReport(
+  request: SubmitSafetyReportRequest,
+): Promise<SafetyReportResponse> {
+  // Include current page URL as context
+  const contextUrl = typeof window !== 'undefined' ? window.location.href : undefined;
+
+  return apiClient.post<SafetyReportResponse>('/moderation/safety-reports', {
+    ...request,
+    contextUrl,
+  });
+}
