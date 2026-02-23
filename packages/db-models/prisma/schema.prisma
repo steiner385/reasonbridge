@@ -1326,3 +1326,67 @@ model SafetyReport {
   @@index([contextTopicId])
   @@map("safety_reports")
 }
+
+/// Detection source for CSAM content
+enum CsamDetectionSource {
+  AI_DETECTION     // Detected by AI content screening
+  USER_REPORT      // Reported by platform user
+  MODERATOR_REVIEW // Found during moderation review
+  HASH_MATCH       // Matched known CSAM hash (PhotoDNA, etc.)
+
+  @@map("csam_detection_source")
+}
+
+/// Status of CSAM report to NCMEC
+enum CsamReportStatus {
+  PENDING_REVIEW   // Awaiting internal review
+  EVIDENCE_PRESERVED // Evidence has been preserved
+  SUBMITTED_NCMEC  // Submitted to NCMEC CyberTipline
+  CONFIRMED        // NCMEC confirmed receipt
+  REJECTED         // Internal review determined not CSAM
+
+  @@map("csam_report_status")
+}
+
+/// CSAM (Child Sexual Abuse Material) reports for NCMEC CyberTipline
+/// Mandatory reporting within 24 hours as required by 18 U.S.C. § 2258A
+model CsamReport {
+  id                    String              @id @default(uuid()) @db.Uuid
+  /// Source of detection
+  detectionSource       CsamDetectionSource @map("detection_source")
+  /// Current status of the report
+  status                CsamReportStatus    @default(PENDING_REVIEW)
+  /// ID of the content (response, topic, etc.) that triggered the report
+  contentType           String              @map("content_type") @db.VarChar(50)
+  contentId             String              @map("content_id") @db.Uuid
+  /// User who created the flagged content (may be null if anonymous)
+  contentAuthorId       String?             @map("content_author_id") @db.Uuid
+  /// S3 path to preserved evidence (encrypted)
+  evidenceS3Key         String?             @map("evidence_s3_key") @db.VarChar(500)
+  /// Hash of preserved content for integrity verification
+  evidenceHash          String?             @map("evidence_hash") @db.VarChar(128)
+  /// NCMEC CyberTipline report ID (assigned after submission)
+  ncmecReportId         String?             @map("ncmec_report_id") @db.VarChar(50)
+  /// Timestamp when submitted to NCMEC
+  ncmecSubmittedAt      DateTime?           @map("ncmec_submitted_at")
+  /// Internal notes (for legal/compliance team only)
+  internalNotes         String?             @map("internal_notes") @db.Text
+  /// Legal hold flag - prevents deletion of related data
+  isLegalHold           Boolean             @default(true) @map("is_legal_hold")
+  /// User ID who flagged/reported (if user-initiated)
+  reportedById          String?             @map("reported_by_id") @db.Uuid
+  /// AI confidence score if AI-detected (0.0-1.0)
+  aiConfidenceScore     Decimal?            @map("ai_confidence_score") @db.Decimal(3, 2)
+  /// PhotoDNA or similar hash match details
+  hashMatchDetails      Json?               @map("hash_match_details")
+  /// Deadline for NCMEC submission (24 hours from detection)
+  ncmecDeadline         DateTime            @map("ncmec_deadline")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
+
+  @@index([status, ncmecDeadline])
+  @@index([contentType, contentId])
+  @@index([ncmecReportId])
+  @@index([isLegalHold])
+  @@map("csam_reports")
+}
