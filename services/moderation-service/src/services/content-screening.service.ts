@@ -3,8 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { GroomingClientService } from './grooming-client.service.js';
+import type { GroomingDetectionResult } from './grooming-client.service.js';
 
+/**
+ * Child safety risk levels for content screening
+ */
+export type ChildSafetyRisk = 'none' | 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * Base screening result for general content moderation
+ */
 export interface ScreeningResult {
   id: string;
   contentId: string;
@@ -14,6 +24,17 @@ export interface ScreeningResult {
   responsePattern: ResponsePatternAnalysis;
   overallRiskScore: number;
   screened_at: Date;
+}
+
+/**
+ * Extended screening result for child-accessible content
+ * Includes grooming detection and child safety risk assessment
+ */
+export interface ChildScreeningResult extends ScreeningResult {
+  /** Grooming detection result from ai-service */
+  groomingDetection?: GroomingDetectionResult;
+  /** Overall child safety risk level based on grooming + tone */
+  childSafetyRisk: ChildSafetyRisk;
 }
 
 export interface ToneAnalysis {
@@ -58,7 +79,7 @@ const INFLAMMATORY_PATTERNS = [
   /\b(you're\s+stupid|idiot|moron|ignorant|fool)\b/gi,
   /\b(never\s+listen|always\s+wrong|completely\s+blind)\b/gi,
   /\b(destroy|attack|crush|eliminate)(ing)?\s+(the|their)\b/gi,
-  /(\!\!+|\?\?+){2,}/g,
+  /(!{2,}|\?{2,})/g,
   /\b(hate|despise|disgusting|repulsive)\b/gi,
 ];
 
@@ -125,6 +146,8 @@ const FACTUAL_CLAIM_PATTERNS = [
 
 @Injectable()
 export class ContentScreeningService {
+  constructor(@Optional() private readonly groomingClient?: GroomingClientService) {}
+
   async screenContent(contentId: string, content: string): Promise<ScreeningResult> {
     const toneAnalysis = this.analyzeTone(content);
     const fallacyDetection = this.detectFallacies(content);
@@ -363,5 +386,100 @@ export class ContentScreeningService {
     }
 
     return recommendations;
+  }
+
+  /**
+   * Screen content specifically for child-accessible topics.
+   *
+   * @remarks
+   * This method performs standard content screening plus grooming detection.
+   * It combines tone analysis and grooming detection to calculate an overall
+   * child safety risk level.
+   *
+   * @param contentId - Unique identifier for the content
+   * @param content - The text content to screen
+   * @returns ChildScreeningResult with grooming detection and safety risk
+   * @throws Error if grooming client is not available
+   *
+   * @example
+   * ```typescript
+   * const result = await screeningService.screenContentForChildren('resp-123', content);
+   * if (result.childSafetyRisk === 'critical') {
+   *   // Block content immediately
+   * } else if (result.childSafetyRisk === 'high') {
+   *   // Queue for urgent moderator review
+   * }
+   * ```
+   */
+  async screenContentForChildren(
+    contentId: string,
+    content: string,
+  ): Promise<ChildScreeningResult> {
+    if (!this.groomingClient) {
+      throw new Error('GroomingClientService is required for child content screening');
+    }
+
+    // Perform base content screening
+    const baseResult = await this.screenContent(contentId, content);
+
+    // Get grooming detection from ai-service
+    const groomingResult = await this.groomingClient.analyzeForGrooming(content);
+
+    // Calculate child safety risk based on grooming and tone
+    const childSafetyRisk = this.calculateChildSafetyRisk(groomingResult, baseResult);
+
+    return {
+      ...baseResult,
+      groomingDetection: groomingResult,
+      childSafetyRisk,
+    };
+  }
+
+  /**
+   * Calculate overall child safety risk based on grooming detection and tone analysis.
+   *
+   * @param groomingResult - Result from grooming pattern detection
+   * @param screeningResult - Base content screening result
+   * @returns Child safety risk level
+   *
+   * @remarks
+   * Risk calculation prioritizes grooming detection:
+   * - BLOCK recommendation -> 'critical'
+   * - REVIEW recommendation -> 'high'
+   * - FLAG recommendation -> 'medium'
+   * - ALLOW with high inflammatory tone -> 'low' or 'medium'
+   * - Clean content -> 'none'
+   */
+  private calculateChildSafetyRisk(
+    groomingResult: GroomingDetectionResult,
+    screeningResult: ScreeningResult,
+  ): ChildSafetyRisk {
+    // Grooming detection takes highest priority
+    if (groomingResult.recommendedAction === 'BLOCK') {
+      return 'critical';
+    }
+
+    if (groomingResult.recommendedAction === 'REVIEW') {
+      return 'high';
+    }
+
+    if (groomingResult.recommendedAction === 'FLAG') {
+      return 'medium';
+    }
+
+    // Check if grooming was detected but confidence was low
+    if (groomingResult.detected && groomingResult.confidence > 0.2) {
+      return 'low';
+    }
+
+    // Factor in tone analysis for non-grooming content
+    if (screeningResult.toneAnalysis.isInflammatory) {
+      if (screeningResult.toneAnalysis.intensity === 'high') {
+        return 'medium';
+      }
+      return 'low';
+    }
+
+    return 'none';
   }
 }

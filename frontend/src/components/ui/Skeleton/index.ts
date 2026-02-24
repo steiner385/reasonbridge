@@ -27,6 +27,7 @@ export type {
   ProfileSkeletonProps,
   ResponseSkeletonProps,
   SkeletonListProps,
+  ArgumentAnalysisSkeletonProps,
 } from './types';
 
 // Constants (for advanced customization)

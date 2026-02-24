@@ -15,6 +15,7 @@ import { SimulatorModule } from './simulator/simulator.module.js';
 import { TopicQualityModule } from './topic-quality/topic-quality.module.js';
 import { TopicDuplicateModule } from './topic-duplicate/topic-duplicate.module.js';
 import { MetricsModule } from './observability/index.js';
+import { GroomingModule } from './grooming/grooming.module.js';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MetricsModule } from './observability/index.js';
     SimulatorModule,
     TopicQualityModule,
     TopicDuplicateModule,
+    GroomingModule,
   ],
   controllers: [],
   providers: [],

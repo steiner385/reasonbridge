@@ -17,23 +17,23 @@ This guide covers deploying the ReasonBridge platform to various environments, f
 
 ### Required Tools
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Docker | 24.x+ | Container runtime |
-| Docker Compose | 2.x+ | Multi-container orchestration |
-| Node.js | 20 LTS | Runtime for services |
-| pnpm | 9.x | Package manager |
-| PostgreSQL Client | 15.x | Database access (optional) |
-| Redis CLI | 7.x | Cache inspection (optional) |
+| Tool              | Version | Purpose                       |
+| ----------------- | ------- | ----------------------------- |
+| Docker            | 24.x+   | Container runtime             |
+| Docker Compose    | 2.x+    | Multi-container orchestration |
+| Node.js           | 20 LTS  | Runtime for services          |
+| pnpm              | 9.x     | Package manager               |
+| PostgreSQL Client | 15.x    | Database access (optional)    |
+| Redis CLI         | 7.x     | Cache inspection (optional)   |
 
 ### AWS Services (Production)
 
-| Service | Purpose |
-|---------|---------|
-| AWS Bedrock | AI model inference (Claude) |
+| Service     | Purpose                        |
+| ----------- | ------------------------------ |
+| AWS Bedrock | AI model inference (Claude)    |
 | AWS Cognito | User authentication (optional) |
-| AWS S3 | File storage |
-| AWS SQS/SNS | Message queuing |
+| AWS S3      | File storage                   |
+| AWS SQS/SNS | Message queuing                |
 
 ## Environment Configuration
 
@@ -55,50 +55,51 @@ cp .env.example .env
 
 **Core Settings:**
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development`, `production` |
+| Variable    | Description       | Example                          |
+| ----------- | ----------------- | -------------------------------- |
+| `NODE_ENV`  | Environment mode  | `development`, `production`      |
 | `LOG_LEVEL` | Logging verbosity | `debug`, `info`, `warn`, `error` |
 
 **Database:**
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://user:pass@host:5432/db` |
-| `POSTGRES_HOST` | Database host | `localhost` |
-| `POSTGRES_PORT` | Database port | `5432` |
-| `POSTGRES_USER` | Database user | `reasonbridge` |
-| `POSTGRES_PASSWORD` | Database password | (secure value) |
-| `POSTGRES_DB` | Database name | `reasonbridge_dev` |
+| Variable            | Description           | Example                               |
+| ------------------- | --------------------- | ------------------------------------- |
+| `DATABASE_URL`      | PostgreSQL connection | `postgresql://user:pass@host:5432/db` |
+| `POSTGRES_HOST`     | Database host         | `localhost`                           |
+| `POSTGRES_PORT`     | Database port         | `5432`                                |
+| `POSTGRES_USER`     | Database user         | `reasonbridge`                        |
+| `POSTGRES_PASSWORD` | Database password     | (secure value)                        |
+| `POSTGRES_DB`       | Database name         | `reasonbridge_dev`                    |
 
 **Cache:**
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `REDIS_URL` | Redis connection | `redis://localhost:6379` |
-| `REDIS_HOST` | Redis host | `localhost` |
-| `REDIS_PORT` | Redis port | `6379` |
+| Variable     | Description      | Example                  |
+| ------------ | ---------------- | ------------------------ |
+| `REDIS_URL`  | Redis connection | `redis://localhost:6379` |
+| `REDIS_HOST` | Redis host       | `localhost`              |
+| `REDIS_PORT` | Redis port       | `6379`                   |
 
 **Authentication:**
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `JWT_SECRET` | JWT signing secret | (32+ char secure string) |
-| `JWT_EXPIRATION` | Access token TTL | `15m` |
-| `JWT_REFRESH_EXPIRATION` | Refresh token TTL | `7d` |
+| Variable                 | Description        | Example                  |
+| ------------------------ | ------------------ | ------------------------ |
+| `JWT_SECRET`             | JWT signing secret | (32+ char secure string) |
+| `JWT_EXPIRATION`         | Access token TTL   | `15m`                    |
+| `JWT_REFRESH_EXPIRATION` | Refresh token TTL  | `7d`                     |
 
 **AWS (Production):**
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `AWS_ACCESS_KEY_ID` | AWS access key | (from IAM) |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | (from IAM) |
-| `AWS_REGION` | AWS region | `us-east-1` |
+| Variable                | Description      | Example                             |
+| ----------------------- | ---------------- | ----------------------------------- |
+| `AWS_ACCESS_KEY_ID`     | AWS access key   | (from IAM)                          |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key   | (from IAM)                          |
+| `AWS_REGION`            | AWS region       | `us-east-1`                         |
 | `BEDROCK_DEFAULT_MODEL` | Default AI model | `us.anthropic.claude-3-5-haiku-...` |
 
 ### Environment-Specific Configuration
 
 **Development:**
+
 ```env
 NODE_ENV=development
 LOG_LEVEL=debug
@@ -106,6 +107,7 @@ DATABASE_URL=postgresql://reasonbridge:localdev@localhost:5432/reasonbridge_dev
 ```
 
 **Production:**
+
 ```env
 NODE_ENV=production
 LOG_LEVEL=info
@@ -174,17 +176,17 @@ pnpm --filter=frontend dev
 
 ### Service Ports
 
-| Service | Port | URL |
-|---------|------|-----|
-| API Gateway | 3000 | http://localhost:3000 |
-| User Service | 3001 | http://localhost:3001 |
-| AI Service | 3002 | http://localhost:3002 |
-| Moderation Service | 3003 | http://localhost:3003 |
-| Notification Service | 3004 | http://localhost:3004 |
-| Fact-Check Service | 3005 | http://localhost:3005 |
+| Service                | Port | URL                   |
+| ---------------------- | ---- | --------------------- |
+| API Gateway            | 3000 | http://localhost:3000 |
+| User Service           | 3001 | http://localhost:3001 |
+| AI Service             | 3002 | http://localhost:3002 |
+| Moderation Service     | 3003 | http://localhost:3003 |
+| Notification Service   | 3004 | http://localhost:3004 |
+| Fact-Check Service     | 3005 | http://localhost:3005 |
 | Recommendation Service | 3006 | http://localhost:3006 |
-| Discussion Service | 3007 | http://localhost:3007 |
-| Frontend | 5173 | http://localhost:5173 |
+| Discussion Service     | 3007 | http://localhost:3007 |
+| Frontend               | 5173 | http://localhost:5173 |
 
 ### Stopping Services
 
@@ -258,6 +260,7 @@ The `main` branch requires these status checks:
 **Server:** `http://jenkins.reasonbridge.org`
 
 **Agents:**
+
 - runner-1, runner-2: 4GB RAM, general tasks
 - runner-3: 6GB RAM, E2E dedicated
 
@@ -371,11 +374,11 @@ Before deploying to production:
 
 Each service exposes health endpoints:
 
-| Endpoint | Purpose |
-|----------|---------|
-| `GET /health` | Basic liveness check |
+| Endpoint            | Purpose                        |
+| ------------------- | ------------------------------ |
+| `GET /health`       | Basic liveness check           |
 | `GET /health/ready` | Readiness check (dependencies) |
-| `GET /metrics` | Prometheus metrics |
+| `GET /metrics`      | Prometheus metrics             |
 
 **Example health check:**
 
@@ -424,6 +427,7 @@ Services output structured JSON logs:
 ```
 
 Aggregate logs with:
+
 - **Development:** `docker-compose logs -f`
 - **Production:** ELK stack, CloudWatch Logs, Datadog, etc.
 

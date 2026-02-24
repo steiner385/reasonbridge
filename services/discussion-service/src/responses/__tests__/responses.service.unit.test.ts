@@ -58,6 +58,10 @@ describe('ResponsesService', () => {
         createMany: vi.fn(),
         deleteMany: vi.fn(),
       },
+      // Added for PENDING_REVIEW status - check if author is a minor
+      user: {
+        findUnique: vi.fn().mockResolvedValue({ isMinor: false }),
+      },
     } as unknown as PrismaService;
 
     commonGroundTrigger = {

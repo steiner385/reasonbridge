@@ -848,73 +848,76 @@ test.describe('View Bridging Suggestions', () => {
     }
   });
 
-  // TODO(#677): Re-enable when WebSocket mock timing is fixed in CI
-  // Issue: Tests timeout with 'Target page, context or browser has been closed'
-  // The WebSocket mock infrastructure is in place but needs CI debugging
-  test.skip('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
-    // Setup WebSocket mock
+  // WebSocket real-time update test - uses mock to simulate server events
+  // Uses test.slow() to double timeout for CI environments with slower page loads
+  test('should update bridging suggestions in real-time via WebSocket', async ({ page }) => {
+    test.slow(); // Double the default timeout for this test
+
+    // Setup WebSocket mock before any navigation
     const wsMock = await setupWebSocketMock(page);
 
-    await page.goto('/topics');
-    await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 10000 });
+    try {
+      await page.goto('/topics');
+      await page.waitForSelector('text=Loading topics...', { state: 'hidden', timeout: 15000 });
 
-    const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-    const linkCount = await firstTopicLink.count();
+      const firstTopicLink = page.locator('a[href^="/topics/"]').first();
+      const linkCount = await firstTopicLink.count();
 
-    if (linkCount > 0) {
-      const href = await firstTopicLink.getAttribute('href');
-      const topicId = href?.split('/topics/')[1];
+      if (linkCount > 0) {
+        const href = await firstTopicLink.getAttribute('href');
+        const topicId = href?.split('/topics/')[1];
 
-      if (!topicId) {
-        throw new Error('Could not extract topic ID from href');
+        if (!topicId) {
+          throw new Error('Could not extract topic ID from href');
+        }
+
+        await page.goto(`/topics/${topicId}`);
+        await page.waitForSelector('text=Loading topic details...', {
+          state: 'hidden',
+          timeout: 15000,
+        });
+
+        // Wait for WebSocket connection (mock should be instant)
+        await wsMock.waitForConnection('/notifications');
+
+        // Get initial state
+        const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
+        const initialText = await suggestionsSection.textContent().catch(() => '');
+
+        // Create new agreement zone with bridging opportunity
+        const newAgreementZone = buildAgreementZone({
+          id: 'agreement-zone-renewable',
+          title: 'Renewable Energy Benefits',
+          description: 'Agreement on environmental benefits of renewable energy',
+          participantCount: 15,
+          consensusLevel: 'high',
+        });
+
+        // Emit WebSocket event with updated common ground including new agreement zone
+        const payload = buildCommonGroundUpdatedPayload({
+          topicId,
+          agreementZones: [newAgreementZone],
+          overallConsensusScore: 0.75,
+        });
+
+        await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
+
+        // Wait for React state update and re-render
+        await page.waitForTimeout(500);
+
+        // Verify UI updated
+        const updatedText = await suggestionsSection.textContent().catch(() => '');
+
+        // Verify content changed or contains expected text
+        expect(
+          updatedText !== initialText ||
+            updatedText.includes('Renewable') ||
+            updatedText.includes('suggestion'),
+        ).toBe(true);
       }
-
-      await page.goto(`/topics/${topicId}`);
-      await page.waitForSelector('text=Loading topic details...', {
-        state: 'hidden',
-        timeout: 10000,
-      });
-
-      // Wait for WebSocket connection
-      await wsMock.waitForConnection('/notifications');
-
-      // Get initial state
-      const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');
-      const initialText = await suggestionsSection.textContent().catch(() => '');
-
-      // Create new agreement zone with bridging opportunity
-      const newAgreementZone = buildAgreementZone({
-        id: 'agreement-zone-renewable',
-        title: 'Renewable Energy Benefits',
-        description: 'Agreement on environmental benefits of renewable energy',
-        participantCount: 15,
-        consensusLevel: 'high',
-      });
-
-      // Emit WebSocket event with updated common ground including new agreement zone
-      const payload = buildCommonGroundUpdatedPayload({
-        topicId,
-        agreementZones: [newAgreementZone],
-        overallConsensusScore: 0.75,
-      });
-
-      await wsMock.emitCommonGroundUpdated(topicId, payload.analysis);
-
-      // Wait for React state update and re-render
-      await page.waitForTimeout(1500);
-
-      // Verify UI updated
-      const updatedText = await suggestionsSection.textContent().catch(() => '');
-
-      // Verify content changed or contains expected text
-      expect(
-        updatedText !== initialText ||
-          updatedText.includes('Renewable') ||
-          updatedText.includes('suggestion'),
-      ).toBe(true);
+    } finally {
+      await wsMock.cleanup();
     }
-
-    await wsMock.cleanup();
   });
 
   test('should display maximum suggestion count limit if configured', async ({ page }) => {

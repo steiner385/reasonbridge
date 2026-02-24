@@ -5,6 +5,7 @@
 
 import { useParams, Link } from 'react-router-dom';
 import { useState, useCallback, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import { useCommonGroundUpdates } from '../../hooks/useCommonGroundUpdates';
@@ -24,6 +25,7 @@ import type { CreateResponseRequest } from '../../types/response';
 function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuthContext();
+  const queryClient = useQueryClient();
   const { data: topic, isLoading, error } = useTopic(id);
   const { data: commonGroundAnalysis } = useCommonGroundAnalysis(id);
   const showSkeleton = useDelayedLoading(isLoading);
@@ -86,10 +88,11 @@ function TopicDetailPage() {
       if (!id) return;
 
       await apiClient.patch(`/topics/${id}`, updates);
-      // Refresh topic data after successful edit
-      window.location.reload();
+      // Invalidate and refetch topic data after successful edit
+      // This allows the modal to close properly before data refreshes
+      await queryClient.invalidateQueries({ queryKey: ['topic', id] });
     },
-    [id],
+    [id, queryClient],
   );
 
   // Fetch bridging suggestions when analysis is available

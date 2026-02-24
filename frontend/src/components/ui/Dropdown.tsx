@@ -102,7 +102,7 @@ export function Dropdown({
         <div
           ref={dropdownRef}
           className={`
-            absolute z-50 mt-2 w-80 max-h-96 overflow-y-auto
+            absolute z-50 mt-2 w-full sm:w-80 max-w-[calc(100vw-2rem)] max-h-96 overflow-y-auto
             bg-white dark:bg-gray-800
             border border-gray-200 dark:border-gray-700
             rounded-lg shadow-lg dark:shadow-gray-900/50

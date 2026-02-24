@@ -6,7 +6,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ComplianceService, type RegionalRules } from './compliance.service.js';
-import { ParentConsentStatus } from '@prisma/client';
+import { ComplianceAuditService } from './compliance-audit.service.js';
+import { ComplianceAction, ParentConsentStatus } from '@prisma/client';
 
 /**
  * Result of age verification process
@@ -52,6 +53,7 @@ export class AgeVerificationService {
   constructor(
     private readonly complianceService: ComplianceService,
     private readonly prisma: PrismaService,
+    private readonly auditService: ComplianceAuditService,
   ) {}
 
   /**
@@ -95,8 +97,27 @@ export class AgeVerificationService {
         isMinor,
         regionalConsentAge: rules.consentAge,
         parentConsentStatus,
+        lastAgeVerifiedAt: new Date(),
       },
     });
+
+    // Log the AGE_VERIFIED action for audit trail
+    // Audit logging should not fail the main operation - catch and log errors
+    try {
+      await this.auditService.logAction(userId, ComplianceAction.AGE_VERIFIED, {
+        region: countryCode,
+        consentAge: rules.consentAge,
+        calculatedAge: age,
+        isMinor,
+        requiresConsent,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to log AGE_VERIFIED audit action for user ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      // Continue - don't fail the verification due to audit logging failure
+    }
 
     this.logger.log(
       `User ${userId} age verified: age=${age}, isMinor=${isMinor}, ` +

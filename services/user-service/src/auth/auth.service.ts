@@ -496,6 +496,7 @@ export class AuthService {
         sub: user.id, // Subject claim - user ID
         email: user.email,
         authMethod: user.authMethod,
+        isMinor: user.isMinor ?? false, // Child-friendly mode: include minor status for privacy controls
       },
       jwtSecret,
       { expiresIn: jwtExpiration } as any, // Type assertion for JWT options

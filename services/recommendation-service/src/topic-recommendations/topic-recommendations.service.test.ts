@@ -30,7 +30,7 @@ describe('TopicRecommendationsService', () => {
     status: 'ACTIVE',
     visibility: 'PUBLIC',
     createdAt: new Date('2026-01-01'),
-    lastActivityAt: new Date('2026-02-10'),
+    lastActivityAt: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago (within trending window)
     tags: [
       {
         tag: {

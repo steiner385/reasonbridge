@@ -61,12 +61,12 @@ export class UploadController {
   }
 
   /**
-   * Delete avatar by key
-   * Uses Fastify wildcard route to capture keys with slashes (e.g., avatars/user123/image.jpg)
+   * Delete avatar for a user
+   * @param userId - The user's UUID
    */
-  @Delete('avatar/*')
+  @Delete('avatar/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAvatar(@Param('*') key: string) {
-    await this.uploadService.deleteAvatar(key);
+  async deleteAvatar(@Param('userId') userId: string) {
+    await this.uploadService.deleteAvatar(userId);
   }
 }

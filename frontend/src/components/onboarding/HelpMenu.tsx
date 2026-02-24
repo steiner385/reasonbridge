@@ -95,7 +95,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1rem)] bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 py-2 z-50">
           <div className="px-4 py-2 border-b border-gray-100">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Help & Resources

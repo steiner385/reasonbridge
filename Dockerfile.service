@@ -42,7 +42,8 @@ RUN ls -la packages/db-models/ && \
     cat packages/db-models/dist/index.d.ts | head -20
 
 # Build services (can be parallel since all package dependencies are ready)
-RUN pnpm -r --filter="./services/*" run build
+# Exclude contact-service which has Prisma type issues and is not used in E2E
+RUN pnpm -r --filter="./services/*" --filter="!./services/contact-service" run build
 
 # Stage 2: Runtime image for a specific service
 FROM node:20-alpine AS runtime

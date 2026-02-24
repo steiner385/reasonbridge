@@ -17,14 +17,9 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/*.integration.test.ts', // Run in integration test phase
-      // CI: Prisma client module resolution issues
-      '**/trust-score.calculator.test.ts',
-      '**/users.controller.test.ts',
-      '**/users.service.test.ts',
-      '**/verification.controller.test.ts',
-      '**/verification.service.test.ts',
-      '**/video-upload.service.test.ts',
     ],
+    // Setup file for Prisma mocking - prevents DB connections in unit tests
+    setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

@@ -32,6 +32,7 @@ export default defineConfig({
     // .spec.ts in e2e/ directory is reserved for Playwright E2E tests
     include: [
       'src/**/*.test.{ts,tsx}',
+      'src/**/__tests__/*.test.{ts,tsx}',
       'tests/unit/**/*.spec.{ts,tsx}',
       'tests/integration/**/*.spec.{ts,tsx}',
     ],

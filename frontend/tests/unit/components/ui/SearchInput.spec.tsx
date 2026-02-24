@@ -337,8 +337,11 @@ describe('SearchInput Component', () => {
       render(<SearchInput {...defaultProps} />);
 
       const input = getSearchInput();
-      expect(input).toHaveClass('pl-10'); // Left padding for search icon
-      expect(input).toHaveClass('pr-10'); // Right padding for clear/loading
+      // Responsive padding: mobile (pl-8/pr-8) scales to desktop (sm:pl-10/sm:pr-10)
+      expect(input).toHaveClass('pl-8'); // Mobile left padding for search icon
+      expect(input).toHaveClass('sm:pl-10'); // Desktop left padding for search icon
+      expect(input).toHaveClass('pr-8'); // Mobile right padding for clear/loading
+      expect(input).toHaveClass('sm:pr-10'); // Desktop right padding for clear/loading
     });
   });
 });

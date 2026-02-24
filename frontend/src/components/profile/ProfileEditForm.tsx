@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardBody } from '../ui/Card';
+import AvatarUpload from './AvatarUpload';
 
 export interface ProfileEditFormData {
   displayName: string;
@@ -19,9 +20,24 @@ export interface ProfileEditFormProps {
   initialData?: ProfileEditFormData;
 
   /**
+   * Current avatar URL (if any)
+   */
+  currentAvatarUrl?: string | null;
+
+  /**
    * Callback when the form is submitted with valid data
    */
   onSubmit: (data: ProfileEditFormData) => void | Promise<void>;
+
+  /**
+   * Callback when avatar is uploaded
+   */
+  onAvatarUpload?: (file: File) => Promise<void>;
+
+  /**
+   * Callback when avatar is removed
+   */
+  onAvatarRemove?: () => Promise<void>;
 
   /**
    * Callback when the user cancels editing
@@ -32,6 +48,11 @@ export interface ProfileEditFormProps {
    * Whether the form is in a loading/submitting state
    */
   isLoading?: boolean;
+
+  /**
+   * Whether avatar is being uploaded
+   */
+  isUploadingAvatar?: boolean;
 
   /**
    * Error message to display at the form level
@@ -50,9 +71,13 @@ interface FormErrors {
 
 function ProfileEditForm({
   initialData = { displayName: '' },
+  currentAvatarUrl,
   onSubmit,
+  onAvatarUpload,
+  onAvatarRemove,
   onCancel,
   isLoading = false,
+  isUploadingAvatar = false,
   error,
   className = '',
 }: ProfileEditFormProps) {
@@ -155,10 +180,23 @@ function ProfileEditForm({
       </CardHeader>
 
       <CardBody>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="rounded-lg bg-fallacy-light dark:bg-red-900/20 border border-fallacy-DEFAULT dark:border-red-700 p-4">
               <p className="text-sm text-fallacy-dark dark:text-red-300">{error}</p>
+            </div>
+          )}
+
+          {/* Avatar upload section */}
+          {onAvatarUpload && (
+            <div className="flex flex-col items-center pb-4 border-b border-gray-200 dark:border-gray-700">
+              <AvatarUpload
+                currentAvatarUrl={currentAvatarUrl}
+                onUpload={onAvatarUpload}
+                onRemove={onAvatarRemove}
+                isLoading={isUploadingAvatar}
+                size="lg"
+              />
             </div>
           )}
 

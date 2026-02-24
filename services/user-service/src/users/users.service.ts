@@ -338,6 +338,78 @@ export class UsersService {
   }
 
   /**
+   * Update a user's avatar URL and S3 key
+   * @param userId - The user's UUID
+   * @param avatarUrl - The public URL of the avatar
+   * @param avatarS3Key - The S3 object key for deletion
+   * @returns Updated user object
+   */
+  async updateAvatar(userId: string, avatarUrl: string, avatarS3Key: string) {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    // Verify user exists
+    await this.findById(userId);
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl,
+        avatarS3Key,
+      },
+    });
+
+    this.logger.log(`Avatar updated for user ${userId}`);
+
+    return updatedUser;
+  }
+
+  /**
+   * Get a user's current avatar S3 key (for deletion before replacing)
+   * @param userId - The user's UUID
+   * @returns The S3 key or null if no avatar exists
+   */
+  async getAvatarS3Key(userId: string): Promise<string | null> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarS3Key: true },
+    });
+
+    return user?.avatarS3Key ?? null;
+  }
+
+  /**
+   * Remove a user's avatar (clear URL and S3 key)
+   * @param userId - The user's UUID
+   * @returns Updated user object
+   */
+  async removeAvatar(userId: string) {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    // Verify user exists
+    await this.findById(userId);
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl: null,
+        avatarS3Key: null,
+      },
+    });
+
+    this.logger.log(`Avatar removed for user ${userId}`);
+
+    return updatedUser;
+  }
+
+  /**
    * Get a user's followers with pagination
    * @param userId - The user's ID
    * @param options - Pagination options

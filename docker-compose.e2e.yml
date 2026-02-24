@@ -2,6 +2,11 @@
 # Complete stack with infrastructure, all backend services, and frontend
 # Mimics production deployment for realistic end-to-end testing
 #
+# MEMORY CONSTRAINTS (Jenkins runner-3 has 6GB):
+# - Services total: ~2.4GB during startup (with db-migrate/seed running)
+# - Playwright container: 4GB (configured in jenkins-lib)
+# - Peak usage: ~6.4GB - keep limits tight to avoid OOM (exit code 137)
+#
 # Note: Explicit image names are set for all built services to enable Docker
 # layer caching across builds with different COMPOSE_PROJECT_NAME values.
 # Without explicit image names, each unique project name would rebuild all images.
@@ -79,7 +84,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - reasonbridge-e2e
     restart: 'no'
@@ -95,7 +100,7 @@ services:
     depends_on:
       db-migrate:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 192m
     networks:
       - reasonbridge-e2e
     restart: 'no'
@@ -137,7 +142,7 @@ services:
         condition: service_started
       discussion-service:
         condition: service_started
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -174,7 +179,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -208,7 +213,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -233,7 +238,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -260,7 +265,7 @@ services:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -284,7 +289,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -308,7 +313,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -335,7 +340,7 @@ services:
         condition: service_completed_successfully
       ai-service:
         condition: service_started
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 
@@ -359,7 +364,7 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 128m
     networks:
       - reasonbridge-e2e
 

@@ -373,10 +373,10 @@ export function TagSelector({
             placeholder={isMaxTagsReached ? 'Maximum tags reached' : placeholder}
             maxLength={maxTagLength}
             className={`
-              flex-1 min-w-[150px] px-2 py-1 outline-none
+              flex-1 min-w-0 sm:min-w-[150px] px-2 py-1 outline-none
               bg-transparent text-gray-900 dark:text-gray-100
               placeholder-gray-400 dark:placeholder-gray-500
-              disabled:cursor-not-allowed
+              disabled:cursor-not-allowed text-sm sm:text-base
             `}
           />
         </div>

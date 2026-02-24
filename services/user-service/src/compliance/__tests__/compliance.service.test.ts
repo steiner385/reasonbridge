@@ -112,6 +112,168 @@ describe('ComplianceService', () => {
 
       expect(rules.consentAge).toBe(16);
     });
+
+    describe('regulationName property', () => {
+      it('should return COPPA for US', () => {
+        const rules = service.getRegionalRules('US');
+
+        expect(rules.regulationName).toBe('COPPA');
+        expect(rules.consentAge).toBe(13);
+        expect(rules.allowsDirectMessaging).toBe(false);
+        expect(rules.requiresManualModeration).toBe(false);
+      });
+
+      it('should return AADC for GB with manual moderation required', () => {
+        const rules = service.getRegionalRules('GB');
+
+        expect(rules.regulationName).toBe('AADC');
+        expect(rules.consentAge).toBe(13);
+        expect(rules.requiresManualModeration).toBe(true);
+      });
+
+      it('should return OSA for AU with manual moderation required', () => {
+        const rules = service.getRegionalRules('AU');
+
+        expect(rules.regulationName).toBe('OSA');
+        expect(rules.consentAge).toBe(13);
+        expect(rules.requiresManualModeration).toBe(true);
+      });
+
+      it('should return GDPR for EU countries (DE)', () => {
+        const rules = service.getRegionalRules('DE');
+
+        expect(rules.regulationName).toBe('GDPR');
+        expect(rules.dataRetentionDays).toBe(365);
+      });
+
+      it('should return GDPR for EU countries (FR)', () => {
+        const rules = service.getRegionalRules('FR');
+
+        expect(rules.regulationName).toBe('GDPR');
+        expect(rules.dataRetentionDays).toBe(365);
+      });
+
+      it('should return PIPEDA for CA', () => {
+        const rules = service.getRegionalRules('CA');
+
+        expect(rules.regulationName).toBe('PIPEDA');
+        expect(rules.consentAge).toBe(13);
+      });
+
+      it('should return DEFAULT for unknown countries', () => {
+        const rules = service.getRegionalRules('XX');
+
+        expect(rules.regulationName).toBe('DEFAULT');
+      });
+    });
+
+    describe('full RegionalRules properties', () => {
+      it('should include all required properties', () => {
+        const rules = service.getRegionalRules('US');
+
+        expect(rules).toHaveProperty('consentAge');
+        expect(rules).toHaveProperty('requiresParentalConsent');
+        expect(rules).toHaveProperty('privacyPolicyUrl');
+        expect(rules).toHaveProperty('regulationName');
+        expect(rules).toHaveProperty('allowsDirectMessaging');
+        expect(rules).toHaveProperty('allowsProfileVisibility');
+        expect(rules).toHaveProperty('requiresManualModeration');
+        expect(rules).toHaveProperty('dataRetentionDays');
+      });
+
+      it('should default allowsDirectMessaging to false', () => {
+        const rules = service.getRegionalRules('US');
+
+        expect(rules.allowsDirectMessaging).toBe(false);
+      });
+
+      it('should default allowsProfileVisibility to false', () => {
+        const rules = service.getRegionalRules('US');
+
+        expect(rules.allowsProfileVisibility).toBe(false);
+      });
+
+      it('should have default dataRetentionDays of 730 (2 years)', () => {
+        const rules = service.getRegionalRules('US');
+
+        expect(rules.dataRetentionDays).toBe(730);
+      });
+
+      it('should have dataRetentionDays of 365 for GDPR countries', () => {
+        const rules = service.getRegionalRules('DE');
+
+        expect(rules.dataRetentionDays).toBe(365);
+      });
+    });
+  });
+
+  describe('getRegulationName', () => {
+    it('should return COPPA for US', () => {
+      expect(service.getRegulationName('US')).toBe('COPPA');
+    });
+
+    it('should return AADC for GB', () => {
+      expect(service.getRegulationName('GB')).toBe('AADC');
+    });
+
+    it('should return OSA for AU', () => {
+      expect(service.getRegulationName('AU')).toBe('OSA');
+    });
+
+    it('should return PIPEDA for CA', () => {
+      expect(service.getRegulationName('CA')).toBe('PIPEDA');
+    });
+
+    it('should return GDPR for EU countries', () => {
+      expect(service.getRegulationName('DE')).toBe('GDPR');
+      expect(service.getRegulationName('FR')).toBe('GDPR');
+      expect(service.getRegulationName('IT')).toBe('GDPR');
+      expect(service.getRegulationName('ES')).toBe('GDPR');
+      expect(service.getRegulationName('NL')).toBe('GDPR');
+      expect(service.getRegulationName('BE')).toBe('GDPR');
+    });
+
+    it('should return DEFAULT for unknown countries', () => {
+      expect(service.getRegulationName('XX')).toBe('DEFAULT');
+      expect(service.getRegulationName('ZZ')).toBe('DEFAULT');
+    });
+
+    it('should handle lowercase country codes', () => {
+      expect(service.getRegulationName('us')).toBe('COPPA');
+      expect(service.getRegulationName('gb')).toBe('AADC');
+    });
+  });
+
+  describe('isEUCountry', () => {
+    it('should return true for EU member states', () => {
+      expect(service.isEUCountry('DE')).toBe(true);
+      expect(service.isEUCountry('FR')).toBe(true);
+      expect(service.isEUCountry('IT')).toBe(true);
+      expect(service.isEUCountry('ES')).toBe(true);
+      expect(service.isEUCountry('NL')).toBe(true);
+      expect(service.isEUCountry('BE')).toBe(true);
+      expect(service.isEUCountry('AT')).toBe(true);
+      expect(service.isEUCountry('SE')).toBe(true);
+      expect(service.isEUCountry('PL')).toBe(true);
+    });
+
+    it('should return false for non-EU countries', () => {
+      expect(service.isEUCountry('US')).toBe(false);
+      expect(service.isEUCountry('GB')).toBe(false);
+      expect(service.isEUCountry('AU')).toBe(false);
+      expect(service.isEUCountry('CA')).toBe(false);
+      expect(service.isEUCountry('JP')).toBe(false);
+    });
+
+    it('should return false for unknown countries', () => {
+      expect(service.isEUCountry('XX')).toBe(false);
+      expect(service.isEUCountry('ZZ')).toBe(false);
+    });
+
+    it('should handle lowercase country codes', () => {
+      expect(service.isEUCountry('de')).toBe(true);
+      expect(service.isEUCountry('us')).toBe(false);
+    });
   });
 
   describe('isMinor', () => {

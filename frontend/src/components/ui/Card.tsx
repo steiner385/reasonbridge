@@ -58,12 +58,12 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       ghost: 'bg-gray-50 border border-transparent dark:bg-gray-900 dark:border-transparent',
     };
 
-    // Padding styles
+    // Padding styles - responsive for mobile/tablet/desktop
     const paddingStyles = {
       none: '',
-      sm: 'p-3',
-      md: 'p-6',
-      lg: 'p-8',
+      sm: 'p-2 sm:p-3',
+      md: 'p-3 sm:p-4 lg:p-6',
+      lg: 'p-4 sm:p-6 lg:p-8',
     };
 
     // Hover styles (with dark mode support)
@@ -111,15 +111,25 @@ export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ title, subtitle, action, children, className = '', ...props }, ref) => {
     return (
-      <div ref={ref} className={`flex items-start justify-between mb-4 ${className}`} {...props}>
-        <div className="flex-1">
+      <div
+        ref={ref}
+        className={`flex items-start justify-between mb-2 sm:mb-4 ${className}`}
+        {...props}
+      >
+        <div className="flex-1 min-w-0">
           {title && (
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+              {title}
+            </h3>
           )}
-          {subtitle && <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mt-0.5 sm:mt-1">
+              {subtitle}
+            </p>
+          )}
           {children}
         </div>
-        {action && <div className="ml-4 flex-shrink-0">{action}</div>}
+        {action && <div className="ml-2 sm:ml-4 flex-shrink-0">{action}</div>}
       </div>
     );
   },
@@ -150,10 +160,12 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ children, bordered = false, className = '', ...props }, ref) => {
-    const borderStyles = bordered ? 'border-t border-gray-200 dark:border-gray-700 pt-4' : '';
+    const borderStyles = bordered
+      ? 'border-t border-gray-200 dark:border-gray-700 pt-2 sm:pt-4'
+      : '';
 
     return (
-      <div ref={ref} className={`mt-4 ${borderStyles} ${className}`} {...props}>
+      <div ref={ref} className={`mt-2 sm:mt-4 ${borderStyles} ${className}`} {...props}>
         {children}
       </div>
     );

@@ -16,6 +16,10 @@ import type {
   QueueStats,
   ModerationActionStatus,
   ModerationSeverity,
+  CsamReport,
+  CsamReportsListResponse,
+  CsamReportStatus,
+  SafetyReportsStats,
 } from '../types/moderation';
 import { apiClient } from './api';
 
@@ -132,4 +136,115 @@ export async function reviewAppeal(
  */
 export async function getQueueStats(): Promise<QueueStats> {
   return apiClient.get<QueueStats>('/moderation/queue/stats');
+}
+
+/**
+ * Get list of CSAM reports (restricted to authorized moderators)
+ */
+export async function getCsamReports(
+  options: {
+    status?: CsamReportStatus;
+    pageSize?: number;
+    page?: number;
+  } = {},
+): Promise<CsamReportsListResponse> {
+  const params = new URLSearchParams();
+
+  if (options.status) {
+    params.append('status', options.status);
+  }
+  if (options.pageSize) {
+    params.append('pageSize', String(options.pageSize));
+  }
+  if (options.page) {
+    params.append('page', String(options.page));
+  }
+
+  const queryString = params.toString();
+  const endpoint = queryString
+    ? `/moderation/csam-reports?${queryString}`
+    : '/moderation/csam-reports';
+
+  return apiClient.get<CsamReportsListResponse>(endpoint);
+}
+
+/**
+ * Get CSAM report details
+ */
+export async function getCsamReport(reportId: string): Promise<CsamReport> {
+  return apiClient.get<CsamReport>(`/moderation/csam-reports/${reportId}`);
+}
+
+/**
+ * Update CSAM report status
+ */
+export async function updateCsamReportStatus(
+  reportId: string,
+  status: CsamReportStatus,
+  internalNotes?: string,
+): Promise<CsamReport> {
+  return apiClient.patch<CsamReport>(`/moderation/csam-reports/${reportId}`, {
+    status,
+    internalNotes,
+  });
+}
+
+/**
+ * Submit CSAM report to NCMEC
+ */
+export async function submitToNcmec(reportId: string): Promise<CsamReport> {
+  return apiClient.post<CsamReport>(`/moderation/csam-reports/${reportId}/submit-ncmec`, {});
+}
+
+/**
+ * Get safety reports statistics
+ */
+export async function getSafetyReportsStats(): Promise<SafetyReportsStats> {
+  return apiClient.get<SafetyReportsStats>('/moderation/csam-reports/stats');
+}
+
+/**
+ * Safety report request for panic button submissions
+ */
+export interface SubmitSafetyReportRequest {
+  reason: 'UNCOMFORTABLE' | 'SCARY_CONTENT' | 'STRANGER_CONTACT' | 'PERSONAL_QUESTIONS' | 'OTHER';
+  additionalInfo?: string;
+  contextUrl?: string;
+  contextTopicId?: string;
+  contextResponseId?: string;
+}
+
+/**
+ * Safety report response from panic button submission
+ */
+export interface SafetyReportResponse {
+  id: string;
+  reporterId: string;
+  reason: string;
+  priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
+  status: string;
+  createdAt: string;
+}
+
+/**
+ * Submit a safety report from the panic button
+ *
+ * @remarks
+ * This endpoint allows minor users to report safety concerns via the
+ * panic button. Reports are immediately routed to moderators with
+ * appropriate priority based on the reason selected.
+ *
+ * @param request - Safety report data
+ * @returns Created safety report details
+ */
+export async function submitSafetyReport(
+  request: SubmitSafetyReportRequest,
+): Promise<SafetyReportResponse> {
+  // Include current page URL as context
+  const contextUrl = typeof window !== 'undefined' ? window.location.href : undefined;
+
+  return apiClient.post<SafetyReportResponse>('/moderation/safety-reports', {
+    ...request,
+    contextUrl,
+  });
 }

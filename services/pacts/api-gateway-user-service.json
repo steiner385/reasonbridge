@@ -1,0 +1,1175 @@
+{
+  "consumer": {
+    "name": "api-gateway"
+  },
+  "interactions": [
+    {
+      "description": "a health check request",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the user service is healthy"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "details": {
+              "database": {
+                "status": "up"
+              },
+              "redis": {
+                "status": "up"
+              }
+            },
+            "error": {},
+            "info": {
+              "database": {
+                "status": "up"
+              },
+              "redis": {
+                "status": "up"
+              }
+            },
+            "status": "ok"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.details": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.database": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.database.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.redis": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.details.redis.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.database": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.database.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.redis": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.info.redis.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to confirm verification with OTP",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "pending verification with ID 990e8400-e29b-41d4-a716-446655440004 exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "otp": "123456"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.otp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verifications/990e8400-e29b-41d4-a716-446655440004/confirm"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "990e8400-e29b-41d4-a716-446655440004",
+            "status": "VERIFIED",
+            "type": "PHONE",
+            "verifiedAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifiedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to follow a user",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID bb0e8400-e29b-41d4-a716-446655440006 exists and is not followed"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/users/bb0e8400-e29b-41d4-a716-446655440006/follow"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "followedId": "bb0e8400-e29b-41d4-a716-446655440006",
+            "followerId": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.followerId": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.followedId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.followerId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get current user profile",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "authenticated user exists"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": ["Bearer valid-jwt-token"]
+        },
+        "method": "GET",
+        "path": "/users/me"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "displayName": "Current User",
+            "email": "current-user@example.com",
+            "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "status": "ACTIVE",
+            "trustScore": 0.85,
+            "updatedAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "verificationLevel": "VERIFIED"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.email": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.trustScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.verificationLevel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get follower count",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID dd0e8400-e29b-41d4-a716-446655440008 exists with followers"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/dd0e8400-e29b-41d4-a716-446655440008/followers/count"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "followerCount": 42,
+            "followingCount": 15,
+            "userId": "dd0e8400-e29b-41d4-a716-446655440008"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.followerCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.followingCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get non-existent user profile",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID 660e8400-e29b-41d4-a716-446655440001 does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/660e8400-e29b-41d4-a716-446655440001"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "error": "Not Found",
+            "message": "User with ID 660e8400-e29b-41d4-a716-446655440001 not found",
+            "statusCode": 404
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.statusCode": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get user profile by ID",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID 550e8400-e29b-41d4-a716-446655440000 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/550e8400-e29b-41d4-a716-446655440000"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "displayName": "Test User",
+            "email": "user@example.com",
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "status": "ACTIVE",
+            "trustScore": 0.75,
+            "updatedAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "verificationLevel": "BASIC"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.email": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.trustScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.verificationLevel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get user trust score",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID aa0e8400-e29b-41d4-a716-446655440005 exists with activity history"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/aa0e8400-e29b-41d4-a716-446655440005/trust-score"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "calculatedAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "components": {
+              "activityScore": 0.75,
+              "communityScore": 0.8,
+              "reputationScore": 0.7,
+              "verificationScore": 0.9
+            },
+            "factors": [
+              {
+                "impact": "positive",
+                "name": "account_age",
+                "value": 0.85,
+                "weight": 0.15
+              }
+            ],
+            "overallScore": 0.78,
+            "userId": "aa0e8400-e29b-41d4-a716-446655440005"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.calculatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.components": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.components.activityScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.components.communityScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.components.reputationScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.components.verificationScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.factors": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.factors[*].impact": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.factors[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.factors[*].value": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.factors[*].weight": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.overallScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get verification status",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID 880e8400-e29b-41d4-a716-446655440003 exists with verification records"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/verifications/880e8400-e29b-41d4-a716-446655440003"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "canRequestVerification": true,
+            "nextVerificationAvailable": null,
+            "userId": "880e8400-e29b-41d4-a716-446655440003",
+            "verificationLevel": "VERIFIED",
+            "verifications": [
+              {
+                "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+                "status": "VERIFIED",
+                "type": "PHONE",
+                "verifiedAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.verifications[*].id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.canRequestVerification": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.nextVerificationAvailable": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.verificationLevel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifications": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.verifications[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.verifications[*].status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifications[*].type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifications[*].verifiedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to initiate phone verification",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "authenticated user exists and can request verification"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "phoneNumber": "+1234567890",
+            "type": "PHONE"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.phoneNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verifications/request"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "expiresAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "status": "PENDING",
+            "type": "PHONE"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.expiresAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to unfollow a user",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID cc0e8400-e29b-41d4-a716-446655440007 exists and is followed"
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "path": "/users/cc0e8400-e29b-41d4-a716-446655440007/follow"
+      },
+      "response": {
+        "status": 204
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to update user profile",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID 770e8400-e29b-41d4-a716-446655440002 exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "displayName": "Updated Display Name"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PATCH",
+        "path": "/users/770e8400-e29b-41d4-a716-446655440002"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "displayName": "Updated Display Name",
+            "email": "user@example.com",
+            "id": "770e8400-e29b-41d4-a716-446655440002",
+            "status": "ACTIVE",
+            "updatedAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "verificationLevel": "BASIC"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.email": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.verificationLevel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "user-service"
+  }
+}
