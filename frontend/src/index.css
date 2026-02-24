@@ -59,7 +59,8 @@
 
   /* Code blocks */
   code {
-    @apply text-sm;
+    font-size: 0.875rem; /* 14px - equivalent to text-sm */
+    line-height: 1.25rem; /* equivalent to text-sm */
     font-variant-ligatures: none; /* Disable ligatures for code */
   }
 
@@ -107,7 +108,9 @@
   /* Skip navigation link (WCAG 2.4.1 Level A) */
   .skip-link {
     @apply absolute left-4 top-4 z-[9999];
-    @apply rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white;
+    @apply rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white;
+    font-size: 0.875rem; /* 14px - equivalent to text-sm */
+    line-height: 1.25rem;
     @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
 
     /* Hidden by default, visible on focus */
@@ -222,7 +225,9 @@
   .child-friendly .safe-space-badge {
     @apply bg-[var(--color-accent-mint)] text-gray-800;
     @apply px-3 py-1.5 rounded-full;
-    @apply text-sm font-medium;
+    @apply font-medium;
+    font-size: 0.875rem; /* 14px - equivalent to text-sm */
+    line-height: 1.25rem;
     @apply flex items-center gap-2;
   }
 
