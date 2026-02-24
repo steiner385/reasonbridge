@@ -6,6 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { CsamReportStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -205,7 +206,7 @@ export class NCMECReportingService {
       await this.updateCsamReport(request.csamReportId, {
         ncmecReportId,
         ncmecSubmittedAt: new Date(),
-        status: 'SUBMITTED',
+        status: CsamReportStatus.SUBMITTED_NCMEC,
       });
 
       this.logger.log(`NCMEC report submitted successfully: ${ncmecReportId}`);
@@ -220,10 +221,10 @@ export class NCMECReportingService {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to submit NCMEC report: ${errorMessage}`);
 
-      // Update database with failure
+      // Update database with failure - keep as PENDING_REVIEW for retry
       await this.updateCsamReport(request.csamReportId, {
         ncmecSubmissionError: errorMessage,
-        status: 'SUBMISSION_FAILED',
+        status: CsamReportStatus.PENDING_REVIEW,
       });
 
       return {
@@ -313,7 +314,7 @@ export class NCMECReportingService {
     const pending = await this.prisma.csamReport.findMany({
       where: {
         ncmecReportId: null,
-        status: { in: ['PENDING', 'SUBMISSION_FAILED'] },
+        status: { in: [CsamReportStatus.PENDING_REVIEW, CsamReportStatus.EVIDENCE_PRESERVED] },
       },
       select: {
         id: true,
@@ -346,8 +347,8 @@ export class NCMECReportingService {
     try {
       const response = await this.callNCMECApi(`/reports/${ncmecReportId}/status`, null, 'GET');
       return {
-        status: response.status,
-        lastUpdated: new Date(response.lastUpdated),
+        status: response['status'] as string,
+        lastUpdated: new Date(response['lastUpdated'] as string),
       };
     } catch (error) {
       this.logger.error(`Failed to check NCMEC report status: ${error}`);
@@ -362,11 +363,11 @@ export class NCMECReportingService {
     // Generate a mock NCMEC ID for testing/development
     const mockId = `MOCK-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-    // Update database to track that we would have submitted
+    // Update database to track that we would have submitted (mock mode)
     await this.updateCsamReport(request.csamReportId, {
       ncmecReportId: mockId,
       ncmecSubmittedAt: new Date(),
-      status: 'MOCK_SUBMITTED',
+      status: CsamReportStatus.SUBMITTED_NCMEC,
     });
 
     this.logger.warn(
@@ -465,7 +466,7 @@ export class NCMECReportingService {
       ncmecReportId?: string;
       ncmecSubmittedAt?: Date;
       ncmecSubmissionError?: string;
-      status?: string;
+      status?: CsamReportStatus;
     },
   ): Promise<void> {
     await this.prisma.csamReport.update({
