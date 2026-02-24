@@ -198,20 +198,22 @@ export class NCMECReportingService {
 
       // Submit to NCMEC API
       const response = await this.callNCMECApi('/reports', payload);
+      const ncmecReportId = response['ncmecReportId'] as string | undefined;
+      const confirmationNumber = response['confirmationNumber'] as string | undefined;
 
       // Update local database with submission result
       await this.updateCsamReport(request.csamReportId, {
-        ncmecReportId: response.ncmecReportId,
+        ncmecReportId,
         ncmecSubmittedAt: new Date(),
         status: 'SUBMITTED',
       });
 
-      this.logger.log(`NCMEC report submitted successfully: ${response.ncmecReportId}`);
+      this.logger.log(`NCMEC report submitted successfully: ${ncmecReportId}`);
 
       return {
         success: true,
-        ncmecReportId: response.ncmecReportId,
-        confirmationNumber: response.confirmationNumber,
+        ncmecReportId,
+        confirmationNumber,
         submittedAt: new Date(),
       };
     } catch (error) {
@@ -276,12 +278,14 @@ export class NCMECReportingService {
         incidentDateTime: csamReport.createdAt,
         detectionMethod:
           csamReport.detectionSource as NCMECReportRequest['incident']['detectionMethod'],
-        aiConfidenceScore: csamReport.aiConfidenceScore ?? undefined,
+        aiConfidenceScore: csamReport.aiConfidenceScore
+          ? Number(csamReport.aiConfidenceScore)
+          : undefined,
       },
       content: {
         contentType: csamReport.contentType,
         contentId: csamReport.contentId,
-        contentHash: csamReport.evidenceHash,
+        contentHash: csamReport.evidenceHash ?? '',
         evidenceS3Key: csamReport.evidenceS3Key,
       },
       reportedUser: {

@@ -5,7 +5,6 @@
 
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { ConfigModule } from '@nestjs/config';
 import { ContentScreeningService } from './content-screening.service.js';
 import { AIReviewService } from './ai-review.service.js';
 import { ModerationActionsService } from './moderation-actions.service.js';
@@ -20,7 +19,7 @@ import { PrismaModule } from '../prisma/prisma.module.js';
 import { QueueModule } from '../queue/queue.module.js';
 
 @Module({
-  imports: [PrismaModule, QueueModule, HttpModule, ConfigModule],
+  imports: [PrismaModule, QueueModule, HttpModule],
   providers: [
     ContentScreeningService,
     AIReviewService,

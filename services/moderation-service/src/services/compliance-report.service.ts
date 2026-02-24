@@ -294,8 +294,8 @@ export class ComplianceReportService {
       },
       select: {
         status: true,
-        reviewResult: true,
-        groomingDetected: true,
+        decision: true,
+        aiFlags: true,
       },
     });
 
@@ -304,13 +304,15 @@ export class ComplianceReportService {
     let contentFlagged = 0;
 
     for (const item of reviewQueue) {
-      if (item.groomingDetected) {
+      // Check aiFlags for grooming detection
+      const aiFlags = item.aiFlags as Record<string, unknown> | null;
+      if (aiFlags?.['groomingDetected']) {
         groomingDetections++;
       }
-      if (item.reviewResult === 'BLOCKED') {
+      if (item.decision === 'BLOCKED' || item.decision === 'REJECTED') {
         contentBlocked++;
       }
-      if (item.reviewResult === 'FLAGGED' || item.status === 'PENDING') {
+      if (item.decision === 'FLAGGED' || item.status === 'PENDING') {
         contentFlagged++;
       }
     }
@@ -391,12 +393,12 @@ export class ComplianceReportService {
     const reviewItems = await this.prisma.childContentReviewQueue.findMany({
       where: {
         createdAt: { gte: startDate, lte: endDate },
-        status: 'COMPLETED',
+        status: { in: ['APPROVED', 'REJECTED'] },
       },
       select: {
         priority: true,
         createdAt: true,
-        completedAt: true,
+        reviewedAt: true,
       },
     });
 
@@ -414,10 +416,10 @@ export class ComplianceReportService {
     let breachedSla = 0;
 
     for (const item of reviewItems) {
-      if (!item.completedAt) continue;
+      if (!item.reviewedAt) continue;
 
       totalProcessed++;
-      const processingTime = (item.completedAt.getTime() - item.createdAt.getTime()) / (1000 * 60);
+      const processingTime = (item.reviewedAt.getTime() - item.createdAt.getTime()) / (1000 * 60);
       const slaLimit = slaLimits[item.priority] || 1440;
       const breached = processingTime > slaLimit;
 
@@ -442,8 +444,10 @@ export class ComplianceReportService {
 
     for (const priority of Object.keys(byPriority)) {
       const stats = byPriority[priority];
-      stats.complianceRate =
-        stats.total > 0 ? ((stats.total - stats.breached) / stats.total) * 100 : 100;
+      if (stats) {
+        stats.complianceRate =
+          stats.total > 0 ? ((stats.total - stats.breached) / stats.total) * 100 : 100;
+      }
     }
 
     return {
@@ -474,11 +478,13 @@ export class ComplianceReportService {
       },
     });
 
-    // Count minors with parental consent
+    // Count minors with verified parental consent
     const withParentalConsent = await this.prisma.user.count({
       where: {
         isMinor: true,
-        parentalConsentVerified: true,
+        parentalConsent: {
+          verifiedAt: { not: null },
+        },
       },
     });
 
