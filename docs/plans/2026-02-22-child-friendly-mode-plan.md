@@ -15,6 +15,7 @@
 ### Task 1: Add ComplianceAuditLog Model
 
 **Files:**
+
 - Modify: `packages/db-models/prisma/schema.prisma` (append after line 1141)
 
 **Step 1: Add the ComplianceAuditLog model to schema**
@@ -73,6 +74,7 @@ git commit -m "feat(db): add ComplianceAuditLog model for regulatory compliance"
 ### Task 2: Add lastAgeVerifiedAt Field to User
 
 **Files:**
+
 - Modify: `packages/db-models/prisma/schema.prisma` (User model, around line 50)
 
 **Step 1: Add field to User model**
@@ -100,6 +102,7 @@ git commit -m "feat(db): add lastAgeVerifiedAt for annual age re-verification"
 ### Task 3: Create ComplianceAuditService
 
 **Files:**
+
 - Create: `services/user-service/src/compliance/compliance-audit.service.ts`
 - Create: `services/user-service/src/compliance/compliance-audit.service.test.ts`
 
@@ -259,6 +262,7 @@ Expected: PASS
 **Step 5: Export from index and add to module**
 
 Update `services/user-service/src/compliance/index.ts`:
+
 ```typescript
 export * from './compliance-audit.service.js';
 ```
@@ -277,6 +281,7 @@ git commit -m "feat(user-service): add ComplianceAuditService for regulatory aud
 ### Task 4: Enhance RegionalRules Interface
 
 **Files:**
+
 - Modify: `services/user-service/src/compliance/compliance.service.ts`
 - Modify: `services/user-service/src/compliance/compliance.service.test.ts` (if exists, else create)
 
@@ -407,6 +412,7 @@ git commit -m "feat(user-service): enhance RegionalRules with full compliance pr
 ### Task 5: Integrate Audit Logging into AgeVerificationService
 
 **Files:**
+
 - Modify: `services/user-service/src/compliance/age-verification.service.ts`
 - Modify: `services/user-service/src/compliance/age-verification.service.test.ts`
 
@@ -422,7 +428,7 @@ it('should log AGE_VERIFIED action to audit trail', async () => {
   expect(mockAuditService.logAction).toHaveBeenCalledWith(
     userId,
     'AGE_VERIFIED',
-    expect.objectContaining({ region: 'US' })
+    expect.objectContaining({ region: 'US' }),
   );
 });
 ```
@@ -473,11 +479,13 @@ git commit -m "feat(user-service): integrate audit logging into AgeVerificationS
 ### Task 6: Integrate Audit Logging into ParentalConsentService
 
 **Files:**
+
 - Modify: `services/user-service/src/compliance/parental-consent.service.ts`
 
 **Step 1: Add audit logging for consent actions**
 
 Inject `ComplianceAuditService` and log these actions:
+
 - `CONSENT_REQUESTED` in `initiateConsent()`
 - `CONSENT_VERIFIED` in `verifyConsent()`
 - `CONSENT_WITHDRAWN` in `withdrawConsent()`
@@ -516,6 +524,7 @@ git commit -m "feat(user-service): add audit logging to ParentalConsentService"
 ### Task 7: Create Annual Age Re-verification Job
 
 **Files:**
+
 - Create: `services/user-service/src/compliance/age-reverification.job.ts`
 - Create: `services/user-service/src/compliance/age-reverification.job.test.ts`
 
@@ -557,7 +566,7 @@ describe('AgeReverificationJob', () => {
           isMinor: true,
           lastAgeVerifiedAt: expect.any(Object),
         }),
-      })
+      }),
     );
   });
 
@@ -607,7 +616,7 @@ export class AgeReverificationJob {
     const users = await this.findUsersNeedingReverification();
 
     if (users.length > 0) {
-      const userIds = users.map(u => u.id);
+      const userIds = users.map((u) => u.id);
       await this.flagForReverification(userIds);
       this.logger.log(`Flagged ${users.length} users for age re-verification`);
     }
@@ -654,6 +663,7 @@ git commit -m "feat(user-service): add annual age re-verification job"
 ### Task 8: Add Privacy Policy Display to Consent Page
 
 **Files:**
+
 - Create: `frontend/src/pages/ParentalConsent/PrivacyPolicySummary.tsx`
 - Modify: `frontend/src/pages/ParentalConsent/VerifyConsent.tsx`
 
@@ -745,6 +755,7 @@ git commit -m "feat(frontend): add age-appropriate privacy summary to consent pa
 ### Task 9-15: Remaining Phase 1 Tasks
 
 Continue with similar TDD pattern for:
+
 - **Task 9:** Consent withdrawal triggers data deletion request
 - **Task 10:** Weekly activity digest email template
 - **Task 11:** Parent digest scheduler in notification-service
@@ -760,6 +771,7 @@ Continue with similar TDD pattern for:
 ### Task 16: Add ChildContentReviewQueue Model
 
 **Files:**
+
 - Modify: `packages/db-models/prisma/schema.prisma`
 
 **Step 1: Add enums and model**
@@ -817,6 +829,7 @@ model ChildContentReviewQueue {
 ### Task 17: Create ChildContentModerationService
 
 **Files:**
+
 - Create: `services/moderation-service/src/services/child-content-moderation.service.ts`
 - Create: `services/moderation-service/src/services/child-content-moderation.service.test.ts`
 
@@ -853,7 +866,12 @@ describe('ChildContentModerationService', () => {
 ```typescript
 @Injectable()
 export class ChildContentModerationService {
-  async queueForReview(responseId: string, topicId: string, authorId: string, content: string): Promise<void>;
+  async queueForReview(
+    responseId: string,
+    topicId: string,
+    authorId: string,
+    content: string,
+  ): Promise<void>;
   async approveContent(queueId: string, moderatorId: string): Promise<void>;
   async rejectContent(queueId: string, moderatorId: string, reason: string): Promise<void>;
   async escalate(queueId: string, reason: string): Promise<void>;
@@ -896,6 +914,7 @@ export class ChildContentModerationService {
 ### Task 28: Create ChildSafetyContext
 
 **Files:**
+
 - Create: `frontend/src/contexts/ChildSafetyContext.tsx`
 - Create: `frontend/src/contexts/ChildSafetyContext.test.tsx`
 
