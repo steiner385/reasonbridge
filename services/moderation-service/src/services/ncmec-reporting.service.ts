@@ -287,7 +287,7 @@ export class NCMECReportingService {
         contentType: csamReport.contentType,
         contentId: csamReport.contentId,
         contentHash: csamReport.evidenceHash ?? '',
-        evidenceS3Key: csamReport.evidenceS3Key,
+        evidenceS3Key: csamReport.evidenceS3Key ?? '',
       },
       reportedUser: {
         userId: csamReport.contentAuthorId ?? 'unknown',

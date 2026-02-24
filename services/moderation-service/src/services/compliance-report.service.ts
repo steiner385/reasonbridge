@@ -433,9 +433,10 @@ export class ComplianceReportService {
       if (!byPriority[item.priority]) {
         byPriority[item.priority] = { total: 0, breached: 0, complianceRate: 0 };
       }
-      byPriority[item.priority].total++;
+      const priorityStats = byPriority[item.priority]!;
+      priorityStats.total++;
       if (breached) {
-        byPriority[item.priority].breached++;
+        priorityStats.breached++;
       }
     }
 
