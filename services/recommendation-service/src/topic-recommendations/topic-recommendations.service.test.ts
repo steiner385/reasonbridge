@@ -258,6 +258,8 @@ describe('TopicRecommendationsService', () => {
   describe('getTrendingTopics', () => {
     const mockTopicWithCount = {
       ...mockTopic,
+      // Use recent lastActivityAt to ensure positive trending score
+      lastActivityAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
       _count: {
         responses: 15,
       },
