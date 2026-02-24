@@ -205,6 +205,38 @@ class AuthService {
   }
 
   /**
+   * Enforce session-only storage for minor users (COPPA/GDPR-K compliance)
+   *
+   * Moves any tokens from localStorage to sessionStorage to ensure:
+   * - Tokens don't persist across browser sessions
+   * - Minor users must re-authenticate on each session
+   * - No persistent tracking data is stored
+   *
+   * @param isMinor - Whether the user is a minor
+   */
+  enforceSessionOnlyForMinor(isMinor: boolean): void {
+    if (!isMinor) {
+      return; // Adult users can use persistent storage
+    }
+
+    // Check if tokens are in localStorage (persistent) and move to sessionStorage
+    const authToken = localStorage.getItem('authToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (authToken || refreshToken) {
+      // Move to session-only storage
+      if (authToken) {
+        sessionStorage.setItem('authToken', authToken);
+        localStorage.removeItem('authToken');
+      }
+      if (refreshToken) {
+        sessionStorage.setItem('refreshToken', refreshToken);
+        localStorage.removeItem('refreshToken');
+      }
+    }
+  }
+
+  /**
    * Get the refresh token
    * Checks both localStorage and sessionStorage
    */

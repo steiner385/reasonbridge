@@ -21,6 +21,7 @@ import type {
 import type {
   ModerationActionRequestedEvent,
   UserTrustUpdatedEvent,
+  SafetyReportCreatedEvent,
 } from '@reason-bridge/event-schemas/moderation';
 
 /**
@@ -337,5 +338,73 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
     });
 
     this.logger.log(`Emitted ${eventType} to user ${userId} in room ${room}`);
+  }
+
+  /**
+   * Subscribe to safety report notifications (for moderators)
+   * Used to receive real-time alerts when children submit panic button reports
+   */
+  @SubscribeMessage('subscribe:safety-reports')
+  async handleSubscribeSafetyReports(
+    @MessageBody() _data: Record<string, unknown>,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const room = 'safety:reports';
+
+    await client.join(room);
+    this.logger.log(`Client ${client.id} subscribed to safety report notifications`);
+
+    client.emit('subscription:confirmed', {
+      type: 'safety-reports',
+      room,
+    });
+  }
+
+  /**
+   * Unsubscribe from safety report notifications
+   */
+  @SubscribeMessage('unsubscribe:safety-reports')
+  async handleUnsubscribeSafetyReports(
+    @MessageBody() _data: Record<string, unknown>,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const room = 'safety:reports';
+
+    await client.leave(room);
+    this.logger.log(`Client ${client.id} unsubscribed from safety report notifications`);
+
+    client.emit('unsubscription:confirmed', {
+      type: 'safety-reports',
+      room,
+    });
+  }
+
+  /**
+   * Broadcast safety report created event to subscribed moderators
+   * Called by SafetyReportNotificationHandler when a child submits a panic button report
+   *
+   * @remarks
+   * URGENT and HIGH priority reports trigger immediate notifications to ensure
+   * rapid moderator response for child safety incidents.
+   */
+  emitSafetyReportCreated(event: SafetyReportCreatedEvent): void {
+    const room = 'safety:reports';
+
+    this.server.to(room).emit('safety:report-created', {
+      reportId: event.payload.reportId,
+      reporterId: event.payload.reporterId,
+      reason: event.payload.reason,
+      priority: event.payload.priority,
+      additionalInfo: event.payload.additionalInfo,
+      contextUrl: event.payload.contextUrl,
+      contextTopicId: event.payload.contextTopicId,
+      contextResponseId: event.payload.contextResponseId,
+      createdAt: event.payload.createdAt,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(
+      `Broadcasted safety.report.created event (priority: ${event.payload.priority}) for report ${event.payload.reportId} to room ${room}`,
+    );
   }
 }

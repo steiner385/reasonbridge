@@ -274,7 +274,8 @@ describe('CredentialSubmitForm', () => {
 
   describe('Form Submission', () => {
     it('should call onSubmit with correct data', async () => {
-      const user = userEvent.setup();
+      // Use delay: null to speed up typing for long URLs
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill all fields
@@ -307,7 +308,8 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should call onSubmit with expiration date when provided', async () => {
-      const user = userEvent.setup();
+      // Use delay: null to speed up typing
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill required fields
@@ -335,7 +337,8 @@ describe('CredentialSubmitForm', () => {
     });
 
     it('should omit optional fields when not provided', async () => {
-      const user = userEvent.setup();
+      // Use delay: null to speed up typing
+      const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
       // Fill only required fields

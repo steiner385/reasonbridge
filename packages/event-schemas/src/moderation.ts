@@ -118,6 +118,67 @@ export interface UserTrustUpdatedEvent extends BaseEvent<
 }
 
 /**
+ * Reason for safety report (from panic button)
+ */
+export type SafetyReportReason =
+  | 'UNCOMFORTABLE'
+  | 'SCARY_CONTENT'
+  | 'STRANGER_CONTACT'
+  | 'PERSONAL_QUESTIONS'
+  | 'OTHER';
+
+/**
+ * Priority level for safety reports
+ */
+export type SafetyReportPriority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
+
+/**
+ * Payload for safety.report.created event
+ * Published when a child submits a safety report via panic button
+ */
+export interface SafetyReportCreatedPayload {
+  /** Unique report ID */
+  reportId: string;
+  /** ID of the user who submitted the report */
+  reporterId: string;
+  /** Reason for the safety report */
+  reason: SafetyReportReason;
+  /** Priority assigned to the report */
+  priority: SafetyReportPriority;
+  /** Additional context from the reporter (optional) */
+  additionalInfo?: string;
+  /** Context - page URL where report was submitted */
+  contextUrl?: string;
+  /** Context - topic ID if applicable */
+  contextTopicId?: string;
+  /** Context - response ID if applicable */
+  contextResponseId?: string;
+  /** When the report was created */
+  createdAt: string;
+}
+
+/**
+ * Event published when a safety report is created
+ */
+export interface SafetyReportCreatedEvent extends BaseEvent<
+  'safety.report.created',
+  SafetyReportCreatedPayload
+> {
+  type: 'safety.report.created';
+}
+
+/**
+ * Event types for moderation service - extended with safety reports
+ */
+export const MODERATION_EVENT_TYPES_EXTENDED = {
+  ...MODERATION_EVENT_TYPES,
+  SAFETY_REPORT_CREATED: 'safety.report.created',
+} as const;
+
+/**
  * Union type of all moderation service events
  */
-export type ModerationEvent = ModerationActionRequestedEvent | UserTrustUpdatedEvent;
+export type ModerationEvent =
+  | ModerationActionRequestedEvent
+  | UserTrustUpdatedEvent
+  | SafetyReportCreatedEvent;

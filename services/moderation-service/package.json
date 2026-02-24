@@ -19,10 +19,12 @@
   "dependencies": {
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
+    "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.1.13",
     "@nestjs/core": "^11.1.13",
     "@nestjs/platform-fastify": "^11.1.13",
     "@nestjs/swagger": "^11.2.6",
+    "axios": "^1.7.7",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "7.4.0",
     "@reason-bridge/common": "workspace:*",
