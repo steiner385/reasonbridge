@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { of, throwError } from 'rxjs';
+import { CsamReportStatus } from '@prisma/client';
 import { NCMECReportingService } from '../ncmec-reporting.service.js';
 import type { NCMECReportRequest } from '../ncmec-reporting.service.js';
 
@@ -91,7 +92,7 @@ describe('NCMECReportingService', () => {
       expect(prisma.csamReport.update).toHaveBeenCalledWith({
         where: { id: 'csam-123' },
         data: expect.objectContaining({
-          status: 'MOCK_SUBMITTED',
+          status: CsamReportStatus.SUBMITTED_NCMEC,
         }),
       });
     });
@@ -151,7 +152,7 @@ describe('NCMECReportingService', () => {
       expect(prisma.csamReport.update).toHaveBeenCalledWith({
         where: { id: 'csam-123' },
         data: expect.objectContaining({
-          status: 'SUBMISSION_FAILED',
+          status: CsamReportStatus.PENDING_REVIEW,
           ncmecSubmissionError: 'API connection failed',
         }),
       });

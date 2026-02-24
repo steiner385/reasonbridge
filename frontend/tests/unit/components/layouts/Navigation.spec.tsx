@@ -3,11 +3,16 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { Navigation } from '../../../../src/components/layouts/Navigation';
+import { ChildSafetyProvider } from '../../../../src/contexts/ChildSafetyContext';
 import * as notificationsHook from '../../../../src/hooks/useNotifications';
 
 describe('Navigation Component', () => {
   const renderWithRouter = (component: React.ReactElement, initialRoute = '/') => {
-    return render(<MemoryRouter initialEntries={[initialRoute]}>{component}</MemoryRouter>);
+    return render(
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <ChildSafetyProvider>{component}</ChildSafetyProvider>
+      </MemoryRouter>,
+    );
   };
 
   const mockUseNotifications = (unreadCount: number = 0) => {
