@@ -225,9 +225,7 @@
   .child-friendly .safe-space-badge {
     @apply bg-[var(--color-accent-mint)] text-gray-800;
     @apply px-3 py-1.5 rounded-full;
-    @apply font-medium;
-    font-size: 0.875rem; /* 14px - equivalent to text-sm */
-    line-height: 1.25rem;
+@apply text-sm font-medium;
     @apply flex items-center gap-2;
   }
 

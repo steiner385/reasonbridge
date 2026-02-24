@@ -43,7 +43,6 @@
 ### Existing Infrastructure to Leverage
 
 The codebase already has:
-
 - `birthDate`, `isMinor`, `regionalConsentAge`, `parentEmail`, `parentConsentStatus` fields on User
 - `ComplianceService`, `AgeVerificationService`, `ParentalConsentService` services
 - `ConsentRequiredRoute` frontend guard
@@ -70,7 +69,6 @@ interface RegionalComplianceRules {
 ```
 
 Regional rules:
-
 - **US (COPPA):** consentAge=13, no DMs, no profile visibility to adults
 - **UK (AADC):** consentAge=13, manual moderation required, high privacy defaults
 - **EU (GDPR):** consentAge=16 (with member state overrides: Belgium=13, Spain=14, etc.)
@@ -103,7 +101,6 @@ model ComplianceAuditLog {
 ### 2.4 Parental Consent Completion
 
 Gaps to fill:
-
 - Parent consent page needs age-appropriate privacy policy display
 - Consent withdrawal must trigger 48-hour data deletion
 - Weekly activity digest email not implemented
@@ -155,7 +152,6 @@ enum ReviewPriority {
 ### 3.2 Automatic Queue Routing
 
 In discussion-service, when a response is created:
-
 1. Check if `topic.isMatureContent = false` (child-accessible)
 2. Check if any child users are participants in the topic
 3. If either true → route to `ChildContentReviewQueue`
@@ -168,7 +164,7 @@ New `GroomingDetectorService` in ai-service:
 
 ```typescript
 interface GroomingAnalysisResult {
-  riskScore: number; // 0-1
+  riskScore: number;         // 0-1
   flaggedPatterns: string[]; // PERSONAL_INFO_REQUEST, MEETING_ATTEMPT, ISOLATION_TACTIC
   confidence: number;
   recommendation: 'ALLOW' | 'REVIEW' | 'BLOCK';
@@ -176,7 +172,6 @@ interface GroomingAnalysisResult {
 ```
 
 Detection patterns:
-
 - Personal info requests: "what's your phone number", "where do you live"
 - Meeting attempts: "let's meet up", "can we talk privately"
 - Age-inappropriate content: sexual references, violence
@@ -208,15 +203,15 @@ interface ChildSafetyState {
 
 UI modifications when `isChildMode: true`:
 
-| Element          | Standard      | Child-Friendly                         |
-| ---------------- | ------------- | -------------------------------------- |
-| Font size        | 14px base     | 16px base                              |
-| Colors           | Brand palette | Softer, high-contrast                  |
-| Navigation       | Full menu     | Simplified (Topics, My Activity, Help) |
-| User search      | Visible       | Hidden                                 |
-| Trending topics  | Visible       | Hidden                                 |
-| Profile editing  | Full          | Avatar only                            |
-| Shield indicator | None          | Floating "Safe Space" badge            |
+| Element | Standard | Child-Friendly |
+|---------|----------|----------------|
+| Font size | 14px base | 16px base |
+| Colors | Brand palette | Softer, high-contrast |
+| Navigation | Full menu | Simplified (Topics, My Activity, Help) |
+| User search | Visible | Hidden |
+| Trending topics | Visible | Hidden |
+| Profile editing | Full | Avatar only |
+| Shield indicator | None | Floating "Safe Space" badge |
 
 ### 4.2 Panic Button
 
@@ -234,14 +229,12 @@ Floating `PanicButton` component (bottom-right, z-50) for minor accounts:
 Route: `/parent/dashboard/:token` (token-authenticated, no login required)
 
 Features:
-
 - Activity timeline (topics joined, responses posted)
 - Usage statistics (time active, responses this week)
 - Settings: email preferences, usage limits, topic restrictions
 - Consent withdrawal button (triggers data deletion)
 
 API endpoints:
-
 - `GET /parent/dashboard/:token` - Dashboard data
 - `PUT /parent/settings/:token` - Update preferences
 - `POST /parent/withdraw/:token` - Withdraw consent
@@ -253,7 +246,6 @@ API endpoints:
 ### 5.1 Cookie-less Sessions for Minors
 
 When `user.isMinor`:
-
 - Use session-only tokens (not persisted to localStorage)
 - Disable Google Analytics
 - Disable Sentry (or anonymize completely)
@@ -287,7 +279,6 @@ enum DeletionStatus {
 ```
 
 Deletion scope (48-hour SLA):
-
 1. User record → anonymize (keep ID for referential integrity)
 2. Responses → delete content, keep tombstone
 3. Topics created → transfer ownership or delete if empty
@@ -300,7 +291,6 @@ Deletion scope (48-hour SLA):
 Mandatory reporting to NCMEC CyberTipline (US) within 24 hours.
 
 New `CsamReport` model for tracking:
-
 - Detection source (AI, moderator, panic report)
 - Evidence preservation (content snapshot, metadata)
 - Submission status and case number
@@ -311,7 +301,6 @@ Flow: Detection → Auto-preserve evidence → Admin notified → Manual NCMEC s
 ### 5.4 Weekly Parent Digest
 
 Scheduled email (Sundays 9am parent's local time):
-
 - Topics participated in with response counts
 - Time active (approximate)
 - Safety status (concerns flagged or not)
@@ -352,60 +341,57 @@ model User {
 
 ### Age Verification
 
-| Scenario                         | Handling                             |
-| -------------------------------- | ------------------------------------ |
-| Future birthdate                 | Reject with "Invalid date"           |
-| Age 100+                         | Flag for manual review               |
-| Exactly consent age today        | Treat as adult (>=)                  |
+| Scenario | Handling |
+|----------|----------|
+| Future birthdate | Reject with "Invalid date" |
+| Age 100+ | Flag for manual review |
+| Exactly consent age today | Treat as adult (>=) |
 | Country change post-registration | Re-evaluate, may trigger new consent |
-| Leap year birthday               | Use Feb 28 in non-leap years         |
+| Leap year birthday | Use Feb 28 in non-leap years |
 
 ### Parental Consent
 
-| Scenario          | Handling                            |
-| ----------------- | ----------------------------------- |
-| Email bounces     | Mark FAILED, notify user            |
-| Token expires     | Allow resend with new token         |
-| Token reused      | Show "Already verified"             |
+| Scenario | Handling |
+|----------|----------|
+| Email bounces | Mark FAILED, notify user |
+| Token expires | Allow resend with new token |
+| Token reused | Show "Already verified" |
 | Consent withdrawn | Block posting with friendly message |
 
 ### Content Moderation
 
-| Scenario                           | Handling                        |
-| ---------------------------------- | ------------------------------- |
-| Review pending >24h                | Auto-reject with explanation    |
-| Topic marked mature after approval | Grandfather existing responses  |
-| Minor turns 18                     | No change to historical content |
+| Scenario | Handling |
+|----------|----------|
+| Review pending >24h | Auto-reject with explanation |
+| Topic marked mature after approval | Grandfather existing responses |
+| Minor turns 18 | No change to historical content |
 
 ### Failure Modes
 
-| Failure                   | Degradation                        |
-| ------------------------- | ---------------------------------- |
-| GeoIP down                | Fall back to user-declared country |
-| AI moderation unavailable | Route all to manual queue          |
-| Email service down        | Queue with retry backoff           |
-| NCMEC API unavailable     | Alert admin for manual submission  |
+| Failure | Degradation |
+|---------|-------------|
+| GeoIP down | Fall back to user-declared country |
+| AI moderation unavailable | Route all to manual queue |
+| Email service down | Queue with retry backoff |
+| NCMEC API unavailable | Alert admin for manual submission |
 
 ---
 
 ## 8. Testing Strategy
 
 ### Unit Tests
-
 - `ComplianceService.getRegionalRules()` - All country codes
 - `ComplianceService.calculateAge()` - Edge cases
 - `GroomingDetectorService` - Pattern matching
 - `DataDeletionService` - Deletion scope
 
 ### Integration Tests
-
 - Age verification → consent flow
 - Content queue routing and approval
 - Panic report → moderator notification
 - Consent withdrawal → data deletion
 
 ### E2E Tests
-
 ```
 frontend/e2e/child-safety/
 ├── minor-registration.spec.ts
@@ -418,14 +404,12 @@ frontend/e2e/child-safety/
 ```
 
 ### Security Tests
-
 - Age spoofing attempts
 - Consent token reuse
 - Feature bypass via direct API
 - Data exfiltration attempts
 
 ### Compliance Audit Tests
-
 - COPPA: blocks <13 without consent, 48h deletion
 - GDPR: correct consent ages, right to erasure
 - AADC: high privacy defaults, no nudge techniques
@@ -434,12 +418,12 @@ frontend/e2e/child-safety/
 
 ## 9. Implementation Phases
 
-| Phase       | Scope               | Tasks |
-| ----------- | ------------------- | ----- |
-| **Phase 1** | Core Compliance     | ~15   |
-| **Phase 2** | Content Safety      | ~12   |
-| **Phase 3** | UX Layer            | ~14   |
-| **Phase 4** | Privacy & Reporting | ~10   |
+| Phase | Scope | Tasks |
+|-------|-------|-------|
+| **Phase 1** | Core Compliance | ~15 |
+| **Phase 2** | Content Safety | ~12 |
+| **Phase 3** | UX Layer | ~14 |
+| **Phase 4** | Privacy & Reporting | ~10 |
 
 **Total estimated tasks:** ~51
 
