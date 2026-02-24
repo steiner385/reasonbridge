@@ -562,7 +562,7 @@ describe('CredentialReviewQueue', () => {
     });
 
     it('should close modal after successful action', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <CredentialReviewQueue
           credentials={mockCredentials}
@@ -577,9 +577,13 @@ describe('CredentialReviewQueue', () => {
       const confirmButton = screen.getByRole('button', { name: /confirm/i });
       await user.click(confirmButton);
 
-      await waitFor(() => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      });
+      // Component has 1000ms delay before closing modal - need longer timeout
+      await waitFor(
+        () => {
+          expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        },
+        { timeout: 2000 },
+      );
     });
   });
 

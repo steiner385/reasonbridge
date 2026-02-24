@@ -27,7 +27,7 @@ describe('InvitationsService', () => {
   describe('createInvitation', () => {
     it('should create invitation with token and 7-day expiry', async () => {
       mockPrisma.topicInvitation.findFirst.mockResolvedValue(null);
-      mockPrisma.topicInvitation.create.mockImplementation(({ data }) =>
+      mockPrisma.topicInvitation.create.mockImplementation(({ data }: { data: any }) =>
         Promise.resolve({
           id: 'inv-1',
           ...data,
@@ -79,7 +79,7 @@ describe('InvitationsService', () => {
 
     it('should allow invitation via email', async () => {
       mockPrisma.topicInvitation.findFirst.mockResolvedValue(null);
-      mockPrisma.topicInvitation.create.mockImplementation(({ data }) =>
+      mockPrisma.topicInvitation.create.mockImplementation(({ data }: { data: any }) =>
         Promise.resolve({ id: 'inv-1', ...data, createdAt: new Date() }),
       );
 

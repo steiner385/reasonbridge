@@ -15,6 +15,7 @@
 ### Task 1: Create Conversation Mode Types
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/types/conversation-mode.types.ts`
 - Test: `services/ai-service/src/simulator/types/conversation-mode.types.spec.ts`
 
@@ -101,6 +102,7 @@ git commit -m "feat(ai-service): add conversation mode types for simulator"
 ### Task 2: Create Chat Request DTO
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/dto/chat-request.dto.ts`
 - Test: `services/ai-service/src/simulator/dto/chat-request.dto.spec.ts`
 
@@ -193,9 +195,24 @@ Expected: FAIL with "Cannot find module"
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IsString, IsEnum, IsNotEmpty, IsArray, IsOptional, ValidateNested, IsNumber, Min, Max, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  ValidateNested,
+  IsNumber,
+  Min,
+  Max,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import type { ConversationMode, DifficultyLevel, PersonaTone } from '../types/conversation-mode.types.js';
+import type {
+  ConversationMode,
+  DifficultyLevel,
+  PersonaTone,
+} from '../types/conversation-mode.types.js';
 
 class ArgumentationConfigDto {
   @IsBoolean()
@@ -290,6 +307,7 @@ git commit -m "feat(ai-service): add ChatRequestDto with validation"
 ### Task 3: Create Analyze Argument DTO
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/dto/analyze-argument.dto.ts`
 - Test: `services/ai-service/src/simulator/dto/analyze-argument.dto.spec.ts`
 
@@ -381,6 +399,7 @@ git commit -m "feat(ai-service): add AnalyzeArgumentDto"
 ### Task 4: Create Generate Insights DTO
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/dto/generate-insights.dto.ts`
 - Test: `services/ai-service/src/simulator/dto/generate-insights.dto.spec.ts`
 
@@ -481,6 +500,7 @@ git commit -m "feat(ai-service): add GenerateInsightsDto"
 ### Task 5: Create Preset Personas Data
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/data/preset-personas.ts`
 
 **Step 1: Write the preset personas**
@@ -603,6 +623,7 @@ git commit -m "feat(ai-service): add preset personas data"
 ### Task 6: Create Mode Prompt Builder
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/services/mode-prompt-builder.ts`
 - Test: `services/ai-service/src/simulator/services/mode-prompt-builder.spec.ts`
 
@@ -782,6 +803,7 @@ git commit -m "feat(ai-service): add ModePromptBuilder service"
 ### Task 7: Create Argument Analyzer Service
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/services/argument-analyzer.service.ts`
 - Test: `services/ai-service/src/simulator/services/argument-analyzer.service.spec.ts`
 
@@ -812,7 +834,12 @@ describe('ArgumentAnalyzerService', () => {
     mockBedrockService.complete.mockResolvedValue({
       content: JSON.stringify({
         fallacies: [
-          { type: 'ad_hominem', description: 'Attacks the person', excerpt: 'People who believe X are stupid', severity: 'major' },
+          {
+            type: 'ad_hominem',
+            description: 'Attacks the person',
+            excerpt: 'People who believe X are stupid',
+            severity: 'major',
+          },
         ],
         unsupportedClaims: ['All scientists agree'],
         toneScore: 4,
@@ -975,6 +1002,7 @@ git commit -m "feat(ai-service): add ArgumentAnalyzerService"
 ### Task 8: Create Chat Service
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/services/chat.service.ts`
 - Test: `services/ai-service/src/simulator/services/chat.service.spec.ts`
 
@@ -1136,11 +1164,7 @@ export class ChatService {
 
   private buildSystemPrompt(dto: ChatRequestDto): string {
     const personaPrompt = this.buildPersonaPrompt(dto.persona);
-    return this.modePromptBuilder.buildFullSystemPrompt(
-      personaPrompt,
-      dto.mode,
-      dto.difficulty,
-    );
+    return this.modePromptBuilder.buildFullSystemPrompt(personaPrompt, dto.mode, dto.difficulty);
   }
 
   private buildPersonaPrompt(persona: ChatRequestDto['persona']): string {
@@ -1164,7 +1188,9 @@ COMMUNICATION STYLE:
 - Asks clarifying questions: ${persona.argumentation.asksQuestions ? 'Yes' : 'No'}`;
   }
 
-  private buildMessages(dto: ChatRequestDto): Array<{ role: 'user' | 'assistant'; content: string }> {
+  private buildMessages(
+    dto: ChatRequestDto,
+  ): Array<{ role: 'user' | 'assistant'; content: string }> {
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
     // Add conversation history (last 10 exchanges)
@@ -1212,6 +1238,7 @@ git commit -m "feat(ai-service): add ChatService for persona responses"
 ### Task 9: Create Insights Generator Service
 
 **Files:**
+
 - Create: `services/ai-service/src/simulator/services/insights-generator.service.ts`
 - Test: `services/ai-service/src/simulator/services/insights-generator.service.spec.ts`
 
@@ -1244,7 +1271,9 @@ describe('InsightsGeneratorService', () => {
         strengths: ['Good use of evidence', 'Civil tone throughout'],
         improvements: ['Could challenge assumptions more'],
         fallaciesCommitted: [{ type: 'strawman', exchange: 3, excerpt: 'You think...' }],
-        recommendedReadings: [{ title: 'A Rulebook for Arguments', reason: 'Strengthen logical structure' }],
+        recommendedReadings: [
+          { title: 'A Rulebook for Arguments', reason: 'Strengthen logical structure' },
+        ],
         overallAssessment: 'Solid performance with room for improvement.',
       }),
     });
@@ -1252,7 +1281,12 @@ describe('InsightsGeneratorService', () => {
     const result = await service.generateInsights({
       transcript: [
         { id: '1', role: 'user', content: 'I believe X', timestamp: '2026-02-21T10:00:00Z' },
-        { id: '2', role: 'persona', content: 'Why do you believe that?', timestamp: '2026-02-21T10:01:00Z' },
+        {
+          id: '2',
+          role: 'persona',
+          content: 'Why do you believe that?',
+          timestamp: '2026-02-21T10:01:00Z',
+        },
       ],
       mode: 'socratic',
       persona: { name: 'Skeptic', position: 'Questions claims', tone: 'analytical' },
@@ -1383,6 +1417,7 @@ git commit -m "feat(ai-service): add InsightsGeneratorService"
 ### Task 10: Update Simulator Controller
 
 **Files:**
+
 - Modify: `services/ai-service/src/simulator/simulator.controller.ts`
 - Test: `services/ai-service/src/simulator/simulator.controller.spec.ts`
 
@@ -1496,6 +1531,7 @@ git commit -m "feat(ai-service): add chat, analyze, and insights endpoints"
 ### Task 11: Update Simulator API Client
 
 **Files:**
+
 - Modify: `frontend/src/lib/simulator-api.ts`
 
 **Step 1: Add new API functions**
@@ -1572,6 +1608,7 @@ git commit -m "feat(frontend): add chat, analyze, and insights API functions"
 ### Task 12: Create Simulator Types
 
 **Files:**
+
 - Create: `frontend/src/types/simulator.ts`
 
 **Step 1: Write the types**
@@ -1689,6 +1726,7 @@ git commit -m "feat(frontend): add simulator TypeScript types"
 ### Task 13: Create Chat Message Skeleton
 
 **Files:**
+
 - Create: `frontend/src/components/ui/skeletons/ChatMessageSkeleton.tsx`
 
 **Step 1: Write the component**
@@ -1710,9 +1748,7 @@ export function ChatMessageSkeleton({ isUser = false }: ChatMessageSkeletonProps
       role="status"
       aria-label="Loading message"
     >
-      <div
-        className={`flex items-start gap-3 max-w-[80%] ${isUser ? 'flex-row-reverse' : ''}`}
-      >
+      <div className={`flex items-start gap-3 max-w-[80%] ${isUser ? 'flex-row-reverse' : ''}`}>
         {/* Avatar skeleton */}
         <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
 
@@ -1723,16 +1759,23 @@ export function ChatMessageSkeleton({ isUser = false }: ChatMessageSkeletonProps
           {/* Message bubble skeleton */}
           <div
             className={`rounded-lg p-4 ${
-              isUser
-                ? 'bg-blue-100 dark:bg-blue-900/30'
-                : 'bg-gray-100 dark:bg-gray-800'
+              isUser ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-800'
             }`}
           >
             {/* Typing indicator */}
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span
+                className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: '0ms' }}
+              />
+              <span
+                className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: '150ms' }}
+              />
+              <span
+                className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: '300ms' }}
+              />
             </div>
           </div>
         </div>
@@ -1754,6 +1797,7 @@ git commit -m "feat(frontend): add ChatMessageSkeleton component"
 ### Task 14: Create Argument Analysis Skeleton
 
 **Files:**
+
 - Create: `frontend/src/components/ui/skeletons/ArgumentAnalysisSkeleton.tsx`
 
 **Step 1: Write the component**
@@ -1773,9 +1817,7 @@ export function ArgumentAnalysisSkeleton() {
     >
       <div className="flex items-center gap-2 mb-4">
         <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-gray-600 dark:text-gray-400">
-          Analyzing your argument...
-        </span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">Analyzing your argument...</span>
       </div>
 
       {/* Progress steps */}
@@ -1783,10 +1825,16 @@ export function ArgumentAnalysisSkeleton() {
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
-          <span className="text-sm text-gray-600 dark:text-gray-400">Checking logical structure</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Checking logical structure
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -1822,6 +1870,7 @@ git commit -m "feat(frontend): add ArgumentAnalysisSkeleton component"
 ### Task 15: Create Progress Tracker Component
 
 **Files:**
+
 - Create: `frontend/src/components/ui/ProgressTracker.tsx`
 
 **Step 1: Write the component**
@@ -1863,7 +1912,11 @@ export function ProgressTracker({ steps, className = '' }: ProgressTrackerProps)
           <div key={step.id} className="flex items-center gap-2 text-sm">
             {step.status === 'completed' && (
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
             )}
             {step.status === 'active' && (
@@ -1874,7 +1927,11 @@ export function ProgressTracker({ steps, className = '' }: ProgressTrackerProps)
             )}
             {step.status === 'failed' && (
               <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
             )}
             <span
@@ -1910,6 +1967,7 @@ git commit -m "feat(frontend): add ProgressTracker component"
 ### Task 16: Create Operation Queue Component
 
 **Files:**
+
 - Create: `frontend/src/components/ui/OperationQueue.tsx`
 
 **Step 1: Write the component**
@@ -1994,6 +2052,7 @@ git commit -m "feat(frontend): add OperationQueue component for AI status"
 ### Task 17: Create Persona Selector Component
 
 **Files:**
+
 - Create: `frontend/src/components/simulator/PersonaSelector.tsx`
 
 **Step 1: Write the component**
@@ -2115,7 +2174,9 @@ export function PersonaSelector({ isOpen, onClose, onSelect }: PersonaSelectorPr
             <label className="block text-sm font-medium mb-1">Tone</label>
             <select
               value={customPersona.tone}
-              onChange={(e) => setCustomPersona({ ...customPersona, tone: e.target.value as PersonaTone })}
+              onChange={(e) =>
+                setCustomPersona({ ...customPersona, tone: e.target.value as PersonaTone })
+              }
               className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
             >
               <option value="measured">Measured</option>
@@ -2135,7 +2196,9 @@ export function PersonaSelector({ isOpen, onClose, onSelect }: PersonaSelectorPr
               max="1"
               step="0.1"
               value={customPersona.receptiveness}
-              onChange={(e) => setCustomPersona({ ...customPersona, receptiveness: parseFloat(e.target.value) })}
+              onChange={(e) =>
+                setCustomPersona({ ...customPersona, receptiveness: parseFloat(e.target.value) })
+              }
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500">
@@ -2153,7 +2216,10 @@ export function PersonaSelector({ isOpen, onClose, onSelect }: PersonaSelectorPr
                 onChange={(e) =>
                   setCustomPersona({
                     ...customPersona,
-                    argumentation: { ...customPersona.argumentation, usesEmotionalAppeals: e.target.checked },
+                    argumentation: {
+                      ...customPersona.argumentation,
+                      usesEmotionalAppeals: e.target.checked,
+                    },
                   })
                 }
               />
@@ -2179,7 +2245,10 @@ export function PersonaSelector({ isOpen, onClose, onSelect }: PersonaSelectorPr
                 onChange={(e) =>
                   setCustomPersona({
                     ...customPersona,
-                    argumentation: { ...customPersona.argumentation, asksQuestions: e.target.checked },
+                    argumentation: {
+                      ...customPersona.argumentation,
+                      asksQuestions: e.target.checked,
+                    },
                   })
                 }
               />
@@ -2187,7 +2256,10 @@ export function PersonaSelector({ isOpen, onClose, onSelect }: PersonaSelectorPr
             </label>
           </div>
 
-          <Button onClick={handleCustomSubmit} disabled={!customPersona.name || !customPersona.position}>
+          <Button
+            onClick={handleCustomSubmit}
+            disabled={!customPersona.name || !customPersona.position}
+          >
             Create Persona
           </Button>
         </div>
@@ -2238,6 +2310,7 @@ git commit -m "feat(frontend): add PersonaSelector component"
 ### Task 18: Create Conversation Mode Selector
 
 **Files:**
+
 - Create: `frontend/src/components/simulator/ConversationModeSelector.tsx`
 
 **Step 1: Write the component**
@@ -2335,6 +2408,7 @@ git commit -m "feat(frontend): add ConversationModeSelector component"
 ### Task 19: Create Argument Feedback Panel
 
 **Files:**
+
 - Create: `frontend/src/components/simulator/ArgumentFeedbackPanel.tsx`
 
 **Step 1: Write the component**
@@ -2363,7 +2437,9 @@ function ScoreBar({ label, score, max = 10 }: { label: string; score: number; ma
     <div className="space-y-1">
       <div className="flex justify-between text-sm">
         <span className="text-gray-600 dark:text-gray-400">{label}</span>
-        <span className="font-medium">{score.toFixed(1)}/{max}</span>
+        <span className="font-medium">
+          {score.toFixed(1)}/{max}
+        </span>
       </div>
       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full ${color} transition-all`} style={{ width: `${percentage}%` }} />
@@ -2380,7 +2456,9 @@ function FallacyBadge({ type, severity }: { type: string; severity: string }) {
   };
 
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[severity as keyof typeof colors] || colors.minor}`}>
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium ${colors[severity as keyof typeof colors] || colors.minor}`}
+    >
       {type.replace(/_/g, ' ')}
     </span>
   );
@@ -2406,7 +2484,9 @@ export function ArgumentFeedbackPanel({
   }
 
   return (
-    <div className={`p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-4 ${className}`}>
+    <div
+      className={`p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-4 ${className}`}
+    >
       <h3 className="font-medium text-gray-900 dark:text-gray-100">Argument Analysis</h3>
 
       {/* Scores */}
@@ -2453,9 +2533,7 @@ export function ArgumentFeedbackPanel({
       {/* Suggestions */}
       {analysis.suggestions.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Suggestions
-          </h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Suggestions</h4>
           <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
             {analysis.suggestions.map((suggestion, i) => (
               <li key={i}>{suggestion}</li>
@@ -2480,6 +2558,7 @@ git commit -m "feat(frontend): add ArgumentFeedbackPanel component"
 ### Task 20: Create Simulator Chat Interface
 
 **Files:**
+
 - Create: `frontend/src/components/simulator/SimulatorChatInterface.tsx`
 
 **Step 1: Write the component**
@@ -2594,9 +2673,7 @@ export function SimulatorChatInterface({
             Exchange {currentExchange} of {maxExchanges}
           </span>
           {isAtLimit && (
-            <span className="text-amber-600 dark:text-amber-400 font-medium">
-              Limit reached
-            </span>
+            <span className="text-amber-600 dark:text-amber-400 font-medium">Limit reached</span>
           )}
         </div>
         <div className="mt-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -2672,21 +2749,25 @@ git commit -m "feat(frontend): add SimulatorChatInterface component"
 Due to the comprehensive nature of this plan, the remaining tasks follow the same structure:
 
 ### Phase 5 (continued):
+
 - **Task 21**: Create Learning Insights Panel
 - **Task 22**: Create Transcript Viewer
 - **Task 23**: Create Simulation Settings Modal
 
 ### Phase 6: Main Page Integration
+
 - **Task 24**: Create useSimulation hook for state management
 - **Task 25**: Update DiscussionSimulatorPage with new components
 - **Task 26**: Add localStorage persistence for pause/resume
 
 ### Phase 7: Testing
+
 - **Task 27**: Write E2E tests for simulation flow
 - **Task 28**: Write integration tests for API calls
 - **Task 29**: Write component tests for new UI elements
 
 ### Phase 8: Polish
+
 - **Task 30**: Add keyboard navigation and focus management
 - **Task 31**: Add screen reader announcements
 - **Task 32**: Final code review and cleanup

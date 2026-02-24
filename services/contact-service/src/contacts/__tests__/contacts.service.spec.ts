@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ContactsService } from '../contacts.service.js';
+import { SocialProviderDto } from '../../connections/dto/initiate-connection.dto.js';
 
 describe('ContactsService', () => {
   let service: ContactsService;
@@ -125,7 +126,7 @@ describe('ContactsService', () => {
       mockPrisma.importedContact.findMany.mockResolvedValue([]);
       mockPrisma.importedContact.count.mockResolvedValue(0);
 
-      await service.getContacts('user-123', { provider: 'GOOGLE' });
+      await service.getContacts('user-123', { provider: SocialProviderDto.GOOGLE });
 
       expect(mockPrisma.importedContact.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
