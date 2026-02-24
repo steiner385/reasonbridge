@@ -137,9 +137,9 @@ describe('ComplianceReportService', () => {
   describe('getModerationMetrics', () => {
     it('should calculate moderation metrics correctly', async () => {
       prisma.childContentReviewQueue.findMany.mockResolvedValue([
-        { status: 'COMPLETED', reviewResult: 'BLOCKED', groomingDetected: true },
-        { status: 'COMPLETED', reviewResult: 'APPROVED', groomingDetected: false },
-        { status: 'PENDING', reviewResult: null, groomingDetected: false },
+        { status: 'APPROVED', decision: 'BLOCKED', aiFlags: { groomingDetected: true } },
+        { status: 'APPROVED', decision: 'APPROVED', aiFlags: { groomingDetected: false } },
+        { status: 'PENDING', decision: null, aiFlags: null },
       ]);
       prisma.moderationAction.count.mockResolvedValue(10);
 
@@ -208,14 +208,16 @@ describe('ComplianceReportService', () => {
 
       prisma.childContentReviewQueue.findMany.mockResolvedValue([
         {
+          status: 'APPROVED',
           priority: 'URGENT',
           createdAt: new Date(now.getTime() - shortTime * 60 * 1000),
-          completedAt: now,
+          reviewedAt: now,
         },
         {
+          status: 'REJECTED',
           priority: 'HIGH',
           createdAt: new Date(now.getTime() - longTime * 60 * 1000),
-          completedAt: now,
+          reviewedAt: now,
         },
       ]);
 
@@ -298,9 +300,10 @@ describe('ComplianceReportService', () => {
       prisma.childContentReviewQueue.findMany.mockResolvedValue([
         // 10 items that breached SLA
         ...Array.from({ length: 10 }, () => ({
+          status: 'APPROVED',
           priority: 'URGENT',
           createdAt: new Date(now.getTime() - 120 * 60 * 1000), // 2 hours ago
-          reviewedAt: now, // Changed from completedAt to match schema
+          reviewedAt: now,
         })),
       ]);
 
