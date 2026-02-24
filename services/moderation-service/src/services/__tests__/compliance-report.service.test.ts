@@ -297,10 +297,10 @@ describe('ComplianceReportService', () => {
       const now = new Date();
       prisma.childContentReviewQueue.findMany.mockResolvedValue([
         // 10 items that breached SLA
-        ...Array.from({ length: 10 }, (_, i) => ({
+        ...Array.from({ length: 10 }, () => ({
           priority: 'URGENT',
           createdAt: new Date(now.getTime() - 120 * 60 * 1000), // 2 hours ago
-          completedAt: now,
+          reviewedAt: now, // Changed from completedAt to match schema
         })),
       ]);
 

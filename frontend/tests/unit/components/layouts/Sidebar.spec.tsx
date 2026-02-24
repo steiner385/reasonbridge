@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Sidebar } from '../../../../src/components/layouts/Sidebar';
+import { AuthProvider } from '../../../../src/contexts/AuthContext';
 import { ChildSafetyProvider } from '../../../../src/contexts/ChildSafetyContext';
 import * as sidebarHook from '../../../../src/hooks/useSidebar';
 import * as authHook from '../../../../src/hooks/useAuth';
@@ -55,9 +56,11 @@ describe('Sidebar Component', () => {
   const renderSidebar = () => {
     return render(
       <MemoryRouter>
-        <ChildSafetyProvider>
-          <Sidebar />
-        </ChildSafetyProvider>
+        <AuthProvider>
+          <ChildSafetyProvider>
+            <Sidebar />
+          </ChildSafetyProvider>
+        </AuthProvider>
       </MemoryRouter>,
     );
   };

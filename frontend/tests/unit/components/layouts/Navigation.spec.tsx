@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { Navigation } from '../../../../src/components/layouts/Navigation';
+import { AuthProvider } from '../../../../src/contexts/AuthContext';
 import { ChildSafetyProvider } from '../../../../src/contexts/ChildSafetyContext';
 import * as notificationsHook from '../../../../src/hooks/useNotifications';
 
@@ -10,7 +11,9 @@ describe('Navigation Component', () => {
   const renderWithRouter = (component: React.ReactElement, initialRoute = '/') => {
     return render(
       <MemoryRouter initialEntries={[initialRoute]}>
-        <ChildSafetyProvider>{component}</ChildSafetyProvider>
+        <AuthProvider>
+          <ChildSafetyProvider>{component}</ChildSafetyProvider>
+        </AuthProvider>
       </MemoryRouter>,
     );
   };
