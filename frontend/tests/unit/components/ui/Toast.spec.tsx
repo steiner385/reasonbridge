@@ -193,16 +193,18 @@ describe('Toast Component', () => {
       const { container } = render(<Toast {...defaultProps} variant="success" />);
 
       const toast = container.firstChild as HTMLElement;
-      expect(toast.className).toContain('dark:bg-green-900/20');
-      expect(toast.className).toContain('dark:text-green-300');
+      // Uses 95% opacity for readability over page content
+      expect(toast.className).toContain('dark:bg-green-900/95');
+      expect(toast.className).toContain('dark:text-green-200');
     });
 
     it('should have dark mode classes for error variant', () => {
       const { container } = render(<Toast {...defaultProps} variant="error" />);
 
       const toast = container.firstChild as HTMLElement;
-      expect(toast.className).toContain('dark:bg-red-900/20');
-      expect(toast.className).toContain('dark:text-red-300');
+      // Uses 95% opacity for readability over page content
+      expect(toast.className).toContain('dark:bg-red-900/95');
+      expect(toast.className).toContain('dark:text-red-200');
     });
   });
 });
