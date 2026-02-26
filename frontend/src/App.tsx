@@ -99,7 +99,9 @@ function App() {
             className={`flex-1 transition-all duration-300 ${
               !isMobile
                 ? sidebarMode === 'topics'
-                  ? 'ml-80' // Topics mode: 320px sidebar (never collapses)
+                  ? isCollapsed
+                    ? 'ml-20' // Topics mode collapsed: 80px
+                    : 'ml-80' // Topics mode expanded: 320px
                   : isCollapsed
                     ? 'ml-20' // Full mode collapsed: 80px
                     : 'ml-64' // Full mode expanded: 256px
@@ -119,7 +121,9 @@ function App() {
             ${
               !isMobile
                 ? sidebarMode === 'topics'
-                  ? 'ml-80'
+                  ? isCollapsed
+                    ? 'ml-20'
+                    : 'ml-80'
                   : isCollapsed
                     ? 'ml-20'
                     : 'ml-64'
