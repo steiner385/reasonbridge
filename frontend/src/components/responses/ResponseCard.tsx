@@ -5,6 +5,7 @@
 
 import React from 'react';
 import Card, { CardHeader, CardBody, CardFooter } from '../ui/Card';
+import { useAuthContext } from '../../contexts/AuthContext';
 import type { Response } from '../../types/response';
 
 export interface ResponseCardProps {
@@ -53,6 +54,9 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
   actions,
   showPropositions = false,
 }) => {
+  const { user } = useAuthContext();
+  const isAuthor = user?.id === response.authorId;
+  const isPendingReview = response.status === 'PENDING_REVIEW';
   // Format timestamp
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -106,6 +110,20 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
               <span className="text-gray-400">•</span>
               <span className="text-xs text-gray-500">
                 edited {response.revisionCount} {response.revisionCount === 1 ? 'time' : 'times'}
+              </span>
+            </>
+          )}
+          {isPendingReview && (
+            <>
+              <span className="text-gray-400">•</span>
+              <span
+                className={`inline-flex items-center text-xs px-2 py-0.5 rounded ${
+                  isAuthor
+                    ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-200'
+                    : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200'
+                }`}
+              >
+                {isAuthor ? 'Being checked' : 'Pending Review'}
               </span>
             </>
           )}
@@ -207,7 +225,25 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
         )}
       </CardBody>
 
-      {response.status !== 'visible' && (
+      {/* Author's pending review notice - child-friendly message */}
+      {isPendingReview && isAuthor && (
+        <CardFooter bordered>
+          <div className="flex items-center gap-2 text-sm">
+            <svg className="h-4 w-4 text-sky-500" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-sky-700 dark:text-sky-300">
+              Your response is being checked by a helper. It will show up soon!
+            </span>
+          </div>
+        </CardFooter>
+      )}
+
+      {(response.status === 'HIDDEN' || response.status === 'REMOVED') && (
         <CardFooter bordered>
           <div className="flex items-center gap-2 text-sm">
             <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
@@ -217,8 +253,8 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                 clipRule="evenodd"
               />
             </svg>
-            <span className="text-gray-700">
-              This response is {response.status === 'hidden' ? 'hidden' : 'removed'}
+            <span className="text-gray-700 dark:text-gray-300">
+              This response is {response.status === 'HIDDEN' ? 'hidden' : 'removed'}
             </span>
           </div>
         </CardFooter>

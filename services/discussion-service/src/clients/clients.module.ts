@@ -5,10 +5,11 @@
 
 import { Module, Global } from '@nestjs/common';
 import { ActivityClientService } from './activity-client.service.js';
+import { ModerationClientService } from './moderation-client.service.js';
 
 @Global()
 @Module({
-  providers: [ActivityClientService],
-  exports: [ActivityClientService],
+  providers: [ActivityClientService, ModerationClientService],
+  exports: [ActivityClientService, ModerationClientService],
 })
 export class ClientsModule {}

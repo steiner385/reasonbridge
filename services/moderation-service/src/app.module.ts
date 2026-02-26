@@ -9,7 +9,9 @@ import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ModerationModule } from './services/moderation.module.js';
 import { ModerationController } from './controllers/moderation.controller.js';
+import { ChildContentController } from './controllers/child-content.controller.js';
 import { MetricsModule } from './observability/index.js';
+import { JobsModule } from './jobs/jobs.module.js';
 
 @Module({
   imports: [
@@ -22,8 +24,9 @@ import { MetricsModule } from './observability/index.js';
     MetricsModule,
     HealthModule,
     ModerationModule,
+    JobsModule,
   ],
-  controllers: [ModerationController],
+  controllers: [ModerationController, ChildContentController],
   providers: [],
 })
 export class AppModule {}

@@ -12,6 +12,7 @@
 Transform the discussion simulator from a passive observation tool into an active learning environment where users practice argumentation skills through interactive debates with AI-powered personas.
 
 **Core Goals:**
+
 1. Argumentation practice in low-stakes environment
 2. Perspective-taking through engaging with counter-arguments
 3. Argument stress testing (fallacy detection, weak evidence identification)
@@ -98,15 +99,15 @@ interface ConversationMessage {
   role: 'user' | 'persona';
   content: string;
   timestamp: string;
-  analysis?: ArgumentAnalysis;  // For user messages
+  analysis?: ArgumentAnalysis; // For user messages
 }
 
 interface ArgumentAnalysis {
   fallacies: Fallacy[];
   unsupportedClaims: string[];
-  toneScore: number;        // 0-10
-  evidenceScore: number;    // 0-10
-  coherenceScore: number;   // 0-10
+  toneScore: number; // 0-10
+  evidenceScore: number; // 0-10
+  coherenceScore: number; // 0-10
   suggestions: string[];
 }
 ```
@@ -117,14 +118,14 @@ interface ArgumentAnalysis {
 
 ### New Endpoints (ai-service)
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /ai/simulator/personas` | List preset personas |
-| `POST /ai/simulator/personas/custom` | Create custom persona prompt |
-| `POST /ai/simulator/chat` | Generate persona response (mode-aware) |
-| `POST /ai/simulator/analyze` | Analyze user argument |
-| `POST /ai/simulator/verify-citation` | Verify claim + source |
-| `POST /ai/simulator/insights` | Generate learning insights from transcript |
+| Endpoint                             | Purpose                                    |
+| ------------------------------------ | ------------------------------------------ |
+| `POST /ai/simulator/personas`        | List preset personas                       |
+| `POST /ai/simulator/personas/custom` | Create custom persona prompt               |
+| `POST /ai/simulator/chat`            | Generate persona response (mode-aware)     |
+| `POST /ai/simulator/analyze`         | Analyze user argument                      |
+| `POST /ai/simulator/verify-citation` | Verify claim + source                      |
+| `POST /ai/simulator/insights`        | Generate learning insights from transcript |
 
 ### Key DTOs
 
@@ -180,20 +181,20 @@ interface LearningInsights {
 
 ### Conversation Modes
 
-| Mode | AI Behavior |
-|------|-------------|
-| **Socratic** | Ask clarifying questions, challenge assumptions, never state own position |
-| **Debate** | Present counter-arguments with evidence, defend persona position, rebut claims |
-| **Steelman** | Present strongest version of opposing view, force engagement with best arguments |
-| **Common Ground** | Seek points of agreement, reframe disagreements as shared goals |
+| Mode              | AI Behavior                                                                      |
+| ----------------- | -------------------------------------------------------------------------------- |
+| **Socratic**      | Ask clarifying questions, challenge assumptions, never state own position        |
+| **Debate**        | Present counter-arguments with evidence, defend persona position, rebut claims   |
+| **Steelman**      | Present strongest version of opposing view, force engagement with best arguments |
+| **Common Ground** | Seek points of agreement, reframe disagreements as shared goals                  |
 
 ### Difficulty Levels
 
-| Level | AI Behavior |
-|-------|-------------|
-| **Novice** | Simple arguments, obvious fallacies, patient explanations |
-| **Intermediate** | Nuanced arguments, moderate complexity, balanced challenge |
-| **Expert** | Sophisticated rhetoric, subtle fallacies, demanding evidence standards |
+| Level            | AI Behavior                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| **Novice**       | Simple arguments, obvious fallacies, patient explanations              |
+| **Intermediate** | Nuanced arguments, moderate complexity, balanced challenge             |
+| **Expert**       | Sophisticated rhetoric, subtle fallacies, demanding evidence standards |
 
 ---
 
@@ -218,16 +219,19 @@ interface AIOperation {
 ### Loading Components
 
 **Chat Message Loading:**
+
 - Typing indicator with animated dots
 - Skeleton shimmer for message content
 - Persona avatar visible during loading
 
 **Analysis Panel Loading:**
+
 - Progress bar with step indicators
 - Checkmarks for completed analysis steps
 - Estimated time remaining
 
 **Operations Queue Banner:**
+
 - Shows count of active operations
 - Individual operation status with estimated time
 - Collapsible for minimal distraction
@@ -251,14 +255,14 @@ interface AIOperation {
 
 ## Preset Personas
 
-| Persona | Position | Tone | Mode Affinity |
-|---------|----------|------|---------------|
-| **The Skeptic** | Questions all claims, demands evidence | Analytical | Socratic |
-| **The Advocate** | Passionately defends a position | Passionate | Debate |
-| **Devil's Advocate** | Argues opposite of user's position | Confrontational | Steelman |
-| **The Mediator** | Seeks compromise and shared values | Measured | Common Ground |
-| **The Expert** | Cites research, technical depth | Analytical | Debate |
-| **The Idealist** | Appeals to values and principles | Passionate | Common Ground |
+| Persona              | Position                               | Tone            | Mode Affinity |
+| -------------------- | -------------------------------------- | --------------- | ------------- |
+| **The Skeptic**      | Questions all claims, demands evidence | Analytical      | Socratic      |
+| **The Advocate**     | Passionately defends a position        | Passionate      | Debate        |
+| **Devil's Advocate** | Argues opposite of user's position     | Confrontational | Steelman      |
+| **The Mediator**     | Seeks compromise and shared values     | Measured        | Common Ground |
+| **The Expert**       | Cites research, technical depth        | Analytical      | Debate        |
+| **The Idealist**     | Appeals to values and principles       | Passionate      | Common Ground |
 
 ### Custom Persona Builder
 
@@ -268,7 +272,7 @@ interface CustomPersonaConfig {
   position: string;
   background: string;
   tone: PersonaTone;
-  receptiveness: number;  // 0.1-1.0
+  receptiveness: number; // 0.1-1.0
   argumentation: {
     usesEmotionalAppeals: boolean;
     citesData: boolean;
@@ -294,6 +298,7 @@ Generated via `/ai/simulator/insights` endpoint:
 ### Transcript Export
 
 Formats:
+
 - **JSON:** Full data for programmatic use
 - **PDF:** Formatted transcript with annotations
 - **Markdown:** Shareable text format
@@ -315,11 +320,11 @@ interface SavedSimulation {
 
 ### Session Controls
 
-| Action | Behavior |
-|--------|----------|
-| **Pause** | Saves state to localStorage |
-| **Resume** | Restores conversation from localStorage |
-| **Reset** | Clears state, returns to configuration |
+| Action        | Behavior                                             |
+| ------------- | ---------------------------------------------------- |
+| **Pause**     | Saves state to localStorage                          |
+| **Resume**    | Restores conversation from localStorage              |
+| **Reset**     | Clears state, returns to configuration               |
 | **End Early** | Triggers insights generation with partial transcript |
 
 ---
@@ -327,6 +332,7 @@ interface SavedSimulation {
 ## Fallacy Detection Categories
 
 ### Logical Fallacies
+
 - Ad hominem
 - Strawman
 - Slippery slope
@@ -334,16 +340,19 @@ interface SavedSimulation {
 - Appeal to authority
 
 ### Evidential Issues
+
 - Unsupported claims
 - Cherry-picking
 - Anecdotal evidence
 
 ### Rhetorical Issues
+
 - Emotional manipulation
 - Loaded language
 - False equivalence
 
 ### Cognitive Biases
+
 - Confirmation bias
 - Anchoring
 - Availability heuristic
@@ -355,7 +364,7 @@ interface SavedSimulation {
 ```typescript
 const RATE_LIMITS = {
   free: { simulationsPerDay: 5, exchangesPerSimulation: 10 },
-  paid: { simulationsPerDay: Infinity, exchangesPerSimulation: 50 }
+  paid: { simulationsPerDay: Infinity, exchangesPerSimulation: 50 },
 };
 ```
 
@@ -372,17 +381,20 @@ const RATE_LIMITS = {
 ## Testing Strategy
 
 ### Unit Tests
+
 - Persona prompt generation
 - Fallacy detection accuracy
 - Mode-specific behavior
 - State management hooks
 
 ### Integration Tests
+
 - Full simulation flow (start → exchanges → complete)
 - Parallel API calls (chat + analyze)
 - Error handling and fallbacks
 
 ### E2E Tests
+
 - Complete user journey through simulation
 - Pause/resume functionality
 - Export functionality

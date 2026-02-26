@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Module, Logger } from '@nestjs/common';
+import { Module, Global, Logger } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 
@@ -22,6 +22,7 @@ const logger = new Logger('CacheModule');
  * - CACHE_TTL: Cache TTL in seconds (default: 3600 = 1 hour)
  * - CACHE_MAX_ITEMS: Maximum cached items (default: 1000)
  */
+@Global()
 @Module({
   imports: [
     NestCacheModule.registerAsync({

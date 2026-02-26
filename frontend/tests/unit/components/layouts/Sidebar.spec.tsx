@@ -7,6 +7,9 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Sidebar } from '../../../../src/components/layouts/Sidebar';
+import { ToastProvider } from '../../../../src/contexts/ToastContext';
+import { AuthProvider } from '../../../../src/contexts/AuthContext';
+import { ChildSafetyProvider } from '../../../../src/contexts/ChildSafetyContext';
 import * as sidebarHook from '../../../../src/hooks/useSidebar';
 import * as authHook from '../../../../src/hooks/useAuth';
 import * as notificationsHook from '../../../../src/hooks/useNotifications';
@@ -96,7 +99,13 @@ describe('Sidebar Component', () => {
     return render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
-          <Sidebar />
+          <ToastProvider>
+            <AuthProvider>
+              <ChildSafetyProvider>
+                <Sidebar />
+              </ChildSafetyProvider>
+            </AuthProvider>
+          </ToastProvider>
         </MemoryRouter>
       </QueryClientProvider>,
     );

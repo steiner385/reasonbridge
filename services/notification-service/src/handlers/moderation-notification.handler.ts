@@ -9,6 +9,7 @@ import { NotificationGateway } from '../gateways/notification.gateway.js';
 import type {
   ModerationActionRequestedEvent,
   UserTrustUpdatedEvent,
+  SafetyReportCreatedEvent,
 } from '@reason-bridge/event-schemas/moderation';
 
 /**
@@ -194,6 +195,117 @@ export class ModerationNotificationHandler {
       );
       throw error;
     }
+  }
+
+  /**
+   * Handle safety.report.created event
+   * Creates urgent notification when a child submits a panic button report
+   *
+   * @remarks
+   * This handler prioritizes URGENT and HIGH priority reports to ensure
+   * moderators are immediately alerted to potential child safety incidents.
+   * Reports with STRANGER_CONTACT or PERSONAL_QUESTIONS reasons are
+   * automatically marked as URGENT.
+   */
+  async handleSafetyReportCreated(event: SafetyReportCreatedEvent): Promise<void> {
+    this.logger.log(
+      `Processing safety.report.created event: report ${event.payload.reportId} (priority: ${event.payload.priority})`,
+    );
+
+    try {
+      // Fetch reporter details
+      const reporter = await this.prisma.user.findUnique({
+        where: { id: event.payload.reporterId },
+        select: { id: true, displayName: true },
+      });
+
+      if (!reporter) {
+        this.logger.warn(`Reporter ${event.payload.reporterId} not found, still processing report`);
+      }
+
+      // Build notification content based on priority and reason
+      const title = this.buildSafetyReportTitle(event.payload.priority, event.payload.reason);
+      const body = this.buildSafetyReportBody(
+        event.payload.reason,
+        event.payload.priority,
+        event.payload.additionalInfo,
+      );
+
+      // For safety reports, notify all moderators with child-safety permissions
+      // TODO: Query for moderators with child-safety role when roles are implemented
+      const actionUrl = `/moderation/safety-reports/${event.payload.reportId}`;
+
+      // Create notifications
+      await this.createNotifications({
+        recipientIds: [], // Moderators will be added once role system is implemented
+        type: 'safety_report',
+        title,
+        body,
+        actionUrl,
+        metadata: {
+          reportId: event.payload.reportId,
+          reporterId: event.payload.reporterId,
+          reason: event.payload.reason,
+          priority: event.payload.priority,
+          additionalInfo: event.payload.additionalInfo,
+          contextUrl: event.payload.contextUrl,
+          contextTopicId: event.payload.contextTopicId,
+          contextResponseId: event.payload.contextResponseId,
+        },
+      });
+
+      this.logger.log(
+        `Created safety report notification for report ${event.payload.reportId} (priority: ${event.payload.priority})`,
+      );
+
+      // Emit WebSocket event for real-time delivery to moderators
+      this.notificationGateway.emitSafetyReportCreated(event);
+    } catch (error) {
+      this.logger.error(
+        `Failed to handle safety.report.created event: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Build notification title for safety report
+   */
+  private buildSafetyReportTitle(priority: string, reason: string): string {
+    const priorityEmoji = priority === 'URGENT' ? '[URGENT]' : priority === 'HIGH' ? '[HIGH]' : '';
+    const reasonLabels: Record<string, string> = {
+      UNCOMFORTABLE: 'Child Uncomfortable',
+      SCARY_CONTENT: 'Scary Content Report',
+      STRANGER_CONTACT: 'Stranger Contact Alert',
+      PERSONAL_QUESTIONS: 'Personal Questions Alert',
+      OTHER: 'Safety Concern',
+    };
+
+    const reasonLabel = reasonLabels[reason] || 'Safety Report';
+    return `${priorityEmoji} Panic Button: ${reasonLabel}`.trim();
+  }
+
+  /**
+   * Build notification body for safety report
+   */
+  private buildSafetyReportBody(reason: string, priority: string, additionalInfo?: string): string {
+    const reasonDescriptions: Record<string, string> = {
+      UNCOMFORTABLE: 'A child reported feeling uncomfortable.',
+      SCARY_CONTENT: 'A child reported encountering scary content.',
+      STRANGER_CONTACT: 'A child reported unwanted contact from a stranger.',
+      PERSONAL_QUESTIONS: 'A child reported being asked personal questions.',
+      OTHER: 'A child submitted a safety report.',
+    };
+
+    let body = reasonDescriptions[reason] || 'A safety report was submitted.';
+    body += ` Priority: ${priority}.`;
+
+    if (additionalInfo) {
+      body += ` Details: "${additionalInfo.substring(0, 100)}${additionalInfo.length > 100 ? '...' : ''}"`;
+    }
+
+    return body;
   }
 
   /**

@@ -20,7 +20,9 @@ import {
   configureAnalytics,
   setAnalyticsConsent,
   getAnalyticsConsent,
+  setMinorUserStatus,
 } from '../../src/lib/analytics';
+import * as ChildSafetyContextModule from '../../src/contexts/ChildSafetyContext';
 
 // Mock the analytics module
 vi.mock('../../src/lib/analytics', async () => {
@@ -29,8 +31,22 @@ vi.mock('../../src/lib/analytics', async () => {
     ...actual,
     trackPageView: vi.fn(),
     trackEvent: vi.fn(),
+    setMinorUserStatus: vi.fn(),
   };
 });
+
+// Mock the ChildSafetyContext
+vi.mock('../../src/contexts/ChildSafetyContext', () => ({
+  useChildSafety: vi.fn(() => ({
+    isChildMode: false,
+    uiTheme: 'standard',
+    restrictedFeatures: [],
+    showPanicButton: false,
+    isFeatureRestricted: () => false,
+  })),
+}));
+
+const mockUseChildSafety = vi.mocked(ChildSafetyContextModule.useChildSafety);
 
 // Simple test pages
 function HomePage() {
@@ -196,6 +212,68 @@ describe('Analytics Integration', () => {
       expect(trackEvent).toHaveBeenCalledWith('error', {
         code: '500',
         message: 'Server error',
+      });
+    });
+  });
+
+  describe('Child Safety - Minor Tracking Disable', () => {
+    afterEach(() => {
+      // Reset to non-minor mode
+      mockUseChildSafety.mockReturnValue({
+        isChildMode: false,
+        uiTheme: 'standard',
+        restrictedFeatures: [],
+        showPanicButton: false,
+        isFeatureRestricted: () => false,
+      });
+    });
+
+    it('calls setMinorUserStatus with false when not in child mode', async () => {
+      mockUseChildSafety.mockReturnValue({
+        isChildMode: false,
+        uiTheme: 'standard',
+        restrictedFeatures: [],
+        showPanicButton: false,
+        isFeatureRestricted: () => false,
+      });
+
+      render(<TestApp initialPath="/" />);
+
+      await waitFor(() => {
+        expect(setMinorUserStatus).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it('calls setMinorUserStatus with true when in child mode', async () => {
+      mockUseChildSafety.mockReturnValue({
+        isChildMode: true,
+        uiTheme: 'child-friendly',
+        restrictedFeatures: ['DM', 'USER_SEARCH'],
+        showPanicButton: true,
+        isFeatureRestricted: () => true,
+      });
+
+      render(<TestApp initialPath="/" />);
+
+      await waitFor(() => {
+        expect(setMinorUserStatus).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it('still tracks page views after component mounts (tracking module handles blocking)', async () => {
+      mockUseChildSafety.mockReturnValue({
+        isChildMode: true,
+        uiTheme: 'child-friendly',
+        restrictedFeatures: [],
+        showPanicButton: true,
+        isFeatureRestricted: () => false,
+      });
+
+      render(<TestApp initialPath="/topics" />);
+
+      // trackPageView is still called (the analytics module decides whether to actually track)
+      await waitFor(() => {
+        expect(trackPageView).toHaveBeenCalled();
       });
     });
   });
