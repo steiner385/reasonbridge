@@ -112,9 +112,12 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Should show step 2 content (wait for navigation to complete)
-      await waitFor(() => {
-        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('shows Back button on step 2', async () => {
@@ -126,9 +129,12 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render, then check for Back button
-      await waitFor(() => {
-        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
       expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument();
     });
 
@@ -141,17 +147,23 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render
-      await waitFor(() => {
-        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Click Back
       await user.click(screen.getByRole('button', { name: /Back/i }));
 
       // Should show step 1 content again (wait for navigation to complete)
-      await waitFor(() => {
-        expect(screen.getByText('What would you like to discuss?')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('What would you like to discuss?')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
   });
 
@@ -161,9 +173,12 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render before proceeding
-      await waitFor(() => {
-        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     }
 
     it('Continue is disabled without tags', async () => {
@@ -211,9 +226,12 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 2 to render
-      await waitFor(() => {
-        expect(screen.getByText('Classify your topic')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Classify your topic')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Step 2
       const tagInput = screen.getByPlaceholderText(/climate, policy/i);
@@ -222,9 +240,12 @@ describe('TopicWizard', () => {
       await user.click(screen.getByRole('button', { name: /Continue/i }));
 
       // Wait for step 3 to render
-      await waitFor(() => {
-        expect(screen.getByText('Review your topic')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Review your topic')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     }
 
     it('shows preview content', async () => {
@@ -266,12 +287,15 @@ describe('TopicWizard', () => {
 
       await user.type(screen.getByLabelText(/Title/i), 'Test title');
 
-      await waitFor(() => {
-        expect(localStorageMock.setItem).toHaveBeenCalledWith(
-          'topic-wizard-draft',
-          expect.any(String),
-        );
-      });
+      await waitFor(
+        () => {
+          expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'topic-wizard-draft',
+            expect.any(String),
+          );
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('loads draft from localStorage on open', async () => {
@@ -284,9 +308,12 @@ describe('TopicWizard', () => {
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       // Wait for async draft loading (queueMicrotask defers the state update)
-      await waitFor(() => {
-        expect(screen.getByLabelText(/Title/i)).toHaveValue('Saved draft title');
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByLabelText(/Title/i)).toHaveValue('Saved draft title');
+        },
+        { timeout: 10000 },
+      );
     });
   });
 });

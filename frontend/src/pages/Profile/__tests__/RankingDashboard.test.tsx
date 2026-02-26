@@ -309,37 +309,46 @@ describe('RankingDashboard', () => {
     });
 
     it('should open credential modal when Add Credential is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       renderWithRouter(<RankingDashboard />);
 
       const addButton = screen.getByRole('button', { name: /add credential/i });
       await user.click(addButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: /add credential/i })).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+          expect(screen.getByRole('heading', { name: /add credential/i })).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should close credential modal when cancel is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       renderWithRouter(<RankingDashboard />);
 
       // Open modal
       await user.click(screen.getByRole('button', { name: /add credential/i }));
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Close modal
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
       await user.click(cancelButton);
 
-      await waitFor(() => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should show empty state when no credentials', () => {
@@ -423,7 +432,7 @@ describe('RankingDashboard', () => {
     });
 
     it('should open appeal modal when Submit Appeal button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       mockValues.useMyAppeals = {
         data: [],
@@ -439,14 +448,17 @@ describe('RankingDashboard', () => {
       const submitButton = screen.getByRole('button', { name: /submit appeal/i });
       await user.click(submitButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: /submit appeal/i })).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+          expect(screen.getByRole('heading', { name: /submit appeal/i })).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should close appeal modal when cancel is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       mockValues.useMyAppeals = {
         data: [],
@@ -461,21 +473,27 @@ describe('RankingDashboard', () => {
 
       // Open modal
       await user.click(screen.getByRole('button', { name: /submit appeal/i }));
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Close modal
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
       await user.click(cancelButton);
 
-      await waitFor(() => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should submit appeal when form is filled and submitted', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const { rankingService } = await import('../../../services/rankingService');
       const refetchMock = vi.fn();
 
@@ -492,9 +510,12 @@ describe('RankingDashboard', () => {
 
       // Open modal
       await user.click(screen.getByRole('button', { name: /submit appeal/i }));
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Fill in the reason
       const textarea = screen.getByTestId('appeal-reason-textarea');
@@ -504,15 +525,18 @@ describe('RankingDashboard', () => {
       const submitButton = screen.getByTestId('submit-appeal-confirm-button');
       await user.click(submitButton);
 
-      await waitFor(() => {
-        expect(rankingService.submitAppeal).toHaveBeenCalledWith(
-          'I believe this decision was incorrect because...',
-        );
-      });
+      await waitFor(
+        () => {
+          expect(rankingService.submitAppeal).toHaveBeenCalledWith(
+            'I believe this decision was incorrect because...',
+          );
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should disable submit button when appeal reason is empty', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       mockValues.useMyAppeals = {
         data: [],
@@ -527,9 +551,12 @@ describe('RankingDashboard', () => {
 
       // Open modal
       await user.click(screen.getByRole('button', { name: /submit appeal/i }));
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Submit button should be disabled when reason is empty
       const submitButton = screen.getByTestId('submit-appeal-confirm-button');

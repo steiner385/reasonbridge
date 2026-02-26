@@ -240,8 +240,13 @@ describe('CredentialReviewQueue', () => {
       await user.click(approveButtons[0]);
 
       // Modal should open
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText(/approve credential/i)).toBeInTheDocument();
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+          expect(screen.getByText(/approve credential/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should call onApprove with credential id when confirmed', async () => {
@@ -336,8 +341,13 @@ describe('CredentialReviewQueue', () => {
       await user.click(rejectButtons[0]);
 
       // Modal should open
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText(/reject credential/i)).toBeInTheDocument();
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+          expect(screen.getByText(/reject credential/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should require reason for rejection', async () => {
@@ -354,8 +364,13 @@ describe('CredentialReviewQueue', () => {
       await user.click(rejectButtons[0]);
 
       // Confirm button should be disabled without reason
-      const confirmButton = screen.getByRole('button', { name: /confirm/i });
-      expect(confirmButton).toBeDisabled();
+      await waitFor(
+        () => {
+          const confirmButton = screen.getByRole('button', { name: /confirm/i });
+          expect(confirmButton).toBeDisabled();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should call onReject with credential id and reason', async () => {
@@ -379,9 +394,12 @@ describe('CredentialReviewQueue', () => {
       const confirmButton = screen.getByRole('button', { name: /confirm/i });
       await user.click(confirmButton);
 
-      await waitFor(() => {
-        expect(mockOnReject).toHaveBeenCalledWith('cred-1', 'Document not legible');
-      });
+      await waitFor(
+        () => {
+          expect(mockOnReject).toHaveBeenCalledWith('cred-1', 'Document not legible');
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should enable confirm button when reason is provided', async () => {

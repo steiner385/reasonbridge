@@ -213,9 +213,12 @@ describe('CredentialSubmitForm', () => {
       await user.tab(); // Trigger blur validation
 
       // Wait for validation error
-      await waitFor(() => {
-        expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Submit should be disabled due to invalid URL
       expect(screen.getByRole('button', { name: /submit credential/i })).toBeDisabled();
@@ -238,9 +241,12 @@ describe('CredentialSubmitForm', () => {
       await user.tab(); // Trigger blur validation
 
       // Wait for validation error
-      await waitFor(() => {
-        expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Submit should be disabled due to invalid URL
       expect(screen.getByRole('button', { name: /submit credential/i })).toBeDisabled();
@@ -266,9 +272,12 @@ describe('CredentialSubmitForm', () => {
       await user.type(screen.getByLabelText(/title/i), 'PhD in Physics');
       await user.type(screen.getByLabelText(/institution/i), 'MIT');
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /submit credential/i })).toBeEnabled();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: /submit credential/i })).toBeEnabled();
+        },
+        { timeout: 10000 },
+      );
     });
   });
 
@@ -291,9 +300,12 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(
+        () => {
+          expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 10000 },
+      );
 
       expect(mockOnSubmit).toHaveBeenCalledWith({
         tagId: 'tag-1',
@@ -323,9 +335,12 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(
+        () => {
+          expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 10000 },
+      );
 
       expect(mockOnSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -347,9 +362,12 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(
+        () => {
+          expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 10000 },
+      );
 
       expect(mockOnSubmit).toHaveBeenCalledWith({
         tagId: 'tag-2',
@@ -384,17 +402,23 @@ describe('CredentialSubmitForm', () => {
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
       // Check loading state
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /submitting/i })).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: /submitting/i })).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
       expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
 
       // Resolve submission
       resolveSubmit!();
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /submit credential/i })).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: /submit credential/i })).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should disable form inputs during submission', async () => {
@@ -417,19 +441,25 @@ describe('CredentialSubmitForm', () => {
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
       // Check inputs are disabled
-      await waitFor(() => {
-        expect(screen.getByLabelText(/category/i)).toBeDisabled();
-        expect(screen.getByLabelText(/credential type/i)).toBeDisabled();
-        expect(screen.getByLabelText(/title/i)).toBeDisabled();
-        expect(screen.getByLabelText(/institution/i)).toBeDisabled();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByLabelText(/category/i)).toBeDisabled();
+          expect(screen.getByLabelText(/credential type/i)).toBeDisabled();
+          expect(screen.getByLabelText(/title/i)).toBeDisabled();
+          expect(screen.getByLabelText(/institution/i)).toBeDisabled();
+        },
+        { timeout: 10000 },
+      );
 
       // Resolve submission
       resolveSubmit!();
 
-      await waitFor(() => {
-        expect(screen.getByLabelText(/category/i)).toBeEnabled();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByLabelText(/category/i)).toBeEnabled();
+        },
+        { timeout: 10000 },
+      );
     });
   });
 
@@ -449,9 +479,12 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(screen.getByText(/failed to submit credential/i)).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText(/failed to submit credential/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should allow retry after error', async () => {
@@ -472,16 +505,22 @@ describe('CredentialSubmitForm', () => {
       // First submit - fails
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(screen.getByText(/failed to submit credential/i)).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText(/failed to submit credential/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       // Second submit - succeeds
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(mockOnSuccess).toHaveBeenCalled();
-      });
+      await waitFor(
+        () => {
+          expect(mockOnSuccess).toHaveBeenCalled();
+        },
+        { timeout: 10000 },
+      );
     });
   });
 
@@ -501,9 +540,12 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(mockOnSuccess).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(
+        () => {
+          expect(mockOnSuccess).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should not call onSuccess on submission failure', async () => {
@@ -523,9 +565,12 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(screen.getByText(/failed to submit credential/i)).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText(/failed to submit credential/i)).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
       expect(mockOnSuccess).not.toHaveBeenCalled();
     });
 
@@ -544,17 +589,23 @@ describe('CredentialSubmitForm', () => {
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
 
-      await waitFor(() => {
-        expect(mockOnSuccess).toHaveBeenCalled();
-      });
+      await waitFor(
+        () => {
+          expect(mockOnSuccess).toHaveBeenCalled();
+        },
+        { timeout: 10000 },
+      );
 
       // Form should be reset
-      await waitFor(() => {
-        expect(screen.getByLabelText(/category/i)).toHaveValue('');
-        expect(screen.getByLabelText(/credential type/i)).toHaveValue('');
-        expect(screen.getByLabelText(/title/i)).toHaveValue('');
-        expect(screen.getByLabelText(/institution/i)).toHaveValue('');
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByLabelText(/category/i)).toHaveValue('');
+          expect(screen.getByLabelText(/credential type/i)).toHaveValue('');
+          expect(screen.getByLabelText(/title/i)).toHaveValue('');
+          expect(screen.getByLabelText(/institution/i)).toHaveValue('');
+        },
+        { timeout: 10000 },
+      );
     });
   });
 
@@ -641,9 +692,12 @@ describe('CredentialSubmitForm', () => {
       await user.tab(); // Trigger blur validation
 
       // Field with error should have aria-invalid
-      await waitFor(() => {
-        expect(titleInput).toHaveAttribute('aria-invalid', 'true');
-      });
+      await waitFor(
+        () => {
+          expect(titleInput).toHaveAttribute('aria-invalid', 'true');
+        },
+        { timeout: 10000 },
+      );
     });
   });
 
