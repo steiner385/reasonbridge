@@ -41,7 +41,7 @@ export function NotificationDropdown() {
         <div className="relative inline-flex items-center">
           <Bell className="h-6 w-6 text-gray-700 dark:text-gray-300" />
           {unreadCount > 0 && (
-            <span className="absolute right-[-8px] top-[-8px] flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-semibold text-white">
+            <span className="absolute right-[-8px] top-[-8px] flex h-5 w-5 items-center justify-center rounded-full bg-red-700 text-xs font-semibold text-white">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
