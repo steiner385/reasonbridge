@@ -23,19 +23,22 @@ import { ComplianceModule } from '../compliance/compliance.module.js';
  * AUTH_MODE options:
  * - 'database': Use DatabaseAuthService (authenticates against User table with bcrypt)
  * - 'mock': Use MockAuthService (in-memory, for unit tests)
- * - 'cognito' or unset: Use CognitoService (AWS Cognito)
+ * - 'cognito': Use CognitoService (AWS Cognito)
  *
- * For backwards compatibility:
- * - AUTH_MOCK=true enables mock mode
- * - NODE_ENV=test enables mock mode
+ * Automatic mode detection (when AUTH_MODE is not set):
+ * - AUTH_MOCK=true → MockAuthService
+ * - NODE_ENV=test → MockAuthService
+ * - NODE_ENV=development or not set → DatabaseAuthService (avoids requiring Cognito config)
+ * - NODE_ENV=production → CognitoService (requires COGNITO_USER_POOL_ID and COGNITO_CLIENT_ID)
  */
 const authServiceProvider = {
   provide: AUTH_SERVICE,
   useFactory: (configService: ConfigService, prisma: PrismaService) => {
     const authMode = configService.get<string>('AUTH_MODE');
-    const useMock =
-      configService.get<string>('AUTH_MOCK') === 'true' ||
-      configService.get<string>('NODE_ENV') === 'test';
+    const nodeEnv = configService.get<string>('NODE_ENV');
+    const useMock = configService.get<string>('AUTH_MOCK') === 'true' || nodeEnv === 'test';
+    // Use database auth for local development (when NODE_ENV is development or not set)
+    const useDatabase = nodeEnv === 'development' || !nodeEnv;
 
     // Explicit AUTH_MODE takes precedence
     if (authMode === 'database') {
@@ -44,6 +47,11 @@ const authServiceProvider = {
 
     if (authMode === 'mock' || useMock) {
       return new MockAuthService(configService);
+    }
+
+    // Use database auth in development mode (avoids requiring Cognito config)
+    if (useDatabase) {
+      return new DatabaseAuthService(configService, prisma);
     }
 
     return new CognitoService(configService);

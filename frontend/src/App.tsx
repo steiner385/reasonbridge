@@ -24,7 +24,7 @@ import { submitSafetyReport, type SubmitSafetyReportRequest } from './lib/modera
 function App() {
   const routing = useRoutes(routes);
   const location = useLocation();
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, sidebarMode } = useSidebar();
   const isMobile = useIsMobileViewport();
 
   /**
@@ -83,25 +83,52 @@ function App() {
         Skip to main content
       </a>
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
         <Header />
+
+        {/* Mobile Drawer - rendered outside flex container to avoid stacking context issues */}
+        {isMobile && <MobileDrawer />}
+
         <div className="flex">
           {/* Desktop Sidebar */}
           {!isMobile && <Sidebar />}
-
-          {/* Mobile Drawer */}
-          {isMobile && <MobileDrawer />}
 
           {/* Main Content */}
           <main
             id="main-content"
             className={`flex-1 transition-all duration-300 ${
-              !isMobile && !isCollapsed ? 'ml-64' : 'ml-0'
+              !isMobile
+                ? sidebarMode === 'topics'
+                  ? 'ml-80' // Topics mode: 320px sidebar (never collapses)
+                  : isCollapsed
+                    ? 'ml-20' // Full mode collapsed: 80px
+                    : 'ml-64' // Full mode expanded: 256px
+                : 'ml-0' // Mobile: no margin
             }`}
           >
             <div className="px-4 py-6 sm:px-6 lg:px-8">{routing}</div>
           </main>
         </div>
+
+        {/* Footer landmark for WCAG compliance */}
+        <footer
+          className={`
+            py-4 px-4 text-center text-sm text-gray-500 dark:text-gray-400
+            border-t border-gray-200 dark:border-gray-800
+            transition-all duration-300
+            ${
+              !isMobile
+                ? sidebarMode === 'topics'
+                  ? 'ml-80'
+                  : isCollapsed
+                    ? 'ml-20'
+                    : 'ml-64'
+                : 'ml-0'
+            }
+          `}
+        >
+          © 2026 ReasonBridge. Building bridges through rational discussion.
+        </footer>
       </div>
     </LoginModalProvider>
   );

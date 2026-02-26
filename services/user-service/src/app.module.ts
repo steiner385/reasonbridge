@@ -16,12 +16,14 @@ import { UsersModule } from './users/users.module.js';
 import { VerificationModule } from './verification/verification.module.js';
 import { ComplianceModule } from './compliance/compliance.module.js';
 import { MetricsModule } from './observability/index.js';
+import { DemoModule } from './demo/demo.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      // Look for .env files in order: local service config, then root monorepo config
+      envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
     // Rate limiting for brute force protection
     ThrottlerModule.forRoot([
@@ -40,6 +42,7 @@ import { MetricsModule } from './observability/index.js';
     UsersModule,
     VerificationModule,
     ComplianceModule,
+    DemoModule,
   ],
   controllers: [],
   providers: [

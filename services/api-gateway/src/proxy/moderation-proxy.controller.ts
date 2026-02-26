@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, All, Req, Res, Headers } from '@nestjs/common';
+import { Controller, All, Req, Res, Headers, Inject } from '@nestjs/common';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -13,7 +13,7 @@ import { ProxyService } from './proxy.service.js';
  */
 @Controller('moderation')
 export class ModerationProxyController {
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   /**
    * Proxy all moderation service requests

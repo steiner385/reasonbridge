@@ -16,6 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RankingCalculatorService } from '../ranking-calculator.service.js';
 import { RankingService } from '../ranking.service.js';
 import { RankingAnalyticsService } from '../ranking-analytics.service.js';
+import { RankingCronService } from '../ranking-cron.service.js';
 import { RankingController } from '../ranking.controller.js';
 import { RankingAnalyticsController } from '../ranking-analytics.controller.js';
 import { TrustScoreCalculator } from '../../services/trust-score.calculator.js';
@@ -109,6 +110,29 @@ const mockAdminGuard = {
   canActivate: vi.fn().mockReturnValue(true),
 };
 
+/**
+ * Mock RankingCronService for testing
+ */
+const mockRankingCronService = {
+  recalculateAllRankings: vi.fn().mockResolvedValue({
+    startedAt: new Date(),
+    completedAt: new Date(),
+    usersProcessed: 0,
+    errors: 0,
+    durationSeconds: 0,
+    success: true,
+  }),
+  getLastRecalculationResult: vi.fn().mockReturnValue(null),
+  triggerRecalculation: vi.fn().mockResolvedValue({
+    startedAt: new Date(),
+    completedAt: new Date(),
+    usersProcessed: 0,
+    errors: 0,
+    durationSeconds: 0,
+    success: true,
+  }),
+};
+
 describe('RankingModule', () => {
   let module: TestingModule;
 
@@ -123,6 +147,7 @@ describe('RankingModule', () => {
         RankingAnalyticsService,
         TrustScoreCalculator,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: RankingCronService, useValue: mockRankingCronService },
       ],
     })
       .overrideProvider(ConfigService)
@@ -275,6 +300,7 @@ describe('RankingModule - Isolation Tests', () => {
           RankingAnalyticsService,
           TrustScoreCalculator,
           { provide: PrismaService, useValue: mockPrismaService },
+          { provide: RankingCronService, useValue: mockRankingCronService },
         ],
       })
         .overrideProvider(ConfigService)
@@ -309,6 +335,7 @@ describe('RankingModule - Isolation Tests', () => {
           TrustScoreCalculator,
           { provide: PrismaService, useValue: mockPrismaService },
           { provide: RankingCalculatorService, useValue: mockCalculator },
+          { provide: RankingCronService, useValue: mockRankingCronService },
         ],
       })
         .overrideProvider(ConfigService)
@@ -344,6 +371,7 @@ describe('RankingModule - Isolation Tests', () => {
           TrustScoreCalculator,
           { provide: PrismaService, useValue: mockPrismaService },
           { provide: RankingService, useValue: mockRankingServiceOverride },
+          { provide: RankingCronService, useValue: mockRankingCronService },
         ],
       })
         .overrideProvider(ConfigService)

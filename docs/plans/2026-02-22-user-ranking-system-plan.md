@@ -15,7 +15,6 @@
 ### Task 1.1: Add UserRank Model to Prisma Schema
 
 **Files:**
-
 - Modify: `packages/db-models/prisma/schema.prisma`
 
 **Step 1: Add TierLevel enum**
@@ -91,7 +90,6 @@ git commit -m "feat(db): add UserRank model for tier system #781"
 ### Task 1.2: Add TopicExpertise Model
 
 **Files:**
-
 - Modify: `packages/db-models/prisma/schema.prisma`
 
 **Step 1: Add ExpertiseLevel enum**
@@ -140,13 +138,11 @@ model TopicExpertise {
 **Step 3: Add relations to User and Tag models**
 
 Add to User model:
-
 ```prisma
   topicExpertise        TopicExpertise[]
 ```
 
 Add to Tag model (after line 428):
-
 ```prisma
   expertise   TopicExpertise[]
 ```
@@ -168,7 +164,6 @@ git commit -m "feat(db): add TopicExpertise model for domain expertise #781"
 ### Task 1.3: Add DomainCredential Model
 
 **Files:**
-
 - Modify: `packages/db-models/prisma/schema.prisma`
 
 **Step 1: Add CredentialType and CredentialStatus enums**
@@ -232,14 +227,12 @@ model DomainCredential {
 **Step 3: Add relations to User and Tag**
 
 Add to User:
-
 ```prisma
   credentials           DomainCredential[] @relation("UserCredentials")
   credentialReviews     DomainCredential[] @relation("CredentialReviewer")
 ```
 
 Add to Tag:
-
 ```prisma
   credentials DomainCredential[]
 ```
@@ -257,7 +250,6 @@ git commit -m "feat(db): add DomainCredential model for verified credentials #78
 ### Task 1.4: Add TierAppeal and ProvisionalAccess Models
 
 **Files:**
-
 - Modify: `packages/db-models/prisma/schema.prisma`
 
 **Step 1: Add AppealType and AppealStatus enums**
@@ -344,7 +336,6 @@ model ProvisionalAccess {
 **Step 4: Add relations to User, Tag, and DiscussionTopic**
 
 Add to User:
-
 ```prisma
   tierAppeals           TierAppeal[]        @relation("UserAppeals")
   appealReviews         TierAppeal[]        @relation("AppealReviewer")
@@ -354,13 +345,11 @@ Add to User:
 ```
 
 Add to Tag:
-
 ```prisma
   appeals     TierAppeal[]
 ```
 
 Add to DiscussionTopic:
-
 ```prisma
   provisionalAccess     ProvisionalAccess[]
 ```
@@ -378,7 +367,6 @@ git commit -m "feat(db): add TierAppeal and ProvisionalAccess models #781"
 ### Task 1.5: Add Tier Restriction Fields to DiscussionTopic
 
 **Files:**
-
 - Modify: `packages/db-models/prisma/schema.prisma`
 
 **Step 1: Add tier restriction fields to DiscussionTopic model**
@@ -394,13 +382,11 @@ Add after line 230 (after `visibility` field):
 ```
 
 Add relation for requiredTagId:
-
 ```prisma
   requiredTag             Tag?      @relation("TopicRequiredExpertise", fields: [requiredTagId], references: [id])
 ```
 
 Add to Tag:
-
 ```prisma
   requiredByTopics DiscussionTopic[] @relation("TopicRequiredExpertise")
 ```
@@ -418,7 +404,6 @@ git commit -m "feat(db): add tier restriction fields to DiscussionTopic #781"
 ### Task 1.6: Generate and Run Migration
 
 **Files:**
-
 - Create: `packages/db-models/prisma/migrations/YYYYMMDDHHMMSS_add_ranking_system/migration.sql`
 
 **Step 1: Generate migration**
@@ -450,7 +435,6 @@ git commit -m "feat(db): add ranking system migration #781"
 ### Task 2.1: Create RankingCalculator Service - Test First
 
 **Files:**
-
 - Create: `services/user-service/src/ranking/ranking-calculator.service.ts`
 - Create: `services/user-service/src/ranking/__tests__/ranking-calculator.service.spec.ts`
 
@@ -539,10 +523,7 @@ describe('RankingCalculatorService', () => {
       };
 
       const basic = service.calculateCompositeScore({ ...base, verificationLevel: 'BASIC' });
-      const verified = service.calculateCompositeScore({
-        ...base,
-        verificationLevel: 'VERIFIED_HUMAN',
-      });
+      const verified = service.calculateCompositeScore({ ...base, verificationLevel: 'VERIFIED_HUMAN' });
 
       // BASIC = 0.2, VERIFIED_HUMAN = 1.0 -> difference = 0.8 * 0.2 = 0.16
       expect(verified - basic).toBeCloseTo(0.16, 2);
@@ -713,7 +694,6 @@ git commit -m "feat(user-service): add RankingCalculatorService with TDD #781"
 ### Task 2.2: Create RankingService - Orchestration Layer
 
 **Files:**
-
 - Create: `services/user-service/src/ranking/ranking.service.ts`
 - Create: `services/user-service/src/ranking/__tests__/ranking.service.spec.ts`
 
@@ -973,7 +953,6 @@ git commit -m "feat(user-service): add RankingService for rank orchestration #78
 ### Task 2.3: Create Ranking Module and DTOs
 
 **Files:**
-
 - Create: `services/user-service/src/ranking/ranking.module.ts`
 - Create: `services/user-service/src/ranking/dto/user-rank.dto.ts`
 - Create: `services/user-service/src/ranking/dto/leaderboard.dto.ts`
@@ -1181,7 +1160,6 @@ git commit -m "feat(user-service): add RankingModule with DTOs #781"
 ### Task 2.4: Create Ranking Controller
 
 **Files:**
-
 - Create: `services/user-service/src/ranking/ranking.controller.ts`
 - Create: `services/user-service/src/ranking/__tests__/ranking.controller.spec.ts`
 
@@ -1313,7 +1291,9 @@ export class RankingController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 50,
   ): Promise<LeaderboardDto> {
     const ranks = await this.rankingService.getLeaderboard(Math.min(limit, 100));
-    const entries = ranks.map((rank, index) => new LeaderboardEntryDto(rank as never, index + 1));
+    const entries = ranks.map(
+      (rank, index) => new LeaderboardEntryDto(rank as never, index + 1),
+    );
     return new LeaderboardDto(entries, entries.length);
   }
 }
@@ -1354,7 +1334,6 @@ git commit -m "feat(user-service): add RankingController with endpoints #781"
 ### Task 3.1: Create TierBadge Component
 
 **Files:**
-
 - Create: `frontend/src/components/ranking/TierBadge.tsx`
 - Create: `frontend/src/components/ranking/__tests__/TierBadge.test.tsx`
 
@@ -1523,7 +1502,6 @@ git commit -m "feat(frontend): add TierBadge component #781"
 ### Task 3.2: Create TierProgressCard Component
 
 **Files:**
-
 - Create: `frontend/src/components/ranking/TierProgressCard.tsx`
 - Create: `frontend/src/components/ranking/__tests__/TierProgressCard.test.tsx`
 
@@ -1734,28 +1712,24 @@ git commit -m "feat(frontend): add TierProgressCard component #781"
 Due to plan length constraints, the following phases are outlined at task level. Each task follows the same TDD pattern (test first, implement, commit):
 
 ### Phase 4: Domain Expertise
-
 - Task 4.1: Create ExpertiseCalculatorService (test + impl)
 - Task 4.2: Create ExpertiseService for CRUD operations
 - Task 4.3: Add ExpertiseBadge frontend component
 - Task 4.4: Create expertise API endpoints
 
 ### Phase 5: Credentials System
-
 - Task 5.1: Create CredentialService (test + impl)
 - Task 5.2: Create CredentialController with upload handling
 - Task 5.3: Create CredentialSubmitForm frontend component
 - Task 5.4: Create admin CredentialReviewQueue component
 
 ### Phase 6: Access Control
-
 - Task 6.1: Create TierGuard middleware (test + impl)
 - Task 6.2: Add provisional access endpoints
 - Task 6.3: Create TierGateBanner frontend component
 - Task 6.4: Create RequestAccessModal component
 
 ### Phase 7: Anti-Exclusion & Polish
-
 - Task 7.1: Create AppealService (test + impl)
 - Task 7.2: Create AppealController with endpoints
 - Task 7.3: Create RankingDashboard page
@@ -1768,26 +1742,22 @@ Due to plan length constraints, the following phases are outlined at task level.
 ## Commands Reference
 
 **Run all ranking tests:**
-
 ```bash
 cd services/user-service && pnpm vitest run src/ranking/
 cd frontend && pnpm vitest run src/components/ranking/
 ```
 
 **Generate Prisma client after schema changes:**
-
 ```bash
 cd packages/db-models && pnpm prisma generate
 ```
 
 **Run migrations:**
-
 ```bash
 cd packages/db-models && pnpm prisma migrate dev
 ```
 
 **Build all packages:**
-
 ```bash
 pnpm -r build
 ```

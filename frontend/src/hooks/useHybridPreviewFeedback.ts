@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   previewFeedback,
   MIN_CONTENT_LENGTH,
@@ -206,9 +206,19 @@ export function useHybridPreviewFeedback(
   // Parse error message
   const errorMessage = activeError instanceof Error ? activeError.message : null;
 
+  // CRITICAL: Memoize feedback array to prevent creating new empty array on every render
+  // This prevents infinite render loops in components that use this feedback in useEffect dependencies
+  // Use stable empty array via useMemo (not ref, as refs can't be accessed during render)
+  const emptyFeedback = useMemo<PreviewFeedbackResponse['feedback']>(() => [], []);
+  const feedback = useMemo(
+    () => activeData?.feedback ?? emptyFeedback,
+    [activeData?.feedback, emptyFeedback],
+  );
+
   // IMPORTANT: Don't show definitive "readyToPost" until AI completes
   // This prevents the jarring transition from green (regex AFFIRMATION) to red (AI detected issues)
-  const readyToPost = (() => {
+  // Memoized to prevent unnecessary re-renders
+  const readyToPost = useMemo(() => {
     // If AI is enabled and currently fetching (initial OR refetch), show "pending" state (null)
     // This prevents showing green prematurely based on regex-only results
     // CRITICAL: Use isFetching not isLoading to catch subsequent edits
@@ -228,10 +238,10 @@ export function useHybridPreviewFeedback(
 
     // Default: true (no feedback loaded yet)
     return true;
-  })();
+  }, [enableAI, isContentValid, aiQuery.isFetching, aiQuery.data, regexQuery.data]);
 
-  // Update summary based on state
-  const summary = (() => {
+  // Update summary based on state - memoized to prevent unnecessary re-renders
+  const summary = useMemo(() => {
     // While AI is fetching (initial OR refetch), show pending message (even if regex has results)
     // CRITICAL: Use isFetching not isLoading to show message on EVERY edit
     if (enableAI && isContentValid && aiQuery.isFetching) {
@@ -240,10 +250,10 @@ export function useHybridPreviewFeedback(
 
     // Use active data summary (from AI or regex)
     return activeData?.summary ?? '';
-  })();
+  }, [enableAI, isContentValid, aiQuery.isFetching, activeData?.summary]);
 
   return {
-    feedback: activeData?.feedback ?? [],
+    feedback,
     primary: activeData?.primary,
     readyToPost,
     summary,

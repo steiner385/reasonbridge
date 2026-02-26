@@ -9,6 +9,7 @@ import {
   ConflictException,
   BadRequestException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
@@ -33,8 +34,8 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly botDetector: BotDetectorService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(BotDetectorService) private readonly botDetector: BotDetectorService,
   ) {}
 
   /**

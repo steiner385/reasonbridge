@@ -148,7 +148,7 @@ describe('FallacyWarnings', () => {
 
   describe('Fallacy Subtypes', () => {
     it('should render ad_hominem fallacy correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} />);
 
       expect(screen.getByText('Ad Hominem')).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should render straw_man fallacy correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyMediumConfidence]} />);
 
       expect(screen.getByText('Straw Man')).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should render false_dichotomy fallacy correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyLowConfidence]} />);
 
       expect(screen.getByText('False Dichotomy')).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should render appeal_to_authority fallacy correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyWithResources]} />);
 
       expect(screen.getByText('Appeal to Authority')).toBeInTheDocument();
@@ -209,7 +209,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should show generic description for unknown fallacy type', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyUnknownType]} />);
 
       await user.click(screen.getByRole('button', { name: /learn more/i }));
@@ -222,7 +222,7 @@ describe('FallacyWarnings', () => {
 
   describe('User Interactions', () => {
     it('should toggle expanded details when "Learn more" is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} />);
 
       const learnMoreButton = screen.getByRole('button', { name: /learn more/i });
@@ -241,7 +241,7 @@ describe('FallacyWarnings', () => {
 
     it('should call onAcknowledge when "I understand" is clicked', async () => {
       const onAcknowledge = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <FallacyWarnings feedback={[mockFallacyHighConfidence]} onAcknowledge={onAcknowledge} />,
@@ -255,7 +255,7 @@ describe('FallacyWarnings', () => {
 
     it('should call onDismiss when dismiss button is clicked', async () => {
       const onDismiss = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} onDismiss={onDismiss} />);
 
@@ -265,7 +265,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should expand/collapse with keyboard navigation in compact mode', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} compact />);
 
       const badge = screen.getByRole('listitem', { name: /ad hominem fallacy warning/i });
@@ -283,7 +283,7 @@ describe('FallacyWarnings', () => {
 
   describe('Educational Resources', () => {
     it('should display educational resources when available and showEducationalResources is true', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyWithResources]} showEducationalResources />);
 
       await user.click(screen.getByRole('button', { name: /learn more/i }));
@@ -294,7 +294,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should hide educational resources when showEducationalResources is false', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <FallacyWarnings feedback={[mockFallacyWithResources]} showEducationalResources={false} />,
       );
@@ -305,7 +305,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should show AI reasoning in expanded view', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} />);
 
       await user.click(screen.getByRole('button', { name: /learn more/i }));
@@ -317,7 +317,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should display fallacy definition in expanded view', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyMediumConfidence]} />);
 
       await user.click(screen.getByRole('button', { name: /learn more/i }));
@@ -339,7 +339,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should toggle expansion on badge click in compact mode', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} compact />);
 
       const badge = screen.getByRole('listitem');
@@ -390,7 +390,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should have aria-expanded attribute on detail toggles', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} />);
 
       const learnMoreButton = screen.getByRole('button', { name: /learn more/i });
@@ -403,7 +403,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should support keyboard navigation for interactive elements', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<FallacyWarnings feedback={[mockFallacyHighConfidence]} />);
 
       const learnMoreButton = screen.getByRole('button', { name: /learn more/i });
@@ -455,7 +455,7 @@ describe('FallacyWarnings', () => {
     });
 
     it('should maintain independent expand/collapse state for each fallacy', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <FallacyWarnings feedback={[mockFallacyHighConfidence, mockFallacyMediumConfidence]} />,
       );

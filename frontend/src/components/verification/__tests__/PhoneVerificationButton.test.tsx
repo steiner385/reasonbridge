@@ -40,7 +40,7 @@ describe('PhoneVerificationButton', () => {
   });
 
   it('opens modal when clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<PhoneVerificationButton />);
 
     const button = screen.getByRole('button', { name: /verify phone number/i });
@@ -52,7 +52,7 @@ describe('PhoneVerificationButton', () => {
   });
 
   it('does not open modal when disabled', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<PhoneVerificationButton disabled={true} />);
 
     const button = screen.getByRole('button', { name: /verify phone number/i });
@@ -69,7 +69,7 @@ describe('PhoneVerificationButton', () => {
     // The setTimeout in PhoneVerificationModal (2000ms) before calling onSuccess()
     // may be causing race conditions in test environment
     // Issue: Main branch build #88 FAILED due to this timeout
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockOnSuccess = vi.fn();
 
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
@@ -120,7 +120,7 @@ describe('PhoneVerificationButton', () => {
   }, 10000);
 
   it('closes modal when cancel is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<PhoneVerificationButton />);
 
     // Open modal

@@ -3,7 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Post, Patch, Body, Param, Res, Headers, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  Res,
+  Headers,
+  Logger,
+  Inject,
+} from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -35,7 +46,7 @@ function isValidUUID(id: string): boolean {
 export class VerificationProxyController {
   private readonly logger = new Logger(VerificationProxyController.name);
 
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   @Post('request')
   async requestVerification(

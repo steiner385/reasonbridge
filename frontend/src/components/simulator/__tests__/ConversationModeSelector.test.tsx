@@ -109,7 +109,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should call onModeChange when clicking a mode option', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'debate' });
 
       const socraticOption = screen.getByRole('radio', { name: /socratic/i });
@@ -119,7 +119,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should call onModeChange for each mode type', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'debate' });
 
       // Test each mode
@@ -159,7 +159,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should call onDifficultyChange when clicking a difficulty option', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedDifficulty: 'intermediate' });
 
       const expertOption = screen.getByRole('radio', { name: /expert/i });
@@ -169,7 +169,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should call onDifficultyChange for each difficulty level', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedDifficulty: 'intermediate' });
 
       for (const difficulty of DIFFICULTY_CONFIGS) {
@@ -182,7 +182,7 @@ describe('ConversationModeSelector', () => {
 
   describe('Keyboard Navigation', () => {
     it('should navigate modes with ArrowDown key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'socratic' });
 
       const socraticOption = screen.getByRole('radio', { name: /socratic/i });
@@ -195,7 +195,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should navigate modes with ArrowRight key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'socratic' });
 
       const socraticOption = screen.getByRole('radio', { name: /socratic/i });
@@ -207,7 +207,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should navigate modes with ArrowUp key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'debate' });
 
       const debateOption = screen.getByRole('radio', { name: /debate/i });
@@ -220,7 +220,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should navigate modes with ArrowLeft key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'debate' });
 
       const debateOption = screen.getByRole('radio', { name: /debate/i });
@@ -232,7 +232,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should wrap around when navigating past last mode', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'common_ground' });
 
       const commonGroundOption = screen.getByRole('radio', { name: /common ground/i });
@@ -245,7 +245,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should wrap around when navigating before first mode', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedMode: 'socratic' });
 
       const socraticOption = screen.getByRole('radio', { name: /socratic/i });
@@ -258,7 +258,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should navigate difficulties with ArrowDown key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedDifficulty: 'novice' });
 
       const noviceOption = screen.getByRole('radio', { name: /novice/i });
@@ -270,7 +270,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should navigate difficulties with ArrowUp key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedDifficulty: 'intermediate' });
 
       const intermediateOption = screen.getByRole('radio', { name: /intermediate/i });
@@ -282,7 +282,7 @@ describe('ConversationModeSelector', () => {
     });
 
     it('should wrap around when navigating past last difficulty', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderSelector({ selectedDifficulty: 'expert' });
 
       const expertOption = screen.getByRole('radio', { name: /expert/i });

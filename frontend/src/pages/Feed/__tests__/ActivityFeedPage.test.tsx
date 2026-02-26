@@ -205,7 +205,7 @@ describe('ActivityFeedPage', () => {
     });
 
     it('loads more activities when button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       const moreActivities = [
         {
@@ -262,7 +262,7 @@ describe('ActivityFeedPage', () => {
     });
 
     it('retries fetch when try again is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       mockGetFeed.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({
         activities: mockActivities,

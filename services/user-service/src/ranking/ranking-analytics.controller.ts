@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Post, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Logger, Inject } from '@nestjs/common';
 import { RankingAnalyticsService } from './ranking-analytics.service.js';
 import { RankingCronService, type RecalculationResult } from './ranking-cron.service.js';
 import { RankingAnalyticsDto } from './dto/ranking-analytics.dto.js';
@@ -53,8 +53,8 @@ export class RankingAnalyticsController {
   private readonly logger = new Logger(RankingAnalyticsController.name);
 
   constructor(
-    private readonly analyticsService: RankingAnalyticsService,
-    private readonly cronService: RankingCronService,
+    @Inject(RankingAnalyticsService) private readonly analyticsService: RankingAnalyticsService,
+    @Inject(RankingCronService) private readonly cronService: RankingCronService,
   ) {}
 
   /**

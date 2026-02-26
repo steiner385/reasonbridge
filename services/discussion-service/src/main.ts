@@ -24,21 +24,26 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: false,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
-  // OpenAPI/Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('ReasonBridge Discussion Service')
-    .setDescription('Topics, propositions, responses, and discussion threading endpoints')
-    .setVersion('1.0.0')
-    .addBearerAuth()
-    .build();
+  // OpenAPI/Swagger documentation (skip if SKIP_SWAGGER is set for faster dev startup)
+  if (!process.env['SKIP_SWAGGER']) {
+    const config = new DocumentBuilder()
+      .setTitle('ReasonBridge Discussion Service')
+      .setDescription('Topics, propositions, responses, and discussion threading endpoints')
+      .setVersion('1.0.0')
+      .addBearerAuth()
+      .build();
 
-  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
-  const document = SwaggerModule.createDocument(app, config);
-  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
-  SwaggerModule.setup('api-docs', app, document);
+    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+    const document = SwaggerModule.createDocument(app, config);
+    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+    SwaggerModule.setup('api-docs', app, document);
+  }
 
   // Distributed tracing interceptor
   app.useGlobalInterceptors(new TracingInterceptor('discussion-service'));

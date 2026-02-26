@@ -260,7 +260,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('toggles analysis visibility on click', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const userMessage = createMessage({
         id: 'user-1',
         role: 'user',
@@ -283,7 +283,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('displays analysis scores', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const userMessage = createMessage({
         id: 'user-1',
         role: 'user',
@@ -300,7 +300,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('shows fallacy count in analysis', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const userMessage = createMessage({
         id: 'user-1',
         role: 'user',
@@ -318,7 +318,7 @@ describe('SimulatorChatInterface', () => {
 
   describe('Message Input', () => {
     it('allows typing a message', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -330,7 +330,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('dispatches ADD_USER_MESSAGE on form submit', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -348,7 +348,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('submits on Enter key press', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -363,7 +363,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('does not submit on Shift+Enter', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -376,7 +376,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('clears input after sending', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -423,7 +423,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('does not dispatch on empty input', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -452,7 +452,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('dispatches PAUSE_SIMULATION on pause click', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -463,7 +463,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('dispatches RESUME_SIMULATION on resume click', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState({ status: 'paused' });
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -474,7 +474,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('dispatches END_SIMULATION on end click', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState();
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -485,7 +485,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('dispatches RESET_SIMULATION on new session click', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const state = createActiveState({ status: 'completed' });
 
       render(<SimulatorChatInterface state={state} dispatch={mockDispatch} />);
@@ -560,7 +560,7 @@ describe('SimulatorChatInterface', () => {
     });
 
     it('has proper aria-expanded on analysis toggle', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const mockAnalysis = {
         fallacies: [],
         unsupportedClaims: [],

@@ -32,6 +32,7 @@ export class InitialResponseDto {
     example: 'I believe we need to address climate change urgently because...',
     minLength: 50,
     maxLength: 25000,
+    type: String,
   })
   @IsString()
   @MinLength(50, { message: 'Initial response must be at least 50 characters' })
@@ -58,6 +59,7 @@ export class CreateDiscussionDto {
     description: 'ID of the topic this discussion belongs to',
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
+    type: String,
   })
   @IsUUID('4')
   topicId!: string;
@@ -67,6 +69,7 @@ export class CreateDiscussionDto {
     example: 'Should carbon taxes be increased in 2027?',
     minLength: 10,
     maxLength: 200,
+    type: String,
   })
   @IsString()
   @MinLength(10, { message: 'Title must be at least 10 characters' })

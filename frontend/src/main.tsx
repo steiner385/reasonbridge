@@ -33,13 +33,13 @@ createRoot(rootElement).render(
             <ToastProvider>
               <AuthProvider>
                 <ChildSafetyProvider>
-                  <SidebarProvider>
-                    <BrowserRouter>
+                  <BrowserRouter>
+                    <SidebarProvider>
                       <AnalyticsProvider>
                         <App />
                       </AnalyticsProvider>
-                    </BrowserRouter>
-                  </SidebarProvider>
+                    </SidebarProvider>
+                  </BrowserRouter>
                 </ChildSafetyProvider>
               </AuthProvider>
             </ToastProvider>

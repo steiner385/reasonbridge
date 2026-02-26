@@ -90,7 +90,7 @@ describe('PropositionInputSection', () => {
 
   describe('Adding Propositions', () => {
     it('should call onChange when adding a proposition', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<PropositionInputSection propositions={[]} onChange={onChange} />);
 
@@ -109,7 +109,7 @@ describe('PropositionInputSection', () => {
     });
 
     it('should clear input after adding', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<PropositionInputSection propositions={[]} onChange={onChange} />);
 
@@ -121,7 +121,7 @@ describe('PropositionInputSection', () => {
     });
 
     it('should disable add button when text is too short', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<PropositionInputSection propositions={[]} onChange={() => {}} />);
 
       const textarea = screen.getByLabelText(/new proposition text/i);
@@ -131,7 +131,7 @@ describe('PropositionInputSection', () => {
     });
 
     it('should allow selecting proposition type', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<PropositionInputSection propositions={[]} onChange={onChange} />);
 
@@ -161,7 +161,7 @@ describe('PropositionInputSection', () => {
 
   describe('Removing Propositions', () => {
     it('should call onChange when removing a proposition', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       const propositions = [createMockProposition({ id: 'prop-1' })];
       render(<PropositionInputSection propositions={propositions} onChange={onChange} />);
@@ -175,7 +175,7 @@ describe('PropositionInputSection', () => {
 
   describe('Editing Propositions', () => {
     it('should enter edit mode when edit button clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const propositions = [createMockProposition({ text: 'Original text here for testing' })];
       render(<PropositionInputSection propositions={propositions} onChange={() => {}} />);
 
@@ -187,7 +187,7 @@ describe('PropositionInputSection', () => {
     });
 
     it('should save edits when save clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       const propositions = [createMockProposition({ id: 'prop-1', text: 'Original text here' })];
       render(<PropositionInputSection propositions={propositions} onChange={onChange} />);
@@ -209,7 +209,7 @@ describe('PropositionInputSection', () => {
     });
 
     it('should cancel edits when cancel clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       const propositions = [createMockProposition({ text: 'Original text here for testing' })];
       render(<PropositionInputSection propositions={propositions} onChange={onChange} />);
@@ -224,7 +224,7 @@ describe('PropositionInputSection', () => {
 
   describe('Changing Type', () => {
     it('should update proposition type when changed', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       const propositions = [createMockProposition({ id: 'prop-1', type: 'thesis' })];
       render(<PropositionInputSection propositions={propositions} onChange={onChange} />);

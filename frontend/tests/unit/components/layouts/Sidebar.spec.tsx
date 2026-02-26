@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Sidebar } from '../../../../src/components/layouts/Sidebar';
 import { ToastProvider } from '../../../../src/contexts/ToastContext';
 import { AuthProvider } from '../../../../src/contexts/AuthContext';
@@ -12,6 +13,17 @@ import { ChildSafetyProvider } from '../../../../src/contexts/ChildSafetyContext
 import * as sidebarHook from '../../../../src/hooks/useSidebar';
 import * as authHook from '../../../../src/hooks/useAuth';
 import * as notificationsHook from '../../../../src/hooks/useNotifications';
+import * as topicNavigationHook from '../../../../src/hooks/useTopicNavigation';
+import * as webSocketHook from '../../../../src/hooks/useWebSocket';
+
+// Mock useTopics to prevent actual API calls
+vi.mock('../../../../src/lib/useTopics', () => ({
+  useTopics: vi.fn(() => ({
+    data: { data: [] },
+    isLoading: false,
+    error: null,
+  })),
+}));
 
 describe('Sidebar Component', () => {
   const mockUser = {
@@ -21,10 +33,11 @@ describe('Sidebar Component', () => {
     avatarUrl: null,
   };
 
-  const mockUseSidebar = (isCollapsed: boolean) => {
+  const mockUseSidebar = (isCollapsed: boolean, sidebarMode: 'full' | 'topics' = 'full') => {
     vi.spyOn(sidebarHook, 'useSidebar').mockReturnValue({
       isCollapsed,
       isMobileOpen: false,
+      sidebarMode,
       toggleCollapsed: vi.fn(),
       toggleMobile: vi.fn(),
       closeMobile: vi.fn(),
@@ -54,28 +67,60 @@ describe('Sidebar Component', () => {
     });
   };
 
+  const mockUseTopicNavigation = () => {
+    vi.spyOn(topicNavigationHook, 'useTopicNavigation').mockReturnValue({
+      activeTopicId: null,
+      navigateToTopic: vi.fn(),
+      clearTopic: vi.fn(),
+      isTopicActive: vi.fn().mockReturnValue(false),
+    });
+  };
+
+  const mockUseWebSocket = () => {
+    vi.spyOn(webSocketHook, 'useWebSocket').mockReturnValue({
+      state: 'CONNECTED',
+      isConnected: true,
+      subscribe: vi.fn().mockReturnValue(vi.fn()),
+      send: vi.fn(),
+    });
+  };
+
+  const createQueryClient = () => {
+    return new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+  };
+
   const renderSidebar = () => {
+    const queryClient = createQueryClient();
     return render(
-      <MemoryRouter>
-        <ToastProvider>
-          <AuthProvider>
-            <ChildSafetyProvider>
-              <Sidebar />
-            </ChildSafetyProvider>
-          </AuthProvider>
-        </ToastProvider>
-      </MemoryRouter>,
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <ToastProvider>
+            <AuthProvider>
+              <ChildSafetyProvider>
+                <Sidebar />
+              </ChildSafetyProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseNotifications();
+    mockUseTopicNavigation();
+    mockUseWebSocket();
   });
 
   describe('expanded state', () => {
     beforeEach(() => {
-      mockUseSidebar(false);
+      mockUseSidebar(false, 'full');
       mockUseAuth();
     });
 
@@ -106,7 +151,7 @@ describe('Sidebar Component', () => {
 
   describe('collapsed state', () => {
     beforeEach(() => {
-      mockUseSidebar(true);
+      mockUseSidebar(true, 'full');
       mockUseAuth();
     });
 
@@ -153,7 +198,7 @@ describe('Sidebar Component', () => {
 
   describe('no user logged in', () => {
     it('should not show user profile section when not logged in', () => {
-      mockUseSidebar(false);
+      mockUseSidebar(false, 'full');
       mockUseAuth(null);
 
       renderSidebar();

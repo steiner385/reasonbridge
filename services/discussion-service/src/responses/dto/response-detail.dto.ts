@@ -21,6 +21,7 @@ export class ResponseDetailDto {
     description: 'Response ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
+    type: String,
   })
   id!: string;
 
@@ -28,12 +29,14 @@ export class ResponseDetailDto {
     description: 'Discussion ID this response belongs to',
     example: '660e8400-e29b-41d4-a716-446655440001',
     format: 'uuid',
+    type: String,
   })
   discussionId!: string;
 
   @ApiProperty({
     description: 'Response content',
     example: 'I believe we should consider the environmental impact...',
+    type: String,
   })
   content!: string;
 
@@ -48,6 +51,7 @@ export class ResponseDetailDto {
     example: '770e8400-e29b-41d4-a716-446655440002',
     format: 'uuid',
     nullable: true,
+    type: String,
   })
   parentResponseId!: string | null;
 
@@ -61,12 +65,14 @@ export class ResponseDetailDto {
   @ApiProperty({
     description: 'Current version number for optimistic locking',
     example: 1,
+    type: Number,
   })
   version!: number;
 
   @ApiProperty({
     description: 'Number of times this response has been edited',
     example: 0,
+    type: Number,
   })
   editCount!: number;
 
@@ -74,6 +80,7 @@ export class ResponseDetailDto {
     description: 'Timestamp when response was last edited',
     example: '2026-01-27T15:30:00Z',
     nullable: true,
+    type: String,
   })
   editedAt!: string | null;
 
@@ -81,30 +88,34 @@ export class ResponseDetailDto {
     description: 'Timestamp when response was soft-deleted',
     example: '2026-01-27T16:00:00Z',
     nullable: true,
+    type: String,
   })
   deletedAt!: string | null;
 
   @ApiProperty({
     description: 'Response creation timestamp',
     example: '2026-01-27T10:00:00Z',
+    type: String,
   })
   createdAt!: string;
 
   @ApiProperty({
     description: 'Last updated timestamp',
     example: '2026-01-27T10:00:00Z',
+    type: String,
   })
   updatedAt!: string;
 
   @ApiPropertyOptional({
     description: 'Number of direct replies to this response',
     example: 3,
+    type: Number,
   })
   replyCount?: number;
 
   @ApiPropertyOptional({
     description: 'Nested replies for thread display (populated on demand)',
-    type: [ResponseDetailDto],
+    type: () => [ResponseDetailDto],
     isArray: true,
   })
   replies?: ResponseDetailDto[];

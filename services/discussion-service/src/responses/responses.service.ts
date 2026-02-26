@@ -8,6 +8,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Inject,
   Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -33,7 +34,8 @@ export class ResponsesService {
   private readonly logger = new DiscussionLogger('ResponsesService');
 
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(CommonGroundTriggerService)
     private readonly commonGroundTrigger: CommonGroundTriggerService,
     @Optional() private readonly moderationClient?: ModerationClientService,
   ) {}

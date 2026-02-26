@@ -14,6 +14,7 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
@@ -38,8 +39,8 @@ export class VerificationController {
   private readonly logger = new Logger(VerificationController.name);
 
   constructor(
-    private verificationService: VerificationService,
-    private videoUploadService: VideoUploadService,
+    @Inject(VerificationService) private verificationService: VerificationService,
+    @Inject(VideoUploadService) private videoUploadService: VideoUploadService,
   ) {}
 
   /**

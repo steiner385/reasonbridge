@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -29,46 +30,48 @@ async function bootstrap() {
   const corsConfig = getCorsConfig();
   app.enableCors(corsConfig);
 
-  // Configure OpenAPI/Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('ReasonBridge API')
-    .setDescription(
-      'RESTful API for the ReasonBridge rational discussion platform. ' +
-        'Provides endpoints for user management, discussions, topics, AI analysis, and moderation.',
-    )
-    .setVersion('1.0.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'Authorization',
-        description: 'JWT authentication token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
-    .addTag('health', 'Health check endpoints')
-    .addTag('auth', 'Authentication and authorization')
-    .addTag('users', 'User management')
-    .addTag('topics', 'Discussion topics')
-    .addTag('discussions', 'Discussion threads')
-    .addTag('responses', 'Discussion responses')
-    .addTag('ai', 'AI-powered analysis')
-    .addTag('moderation', 'Content moderation')
-    .build();
+  // Configure OpenAPI/Swagger documentation (skip if SKIP_SWAGGER is set for faster dev startup)
+  if (!process.env['SKIP_SWAGGER']) {
+    const config = new DocumentBuilder()
+      .setTitle('ReasonBridge API')
+      .setDescription(
+        'RESTful API for the ReasonBridge rational discussion platform. ' +
+          'Provides endpoints for user management, discussions, topics, AI analysis, and moderation.',
+      )
+      .setVersion('1.0.0')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'Authorization',
+          description: 'JWT authentication token',
+          in: 'header',
+        },
+        'JWT-auth',
+      )
+      .addTag('health', 'Health check endpoints')
+      .addTag('auth', 'Authentication and authorization')
+      .addTag('users', 'User management')
+      .addTag('topics', 'Discussion topics')
+      .addTag('discussions', 'Discussion threads')
+      .addTag('responses', 'Discussion responses')
+      .addTag('ai', 'AI-powered analysis')
+      .addTag('moderation', 'Content moderation')
+      .build();
 
-  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
-  const document = SwaggerModule.createDocument(app, config);
-  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
-  SwaggerModule.setup('api-docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-      docExpansion: 'none',
-      filter: true,
-      showRequestDuration: true,
-    },
-  });
+    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+    const document = SwaggerModule.createDocument(app, config);
+    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+    SwaggerModule.setup('api-docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+        docExpansion: 'none',
+        filter: true,
+        showRequestDuration: true,
+      },
+    });
+  }
 
   // Distributed tracing interceptor
   app.useGlobalInterceptors(new TracingInterceptor('api-gateway'));
@@ -80,7 +83,11 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 API Gateway is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation available at: http://localhost:${port}/api-docs`);
+  if (!process.env['SKIP_SWAGGER']) {
+    console.log(`📚 API Documentation available at: http://localhost:${port}/api-docs`);
+  } else {
+    console.log(`⚠️  Swagger disabled (SKIP_SWAGGER=1)`);
+  }
 }
 
 bootstrap().catch((error) => {

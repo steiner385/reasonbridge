@@ -162,6 +162,8 @@ export function CreateResponseForm({
             errors.content ? 'border-red-500' : 'border-gray-300'
           }`}
           maxLength={25000}
+          aria-label="Your response"
+          aria-describedby={errors.content ? 'response-error' : undefined}
         />
         <div className="flex justify-between mt-1">
           <span className="text-sm text-red-500">{errors.content}</span>

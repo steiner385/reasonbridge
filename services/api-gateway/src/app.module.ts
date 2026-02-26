@@ -19,6 +19,8 @@ import { JwtUserMiddleware } from './middleware/jwt-user.middleware.js';
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
+      // Look for .env files in order: local service config, then root monorepo config
+      envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
 
     // Rate limiting with configurable storage

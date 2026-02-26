@@ -16,6 +16,7 @@ import {
   BadRequestException,
   ForbiddenException,
   ConflictException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { DiscussionLogger } from '../utils/logger.js';
@@ -39,7 +40,7 @@ export interface ListDiscussionsQuery extends PaginationQueryDto {
 export class DiscussionsService {
   private readonly logger = new DiscussionLogger('DiscussionsService');
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * T021 [P] [US1] - Create a new discussion with initial response

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Param, Query, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, Logger, Inject } from '@nestjs/common';
 import { RankingService } from './ranking.service.js';
 import { UserRankDto } from './dto/user-rank.dto.js';
 import type { LeaderboardOptions } from './dto/leaderboard-options.dto.js';
@@ -31,7 +31,7 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 export class RankingController {
   private readonly logger = new Logger(RankingController.name);
 
-  constructor(private readonly rankingService: RankingService) {}
+  constructor(@Inject(RankingService) private readonly rankingService: RankingService) {}
 
   /**
    * GET /users/:id/ranking - Get user's global tier and composite score

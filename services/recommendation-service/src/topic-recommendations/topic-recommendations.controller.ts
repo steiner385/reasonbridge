@@ -4,7 +4,8 @@
  */
 
 import { Controller, Get, Query, Param, UseInterceptors } from '@nestjs/common';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { CacheTTL } from '@nestjs/cache-manager';
+import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interceptor.js';
 import { TopicRecommendationsService } from './topic-recommendations.service.js';
 import {
   GetTopicRecommendationsDto,
@@ -51,7 +52,7 @@ export class TopicRecommendationsController {
    * @example GET /topic-recommendations/similar/123e4567-e89b-12d3-a456-426614174000?limit=5
    */
   @Get('similar/:topicId')
-  @UseInterceptors(CacheInterceptor)
+  @UseInterceptors(OptionalCacheInterceptor)
   @CacheTTL(86400000) // 24 hours in ms
   async getSimilarTopics(
     @Param('topicId') topicId: string,
@@ -72,7 +73,7 @@ export class TopicRecommendationsController {
    * @example GET /topic-recommendations/trending?hours=24&limit=10&tags=politics
    */
   @Get('trending')
-  @UseInterceptors(CacheInterceptor)
+  @UseInterceptors(OptionalCacheInterceptor)
   @CacheTTL(300000) // 5 minutes in ms
   async getTrendingTopics(
     @Query() query: GetTrendingTopicsDto,

@@ -16,8 +16,10 @@ import {
   UseInterceptors,
   Request,
   Headers,
+  Inject,
 } from '@nestjs/common';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+// TEMPORARILY DISABLED for debugging hang issue
+// import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Throttle } from '@nestjs/throttler';
 import type { FastifyReply as Response } from 'fastify';
 import { TopicsService } from './topics.service.js';
@@ -37,9 +39,9 @@ import { TopicsAnalyticsService } from './topics-analytics.service.js';
 @Controller('topics')
 export class TopicsController {
   constructor(
-    private readonly topicsService: TopicsService,
-    private readonly exportService: CommonGroundExportService,
-    private readonly analyticsService: TopicsAnalyticsService,
+    @Inject(TopicsService) private readonly topicsService: TopicsService,
+    @Inject(CommonGroundExportService) private readonly exportService: CommonGroundExportService,
+    @Inject(TopicsAnalyticsService) private readonly analyticsService: TopicsAnalyticsService,
   ) {}
 
   /**
@@ -47,8 +49,8 @@ export class TopicsController {
    * Cached for 5 minutes (300 seconds)
    */
   @Get()
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(300000) // 5 minutes in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(300000) // 5 minutes in ms
   async getTopics(@Query() query: GetTopicsQueryDto): Promise<PaginatedTopicsResponseDto> {
     return this.topicsService.getTopics(query);
   }
@@ -58,8 +60,8 @@ export class TopicsController {
    * Cached for 5 minutes (300 seconds)
    */
   @Get('search')
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(300000) // 5 minutes in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(300000) // 5 minutes in ms
   async searchTopics(@Query() query: SearchTopicsQueryDto): Promise<PaginatedTopicsResponseDto> {
     return this.topicsService.searchTopics(query);
   }
@@ -181,8 +183,8 @@ export class TopicsController {
    * Cached for 30 minutes (1800 seconds)
    */
   @Get(':id')
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(1800000) // 30 minutes in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(1800000) // 30 minutes in ms
   async getTopicById(@Param('id') id: string): Promise<TopicResponseDto> {
     return this.topicsService.getTopicById(id);
   }
@@ -207,8 +209,8 @@ export class TopicsController {
    * Returns participation metrics, engagement trends, and activity over time
    */
   @Get(':id/analytics')
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600000) // 1 hour in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(3600000) // 1 hour in ms
   async getTopicAnalytics(@Param('id') id: string, @Query('days') days?: string): Promise<any> {
     const daysBack = days ? parseInt(days, 10) : 30;
     return this.analyticsService.getTopicAnalytics(id, daysBack);
@@ -219,8 +221,8 @@ export class TopicsController {
    * Cached for 24 hours (86400 seconds) - expensive AI operation
    */
   @Get(':id/common-ground')
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(86400000) // 24 hours in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(86400000) // 24 hours in ms
   async getCommonGroundAnalysis(
     @Param('id') id: string,
     @Query() query: GetCommonGroundQueryDto,

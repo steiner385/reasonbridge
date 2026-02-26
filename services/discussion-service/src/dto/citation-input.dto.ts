@@ -17,6 +17,7 @@ export class CitationInputDto {
     description: 'Citation URL (will be validated for SSRF threats)',
     example: 'https://example.com/article',
     maxLength: 2048,
+    type: String,
   })
   @IsString()
   @IsUrl({}, { message: 'Must be a valid URL' })
@@ -28,6 +29,7 @@ export class CitationInputDto {
     example: 'Study on Climate Change Impacts',
     maxLength: 500,
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsString()
@@ -42,18 +44,21 @@ export class CitationDto {
   @ApiProperty({
     description: 'Citation ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
+    type: String,
   })
   id!: string;
 
   @ApiProperty({
     description: 'Original URL as provided by user',
     example: 'https://example.com/article',
+    type: String,
   })
   originalUrl!: string;
 
   @ApiProperty({
     description: 'Normalized URL for deduplication',
     example: 'https://example.com/article',
+    type: String,
   })
   normalizedUrl!: string;
 
@@ -61,6 +66,7 @@ export class CitationDto {
     description: 'Citation title',
     example: 'Study on Climate Change Impacts',
     nullable: true,
+    type: String,
   })
   title!: string | null;
 
@@ -68,6 +74,7 @@ export class CitationDto {
     description: 'Validation status of the URL',
     enum: ['ACTIVE', 'BROKEN', 'UNVERIFIED'],
     example: 'UNVERIFIED',
+    type: String,
   })
   validationStatus!: 'ACTIVE' | 'BROKEN' | 'UNVERIFIED';
 
@@ -75,12 +82,14 @@ export class CitationDto {
     description: 'When the URL was last validated',
     example: '2026-01-27T10:30:00Z',
     nullable: true,
+    type: String,
   })
   validatedAt!: string | null;
 
   @ApiProperty({
     description: 'When the citation was added',
     example: '2026-01-27T10:00:00Z',
+    type: String,
   })
   createdAt!: string;
 }

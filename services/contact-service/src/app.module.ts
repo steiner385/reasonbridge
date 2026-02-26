@@ -19,7 +19,8 @@ import { InvitationsModule } from './invitations/invitations.module.js';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      // Look for .env files in order: local service config, then root monorepo config
+      envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60000, limit: 100 }]),
     PrismaModule,

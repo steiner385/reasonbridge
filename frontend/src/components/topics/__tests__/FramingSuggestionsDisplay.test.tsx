@@ -161,7 +161,7 @@ describe('FramingSuggestionsDisplay', () => {
     });
 
     it('should call onAcceptTitle when apply button clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onAcceptTitle = vi.fn();
       render(
         <FramingSuggestionsDisplay
@@ -178,7 +178,7 @@ describe('FramingSuggestionsDisplay', () => {
     });
 
     it('should show applied state after accepting title', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <FramingSuggestionsDisplay
           suggestions={createMockResponse({
@@ -303,7 +303,7 @@ describe('FramingSuggestionsDisplay', () => {
     });
 
     it('should call onAcceptSuggestion when accept button clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onAcceptSuggestion = vi.fn();
       const suggestion = createMockSuggestion();
 
@@ -320,7 +320,7 @@ describe('FramingSuggestionsDisplay', () => {
     });
 
     it('should call onDismissSuggestion when dismiss button clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onDismissSuggestion = vi.fn();
       const suggestion = createMockSuggestion();
 
@@ -337,7 +337,7 @@ describe('FramingSuggestionsDisplay', () => {
     });
 
     it('should show applied state after accepting suggestion', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <FramingSuggestionsDisplay
           suggestions={createMockResponse({
@@ -353,7 +353,7 @@ describe('FramingSuggestionsDisplay', () => {
     });
 
     it('should remove suggestion after dismissing', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(
         <FramingSuggestionsDisplay
           suggestions={createMockResponse({

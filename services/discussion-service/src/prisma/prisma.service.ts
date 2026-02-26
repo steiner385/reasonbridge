@@ -22,8 +22,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   constructor() {
     // Create PostgreSQL connection pool
+    // Fallback to local development database if DATABASE_URL is not set
+    const connectionString =
+      process.env['DATABASE_URL'] ||
+      'postgresql://reasonbridge:reasonbridge@localhost:5432/reasonbridge';
     const pool = new Pool({
-      connectionString: process.env['DATABASE_URL'],
+      connectionString,
     });
 
     // Create PrismaPg adapter

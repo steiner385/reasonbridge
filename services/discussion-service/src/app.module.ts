@@ -4,8 +4,10 @@
  */
 
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { CacheModule } from './cache/cache.module.js';
 import { HealthModule } from './health/health.module.js';
 import { TopicsModule } from './topics/topics.module.js';
 import { ResponsesModule } from './responses/responses.module.js';
@@ -26,6 +28,11 @@ import { MetricsModule } from './observability/index.js';
  */
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // Look for .env files in order: local service config, then root monorepo config
+      envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
+    }),
     // T009 [P] - Rate limiting configuration
     ThrottlerModule.forRoot([
       {
@@ -45,9 +52,13 @@ import { MetricsModule } from './observability/index.js';
       },
     ]),
     PrismaModule,
+    // CacheModule is global - import once here, available everywhere
+    CacheModule,
     MetricsModule,
     HealthModule,
+    // T015-T044 - Topic management (Feature 016)
     TopicsModule,
+    // T037-T087 - Response management (Feature 009)
     ResponsesModule,
     VotesModule,
     AlignmentsModule,

@@ -199,7 +199,7 @@ describe('FeedbackDisplayPanel', () => {
   describe('Dismiss Functionality', () => {
     it('should call onDismiss when dismiss button is clicked', async () => {
       const onDismiss = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <FeedbackDisplayPanel
