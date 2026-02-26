@@ -8,7 +8,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { type UserRank, type TopicExpertise, type Credential } from '../../../types/ranking';
@@ -517,9 +517,11 @@ describe('RankingDashboard', () => {
         { timeout: 10000 },
       );
 
-      // Fill in the reason
+      // Fill in the reason - use fireEvent.change for speed in CI
       const textarea = screen.getByTestId('appeal-reason-textarea');
-      await user.type(textarea, 'I believe this decision was incorrect because...');
+      fireEvent.change(textarea, {
+        target: { value: 'I believe this decision was incorrect because...' },
+      });
 
       // Submit the appeal
       const submitButton = screen.getByTestId('submit-appeal-confirm-button');
