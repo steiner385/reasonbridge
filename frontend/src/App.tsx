@@ -75,6 +75,26 @@ function App() {
             <div className="px-4 py-6 sm:px-6 lg:px-8">{routing}</div>
           </main>
         </div>
+
+        {/* Footer landmark for WCAG compliance */}
+        <footer
+          className={`
+            py-4 px-4 text-center text-sm text-gray-500 dark:text-gray-400
+            border-t border-gray-200 dark:border-gray-800
+            transition-all duration-300
+            ${
+              !isMobile
+                ? sidebarMode === 'topics'
+                  ? 'ml-80'
+                  : isCollapsed
+                    ? 'ml-20'
+                    : 'ml-64'
+                : 'ml-0'
+            }
+          `}
+        >
+          © 2026 ReasonBridge. Building bridges through rational discussion.
+        </footer>
       </div>
     </LoginModalProvider>
   );

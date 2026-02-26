@@ -206,9 +206,10 @@
     transform: translateX(0);
   }
 
-  /* Adjust right panel width constraint for tablet */
+  /* Adjust right panel width constraint for tablet -
+     Use smaller minimum at lower tablet widths for better center panel space */
   .discussion-layout[data-breakpoint='tablet'] {
-    --right-panel-width: clamp(280px, 35vw, 450px);
+    --right-panel-width: clamp(240px, 35vw, 450px);
   }
 
   /* Hide left resizer on tablet */
@@ -225,6 +226,24 @@
   .discussion-layout[data-breakpoint='tablet'][data-panels="2"] {
     grid-template-columns: 1fr var(--right-panel-width, 360px);
     grid-template-areas: 'center right';
+  }
+}
+
+/* Lower tablet range polish (768px - 900px) - give more room to center panel */
+@media (min-width: 768px) and (max-width: 900px) {
+  .discussion-layout[data-breakpoint='tablet'] {
+    /* At narrow tablet widths, use proportional right panel for better balance */
+    --right-panel-width: 32vw;
+  }
+
+  /* Ensure minimum content width in center panel */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--center {
+    min-width: 0; /* Allow flex shrink */
+  }
+
+  /* Slightly narrower left panel overlay for narrow tablets */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--left {
+    width: clamp(260px, 45vw, 320px);
   }
 }
 

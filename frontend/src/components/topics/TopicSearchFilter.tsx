@@ -109,13 +109,14 @@ export function TopicSearchFilter({
           data-testid="topic-search-input"
         />
 
-        {/* Clear button */}
+        {/* Clear button (44px touch target via absolute positioning with centered content) */}
         {value && (
           <button
             type="button"
             onClick={handleClear}
             className="
-              absolute right-3 p-0.5 rounded-full
+              absolute right-1 p-2 rounded-full min-h-[44px] min-w-[44px]
+              flex items-center justify-center
               hover:bg-gray-200 transition-colors
             "
             aria-label="Clear search"
@@ -138,18 +139,18 @@ export function TopicSearchFilter({
         )}
       </div>
 
-      {/* Status Filter Buttons (optional) */}
+      {/* Status Filter Buttons (optional) - min 44px height for WCAG touch target compliance */}
       {showStatusFilter && onStatusFilterChange && (
         <div className="flex gap-1 mt-2" role="group" aria-label="Filter by status">
           <button
             type="button"
             onClick={() => handleStatusClick(null)}
             className={`
-              flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors
+              flex-1 px-3 py-2.5 text-sm font-medium rounded-md transition-colors min-h-[44px]
               ${
                 statusFilter === null
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
               }
             `}
             aria-label="Show all topics"
@@ -162,11 +163,11 @@ export function TopicSearchFilter({
             type="button"
             onClick={() => handleStatusClick('SEEDING')}
             className={`
-              flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors
+              flex-1 px-3 py-2.5 text-sm font-medium rounded-md transition-colors min-h-[44px]
               ${
                 statusFilter === 'SEEDING'
                   ? 'bg-yellow-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
               }
             `}
             aria-label="Show seeding topics"
@@ -179,11 +180,11 @@ export function TopicSearchFilter({
             type="button"
             onClick={() => handleStatusClick('ACTIVE')}
             className={`
-              flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors
+              flex-1 px-3 py-2.5 text-sm font-medium rounded-md transition-colors min-h-[44px]
               ${
                 statusFilter === 'ACTIVE'
                   ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
               }
             `}
             aria-label="Show active topics"

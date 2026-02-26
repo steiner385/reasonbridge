@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
@@ -83,6 +83,20 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
     setLoginPassword('');
     setLoginError(null);
   }, []);
+
+  // Close modal on Escape key press (WCAG 2.1 AA keyboard accessibility)
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, closeModal]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

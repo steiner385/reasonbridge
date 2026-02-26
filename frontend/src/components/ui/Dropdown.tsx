@@ -85,12 +85,12 @@ export function Dropdown({
 
   return (
     <div className="relative">
-      {/* Trigger */}
+      {/* Trigger - minimum 44px touch target for WCAG compliance */}
       <button
         ref={triggerRef}
         onClick={toggleDropdown}
         type="button"
-        className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+        className="flex items-center justify-center min-h-[44px] min-w-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >

@@ -84,15 +84,15 @@ export function TopicListItem({
         />
       )}
 
-      {/* Topic title */}
+      {/* Topic title - uses span instead of h3 to maintain proper heading hierarchy (h1 in main content should come first) */}
       <div className="flex items-start justify-between gap-2 mb-1">
-        <h3
+        <span
           className={`text-sm font-medium line-clamp-2 flex-1 ${hasUnread ? 'pl-3' : ''}`}
           title={topic.title}
           data-testid="topic-title"
         >
           {topic.title}
-        </h3>
+        </span>
 
         {/* Status indicator dot */}
         <div
