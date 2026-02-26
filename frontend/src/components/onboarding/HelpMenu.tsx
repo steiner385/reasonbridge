@@ -106,7 +106,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
             {/* Reopen Orientation */}
             <button
               onClick={handleReopenOrientation}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               <svg
                 className="h-5 w-5 text-primary-600 flex-shrink-0"
@@ -132,7 +132,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
             {/* Documentation */}
             <a
               href="/docs"
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               <svg
                 className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0"
@@ -156,7 +156,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
             {/* FAQs */}
             <a
               href="/faq"
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               <svg
                 className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0"
@@ -180,7 +180,7 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
             {/* Contact Support */}
             <a
               href="/support"
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
             >
               <svg
                 className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0"

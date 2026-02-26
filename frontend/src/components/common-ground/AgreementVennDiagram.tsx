@@ -172,8 +172,8 @@ const AgreementVennDiagram = ({
             return (
               <div
                 key={idx}
-                className={`p-4 rounded-lg border-l-4 bg-gray-50 ${
-                  onPositionClick ? 'cursor-pointer hover:bg-gray-100' : ''
+                className={`p-4 rounded-lg border-l-4 bg-gray-50 dark:bg-gray-800 ${
+                  onPositionClick ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700' : ''
                 }`}
                 style={{ borderColor: color.stroke }}
                 onClick={() => onPositionClick?.(idx)}

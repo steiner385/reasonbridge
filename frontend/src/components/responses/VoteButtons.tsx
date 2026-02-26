@@ -90,8 +90,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
     ${buttonBaseClasses}
     ${
       userVote === 'up'
-        ? 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-        : 'text-gray-500 hover:bg-gray-100 hover:text-primary-600'
+        ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900/50'
+        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400'
     }
   `;
 
@@ -100,8 +100,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
     ${buttonBaseClasses}
     ${
       userVote === 'down'
-        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-        : 'text-gray-500 hover:bg-gray-100 hover:text-red-700'
+        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
+        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-700 dark:hover:text-red-400'
     }
   `;
 
