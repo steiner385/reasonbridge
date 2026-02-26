@@ -4,8 +4,9 @@ describe('CommonGroundTriggerService', () => {
   let service: CommonGroundTriggerService;
   let mockPrisma: any;
   let mockCache: any;
+  let mockModuleRef: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Create simple mock objects
     mockPrisma = {
       discussionTopic: {
@@ -22,7 +23,14 @@ describe('CommonGroundTriggerService', () => {
       set: async (key: string, value: any) => undefined,
     };
 
-    service = new CommonGroundTriggerService(mockPrisma, mockCache);
+    // Mock ModuleRef - used for lazy injection of cache manager
+    mockModuleRef = {
+      get: () => mockCache,
+    };
+
+    service = new CommonGroundTriggerService(mockPrisma, mockModuleRef);
+    // Initialize cache manager via onModuleInit
+    await service.onModuleInit();
   });
 
   describe('checkAndTrigger', () => {
