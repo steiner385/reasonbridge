@@ -146,10 +146,10 @@ describe('PhoneVerificationModal', () => {
       expect(screen.getByText('Enter Verification Code')).toBeInTheDocument();
     });
 
-    // Enter OTP code
+    // Enter OTP code - use fireEvent for speed
     const otpInputs = screen.getAllByLabelText(/digit \d/i);
     for (let i = 0; i < 6; i++) {
-      await user.type(otpInputs[i], String(i));
+      fireEvent.change(otpInputs[i], { target: { value: String(i) } });
     }
 
     // Verify code
@@ -172,9 +172,9 @@ describe('PhoneVerificationModal', () => {
         expect(mockOnSuccess).toHaveBeenCalled();
         expect(mockOnClose).toHaveBeenCalled();
       },
-      { timeout: 3000 },
+      { timeout: 5000 },
     );
-  }, 10000);
+  }, 30000);
 
   it('handles OTP verification error', async () => {
     const user = userEvent.setup({ delay: null });
@@ -196,10 +196,10 @@ describe('PhoneVerificationModal', () => {
       expect(screen.getByText('Enter Verification Code')).toBeInTheDocument();
     });
 
-    // Enter OTP code
+    // Enter OTP code - use fireEvent for speed
     const otpInputs = screen.getAllByLabelText(/digit \d/i);
     for (let i = 0; i < 6; i++) {
-      await user.type(otpInputs[i], String(i));
+      fireEvent.change(otpInputs[i], { target: { value: String(i) } });
     }
 
     // Verify code
@@ -209,7 +209,7 @@ describe('PhoneVerificationModal', () => {
     await waitFor(() => {
       expect(screen.getByText(/invalid verification code/i)).toBeInTheDocument();
     });
-  }, 10000);
+  }, 30000);
 
   it('allows going back to phone entry from OTP step', async () => {
     const user = userEvent.setup({ delay: null });

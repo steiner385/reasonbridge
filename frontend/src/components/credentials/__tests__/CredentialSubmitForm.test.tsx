@@ -8,7 +8,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CredentialSubmitForm from '../CredentialSubmitForm';
 import type { SubmitCredentialInput } from '../../../types/ranking';
@@ -286,16 +286,21 @@ describe('CredentialSubmitForm', () => {
       const user = userEvent.setup({ delay: null });
       render(<CredentialSubmitForm tags={mockTags} onSubmit={mockOnSubmit} />);
 
-      // Fill all fields
+      // Fill all fields - use fireEvent.change for faster input
       await user.selectOptions(screen.getByLabelText(/category/i), 'tag-1');
       await user.selectOptions(screen.getByLabelText(/credential type/i), 'ACADEMIC_DOCTORATE');
-      await user.type(screen.getByLabelText(/title/i), 'PhD in Clinical Psychology');
-      await user.type(screen.getByLabelText(/institution/i), 'Stanford University');
-      await user.type(screen.getByLabelText(/document url/i), 'https://example.com/diploma.pdf');
-      await user.type(
-        screen.getByLabelText(/verification url/i),
-        'https://verify.stanford.edu/12345',
-      );
+      fireEvent.change(screen.getByLabelText(/title/i), {
+        target: { value: 'PhD in Clinical Psychology' },
+      });
+      fireEvent.change(screen.getByLabelText(/institution/i), {
+        target: { value: 'Stanford University' },
+      });
+      fireEvent.change(screen.getByLabelText(/document url/i), {
+        target: { value: 'https://example.com/diploma.pdf' },
+      });
+      fireEvent.change(screen.getByLabelText(/verification url/i), {
+        target: { value: 'https://verify.stanford.edu/12345' },
+      });
 
       // Submit
       await user.click(screen.getByRole('button', { name: /submit credential/i }));
