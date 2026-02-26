@@ -138,7 +138,7 @@ const FeedbackDisplayPanel: React.FC<FeedbackDisplayPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => onDismiss(item.id)}
-                      className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors"
+                      className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                       aria-label="Dismiss feedback"
                     >
                       <svg

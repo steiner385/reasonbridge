@@ -190,7 +190,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                       <button
                         type="button"
                         onClick={() => onDismiss(tag)}
-                        className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors"
+                        className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                         aria-label={`Dismiss tag ${tag}`}
                       >
                         <svg
@@ -273,7 +273,7 @@ const SuggestionCards: React.FC<SuggestionCardsProps> = ({
                         <button
                           type="button"
                           onClick={() => onDismiss(link)}
-                          className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors"
+                          className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                           aria-label="Dismiss topic link suggestion"
                         >
                           <svg

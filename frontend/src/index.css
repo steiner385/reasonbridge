@@ -323,8 +323,9 @@
   }
 
   /* Small text - still readable */
-  .child-friendly .text-sm,
-  .child-friendly .text-xs,
+  /* Note: Use attribute selectors to avoid Tailwind circular dependency */
+  .child-friendly [class~="text-sm"],
+  .child-friendly [class~="text-xs"],
   .child-friendly small {
     font-size: 0.9375rem !important; /* 15px minimum - never below this */
     line-height: 1.6;
@@ -362,6 +363,71 @@
 }
 
 @layer utilities {
+  /**
+   * Mobile Touch Target Sizes (WCAG 2.1 AA Compliance)
+   * Ensures all interactive elements meet 44px minimum touch target
+   * Applied via media query to avoid affecting desktop layouts
+   */
+  @media (max-width: 767px) {
+    /* Primary interactive elements */
+    button,
+    [role="button"],
+    a:not(.prose a),
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Ensure clickable links have adequate padding */
+    a:not(.prose a):not([class*="text-"]) {
+      display: inline-flex;
+      align-items: center;
+      padding-block: 0.5rem;
+    }
+
+    /* Topic card "View Discussion" links - specific fix for UX assessment finding */
+    .topic-card a,
+    a[href*="/discussions"] {
+      min-height: 44px;
+      padding: 0.75rem 1rem;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Sort and filter buttons */
+    [aria-label*="sort"],
+    [aria-label*="Sort"],
+    [aria-label*="filter"],
+    [aria-label*="Filter"] {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.625rem;
+    }
+
+    /* Navigation icons */
+    nav button,
+    nav a,
+    [role="navigation"] button,
+    [role="navigation"] a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Tab buttons */
+    [role="tab"] {
+      min-height: 44px;
+      padding: 0.75rem 1rem;
+    }
+
+    /* Accordion headers */
+    [role="button"][aria-expanded],
+    button[aria-expanded] {
+      min-height: 48px;
+      padding: 0.75rem 1rem;
+    }
+  }
+
   /* Reading width constraints for optimal readability (50-75 characters per line) */
   .prose-reading-width {
     max-width: 65ch; /* ~65 characters for optimal reading */

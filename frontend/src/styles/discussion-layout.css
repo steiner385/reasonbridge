@@ -182,8 +182,11 @@
 
 @media (min-width: 768px) and (max-width: 1279px) {
   .discussion-layout[data-breakpoint='tablet'] {
-    grid-template-columns: 1fr var(--right-panel-width, 360px);
+    /* Use fixed pixel values for more predictable layout at tablet widths */
+    grid-template-columns: 1fr minmax(280px, 320px);
     grid-template-areas: 'center right';
+    /* Prevent overflow */
+    overflow-x: hidden;
   }
 
   /* Hide left panel on tablet by default */
@@ -206,10 +209,17 @@
     transform: translateX(0);
   }
 
-  /* Adjust right panel width constraint for tablet -
-     Use smaller minimum at lower tablet widths for better center panel space */
-  .discussion-layout[data-breakpoint='tablet'] {
-    --right-panel-width: clamp(240px, 35vw, 450px);
+  /* Ensure center panel doesn't overflow */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--center {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  /* Ensure right panel doesn't overflow and has proper sizing */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--right {
+    min-width: 280px;
+    max-width: 320px;
+    flex-shrink: 0;
   }
 
   /* Hide left resizer on tablet */
@@ -217,14 +227,14 @@
     display: none;
   }
 
-  /* Adjust right resizer position */
+  /* Hide right resizer on tablet - fixed width */
   .discussion-layout[data-breakpoint='tablet'] .panel-resizer--right {
-    right: var(--right-panel-width, 360px);
+    display: none;
   }
 
   /* 2-panel mode on tablet: same as default tablet layout */
   .discussion-layout[data-breakpoint='tablet'][data-panels="2"] {
-    grid-template-columns: 1fr var(--right-panel-width, 360px);
+    grid-template-columns: 1fr minmax(280px, 320px);
     grid-template-areas: 'center right';
   }
 }
@@ -232,13 +242,19 @@
 /* Lower tablet range polish (768px - 900px) - give more room to center panel */
 @media (min-width: 768px) and (max-width: 900px) {
   .discussion-layout[data-breakpoint='tablet'] {
-    /* At narrow tablet widths, use proportional right panel for better balance */
-    --right-panel-width: 32vw;
+    /* At narrow tablet widths, use smaller fixed right panel */
+    grid-template-columns: 1fr 260px;
   }
 
   /* Ensure minimum content width in center panel */
   .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--center {
     min-width: 0; /* Allow flex shrink */
+  }
+
+  /* Smaller right panel for narrow tablets */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--right {
+    min-width: 260px;
+    max-width: 260px;
   }
 
   /* Slightly narrower left panel overlay for narrow tablets */

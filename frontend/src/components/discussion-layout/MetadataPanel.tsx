@@ -436,9 +436,9 @@ export function MetadataPanel({
             {/* Topic Status Actions */}
             {topic && (
               <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                   Topic Status
-                </h4>
+                </h2>
                 <TopicStatusActions topic={topic} isCreator={isCreator} isModerator={isModerator} />
               </div>
             )}

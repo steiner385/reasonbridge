@@ -90,13 +90,13 @@ export const LandingPage: React.FC = () => {
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3">
               <img
                 src="/assets/brand/logo-full.svg"
                 alt="ReasonBridge"
-                className="h-10 dark:brightness-110"
+                className="h-8 sm:h-10 dark:brightness-110"
               />
-              <span className="px-2 py-1 text-xs font-semibold text-primary-800 bg-primary-100 dark:text-primary-200 dark:bg-primary-900/50 rounded">
+              <span className="hidden sm:inline-block px-2 py-1 text-xs font-semibold text-primary-800 bg-primary-100 dark:text-primary-200 dark:bg-primary-900/50 rounded">
                 Beta
               </span>
             </Link>

@@ -147,7 +147,7 @@ const OrientationOverlay: React.FC<OrientationOverlayProps> = ({
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="text-gray-400 hover:text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
+                className="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
                 aria-label="Dismiss orientation"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
