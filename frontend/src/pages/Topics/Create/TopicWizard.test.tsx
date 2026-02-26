@@ -102,7 +102,7 @@ describe('TopicWizard', () => {
     });
 
     it('navigates to step 2 when Continue is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       // Fill step 1 using fireEvent for speed
@@ -121,7 +121,7 @@ describe('TopicWizard', () => {
     });
 
     it('shows Back button on step 2', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       // Navigate to step 2
@@ -139,7 +139,7 @@ describe('TopicWizard', () => {
     });
 
     it('navigates back to step 1 when Back is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       // Navigate to step 2
@@ -182,7 +182,7 @@ describe('TopicWizard', () => {
     }
 
     it('Continue is disabled without tags', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       await navigateToStep2(user);
@@ -192,7 +192,7 @@ describe('TopicWizard', () => {
     });
 
     it('can add tags', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       await navigateToStep2(user);
@@ -205,7 +205,7 @@ describe('TopicWizard', () => {
     }, 10000);
 
     it('enables Continue after adding a tag', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       await navigateToStep2(user);
@@ -249,7 +249,7 @@ describe('TopicWizard', () => {
     }
 
     it('shows preview content', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       await navigateToStep3(user);
@@ -259,7 +259,7 @@ describe('TopicWizard', () => {
     });
 
     it('shows Create Topic button on preview step', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       await navigateToStep3(user);
@@ -270,7 +270,7 @@ describe('TopicWizard', () => {
 
   describe('cancel and close', () => {
     it('calls onClose when Cancel is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClose = vi.fn();
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={onClose} onSuccess={vi.fn()} />);
 
@@ -282,7 +282,7 @@ describe('TopicWizard', () => {
 
   describe('draft persistence', () => {
     it('saves draft to localStorage when data changes', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderWithQueryClient(<TopicWizard isOpen={true} onClose={vi.fn()} onSuccess={vi.fn()} />);
 
       await user.type(screen.getByLabelText(/Title/i), 'Test title');

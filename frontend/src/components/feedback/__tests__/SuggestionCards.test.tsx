@@ -105,7 +105,7 @@ describe('SuggestionCards', () => {
 
     it('should call onAccept when accept button is clicked', async () => {
       const onAccept = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionCards
@@ -123,7 +123,7 @@ describe('SuggestionCards', () => {
 
     it('should call onDismiss when dismiss button is clicked', async () => {
       const onDismiss = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionCards
@@ -234,7 +234,7 @@ describe('SuggestionCards', () => {
 
     it('should call onAccept with TopicLink when accept is clicked', async () => {
       const onAccept = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionCards
@@ -255,7 +255,7 @@ describe('SuggestionCards', () => {
 
     it('should call onDismiss with TopicLink when dismiss is clicked', async () => {
       const onDismiss = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionCards

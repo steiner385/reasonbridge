@@ -169,7 +169,7 @@ describe('DuplicateTopicWarning', () => {
 
   describe('View Topic Callback', () => {
     it('should call onViewTopic when duplicate title is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onViewTopic = vi.fn();
 
       render(<DuplicateTopicWarning duplicates={mockDuplicates} onViewTopic={onViewTopic} />);

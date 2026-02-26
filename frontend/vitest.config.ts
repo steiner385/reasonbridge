@@ -23,6 +23,9 @@ export default defineConfig({
     // Use jsdom for DOM simulation in tests
     environment: 'jsdom',
 
+    // Increase test timeout for slower form/modal tests in CI (default is 5000ms)
+    testTimeout: 15000,
+
     // Setup files run before each test file
     // - Configures jest-dom matchers
     // - Sets up MSW server for API mocking

@@ -105,7 +105,7 @@ describe('EditResponseModal', () => {
 
   describe('Cited Sources', () => {
     it('should allow adding cited sources', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/);
@@ -118,7 +118,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should allow removing cited sources', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const removeButton = screen.getByRole('button', {
@@ -132,7 +132,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should validate URL format for cited sources', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/);
@@ -143,7 +143,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should allow adding source with Enter key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/);
@@ -153,7 +153,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should not add duplicate sources', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/);
@@ -168,7 +168,7 @@ describe('EditResponseModal', () => {
 
   describe('Save Button State', () => {
     it('should only enable save button when changes are made', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const saveButton = screen.getByRole('button', { name: /save changes/i });
@@ -181,7 +181,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should disable save button when content is invalid', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} minLength={10} />);
 
       const textarea = screen.getByLabelText(/your response/i);
@@ -193,7 +193,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should detect changes in checkbox state', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const saveButton = screen.getByRole('button', { name: /save changes/i });
@@ -206,7 +206,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should detect changes in cited sources', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const saveButton = screen.getByRole('button', { name: /save changes/i });
@@ -223,7 +223,7 @@ describe('EditResponseModal', () => {
   describe('Modal Actions', () => {
     it('should close modal on cancel', async () => {
       const onClose = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<EditResponseModal {...defaultProps} onClose={onClose} />);
 
@@ -234,7 +234,7 @@ describe('EditResponseModal', () => {
 
     it('should call onSubmit with updated data', async () => {
       const onSubmit = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<EditResponseModal {...defaultProps} onSubmit={onSubmit} />);
 
@@ -256,7 +256,7 @@ describe('EditResponseModal', () => {
     it('should close modal after successful submit', async () => {
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       const onClose = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<EditResponseModal {...defaultProps} onSubmit={onSubmit} onClose={onClose} />);
 
@@ -273,7 +273,7 @@ describe('EditResponseModal', () => {
 
   describe('Checkbox State', () => {
     it('should handle opinion checkbox state', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const opinionCheckbox = screen.getByLabelText(/this response contains my opinion/i);
@@ -284,7 +284,7 @@ describe('EditResponseModal', () => {
     });
 
     it('should handle factual claims checkbox state', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<EditResponseModal {...defaultProps} />);
 
       const factualCheckbox = screen.getByLabelText(/this response contains factual claims/i);

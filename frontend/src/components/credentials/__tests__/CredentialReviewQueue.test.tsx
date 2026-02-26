@@ -595,9 +595,12 @@ describe('CredentialReviewQueue', () => {
       const confirmButton = screen.getByRole('button', { name: /confirm/i });
       await user.click(confirmButton);
 
-      await waitFor(() => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
   });
 

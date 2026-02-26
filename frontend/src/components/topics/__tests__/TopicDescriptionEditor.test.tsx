@@ -106,7 +106,7 @@ describe('TopicDescriptionEditor', () => {
 
   describe('User Interaction', () => {
     it('should call onChange when typing', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<TopicDescriptionEditor value="" onChange={onChange} />);
 
@@ -118,7 +118,7 @@ describe('TopicDescriptionEditor', () => {
     });
 
     it('should prevent typing beyond maxLength', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<TopicDescriptionEditor value="12345" onChange={onChange} maxLength={5} />);
 

@@ -173,7 +173,7 @@ describe('SafetyReportsPage', () => {
 
   describe('status filtering', () => {
     it('filters by status when dropdown changes', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockGetSafetyReportsStats.mockResolvedValue(mockStats);
       mockGetCsamReports.mockResolvedValue({
         reports: mockReports,
@@ -230,7 +230,7 @@ describe('SafetyReportsPage', () => {
     });
 
     it('calls updateCsamReportStatus when preserve evidence clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockGetSafetyReportsStats.mockResolvedValue(mockStats);
       mockGetCsamReports.mockResolvedValue({
         reports: [mockReports[0]],
@@ -256,7 +256,7 @@ describe('SafetyReportsPage', () => {
     });
 
     it('calls submitToNcmec when submit button clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockGetSafetyReportsStats.mockResolvedValue(mockStats);
       mockGetCsamReports.mockResolvedValue({
         reports: [mockReports[1]],

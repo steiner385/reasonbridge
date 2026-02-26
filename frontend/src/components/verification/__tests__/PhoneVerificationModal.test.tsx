@@ -36,7 +36,7 @@ describe('PhoneVerificationModal', () => {
   });
 
   it('validates phone number before sending OTP', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<PhoneVerificationModal isOpen={true} onClose={mockOnClose} />);
 
     const sendButton = screen.getByRole('button', { name: /send code/i });
@@ -47,7 +47,7 @@ describe('PhoneVerificationModal', () => {
   });
 
   it('sends OTP and transitions to OTP entry step', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
       verificationId: 'test-verification-id',
       expiresAt: '2026-01-23T18:00:00.000Z',
@@ -75,7 +75,7 @@ describe('PhoneVerificationModal', () => {
   }, 10000);
 
   it('handles OTP request error', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.requestPhoneVerification).mockRejectedValue(
       new Error('Failed to send verification code'),
     );
@@ -94,7 +94,7 @@ describe('PhoneVerificationModal', () => {
   }, 10000);
 
   it('validates OTP code before verifying', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
       verificationId: 'test-verification-id',
       expiresAt: '2026-01-23T18:00:00.000Z',
@@ -121,7 +121,7 @@ describe('PhoneVerificationModal', () => {
   }, 10000);
 
   it('verifies OTP and shows success', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
       verificationId: 'test-verification-id',
       expiresAt: '2026-01-23T18:00:00.000Z',
@@ -177,7 +177,7 @@ describe('PhoneVerificationModal', () => {
   }, 10000);
 
   it('handles OTP verification error', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
       verificationId: 'test-verification-id',
       expiresAt: '2026-01-23T18:00:00.000Z',
@@ -212,7 +212,7 @@ describe('PhoneVerificationModal', () => {
   }, 10000);
 
   it('allows going back to phone entry from OTP step', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
       verificationId: 'test-verification-id',
       expiresAt: '2026-01-23T18:00:00.000Z',

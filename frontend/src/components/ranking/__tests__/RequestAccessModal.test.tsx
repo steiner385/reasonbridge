@@ -71,7 +71,7 @@ describe('RequestAccessModal', () => {
 
   describe('Reason Field', () => {
     it('should allow typing in reason textarea', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<RequestAccessModal {...defaultProps} />);
 
       const textarea = screen.getByRole('textbox');
@@ -89,7 +89,7 @@ describe('RequestAccessModal', () => {
 
   describe('Submit Behavior', () => {
     it('should call onSubmit with reason when Submit button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
 
@@ -101,7 +101,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should call onSubmit with undefined when no reason provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
 
@@ -111,7 +111,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should call onSubmit with undefined when only whitespace provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
 
@@ -125,7 +125,7 @@ describe('RequestAccessModal', () => {
 
   describe('Cancel Behavior', () => {
     it('should call onClose when Cancel button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClose = vi.fn();
       render(<RequestAccessModal {...defaultProps} onClose={onClose} />);
 
@@ -135,7 +135,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should clear reason text when reopening modal', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const { rerender } = render(<RequestAccessModal {...defaultProps} />);
 
       const textarea = screen.getByRole('textbox');
@@ -154,7 +154,7 @@ describe('RequestAccessModal', () => {
 
   describe('Loading State', () => {
     it('should show loading state during submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       // Create a promise that we control
       let resolveSubmit: () => void;
       const submitPromise = new Promise<void>((resolve) => {
@@ -178,7 +178,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should disable Cancel button during submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveSubmit: () => void;
       const submitPromise = new Promise<void>((resolve) => {
         resolveSubmit = resolve;
@@ -199,7 +199,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should disable textarea during submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveSubmit: () => void;
       const submitPromise = new Promise<void>((resolve) => {
         resolveSubmit = resolve;
@@ -222,7 +222,7 @@ describe('RequestAccessModal', () => {
 
   describe('Error Handling', () => {
     it('should display error message on submission failure', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockRejectedValue(new Error('Network error'));
 
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
@@ -236,7 +236,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should re-enable form after error', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockRejectedValue(new Error('Network error'));
 
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
@@ -251,7 +251,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should clear error when user starts typing', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockRejectedValue(new Error('Network error'));
 
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
@@ -271,7 +271,7 @@ describe('RequestAccessModal', () => {
 
   describe('Success Handling', () => {
     it('should call onSuccess callback after successful submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       const onSuccess = vi.fn();
 
@@ -285,7 +285,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should show success feedback before closing', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockResolvedValue(undefined);
 
       render(<RequestAccessModal {...defaultProps} onSubmit={onSubmit} />);
@@ -298,7 +298,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should close modal after success', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSubmit = vi.fn().mockResolvedValue(undefined);
       const onClose = vi.fn();
 
@@ -344,7 +344,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should close on Escape key press', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClose = vi.fn();
 
       render(<RequestAccessModal {...defaultProps} onClose={onClose} />);
@@ -355,7 +355,7 @@ describe('RequestAccessModal', () => {
     });
 
     it('should not close on Escape during submission', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       let resolveSubmit: () => void;
       const submitPromise = new Promise<void>((resolve) => {
         resolveSubmit = resolve;

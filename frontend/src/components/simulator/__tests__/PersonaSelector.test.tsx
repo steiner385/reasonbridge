@@ -128,7 +128,7 @@ describe('PersonaSelector', () => {
 
   describe('Selection', () => {
     it('should show selection indicator when persona is selected', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -140,7 +140,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should show selected persona summary at bottom', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -150,7 +150,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should enable Select Persona button after selection', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -160,7 +160,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should call onSelect with persona when clicking Select Persona', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -177,7 +177,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should call onClose after selection', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -189,7 +189,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should allow changing selection before confirming', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       // First select Socratic Mentor
@@ -228,7 +228,7 @@ describe('PersonaSelector', () => {
 
   describe('Closing', () => {
     it('should call onClose when clicking Cancel', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       await user.click(screen.getByRole('button', { name: /cancel/i }));
@@ -237,7 +237,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should call onClose when clicking close button', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       await user.click(screen.getByLabelText('Close modal'));
@@ -246,7 +246,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should call onClose when pressing Escape', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       await user.keyboard('{Escape}');
@@ -255,7 +255,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should call onClose when clicking backdrop', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       // Click on the backdrop (the semi-transparent overlay)
@@ -269,7 +269,7 @@ describe('PersonaSelector', () => {
 
   describe('Keyboard Navigation', () => {
     it('should select persona with Enter key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -281,7 +281,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should select persona with Space key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -293,7 +293,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should support Tab navigation between cards', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       // Tab through the modal to the first card
@@ -396,7 +396,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should update aria-activedescendant when selection changes', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const listbox = screen.getByRole('listbox');
@@ -443,7 +443,7 @@ describe('PersonaSelector', () => {
     });
 
     it('should show checkmark icon for selected persona', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPersonaSelector();
 
       const socraticCard = screen.getByText('Socratic Mentor').closest('[role="option"]');
@@ -477,7 +477,7 @@ describe('PersonaSelector', () => {
 
   describe('State Reset on Modal Open', () => {
     it('should reset local selection when modal reopens', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const { rerender } = render(
         <PersonaSelector isOpen={true} onClose={mockOnClose} onSelect={mockOnSelect} />,
       );
