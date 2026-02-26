@@ -8,6 +8,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CommonGroundTriggerService } from '../services/common-ground-trigger.service.js';
@@ -31,7 +32,8 @@ export class ResponsesService {
   private readonly logger = new DiscussionLogger('ResponsesService');
 
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(CommonGroundTriggerService)
     private readonly commonGroundTrigger: CommonGroundTriggerService,
   ) {}
 

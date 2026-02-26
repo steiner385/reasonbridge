@@ -3,23 +3,102 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
+import { TopicNavigationContent } from '../topics/TopicNavigationContent';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useAuth } from '../../hooks/useAuth';
+import { useWebSocket } from '../../hooks/useWebSocket';
+import { useTopicNavigation } from '../../hooks/useTopicNavigation';
+import { useTopics } from '../../lib/useTopics';
 import { Navigation } from './Navigation';
+import { CompactSiteNav } from './CompactSiteNav';
 
 /**
  * MobileDrawer Component
- * Slide-out drawer navigation for mobile viewports (< 768px)
- * Includes backdrop overlay and closes on navigation, backdrop click, or Escape key
+ *
+ * @remarks
+ * Slide-out drawer navigation for mobile viewports (< 768px).
+ * Adapts content based on sidebar mode:
+ *
+ * **Topics Mode** (on /topics, /discussions):
+ * - CompactSiteNav at top
+ * - TopicNavigationContent (search, filter, topic list)
+ *
+ * **Full Mode** (all other routes):
+ * - Standard Navigation with labels
+ * - User profile section at bottom
+ *
+ * Includes backdrop overlay and closes on navigation, backdrop click, or Escape key.
  */
-
 export function MobileDrawer() {
-  const { isMobileOpen, closeMobile } = useSidebar();
+  const { isMobileOpen, closeMobile, sidebarMode } = useSidebar();
   const { user } = useAuth();
+  const { activeTopicId } = useTopicNavigation();
+  const { subscribe } = useWebSocket();
   const drawerRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [unreadMap, setUnreadMap] = useState<Map<string, boolean>>(new Map());
+
+  // Fetch topics when in topics mode and drawer is open
+  // When not in topics mode or drawer is closed, pass undefined to skip fetching
+  // Note: Don't pre-filter by status - let users filter via TopicSearchFilter
+  // Memoize params to prevent creating new object reference on every render
+  const topicsParams = useMemo(
+    () =>
+      sidebarMode === 'topics' && isMobileOpen
+        ? {
+            sortBy: 'responseCount' as const,
+            sortOrder: 'desc' as const,
+            page: 1,
+            limit: 100,
+          }
+        : undefined,
+    [sidebarMode, isMobileOpen],
+  );
+
+  const { data, isLoading, error } = useTopics(topicsParams);
+
+  const topics = useMemo(() => data?.data || [], [data?.data]);
+  const errorMessage = error ? 'Failed to load topics' : null;
+
+  // Subscribe to new response WebSocket messages for unread badges
+  useEffect(() => {
+    if (sidebarMode !== 'topics') return;
+
+    const unsubscribe = subscribe('NEW_RESPONSE', (message) => {
+      const topicId = message.payload.topicId;
+
+      if (topicId !== activeTopicId) {
+        setUnreadMap((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(topicId, true);
+          return newMap;
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [activeTopicId, subscribe, sidebarMode]);
+
+  // Clear unread status when a topic becomes active
+  // Schedule state update asynchronously to avoid cascading renders
+  useEffect(() => {
+    if (activeTopicId) {
+      const timeoutId = setTimeout(() => {
+        setUnreadMap((prev) => {
+          // Only update if this topic is actually in the unread map
+          if (!prev.has(activeTopicId)) return prev;
+          const newMap = new Map(prev);
+          newMap.delete(activeTopicId);
+          return newMap;
+        });
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+    return undefined;
+  }, [activeTopicId]);
 
   // Close drawer on Escape key
   useEffect(() => {
@@ -89,28 +168,35 @@ export function MobileDrawer() {
     };
   }, [isMobileOpen]);
 
-  return (
+  // Handle topic selection - close drawer after selecting
+  const handleTopicSelect = () => {
+    closeMobile();
+  };
+
+  // Use portal to render at document.body level to avoid stacking context issues
+  return createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop - z-[99] to cover header and all other elements */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-[99] bg-black/50 md:hidden"
           onClick={closeMobile}
           aria-hidden="true"
         />
       )}
 
-      {/* Drawer */}
+      {/* Drawer - z-[100] to stay above backdrop */}
       <aside
         ref={drawerRef}
         tabIndex={-1}
         className={`
-          fixed left-0 top-0 bottom-0 z-50 w-64
+          fixed left-0 top-0 bottom-0 z-[100]
           flex flex-col
           bg-white dark:bg-gray-900
           border-r border-gray-200 dark:border-gray-800
           transform transition-transform duration-300 ease-in-out
           md:hidden
+          ${sidebarMode === 'topics' ? 'w-80' : 'w-64'}
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         aria-label="Mobile navigation drawer"
@@ -123,14 +209,11 @@ export function MobileDrawer() {
             className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white"
             onClick={closeMobile}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-8 w-8 text-blue-600 dark:text-blue-500"
-            >
-              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-            </svg>
+            <img
+              src="/assets/brand/logo-icon.svg"
+              alt="ReasonBridge"
+              className="h-8 w-8 dark:brightness-110"
+            />
             <span>ReasonBridge</span>
           </Link>
 
@@ -152,44 +235,69 @@ export function MobileDrawer() {
           </button>
         </div>
 
-        {/* Navigation Links */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <Navigation onNavigate={closeMobile} />
-        </div>
+        {/* Content based on mode */}
+        {sidebarMode === 'topics' ? (
+          <>
+            {/* Compact Site Navigation */}
+            <CompactSiteNav onNavigate={closeMobile} />
 
-        {/* User Profile Section (bottom) */}
-        {user && (
-          <div className="border-t border-gray-200 p-4 dark:border-gray-800">
-            <Link
-              to="/profile"
-              className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-              onClick={closeMobile}
-              aria-label="View profile"
-            >
-              {/* Avatar */}
-              {user.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt=""
-                  className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-                  {user.displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
+            {/* Topic Navigation Content */}
+            <div className="flex-1 overflow-hidden">
+              <TopicNavigationContent
+                topics={topics}
+                unreadMap={unreadMap}
+                isLoading={isLoading}
+                error={errorMessage}
+                height={typeof window !== 'undefined' ? window.innerHeight - 180 : 400}
+                onTopicSelect={handleTopicSelect}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Navigation Links */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <Navigation onNavigate={closeMobile} />
+            </div>
 
-              {/* User Info */}
-              <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
-                  {user.displayName}
-                </p>
-                <p className="truncate text-xs text-gray-500 dark:text-gray-300">{user.email}</p>
+            {/* User Profile Section (bottom) */}
+            {user && (
+              <div className="border-t border-gray-200 p-4 dark:border-gray-800">
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onClick={closeMobile}
+                  aria-label="View profile"
+                >
+                  {/* Avatar */}
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt=""
+                      className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+                      {user.displayName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+
+                  {/* User Info */}
+                  <div className="flex-1 overflow-hidden">
+                    <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                      {user.displayName}
+                    </p>
+                    <p className="truncate text-xs text-gray-500 dark:text-gray-300">
+                      {user.email}
+                    </p>
+                  </div>
+                </Link>
               </div>
-            </Link>
-          </div>
+            )}
+          </>
         )}
       </aside>
-    </>
+    </>,
+    document.body,
   );
 }

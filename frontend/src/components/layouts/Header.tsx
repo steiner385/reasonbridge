@@ -18,14 +18,18 @@ import { NotificationDropdown } from '../notifications/NotificationDropdown';
  */
 
 export function Header() {
-  const { isCollapsed, toggleCollapsed, toggleMobile } = useSidebar();
+  const { isCollapsed, toggleCollapsed, toggleMobile, isMobileOpen } = useSidebar();
   const isMobile = useIsMobileViewport();
   const { isDark, toggleTheme } = useTheme();
   const { openModal: openLoginModal } = useLoginModal();
   const { user, isLoading } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <header
+      className={`fixed top-0 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 ${
+        isMobileOpen ? 'z-0' : 'z-40'
+      } ${isMobile && isMobileOpen ? 'invisible' : ''}`}
+    >
       <div className="flex h-16 items-center justify-between gap-4 px-4">
         {/* Left: Logo + Menu Toggle */}
         <div className="flex items-center gap-3">

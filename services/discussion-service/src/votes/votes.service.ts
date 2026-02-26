@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { VoteDto, VoteSummaryDto } from './dto/vote.dto.js';
 import type { CreateVoteDto } from './dto/create-vote.dto.js';
 
 @Injectable()
 export class VotesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Create or update a vote on a response

@@ -9,6 +9,7 @@ import {
   BadRequestException,
   ForbiddenException,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from '../dto/moderate-response.dto.js';
@@ -19,7 +20,7 @@ import { ModerateResponseDto, ModerationActionResponseDto } from '../dto/moderat
  */
 @Injectable()
 export class ContentModerationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Hide a response from public view

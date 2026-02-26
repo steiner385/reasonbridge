@@ -13,6 +13,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { VotesService } from './votes.service.js';
 import { CreateVoteDto } from './dto/create-vote.dto.js';
@@ -20,7 +21,7 @@ import type { VoteDto, VoteSummaryDto } from './dto/vote.dto.js';
 
 @Controller('responses')
 export class VotesController {
-  constructor(private readonly votesService: VotesService) {}
+  constructor(@Inject(VotesService) private readonly votesService: VotesService) {}
 
   /**
    * Vote on a response (upvote or downvote)

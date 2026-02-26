@@ -25,6 +25,7 @@ const logger = new Logger('CacheModule');
 @Module({
   imports: [
     NestCacheModule.registerAsync({
+      isGlobal: true,
       useFactory: async () => {
         const isTestMode = process.env['NODE_ENV'] === 'test';
         const redisHost = process.env['REDIS_HOST'];

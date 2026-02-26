@@ -14,6 +14,7 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { CredentialService } from './credential.service.js';
 import { CredentialDto, SubmitCredentialDto } from './dto/credential.dto.js';
@@ -47,7 +48,7 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 export class CredentialController {
   private readonly logger = new Logger(CredentialController.name);
 
-  constructor(private readonly credentialService: CredentialService) {}
+  constructor(@Inject(CredentialService) private readonly credentialService: CredentialService) {}
 
   /**
    * POST /credentials - Submit a new credential for verification

@@ -14,6 +14,7 @@ import {
   Logger,
   UseGuards,
   ForbiddenException,
+  Inject,
 } from '@nestjs/common';
 import { DemoService } from './demo.service.js';
 import { DemoResetService } from './demo-reset.service.js';
@@ -35,8 +36,8 @@ export class DemoController {
   private readonly logger = new Logger(DemoController.name);
 
   constructor(
-    private readonly demoService: DemoService,
-    private readonly demoResetService: DemoResetService,
+    @Inject(DemoService) private readonly demoService: DemoService,
+    @Inject(DemoResetService) private readonly demoResetService: DemoResetService,
   ) {}
 
   /**

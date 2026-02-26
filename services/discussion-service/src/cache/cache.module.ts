@@ -5,7 +5,6 @@
 
 import { Module, Logger } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-store';
 
 const logger = new Logger('CacheModule');
 
@@ -25,21 +24,24 @@ const logger = new Logger('CacheModule');
 @Module({
   imports: [
     NestCacheModule.registerAsync({
+      isGlobal: true,
       useFactory: async () => {
-        const isTestMode = process.env['NODE_ENV'] === 'test';
+        const nodeEnv = process.env['NODE_ENV'];
         const redisHost = process.env['REDIS_HOST'];
 
-        // In test mode without explicit REDIS_HOST, use in-memory cache
-        // This prevents tests from failing when Redis is not available
-        if (isTestMode && !redisHost) {
-          logger.warn('REDIS_HOST not configured in test mode - using in-memory cache');
+        // In test or development mode without explicit REDIS_HOST, use in-memory cache
+        // This prevents services from hanging when Redis is not available
+        if ((nodeEnv === 'test' || nodeEnv === 'development' || !nodeEnv) && !redisHost) {
+          logger.warn('REDIS_HOST not configured - using in-memory cache');
           return {
             ttl: parseInt(process.env['CACHE_TTL'] || '3600', 10) * 1000,
             max: parseInt(process.env['CACHE_MAX_ITEMS'] || '1000', 10),
           };
         }
 
-        // Use Redis cache for development and production
+        // Use Redis cache when explicitly configured
+        // Dynamic import to avoid blocking when Redis is not needed
+        const { redisStore } = await import('cache-manager-redis-store');
         return {
           store: redisStore,
           host: redisHost || 'localhost',

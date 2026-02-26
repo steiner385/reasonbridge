@@ -40,6 +40,13 @@ export interface NavigationState {
 }
 
 /**
+ * Sidebar mode type
+ * - 'topics': Show compact site nav + topic navigation (on /topics, /discussions)
+ * - 'full': Show standard full site navigation (all other routes)
+ */
+export type SidebarMode = 'topics' | 'full';
+
+/**
  * Sidebar context type for React Context
  */
 export interface SidebarContextType {
@@ -48,6 +55,9 @@ export interface SidebarContextType {
 
   /** Whether mobile drawer is open */
   isMobileOpen: boolean;
+
+  /** Current sidebar mode based on route */
+  sidebarMode: SidebarMode;
 
   /** Toggle sidebar collapsed/expanded state */
   toggleCollapsed: () => void;

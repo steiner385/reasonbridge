@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -30,7 +30,7 @@ export interface DuplicateSuggestion {
 export class TopicsSearchService {
   private readonly logger = new Logger(TopicsSearchService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Full-text search using PostgreSQL tsvector

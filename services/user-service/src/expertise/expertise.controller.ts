@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Param, Query, Logger, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, Query, Logger, NotFoundException, Inject } from '@nestjs/common';
 import { ExpertiseService } from './expertise.service.js';
 import { TopicExpertiseDto } from './dto/topic-expertise.dto.js';
 import type { ExpertiseLeaderboardOptions } from './dto/expertise-leaderboard-options.dto.js';
@@ -30,7 +30,7 @@ import type { ExpertiseLeaderboardOptions } from './dto/expertise-leaderboard-op
 export class ExpertiseController {
   private readonly logger = new Logger(ExpertiseController.name);
 
-  constructor(private readonly expertiseService: ExpertiseService) {}
+  constructor(@Inject(ExpertiseService) private readonly expertiseService: ExpertiseService) {}
 
   /**
    * GET /users/:id/expertise - Get all domain expertise for a user

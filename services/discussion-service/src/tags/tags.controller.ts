@@ -16,6 +16,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  Inject,
 } from '@nestjs/common';
 import { TagsService } from './tags.service.js';
 import {
@@ -39,7 +40,7 @@ import type { TagResponseDto, TagListResponseDto, TagStatisticsDto } from './dto
  */
 @Controller('tags')
 export class TagsController {
-  constructor(private readonly tagsService: TagsService) {}
+  constructor(@Inject(TagsService) private readonly tagsService: TagsService) {}
 
   /**
    * GET /tags

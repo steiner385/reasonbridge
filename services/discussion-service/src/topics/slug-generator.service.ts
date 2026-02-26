@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -17,7 +17,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export class SlugGeneratorService {
   private readonly logger = new Logger(SlugGeneratorService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Generate a URL-friendly slug from a title

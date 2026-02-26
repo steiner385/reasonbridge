@@ -14,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { AppealService } from './appeal.service.js';
 import { AppealDto, SubmitAppealDto, AppealEligibilityDto } from './dto/appeal.dto.js';
@@ -62,7 +63,7 @@ interface ResolveAppealBody {
 export class AppealController {
   private readonly logger = new Logger(AppealController.name);
 
-  constructor(private readonly appealService: AppealService) {}
+  constructor(@Inject(AppealService) private readonly appealService: AppealService) {}
 
   /**
    * POST /appeals - Submit a new tier appeal

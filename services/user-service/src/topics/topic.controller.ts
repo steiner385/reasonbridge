@@ -8,7 +8,7 @@
  * Handles topic retrieval endpoints
  */
 
-import { Controller, Get, Query, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Logger, Inject } from '@nestjs/common';
 import { TopicService } from './topic.service';
 import type { TopicsResponseDto } from './dto/topics-response.dto';
 import { ActivityLevel } from './dto/topic.dto';
@@ -17,7 +17,7 @@ import { ActivityLevel } from './dto/topic.dto';
 export class TopicController {
   private readonly logger = new Logger(TopicController.name);
 
-  constructor(private readonly topicService: TopicService) {}
+  constructor(@Inject(TopicService) private readonly topicService: TopicService) {}
 
   /**
    * T093: GET /topics

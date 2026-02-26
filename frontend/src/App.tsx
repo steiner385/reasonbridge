@@ -21,7 +21,7 @@ import { useIsMobileViewport } from './hooks/useMediaQuery';
 function App() {
   const routing = useRoutes(routes);
   const location = useLocation();
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, sidebarMode } = useSidebar();
   const isMobile = useIsMobileViewport();
 
   // Landing page and auth pages have their own complete layout
@@ -49,20 +49,27 @@ function App() {
         Skip to main content
       </a>
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
         <Header />
+
+        {/* Mobile Drawer - rendered outside flex container to avoid stacking context issues */}
+        {isMobile && <MobileDrawer />}
+
         <div className="flex">
           {/* Desktop Sidebar */}
           {!isMobile && <Sidebar />}
-
-          {/* Mobile Drawer */}
-          {isMobile && <MobileDrawer />}
 
           {/* Main Content */}
           <main
             id="main-content"
             className={`flex-1 transition-all duration-300 ${
-              !isMobile && !isCollapsed ? 'ml-64' : 'ml-0'
+              !isMobile
+                ? sidebarMode === 'topics'
+                  ? 'ml-80' // Topics mode: 320px sidebar (never collapses)
+                  : isCollapsed
+                    ? 'ml-20' // Full mode collapsed: 80px
+                    : 'ml-64' // Full mode expanded: 256px
+                : 'ml-0' // Mobile: no margin
             }`}
           >
             <div className="px-4 py-6 sm:px-6 lg:px-8">{routing}</div>

@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { SidebarContextType } from '../types/navigation';
+import { useSidebarMode } from '../hooks/useSidebarMode';
 
 /**
  * Sidebar Context
@@ -47,28 +48,36 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
     }
   }, [isCollapsed]);
 
-  // Toggle sidebar collapsed/expanded state
-  const toggleCollapsed = () => {
+  // Toggle sidebar collapsed/expanded state (memoized to prevent unnecessary re-renders)
+  const toggleCollapsed = useCallback(() => {
     setIsCollapsed((prev) => !prev);
-  };
+  }, []);
 
-  // Toggle mobile drawer open/closed state
-  const toggleMobile = () => {
+  // Toggle mobile drawer open/closed state (memoized)
+  const toggleMobile = useCallback(() => {
     setIsMobileOpen((prev) => !prev);
-  };
+  }, []);
 
-  // Close mobile drawer (used for route changes, backdrop clicks, Escape key)
-  const closeMobile = () => {
+  // Close mobile drawer (used for route changes, backdrop clicks, Escape key) (memoized)
+  const closeMobile = useCallback(() => {
     setIsMobileOpen(false);
-  };
+  }, []);
 
-  const value: SidebarContextType = {
-    isCollapsed,
-    isMobileOpen,
-    toggleCollapsed,
-    toggleMobile,
-    closeMobile,
-  };
+  // Get current sidebar mode (always 'topics' for consistent UX)
+  const sidebarMode = useSidebarMode();
+
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  const value: SidebarContextType = useMemo(
+    () => ({
+      isCollapsed,
+      isMobileOpen,
+      sidebarMode,
+      toggleCollapsed,
+      toggleMobile,
+      closeMobile,
+    }),
+    [isCollapsed, isMobileOpen, sidebarMode, toggleCollapsed, toggleMobile, closeMobile],
+  );
 
   return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
 }

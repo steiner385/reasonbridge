@@ -25,14 +25,16 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Contact Service')
-    .setDescription('Social connections, contact import, and topic invitations')
-    .setVersion('1.0.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  if (!process.env['SKIP_SWAGGER']) {
+    const config = new DocumentBuilder()
+      .setTitle('Contact Service')
+      .setDescription('Social connections, contact import, and topic invitations')
+      .setVersion('1.0.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api-docs', app, document);
+  }
 
   const port = process.env['PORT'] || SERVICE_PORTS.CONTACT_SERVICE;
   await app.listen(port, '0.0.0.0');

@@ -15,8 +15,10 @@ import {
   Delete,
   Req,
   UseInterceptors,
+  Inject,
 } from '@nestjs/common';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+// TEMPORARILY DISABLED for debugging hang issue
+// import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ResponsesService } from './responses.service.js';
@@ -40,7 +42,8 @@ interface AuthRequest extends Request {
 @Controller('topics')
 export class ResponsesController {
   constructor(
-    private readonly responsesService: ResponsesService,
+    @Inject(ResponsesService) private readonly responsesService: ResponsesService,
+    @Inject(ContentModerationService)
     private readonly contentModerationService: ContentModerationService,
   ) {}
 
@@ -54,8 +57,8 @@ export class ResponsesController {
    */
   @Get(':topicId/responses')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000) // 30 seconds in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(30000) // 30 seconds in ms
   async getResponsesForTopic(@Param('topicId') topicId: string): Promise<ResponseDto[]> {
     return this.responsesService.getResponsesForTopic(topicId);
   }
@@ -308,8 +311,8 @@ export class ResponsesController {
   @Get('discussions/:discussionId/responses')
   @HttpCode(HttpStatus.OK)
   @SkipThrottle() // No rate limit on read operations
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(30000) // 30 seconds in ms
+  // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
+  // @CacheTTL(30000) // 30 seconds in ms
   @ApiTags('responses')
   @ApiOperation({
     summary: 'Get responses for a discussion',

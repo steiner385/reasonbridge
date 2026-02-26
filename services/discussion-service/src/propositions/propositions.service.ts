@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreatePropositionDto } from './dto/create-proposition.dto.js';
 import type { PropositionResponseDto } from './dto/create-proposition.dto.js';
@@ -16,7 +16,7 @@ import type { PropositionResponseDto } from './dto/create-proposition.dto.js';
 export class PropositionsService {
   private readonly logger = new Logger(PropositionsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private prisma: PrismaService) {}
 
   /**
    * Find all propositions for a topic

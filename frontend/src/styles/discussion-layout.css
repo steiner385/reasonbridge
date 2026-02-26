@@ -19,6 +19,12 @@
   color: var(--color-text, #1f2937);
 }
 
+/* 2-panel mode: when unified sidebar handles topic navigation */
+.discussion-layout[data-panels="2"] {
+  grid-template-columns: 1fr var(--right-panel-width, clamp(320px, 30vw, 450px));
+  grid-template-areas: 'center right';
+}
+
 /* ==========================================================================
    Panel Base Styles
    ========================================================================== */
@@ -214,6 +220,12 @@
   .discussion-layout[data-breakpoint='tablet'] .panel-resizer--right {
     right: var(--right-panel-width, 360px);
   }
+
+  /* 2-panel mode on tablet: same as default tablet layout */
+  .discussion-layout[data-breakpoint='tablet'][data-panels="2"] {
+    grid-template-columns: 1fr var(--right-panel-width, 360px);
+    grid-template-areas: 'center right';
+  }
 }
 
 /* ==========================================================================
@@ -297,6 +309,13 @@
     min-height: 44px;
     min-width: 44px;
     padding: 10px;
+  }
+
+  /* 2-panel mode on mobile: same behavior, center takes full width */
+  .discussion-layout[data-breakpoint='mobile'][data-panels="2"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: 'center';
   }
 }
 

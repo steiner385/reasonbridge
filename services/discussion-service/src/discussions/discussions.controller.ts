@@ -20,6 +20,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
@@ -42,7 +43,9 @@ interface AuthRequest extends Request {
 @ApiTags('discussions')
 @Controller('discussions')
 export class DiscussionsController {
-  constructor(private readonly discussionsService: DiscussionsService) {}
+  constructor(
+    @Inject(DiscussionsService) private readonly discussionsService: DiscussionsService,
+  ) {}
 
   /**
    * T023 [US1] - Create a new discussion with initial response

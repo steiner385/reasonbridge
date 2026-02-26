@@ -17,8 +17,10 @@ import {
   Body,
   Logger,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { CacheTTL } from '@nestjs/cache-manager';
+import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interceptor.js';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { UsersService } from './users.service.js';
@@ -50,7 +52,8 @@ export class UsersController {
   private readonly logger = new Logger(UsersController.name);
 
   constructor(
-    private readonly usersService: UsersService,
+    @Inject(UsersService) private readonly usersService: UsersService,
+    @Inject(FeedbackPreferencesService)
     private readonly feedbackPreferencesService: FeedbackPreferencesService,
   ) {}
 
@@ -130,7 +133,7 @@ export class UsersController {
    * Cached for 30 minutes (1800 seconds)
    */
   @Get(':id')
-  @UseInterceptors(CacheInterceptor)
+  @UseInterceptors(OptionalCacheInterceptor)
   @CacheTTL(1800000) // 30 minutes in ms
   async getUserById(@Param('id') id: string): Promise<PublicUserResponseDto> {
     // Validate UUID format to prevent Prisma errors and aid debugging
@@ -246,7 +249,7 @@ export class UsersController {
    * Cached for 1 hour (3600 seconds)
    */
   @Get(':id/followers')
-  @UseInterceptors(CacheInterceptor)
+  @UseInterceptors(OptionalCacheInterceptor)
   @CacheTTL(3600000) // 1 hour in ms
   async getFollowers(
     @Param('id') userId: string,
@@ -276,7 +279,7 @@ export class UsersController {
    * Cached for 1 hour (3600 seconds)
    */
   @Get(':id/following')
-  @UseInterceptors(CacheInterceptor)
+  @UseInterceptors(OptionalCacheInterceptor)
   @CacheTTL(3600000) // 1 hour in ms
   async getFollowing(
     @Param('id') userId: string,

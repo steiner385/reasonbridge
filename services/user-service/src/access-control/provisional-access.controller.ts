@@ -13,6 +13,7 @@ import {
   Logger,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { ProvisionalAccessService } from './provisional-access.service.js';
 import {
@@ -54,7 +55,10 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 export class ProvisionalAccessController {
   private readonly logger = new Logger(ProvisionalAccessController.name);
 
-  constructor(private readonly provisionalAccessService: ProvisionalAccessService) {}
+  constructor(
+    @Inject(ProvisionalAccessService)
+    private readonly provisionalAccessService: ProvisionalAccessService,
+  ) {}
 
   /**
    * POST /topics/:id/request-access - Request provisional access to a topic

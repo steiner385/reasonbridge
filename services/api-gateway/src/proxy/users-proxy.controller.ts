@@ -14,6 +14,7 @@ import {
   Res,
   Headers,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
@@ -30,7 +31,7 @@ function isValidUUID(id: string): boolean {
 export class UsersProxyController {
   private readonly logger = new Logger(UsersProxyController.name);
 
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   @Get('me')
   async getCurrentUser(

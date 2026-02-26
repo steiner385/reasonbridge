@@ -31,13 +31,13 @@ createRoot(rootElement).render(
           <ThemeProvider>
             <ToastProvider>
               <AuthProvider>
-                <SidebarProvider>
-                  <BrowserRouter>
+                <BrowserRouter>
+                  <SidebarProvider>
                     <AnalyticsProvider>
                       <App />
                     </AnalyticsProvider>
-                  </BrowserRouter>
-                </SidebarProvider>
+                  </SidebarProvider>
+                </BrowserRouter>
               </AuthProvider>
             </ToastProvider>
           </ThemeProvider>

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TopicsController } from './topics.controller.js';
 import { TopicDraftsController } from './topic-drafts.controller.js';
 import { TopicLinksController, LinkedTopicsController } from './topic-links.controller.js';
@@ -16,11 +16,11 @@ import { SlugGeneratorService } from './slug-generator.service.js';
 import { TopicsEditService } from './topics-edit.service.js';
 import { TopicsAnalyticsService } from './topics-analytics.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
-import { CacheModule } from '../cache/cache.module.js';
+// CacheModule removed - it's global and imported once in AppModule
 import { PropositionsModule } from '../propositions/propositions.module.js';
 
 @Module({
-  imports: [PrismaModule, CacheModule, PropositionsModule],
+  imports: [PrismaModule, PropositionsModule],
   controllers: [
     TopicsController,
     TopicDraftsController,

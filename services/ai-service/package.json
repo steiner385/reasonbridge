@@ -19,6 +19,7 @@
     "test:benchmarks": "vitest run --config vitest.benchmark.config.ts"
   },
   "dependencies": {
+    "@nestjs/config": "^4.0.3",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
     "@nestjs/cache-manager": "^3.1.0",

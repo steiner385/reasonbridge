@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   Body,
+  Inject,
 } from '@nestjs/common';
 import { UploadService } from './upload.service.js';
 
@@ -25,7 +26,7 @@ interface UploadAvatarDto {
 
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(@Inject(UploadService) private readonly uploadService: UploadService) {}
 
   /**
    * Upload avatar for a user

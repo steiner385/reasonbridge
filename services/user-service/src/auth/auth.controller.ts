@@ -31,7 +31,9 @@ export class AuthController {
     private readonly authService: IAuthService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(AgeVerificationService)
     private readonly ageVerificationService: AgeVerificationService,
+    @Inject(ParentalConsentService)
     private readonly parentalConsentService: ParentalConsentService,
   ) {}
 

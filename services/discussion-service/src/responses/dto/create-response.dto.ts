@@ -32,6 +32,7 @@ export class CreateResponseDto {
     description: 'ID of the discussion this response belongs to',
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
+    type: String,
   })
   @IsUUID('4')
   discussionId!: string;
@@ -41,6 +42,7 @@ export class CreateResponseDto {
     example: 'I agree with the previous points because...',
     minLength: 50,
     maxLength: 25000,
+    type: String,
   })
   @IsString()
   @MinLength(50, { message: 'Response must be at least 50 characters' })
@@ -63,6 +65,7 @@ export class CreateResponseDto {
     example: '660e8400-e29b-41d4-a716-446655440001',
     format: 'uuid',
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsUUID('4')
@@ -75,6 +78,7 @@ export class CreateResponseDto {
   @ApiPropertyOptional({
     description: 'Whether the response contains opinion',
     example: false,
+    type: Boolean,
   })
   @IsOptional()
   @IsBoolean()
@@ -83,6 +87,7 @@ export class CreateResponseDto {
   @ApiPropertyOptional({
     description: 'Whether the response contains factual claims',
     example: true,
+    type: Boolean,
   })
   @IsOptional()
   @IsBoolean()

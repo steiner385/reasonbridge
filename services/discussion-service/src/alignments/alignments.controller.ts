@@ -13,6 +13,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { AlignmentsService } from './alignments.service.js';
 import { SetAlignmentDto } from './dto/set-alignment.dto.js';
@@ -20,7 +21,7 @@ import type { AlignmentDto } from './dto/alignment.dto.js';
 
 @Controller('propositions')
 export class AlignmentsController {
-  constructor(private readonly alignmentsService: AlignmentsService) {}
+  constructor(@Inject(AlignmentsService) private readonly alignmentsService: AlignmentsService) {}
 
   /**
    * Get user's alignment on a proposition
