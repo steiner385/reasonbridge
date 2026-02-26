@@ -232,7 +232,7 @@ const FallacyWarnings: React.FC<FallacyWarningsProps> = ({
                     <button
                       type="button"
                       onClick={() => onDismiss(item.id)}
-                      className="text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors p-1"
+                      className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors p-1"
                       aria-label="Dismiss warning"
                     >
                       <svg
