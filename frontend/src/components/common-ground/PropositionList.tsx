@@ -41,10 +41,11 @@ export interface PropositionListProps {
  * Get consensus badge color based on score
  */
 function getConsensusColor(score: number | null): string {
-  if (score === null) return 'bg-gray-100 text-gray-700 dark:text-gray-300';
-  if (score >= 0.7) return 'bg-green-100 text-green-800';
-  if (score >= 0.4) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-red-100 text-red-800';
+  if (score === null) return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+  if (score >= 0.7) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300';
+  if (score >= 0.4)
+    return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300';
+  return 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300';
 }
 
 /**
@@ -125,8 +126,8 @@ export function PropositionList({
               p-3 rounded-lg border cursor-pointer transition-all
               ${
                 isHighlighted
-                  ? 'border-primary-500 bg-primary-50 shadow-md'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:border-gray-600 hover:shadow-sm'
+                  ? 'border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/30 shadow-md'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm'
               }
             `}
             role="button"
@@ -146,7 +147,7 @@ export function PropositionList({
             {/* Alignment Summary */}
             <div className="flex items-center gap-3 text-xs">
               {/* Support */}
-              <div className="flex items-center gap-1 text-green-700">
+              <div className="flex items-center gap-1 text-green-700 dark:text-green-400">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="currentColor"
@@ -163,7 +164,7 @@ export function PropositionList({
               </div>
 
               {/* Oppose */}
-              <div className="flex items-center gap-1 text-red-700">
+              <div className="flex items-center gap-1 text-red-700 dark:text-red-400">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="currentColor"
@@ -180,7 +181,7 @@ export function PropositionList({
               </div>
 
               {/* Nuanced */}
-              <div className="flex items-center gap-1 text-blue-700">
+              <div className="flex items-center gap-1 text-blue-700 dark:text-blue-400">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="currentColor"

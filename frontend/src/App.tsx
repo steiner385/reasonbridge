@@ -108,7 +108,12 @@ function App() {
                 : 'ml-0' // Mobile: no margin
             }`}
           >
-            <div className="px-4 py-6 sm:px-6 lg:px-8">{routing}</div>
+            <div
+              key={location.pathname + location.search}
+              className="px-4 py-6 sm:px-6 lg:px-8 route-content"
+            >
+              {routing}
+            </div>
           </main>
         </div>
 

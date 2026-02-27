@@ -238,10 +238,10 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={placeholder}
-            className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y min-h-[120px] ${
+            className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y min-h-[120px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${
               error
                 ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20'
-                : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20'
+                : 'border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500/20'
             }`}
             maxLength={maxLength}
             disabled={isLoading}
@@ -321,13 +321,13 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               {citedSources.map((source, index) => (
                 <li
                   key={index}
-                  className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
+                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md"
                 >
                   <a
                     href={source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-primary-600 hover:text-primary-700 truncate flex-1"
+                    className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 truncate flex-1"
                   >
                     {source}
                   </a>
@@ -362,7 +362,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               checked={containsOpinion}
               onChange={(e) => setContainsOpinion(e.target.checked)}
               disabled={isLoading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
             />
             <label
               htmlFor="contains-opinion"
@@ -378,7 +378,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               checked={containsFactualClaims}
               onChange={(e) => setContainsFactualClaims(e.target.checked)}
               disabled={isLoading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
             />
             <label
               htmlFor="contains-factual-claims"
