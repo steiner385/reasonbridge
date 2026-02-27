@@ -23,7 +23,7 @@ import { CompactSiteNav } from './CompactSiteNav';
  * **Topics Mode** (on /topics, /discussions):
  * - CompactSiteNav (icon-only horizontal nav) at top
  * - TopicNavigationContent (search, filter, topic list) below
- * - Fixed 320px width (never collapses in this mode)
+ * - 320px width expanded, 80px collapsed (icon-only nav)
  *
  * **Full Mode** (all other routes):
  * - Standard Navigation component with labels
@@ -99,31 +99,34 @@ export function Sidebar() {
     return undefined;
   }, [activeTopicId]);
 
-  // Topics mode: wider sidebar with compact nav + topic list
+  // Topics mode: collapsible sidebar with compact nav + topic list
   if (sidebarMode === 'topics') {
     return (
       <aside
-        className="
+        className={`
           hidden md:flex md:flex-col
           fixed left-0 top-16 bottom-0 z-30
-          w-80 border-r border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900
+          border-r border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900
           transition-all duration-300 ease-in-out
-        "
+          ${isCollapsed ? 'w-20' : 'w-80'}
+        `}
         aria-label="Topic navigation sidebar"
       >
-        {/* Compact Site Navigation */}
-        <CompactSiteNav />
+        {/* Compact Site Navigation - always visible */}
+        <CompactSiteNav isCollapsed={isCollapsed} />
 
-        {/* Topic Navigation Content */}
-        <div className="flex-1 overflow-hidden">
-          <TopicNavigationContent
-            topics={topics}
-            unreadMap={unreadMap}
-            isLoading={isLoading}
-            error={errorMessage}
-            height={typeof window !== 'undefined' ? window.innerHeight - 120 : 600}
-          />
-        </div>
+        {/* Topic Navigation Content - hidden when collapsed */}
+        {!isCollapsed && (
+          <div className="flex-1 overflow-hidden">
+            <TopicNavigationContent
+              topics={topics}
+              unreadMap={unreadMap}
+              isLoading={isLoading}
+              error={errorMessage}
+              height={typeof window !== 'undefined' ? window.innerHeight - 120 : 600}
+            />
+          </div>
+        )}
       </aside>
     );
   }

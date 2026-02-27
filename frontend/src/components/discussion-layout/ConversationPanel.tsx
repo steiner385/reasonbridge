@@ -391,11 +391,11 @@ export function ConversationPanel({
 
       {/* New Responses Notification Banner */}
       {newResponseCount > 0 && (
-        <div className="flex-shrink-0 px-6 py-3 bg-primary-50 border-b border-primary-200">
+        <div className="flex-shrink-0 px-6 py-3 bg-primary-50 dark:bg-primary-900/30 border-b border-primary-200 dark:border-primary-700">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm text-primary-900">
+            <div className="flex items-center gap-2 text-sm text-primary-900 dark:text-primary-100">
               <svg
-                className="w-5 h-5 text-primary-600"
+                className="w-5 h-5 text-primary-600 dark:text-primary-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -414,7 +414,7 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={handleLoadNewResponses}
-              className="px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-sm font-medium text-primary-700 dark:text-primary-200 bg-primary-100 dark:bg-primary-800 hover:bg-primary-200 dark:hover:bg-primary-700 rounded-lg transition-colors"
             >
               Click to load
             </button>
@@ -427,15 +427,15 @@ export function ConversationPanel({
         <div
           className={`flex-shrink-0 px-6 py-3 border-b ${
             topicStatusChange.newStatus === 'ARCHIVED'
-              ? 'bg-yellow-50 border-yellow-200'
-              : 'bg-blue-50 border-blue-200'
+              ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700'
+              : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
           }`}
           role="alert"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm">
               <svg
-                className={`w-5 h-5 ${topicStatusChange.newStatus === 'ARCHIVED' ? 'text-yellow-600' : 'text-blue-600'}`}
+                className={`w-5 h-5 ${topicStatusChange.newStatus === 'ARCHIVED' ? 'text-yellow-600 dark:text-yellow-400' : 'text-blue-600 dark:text-blue-400'}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -449,7 +449,9 @@ export function ConversationPanel({
               </svg>
               <span
                 className={
-                  topicStatusChange.newStatus === 'ARCHIVED' ? 'text-yellow-900' : 'text-blue-900'
+                  topicStatusChange.newStatus === 'ARCHIVED'
+                    ? 'text-yellow-900 dark:text-yellow-100'
+                    : 'text-blue-900 dark:text-blue-100'
                 }
               >
                 Topic is now <strong>{topicStatusChange.newStatus.toLowerCase()}</strong>
@@ -459,10 +461,15 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={handleDismissStatusChange}
-              className="p-1 rounded-lg hover:bg-black/5 transition-colors"
+              className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               aria-label="Dismiss notification"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

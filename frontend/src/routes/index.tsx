@@ -70,11 +70,12 @@ const ParentalDashboardPage = lazy(() =>
 
 /**
  * Loading fallback for lazy-loaded routes
- * Uses minimal styling to avoid layout shift
+ * Uses transparent background to avoid flash during route transitions
+ * and matches App wrapper's background colors for consistency
  */
 function PageLoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-[50vh] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
         <span className="text-sm text-gray-500 dark:text-gray-400">Loading...</span>

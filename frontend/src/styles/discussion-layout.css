@@ -385,24 +385,45 @@
 
 /* ==========================================================================
    Dark Mode Support
+   Uses .dark class selector to match Tailwind's class-based dark mode
    ========================================================================== */
 
+/* Class-based dark mode (user toggle) */
+.dark .discussion-layout {
+  --color-background: #171717; /* gray-900 */
+  --color-text: #f5f5f5; /* gray-100 */
+  --color-panel-background: #262626; /* gray-800 */
+  --color-panel-left-background: #171717; /* gray-900 */
+  --color-panel-center-background: #262626; /* gray-800 */
+  --color-panel-right-background: #171717; /* gray-900 */
+  --color-border: #404040; /* gray-700 */
+  --color-resizer-background: #404040; /* gray-700 */
+  --color-resizer-hover: #525252; /* gray-600 */
+  --color-resizer-active: #818cf8; /* indigo-400 */
+  --color-resizer-handle: #a3a3a3; /* gray-400 */
+  --color-scrollbar-track: #262626; /* gray-800 */
+  --color-scrollbar-thumb: #525252; /* gray-600 */
+  --color-scrollbar-thumb-hover: #737373; /* gray-500 */
+  --color-focus: #60a5fa; /* blue-400 */
+}
+
+/* System preference fallback (when no toggle used) */
 @media (prefers-color-scheme: dark) {
-  .discussion-layout {
-    --color-background: #111827;
-    --color-text: #f9fafb;
-    --color-panel-background: #1f2937;
-    --color-panel-left-background: #111827;
-    --color-panel-center-background: #1f2937;
-    --color-panel-right-background: #111827;
-    --color-border: #374151;
-    --color-resizer-background: #374151;
-    --color-resizer-hover: #4b5563;
+  :root:not(.light) .discussion-layout {
+    --color-background: #171717;
+    --color-text: #f5f5f5;
+    --color-panel-background: #262626;
+    --color-panel-left-background: #171717;
+    --color-panel-center-background: #262626;
+    --color-panel-right-background: #171717;
+    --color-border: #404040;
+    --color-resizer-background: #404040;
+    --color-resizer-hover: #525252;
     --color-resizer-active: #818cf8;
-    --color-resizer-handle: #9ca3af;
-    --color-scrollbar-track: #1f2937;
-    --color-scrollbar-thumb: #4b5563;
-    --color-scrollbar-thumb-hover: #6b7280;
+    --color-resizer-handle: #a3a3a3;
+    --color-scrollbar-track: #262626;
+    --color-scrollbar-thumb: #525252;
+    --color-scrollbar-thumb-hover: #737373;
     --color-focus: #60a5fa;
   }
 }

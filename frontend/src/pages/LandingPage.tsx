@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { useLoginModal } from '../contexts/LoginModalContext';
+import { authService } from '../services/authService';
 
 interface Topic {
   id: string;
@@ -40,10 +41,20 @@ export const LandingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check authentication synchronously to prevent flash before redirect
+  // This must be checked before any rendering to avoid the landing page flash
+  const isAuthenticatedSync = authService.isAuthenticated();
+
   // Redirect authenticated users to /topics?welcome=true
   useAuthRedirect();
 
+  // Fetch topics for landing page display (only if not authenticated)
   useEffect(() => {
+    // Skip fetch if user is authenticated - they'll be redirected anyway
+    if (isAuthenticatedSync) {
+      return;
+    }
+
     const fetchTopics = async () => {
       try {
         setLoading(true);
@@ -62,7 +73,20 @@ export const LandingPage: React.FC = () => {
     };
 
     fetchTopics();
-  }, []);
+  }, [isAuthenticatedSync]);
+
+  // Prevent landing page flash by returning loading state for authenticated users
+  // The useAuthRedirect hook will handle the actual redirect via useEffect
+  if (isAuthenticatedSync) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+          <span className="text-sm text-gray-500 dark:text-gray-400">Redirecting...</span>
+        </div>
+      </div>
+    );
+  }
 
   const handleJoinClick = () => {
     setShowJoinModal(true);

@@ -258,7 +258,7 @@ export function MetadataPanel({
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-3">
                   <div
-                    className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
+                    className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                     aria-hidden="true"
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -295,7 +295,7 @@ export function MetadataPanel({
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-3">
                   <div
-                    className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
+                    className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                     aria-hidden="true"
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -357,8 +357,8 @@ export function MetadataPanel({
               flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
               ${
                 activeTab === 'propositions'
-                  ? 'border-primary-600 text-primary-700'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
+                  ? 'border-primary-600 dark:border-primary-400 text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
               }
             `}
           >
@@ -374,8 +374,8 @@ export function MetadataPanel({
               flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
               ${
                 activeTab === 'commonGround'
-                  ? 'border-primary-600 text-primary-700'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
+                  ? 'border-primary-600 dark:border-primary-400 text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
               }
             `}
           >
@@ -391,8 +391,8 @@ export function MetadataPanel({
               flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
               ${
                 activeTab === 'bridging'
-                  ? 'border-primary-600 text-primary-700'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
+                  ? 'border-primary-600 dark:border-primary-400 text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
               }
             `}
           >
@@ -409,14 +409,14 @@ export function MetadataPanel({
                 flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
                 ${
                   activeTab === 'preview'
-                    ? 'border-primary-600 text-primary-700'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 hover:border-gray-300'
+                    ? 'border-primary-600 dark:border-primary-400 text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
                 }
               `}
             >
               Preview
               {readyToPost && previewFeedback.length === 0 && !isLoadingPreviewFeedback && (
-                <span className="ml-1 text-green-600">✓</span>
+                <span className="ml-1 text-green-600 dark:text-green-400">✓</span>
               )}
             </button>
           )}
@@ -462,11 +462,11 @@ export function MetadataPanel({
           >
             {/* Common Ground Update Indicator */}
             {hasCommonGroundUpdate && !isLoadingCommonGround && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-sm text-blue-900">
+                  <div className="flex items-center gap-2 text-sm text-blue-900 dark:text-blue-100">
                     <svg
-                      className="w-5 h-5 text-blue-600"
+                      className="w-5 h-5 text-blue-600 dark:text-blue-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -483,7 +483,7 @@ export function MetadataPanel({
                   <button
                     type="button"
                     onClick={handleRefreshCommonGround}
-                    className="px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+                    className="px-3 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 rounded-lg transition-colors"
                   >
                     Refresh
                   </button>
@@ -495,7 +495,7 @@ export function MetadataPanel({
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-3">
                   <div
-                    className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
+                    className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                     aria-hidden="true"
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -544,7 +544,7 @@ export function MetadataPanel({
               <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-3">
                   <div
-                    className="w-8 h-8 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin"
+                    className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-primary-600 dark:border-t-primary-400 rounded-full animate-spin"
                     aria-hidden="true"
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-400">

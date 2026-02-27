@@ -99,14 +99,21 @@ function App() {
             className={`flex-1 transition-all duration-300 ${
               !isMobile
                 ? sidebarMode === 'topics'
-                  ? 'ml-80' // Topics mode: 320px sidebar (never collapses)
+                  ? isCollapsed
+                    ? 'ml-20' // Topics mode collapsed: 80px
+                    : 'ml-80' // Topics mode expanded: 320px
                   : isCollapsed
                     ? 'ml-20' // Full mode collapsed: 80px
                     : 'ml-64' // Full mode expanded: 256px
                 : 'ml-0' // Mobile: no margin
             }`}
           >
-            <div className="px-4 py-6 sm:px-6 lg:px-8">{routing}</div>
+            <div
+              key={location.pathname + location.search}
+              className="px-4 py-6 sm:px-6 lg:px-8 route-content"
+            >
+              {routing}
+            </div>
           </main>
         </div>
 
@@ -119,7 +126,9 @@ function App() {
             ${
               !isMobile
                 ? sidebarMode === 'topics'
-                  ? 'ml-80'
+                  ? isCollapsed
+                    ? 'ml-20'
+                    : 'ml-80'
                   : isCollapsed
                     ? 'ml-20'
                     : 'ml-64'
