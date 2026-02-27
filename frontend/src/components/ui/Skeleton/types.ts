@@ -110,3 +110,15 @@ export interface ResponseSkeletonProps extends SkeletonBaseProps {
   /** Show author avatar */
   showAvatar?: boolean;
 }
+
+/**
+ * Props for ArgumentAnalysis skeleton
+ */
+export interface ArgumentAnalysisSkeletonProps extends SkeletonBaseProps {
+  /** Whether to show progress indicator with steps */
+  showProgress?: boolean;
+  /** Number of completed steps (for progress indicator) */
+  completedSteps?: number;
+  /** Total steps (for progress indicator) */
+  totalSteps?: number;
+}

@@ -6,11 +6,12 @@
 import {
   Injectable,
   NotFoundException,
-  Inject,
-  Optional,
   ConflictException,
   BadRequestException,
+  Inject,
+  type OnModuleInit,
 } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -29,16 +30,27 @@ import { ActivityClientService } from '../clients/activity-client.service.js';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
-export class TopicsService {
+export class TopicsService implements OnModuleInit {
+  private cacheManager: Cache | null = null;
+
   constructor(
-    private prisma: PrismaService,
-    @Optional() @Inject(CACHE_MANAGER) private cacheManager: Cache | null,
-    private searchService: TopicsSearchService,
-    private slugGenerator: SlugGeneratorService,
-    private editService: TopicsEditService,
-    private propositionsService: PropositionsService,
-    private activityClient: ActivityClientService,
+    @Inject(PrismaService) private prisma: PrismaService,
+    @Inject(ModuleRef) private moduleRef: ModuleRef,
+    @Inject(TopicsSearchService) private searchService: TopicsSearchService,
+    @Inject(SlugGeneratorService) private slugGenerator: SlugGeneratorService,
+    @Inject(TopicsEditService) private editService: TopicsEditService,
+    @Inject(PropositionsService) private propositionsService: PropositionsService,
+    @Inject(ActivityClientService) private activityClient: ActivityClientService,
   ) {}
+
+  async onModuleInit() {
+    try {
+      this.cacheManager = this.moduleRef.get(CACHE_MANAGER, { strict: false });
+    } catch {
+      // Cache manager not available - caching will be disabled
+      this.cacheManager = null;
+    }
+  }
 
   /**
    * Get topics with filtering, search, and caching
@@ -67,6 +79,10 @@ export class TopicsService {
     if (cached) {
       return cached;
     }
+
+    // Ensure pagination values are numbers (tsx ESM type metadata may not preserve type info)
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit as unknown as string, 10) : limit;
 
     // Build where clause
     const where: Prisma.DiscussionTopicWhereInput = {};
@@ -115,7 +131,7 @@ export class TopicsService {
     // Handle full-text search using PostgreSQL tsvector
     if (search) {
       // Use TopicsSearchService for full-text search
-      const searchResults = await this.searchService.fullTextSearch(search, limit * 10); // Get more results for filtering
+      const searchResults = await this.searchService.fullTextSearch(search, limitNum * 10); // Get more results for filtering
 
       if (searchResults.length > 0) {
         // Filter by search result IDs
@@ -128,8 +144,8 @@ export class TopicsService {
           data: [],
           meta: {
             total: 0,
-            page,
-            limit,
+            page: pageNum,
+            limit: limitNum,
             totalPages: 0,
           },
         };
@@ -141,7 +157,7 @@ export class TopicsService {
     orderBy[sortBy] = sortOrder;
 
     // Calculate pagination
-    const skip = (page - 1) * limit;
+    const skip = (pageNum - 1) * limitNum;
 
     // Execute queries
     const [topics, total] = await Promise.all([
@@ -149,7 +165,7 @@ export class TopicsService {
         where,
         orderBy,
         skip,
-        take: limit,
+        take: limitNum,
         include: {
           tags: {
             include: {
@@ -193,9 +209,9 @@ export class TopicsService {
       data,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       },
     };
 

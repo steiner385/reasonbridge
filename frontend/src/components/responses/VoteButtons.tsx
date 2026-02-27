@@ -51,16 +51,16 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   size = 'md',
   orientation = 'vertical',
 }) => {
-  // Size classes
+  // Size classes - all sizes maintain 44px minimum touch target for WCAG 2.1 AA compliance
   const sizeClasses = {
     sm: {
-      button: 'w-6 h-6',
+      button: 'w-6 h-6 min-w-[44px] min-h-[44px]',
       icon: 'w-3 h-3',
       text: 'text-xs',
       gap: orientation === 'vertical' ? 'gap-0.5' : 'gap-1',
     },
     md: {
-      button: 'w-8 h-8',
+      button: 'w-8 h-8 min-w-[44px] min-h-[44px]',
       icon: 'w-4 h-4',
       text: 'text-sm',
       gap: orientation === 'vertical' ? 'gap-1' : 'gap-2',
@@ -90,8 +90,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
     ${buttonBaseClasses}
     ${
       userVote === 'up'
-        ? 'bg-primary-100 text-primary-700 hover:bg-primary-200'
-        : 'text-gray-500 hover:bg-gray-100 hover:text-primary-600'
+        ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900/50'
+        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400'
     }
   `;
 
@@ -100,8 +100,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
     ${buttonBaseClasses}
     ${
       userVote === 'down'
-        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-        : 'text-gray-500 hover:bg-gray-100 hover:text-red-600'
+        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
+        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-700 dark:hover:text-red-400'
     }
   `;
 

@@ -33,7 +33,8 @@ export function useBreakpoint(): Breakpoint {
   useEffect(() => {
     const updateBreakpoint = () => {
       const newBreakpoint = getBreakpoint(window.innerWidth);
-      setBreakpoint(newBreakpoint);
+      // Only update state if breakpoint actually changed
+      setBreakpoint((prev) => (prev !== newBreakpoint ? newBreakpoint : prev));
     };
 
     // Update on mount to ensure correct initial value

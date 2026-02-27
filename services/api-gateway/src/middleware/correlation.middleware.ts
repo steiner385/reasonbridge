@@ -7,17 +7,39 @@ import { Injectable } from '@nestjs/common';
 import type { NestMiddleware } from '@nestjs/common';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { randomUUID } from 'crypto';
+import { AsyncLocalStorage } from 'async_hooks';
+import {
+  CORRELATION_ID_HEADER,
+  REQUEST_ID_HEADER,
+  TRACEPARENT_HEADER,
+  generateTraceparent,
+} from '@reason-bridge/common';
+
+export { CORRELATION_ID_HEADER, REQUEST_ID_HEADER };
 
 /**
- * Correlation ID Header name
- * Standard header for distributed tracing correlation
+ * Request context stored in AsyncLocalStorage for automatic propagation
+ * across async boundaries (e.g., proxy calls to downstream services).
  */
-export const CORRELATION_ID_HEADER = 'x-correlation-id';
+export interface RequestContext {
+  correlationId: string;
+  traceparent: string;
+}
 
 /**
- * Request ID Header name (alias for correlation ID)
+ * AsyncLocalStorage instance for request context propagation.
+ * Allows the ProxyService to automatically include correlation IDs
+ * in outgoing requests without explicit parameter passing.
  */
-export const REQUEST_ID_HEADER = 'x-request-id';
+export const requestContextStorage = new AsyncLocalStorage<RequestContext>();
+
+/**
+ * Get the current request context from AsyncLocalStorage.
+ * Returns undefined if called outside a request context.
+ */
+export function getCurrentRequestContext(): RequestContext | undefined {
+  return requestContextStorage.getStore();
+}
 
 /**
  * Correlation ID Middleware
@@ -30,6 +52,7 @@ export const REQUEST_ID_HEADER = 'x-request-id';
  * - Otherwise, generate a new UUID v4
  * - Adds the correlation ID to the response headers
  * - Attaches the correlation ID to the request for downstream use
+ * - Stores context in AsyncLocalStorage for automatic propagation to proxy calls
  *
  * Usage in downstream services:
  * - Access via request.headers['x-correlation-id']
@@ -52,6 +75,9 @@ export class CorrelationMiddleware implements NestMiddleware {
 
     const correlationId = existingCorrelationId || randomUUID();
 
+    // Get or generate traceparent for distributed tracing
+    const traceparent = (req.headers[TRACEPARENT_HEADER] as string) || generateTraceparent();
+
     // Attach correlation ID to request for downstream access
     req.correlationId = correlationId;
 
@@ -59,7 +85,11 @@ export class CorrelationMiddleware implements NestMiddleware {
     res.setHeader(CORRELATION_ID_HEADER, correlationId);
     res.setHeader(REQUEST_ID_HEADER, correlationId);
 
-    next();
+    // Store in AsyncLocalStorage for automatic propagation to proxy calls
+    const context: RequestContext = { correlationId, traceparent };
+    requestContextStorage.run(context, () => {
+      next();
+    });
   }
 }
 

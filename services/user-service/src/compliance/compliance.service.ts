@@ -6,6 +6,11 @@
 import { Injectable } from '@nestjs/common';
 
 /**
+ * Regulation name type for compliance tracking
+ */
+export type RegulationName = 'COPPA' | 'GDPR' | 'AADC' | 'OSA' | 'PIPEDA' | 'DEFAULT';
+
+/**
  * Regional compliance rules for child safety
  */
 export interface RegionalRules {
@@ -15,6 +20,16 @@ export interface RegionalRules {
   requiresParentalConsent: boolean;
   /** URL to regional privacy policy */
   privacyPolicyUrl: string;
+  /** Name of the applicable regulation */
+  regulationName: RegulationName;
+  /** Whether direct messaging is allowed for minors */
+  allowsDirectMessaging: boolean;
+  /** Whether profile visibility is allowed for minors */
+  allowsProfileVisibility: boolean;
+  /** Whether manual moderation is required for minor content */
+  requiresManualModeration: boolean;
+  /** Number of days to retain user data */
+  dataRetentionDays: number;
 }
 
 /**
@@ -30,6 +45,39 @@ export interface RegionalRules {
  */
 @Injectable()
 export class ComplianceService {
+  /**
+   * EU member state country codes for GDPR applicability
+   */
+  private readonly EU_COUNTRIES: ReadonlySet<string> = new Set([
+    'AT', // Austria
+    'BE', // Belgium
+    'BG', // Bulgaria
+    'HR', // Croatia
+    'CY', // Cyprus
+    'CZ', // Czech Republic
+    'DK', // Denmark
+    'EE', // Estonia
+    'FI', // Finland
+    'FR', // France
+    'DE', // Germany
+    'GR', // Greece
+    'HU', // Hungary
+    'IE', // Ireland
+    'IT', // Italy
+    'LV', // Latvia
+    'LT', // Lithuania
+    'LU', // Luxembourg
+    'MT', // Malta
+    'NL', // Netherlands
+    'PL', // Poland
+    'PT', // Portugal
+    'RO', // Romania
+    'SK', // Slovakia
+    'SI', // Slovenia
+    'ES', // Spain
+    'SE', // Sweden
+  ]);
+
   /**
    * Regional consent ages based on applicable laws
    * Key: ISO 3166-1 alpha-2 country code
@@ -91,16 +139,37 @@ export class ComplianceService {
    * Get regional compliance rules for a country
    *
    * @param countryCode - ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB', 'DE')
-   * @returns Regional rules including consent age and privacy policy URL
+   * @returns Regional rules including consent age, regulation name, and compliance properties
    */
   getRegionalRules(countryCode: string): RegionalRules {
     const normalizedCode = countryCode.toUpperCase();
     const consentAge = this.CONSENT_AGES[normalizedCode] ?? 16;
+    const regulationName = this.getRegulationName(normalizedCode);
+
+    // Base defaults for child safety - DMs and profile visibility are always disabled for minors
+    const allowsDirectMessaging = false;
+    const allowsProfileVisibility = false;
+    let requiresManualModeration = false;
+    let dataRetentionDays = 730; // 2 years default
+
+    // Override for specific regulations
+    if (regulationName === 'AADC' || regulationName === 'OSA') {
+      requiresManualModeration = true;
+    }
+
+    if (regulationName === 'GDPR') {
+      dataRetentionDays = 365; // GDPR requires shorter retention
+    }
 
     return {
       consentAge,
       requiresParentalConsent: true, // Always required for minors under consent age
       privacyPolicyUrl: `/privacy/${normalizedCode.toLowerCase()}`,
+      regulationName,
+      allowsDirectMessaging,
+      allowsProfileVisibility,
+      requiresManualModeration,
+      dataRetentionDays,
     };
   }
 
@@ -167,6 +236,49 @@ export class ComplianceService {
   getConsentAge(countryCode: string): number {
     const normalizedCode = countryCode.toUpperCase();
     return this.CONSENT_AGES[normalizedCode] ?? 16;
+  }
+
+  /**
+   * Get the regulation name for a country
+   *
+   * @param countryCode - ISO 3166-1 alpha-2 country code
+   * @returns The applicable regulation name (COPPA, GDPR, AADC, OSA, PIPEDA, or DEFAULT)
+   */
+  getRegulationName(countryCode: string): RegulationName {
+    const normalizedCode = countryCode.toUpperCase();
+
+    if (normalizedCode === 'US') {
+      return 'COPPA';
+    }
+
+    if (normalizedCode === 'GB') {
+      return 'AADC';
+    }
+
+    if (normalizedCode === 'AU') {
+      return 'OSA';
+    }
+
+    if (normalizedCode === 'CA') {
+      return 'PIPEDA';
+    }
+
+    if (this.isEUCountry(normalizedCode)) {
+      return 'GDPR';
+    }
+
+    return 'DEFAULT';
+  }
+
+  /**
+   * Check if a country is an EU member state
+   *
+   * @param countryCode - ISO 3166-1 alpha-2 country code
+   * @returns true if the country is an EU member state
+   */
+  isEUCountry(countryCode: string): boolean {
+    const normalizedCode = countryCode.toUpperCase();
+    return this.EU_COUNTRIES.has(normalizedCode);
   }
 
   /**

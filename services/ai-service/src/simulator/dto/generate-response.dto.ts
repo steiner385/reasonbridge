@@ -132,4 +132,9 @@ export class GenerateResponseResultDto {
   content!: string;
   reasoning!: string;
   revisedAreas?: string[];
+  /**
+   * Indicates the response was generated using fallback behavior
+   * because the AI service was unavailable
+   */
+  degradedMode?: boolean;
 }

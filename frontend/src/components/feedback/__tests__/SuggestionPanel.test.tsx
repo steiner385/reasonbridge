@@ -74,7 +74,7 @@ describe('SuggestionPanel', () => {
   describe('Apply Tag Suggestions', () => {
     it('should apply a tag suggestion when accept button is clicked', async () => {
       mockApplyTag.mockResolvedValue({ success: true });
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<SuggestionPanel type="tags" topicId="topic-1" tagSuggestions={mockTagSuggestions} />);
 
@@ -134,7 +134,7 @@ describe('SuggestionPanel', () => {
     it('should call onApplied callback with tag when successful', async () => {
       mockApplyTag.mockResolvedValue({ success: true });
       const onApplied = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -155,7 +155,7 @@ describe('SuggestionPanel', () => {
     it('should not call onApplied when application fails', async () => {
       mockApplyTag.mockResolvedValue({ success: false, error: 'API error' });
       const onApplied = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -179,7 +179,7 @@ describe('SuggestionPanel', () => {
   describe('Apply Topic Link Suggestions', () => {
     it('should apply a topic link suggestion when accept button is clicked', async () => {
       mockApplyTopicLink.mockResolvedValue({ success: true });
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -274,7 +274,7 @@ describe('SuggestionPanel', () => {
     it('should call onApplied callback with TopicLink when successful', async () => {
       mockApplyTopicLink.mockResolvedValue({ success: true });
       const onApplied = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -298,7 +298,7 @@ describe('SuggestionPanel', () => {
     it('should not call onApplied when application fails', async () => {
       mockApplyTopicLink.mockResolvedValue({ success: false, error: 'API error' });
       const onApplied = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -324,7 +324,7 @@ describe('SuggestionPanel', () => {
 
   describe('Dismiss Suggestions', () => {
     it('should dismiss a tag suggestion when dismiss button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<SuggestionPanel type="tags" topicId="topic-1" tagSuggestions={mockTagSuggestions} />);
 
@@ -334,7 +334,7 @@ describe('SuggestionPanel', () => {
     });
 
     it('should dismiss a topic link suggestion when dismiss button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -356,7 +356,7 @@ describe('SuggestionPanel', () => {
 
     it('should call onDismissed callback when tag is dismissed', async () => {
       const onDismissed = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel
@@ -374,7 +374,7 @@ describe('SuggestionPanel', () => {
 
     it('should call onDismissed callback when topic link is dismissed', async () => {
       const onDismissed = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <SuggestionPanel

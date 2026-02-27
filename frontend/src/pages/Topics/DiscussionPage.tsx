@@ -3,35 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { DiscussionLayout } from '../../components/discussion-layout/DiscussionLayout';
-import { TopicNavigationPanel } from '../../components/discussion-layout/TopicNavigationPanel';
 import { ConversationPanel } from '../../components/discussion-layout/ConversationPanel';
 import { MetadataPanel } from '../../components/discussion-layout/MetadataPanel';
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useTopics } from '../../lib/useTopics';
 import { useTopic } from '../../lib/useTopic';
-import { useWebSocket } from '../../hooks/useWebSocket';
 import { usePropositions } from '../../hooks/usePropositions';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 import type { CreateResponseRequest } from '../../types/response';
 
 /**
- * Main discussion page component implementing the redesigned three-panel discussion interface
+ * Main discussion page component implementing the two-panel discussion interface
  *
  * @remarks
- * This component orchestrates the entire discussion experience with:
- * - **Left Panel**: Topic navigation with search, filters, and unread badges
+ * This component orchestrates the discussion experience with a 2-panel layout:
  * - **Center Panel**: Conversation thread with responses and composer
  * - **Right Panel**: Metadata including propositions, common ground analysis, and preview feedback
  *
+ * Topic navigation is handled by the unified sidebar (see Sidebar.tsx), which adapts
+ * to show topic search/filter/list when on /topics or /discussions routes.
+ *
  * **Key Features**:
- * - Real-time updates via WebSocket (new responses, topic status changes)
- * - Responsive design (desktop 3-panel, tablet 2-panel + overlay, mobile single-panel)
- * - Unread badge management across topics
  * - Preview feedback during composition (displayed in right panel)
  * - Unsaved changes protection when switching topics
  * - Proposition/response highlighting and cross-panel interactions
+ * - Responsive design (desktop 2-panel, tablet 2-panel, mobile single-panel)
  *
  * **URL Pattern**: `/discussions?topic=<topicId>`
  *
@@ -43,9 +42,7 @@ import type { CreateResponseRequest } from '../../types/response';
  */
 export function DiscussionPage() {
   const { activeTopicId } = useTopicNavigation();
-  const [unreadMap, setUnreadMap] = useState<Map<string, boolean>>(new Map());
   const [highlightedResponseIds, setHighlightedResponseIds] = useState<Set<string>>(new Set());
-  const { subscribe } = useWebSocket();
 
   // Composition state for preview feedback in right panel
   const [isComposing, setIsComposing] = useState(false);
@@ -60,19 +57,26 @@ export function DiscussionPage() {
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
   const [pendingTopicId, setPendingTopicId] = useState<string | null>(null);
 
-  // Fetch active topics with high limit for client-side filtering
-  const { data, isLoading, error } = useTopics({
-    status: 'ACTIVE',
-    sortBy: 'responseCount',
-    sortOrder: 'desc',
-    page: 1,
-    limit: 100,
-  });
+  // Memoize query params to prevent creating new object reference on every render
+  // This ensures React Query doesn't see a "new" query key each render
+  const topicsQueryParams = useMemo(
+    () => ({
+      status: 'ACTIVE' as const,
+      sortBy: 'responseCount' as const,
+      sortOrder: 'desc' as const,
+      page: 1,
+      limit: 100,
+    }),
+    [],
+  );
+
+  // Fetch active topics to find the active topic in the list
+  // (Topic navigation with search/filter is handled by the unified sidebar)
+  const { data } = useTopics(topicsQueryParams);
 
   // Memoize topics array to prevent creating new empty array on every render
   // This ensures useMemo dependencies remain stable
   const topics = useMemo(() => data?.data || [], [data?.data]);
-  const errorMessage = error ? 'Failed to load topics. Please try again.' : null;
 
   // Find the active topic object in the list
   const topicInList = useMemo(() => {
@@ -88,6 +92,20 @@ export function DiscussionPage() {
 
   // Use topic from list, or fall back to individual fetch
   const activeTopic = topicInList || individualTopic || null;
+
+  // Memoize keywords to prevent creating new array on every render
+  const keywords = useMemo(() => activeTopic?.tags?.map((t) => t.name), [activeTopic?.tags]);
+
+  // Update document meta tags for SEO
+  useDocumentMeta({
+    title: activeTopic?.title,
+    description: activeTopic?.description?.substring(0, 160),
+    keywords,
+    canonical: activeTopic
+      ? `${window.location.origin}/discussions?topic=${activeTopic.id}`
+      : undefined,
+    ogType: 'article',
+  });
 
   // Fetch propositions for the active topic
   const { data: rawPropositions = [] } = usePropositions(activeTopic?.id || null);
@@ -108,30 +126,36 @@ export function DiscussionPage() {
   }, [rawPropositions]);
 
   // Handle proposition hover - highlight related responses
-  const handlePropositionHover = (propositionId: string | null) => {
+  // Memoized with useCallback to prevent unnecessary re-renders
+  const handlePropositionHover = useCallback((propositionId: string | null) => {
     if (propositionId === null) {
       setHighlightedResponseIds(new Set());
     }
     // TODO: Fetch related response IDs from proposition data
     // For now, this is a placeholder - will be implemented with real data
-  };
+  }, []);
 
   // Handle proposition click - scroll to and highlight related responses
-  const handlePropositionClick = (_propositionId: string, relatedResponseIds: string[]) => {
-    setHighlightedResponseIds(new Set(relatedResponseIds));
+  // Memoized with useCallback to prevent unnecessary re-renders
+  const handlePropositionClick = useCallback(
+    (_propositionId: string, relatedResponseIds: string[]) => {
+      setHighlightedResponseIds(new Set(relatedResponseIds));
 
-    // Scroll to first related response
-    if (relatedResponseIds.length > 0) {
-      const firstResponseId = relatedResponseIds[0];
-      const element = document.querySelector(`[data-response-id="${firstResponseId}"]`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Scroll to first related response
+      if (relatedResponseIds.length > 0) {
+        const firstResponseId = relatedResponseIds[0];
+        const element = document.querySelector(`[data-response-id="${firstResponseId}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
-    }
-  };
+    },
+    [],
+  );
 
   // Handle agreement zone click - highlight related responses
-  const handleAgreementZoneClick = (_zoneId: string, relatedResponseIds: string[]) => {
+  // Memoized with useCallback to prevent unnecessary re-renders
+  const handleAgreementZoneClick = useCallback((_zoneId: string, relatedResponseIds: string[]) => {
     setHighlightedResponseIds(new Set(relatedResponseIds));
 
     // Scroll to first related response
@@ -142,30 +166,35 @@ export function DiscussionPage() {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
-  };
+  }, []);
 
   // Handle preview feedback changes from ResponseComposer
-  const handlePreviewFeedbackChange = (
-    feedback: PreviewFeedbackItem[],
-    ready: boolean,
-    summary: string,
-    isLoading = false,
-    error: string | null = null,
-  ) => {
-    setPreviewFeedback(feedback);
-    setReadyToPost(ready);
-    setPreviewSummary(summary);
-    setIsLoadingPreviewFeedback(isLoading);
-    setPreviewError(error);
+  // Memoized with useCallback to prevent infinite re-render loop when passed to child components
+  const handlePreviewFeedbackChange = useCallback(
+    (
+      feedback: PreviewFeedbackItem[],
+      ready: boolean,
+      summary: string,
+      isLoading = false,
+      error: string | null = null,
+    ) => {
+      setPreviewFeedback(feedback);
+      setReadyToPost(ready);
+      setPreviewSummary(summary);
+      setIsLoadingPreviewFeedback(isLoading);
+      setPreviewError(error);
 
-    // Set composing state when there's content being edited
-    if (feedback.length > 0 || isLoading || summary) {
-      setIsComposing(true);
-    }
-  };
+      // Set composing state when there's content being edited
+      if (feedback.length > 0 || isLoading || summary) {
+        setIsComposing(true);
+      }
+    },
+    [], // No dependencies needed - uses only setState functions which are stable
+  );
 
   // Handle composition state changes (when user starts/stops composing)
-  const handleCompositionStateChange = (composing: boolean) => {
+  // Memoized with useCallback to prevent unnecessary re-renders
+  const handleCompositionStateChange = useCallback((composing: boolean) => {
     setIsComposing(composing);
     if (!composing) {
       // Clear preview feedback when composition ends
@@ -175,51 +204,22 @@ export function DiscussionPage() {
       setReadyToPost(true);
       setIsLoadingPreviewFeedback(false);
     }
-  };
+  }, []);
 
-  // Handle inline reply submission
-  const handleReplySubmit = async (_response: CreateResponseRequest) => {
-    // TODO: Implement actual API call to submit reply
-    // For now, just placeholder - API integration will be added later
+  // Handle inline reply submission (memoized to prevent unnecessary re-renders)
+  const handleReplySubmit = useCallback(
+    async (_response: CreateResponseRequest) => {
+      // TODO: Implement actual API call to submit reply
+      // For now, just placeholder - API integration will be added later
 
-    // Clear composition state after submission
-    handleCompositionStateChange(false);
+      // Clear composition state after submission
+      handleCompositionStateChange(false);
 
-    // TODO: Invalidate responses query to refetch updated list
-    // queryClient.invalidateQueries(['responses', activeTopic?.id]);
-  };
-
-  // Subscribe to new response WebSocket messages to update unread badges
-  useEffect(() => {
-    const unsubscribe = subscribe('NEW_RESPONSE', (message) => {
-      const topicId = message.payload.topicId;
-
-      // Don't mark as unread if it's the currently active topic
-      if (topicId !== activeTopicId) {
-        setUnreadMap((prev) => {
-          const newMap = new Map(prev);
-          newMap.set(topicId, true);
-          return newMap;
-        });
-      }
-    });
-
-    return unsubscribe;
-  }, [activeTopicId, subscribe]);
-
-  // Clear unread status when a topic becomes active
-  useEffect(() => {
-    if (activeTopicId) {
-      // Schedule state update asynchronously to avoid cascading renders
-      setTimeout(() => {
-        setUnreadMap((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(activeTopicId);
-          return newMap;
-        });
-      }, 0);
-    }
-  }, [activeTopicId]);
+      // TODO: Invalidate responses query to refetch updated list
+      // queryClient.invalidateQueries(['responses', activeTopic?.id]);
+    },
+    [handleCompositionStateChange],
+  );
 
   // Handle unsaved changes confirmation
   const handleConfirmLeave = () => {
@@ -283,15 +283,7 @@ export function DiscussionPage() {
       )}
 
       <DiscussionLayout
-        leftPanel={
-          <TopicNavigationPanel
-            topics={topics}
-            unreadMap={unreadMap}
-            isLoading={isLoading}
-            error={errorMessage}
-            height={typeof window !== 'undefined' ? window.innerHeight : 800}
-          />
-        }
+        hideSidebar={true}
         centerPanel={
           <ConversationPanel
             topic={activeTopic}

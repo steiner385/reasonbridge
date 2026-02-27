@@ -101,9 +101,9 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div className={`relative ${className}`}>
         {/* Search Icon */}
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 sm:pl-3 pointer-events-none">
           <svg
-            className="h-5 w-5 text-gray-400 dark:text-gray-300"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -127,7 +127,8 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={`
-            w-full pl-10 pr-10 py-2.5
+            w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-2.5
+            text-sm sm:text-base
             text-gray-900 dark:text-gray-100
             bg-white dark:bg-gray-800
             border border-gray-300 dark:border-gray-700
@@ -141,10 +142,10 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         />
 
         {/* Loading Spinner or Clear Button */}
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 sm:pr-3">
           {isLoading ? (
             <svg
-              className="h-5 w-5 text-gray-400 dark:text-gray-300 animate-spin"
+              className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-300 animate-spin"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -168,10 +169,15 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             <button
               type="button"
               onClick={handleClear}
-              className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+              className="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-colors p-2 -mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Clear search"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="h-4 w-4 sm:h-5 sm:w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

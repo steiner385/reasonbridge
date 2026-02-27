@@ -14,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
@@ -39,7 +40,9 @@ import {
 export class ParentalConsentController {
   private readonly logger = new Logger(ParentalConsentController.name);
 
-  constructor(private readonly consentService: ParentalConsentService) {}
+  constructor(
+    @Inject(ParentalConsentService) private readonly consentService: ParentalConsentService,
+  ) {}
 
   /**
    * Request parental consent for the current user

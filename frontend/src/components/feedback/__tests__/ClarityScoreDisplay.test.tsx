@@ -221,7 +221,7 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should be clickable when onClick is provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClick = vi.fn();
       render(<ClarityScoreDisplay clarity={mockGoodClarity} variant="compact" onClick={onClick} />);
 
@@ -391,7 +391,7 @@ describe('ClarityScoreDisplay', () => {
     });
 
     it('should call onClick when view details is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClick = vi.fn();
       render(<ClarityScoreDisplay clarity={mockGoodClarity} onClick={onClick} />);
 

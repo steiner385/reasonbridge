@@ -44,6 +44,7 @@ export class JwtUserMiddleware implements NestMiddleware {
         sub?: string;
         userId?: string;
         id?: string;
+        isMinor?: boolean;
       };
 
       // Extract user ID (check common JWT claim names)
@@ -52,7 +53,14 @@ export class JwtUserMiddleware implements NestMiddleware {
       if (userId) {
         // Add user ID as custom header for downstream services
         req.headers['x-user-id'] = userId;
-        this.logger.debug(`JWT decoded: User ID ${userId}`);
+
+        // Add minor status header for child-friendly mode privacy controls
+        // Downstream services use this to disable tracking, limit data collection, etc.
+        if (typeof decoded.isMinor === 'boolean') {
+          req.headers['x-is-minor'] = decoded.isMinor ? 'true' : 'false';
+        }
+
+        this.logger.debug(`JWT decoded: User ID ${userId}, isMinor: ${decoded.isMinor ?? 'N/A'}`);
       } else {
         this.logger.warn('JWT token valid but no user ID found in payload');
       }

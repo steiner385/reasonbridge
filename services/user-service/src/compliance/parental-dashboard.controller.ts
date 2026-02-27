@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Post, Param, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Param, HttpCode, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ParentalConsentService } from './parental-consent.service.js';
 import type {
   ChildActivitySummaryDto,
@@ -25,7 +25,9 @@ import type {
 export class ParentalDashboardController {
   private readonly logger = new Logger(ParentalDashboardController.name);
 
-  constructor(private readonly consentService: ParentalConsentService) {}
+  constructor(
+    @Inject(ParentalConsentService) private readonly consentService: ParentalConsentService,
+  ) {}
 
   /**
    * Get child's activity summary

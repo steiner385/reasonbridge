@@ -229,3 +229,64 @@ export interface CreateAppealResponse {
    */
   message: string;
 }
+
+/**
+ * CSAM Detection Sources
+ */
+export type CsamDetectionSource =
+  | 'AI_DETECTION'
+  | 'USER_REPORT'
+  | 'MODERATOR_REVIEW'
+  | 'HASH_MATCH';
+
+/**
+ * CSAM Report Status
+ */
+export type CsamReportStatus =
+  | 'PENDING_REVIEW'
+  | 'EVIDENCE_PRESERVED'
+  | 'SUBMITTED_NCMEC'
+  | 'CONFIRMED'
+  | 'REJECTED';
+
+/**
+ * CSAM Report
+ */
+export interface CsamReport {
+  id: string;
+  detectionSource: CsamDetectionSource;
+  status: CsamReportStatus;
+  contentType: string;
+  contentId: string;
+  contentAuthorId?: string;
+  evidenceS3Key?: string;
+  evidenceHash?: string;
+  ncmecReportId?: string;
+  ncmecSubmittedAt?: string;
+  ncmecDeadline: string;
+  internalNotes?: string;
+  isLegalHold: boolean;
+  aiConfidenceScore?: number;
+  reportedById?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * CSAM Reports List Response
+ */
+export interface CsamReportsListResponse {
+  reports: CsamReport[];
+  totalCount: number;
+  nextCursor: string | null;
+}
+
+/**
+ * Safety Reports Statistics
+ */
+export interface SafetyReportsStats {
+  totalPending: number;
+  approachingDeadline: number;
+  submittedToday: number;
+  awaitingEvidence: number;
+}

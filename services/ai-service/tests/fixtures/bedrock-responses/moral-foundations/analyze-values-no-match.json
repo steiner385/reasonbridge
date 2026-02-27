@@ -1,0 +1,20 @@
+{
+  "description": "Neutral text with no strong moral foundation signals",
+  "request": {
+    "systemPrompt": "Analyze the moral foundations present in the given text. Identify which of the six moral foundations are expressed: Care/Harm, Fairness/Cheating, Loyalty/Betrayal, Authority/Subversion, Sanctity/Degradation, Liberty/Oppression.\nReturn a JSON object with foundation scores from 0.0 to 1.0.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Analyze: 'The meeting will be held at 3pm in the conference room.'"
+      }
+    ]
+  },
+  "response": {
+    "content": "{\"care\": 0.05, \"fairness\": 0.05, \"loyalty\": 0.05, \"authority\": 0.1, \"sanctity\": 0.0, \"liberty\": 0.05}",
+    "stopReason": "end_turn"
+  },
+  "metadata": {
+    "latencyMs": 298,
+    "tokensUsed": 112
+  }
+}

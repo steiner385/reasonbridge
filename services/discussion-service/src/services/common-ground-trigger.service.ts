@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger, Inject, Optional } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleInit, Inject } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -17,17 +18,27 @@ import { PrismaService } from '../prisma/prisma.service.js';
  * - 6+ hours have elapsed since last analysis
  */
 @Injectable()
-export class CommonGroundTriggerService {
+export class CommonGroundTriggerService implements OnModuleInit {
   private readonly logger = new Logger(CommonGroundTriggerService.name);
+  private cacheManager: Cache | null = null;
 
   // Trigger thresholds
   private readonly RESPONSE_DELTA_THRESHOLD = 10;
   private readonly TIME_THRESHOLD_HOURS = 6;
 
   constructor(
-    private readonly prisma: PrismaService,
-    @Optional() @Inject(CACHE_MANAGER) private cacheManager: Cache | null,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
   ) {}
+
+  async onModuleInit() {
+    try {
+      this.cacheManager = this.moduleRef.get(CACHE_MANAGER, { strict: false });
+    } catch {
+      this.logger.warn('Cache manager not available, caching disabled');
+      this.cacheManager = null;
+    }
+  }
 
   /**
    * Check if common ground analysis should be triggered for a topic

@@ -23,6 +23,9 @@ export default defineConfig({
     // Use jsdom for DOM simulation in tests
     environment: 'jsdom',
 
+    // Increase test timeout for slower form/modal tests in CI (default is 5000ms)
+    testTimeout: 15000,
+
     // Setup files run before each test file
     // - Configures jest-dom matchers
     // - Sets up MSW server for API mocking
@@ -32,6 +35,7 @@ export default defineConfig({
     // .spec.ts in e2e/ directory is reserved for Playwright E2E tests
     include: [
       'src/**/*.test.{ts,tsx}',
+      'src/**/__tests__/*.test.{ts,tsx}',
       'tests/unit/**/*.spec.{ts,tsx}',
       'tests/integration/**/*.spec.{ts,tsx}',
     ],

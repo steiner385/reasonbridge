@@ -324,8 +324,10 @@ const PropositionClusterView = ({
               return (
                 <div
                   key={propId}
-                  className={`p-3 bg-gray-50 rounded border border-gray-200 ${
-                    onPropositionClick ? 'cursor-pointer hover:bg-gray-100' : ''
+                  className={`p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 ${
+                    onPropositionClick
+                      ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : ''
                   }`}
                   onClick={() => onPropositionClick?.(propId)}
                   role={onPropositionClick ? 'button' : undefined}

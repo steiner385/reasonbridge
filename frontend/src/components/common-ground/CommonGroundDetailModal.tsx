@@ -163,7 +163,7 @@ const AgreementZoneDetail: React.FC<{ zone: AgreementZone }> = ({ zone }) => {
                     supporting
                   </span>
                   <span>
-                    <span className="text-red-600 font-medium">
+                    <span className="text-red-700 font-medium">
                       {prop.opposingParticipants.length}
                     </span>{' '}
                     opposing

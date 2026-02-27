@@ -45,6 +45,19 @@ import { AuthMethod, OnboardingStep } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 const { sign: jwtSign } = jwt;
 
+/**
+ * Redact email for safe logging (shows first 2 chars and domain)
+ * e.g., "user@example.com" -> "us***@example.com"
+ */
+function redactEmail(email: string): string {
+  const parts = email.split('@');
+  const local = parts[0];
+  const domain = parts[1];
+  if (!local || !domain) return '***@***';
+  const redactedLocal = local.length > 2 ? `${local.slice(0, 2)}***` : '***';
+  return `${redactedLocal}@${domain}`;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -66,7 +79,7 @@ export class AuthService {
    * Creates Cognito user, User record, OnboardingProgress, links VisitorSession
    */
   async signup(dto: SignupRequestDto): Promise<AuthSuccessResponseDto> {
-    this.logger.log(`Signup attempt for email: ${dto.email}`);
+    this.logger.log(`Signup attempt for email: ${redactEmail(dto.email)}`);
 
     // T055: Validate password strength
     const passwordValidation = validatePassword(dto.password);
@@ -123,7 +136,7 @@ export class AuthService {
       // Generate verification token in our system for tracking
       await this.verificationService.generateToken(user.id, user.email);
 
-      this.logger.log(`User created successfully: ${user.id}, email: ${user.email}`);
+      this.logger.log(`User created successfully: ${user.id}`);
 
       // Return success response with empty tokens (user must verify email first)
       return {
@@ -149,7 +162,7 @@ export class AuthService {
       };
     } catch (error: unknown) {
       const errorObj = error as { name?: string; message?: string; stack?: string };
-      this.logger.error(`Signup failed for ${dto.email}: ${errorObj.message}`, errorObj.stack);
+      this.logger.error(`Signup failed for ${redactEmail(dto.email)}: ${errorObj.message}`);
       if (errorObj.name === 'UsernameExistsException') {
         throw new ConflictException('Email address is already registered');
       }
@@ -162,7 +175,7 @@ export class AuthService {
    * Confirms with Cognito and updates User.emailVerified and OnboardingProgress
    */
   async verifyEmail(dto: VerifyEmailRequestDto): Promise<AuthSuccessResponseDto> {
-    this.logger.log(`Email verification attempt for: ${dto.email}`);
+    this.logger.log(`Email verification attempt for: ${redactEmail(dto.email)}`);
 
     // Find user by email
     const user = await this.userRepository.findByEmail(dto.email);
@@ -231,7 +244,7 @@ export class AuthService {
   async resendVerification(
     dto: ResendVerificationRequestDto,
   ): Promise<ResendVerificationResponseDto> {
-    this.logger.log(`Resend verification request for: ${dto.email}`);
+    this.logger.log(`Resend verification request for: ${redactEmail(dto.email)}`);
 
     const user = await this.userRepository.findByEmail(dto.email);
     if (!user) {
@@ -259,7 +272,7 @@ export class AuthService {
       const token = await this.verificationService.generateToken(user.id, user.email);
       const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
 
-      this.logger.log(`Verification code resent to: ${dto.email}`);
+      this.logger.log(`Verification code resent to: ${redactEmail(dto.email)}`);
 
       return {
         message: 'Verification code resent successfully',
@@ -268,7 +281,8 @@ export class AuthService {
         expiresAt: expiresAt.toISOString(),
       };
     } catch (error) {
-      this.logger.error(`Resend verification failed for ${dto.email}:`, error);
+      this.logger.error(`Resend verification failed for ${redactEmail(dto.email)}`);
+      // Don't log full error object in production - may contain PII
       throw error;
     }
   }
@@ -409,7 +423,7 @@ export class AuthService {
    * Authenticates with Cognito and updates lastLoginAt
    */
   async login(dto: LoginDto): Promise<AuthSuccessResponseDto> {
-    this.logger.log(`Login attempt for: ${dto.email}`);
+    this.logger.log(`Login attempt for: ${redactEmail(dto.email)}`);
 
     // Find user
     const user = await this.userRepository.findByEmail(dto.email);
@@ -442,7 +456,7 @@ export class AuthService {
       };
     } catch (error: unknown) {
       const errorObj = error as { name?: string; message?: string; stack?: string };
-      this.logger.error(`Login failed for ${dto.email}: ${errorObj.message}`, errorObj.stack);
+      this.logger.error(`Login failed for ${redactEmail(dto.email)}: ${errorObj.message}`);
       if (errorObj.name === 'NotAuthorizedException' || errorObj.name === 'UserNotFoundException') {
         throw new UnauthorizedException('Invalid email or password');
       }
@@ -482,6 +496,7 @@ export class AuthService {
         sub: user.id, // Subject claim - user ID
         email: user.email,
         authMethod: user.authMethod,
+        isMinor: user.isMinor ?? false, // Child-friendly mode: include minor status for privacy controls
       },
       jwtSecret,
       { expiresIn: jwtExpiration } as any, // Type assertion for JWT options

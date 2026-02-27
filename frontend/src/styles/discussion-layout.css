@@ -9,13 +9,20 @@
 
 .discussion-layout {
   display: grid;
-  grid-template-columns: var(--left-panel-width, 320px) 1fr var(--right-panel-width, 400px);
+  /* Fluid panel widths using clamp() for smooth scaling across viewports */
+  grid-template-columns: var(--left-panel-width, clamp(240px, 25vw, 320px)) 1fr var(--right-panel-width, clamp(320px, 30vw, 450px));
   grid-template-areas: 'left center right';
   height: 100vh;
   width: 100%;
   overflow: hidden;
   background: var(--color-background, #ffffff);
   color: var(--color-text, #1f2937);
+}
+
+/* 2-panel mode: when unified sidebar handles topic navigation */
+.discussion-layout[data-panels="2"] {
+  grid-template-columns: 1fr var(--right-panel-width, clamp(320px, 30vw, 450px));
+  grid-template-areas: 'center right';
 }
 
 /* ==========================================================================
@@ -112,14 +119,14 @@
 /* Left panel resizer positioning */
 .panel-resizer--left {
   position: absolute;
-  left: var(--left-panel-width, 320px);
+  left: var(--left-panel-width, clamp(240px, 25vw, 320px));
   top: 0;
 }
 
 /* Right panel resizer positioning */
 .panel-resizer--right {
   position: absolute;
-  right: var(--right-panel-width, 400px);
+  right: var(--right-panel-width, clamp(320px, 30vw, 450px));
   top: 0;
 }
 
@@ -175,8 +182,11 @@
 
 @media (min-width: 768px) and (max-width: 1279px) {
   .discussion-layout[data-breakpoint='tablet'] {
-    grid-template-columns: 1fr var(--right-panel-width, 360px);
+    /* Use fixed pixel values for more predictable layout at tablet widths */
+    grid-template-columns: 1fr minmax(280px, 320px);
     grid-template-areas: 'center right';
+    /* Prevent overflow */
+    overflow-x: hidden;
   }
 
   /* Hide left panel on tablet by default */
@@ -199,9 +209,17 @@
     transform: translateX(0);
   }
 
-  /* Adjust right panel width constraint for tablet */
-  .discussion-layout[data-breakpoint='tablet'] {
-    --right-panel-width: clamp(280px, 35vw, 450px);
+  /* Ensure center panel doesn't overflow */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--center {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  /* Ensure right panel doesn't overflow and has proper sizing */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--right {
+    min-width: 280px;
+    max-width: 320px;
+    flex-shrink: 0;
   }
 
   /* Hide left resizer on tablet */
@@ -209,9 +227,39 @@
     display: none;
   }
 
-  /* Adjust right resizer position */
+  /* Hide right resizer on tablet - fixed width */
   .discussion-layout[data-breakpoint='tablet'] .panel-resizer--right {
-    right: var(--right-panel-width, 360px);
+    display: none;
+  }
+
+  /* 2-panel mode on tablet: same as default tablet layout */
+  .discussion-layout[data-breakpoint='tablet'][data-panels="2"] {
+    grid-template-columns: 1fr minmax(280px, 320px);
+    grid-template-areas: 'center right';
+  }
+}
+
+/* Lower tablet range polish (768px - 900px) - give more room to center panel */
+@media (min-width: 768px) and (max-width: 900px) {
+  .discussion-layout[data-breakpoint='tablet'] {
+    /* At narrow tablet widths, use smaller fixed right panel */
+    grid-template-columns: 1fr 260px;
+  }
+
+  /* Ensure minimum content width in center panel */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--center {
+    min-width: 0; /* Allow flex shrink */
+  }
+
+  /* Smaller right panel for narrow tablets */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--right {
+    min-width: 260px;
+    max-width: 260px;
+  }
+
+  /* Slightly narrower left panel overlay for narrow tablets */
+  .discussion-layout[data-breakpoint='tablet'] .discussion-layout__panel--left {
+    width: clamp(260px, 45vw, 320px);
   }
 }
 
@@ -233,8 +281,8 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 280px;
-    max-width: 80vw;
+    width: clamp(240px, 75vw, 320px);
+    max-width: 85vw;
     z-index: 50;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
@@ -297,6 +345,13 @@
     min-width: 44px;
     padding: 10px;
   }
+
+  /* 2-panel mode on mobile: same behavior, center takes full width */
+  .discussion-layout[data-breakpoint='mobile'][data-panels="2"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: 'center';
+  }
 }
 
 /* ==========================================================================
@@ -330,24 +385,45 @@
 
 /* ==========================================================================
    Dark Mode Support
+   Uses .dark class selector to match Tailwind's class-based dark mode
    ========================================================================== */
 
+/* Class-based dark mode (user toggle) */
+.dark .discussion-layout {
+  --color-background: #171717; /* gray-900 */
+  --color-text: #f5f5f5; /* gray-100 */
+  --color-panel-background: #262626; /* gray-800 */
+  --color-panel-left-background: #171717; /* gray-900 */
+  --color-panel-center-background: #262626; /* gray-800 */
+  --color-panel-right-background: #171717; /* gray-900 */
+  --color-border: #404040; /* gray-700 */
+  --color-resizer-background: #404040; /* gray-700 */
+  --color-resizer-hover: #525252; /* gray-600 */
+  --color-resizer-active: #818cf8; /* indigo-400 */
+  --color-resizer-handle: #a3a3a3; /* gray-400 */
+  --color-scrollbar-track: #262626; /* gray-800 */
+  --color-scrollbar-thumb: #525252; /* gray-600 */
+  --color-scrollbar-thumb-hover: #737373; /* gray-500 */
+  --color-focus: #60a5fa; /* blue-400 */
+}
+
+/* System preference fallback (when no toggle used) */
 @media (prefers-color-scheme: dark) {
-  .discussion-layout {
-    --color-background: #111827;
-    --color-text: #f9fafb;
-    --color-panel-background: #1f2937;
-    --color-panel-left-background: #111827;
-    --color-panel-center-background: #1f2937;
-    --color-panel-right-background: #111827;
-    --color-border: #374151;
-    --color-resizer-background: #374151;
-    --color-resizer-hover: #4b5563;
+  :root:not(.light) .discussion-layout {
+    --color-background: #171717;
+    --color-text: #f5f5f5;
+    --color-panel-background: #262626;
+    --color-panel-left-background: #171717;
+    --color-panel-center-background: #262626;
+    --color-panel-right-background: #171717;
+    --color-border: #404040;
+    --color-resizer-background: #404040;
+    --color-resizer-hover: #525252;
     --color-resizer-active: #818cf8;
-    --color-resizer-handle: #9ca3af;
-    --color-scrollbar-track: #1f2937;
-    --color-scrollbar-thumb: #4b5563;
-    --color-scrollbar-thumb-hover: #6b7280;
+    --color-resizer-handle: #a3a3a3;
+    --color-scrollbar-track: #262626;
+    --color-scrollbar-thumb: #525252;
+    --color-scrollbar-thumb-hover: #737373;
     --color-focus: #60a5fa;
   }
 }

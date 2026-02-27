@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Post, Param, Query, Body, Res, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, Body, Res, Headers, Inject } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -15,7 +15,7 @@ import { ProxyService } from './proxy.service.js';
  */
 @Controller('discussions')
 export class DiscussionsProxyController {
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   /**
    * GET /discussions - List discussions with filters

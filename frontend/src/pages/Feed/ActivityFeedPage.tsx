@@ -15,6 +15,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { activityFeedService, type ActivityEvent } from '../../services/activityFeedService';
+import Skeleton from '../../components/ui/Skeleton/Skeleton';
 
 function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString);
@@ -148,14 +149,6 @@ function ActivityCard({ activity }: ActivityCardProps) {
   );
 }
 
-function LoadingSpinner() {
-  return (
-    <div className="flex justify-center py-8">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-    </div>
-  );
-}
-
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -245,7 +238,25 @@ export default function ActivityFeedPage() {
             See what people you follow are doing
           </p>
         </div>
-        <LoadingSpinner />
+        {/* Activity feed skeleton cards */}
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div className="flex items-start gap-3">
+                <Skeleton variant="circular" width={40} height={40} />
+                <div className="flex-1 space-y-2">
+                  <Skeleton variant="text" width="60%" height={16} />
+                  <Skeleton variant="text" width="100%" height={14} />
+                  <Skeleton variant="text" width="80%" height={14} />
+                  <Skeleton variant="text" width="30%" height={12} className="mt-2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -260,7 +271,7 @@ export default function ActivityFeedPage() {
           <p className="text-red-700 dark:text-red-300">{error}</p>
           <button
             onClick={() => fetchFeed()}
-            className="mt-3 text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+            className="mt-3 text-sm font-medium text-red-700 hover:underline dark:text-red-400"
           >
             Try again
           </button>

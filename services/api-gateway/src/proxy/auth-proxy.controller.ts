@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Post, Body, Req, Res, Headers } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, Headers, Inject } from '@nestjs/common';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
 @Controller('auth')
 export class AuthProxyController {
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   @Post('register')
   async register(

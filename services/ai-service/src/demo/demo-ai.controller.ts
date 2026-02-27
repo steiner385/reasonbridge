@@ -68,7 +68,7 @@ export class DemoAIController {
         cacheEnabled: serviceStatus.cacheEnabled,
         cacheSize: serviceStatus.cacheSize,
         fallbackEnabled: serviceStatus.fallbackEnabled,
-        fallbackTypes: ['clarity', 'tone', 'fallacy', 'common-ground'],
+        fallbackTypes: ['clarity', 'tone', 'fallacy', 'common-ground', 'simulator'],
       },
       environment: {
         demoMode: process.env['DEMO_MODE'] === 'true',
@@ -128,6 +128,12 @@ export class DemoAIController {
         available: bedrockAvailable,
         source: bedrockAvailable ? 'bedrock' : 'fallback',
         avgLatencyMs: bedrockAvailable ? 3500 : 80,
+      },
+      {
+        name: 'Discussion Simulator',
+        available: true, // Always available via fallback
+        source: bedrockAvailable ? 'bedrock' : 'fallback',
+        avgLatencyMs: bedrockAvailable ? 2000 : 10,
       },
     ];
 

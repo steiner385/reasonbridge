@@ -54,6 +54,11 @@ const createMockCacheManager = () => ({
   },
 });
 
+// Mock ModuleRef - used for lazy injection of cache manager
+const createMockModuleRef = (cacheManager: ReturnType<typeof createMockCacheManager>) => ({
+  get: vi.fn().mockReturnValue(cacheManager),
+});
+
 // Mock Propositions Service
 const createMockPropositionsService = () => ({
   createInitialPropositions: vi.fn().mockResolvedValue([]),
@@ -91,16 +96,18 @@ describe('TopicsService', () => {
   let service: TopicsService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockCacheManager: ReturnType<typeof createMockCacheManager>;
+  let mockModuleRef: ReturnType<typeof createMockModuleRef>;
   let mockSearchService: ReturnType<typeof createMockSearchService>;
   let mockSlugGenerator: ReturnType<typeof createMockSlugGenerator>;
   let mockEditService: ReturnType<typeof createMockEditService>;
   let mockPropositionsService: ReturnType<typeof createMockPropositionsService>;
   let mockActivityClient: ReturnType<typeof createMockActivityClient>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockCacheManager = createMockCacheManager();
+    mockModuleRef = createMockModuleRef(mockCacheManager);
     mockSearchService = createMockSearchService();
     mockSlugGenerator = createMockSlugGenerator();
     mockEditService = createMockEditService();
@@ -108,13 +115,15 @@ describe('TopicsService', () => {
     mockActivityClient = createMockActivityClient();
     service = new TopicsService(
       mockPrisma as any,
-      mockCacheManager as any,
+      mockModuleRef as any,
       mockSearchService as any,
       mockSlugGenerator as any,
       mockEditService as any,
       mockPropositionsService as any,
       mockActivityClient as any,
     );
+    // Initialize cache manager via onModuleInit
+    await service.onModuleInit();
   });
 
   describe('getTopics', () => {

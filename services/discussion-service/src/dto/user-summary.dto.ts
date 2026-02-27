@@ -20,6 +20,7 @@ export class UserSummaryDto {
     description: 'User ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
     format: 'uuid',
+    type: String,
   })
   id!: string;
 
@@ -27,6 +28,7 @@ export class UserSummaryDto {
     description: 'User display name',
     example: 'Jane Doe',
     nullable: true,
+    type: String,
   })
   displayName!: string | null;
 
@@ -34,6 +36,7 @@ export class UserSummaryDto {
     description: 'User avatar URL',
     example: 'https://example.com/avatars/jane.jpg',
     nullable: true,
+    type: String,
   })
   avatarUrl?: string | null;
 
@@ -41,6 +44,7 @@ export class UserSummaryDto {
     description: 'User verification level',
     enum: ['BASIC', 'ENHANCED', 'VERIFIED_HUMAN'],
     example: 'BASIC',
+    type: String,
   })
   verificationLevel!: 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN';
 }

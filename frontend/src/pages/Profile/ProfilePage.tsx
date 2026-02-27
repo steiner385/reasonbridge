@@ -13,6 +13,7 @@ import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import { useAuth } from '../../hooks/useAuth';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Avatar from '../../components/ui/Avatar';
 import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
 
 function ProfilePage() {
@@ -97,11 +98,14 @@ function ProfilePage() {
         </CardHeader>
         <CardBody>
           <div className="space-y-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                {user.displayName}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
+            <div className="flex items-center gap-4">
+              <Avatar src={user.avatarUrl} alt={user.displayName} size="xl" />
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {user.displayName}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">

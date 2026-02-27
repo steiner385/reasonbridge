@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   Body,
+  Inject,
 } from '@nestjs/common';
 import { UploadService } from './upload.service.js';
 
@@ -25,7 +26,7 @@ interface UploadAvatarDto {
 
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(@Inject(UploadService) private readonly uploadService: UploadService) {}
 
   /**
    * Upload avatar for a user
@@ -61,11 +62,12 @@ export class UploadController {
   }
 
   /**
-   * Delete avatar by key
+   * Delete avatar for a user
+   * @param userId - The user's UUID
    */
-  @Delete('avatar/:key(.*)')
+  @Delete('avatar/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAvatar(@Param('key') key: string) {
-    await this.uploadService.deleteAvatar(key);
+  async deleteAvatar(@Param('userId') userId: string) {
+    await this.uploadService.deleteAvatar(userId);
   }
 }

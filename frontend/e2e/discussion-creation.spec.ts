@@ -1,33 +1,143 @@
 /**
- * T033 [US1] - E2E test for discussion creation flow (Feature 009)
+ * Discussion Creation Flow E2E Tests (Feature 009)
  *
- * Tests the complete user journey for creating a new discussion:
- * - Navigating to discussion creation
- * - Filling out the form
- * - Adding citations
- * - Form validation
- * - Successful submission
- * - Redirect to new discussion
+ * Tests for creating discussions under topics.
+ *
+ * IMPORTANT: These tests are SKIPPED because the feature is not fully implemented:
+ * - The DiscussionListPage and CreateDiscussionForm components exist
+ * - The backend API (/discussions endpoint) exists
+ * - BUT: No route exposes DiscussionListPage in the UI
+ *
+ * Current routing:
+ * - /topics -> TopicsPage (create TOPICS via modal) - tested in create-topic.spec.ts
+ * - /discussions?topic=<id> -> DiscussionPage (view/post responses)
+ *
+ * When this feature is implemented, it will likely add:
+ * - /topics/:topicId/discussions -> DiscussionListPage
+ *
+ * See also: create-topic.spec.ts for topic creation tests (which IS implemented)
+ *
+ * @see services/discussion-service/src/discussions/discussions.controller.ts
+ * @see frontend/src/pages/Discussions/DiscussionListPage.tsx
+ * @see frontend/src/components/discussions/CreateDiscussionForm.tsx
  */
 
 import { test, expect } from '@playwright/test';
+import { mockAuthenticatedUser, mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
 
 test.describe('Discussion Creation Flow', () => {
-  // TODO: All tests skipped until Feature 009 discussion infrastructure is implemented
-  // Requirements:
-  // 1. Discussion entity and database schema (packages/db-models)
-  // 2. Discussion API endpoints (packages/backend-services)
-  // 3. "Start Discussion" button on TopicDetailPage
-  // 4. DiscussionCreationForm component
-  // See: specs/009-discussion-participation/
+  /**
+   * NOTE: All tests are skipped because DiscussionListPage is not routed.
+   * The "Start Discussion" button exists in DiscussionListPage but there's
+   * no way to navigate to it from the current routes.
+   *
+   * When implementing this feature:
+   * 1. Add route: /topics/:topicId/discussions -> DiscussionListPage
+   * 2. Update beforeEach to navigate to that route
+   * 3. Remove test.skip() calls
+   */
 
   test.beforeEach(async ({ page }) => {
-    // Navigate to a topic page where discussions can be created
-    // Note: Adjust this route when integrated with actual routing
-    await page.goto('/topics/test-topic-id');
+    // Set up authentication
+    await mockAuthenticatedUser(page);
+    await mockAuthenticatedEndpoints(page);
+
+    // Mock topics endpoint for topic detail
+    await page.route('**/api/topics/*', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'test-topic-id',
+            title: 'Climate Change Policy Discussion',
+            description: 'A comprehensive discussion about climate change policies.',
+            status: 'ACTIVE',
+            visibility: 'PUBLIC',
+            evidenceStandards: 'STANDARD',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            participantCount: 25,
+            responseCount: 42,
+            discussionCount: 3,
+            tags: [{ id: 'tag-1', name: 'climate', slug: 'climate' }],
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Mock discussions endpoint
+    await page.route('**/api/discussions*', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            data: [
+              {
+                id: 'discussion-1',
+                title: 'Carbon Tax Implementation',
+                topicId: 'test-topic-id',
+                status: 'ACTIVE',
+                responseCount: 15,
+                participantCount: 8,
+                lastActivityAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                creator: {
+                  id: 'user-1',
+                  displayName: 'Climate Expert',
+                },
+              },
+            ],
+            meta: {
+              currentPage: 1,
+              totalPages: 1,
+              totalItems: 1,
+              itemsPerPage: 20,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            },
+          }),
+        });
+      } else if (route.request().method() === 'POST') {
+        route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'new-discussion-123',
+            topicId: 'test-topic-id',
+            title: 'Should carbon taxes be increased?',
+            status: 'ACTIVE',
+            responseCount: 1,
+            participantCount: 1,
+            lastActivityAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            creator: {
+              id: 'test-user-1',
+              displayName: 'Test User',
+            },
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Navigate to topics page (DiscussionListPage route doesn't exist yet)
+    await page.goto('/topics');
   });
 
-  test.skip('should display the "Start Discussion" button on topic page', async ({ page }) => {
+  // =============================================================================
+  // SKIPPED TESTS - Awaiting DiscussionListPage route implementation
+  // =============================================================================
+
+  test.skip('should display the "Start Discussion" button on discussion list page', async ({
+    page,
+  }) => {
+    // When implemented: Navigate to /topics/:topicId/discussions
+    // await page.goto('/topics/test-topic-id/discussions');
     const startButton = page.getByRole('button', { name: /start discussion/i });
     await expect(startButton).toBeVisible();
   });
@@ -35,17 +145,16 @@ test.describe('Discussion Creation Flow', () => {
   test.skip('should open discussion creation form when clicking "Start Discussion"', async ({
     page,
   }) => {
-    // Click the start discussion button
+    // When implemented: Navigate to /topics/:topicId/discussions
     await page.getByRole('button', { name: /start discussion/i }).click();
 
-    // Form should be visible
+    // Form should be visible with heading
     await expect(page.getByText(/start a new discussion/i)).toBeVisible();
     await expect(page.getByLabel(/discussion title/i)).toBeVisible();
     await expect(page.getByLabel(/initial response/i)).toBeVisible();
   });
 
   test.skip('should validate title length (minimum 10 characters)', async ({ page }) => {
-    // Open form
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     // Enter short title
@@ -110,7 +219,7 @@ test.describe('Discussion Creation Flow', () => {
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     const contentInput = page.getByLabel(/initial response/i);
-    const testContent = 'This is test content';
+    const testContent = 'This is test content for character counting.';
     await contentInput.fill(testContent);
 
     // Should show character count
@@ -125,7 +234,7 @@ test.describe('Discussion Creation Flow', () => {
     await citationUrlInput.fill('https://example.com/source1');
 
     // Find and fill citation title input
-    const citationTitleInput = page.getByPlaceholder(/citation title \(optional\)/i);
+    const citationTitleInput = page.getByPlaceholder(/citation title/i);
     await citationTitleInput.fill('Example Source');
 
     // Click add citation button
@@ -199,33 +308,7 @@ test.describe('Discussion Creation Flow', () => {
     await expect(page.getByText(/start a new discussion/i)).not.toBeVisible();
   });
 
-  test.skip('should successfully create a discussion and redirect (mock API)', async ({ page }) => {
-    // Mock the API response
-    await page.route('**/discussions', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 201,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            id: 'new-discussion-123',
-            topicId: 'test-topic-id',
-            title: 'Should carbon taxes be increased?',
-            status: 'ACTIVE',
-            creator: {
-              id: 'user-123',
-              displayName: 'Test User',
-            },
-            responseCount: 1,
-            participantCount: 1,
-            lastActivityAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            responses: [],
-          }),
-        });
-      }
-    });
-
+  test.skip('should successfully create a discussion and redirect', async ({ page }) => {
     await page.getByRole('button', { name: /start discussion/i }).click();
 
     // Fill valid form
@@ -239,16 +322,16 @@ test.describe('Discussion Creation Flow', () => {
     // Submit
     await page.getByRole('button', { name: /publish discussion/i }).click();
 
-    // Should show loading state
+    // Should show loading state briefly
     await expect(page.getByRole('button', { name: /publishing/i })).toBeVisible();
 
-    // Should redirect to new discussion (check URL change)
+    // Should redirect to new discussion
     await page.waitForURL('**/discussions/new-discussion-123', { timeout: 5000 });
   });
 
   test.skip('should show error message on API failure', async ({ page }) => {
-    // Mock API error
-    await page.route('**/discussions', async (route) => {
+    // Override mock with error response
+    await page.route('**/api/discussions', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 403,
@@ -277,8 +360,8 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test.skip('should show rate limit error when exceeded', async ({ page }) => {
-    // Mock rate limit error
-    await page.route('**/discussions', async (route) => {
+    // Override mock with rate limit error
+    await page.route('**/api/discussions', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 429,

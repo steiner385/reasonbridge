@@ -19,6 +19,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { OnboardingService } from './onboarding.service';
 import { SelectTopicsRequestDto } from './dto/select-topics.dto';
@@ -35,7 +36,7 @@ import { ValidationErrorResponseDto, UnauthorizedErrorResponseDto } from '../dto
 export class OnboardingController {
   private readonly logger = new Logger(OnboardingController.name);
 
-  constructor(private readonly onboardingService: OnboardingService) {}
+  constructor(@Inject(OnboardingService) private readonly onboardingService: OnboardingService) {}
 
   /**
    * T100: POST /onboarding/select-topics

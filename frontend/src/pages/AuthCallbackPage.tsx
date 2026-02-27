@@ -108,7 +108,7 @@ export const AuthCallbackPage: React.FC = () => {
           <div>
             <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
               <svg
-                className="w-8 h-8 text-red-600 dark:text-red-400"
+                className="w-8 h-8 text-red-700 dark:text-red-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

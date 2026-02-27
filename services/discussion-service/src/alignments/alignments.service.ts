@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { AlignmentDto } from './dto/alignment.dto.js';
 import type { SetAlignmentDto } from './dto/set-alignment.dto.js';
@@ -12,7 +12,8 @@ import { AlignmentAggregationService } from './alignment-aggregation.service.js'
 @Injectable()
 export class AlignmentsService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(AlignmentAggregationService)
     private readonly aggregationService: AlignmentAggregationService,
   ) {}
 

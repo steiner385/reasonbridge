@@ -159,15 +159,18 @@ const Modal: React.FC<ModalProps> = ({
           className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-2xl dark:shadow-gray-900/50 transition-all w-full ${sizeClasses[size]}`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2
+              id="modal-title"
+              className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100"
+            >
               {title}
             </h2>
             {showCloseButton && (
               <button
                 type="button"
                 onClick={onClose}
-                className="text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
+                className="text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Close modal"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,13 +186,13 @@ const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto text-gray-900 dark:text-gray-100">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 max-h-[calc(100vh-160px)] sm:max-h-[calc(100vh-200px)] overflow-y-auto text-gray-900 dark:text-gray-100">
             {children}
           </div>
 
           {/* Footer */}
           {footer && (
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div className="flex items-center justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
               {footer}
             </div>
           )}

@@ -68,7 +68,7 @@ describe('VoteButtons', () => {
   describe('User Interactions', () => {
     it('should call onUpvote when upvote button is clicked', async () => {
       const onUpvote = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<VoteButtons {...defaultProps} onUpvote={onUpvote} />);
 
@@ -79,7 +79,7 @@ describe('VoteButtons', () => {
 
     it('should call onDownvote when downvote button is clicked', async () => {
       const onDownvote = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<VoteButtons {...defaultProps} onDownvote={onDownvote} />);
 
@@ -91,7 +91,7 @@ describe('VoteButtons', () => {
     it('should not call callbacks when buttons are disabled', async () => {
       const onUpvote = vi.fn();
       const onDownvote = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <VoteButtons {...defaultProps} onUpvote={onUpvote} onDownvote={onDownvote} disabled />,

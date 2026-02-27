@@ -6,8 +6,10 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
+import { TracingInterceptor } from './observability/index.js';
 
 async function bootstrap() {
   // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
@@ -22,8 +24,29 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: false,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
+
+  // OpenAPI/Swagger documentation (skip if SKIP_SWAGGER is set for faster dev startup)
+  if (!process.env['SKIP_SWAGGER']) {
+    const config = new DocumentBuilder()
+      .setTitle('ReasonBridge Discussion Service')
+      .setDescription('Topics, propositions, responses, and discussion threading endpoints')
+      .setVersion('1.0.0')
+      .addBearerAuth()
+      .build();
+
+    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+    const document = SwaggerModule.createDocument(app, config);
+    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
+    SwaggerModule.setup('api-docs', app, document);
+  }
+
+  // Distributed tracing interceptor
+  app.useGlobalInterceptors(new TracingInterceptor('discussion-service'));
 
   // Setup graceful shutdown handlers
   setupGracefulShutdown(app, { serviceName: 'discussion-service' });

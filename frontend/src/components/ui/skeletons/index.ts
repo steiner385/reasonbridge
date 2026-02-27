@@ -28,6 +28,8 @@ export { default as TopicCardSkeleton } from './TopicCardSkeleton';
 export { default as TopicDetailSkeleton } from './TopicDetailSkeleton';
 export { default as ResponseSkeleton } from './ResponseSkeleton';
 export { default as ProfileSkeleton } from './ProfileSkeleton';
+export { default as ChatMessageSkeleton } from './ChatMessageSkeleton';
+export { default as ArgumentAnalysisSkeleton } from './ArgumentAnalysisSkeleton';
 
 // Re-export types for convenience
 export type {
@@ -35,4 +37,9 @@ export type {
   TopicDetailSkeletonProps,
   ResponseSkeletonProps,
   ProfileSkeletonProps,
+  ArgumentAnalysisSkeletonProps,
 } from '../Skeleton/types';
+
+// Re-export props type from component file for direct import
+export type { ChatMessageSkeletonProps } from './ChatMessageSkeleton';
+export type { ArgumentAnalysisSkeletonProps as ArgumentAnalysisSkeletonPropsAlt } from './ArgumentAnalysisSkeleton';

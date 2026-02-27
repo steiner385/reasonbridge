@@ -62,7 +62,7 @@ describe('PropositionInput', () => {
     });
 
     it('Add button is disabled when input is too short', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<PropositionInput {...defaultProps} />);
 
       const input = screen.getByLabelText(/Proposition statement/i);
@@ -74,7 +74,7 @@ describe('PropositionInput', () => {
     });
 
     it('enables Add button when input is valid', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<PropositionInput {...defaultProps} />);
 
       const input = screen.getByLabelText(/Proposition statement/i);
@@ -85,7 +85,7 @@ describe('PropositionInput', () => {
     });
 
     it('calls onChange when adding a proposition', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<PropositionInput {...defaultProps} onChange={onChange} />);
 
@@ -99,7 +99,7 @@ describe('PropositionInput', () => {
     });
 
     it('clears input after adding', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<PropositionInput {...defaultProps} />);
 
       const input = screen.getByLabelText(/Proposition statement/i);
@@ -110,7 +110,7 @@ describe('PropositionInput', () => {
     });
 
     it('adds proposition on Enter key', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<PropositionInput {...defaultProps} onChange={onChange} />);
 
@@ -124,7 +124,7 @@ describe('PropositionInput', () => {
     });
 
     it('trims whitespace from input', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       render(<PropositionInput {...defaultProps} onChange={onChange} />);
 
@@ -138,7 +138,7 @@ describe('PropositionInput', () => {
 
   describe('removing propositions', () => {
     it('calls onChange when removing a proposition', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onChange = vi.fn();
       const propositions = [
         { statement: 'First proposition here' },
@@ -212,7 +212,7 @@ describe('PropositionInput', () => {
 
   describe('validation messages', () => {
     it('shows character count', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<PropositionInput {...defaultProps} />);
 
       const input = screen.getByLabelText(/Proposition statement/i);

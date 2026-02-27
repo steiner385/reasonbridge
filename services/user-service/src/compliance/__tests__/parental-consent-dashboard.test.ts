@@ -55,17 +55,27 @@ const createMockEmailService = () => ({
   sendParentalConsentEmail: vi.fn(),
 });
 
+const createMockAuditService = () => ({
+  logAction: vi.fn().mockResolvedValue({}),
+});
+
 describe('ParentalConsentService - Child Activity & Consent Withdrawal', () => {
   let service: ParentalConsentService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockEmailService: ReturnType<typeof createMockEmailService>;
+  let mockAuditService: ReturnType<typeof createMockAuditService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockEmailService = createMockEmailService();
+    mockAuditService = createMockAuditService();
 
-    service = new ParentalConsentService(mockPrisma as any, mockEmailService as any);
+    service = new ParentalConsentService(
+      mockPrisma as any,
+      mockEmailService as any,
+      mockAuditService as any,
+    );
   });
 
   describe('getChildActivitySummary', () => {

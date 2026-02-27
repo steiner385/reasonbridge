@@ -9,6 +9,11 @@
 
 import type { UserSummary } from './user';
 
+/**
+ * Response visibility status values matching backend ResponseStatus enum
+ */
+export type ResponseStatus = 'VISIBLE' | 'HIDDEN' | 'REMOVED' | 'PENDING_REVIEW';
+
 export interface CitedSource {
   url: string;
   title?: string;
@@ -33,7 +38,7 @@ export interface Response {
   containsOpinion: boolean;
   containsFactualClaims: boolean;
   propositions?: ResponseProposition[];
-  status: string;
+  status: ResponseStatus;
   revisionCount: number;
   createdAt: string;
   updatedAt: string;

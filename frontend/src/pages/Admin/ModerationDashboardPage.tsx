@@ -308,7 +308,7 @@ export default function ModerationDashboardPage() {
                 <Card>
                   <CardBody>
                     <div className="text-center">
-                      <p className="text-4xl font-bold text-red-600 mb-1">
+                      <p className="text-4xl font-bold text-red-700 mb-1">
                         {stats.criticalActions ?? 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Critical Actions</p>

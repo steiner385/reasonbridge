@@ -77,7 +77,7 @@ describe('AI Service Consumer Contract Tests', () => {
               articles: eachLike('https://example.com/bias-article'),
             }),
             displayedToUser: boolean(true),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -117,7 +117,7 @@ describe('AI Service Consumer Contract Tests', () => {
             reasoning: string('This appears to be a strawman fallacy...'),
             confidenceScore: decimal(0.78),
             displayedToUser: boolean(true),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -151,7 +151,7 @@ describe('AI Service Consumer Contract Tests', () => {
             reasoning: string('The response shows signs of bias...'),
             confidenceScore: decimal(0.72),
             displayedToUser: boolean(false),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           });
         })
         .executeTest(async (mockServer) => {
@@ -258,7 +258,7 @@ describe('AI Service Consumer Contract Tests', () => {
             participantCountAtGeneration: integer(25),
             responseCountAtGeneration: integer(48),
             modelVersion: string('gpt-4-turbo'),
-            createdAt: timestamp("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            createdAt: timestamp('2026-01-15T10:30:00.000Z', "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             attribution: string('AI Assistant'),
           });
         })

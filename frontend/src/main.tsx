@@ -12,8 +12,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { ChildSafetyProvider } from './contexts/ChildSafetyContext';
 import ErrorBoundary from './components/error/ErrorBoundary';
-import App from './App.tsx';
+import { AnalyticsProvider } from './components/analytics';
+import App from './App';
 import './index.css';
 
 const rootElement = document.getElementById('root');
@@ -30,11 +32,15 @@ createRoot(rootElement).render(
           <ThemeProvider>
             <ToastProvider>
               <AuthProvider>
-                <SidebarProvider>
+                <ChildSafetyProvider>
                   <BrowserRouter>
-                    <App />
+                    <SidebarProvider>
+                      <AnalyticsProvider>
+                        <App />
+                      </AnalyticsProvider>
+                    </SidebarProvider>
                   </BrowserRouter>
-                </SidebarProvider>
+                </ChildSafetyProvider>
               </AuthProvider>
             </ToastProvider>
           </ThemeProvider>

@@ -12,6 +12,7 @@ export class UserResponseDto {
   id!: string;
   email!: string;
   displayName!: string;
+  avatarUrl!: string | null;
   verificationLevel!: VerificationLevel;
   trustScoreAbility!: number;
   trustScoreBenevolence!: number;
@@ -27,6 +28,7 @@ export class UserResponseDto {
     this.id = user.id;
     this.email = user.email;
     this.displayName = user.displayName ?? '';
+    this.avatarUrl = user.avatarUrl ?? null;
     this.verificationLevel = user.verificationLevel;
     this.trustScoreAbility = Number(user.trustScoreAbility);
     this.trustScoreBenevolence = Number(user.trustScoreBenevolence);
@@ -47,6 +49,7 @@ export class UserResponseDto {
 export class PublicUserResponseDto {
   id!: string;
   displayName!: string;
+  avatarUrl!: string | null;
   verificationLevel!: VerificationLevel;
   trustScoreAbility!: number;
   trustScoreBenevolence!: number;
@@ -57,6 +60,7 @@ export class PublicUserResponseDto {
   constructor(user: User) {
     this.id = user.id;
     this.displayName = user.displayName ?? '';
+    this.avatarUrl = user.avatarUrl ?? null;
     this.verificationLevel = user.verificationLevel;
     this.trustScoreAbility = Number(user.trustScoreAbility);
     this.trustScoreBenevolence = Number(user.trustScoreBenevolence);

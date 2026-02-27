@@ -64,7 +64,7 @@ export function TopicListItem({
       className={`
         topic-list-item
         relative px-3 py-2.5 cursor-pointer rounded-md transition-colors
-        ${isActive ? 'bg-primary-100 text-primary-900' : 'hover:bg-gray-100 text-gray-900 dark:text-gray-100'}
+        ${isActive ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-900 dark:text-primary-100' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100'}
         ${className}
       `}
       data-testid="topic-list-item"
@@ -84,15 +84,15 @@ export function TopicListItem({
         />
       )}
 
-      {/* Topic title */}
+      {/* Topic title - uses span instead of h3 to maintain proper heading hierarchy (h1 in main content should come first) */}
       <div className="flex items-start justify-between gap-2 mb-1">
-        <h3
+        <span
           className={`text-sm font-medium line-clamp-2 flex-1 ${hasUnread ? 'pl-3' : ''}`}
           title={topic.title}
           data-testid="topic-title"
         >
           {topic.title}
-        </h3>
+        </span>
 
         {/* Status indicator dot */}
         <div

@@ -18,14 +18,18 @@ import { NotificationDropdown } from '../notifications/NotificationDropdown';
  */
 
 export function Header() {
-  const { isCollapsed, toggleCollapsed, toggleMobile } = useSidebar();
+  const { isCollapsed, toggleCollapsed, toggleMobile, isMobileOpen } = useSidebar();
   const isMobile = useIsMobileViewport();
   const { isDark, toggleTheme } = useTheme();
   const { openModal: openLoginModal } = useLoginModal();
   const { user, isLoading } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <header
+      className={`fixed top-0 w-full border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 ${
+        isMobileOpen ? 'z-0' : 'z-40'
+      } ${isMobile && isMobileOpen ? 'invisible' : ''}`}
+    >
       <div className="flex h-16 items-center justify-between gap-4 px-4">
         {/* Left: Logo + Menu Toggle */}
         <div className="flex items-center gap-3">
@@ -33,7 +37,7 @@ export function Header() {
             // Mobile: Hamburger menu button
             <button
               onClick={toggleMobile}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               aria-label="Toggle mobile menu"
               aria-expanded={false}
             >
@@ -56,7 +60,7 @@ export function Header() {
             // Desktop: Sidebar collapse toggle
             <button
               onClick={toggleCollapsed}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-expanded={!isCollapsed}
             >
@@ -78,19 +82,15 @@ export function Header() {
           )}
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2" aria-label="ReasonBridge home">
             {isMobile ? (
               <img
                 src="/assets/brand/logo-icon.svg"
-                alt="ReasonBridge"
+                alt=""
                 className="h-8 w-8 dark:brightness-110"
               />
             ) : (
-              <img
-                src="/assets/brand/logo-full.svg"
-                alt="ReasonBridge"
-                className="h-8 dark:brightness-110"
-              />
+              <img src="/assets/brand/logo-full.svg" alt="" className="h-8 dark:brightness-110" />
             )}
           </Link>
         </div>
@@ -128,7 +128,7 @@ export function Header() {
           {/* Theme toggle button */}
           <button
             onClick={toggleTheme}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDark ? (
@@ -175,7 +175,7 @@ export function Header() {
           ) : user ? (
             <Link
               to="/profile"
-              className="flex h-10 items-center gap-2 rounded-lg px-3 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex h-11 items-center gap-2 rounded-lg px-3 hover:bg-gray-100 dark:hover:bg-gray-800"
               aria-label="Profile"
             >
               {user.avatarUrl ? (
@@ -194,7 +194,7 @@ export function Header() {
           ) : (
             <button
               onClick={openLoginModal}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700"
+              className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 min-h-[44px]"
             >
               Log In
             </button>

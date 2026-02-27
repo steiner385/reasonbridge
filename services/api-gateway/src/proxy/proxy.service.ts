@@ -8,9 +8,16 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { SERVICE_PORTS, getServiceUrl } from '@reason-bridge/common';
+import {
+  SERVICE_PORTS,
+  getServiceUrl,
+  CORRELATION_ID_HEADER,
+  TRACEPARENT_HEADER,
+  SERVICE_NAME_HEADER,
+} from '@reason-bridge/common';
 import { CircuitBreakerService } from '../resilience/circuit-breaker.service.js';
 import { withRetry, isRetryableHttpError } from '../resilience/retry.util.js';
+import { getCurrentRequestContext } from '../middleware/correlation.middleware.js';
 
 export interface ProxyRequest {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -60,6 +67,7 @@ export class ProxyService {
   private readonly aiService: ServiceConfig;
   private readonly moderationService: ServiceConfig;
   private readonly activityService: ServiceConfig;
+  private readonly contactService: ServiceConfig;
 
   constructor(
     @Inject(HttpService) private readonly httpService: HttpService,
@@ -109,6 +117,12 @@ export class ProxyService {
       timeout: getConfig<number>('ACTIVITY_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
       retryAttempts: getConfig<number>('ACTIVITY_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
+
+    this.contactService = {
+      url: getConfig<string>('CONTACT_SERVICE_URL', getServiceUrl('CONTACT_SERVICE')),
+      timeout: getConfig<number>('CONTACT_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      retryAttempts: getConfig<number>('CONTACT_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
+    };
   }
 
   async proxyToUserService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
@@ -129,6 +143,10 @@ export class ProxyService {
 
   async proxyToActivityService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
     return this.proxyWithResilience<T>('activity-service', this.activityService, request);
+  }
+
+  async proxyToContactService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
+    return this.proxyWithResilience<T>('contact-service', this.contactService, request);
   }
 
   /**
@@ -167,15 +185,17 @@ export class ProxyService {
       // Pass the request as an argument to fire() so each request uses its own data
       return await breaker.fire(request);
     } catch (error) {
+      const context = getCurrentRequestContext();
+      const correlationInfo = context ? ` correlationId=${context.correlationId}` : '';
       this.logger.error(
-        `Request to ${serviceName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Request to ${serviceName} failed: ${error instanceof Error ? error.message : 'Unknown error'}${correlationInfo}`,
       );
       throw error;
     }
   }
 
   /**
-   * Execute HTTP request with timeout
+   * Execute HTTP request with timeout and automatic observability header propagation
    */
   private async executeRequest<T>(
     baseUrl: string,
@@ -184,12 +204,23 @@ export class ProxyService {
   ): Promise<AxiosResponse<T>> {
     const url = `${baseUrl}${request.path}`;
 
+    // Get observability context from AsyncLocalStorage (set by CorrelationMiddleware)
+    const requestContext = getCurrentRequestContext();
+    const observabilityHeaders: Record<string, string> = {
+      [SERVICE_NAME_HEADER]: 'api-gateway',
+    };
+    if (requestContext) {
+      observabilityHeaders[CORRELATION_ID_HEADER] = requestContext.correlationId;
+      observabilityHeaders[TRACEPARENT_HEADER] = requestContext.traceparent;
+    }
+
     const config: AxiosRequestConfig = {
       method: request.method,
       url,
       data: request.body,
       headers: {
         'Content-Type': 'application/json',
+        ...observabilityHeaders,
         ...request.headers,
       },
       params: request.query,

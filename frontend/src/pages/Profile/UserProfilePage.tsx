@@ -12,6 +12,7 @@ import { useUser } from '../../lib/useUser';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Avatar from '../../components/ui/Avatar';
 import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
 import { FollowButton } from '../../components/users';
 
@@ -88,9 +89,12 @@ function UserProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {user.displayName}
-            </h1>
+            <div className="flex items-center gap-4">
+              <Avatar src={user.avatarUrl} alt={user.displayName} size="xl" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {user.displayName}
+              </h1>
+            </div>
             {id && <FollowButton userId={id} />}
           </div>
         </CardHeader>

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -39,6 +44,22 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React - rarely changes, highly cacheable
+          'vendor-react': ['react', 'react-dom'],
+          // React Router - routing layer
+          'vendor-router': ['react-router-dom'],
+          // TanStack Query - data fetching layer
+          'vendor-query': ['@tanstack/react-query'],
+          // UI utilities
+          'vendor-ui': ['lucide-react'],
+        },
+      },
+    },
+    // Increase chunk size warning threshold (with code splitting enabled)
+    chunkSizeWarningLimit: 300,
   },
   resolve: {
     alias: {

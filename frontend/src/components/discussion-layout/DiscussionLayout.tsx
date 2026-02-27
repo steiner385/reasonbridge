@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { DiscussionLayoutProvider } from '../../contexts/DiscussionLayoutContext';
@@ -18,6 +18,11 @@ interface DiscussionLayoutProps {
   leftPanel?: ReactNode;
   centerPanel?: ReactNode;
   rightPanel?: ReactNode;
+  /**
+   * When true, hides the left panel and uses 2-panel mode.
+   * Use this when the unified sidebar already provides topic navigation.
+   */
+  hideSidebar?: boolean;
 }
 
 /**
@@ -64,7 +69,12 @@ interface DiscussionLayoutProps {
  * />
  * ```
  */
-export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: DiscussionLayoutProps) {
+export function DiscussionLayout({
+  leftPanel,
+  centerPanel,
+  rightPanel,
+  hideSidebar = false,
+}: DiscussionLayoutProps) {
   const { panelState, setPanelWidth, togglePanel, setActiveTopic } = usePanelState();
   const breakpoint = useBreakpoint();
   const [isLeftPanelOverlayOpen, setIsLeftPanelOverlayOpen] = useState(false);
@@ -79,13 +89,13 @@ export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: Discuss
     }
   }, [breakpoint]);
 
-  const handleToggleLeftPanelOverlay = () => {
+  const handleToggleLeftPanelOverlay = useCallback(() => {
     setIsLeftPanelOverlayOpen((prev) => !prev);
-  };
+  }, []);
 
-  const handleCloseLeftPanelOverlay = () => {
+  const handleCloseLeftPanelOverlay = useCallback(() => {
     setIsLeftPanelOverlayOpen(false);
-  };
+  }, []);
 
   // Swipe gesture handlers (mobile/tablet only)
   const swipeHandlers = useSwipeable({
@@ -104,18 +114,33 @@ export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: Discuss
     delta: 50, // Minimum distance for swipe detection (pixels)
   });
 
-  const contextValue = {
-    panelState,
-    setPanelWidth,
-    togglePanel,
-    setActiveTopic,
-    isLeftPanelOverlayOpen,
-    toggleLeftPanelOverlay: handleToggleLeftPanelOverlay,
-    closeLeftPanelOverlay: handleCloseLeftPanelOverlay,
-  };
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  const contextValue = useMemo(
+    () => ({
+      panelState,
+      setPanelWidth,
+      togglePanel,
+      setActiveTopic,
+      isLeftPanelOverlayOpen,
+      toggleLeftPanelOverlay: handleToggleLeftPanelOverlay,
+      closeLeftPanelOverlay: handleCloseLeftPanelOverlay,
+    }),
+    [
+      panelState,
+      setPanelWidth,
+      togglePanel,
+      setActiveTopic,
+      isLeftPanelOverlayOpen,
+      handleToggleLeftPanelOverlay,
+      handleCloseLeftPanelOverlay,
+    ],
+  );
 
   const showBackdrop =
     (breakpoint === 'tablet' || breakpoint === 'mobile') && isLeftPanelOverlayOpen;
+
+  // Determine panel configuration
+  const panelCount = hideSidebar ? 2 : 3;
 
   return (
     <DiscussionLayoutProvider value={contextValue}>
@@ -124,6 +149,7 @@ export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: Discuss
         className="discussion-layout"
         data-testid="discussion-layout"
         data-breakpoint={breakpoint}
+        data-panels={panelCount}
         style={
           {
             '--left-panel-width': `${panelState.leftPanelWidth}px`,
@@ -132,7 +158,7 @@ export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: Discuss
         }
       >
         {/* Backdrop overlay for tablet/mobile when left panel is open */}
-        {showBackdrop && (
+        {showBackdrop && !hideSidebar && (
           <div
             className="discussion-layout__backdrop"
             onClick={handleCloseLeftPanelOverlay}
@@ -147,16 +173,18 @@ export function DiscussionLayout({ leftPanel, centerPanel, rightPanel }: Discuss
           />
         )}
 
-        {/* Left Panel - Topic Navigation */}
-        <aside
-          className={`discussion-layout__panel discussion-layout__panel--left ${
-            panelState.isLeftPanelCollapsed ? 'discussion-layout__panel--collapsed' : ''
-          } ${isLeftPanelOverlayOpen ? 'discussion-layout__panel--overlay-open' : ''}`}
-          role="navigation"
-          aria-label="Topic navigation"
-        >
-          {leftPanel}
-        </aside>
+        {/* Left Panel - Topic Navigation (hidden when hideSidebar is true) */}
+        {!hideSidebar && (
+          <aside
+            className={`discussion-layout__panel discussion-layout__panel--left ${
+              panelState.isLeftPanelCollapsed ? 'discussion-layout__panel--collapsed' : ''
+            } ${isLeftPanelOverlayOpen ? 'discussion-layout__panel--overlay-open' : ''}`}
+            role="navigation"
+            aria-label="Topic navigation"
+          >
+            {leftPanel}
+          </aside>
+        )}
 
         {/* Center Panel - Conversation */}
         <main

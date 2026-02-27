@@ -270,7 +270,7 @@ describe('FactCheckResultDisplay', () => {
 
       render(<FactCheckResultDisplay results={lowCredResults} />);
       const credibilityScore = screen.getByText('30%');
-      expect(credibilityScore).toHaveClass('text-red-600');
+      expect(credibilityScore).toHaveClass('text-red-700');
     });
   });
 });

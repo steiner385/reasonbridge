@@ -168,7 +168,7 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
     // State-specific classes
     const stateClasses = isFollowing
       ? // Following state: outlined style
-        'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400 focus:ring-gray-300 dark:focus:ring-gray-600'
+        'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-400 focus:ring-gray-300 dark:focus:ring-gray-600'
       : // Not following state: filled primary style
         'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400';
 

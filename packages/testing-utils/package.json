@@ -60,8 +60,8 @@
   },
   "dependencies": {
     "@pact-foundation/pact": "^16.2.0",
-    "@prisma/client": "7.4.0",
-    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "7.4.1",
+    "@prisma/adapter-pg": "^7.4.1",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "ajv": "^8.18.0",
@@ -71,7 +71,7 @@
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@types/node": "25.2.3",
+    "@types/node": "25.3.0",
     "@types/pg": "^8.11.10",
     "typescript": "5.9.3",
     "vitest": "^2.1.0"

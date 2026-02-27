@@ -35,7 +35,7 @@ describe('AlignmentInput', () => {
 
   describe('Stance Selection', () => {
     it('should highlight selected support stance button', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<AlignmentInput />);
 
       const agreeButton = screen.getByRole('button', { name: /agree\/support/i });
@@ -46,7 +46,7 @@ describe('AlignmentInput', () => {
     });
 
     it('should highlight selected oppose stance button', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<AlignmentInput />);
 
       const disagreeButton = screen.getByRole('button', { name: /disagree\/oppose/i });
@@ -57,7 +57,7 @@ describe('AlignmentInput', () => {
     });
 
     it('should highlight selected nuanced stance button', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<AlignmentInput />);
 
       const nuancedButton = screen.getByRole('button', { name: /nuanced position/i });
@@ -71,7 +71,7 @@ describe('AlignmentInput', () => {
   describe('Callbacks', () => {
     it('should call onAlign when agree button is clicked', async () => {
       const onAlign = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<AlignmentInput onAlign={onAlign} />);
 
@@ -82,7 +82,7 @@ describe('AlignmentInput', () => {
 
     it('should call onAlign when disagree button is clicked', async () => {
       const onAlign = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<AlignmentInput onAlign={onAlign} />);
 
@@ -93,7 +93,7 @@ describe('AlignmentInput', () => {
 
     it('should call onRemove when deselecting current stance', async () => {
       const onRemove = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<AlignmentInput currentStance="support" onRemove={onRemove} />);
 
@@ -105,7 +105,7 @@ describe('AlignmentInput', () => {
 
   describe('Nuanced Input', () => {
     it('should show explanation textarea when nuanced button is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       render(<AlignmentInput />);
 
       await user.click(screen.getByRole('button', { name: /nuanced position/i }));
@@ -235,7 +235,7 @@ describe('AlignmentInput', () => {
     it('should not call callbacks when disabled', async () => {
       const onAlign = vi.fn();
       const onRemove = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<AlignmentInput onAlign={onAlign} onRemove={onRemove} disabled />);
 
@@ -247,7 +247,7 @@ describe('AlignmentInput', () => {
 
     it('should not submit nuanced alignment with empty explanation', async () => {
       const onAlign = vi.fn();
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(<AlignmentInput onAlign={onAlign} />);
 

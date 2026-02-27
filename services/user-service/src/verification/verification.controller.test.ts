@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { VerificationController } from './verification.controller.js';
+import type { JwtPayload } from '../auth/jwt-auth.guard.js';
 
 const createMockVerificationService = () => ({
   requestVerification: vi.fn(),
@@ -14,10 +15,21 @@ const createMockVideoUploadService = () => ({
   confirmVideoUpload: vi.fn(),
 });
 
+/**
+ * Helper to create a JwtPayload for testing
+ */
+const createJwtPayload = (userId: string): JwtPayload => ({
+  sub: userId,
+  email: `${userId}@test.com`,
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + 3600,
+});
+
 describe('VerificationController', () => {
   let controller: VerificationController;
   let mockVerificationService: ReturnType<typeof createMockVerificationService>;
   let mockVideoUploadService: ReturnType<typeof createMockVideoUploadService>;
+  let userPayload: JwtPayload;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -27,6 +39,7 @@ describe('VerificationController', () => {
       mockVerificationService as any,
       mockVideoUploadService as any,
     );
+    userPayload = createJwtPayload('user-1');
   });
 
   describe('requestVerification', () => {
@@ -40,7 +53,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.requestVerification.mockResolvedValue(expectedResponse);
 
-      const result = await controller.requestVerification('user-1', request as any);
+      const result = await controller.requestVerification(userPayload, request as any);
 
       expect(result).toEqual(expectedResponse);
       expect(mockVerificationService.requestVerification).toHaveBeenCalledWith('user-1', request);
@@ -55,7 +68,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.requestVerification.mockResolvedValue(expectedResponse);
 
-      const result = await controller.requestVerification('user-1', request as any);
+      const result = await controller.requestVerification(userPayload, request as any);
 
       expect(result).toEqual(expectedResponse);
     });
@@ -70,7 +83,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.requestVerification.mockResolvedValue(expectedResponse);
 
-      const result = await controller.requestVerification('user-1', request as any);
+      const result = await controller.requestVerification(userPayload, request as any);
 
       expect(result).toEqual(expectedResponse);
       expect(mockVerificationService.requestVerification).toHaveBeenCalledWith('user-1', request);
@@ -97,7 +110,7 @@ describe('VerificationController', () => {
       };
       mockVideoUploadService.confirmVideoUpload.mockResolvedValue(expectedResponse);
 
-      const result = await controller.confirmVideoUpload('user-1', dto as any);
+      const result = await controller.confirmVideoUpload(userPayload, dto as any);
 
       expect(result).toEqual(expectedResponse);
       expect(mockVideoUploadService.confirmVideoUpload).toHaveBeenCalledWith('user-1', dto);
@@ -117,7 +130,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.getVerification.mockResolvedValue(verification);
 
-      const result = await controller.getVerificationStatus('verification-1', 'user-1');
+      const result = await controller.getVerificationStatus('verification-1', userPayload);
 
       expect(result).toEqual({
         id: verification.id,
@@ -142,7 +155,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.getVerification.mockResolvedValue(verification);
 
-      const result = await controller.getVerificationStatus('verification-1', 'user-1');
+      const result = await controller.getVerificationStatus('verification-1', userPayload);
 
       expect(result.isExpired).toBe(true);
     });
@@ -150,7 +163,7 @@ describe('VerificationController', () => {
     it('should throw error when verification not found', async () => {
       mockVerificationService.getVerification.mockResolvedValue(null);
 
-      await expect(controller.getVerificationStatus('verification-1', 'user-1')).rejects.toThrow(
+      await expect(controller.getVerificationStatus('verification-1', userPayload)).rejects.toThrow(
         'Verification not found or unauthorized',
       );
     });
@@ -164,7 +177,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.getVerification.mockResolvedValue(verification);
 
-      await expect(controller.getVerificationStatus('verification-1', 'user-1')).rejects.toThrow(
+      await expect(controller.getVerificationStatus('verification-1', userPayload)).rejects.toThrow(
         'Verification not found or unauthorized',
       );
     });
@@ -178,7 +191,7 @@ describe('VerificationController', () => {
       ];
       mockVerificationService.getPendingVerifications.mockResolvedValue(pendingVerifications);
 
-      const result = await controller.getPendingVerifications('user-1');
+      const result = await controller.getPendingVerifications(userPayload);
 
       expect(result).toEqual(pendingVerifications);
       expect(mockVerificationService.getPendingVerifications).toHaveBeenCalledWith('user-1');
@@ -187,7 +200,7 @@ describe('VerificationController', () => {
     it('should return empty array when no pending verifications', async () => {
       mockVerificationService.getPendingVerifications.mockResolvedValue([]);
 
-      const result = await controller.getPendingVerifications('user-1');
+      const result = await controller.getPendingVerifications(userPayload);
 
       expect(result).toEqual([]);
     });
@@ -203,7 +216,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.completeVerification.mockResolvedValue(completedVerification);
 
-      const result = await controller.completeVerification('verification-1', 'user-1');
+      const result = await controller.completeVerification('verification-1', userPayload);
 
       expect(result).toEqual(completedVerification);
       expect(mockVerificationService.completeVerification).toHaveBeenCalledWith(
@@ -229,7 +242,7 @@ describe('VerificationController', () => {
       mockVerificationService.getVerification.mockResolvedValue(originalVerification);
       mockVerificationService.reVerify.mockResolvedValue(newVerificationResponse);
 
-      const result = await controller.reVerify('verification-1', 'user-1');
+      const result = await controller.reVerify('verification-1', userPayload);
 
       expect(result).toEqual(newVerificationResponse);
       expect(mockVerificationService.reVerify).toHaveBeenCalledWith('user-1', 'PHONE');
@@ -245,7 +258,7 @@ describe('VerificationController', () => {
       mockVerificationService.getVerification.mockResolvedValue(originalVerification);
       mockVerificationService.reVerify.mockResolvedValue({ verificationId: 'verification-2' });
 
-      await controller.reVerify('verification-1', 'user-1');
+      await controller.reVerify('verification-1', userPayload);
 
       expect(mockVerificationService.reVerify).toHaveBeenCalledWith('user-1', 'GOVERNMENT_ID');
     });
@@ -253,7 +266,7 @@ describe('VerificationController', () => {
     it('should throw error when original verification not found', async () => {
       mockVerificationService.getVerification.mockResolvedValue(null);
 
-      await expect(controller.reVerify('verification-1', 'user-1')).rejects.toThrow(
+      await expect(controller.reVerify('verification-1', userPayload)).rejects.toThrow(
         'Verification not found or unauthorized',
       );
     });
@@ -267,7 +280,7 @@ describe('VerificationController', () => {
       };
       mockVerificationService.getVerification.mockResolvedValue(originalVerification);
 
-      await expect(controller.reVerify('verification-1', 'user-1')).rejects.toThrow(
+      await expect(controller.reVerify('verification-1', userPayload)).rejects.toThrow(
         'Verification not found or unauthorized',
       );
     });
@@ -282,7 +295,7 @@ describe('VerificationController', () => {
       ];
       mockVerificationService.getVerificationHistory.mockResolvedValue(history);
 
-      const result = await controller.getVerificationHistory('user-1');
+      const result = await controller.getVerificationHistory(userPayload);
 
       expect(result).toEqual(history);
       expect(mockVerificationService.getVerificationHistory).toHaveBeenCalledWith('user-1');
@@ -291,7 +304,7 @@ describe('VerificationController', () => {
     it('should return empty array when no history', async () => {
       mockVerificationService.getVerificationHistory.mockResolvedValue([]);
 
-      const result = await controller.getVerificationHistory('user-1');
+      const result = await controller.getVerificationHistory(userPayload);
 
       expect(result).toEqual([]);
     });

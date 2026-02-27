@@ -58,13 +58,14 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
     return undefined;
   }, [id, duration, onDismiss]);
 
-  // Variant styling
+  // Variant styling - using solid backgrounds for readability over page content
+  // Dark mode uses 95% opacity with backdrop-blur for subtle depth while maintaining readability
   const variantClasses = {
-    success: 'bg-green-50 dark:bg-green-900/20 border-green-500 text-green-800 dark:text-green-300',
-    error: 'bg-red-50 dark:bg-red-900/20 border-red-500 text-red-800 dark:text-red-300',
+    success: 'bg-green-50 dark:bg-green-900/95 border-green-500 text-green-800 dark:text-green-200',
+    error: 'bg-red-50 dark:bg-red-900/95 border-red-500 text-red-800 dark:text-red-200',
     warning:
-      'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500 text-yellow-800 dark:text-yellow-300',
-    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-800 dark:text-blue-300',
+      'bg-yellow-50 dark:bg-yellow-900/95 border-yellow-500 text-yellow-800 dark:text-yellow-200',
+    info: 'bg-blue-50 dark:bg-blue-900/95 border-blue-500 text-blue-800 dark:text-blue-200',
   };
 
   // Icons for each variant
@@ -86,7 +87,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
     ),
     error: (
       <svg
-        className="h-5 w-5 text-red-600 dark:text-red-400"
+        className="h-5 w-5 text-red-700 dark:text-red-400"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -138,7 +139,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
       aria-atomic="true"
       className={`
         flex items-start gap-3 p-4 rounded-lg border-l-4 shadow-lg dark:shadow-gray-900/50
-        animate-slide-up
+        animate-slide-up backdrop-blur-sm
         ${variantClasses[variant]}
       `}
     >

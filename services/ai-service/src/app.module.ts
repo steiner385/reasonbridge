@@ -4,6 +4,7 @@
  */
 
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AiModule } from './ai/ai.module.js';
@@ -14,10 +15,18 @@ import { DemoAIModule } from './demo/demo-ai.module.js';
 import { SimulatorModule } from './simulator/simulator.module.js';
 import { TopicQualityModule } from './topic-quality/topic-quality.module.js';
 import { TopicDuplicateModule } from './topic-duplicate/topic-duplicate.module.js';
+import { MetricsModule } from './observability/index.js';
+import { GroomingModule } from './grooming/grooming.module.js';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // Look for .env files in order: local service config, then root monorepo config
+      envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
+    }),
     PrismaModule,
+    MetricsModule,
     HealthModule,
     AiModule,
     FeedbackModule,
@@ -27,6 +36,7 @@ import { TopicDuplicateModule } from './topic-duplicate/topic-duplicate.module.j
     SimulatorModule,
     TopicQualityModule,
     TopicDuplicateModule,
+    GroomingModule,
   ],
   controllers: [],
   providers: [],

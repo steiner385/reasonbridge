@@ -17,3 +17,7 @@ export type {
   UseDraftAutoSaveOptions,
   UseDraftAutoSaveResult,
 } from './useDraftAutoSave';
+export { useOnlineStatus, useIsOnline } from './useOnlineStatus';
+export type { OnlineStatusState, UseOnlineStatusOptions } from './useOnlineStatus';
+export { useDocumentMeta } from './useDocumentMeta';
+export type { DocumentMetaConfig } from './useDocumentMeta';

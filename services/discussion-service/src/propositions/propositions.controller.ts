@@ -13,6 +13,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { PropositionsService } from './propositions.service.js';
@@ -25,7 +26,9 @@ import type { PropositionResponseDto } from './dto/create-proposition.dto.js';
  */
 @Controller('topics/:topicId/propositions')
 export class PropositionsController {
-  constructor(private readonly propositionsService: PropositionsService) {}
+  constructor(
+    @Inject(PropositionsService) private readonly propositionsService: PropositionsService,
+  ) {}
 
   /**
    * Get all propositions for a topic

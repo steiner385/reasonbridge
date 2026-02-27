@@ -268,7 +268,7 @@ describe('TopicFeedbackPanel', () => {
     });
 
     it('should call onSensitivityChange when changed', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onSensitivityChange = vi.fn();
       render(
         <TopicFeedbackPanel

@@ -1,0 +1,20 @@
+{
+  "description": "Successful clustering of 5 texts into 2 themes",
+  "request": {
+    "systemPrompt": "You are an expert at semantic clustering. Group similar texts by meaning.\nReturn ONLY a JSON array of clusters in this exact format:\n[{\"theme\": \"description\", \"members\": [1, 2, 3]}]\nwhere members are the numeric IDs of the texts.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Group these texts by semantic similarity:\n\n1. We need stricter environmental regulations\n2. Climate change requires immediate action\n3. Free market solutions work better than regulation\n4. Government intervention stifles innovation\n5. Protecting the environment is a moral duty"
+      }
+    ]
+  },
+  "response": {
+    "content": "[{\"theme\": \"Environmental protection through regulation\", \"members\": [1, 2, 5]}, {\"theme\": \"Free market and limited government\", \"members\": [3, 4]}]",
+    "stopReason": "end_turn"
+  },
+  "metadata": {
+    "latencyMs": 523,
+    "tokensUsed": 178
+  }
+}

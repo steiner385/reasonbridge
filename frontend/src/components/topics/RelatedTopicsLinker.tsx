@@ -357,7 +357,7 @@ const LinkedTopicItem: React.FC<{
               type="button"
               onClick={handleReject}
               disabled={isUpdating}
-              className="p-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+              className="p-1.5 text-red-700 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
               title="Reject link"
               aria-label="Reject link"
             >
@@ -376,7 +376,7 @@ const LinkedTopicItem: React.FC<{
               type="button"
               onClick={handleDelete}
               disabled={isDeleting}
-              className="p-1.5 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 disabled:opacity-50"
+              className="p-1.5 text-gray-400 hover:text-red-700 dark:text-gray-500 dark:hover:text-red-400 disabled:opacity-50"
               title="Remove link"
               aria-label="Remove link"
             >

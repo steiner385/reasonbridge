@@ -32,4 +32,9 @@ export class PositionResultDto {
 export class GeneratePositionsResultDto {
   positionA!: PositionResultDto;
   positionB!: PositionResultDto;
+  /**
+   * Indicates the response was generated using fallback behavior
+   * because the AI service was unavailable
+   */
+  degradedMode?: boolean;
 }

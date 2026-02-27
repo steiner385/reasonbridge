@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Query, Res, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Res, Logger, Inject } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -18,7 +18,7 @@ import { ProxyService } from './proxy.service.js';
 export class DemoProxyController {
   private readonly logger = new Logger(DemoProxyController.name);
 
-  constructor(private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   /**
    * GET /demo/discussions

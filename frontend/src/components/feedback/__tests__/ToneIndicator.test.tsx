@@ -93,7 +93,7 @@ describe('ToneIndicator', () => {
     });
 
     it('should call onClick when view details is clicked', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClick = vi.fn();
       render(<ToneIndicator tone={mockCalmTone} onClick={onClick} />);
 
@@ -129,7 +129,7 @@ describe('ToneIndicator', () => {
     });
 
     it('should be clickable when onClick is provided', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const onClick = vi.fn();
       render(<ToneIndicator tone={mockCalmTone} variant="compact" onClick={onClick} />);
 

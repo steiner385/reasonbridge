@@ -181,3 +181,67 @@ When adding new query patterns:
 // Composite index example
 @@index([topicId, status, lastActivityAt(sort: Desc)])
 ```
+
+## Automated Performance Testing
+
+The `@reason-bridge/testing-utils` package provides utilities for automated query performance testing:
+
+### Query Timing Utilities
+
+```typescript
+import { createTestPool } from '@reason-bridge/testing-utils/prisma';
+import {
+  explainAnalyze,
+  assertQueryTiming,
+  formatExplainSummary,
+} from '@reason-bridge/testing-utils/perf';
+
+// Create a pg Pool for EXPLAIN ANALYZE
+const pool = await createTestPool();
+
+// Verify index usage
+const result = await explainAnalyze(pool, 'SELECT * FROM users WHERE email = $1', [
+  'test@example.com',
+]);
+
+console.log(formatExplainSummary(result));
+// Output: "exec=0.12ms | plan=0.05ms | total=0.17ms | indexes: users_email_idx"
+
+expect(result.usedIndexScan).toBe(true);
+expect(result.usedSequentialScan).toBe(false);
+
+// Assert performance thresholds
+await assertQueryTiming(pool, 'SELECT * FROM users WHERE id = $1', [userId], {
+  maxExecutionTime: 10, // Must complete in <10ms
+  requireIndexScan: true, // Must use an index
+});
+```
+
+### Running Performance Tests
+
+Performance tests are located in `packages/testing-utils/src/__tests__/query-performance.integration.test.ts` and run during the integration test phase:
+
+```bash
+# Start test database
+docker-compose -f docker-compose.test.yml up -d postgres
+
+# Run performance tests
+pnpm --filter @reason-bridge/testing-utils test:integration
+```
+
+### Available Assertions
+
+| Threshold               | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `maxExecutionTime`      | Maximum query execution time in milliseconds    |
+| `maxTotalTime`          | Maximum planning + execution time               |
+| `requireIndexScan`      | Fail if sequential scan is used                 |
+| `requireIndex`          | Require specific index name to be used          |
+| `maxEstimateInaccuracy` | Maximum row estimate vs actual ratio difference |
+
+### Best Practices
+
+1. **Test critical queries**: Add performance tests for high-frequency queries
+2. **Set realistic thresholds**: Use production-like data volumes for accurate timing
+3. **Run in CI**: Include performance tests in integration test phase
+4. **Monitor regressions**: Thresholds catch accidental index removal or query changes

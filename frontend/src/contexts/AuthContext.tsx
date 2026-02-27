@@ -56,6 +56,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfile = useCallback(async () => {
     try {
       const profile = await apiClient.get<UserProfile>('/users/me');
+
+      // COPPA/GDPR-K: Enforce session-only storage for minor users
+      // This ensures tokens don't persist across browser sessions
+      if (profile.isMinor) {
+        authService.enforceSessionOnlyForMinor(true);
+      }
+
       setUser(profile);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -127,6 +134,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Fetch full user profile after successful login
         const profile = await apiClient.get<UserProfile>('/users/me');
         clearTimeout(timeoutId);
+
+        // COPPA/GDPR-K: Enforce session-only storage for minor users
+        // This overrides any "Remember Me" preference for safety compliance
+        if (profile.isMinor) {
+          authService.enforceSessionOnlyForMinor(true);
+        }
 
         // Set user state immediately
         setUser(profile);

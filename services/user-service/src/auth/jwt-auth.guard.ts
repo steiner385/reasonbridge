@@ -53,11 +53,14 @@ export class JwtAuthGuard implements CanActivate {
 
     // Determine auth mode - database auth and mock auth both use local JWT verification
     const authMode = getConfig('AUTH_MODE');
+    const nodeEnv = getConfig('NODE_ENV');
     this.useMockAuth =
       authMode === 'database' ||
       authMode === 'mock' ||
       getConfig('AUTH_MOCK') === 'true' ||
-      getConfig('NODE_ENV') === 'test';
+      nodeEnv === 'test' ||
+      nodeEnv === 'development' ||
+      !nodeEnv; // Default to mock auth if NODE_ENV is not set
 
     if (this.useMockAuth) {
       // Mock mode - use simple JWT secret

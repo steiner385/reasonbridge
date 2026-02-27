@@ -10,8 +10,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
-    include: ['src/**/*.test.ts'],
+    // Include unit tests (.test.ts) and contract tests (.pact.ts)
+    include: ['src/**/*.test.ts', 'tests/contract/**/*.pact.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
     coverage: {
       provider: 'v8',

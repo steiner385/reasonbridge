@@ -10,10 +10,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderHook } from '@testing-library/react';
 import { TagSelector, useTagValidation } from '../TagSelector';
+// eslint-disable-next-line import/order -- Required: mock must be declared before import for hoisting
 import type { Tag } from '../../../types/tag';
 
 // Mock the tag service
@@ -206,13 +207,13 @@ describe('TagSelector', () => {
         expect(screen.getByText(/create "newtag"/i)).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/create "newtag"/i));
+      // Use fireEvent.click for deterministic behavior with fake timers
+      // userEvent.click has internal delays that can be flaky with fake timers
+      fireEvent.click(screen.getByText(/create "newtag"/i));
 
-      // Flush all pending timers to allow React state updates to complete
-      // Using runAllTimersAsync ensures all setTimeout/setInterval callbacks execute
+      // Flush any pending timers (for React state updates)
       await vi.runAllTimersAsync();
 
-      // Assert directly after flushing timers - no waitFor needed
       expect(onChange).toHaveBeenCalledWith([
         expect.objectContaining({
           name: 'newtag',

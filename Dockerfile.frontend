@@ -49,7 +49,7 @@ RUN ls -la /app/frontend/dist && \
     test -f /app/frontend/dist/index.html || (echo "ERROR: frontend/dist/index.html not found!" && exit 1)
 
 # Stage 2: Serve with nginx
-FROM nginx:1.27-alpine
+FROM nginx:1.29.5-alpine
 
 # Install curl for healthcheck
 RUN apk add --no-cache curl

@@ -215,7 +215,7 @@ function EmailSignupForm({
       color: 'bg-red-500',
       width: 'w-1/3',
       text: 'Weak',
-      textColor: 'text-red-600',
+      textColor: 'text-red-700',
     },
     medium: {
       color: 'bg-yellow-500',

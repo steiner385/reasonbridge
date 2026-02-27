@@ -13,6 +13,7 @@ import {
   forwardRef,
   Logger,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { UsersService } from '../users/users.service.js';
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';
 import { RefreshDto, RefreshResponseDto } from './dto/refresh.dto.js';
@@ -30,11 +31,18 @@ export class AuthController {
     private readonly authService: IAuthService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(AgeVerificationService)
     private readonly ageVerificationService: AgeVerificationService,
+    @Inject(ParentalConsentService)
     private readonly parentalConsentService: ParentalConsentService,
   ) {}
 
+  /**
+   * Register a new user account
+   * Rate limited: 3 attempts per minute to prevent automated account creation
+   */
   @Post('register')
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 per minute
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto): Promise<RegisterResponseDto> {
     // 1. Register with auth service (Cognito or Database)
@@ -111,13 +119,23 @@ export class AuthController {
     };
   }
 
+  /**
+   * Authenticate user and return tokens
+   * Rate limited: 5 attempts per minute to prevent brute force attacks
+   */
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 per minute
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.authenticateUser(loginDto.email, loginDto.password);
   }
 
+  /**
+   * Refresh access token using refresh token
+   * Rate limited: 10 attempts per minute
+   */
   @Post('refresh')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() refreshDto: RefreshDto): Promise<RefreshResponseDto> {
     return this.authService.refreshAccessToken(refreshDto.refreshToken);

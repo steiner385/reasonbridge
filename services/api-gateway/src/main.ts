@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -10,6 +11,7 @@ import helmet from '@fastify/helmet';
 import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { getCorsConfig, getHelmetConfig } from './config/security.config.js';
+import { TracingInterceptor } from './observability/tracing.interceptor.js';
 
 async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter();
@@ -28,10 +30,8 @@ async function bootstrap() {
   const corsConfig = getCorsConfig();
   app.enableCors(corsConfig);
 
-  // Configure OpenAPI/Swagger documentation
-  // Temporarily disabled due to circular dependency in schema generation
-  // TODO: Fix DTO circular reference (property key: "status") and re-enable
-  if (process.env['ENABLE_SWAGGER'] === 'true') {
+  // Configure OpenAPI/Swagger documentation (skip if SKIP_SWAGGER is set for faster dev startup)
+  if (!process.env['SKIP_SWAGGER']) {
     const config = new DocumentBuilder()
       .setTitle('ReasonBridge API')
       .setDescription(
@@ -73,6 +73,9 @@ async function bootstrap() {
     });
   }
 
+  // Distributed tracing interceptor
+  app.useGlobalInterceptors(new TracingInterceptor('api-gateway'));
+
   // Setup graceful shutdown handlers
   setupGracefulShutdown(app, { serviceName: 'api-gateway' });
 
@@ -80,7 +83,11 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 API Gateway is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation available at: http://localhost:${port}/api-docs`);
+  if (!process.env['SKIP_SWAGGER']) {
+    console.log(`📚 API Documentation available at: http://localhost:${port}/api-docs`);
+  } else {
+    console.log(`⚠️  Swagger disabled (SKIP_SWAGGER=1)`);
+  }
 }
 
 bootstrap().catch((error) => {

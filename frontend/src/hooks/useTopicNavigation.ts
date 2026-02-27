@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 /**
  * Topic navigation state and actions
@@ -43,42 +43,42 @@ export interface UseTopicNavigationReturn {
  * ```
  */
 export function useTopicNavigation(): UseTopicNavigationReturn {
-  const [searchParams, setSearchParams] = useSearchParams();
-  // Note: useNavigate() not currently needed as we use setSearchParams for navigation
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(() => {
-    return searchParams.get('topic');
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Sync activeTopicId with URL changes (e.g., browser back/forward)
-  useEffect(() => {
-    const topicId = searchParams.get('topic');
-    // Schedule state update asynchronously to avoid cascading renders
-    setTimeout(() => {
-      setActiveTopicId(topicId);
-    }, 0);
-  }, [searchParams]);
+  // Derive activeTopicId directly from location - using useMemo to parse search params
+  // This ensures we always get the current URL state on every location change
+  const activeTopicId = useMemo(() => {
+    // Check for topic in URL path (e.g., /topics/123)
+    const pathMatch = location.pathname.match(/^\/topics\/([^/]+)/);
+    if (pathMatch?.[1]) {
+      return pathMatch[1];
+    }
+    // Fall back to query param (?topic=123)
+    const params = new URLSearchParams(location.search);
+    return params.get('topic');
+  }, [location.pathname, location.search]);
 
   /**
-   * Navigate to a topic by updating the URL query parameter
-   * Uses client-side navigation (no page reload)
+   * Navigate to a topic discussion
+   * Updates the URL query parameter to show the topic in /discussions
    */
   const navigateToTopic = useCallback(
     (topicId: string) => {
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.set('topic', topicId);
-      setSearchParams(newSearchParams, { replace: false });
+      // Navigate directly to /discussions with topic query param
+      // This avoids the redirect chain through /topics/:id
+      navigate(`/discussions?topic=${topicId}`);
     },
-    [searchParams, setSearchParams],
+    [navigate],
   );
 
   /**
    * Clear topic selection by removing the query parameter
    */
   const clearTopic = useCallback(() => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete('topic');
-    setSearchParams(newSearchParams, { replace: false });
-  }, [searchParams, setSearchParams]);
+    // Navigate to discussions without topic param
+    navigate('/discussions', { replace: false });
+  }, [navigate]);
 
   /**
    * Check if a specific topic is currently active

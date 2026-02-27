@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GetTopicsParams } from '../types/topic';
 import { useMemo } from 'react';
+import type { GetTopicsParams } from '../types/topic';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useTopics } from './useTopics';
 

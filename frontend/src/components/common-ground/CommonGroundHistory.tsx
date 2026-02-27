@@ -38,7 +38,7 @@ export function CommonGroundHistory({ topicId, onVersionSelect }: CommonGroundHi
         <CardHeader title="Common Ground History" />
         <CardBody>
           <div className="flex items-center justify-center py-8">
-            <div className="text-sm text-red-600">
+            <div className="text-sm text-red-700">
               Error loading history: {error instanceof Error ? error.message : 'Unknown error'}
             </div>
           </div>
@@ -188,7 +188,7 @@ function getConsensusColor(score: number): string {
   if (score >= 0.8) return 'text-green-600 dark:text-green-400';
   if (score >= 0.6) return 'text-blue-600 dark:text-blue-400';
   if (score >= 0.4) return 'text-yellow-600 dark:text-yellow-400';
-  return 'text-red-600 dark:text-red-400';
+  return 'text-red-700 dark:text-red-400';
 }
 
 export default CommonGroundHistory;

@@ -137,7 +137,7 @@ export function ResponseList({
   if (error) {
     return (
       <Card variant="elevated" padding="lg">
-        <div className="text-center text-red-600">
+        <div className="text-center text-red-700">
           <p className="font-medium">Failed to load responses</p>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{error.message}</p>
         </div>

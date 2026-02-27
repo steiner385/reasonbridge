@@ -96,7 +96,7 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
     if (score >= 0.8) return 'text-green-700';
     if (score >= 0.6) return 'text-green-600';
     if (score >= 0.4) return 'text-yellow-600';
-    if (score >= 0.2) return 'text-red-600';
+    if (score >= 0.2) return 'text-red-700';
     return 'text-red-700';
   };
 
