@@ -150,6 +150,7 @@ describe('ReactionsService', () => {
         responseId,
         userId,
         emoji,
+        response: { topicId: 'topic-1' },
       });
       mockPrisma.responseReaction.delete.mockResolvedValue({
         id: 'reaction-1',
@@ -163,6 +164,11 @@ describe('ReactionsService', () => {
             responseId,
             userId,
             emoji,
+          },
+        },
+        include: {
+          response: {
+            select: { topicId: true },
           },
         },
       });

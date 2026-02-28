@@ -3,14 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ConflictException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { DiscussionGateway } from '../gateways/discussion.gateway.js';
 import type { CreateReactionDto } from './dto/create-reaction.dto.js';
 import type { ReactionDto, ReactionListDto, ReactionSummaryDto } from './dto/reaction.dto.js';
 
 @Injectable()
 export class ReactionsService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Optional() @Inject(DiscussionGateway) private readonly discussionGateway?: DiscussionGateway,
+  ) {}
 
   /**
    * Add a reaction to a response
@@ -63,7 +67,7 @@ export class ReactionsService {
       },
     });
 
-    return {
+    const reactionDto: ReactionDto = {
       id: reaction.id,
       responseId: reaction.responseId,
       userId: reaction.userId,
@@ -71,6 +75,18 @@ export class ReactionsService {
       emoji: reaction.emoji,
       createdAt: reaction.createdAt,
     };
+
+    // Broadcast WebSocket event for real-time updates
+    if (this.discussionGateway && response.topicId) {
+      this.discussionGateway.emitReactionAdded(response.topicId, {
+        responseId: reaction.responseId,
+        userId: reaction.userId,
+        userName: reaction.user.displayName || 'Anonymous',
+        emoji: reaction.emoji,
+      });
+    }
+
+    return reactionDto;
   }
 
   /**
@@ -89,6 +105,11 @@ export class ReactionsService {
           emoji,
         },
       },
+      include: {
+        response: {
+          select: { topicId: true },
+        },
+      },
     });
 
     if (!reaction) {
@@ -98,6 +119,15 @@ export class ReactionsService {
     await this.prisma.responseReaction.delete({
       where: { id: reaction.id },
     });
+
+    // Broadcast WebSocket event for real-time updates
+    if (this.discussionGateway && reaction.response?.topicId) {
+      this.discussionGateway.emitReactionRemoved(reaction.response.topicId, {
+        responseId,
+        userId,
+        emoji,
+      });
+    }
   }
 
   /**

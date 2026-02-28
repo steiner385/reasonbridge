@@ -15,7 +15,10 @@ export type WebSocketMessageType =
   | 'COMMON_GROUND_UPDATE'
   | 'TOPIC_STATUS_CHANGE'
   | 'RESPONSE_DELETED'
-  | 'RESPONSE_UPDATED';
+  | 'RESPONSE_UPDATED'
+  | 'USER_TYPING'
+  | 'REACTION_ADDED'
+  | 'REACTION_REMOVED';
 
 /**
  * WebSocket message payload for new response
@@ -58,12 +61,66 @@ export interface TopicStatusChangeMessage {
 }
 
 /**
+ * WebSocket message payload for user typing indicator
+ */
+export interface UserTypingMessage {
+  type: 'USER_TYPING';
+  payload: {
+    topicId: string;
+    userId: string;
+    userName: string;
+    isTyping: boolean;
+  };
+}
+
+/**
+ * WebSocket message payload for reaction added
+ */
+export interface ReactionAddedMessage {
+  type: 'REACTION_ADDED';
+  payload: {
+    responseId: string;
+    userId: string;
+    userName: string;
+    emoji: string;
+  };
+}
+
+/**
+ * WebSocket message payload for reaction removed
+ */
+export interface ReactionRemovedMessage {
+  type: 'REACTION_REMOVED';
+  payload: {
+    responseId: string;
+    userId: string;
+    emoji: string;
+  };
+}
+
+/**
  * Union type for all WebSocket messages
  */
 export type WebSocketMessage =
   | NewResponseMessage
   | CommonGroundUpdateMessage
-  | TopicStatusChangeMessage;
+  | TopicStatusChangeMessage
+  | UserTypingMessage
+  | ReactionAddedMessage
+  | ReactionRemovedMessage;
+
+/**
+ * Type mapping from message type string to message interface
+ * Used for type-safe subscription
+ */
+export interface WebSocketMessageMap {
+  NEW_RESPONSE: NewResponseMessage;
+  COMMON_GROUND_UPDATE: CommonGroundUpdateMessage;
+  TOPIC_STATUS_CHANGE: TopicStatusChangeMessage;
+  USER_TYPING: UserTypingMessage;
+  REACTION_ADDED: ReactionAddedMessage;
+  REACTION_REMOVED: ReactionRemovedMessage;
+}
 
 /**
  * WebSocket message handler function
@@ -108,9 +165,9 @@ export interface UseWebSocketReturn {
   /** Manually disconnect from WebSocket */
   disconnect: () => void;
   /** Subscribe to message type */
-  subscribe: <T extends WebSocketMessage>(
-    type: T['type'],
-    handler: WebSocketMessageHandler<T>,
+  subscribe: <T extends keyof WebSocketMessageMap>(
+    type: T,
+    handler: WebSocketMessageHandler<WebSocketMessageMap[T]>,
   ) => () => void;
   /** Send a message to the server */
   send: (message: WebSocketMessage) => void;
@@ -323,7 +380,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
    * Returns unsubscribe function
    */
   const subscribe = useCallback(
-    <T extends WebSocketMessage>(type: T['type'], handler: WebSocketMessageHandler<T>) => {
+    <T extends keyof WebSocketMessageMap>(
+      type: T,
+      handler: WebSocketMessageHandler<WebSocketMessageMap[T]>,
+    ) => {
       const handlers = handlersRef.current.get(type) || new Set();
       handlers.add(handler as WebSocketMessageHandler);
       handlersRef.current.set(type, handlers);

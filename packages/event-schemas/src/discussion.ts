@@ -19,6 +19,10 @@ export const DISCUSSION_EVENT_TYPES = {
   TOPIC_UPDATED: 'topic.updated',
   TOPIC_DELETED: 'topic.deleted',
   TOPIC_STATUS_CHANGED: 'topic.status.changed',
+  // WebSocket real-time message types
+  USER_TYPING: 'user.typing',
+  REACTION_ADDED: 'reaction.added',
+  REACTION_REMOVED: 'reaction.removed',
 } as const;
 
 /**
@@ -235,3 +239,85 @@ export type DiscussionEvent =
   | TopicUpdatedEvent
   | TopicDeletedEvent
   | TopicStatusChangedEvent;
+
+// =============================================================================
+// WebSocket Real-Time Message Types
+// =============================================================================
+
+/**
+ * Payload for user.typing WebSocket message
+ * Broadcast when a user starts or stops typing in a discussion
+ */
+export interface UserTypingPayload {
+  /** Topic where the user is typing */
+  topicId: string;
+  /** User who is typing */
+  userId: string;
+  /** Display name of the user */
+  userName: string;
+  /** Whether the user is currently typing */
+  isTyping: boolean;
+}
+
+/**
+ * WebSocket message for typing indicators
+ */
+export interface UserTypingMessage {
+  type: typeof DISCUSSION_EVENT_TYPES.USER_TYPING;
+  payload: UserTypingPayload;
+  timestamp: string;
+}
+
+/**
+ * Payload for reaction.added WebSocket message
+ * Broadcast when a user adds a reaction to a response
+ */
+export interface ReactionAddedPayload {
+  /** Response that received the reaction */
+  responseId: string;
+  /** User who added the reaction */
+  userId: string;
+  /** Display name of the user */
+  userName: string;
+  /** The emoji used for the reaction */
+  emoji: string;
+}
+
+/**
+ * WebSocket message for reaction added events
+ */
+export interface ReactionAddedMessage {
+  type: typeof DISCUSSION_EVENT_TYPES.REACTION_ADDED;
+  payload: ReactionAddedPayload;
+  timestamp: string;
+}
+
+/**
+ * Payload for reaction.removed WebSocket message
+ * Broadcast when a user removes a reaction from a response
+ */
+export interface ReactionRemovedPayload {
+  /** Response that lost the reaction */
+  responseId: string;
+  /** User who removed the reaction */
+  userId: string;
+  /** The emoji that was removed */
+  emoji: string;
+}
+
+/**
+ * WebSocket message for reaction removed events
+ */
+export interface ReactionRemovedMessage {
+  type: typeof DISCUSSION_EVENT_TYPES.REACTION_REMOVED;
+  payload: ReactionRemovedPayload;
+  timestamp: string;
+}
+
+/**
+ * Union type of all WebSocket real-time messages for discussions
+ */
+export type DiscussionWebSocketMessage =
+  | UserTypingMessage
+  | ReactionAddedMessage
+  | ReactionRemovedMessage;

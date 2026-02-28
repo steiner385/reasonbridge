@@ -21,6 +21,7 @@ import { MetricsModule } from './observability/index.js';
 import { ReactionsModule } from './reactions/reactions.module.js';
 import { BookmarksModule } from './bookmarks/bookmarks.module.js';
 import { ReadStateModule } from './read-state/read-state.module.js';
+import { GatewaysModule } from './gateways/index.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -76,6 +77,8 @@ import { ReadStateModule } from './read-state/read-state.module.js';
     ReactionsModule,
     BookmarksModule,
     ReadStateModule,
+    // WebSocket gateway for real-time updates (typing indicators, reactions)
+    GatewaysModule,
   ],
   controllers: [],
   providers: [],
