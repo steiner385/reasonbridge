@@ -156,8 +156,8 @@ export class ResponsesService {
     }
 
     // Transform citedSources to JSON format if provided
-    let citedSourcesJson: { url: string; title: string | null; extractedAt: string }[] | null =
-      null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Json field accepts any serializable value
+    let citedSourcesJson: any = null;
     if (createResponseDto.citedSources && createResponseDto.citedSources.length > 0) {
       citedSourcesJson = createResponseDto.citedSources.map((url) => ({
         url,
@@ -330,7 +330,8 @@ export class ResponsesService {
     }
 
     // Prepare update data
-    const updateData: Record<string, unknown> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma update data with dynamic properties
+    const updateData: any = {};
 
     if (updateResponseDto.content !== undefined) {
       updateData.content = updateResponseDto.content.trim();
@@ -435,8 +436,8 @@ export class ResponsesService {
   /**
    * Map Prisma Response model to ResponseDto
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma response with dynamic includes
-  private mapToResponseDto(response: Record<string, any>): ResponseDto {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma response with dynamic includes requires any
+  private mapToResponseDto(response: any): ResponseDto {
     const citedSources: CitedSourceDto[] | undefined = response.citedSources
       ? Array.isArray(response.citedSources)
         ? response.citedSources
@@ -732,12 +733,11 @@ export class ResponsesService {
     userId: string,
     replyDto: { content: string; citations?: Array<{ url: string; title?: string }> },
   ): Promise<ResponseDetailDto> {
-    // Fetch parent response to validate and get discussionId/topicId
+    // Fetch parent response to validate and get discussionId
     const parentResponse = await this.prisma.response.findUnique({
       where: { id: parentResponseId },
       select: {
         id: true,
-        topicId: true,
         discussionId: true,
         deletedAt: true,
         parentId: true,
@@ -763,43 +763,22 @@ export class ResponsesService {
       );
     }
 
-    // If discussionId is present, use the discussion-based create method
-    if (parentResponse.discussionId) {
-      return this.createResponseForDiscussion(userId, {
-        discussionId: parentResponse.discussionId,
-        content: replyDto.content,
-        parentResponseId,
-        citations: replyDto.citations,
-      });
+    // Require discussionId for replies - legacy responses without discussions
+    // cannot accept threaded replies through this endpoint
+    if (!parentResponse.discussionId) {
+      throw new BadRequestException(
+        'Cannot reply to this response: it belongs to a legacy topic without a discussion. ' +
+          'Please use the main discussion interface to respond.',
+      );
     }
 
-    // Fallback: Use topic-based createResponse for responses without discussionId
-    // This handles legacy responses created before the Discussion model was introduced
-    const createdResponse = await this.createResponse(parentResponse.topicId, userId, {
+    // Create the reply using the discussion-based method
+    return this.createResponseForDiscussion(userId, {
+      discussionId: parentResponse.discussionId,
       content: replyDto.content,
-      parentId: parentResponseId,
-      citedSources: replyDto.citations?.map((c) => c.url),
+      parentResponseId,
+      citations: replyDto.citations,
     });
-
-    // Transform to ResponseDetailDto format
-    return {
-      id: createdResponse.id,
-      topicId: createdResponse.topicId,
-      discussionId: null,
-      authorId: createdResponse.authorId,
-      author: createdResponse.author,
-      parentId: createdResponse.parentId,
-      content: createdResponse.content,
-      citedSources: createdResponse.citedSources,
-      containsOpinion: createdResponse.containsOpinion,
-      containsFactualClaims: createdResponse.containsFactualClaims,
-      status: createdResponse.status,
-      version: 1,
-      editedAt: null,
-      deletedAt: null,
-      createdAt: createdResponse.createdAt,
-      updatedAt: createdResponse.updatedAt,
-    };
   }
 
   /**

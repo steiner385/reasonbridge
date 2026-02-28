@@ -119,10 +119,10 @@ export class ResponsesController {
     @Req() request: AuthRequest,
   ): Promise<ResponseDetailDto> {
     // Get userId from X-User-Id header (set by API Gateway) or request.user
+    // Use type assertion to access custom header that API Gateway adds
+    const headers = request.headers as unknown as { 'x-user-id'?: string };
     const userId =
-      (request.headers as Record<string, string | undefined>)['x-user-id'] ||
-      request.user?.id ||
-      '00000000-0000-0000-0000-000000000000';
+      headers['x-user-id'] || request.user?.id || '00000000-0000-0000-0000-000000000000';
 
     // Transform DTO to service format
     const replyData = {
