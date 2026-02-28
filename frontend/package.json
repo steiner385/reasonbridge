@@ -21,7 +21,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@reason-bridge/common": "workspace:*",
     "@tanstack/react-query": "5.90.21",
+    "@tanstack/react-virtual": "^3.13.19",
     "libphonenumber-js": "^1.12.37",
     "lucide-react": "^0.575.0",
     "react": "^19.2.4",

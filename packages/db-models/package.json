@@ -37,17 +37,21 @@
     "db:seed:test": "tsx prisma/seed/test-fixtures.ts"
   },
   "dependencies": {
-    "@prisma/client": "7.4.1",
     "@prisma/adapter-pg": "^7.4.1",
-    "pg": "^8.13.1"
+    "@prisma/client": "7.4.1",
+    "bcrypt": "^6.0.0",
+    "pg": "^8.13.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/pg": "^8.11.10",
+    "@types/uuid": "^11.0.0",
+    "@vitest/coverage-v8": "^2.1.8",
     "prisma": "7.4.1",
     "tsx": "^4.19.2",
     "typescript": "5.9.3",
-    "vitest": "^2.1.8",
-    "@vitest/coverage-v8": "^2.1.8"
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "@reason-bridge/common": "workspace:*"

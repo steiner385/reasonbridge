@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import type React from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * Quick reaction emojis available in the picker
@@ -48,6 +50,10 @@ export interface EmojiPickerProps {
  * EmojiPicker component for quick emoji reactions.
  *
  * @remarks
+ * Default position is 'top' (opens above trigger) to prevent dropdown from
+ * being clipped by subsequent content in vertically scrolling containers.
+ *
+ * @remarks
  * - **Quick reactions**: Pre-defined set of common emojis for fast access
  * - **Keyboard navigation**: Arrow keys to navigate, Enter to select, Escape to close
  * - **Accessibility**: WCAG 2.1 AA compliant with proper ARIA attributes
@@ -78,12 +84,17 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
   disabled = false,
   size = 'md',
   className = '',
-  position = 'bottom',
+  position = 'top',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const emojiButtonsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Size classes - all sizes maintain 44px minimum touch target
@@ -107,10 +118,57 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 
   const currentSize = sizeClasses[size];
 
-  // Close picker when clicking outside
+  // Calculate dropdown position based on trigger button
+  const updateDropdownPosition = useCallback(() => {
+    if (!triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const dropdownHeight = 56; // Approximate height of emoji picker
+    const dropdownWidth = 280; // Approximate width of emoji picker
+    const padding = 8;
+
+    let top: number;
+    let left: number;
+
+    // Calculate vertical position
+    if (position === 'top') {
+      // Position above trigger
+      top = rect.top - dropdownHeight - padding;
+      // If it would go above viewport, flip to bottom
+      if (top < padding) {
+        top = rect.bottom + padding;
+      }
+    } else {
+      // Position below trigger
+      top = rect.bottom + padding;
+      // If it would go below viewport, flip to top
+      if (top + dropdownHeight > window.innerHeight - padding) {
+        top = rect.top - dropdownHeight - padding;
+      }
+    }
+
+    // Calculate horizontal position - align left edge with trigger
+    left = rect.left;
+    // If it would go off right edge, adjust
+    if (left + dropdownWidth > window.innerWidth - padding) {
+      left = window.innerWidth - dropdownWidth - padding;
+    }
+    // If it would go off left edge, adjust
+    if (left < padding) {
+      left = padding;
+    }
+
+    setDropdownPosition({ top, left });
+  }, [position]);
+
+  // Close picker when clicking outside (check both container and portal dropdown)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isInsideContainer = containerRef.current?.contains(target);
+      const isInsideDropdown = dropdownRef.current?.contains(target);
+
+      if (!isInsideContainer && !isInsideDropdown) {
         setIsOpen(false);
       }
     };
@@ -121,6 +179,30 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
     }
     return undefined;
   }, [isOpen]);
+
+  // Update position when opening and on scroll/resize
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Calculate initial position on next frame to avoid sync setState in effect
+    const initialPositionFrame = requestAnimationFrame(() => {
+      updateDropdownPosition();
+    });
+
+    const handleScrollOrResize = () => {
+      updateDropdownPosition();
+    };
+
+    // Listen for scroll on any ancestor that might scroll
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+
+    return () => {
+      cancelAnimationFrame(initialPositionFrame);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [isOpen, updateDropdownPosition]);
 
   // Focus first emoji when picker opens
   useEffect(() => {
@@ -223,11 +305,9 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
     ${className}
   `;
 
-  // Dropdown classes
+  // Dropdown classes (now positioned via fixed positioning in portal)
   const dropdownClasses = `
-    absolute z-50
-    ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}
-    left-0
+    fixed z-[9999]
     bg-white dark:bg-gray-800
     border border-gray-200 dark:border-gray-700
     rounded-lg shadow-lg
@@ -265,44 +345,56 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
         </svg>
       </button>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div className={dropdownClasses} role="menu" aria-label="Quick reactions">
-          <div className="flex gap-1">
-            {QUICK_REACTIONS.map((emoji, index) => {
-              const isSelected = selectedEmojis.includes(emoji);
-              return (
-                <button
-                  key={emoji}
-                  ref={(el) => {
-                    emojiButtonsRef.current[index] = el;
-                  }}
-                  onClick={() => handleEmojiSelect(emoji)}
-                  className={`
-                    ${currentSize.emojiButton}
-                    inline-flex items-center justify-center
-                    rounded-md
-                    transition-all duration-150
-                    focus:outline-none focus:ring-2 focus:ring-primary-500
-                    hover:bg-gray-100 dark:hover:bg-gray-700
-                    hover:scale-110
-                    ${
-                      isSelected
-                        ? 'bg-primary-100 dark:bg-primary-900/30 ring-1 ring-primary-500'
-                        : ''
-                    }
-                  `}
-                  role="menuitem"
-                  aria-label={`React with ${emoji}${isSelected ? ' (already selected)' : ''}`}
-                  tabIndex={focusedIndex === index ? 0 : -1}
-                >
-                  <span aria-hidden="true">{emoji}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Dropdown Menu - rendered via portal to escape overflow clipping */}
+      {isOpen &&
+        dropdownPosition &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className={dropdownClasses}
+            role="menu"
+            aria-label="Quick reactions"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+            }}
+          >
+            <div className="flex gap-1">
+              {QUICK_REACTIONS.map((emoji, index) => {
+                const isSelected = selectedEmojis.includes(emoji);
+                return (
+                  <button
+                    key={emoji}
+                    ref={(el) => {
+                      emojiButtonsRef.current[index] = el;
+                    }}
+                    onClick={() => handleEmojiSelect(emoji)}
+                    className={`
+                      ${currentSize.emojiButton}
+                      inline-flex items-center justify-center
+                      rounded-md
+                      transition-all duration-150
+                      focus:outline-none focus:ring-2 focus:ring-primary-500
+                      hover:bg-gray-100 dark:hover:bg-gray-700
+                      hover:scale-110
+                      ${
+                        isSelected
+                          ? 'bg-primary-100 dark:bg-primary-900/30 ring-1 ring-primary-500'
+                          : ''
+                      }
+                    `}
+                    role="menuitem"
+                    aria-label={`React with ${emoji}${isSelected ? ' (already selected)' : ''}`}
+                    tabIndex={focusedIndex === index ? 0 : -1}
+                  >
+                    <span aria-hidden="true">{emoji}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

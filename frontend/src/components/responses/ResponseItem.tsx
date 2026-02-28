@@ -142,7 +142,7 @@ export function ResponseItem({
   const visualDepth = Math.min(depth, maxDepth);
   const indentClass = visualDepth > 0 ? `ml-${Math.min(visualDepth * 4, 16)}` : '';
 
-  // Compact mode styling
+  // Compact mode styling - balanced: space-efficient but readable
   const avatarSize = compact ? 'w-6 h-6 text-xs' : 'w-10 h-10';
   const cardPadding = compact ? 'sm' : 'lg';
   const contentMargin = compact ? 'mb-1' : 'mb-4';
@@ -208,15 +208,15 @@ export function ResponseItem({
         </>
       )}
       <Card
-        variant={depth === 0 && !compact ? 'elevated' : 'outlined'}
+        variant={compact ? 'ghost' : depth === 0 ? 'elevated' : 'outlined'}
         padding={cardPadding}
-        className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${
-          compact ? 'py-2' : ''
-        } ${!isGroupStart && compact ? 'border-t-0 rounded-t-none -mt-px' : ''}`}
+        className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
+          compact ? 'py-2 px-3 border-b border-gray-100 dark:border-gray-800 rounded-none' : ''
+        } ${!isGroupStart && compact ? 'pt-1' : ''}`}
       >
         {/* Header - only shown at group start or in non-compact mode */}
         {isGroupStart && (
-          <div className={`flex items-start gap-3 ${headerMargin}`}>
+          <div className={`flex items-start ${compact ? 'gap-2' : 'gap-3'} ${headerMargin}`}>
             {/* Avatar */}
             <div
               className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}
@@ -254,7 +254,7 @@ export function ResponseItem({
         {/* Content - indented when not showing header to align with text above */}
         <div
           className={`prose prose-sm max-w-none ${contentMargin} ${
-            !isGroupStart && compact ? 'pl-9' : ''
+            !isGroupStart && compact ? 'pl-8' : ''
           }`}
         >
           <p
@@ -267,8 +267,8 @@ export function ResponseItem({
         {/* Citations */}
         {response.citations && response.citations.length > 0 && (
           <div
-            className={`${compact ? 'mb-2 p-2' : 'mb-4 p-3'} bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-700 ${
-              !isGroupStart && compact ? 'ml-9' : ''
+            className={`${compact ? 'mb-1.5 p-2' : 'mb-4 p-3'} bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-700 ${
+              !isGroupStart && compact ? 'ml-8' : ''
             }`}
           >
             <p
@@ -298,16 +298,14 @@ export function ResponseItem({
           </div>
         )}
 
-        {/* Actions - hover-only in compact mode on desktop, always visible on mobile */}
+        {/* Actions - always visible */}
         <div
-          className={`flex items-center justify-between gap-2 ${
-            compact
-              ? `${!isGroupStart ? 'pl-9' : ''} mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150`
-              : 'mt-4'
+          className={`flex items-center justify-between ${
+            compact ? `${!isGroupStart ? 'pl-8' : ''} gap-1.5 mt-1` : 'gap-2 mt-4'
           }`}
         >
           {/* Left side: Reactions and Reply */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className={`flex items-center flex-wrap ${compact ? 'gap-1.5' : 'gap-2'}`}>
             {/* Reaction Bar */}
             <ReactionBar
               reactions={reactions}
@@ -361,7 +359,7 @@ export function ResponseItem({
         {/* Inline Reply Form */}
         {showReplyForm && (
           <div
-            className={`mt-4 ${!isGroupStart && compact ? 'pl-9' : ''}`}
+            className={`${compact ? 'mt-2' : 'mt-4'} ${!isGroupStart && compact ? 'pl-8' : ''}`}
             data-testid="reply-form"
           >
             {shouldUseLightweightComposer ? (

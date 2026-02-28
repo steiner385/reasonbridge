@@ -92,9 +92,15 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
+      '@reason-bridge/common':
+        specifier: workspace:*
+        version: link:../packages/common
       '@tanstack/react-query':
         specifier: 5.90.21
         version: 5.90.21(react@19.2.4)
+      '@tanstack/react-virtual':
+        specifier: ^3.13.19
+        version: 3.13.19(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       libphonenumber-js:
         specifier: ^1.12.37
         version: 1.12.37
@@ -281,13 +287,25 @@ importers:
       '@reason-bridge/common':
         specifier: workspace:*
         version: link:../common
+      bcrypt:
+        specifier: ^6.0.0
+        version: 6.0.0
       pg:
         specifier: ^8.13.1
         version: 8.18.0
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
     devDependencies:
+      '@types/bcrypt':
+        specifier: ^6.0.0
+        version: 6.0.0
       '@types/pg':
         specifier: ^8.11.10
         version: 8.16.0
+      '@types/uuid':
+        specifier: ^11.0.0
+        version: 11.0.0
       '@vitest/coverage-v8':
         specifier: ^2.1.8
         version: 2.1.9(vitest@2.1.9)
@@ -2884,6 +2902,7 @@ packages:
   '@pact-foundation/pact-core@18.1.0':
     resolution: {integrity: sha512-QWdntTsTT32r3SOTDaKjB9QyEbbgfsshsY2X/OwBJaNq28jKYEw50t2lYrITN+SdhkgfkEZJ9Y0XNfxtOUDVnA==}
     engines: {node: '>=20'}
+    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.2.0':
@@ -3423,6 +3442,15 @@ packages:
     resolution: {integrity: sha512-0Lu6y5t+tvlTJMTO7oh5NSpJfpg/5D41LlThfepTixPYkJ0sE2Jj0m0f6yYqujBwIXlId87e234+MxG3D3g7kg==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@tanstack/react-virtual@3.13.19':
+    resolution: {integrity: sha512-KzwmU1IbE0IvCZSm6OXkS+kRdrgW2c2P3Ho3NC+zZXWK6oObv/L+lcV/2VuJ+snVESRlMJ+w/fg4WXI/JzoNGQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/virtual-core@3.13.19':
+    resolution: {integrity: sha512-/BMP7kNhzKOd7wnDeB8NrIRNLwkf5AhCYCvtfZV2GXWbBieFm/el0n6LOAXlTi6ZwHICSNnQcIxRCWHrLzDY+g==}
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -10636,6 +10664,14 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.90.20
       react: 19.2.4
+
+  '@tanstack/react-virtual@3.13.19(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@tanstack/virtual-core': 3.13.19
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
+  '@tanstack/virtual-core@3.13.19': {}
 
   '@testing-library/dom@10.4.1':
     dependencies:
