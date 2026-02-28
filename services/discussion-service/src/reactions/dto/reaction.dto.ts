@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export class ReactionDto {
+export interface ReactionDto {
   id: string;
   responseId: string;
   userId: string;
@@ -12,14 +12,14 @@ export class ReactionDto {
   createdAt: Date;
 }
 
-export class ReactionSummaryDto {
+export interface ReactionSummaryDto {
   emoji: string;
   count: number;
   users: { id: string; displayName: string }[];
   userReacted: boolean;
 }
 
-export class ReactionListDto {
+export interface ReactionListDto {
   reactions: ReactionSummaryDto[];
   totalCount: number;
 }

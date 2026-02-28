@@ -9,5 +9,5 @@ export class CreateReactionDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(32)
-  emoji: string;
+  emoji!: string;
 }
