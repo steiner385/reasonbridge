@@ -106,6 +106,8 @@ model User {
   reactions                     ResponseReaction[]
   // Feature: UI Engagement - bookmarks
   bookmarks                     Bookmark[]
+  // Feature: UI Engagement - new messages divider
+  topicReadStates               UserTopicReadState[]
 
   @@index([cognitoSub])
   @@index([email])
@@ -488,6 +490,8 @@ model DiscussionTopic {
   childContentReviews  ChildContentReviewQueue[]
   // Feature #781: Provisional access for tier-restricted topics
   provisionalAccess    ProvisionalAccess[]
+  // Feature: UI Engagement - new messages divider
+  userReadStates       UserTopicReadState[]
 
   @@index([status])
   @@index([creatorId])
@@ -929,6 +933,24 @@ model Bookmark {
   @@index([userId])
   @@index([responseId])
   @@map("bookmarks")
+}
+
+/// Tracks user's read position in a topic for "New Messages" divider
+model UserTopicReadState {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  topicId        String   @map("topic_id") @db.Uuid
+  lastReadAt     DateTime @map("last_read_at")
+  lastResponseId String?  @map("last_response_id") @db.Uuid
+
+  // Relations
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@index([topicId])
+  @@map("user_topic_read_state")
 }
 
 /// User alignment (support/oppose/nuanced) on a proposition
