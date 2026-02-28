@@ -118,12 +118,13 @@ export class ResponsesController {
   async replyToResponse(
     @Param('responseId') responseId: string,
     @Body() replyDto: ReplyToResponseDto,
+    @Req() request: AuthRequest,
   ): Promise<ResponseDetailDto> {
-    // TODO: Extract userId from JWT token when auth is implemented
-    // For now, using a placeholder. This should be replaced with:
-    // @Req() request: AuthRequest
-    // const userId = request.user!.id;
-    const userId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+    // Get userId from X-User-Id header (set by API Gateway) or request.user
+    const userId =
+      (request.headers as Record<string, string | undefined>)['x-user-id'] ||
+      request.user?.id ||
+      '00000000-0000-0000-0000-000000000000';
 
     // Transform DTO to service format
     const replyData = {

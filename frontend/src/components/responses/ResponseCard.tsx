@@ -148,12 +148,12 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
         {(response.containsOpinion || response.containsFactualClaims) && (
           <div className="flex flex-wrap gap-2 mt-3">
             {response.containsOpinion && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200">
                 Opinion
               </span>
             )}
             {response.containsFactualClaims && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
                 Factual Claims
               </span>
             )}
@@ -162,8 +162,8 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
 
         {/* Cited Sources */}
         {response.citedSources && response.citedSources.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
               Sources ({response.citedSources.length})
             </h4>
             <ul className="space-y-1">
@@ -202,15 +202,15 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
 
         {/* Propositions */}
         {showPropositions && response.propositions && response.propositions.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
               Related Propositions
             </h4>
             <div className="space-y-2">
               {response.propositions.map((prop) => (
                 <div
                   key={prop.id}
-                  className="text-sm bg-gray-50 rounded-lg p-2 border border-gray-200"
+                  className="text-sm bg-gray-50 dark:bg-gray-700 rounded-lg p-2 border border-gray-200 dark:border-gray-600"
                 >
                   <p className="text-gray-800 dark:text-gray-200">{prop.statement}</p>
                   {prop.relevanceScore !== undefined && (

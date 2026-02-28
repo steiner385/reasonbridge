@@ -728,11 +728,12 @@ export class ResponsesService {
     userId: string,
     replyDto: { content: string; citations?: Array<{ url: string; title?: string }> },
   ): Promise<ResponseDetailDto> {
-    // Fetch parent response to validate and get discussionId
+    // Fetch parent response to validate and get discussionId/topicId
     const parentResponse = await this.prisma.response.findUnique({
       where: { id: parentResponseId },
       select: {
         id: true,
+        topicId: true,
         discussionId: true,
         deletedAt: true,
         parentId: true,
@@ -747,10 +748,6 @@ export class ResponsesService {
       throw new BadRequestException('Cannot reply to a deleted response');
     }
 
-    if (!parentResponse.discussionId) {
-      throw new BadRequestException('Parent response must belong to a discussion');
-    }
-
     // Calculate thread depth to enforce limit (T054)
     const depth = await this.calculateThreadDepth(parentResponseId);
     const MAX_THREAD_DEPTH = 10; // Allow up to 10 levels, but UI will flatten after 5
@@ -762,13 +759,43 @@ export class ResponsesService {
       );
     }
 
-    // Create the reply using the existing createResponseForDiscussion method
-    return this.createResponseForDiscussion(userId, {
-      discussionId: parentResponse.discussionId,
+    // If discussionId is present, use the discussion-based create method
+    if (parentResponse.discussionId) {
+      return this.createResponseForDiscussion(userId, {
+        discussionId: parentResponse.discussionId,
+        content: replyDto.content,
+        parentResponseId,
+        citations: replyDto.citations,
+      });
+    }
+
+    // Fallback: Use topic-based createResponse for responses without discussionId
+    // This handles legacy responses created before the Discussion model was introduced
+    const createdResponse = await this.createResponse(parentResponse.topicId, userId, {
       content: replyDto.content,
-      parentResponseId,
-      citations: replyDto.citations,
+      parentId: parentResponseId,
+      citedSources: replyDto.citations?.map((c) => c.url),
     });
+
+    // Transform to ResponseDetailDto format
+    return {
+      id: createdResponse.id,
+      topicId: createdResponse.topicId,
+      discussionId: null,
+      authorId: createdResponse.authorId,
+      author: createdResponse.author,
+      parentId: createdResponse.parentId,
+      content: createdResponse.content,
+      citedSources: createdResponse.citedSources,
+      containsOpinion: createdResponse.containsOpinion,
+      containsFactualClaims: createdResponse.containsFactualClaims,
+      status: createdResponse.status,
+      version: 1,
+      editedAt: null,
+      deletedAt: null,
+      createdAt: createdResponse.createdAt,
+      updatedAt: createdResponse.updatedAt,
+    };
   }
 
   /**

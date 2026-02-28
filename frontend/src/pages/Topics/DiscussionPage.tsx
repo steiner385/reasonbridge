@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { DiscussionLayout } from '../../components/discussion-layout/DiscussionLayout';
 import { ConversationPanel } from '../../components/discussion-layout/ConversationPanel';
 import { MetadataPanel } from '../../components/discussion-layout/MetadataPanel';
@@ -12,6 +13,8 @@ import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useTopics } from '../../lib/useTopics';
 import { useTopic } from '../../lib/useTopic';
 import { usePropositions } from '../../hooks/usePropositions';
+import { useToast } from '../../contexts/ToastContext';
+import { responseService } from '../../services/responseService';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 import type { CreateResponseRequest } from '../../types/response';
 
@@ -42,6 +45,8 @@ import type { CreateResponseRequest } from '../../types/response';
  */
 export function DiscussionPage() {
   const { activeTopicId } = useTopicNavigation();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const [highlightedResponseIds, setHighlightedResponseIds] = useState<Set<string>>(new Set());
 
   // Composition state for preview feedback in right panel
@@ -208,17 +213,34 @@ export function DiscussionPage() {
 
   // Handle inline reply submission (memoized to prevent unnecessary re-renders)
   const handleReplySubmit = useCallback(
-    async (_response: CreateResponseRequest) => {
-      // TODO: Implement actual API call to submit reply
-      // For now, just placeholder - API integration will be added later
+    async (response: CreateResponseRequest) => {
+      if (!response.parentId) {
+        toast.error('Cannot submit reply: missing parent response ID');
+        return;
+      }
 
-      // Clear composition state after submission
-      handleCompositionStateChange(false);
+      try {
+        // Call the API to create the reply
+        await responseService.replyToResponse(response.parentId, {
+          content: response.content,
+          citations: response.citedSources?.map((url) => ({ url })),
+        });
 
-      // TODO: Invalidate responses query to refetch updated list
-      // queryClient.invalidateQueries(['responses', activeTopic?.id]);
+        // Clear composition state after successful submission
+        handleCompositionStateChange(false);
+
+        // Invalidate responses query to refetch updated list with new reply
+        if (activeTopic?.id) {
+          await queryClient.invalidateQueries({ queryKey: ['responses', activeTopic.id] });
+        }
+
+        toast.success('Reply posted successfully');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to post reply';
+        toast.error(message);
+      }
     },
-    [handleCompositionStateChange],
+    [handleCompositionStateChange, activeTopic, queryClient, toast],
   );
 
   // Handle unsaved changes confirmation
