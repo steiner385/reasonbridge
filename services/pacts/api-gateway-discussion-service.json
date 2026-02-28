@@ -1,0 +1,813 @@
+{
+  "consumer": {
+    "name": "api-gateway"
+  },
+  "interactions": [
+    {
+      "description": "a request to add a reaction to a response",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "response with ID 550e8400-e29b-41d4-a716-446655440000 exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "emoji": "thumbsup"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"],
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.emoji": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/responses/550e8400-e29b-41d4-a716-446655440000/reactions"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "responseId": "550e8400-e29b-41d4-a716-446655440000",
+            "userId": "660e8400-e29b-41d4-a716-446655440001",
+            "userName": "Test User",
+            "emoji": "thumbsup",
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.userName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.emoji": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to remove a reaction from a response",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "response with ID 550e8400-e29b-41d4-a716-446655440000 exists with user reaction"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "DELETE",
+        "path": "/responses/550e8400-e29b-41d4-a716-446655440000/reactions/thumbsup"
+      },
+      "response": {
+        "status": 204
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get reactions for a response",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "response with ID 550e8400-e29b-41d4-a716-446655440000 exists with reactions"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "GET",
+        "path": "/responses/550e8400-e29b-41d4-a716-446655440000/reactions"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "reactions": [
+              {
+                "emoji": "thumbsup",
+                "count": 5,
+                "users": [
+                  {
+                    "id": "660e8400-e29b-41d4-a716-446655440001",
+                    "displayName": "Test User"
+                  }
+                ],
+                "userReacted": true
+              }
+            ],
+            "totalCount": 5
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.reactions": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ]
+            },
+            "$.reactions[*].emoji": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reactions[*].count": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.reactions[*].users": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ]
+            },
+            "$.reactions[*].users[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.reactions[*].users[*].displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reactions[*].userReacted": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.totalCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to add a bookmark",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "response with ID 770e8400-e29b-41d4-a716-446655440002 exists and is not bookmarked"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "responseId": "770e8400-e29b-41d4-a716-446655440002"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"],
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/bookmarks"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+            "userId": "660e8400-e29b-41d4-a716-446655440001",
+            "responseId": "770e8400-e29b-41d4-a716-446655440002",
+            "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to remove a bookmark",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "response with ID 770e8400-e29b-41d4-a716-446655440002 is bookmarked by user"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "DELETE",
+        "path": "/bookmarks/770e8400-e29b-41d4-a716-446655440002"
+      },
+      "response": {
+        "status": 204
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get user's bookmarks",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user has bookmarks"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "GET",
+        "path": "/bookmarks",
+        "query": {
+          "limit": ["20"],
+          "offset": ["0"]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "bookmarks": [
+              {
+                "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304",
+                "userId": "660e8400-e29b-41d4-a716-446655440001",
+                "responseId": "770e8400-e29b-41d4-a716-446655440002",
+                "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                "response": {
+                  "id": "770e8400-e29b-41d4-a716-446655440002",
+                  "content": "This is a bookmarked response content",
+                  "topicId": "880e8400-e29b-41d4-a716-446655440003",
+                  "topicTitle": "Sample Discussion Topic",
+                  "authorDisplayName": "Author Name",
+                  "createdAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                }
+              }
+            ],
+            "total": 1,
+            "limit": 20,
+            "offset": 0
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.bookmarks": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ]
+            },
+            "$.bookmarks[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.bookmarks[*].userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.bookmarks[*].responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.bookmarks[*].createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.bookmarks[*].response": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.bookmarks[*].response.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.bookmarks[*].response.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.bookmarks[*].response.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.bookmarks[*].response.topicTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.bookmarks[*].response.authorDisplayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.bookmarks[*].response.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.total": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.limit": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.offset": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to check if a response is bookmarked",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "response with ID 770e8400-e29b-41d4-a716-446655440002 exists"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "GET",
+        "path": "/bookmarks/770e8400-e29b-41d4-a716-446655440002/status"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "isBookmarked": true
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.isBookmarked": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to update read state for a topic",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "topic with ID 880e8400-e29b-41d4-a716-446655440003 exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "lastResponseId": "990e8400-e29b-41d4-a716-446655440004"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"],
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.lastResponseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/topics/880e8400-e29b-41d4-a716-446655440003/read-state"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "userId": "660e8400-e29b-41d4-a716-446655440001",
+            "topicId": "880e8400-e29b-41d4-a716-446655440003",
+            "lastReadAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "lastResponseId": "990e8400-e29b-41d4-a716-446655440004"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.lastReadAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.lastResponseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get read state for a topic",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "topic with ID 880e8400-e29b-41d4-a716-446655440003 exists with read state"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "GET",
+        "path": "/topics/880e8400-e29b-41d4-a716-446655440003/read-state"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "userId": "660e8400-e29b-41d4-a716-446655440001",
+            "topicId": "880e8400-e29b-41d4-a716-446655440003",
+            "lastReadAt": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "lastResponseId": "990e8400-e29b-41d4-a716-446655440004"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            },
+            "$.lastReadAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.lastResponseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get read state for a topic with no existing state",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "topic with ID aa0e8400-e29b-41d4-a716-446655440005 exists but user has no read state"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-user-id": ["660e8400-e29b-41d4-a716-446655440001"]
+        },
+        "method": "GET",
+        "path": "/topics/aa0e8400-e29b-41d4-a716-446655440005/read-state"
+      },
+      "response": {
+        "body": {
+          "content": null,
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "discussion-service"
+  }
+}
