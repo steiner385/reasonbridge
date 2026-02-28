@@ -12,9 +12,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Delete,
   Req,
-  UseInterceptors,
   Inject,
 } from '@nestjs/common';
 // TEMPORARILY DISABLED for debugging hang issue
@@ -253,7 +251,10 @@ export class ResponsesController {
       throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
     }
 
-    return this.contentModerationService.getResponsesByStatus(topicId, status.toUpperCase() as any);
+    return this.contentModerationService.getResponsesByStatus(
+      topicId,
+      status.toUpperCase() as 'VISIBLE' | 'HIDDEN' | 'REMOVED',
+    );
   }
 
   // ==================== Feature 009: Discussion Participation ====================

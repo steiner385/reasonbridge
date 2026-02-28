@@ -156,7 +156,8 @@ export class ResponsesService {
     }
 
     // Transform citedSources to JSON format if provided
-    let citedSourcesJson: any = null;
+    let citedSourcesJson: { url: string; title: string | null; extractedAt: string }[] | null =
+      null;
     if (createResponseDto.citedSources && createResponseDto.citedSources.length > 0) {
       citedSourcesJson = createResponseDto.citedSources.map((url) => ({
         url,
@@ -329,7 +330,7 @@ export class ResponsesService {
     }
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (updateResponseDto.content !== undefined) {
       updateData.content = updateResponseDto.content.trim();
@@ -434,7 +435,8 @@ export class ResponsesService {
   /**
    * Map Prisma Response model to ResponseDto
    */
-  private mapToResponseDto(response: any): ResponseDto {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma response with dynamic includes
+  private mapToResponseDto(response: Record<string, any>): ResponseDto {
     const citedSources: CitedSourceDto[] | undefined = response.citedSources
       ? Array.isArray(response.citedSources)
         ? response.citedSources
@@ -458,11 +460,13 @@ export class ResponsesService {
       containsOpinion: response.containsOpinion,
       containsFactualClaims: response.containsFactualClaims,
       propositions: response.propositions
-        ? response.propositions.map((rp: any) => ({
-            id: rp.proposition.id,
-            statement: rp.proposition.statement,
-            relevanceScore: rp.relevanceScore ? Number(rp.relevanceScore) : undefined,
-          }))
+        ? response.propositions.map(
+            (rp: { proposition: { id: string; statement: string }; relevanceScore?: number }) => ({
+              id: rp.proposition.id,
+              statement: rp.proposition.statement,
+              relevanceScore: rp.relevanceScore ? Number(rp.relevanceScore) : undefined,
+            }),
+          )
         : undefined,
       status: response.status.toLowerCase(),
       revisionCount: response.revisionCount,
