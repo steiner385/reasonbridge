@@ -104,6 +104,8 @@ model User {
   emailHash                     String?                   @map("email_hash")
   // Feature: UI Engagement - emoji reactions
   reactions                     ResponseReaction[]
+  // Feature: UI Engagement - bookmarks
+  bookmarks                     Bookmark[]
 
   @@index([cognitoSub])
   @@index([email])
@@ -831,6 +833,8 @@ model Response {
   childContentReview ChildContentReviewQueue?
   // Feature: UI Engagement - emoji reactions
   reactions          ResponseReaction[]
+  // Feature: UI Engagement - bookmarks
+  bookmarks          Bookmark[]
 
   @@index([topicId])
   // T004 [P] & T005 [P] - NEW: Indexes for soft delete and discussion filtering
@@ -908,6 +912,23 @@ model ResponseReaction {
   @@index([responseId])
   @@index([userId])
   @@map("response_reactions")
+}
+
+/// User bookmark on a response
+model Bookmark {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  responseId String   @map("response_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, responseId])
+  @@index([userId])
+  @@index([responseId])
+  @@map("bookmarks")
 }
 
 /// User alignment (support/oppose/nuanced) on a proposition
