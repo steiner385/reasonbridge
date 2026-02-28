@@ -28,6 +28,9 @@ export const DEFAULT_PANEL_STATE: PanelState = {
   activeTopic: null,
 };
 
+/** Metadata panel tab types (imported from MetadataPanel for type safety) */
+export type MetadataPanelTab = 'propositions' | 'commonGround' | 'bridging' | 'preview' | 'info';
+
 /**
  * Context value interface with state and actions
  */
@@ -42,6 +45,12 @@ interface DiscussionLayoutContextValue {
   toggleLeftPanelOverlay?: () => void;
   /** Close left panel overlay (tablet/mobile only) */
   closeLeftPanelOverlay?: () => void;
+  /** Expand right panel to a specific tab */
+  expandRightPanelToTab?: (tab: MetadataPanelTab) => void;
+  /** Currently requested tab to expand to (used for cross-component communication) */
+  requestedTab?: MetadataPanelTab | null;
+  /** Clear the requested tab after it's been handled */
+  clearRequestedTab?: () => void;
 }
 
 /**
@@ -59,6 +68,14 @@ export function useDiscussionLayout(): DiscussionLayoutContextValue {
     throw new Error('useDiscussionLayout must be used within DiscussionLayoutProvider');
   }
   return context;
+}
+
+/**
+ * Safe hook to access discussion layout context (returns null if not in provider)
+ * Use this in components that may be rendered outside the DiscussionLayoutProvider
+ */
+export function useDiscussionLayoutSafe(): DiscussionLayoutContextValue | null {
+  return useContext(DiscussionLayoutContext);
 }
 
 /**

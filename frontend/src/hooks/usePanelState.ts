@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import type { PanelState } from '../contexts/DiscussionLayoutContext';
+import type { PanelState, MetadataPanelTab } from '../contexts/DiscussionLayoutContext';
 import { DEFAULT_PANEL_STATE } from '../contexts/DiscussionLayoutContext';
 
 const STORAGE_KEY = 'discussion-panel-state';
@@ -86,10 +86,34 @@ export function usePanelState() {
     }));
   }, []);
 
+  // Track requested tab for cross-component communication
+  const [requestedTab, setRequestedTab] = useState<MetadataPanelTab | null>(null);
+
+  /**
+   * Expand right panel and request a specific tab
+   */
+  const expandRightPanelToTab = useCallback((tab: MetadataPanelTab) => {
+    setPanelStateInternal((prev) => ({
+      ...prev,
+      isRightPanelCollapsed: false,
+    }));
+    setRequestedTab(tab);
+  }, []);
+
+  /**
+   * Clear the requested tab after it's been handled
+   */
+  const clearRequestedTab = useCallback(() => {
+    setRequestedTab(null);
+  }, []);
+
   return {
     panelState,
     setPanelWidth,
     togglePanel,
     setActiveTopic,
+    expandRightPanelToTab,
+    requestedTab,
+    clearRequestedTab,
   };
 }

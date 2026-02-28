@@ -12,15 +12,28 @@
  * - Citations (if any)
  * - Edit indicator (if edited)
  * - Reply button and nested replies (Phase 5)
+ *
+ * @remarks
+ * **Compact Mode**: When `compact` is true, the component renders in a
+ * space-efficient format similar to Discord/Slack messages:
+ * - Smaller avatar (24px vs 40px)
+ * - Reduced padding
+ * - Inline name + timestamp
+ * - Hover-only actions on desktop (always visible on mobile for touch)
+ *
+ * **Message Grouping**: When `isGroupStart` is false, the header (avatar,
+ * name, time) is hidden, allowing consecutive messages from the same author
+ * to visually flow together.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import type { ResponseDetail } from '../../services/discussionService';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import ResponseComposer from './ResponseComposer';
+import { LightweightReplyComposer } from './LightweightReplyComposer';
 
 export interface ResponseItemProps {
   response: ResponseDetail;
@@ -39,6 +52,28 @@ export interface ResponseItemProps {
     isLoading?: boolean,
     error?: string | null,
   ) => void;
+  /** Enable compact display mode with smaller elements and hover actions */
+  compact?: boolean;
+  /** Whether this response starts a message group (show avatar/name/time) */
+  isGroupStart?: boolean;
+  /** Whether this response ends a message group (for styling purposes) */
+  isGroupEnd?: boolean;
+  /** Use lightweight reply composer (auto-enabled in compact mode) */
+  useLightweightComposer?: boolean;
+  /** Show visual threading lines for nested replies */
+  showThreadLines?: boolean;
+  /** Whether this is the last reply in its sibling group (affects line termination) */
+  isLastReply?: boolean;
+  /** Minimum number of replies before showing collapse button (default: 5) */
+  collapseThreshold?: number;
+  /** Number of replies to show when collapsed (default: 2) */
+  collapsedVisibleCount?: number;
+  /** Set of thread IDs that are currently expanded */
+  expandedThreads?: Set<string>;
+  /** Callback when a thread is expanded */
+  onThreadExpand?: (threadId: string) => void;
+  /** Callback when a thread is collapsed */
+  onThreadCollapse?: (threadId: string) => void;
 }
 
 export function ResponseItem({
@@ -49,7 +84,20 @@ export function ResponseItem({
   onReply,
   onReplySubmit,
   onPreviewFeedbackChange,
+  compact = false,
+  isGroupStart = true,
+  isGroupEnd: _isGroupEnd = true,
+  useLightweightComposer,
+  showThreadLines = false,
+  isLastReply = false,
+  collapseThreshold = 5,
+  collapsedVisibleCount = 2,
+  expandedThreads,
+  onThreadExpand,
+  onThreadCollapse,
 }: ResponseItemProps) {
+  // Use lightweight composer by default in compact mode
+  const shouldUseLightweightComposer = useLightweightComposer ?? compact;
   const [showReplyForm, setShowReplyForm] = useState(false);
 
   const handleReplyClick = () => {
@@ -86,67 +134,155 @@ export function ResponseItem({
   const visualDepth = Math.min(depth, maxDepth);
   const indentClass = visualDepth > 0 ? `ml-${Math.min(visualDepth * 4, 16)}` : '';
 
+  // Compact mode styling
+  const avatarSize = compact ? 'w-6 h-6 text-xs' : 'w-10 h-10';
+  const cardPadding = compact ? 'sm' : 'lg';
+  const contentMargin = compact ? 'mb-1' : 'mb-4';
+  const headerMargin = compact ? 'mb-1' : 'mb-3';
+
+  // Threading line configuration
+  const hasReplies = response.replies && response.replies.length > 0;
+  const showVerticalLine = showThreadLines && depth > 0;
+  const showBranchLine = showThreadLines && depth > 0;
+
+  // Thread collapse logic
+  const replyCount = response.replies?.length || 0;
+  const shouldShowCollapseButton = replyCount >= collapseThreshold;
+  const isThreadExpanded = expandedThreads?.has(response.id) ?? true;
+
+  const visibleReplies = useMemo(() => {
+    if (!response.replies || response.replies.length === 0) return [];
+    if (!shouldShowCollapseButton || isThreadExpanded) {
+      return response.replies;
+    }
+    // When collapsed, show first N and last reply
+    return response.replies.slice(0, collapsedVisibleCount);
+  }, [response.replies, shouldShowCollapseButton, isThreadExpanded, collapsedVisibleCount]);
+
+  const hiddenReplyCount = replyCount - visibleReplies.length;
+
+  const handleToggleThread = () => {
+    if (isThreadExpanded) {
+      onThreadCollapse?.(response.id);
+    } else {
+      onThreadExpand?.(response.id);
+    }
+  };
+
   return (
     <div
-      className={indentClass}
+      className={`${indentClass} group relative`}
       data-testid="response-item"
       data-response-id={response.id}
       data-parent-id={response.parentResponseId || undefined}
       data-depth={depth}
+      data-compact={compact}
     >
+      {/* Threading lines for nested replies */}
+      {showVerticalLine && (
+        <>
+          {/* Vertical connector line from parent thread */}
+          <div
+            className={`absolute left-0 w-0.5 bg-gray-200 dark:bg-gray-700 ${
+              isLastReply ? 'top-0 h-5' : 'top-0 bottom-0'
+            }`}
+            aria-hidden="true"
+            data-thread-line="vertical"
+          />
+          {/* Horizontal branch connecting to this response */}
+          {showBranchLine && (
+            <div
+              className="absolute left-0 top-5 w-4 h-0.5 bg-gray-200 dark:bg-gray-700"
+              aria-hidden="true"
+              data-thread-line="branch"
+            />
+          )}
+        </>
+      )}
       <Card
-        variant={depth === 0 ? 'elevated' : 'outlined'}
-        padding="lg"
-        className="transition-colors hover:bg-gray-50"
+        variant={depth === 0 && !compact ? 'elevated' : 'outlined'}
+        padding={cardPadding}
+        className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${
+          compact ? 'py-2' : ''
+        } ${!isGroupStart && compact ? 'border-t-0 rounded-t-none -mt-px' : ''}`}
       >
-        {/* Header */}
-        <div className="flex items-start gap-3 mb-3">
-          {/* Avatar Placeholder */}
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-            {response.author.displayName.charAt(0).toUpperCase()}
-          </div>
+        {/* Header - only shown at group start or in non-compact mode */}
+        {isGroupStart && (
+          <div className={`flex items-start gap-3 ${headerMargin}`}>
+            {/* Avatar */}
+            <div
+              className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}
+            >
+              {response.author.displayName.charAt(0).toUpperCase()}
+            </div>
 
-          {/* Author and Timestamp */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="font-semibold text-gray-900 dark:text-gray-100">
-                {response.author.displayName}
-              </span>
-              <span className="text-sm text-gray-500">
-                <time dateTime={response.createdAt}>{formatDate(response.createdAt)}</time>
-              </span>
-              {/* Edit Indicator */}
-              {response.editCount > 0 && response.editedAt && (
-                <span className="text-sm text-gray-500 italic">
-                  (edited {formatDate(response.editedAt)})
+            {/* Author and Timestamp */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span
+                  className={`font-semibold text-gray-900 dark:text-gray-100 ${compact ? 'text-sm' : ''}`}
+                >
+                  {response.author.displayName}
                 </span>
-              )}
+                {/* Compact: inline separator, Non-compact: on its own line */}
+                {compact && <span className="text-gray-400">·</span>}
+                <span className={`text-gray-500 ${compact ? 'text-xs' : 'text-sm'}`}>
+                  <time dateTime={response.createdAt}>{formatDate(response.createdAt)}</time>
+                </span>
+                {/* Edit Indicator */}
+                {response.editCount > 0 && response.editedAt && (
+                  <>
+                    {compact && <span className="text-gray-400">·</span>}
+                    <span className={`text-gray-500 italic ${compact ? 'text-xs' : 'text-sm'}`}>
+                      {compact ? 'edited' : `(edited ${formatDate(response.editedAt)})`}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Content */}
-        <div className="prose prose-sm max-w-none mb-4">
-          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{response.content}</p>
+        {/* Content - indented when not showing header to align with text above */}
+        <div
+          className={`prose prose-sm max-w-none ${contentMargin} ${
+            !isGroupStart && compact ? 'pl-9' : ''
+          }`}
+        >
+          <p
+            className={`text-gray-800 dark:text-gray-200 whitespace-pre-wrap ${compact ? 'text-sm' : ''}`}
+          >
+            {response.content}
+          </p>
         </div>
 
         {/* Citations */}
         {response.citations && response.citations.length > 0 && (
-          <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
-            <p className="text-sm font-medium text-gray-700 mb-2">Sources:</p>
+          <div
+            className={`${compact ? 'mb-2 p-2' : 'mb-4 p-3'} bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-700 ${
+              !isGroupStart && compact ? 'ml-9' : ''
+            }`}
+          >
+            <p
+              className={`font-medium text-gray-700 dark:text-gray-300 ${compact ? 'text-xs mb-1' : 'text-sm mb-2'}`}
+            >
+              Sources:
+            </p>
             <ul className="space-y-1">
               {response.citations.map((citation) => (
-                <li key={citation.id} className="text-sm">
+                <li key={citation.id} className={compact ? 'text-xs' : 'text-sm'}>
                   <a
                     href={citation.originalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     {citation.title || citation.originalUrl}
                   </a>
                   {citation.validationStatus === 'BROKEN' && (
-                    <span className="ml-2 text-xs text-red-700">(broken link)</span>
+                    <span className="ml-2 text-xs text-red-700 dark:text-red-400">
+                      (broken link)
+                    </span>
                   )}
                 </li>
               ))}
@@ -154,17 +290,28 @@ export function ResponseItem({
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-4">
+        {/* Actions - hover-only in compact mode on desktop, always visible on mobile */}
+        <div
+          className={`flex items-center gap-4 ${
+            compact
+              ? `${!isGroupStart ? 'pl-9' : ''} mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150`
+              : 'mt-4'
+          }`}
+        >
           {/* Reply Button (Phase 5) */}
           {showReplies && depth < maxDepth && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleReplyClick}
-              className="text-gray-600 dark:text-gray-400 hover:text-blue-600"
+              className={`text-gray-600 dark:text-gray-400 hover:text-blue-600 ${compact ? 'text-xs py-0.5 px-1.5' : ''}`}
             >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} mr-1`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -182,28 +329,54 @@ export function ResponseItem({
 
         {/* Inline Reply Form */}
         {showReplyForm && (
-          <div className="mt-4" data-testid="reply-form">
-            <ResponseComposer
-              inline
-              parentId={response.id}
-              placeholder="Write your reply..."
-              minLength={10}
-              maxLength={10000}
-              onSubmit={handleReplySubmit}
-              onCancel={() => setShowReplyForm(false)}
-              showCancel
-              topicId={discussionId}
-              onPreviewFeedbackChange={onPreviewFeedbackChange}
-              showPreviewFeedbackInline={false}
-            />
+          <div
+            className={`mt-4 ${!isGroupStart && compact ? 'pl-9' : ''}`}
+            data-testid="reply-form"
+          >
+            {shouldUseLightweightComposer ? (
+              <LightweightReplyComposer
+                parentId={response.id}
+                authorName={response.author.displayName}
+                topicId={discussionId}
+                onSubmit={handleReplySubmit}
+                onCancel={() => setShowReplyForm(false)}
+                onPreviewFeedbackChange={onPreviewFeedbackChange}
+                minLength={10}
+                maxLength={10000}
+                autoFocus
+                defaultExpanded
+              />
+            ) : (
+              <ResponseComposer
+                inline
+                parentId={response.id}
+                placeholder="Write your reply..."
+                minLength={10}
+                maxLength={10000}
+                onSubmit={handleReplySubmit}
+                onCancel={() => setShowReplyForm(false)}
+                showCancel
+                topicId={discussionId}
+                onPreviewFeedbackChange={onPreviewFeedbackChange}
+                showPreviewFeedbackInline={false}
+              />
+            )}
           </div>
         )}
       </Card>
 
       {/* Nested Replies (Phase 5) */}
       {showReplies && response.replies && response.replies.length > 0 && (
-        <div className="mt-2 space-y-2">
-          {response.replies.map((reply) => (
+        <div className={`mt-2 space-y-2 ${showThreadLines ? 'relative' : ''}`}>
+          {/* Parent thread continuation line (when showing thread lines) */}
+          {showThreadLines && hasReplies && (
+            <div
+              className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"
+              aria-hidden="true"
+              data-thread-line="parent-continuation"
+            />
+          )}
+          {visibleReplies.map((reply, index) => (
             <ResponseItem
               key={reply.id}
               response={reply}
@@ -213,8 +386,69 @@ export function ResponseItem({
               onReply={onReply}
               onReplySubmit={onReplySubmit}
               onPreviewFeedbackChange={onPreviewFeedbackChange}
+              compact={compact}
+              isGroupStart={true}
+              isGroupEnd={true}
+              useLightweightComposer={useLightweightComposer}
+              showThreadLines={showThreadLines}
+              isLastReply={
+                isThreadExpanded ? index === visibleReplies.length - 1 : false // Not last when collapsed (more hidden)
+              }
+              collapseThreshold={collapseThreshold}
+              collapsedVisibleCount={collapsedVisibleCount}
+              expandedThreads={expandedThreads}
+              onThreadExpand={onThreadExpand}
+              onThreadCollapse={onThreadCollapse}
             />
           ))}
+
+          {/* Thread collapse/expand button */}
+          {shouldShowCollapseButton && (
+            <button
+              type="button"
+              onClick={handleToggleThread}
+              className={`
+                flex items-center gap-2 py-2 px-3 ml-4
+                text-sm font-medium
+                text-blue-600 dark:text-blue-400
+                hover:text-blue-800 dark:hover:text-blue-300
+                hover:bg-blue-50 dark:hover:bg-blue-900/20
+                rounded-md transition-colors
+                ${showThreadLines ? 'relative' : ''}
+              `}
+              aria-expanded={isThreadExpanded}
+              data-testid="thread-collapse-button"
+            >
+              {/* Thread line connector for button */}
+              {showThreadLines && !isThreadExpanded && (
+                <div
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-gray-200 dark:bg-gray-700"
+                  aria-hidden="true"
+                />
+              )}
+              <svg
+                className={`w-4 h-4 transition-transform ${isThreadExpanded ? 'rotate-90' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+              {isThreadExpanded ? (
+                <>Hide {hiddenReplyCount > 0 ? `${hiddenReplyCount} ` : ''}replies</>
+              ) : (
+                <>
+                  View {hiddenReplyCount} more {hiddenReplyCount === 1 ? 'reply' : 'replies'}
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
     </div>

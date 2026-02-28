@@ -9,6 +9,7 @@ import { useSwipeable } from 'react-swipeable';
 import { DiscussionLayoutProvider } from '../../contexts/DiscussionLayoutContext';
 import { usePanelState } from '../../hooks/usePanelState';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { CollapsedMetadataBar } from './CollapsedMetadataBar';
 import '../../styles/discussion-layout.css';
 
 /**
@@ -23,6 +24,14 @@ interface DiscussionLayoutProps {
    * Use this when the unified sidebar already provides topic navigation.
    */
   hideSidebar?: boolean;
+  /**
+   * Whether user is currently composing (shows Preview icon in collapsed bar)
+   */
+  isComposing?: boolean;
+  /**
+   * Currently active metadata tab (for collapsed bar highlighting)
+   */
+  activeMetadataTab?: 'propositions' | 'commonGround' | 'bridging' | 'preview' | 'info';
 }
 
 /**
@@ -74,8 +83,18 @@ export function DiscussionLayout({
   centerPanel,
   rightPanel,
   hideSidebar = false,
+  isComposing = false,
+  activeMetadataTab = 'propositions',
 }: DiscussionLayoutProps) {
-  const { panelState, setPanelWidth, togglePanel, setActiveTopic } = usePanelState();
+  const {
+    panelState,
+    setPanelWidth,
+    togglePanel,
+    setActiveTopic,
+    expandRightPanelToTab,
+    requestedTab,
+    clearRequestedTab,
+  } = usePanelState();
   const breakpoint = useBreakpoint();
   const [isLeftPanelOverlayOpen, setIsLeftPanelOverlayOpen] = useState(false);
 
@@ -114,6 +133,11 @@ export function DiscussionLayout({
     delta: 50, // Minimum distance for swipe detection (pixels)
   });
 
+  // Handle expanding right panel
+  const handleExpandRightPanel = useCallback(() => {
+    togglePanel('right');
+  }, [togglePanel]);
+
   // Memoize context value to prevent unnecessary re-renders of consumers
   const contextValue = useMemo(
     () => ({
@@ -124,6 +148,9 @@ export function DiscussionLayout({
       isLeftPanelOverlayOpen,
       toggleLeftPanelOverlay: handleToggleLeftPanelOverlay,
       closeLeftPanelOverlay: handleCloseLeftPanelOverlay,
+      expandRightPanelToTab,
+      requestedTab,
+      clearRequestedTab,
     }),
     [
       panelState,
@@ -133,6 +160,9 @@ export function DiscussionLayout({
       isLeftPanelOverlayOpen,
       handleToggleLeftPanelOverlay,
       handleCloseLeftPanelOverlay,
+      expandRightPanelToTab,
+      requestedTab,
+      clearRequestedTab,
     ],
   );
 
@@ -150,6 +180,7 @@ export function DiscussionLayout({
         data-testid="discussion-layout"
         data-breakpoint={breakpoint}
         data-panels={panelCount}
+        data-right-collapsed={panelState.isRightPanelCollapsed ? 'true' : undefined}
         style={
           {
             '--left-panel-width': `${panelState.leftPanelWidth}px`,
@@ -195,16 +226,31 @@ export function DiscussionLayout({
           {centerPanel}
         </main>
 
-        {/* Right Panel - Metadata */}
-        <aside
-          className={`discussion-layout__panel discussion-layout__panel--right ${
-            panelState.isRightPanelCollapsed ? 'discussion-layout__panel--collapsed' : ''
-          }`}
-          role="complementary"
-          aria-label="Discussion metadata and analysis"
-        >
-          {rightPanel}
-        </aside>
+        {/* Right Panel - Metadata (or Collapsed Bar) */}
+        {panelState.isRightPanelCollapsed && breakpoint === 'desktop' ? (
+          <aside
+            className="discussion-layout__panel discussion-layout__panel--right discussion-layout__panel--collapsed-bar"
+            role="complementary"
+            aria-label="Discussion metadata shortcuts"
+          >
+            <CollapsedMetadataBar
+              onExpandToTab={expandRightPanelToTab}
+              onExpand={handleExpandRightPanel}
+              isComposing={isComposing}
+              activeTab={activeMetadataTab}
+            />
+          </aside>
+        ) : (
+          <aside
+            className={`discussion-layout__panel discussion-layout__panel--right ${
+              panelState.isRightPanelCollapsed ? 'discussion-layout__panel--collapsed' : ''
+            }`}
+            role="complementary"
+            aria-label="Discussion metadata and analysis"
+          >
+            {rightPanel}
+          </aside>
+        )}
       </div>
     </DiscussionLayoutProvider>
   );
