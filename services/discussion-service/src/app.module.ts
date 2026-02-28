@@ -20,6 +20,7 @@ import { ClientsModule } from './clients/clients.module.js';
 import { MetricsModule } from './observability/index.js';
 import { ReactionsModule } from './reactions/reactions.module.js';
 import { BookmarksModule } from './bookmarks/bookmarks.module.js';
+import { ReadStateModule } from './read-state/read-state.module.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -71,9 +72,10 @@ import { BookmarksModule } from './bookmarks/bookmarks.module.js';
     TagsModule,
     // T249 - Activity feed integration (#245)
     ClientsModule,
-    // UI engagement features - emoji reactions and bookmarks
+    // UI engagement features - emoji reactions, bookmarks, read state
     ReactionsModule,
     BookmarksModule,
+    ReadStateModule,
   ],
   controllers: [],
   providers: [],
