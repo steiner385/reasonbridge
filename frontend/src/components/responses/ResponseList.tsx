@@ -20,15 +20,19 @@
  * header pattern where only the first message in a group shows avatar/name/time.
  */
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { List } from 'react-window';
 import { useResponses } from '../../hooks/useResponses';
+import { useReadState } from '../../hooks/useReadState';
+import { useTypingIndicator } from '../../hooks/useTypingIndicator';
 import Card from '../ui/Card';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { groupResponses, type GroupedResponse } from '../../lib/groupResponses';
 import type { ResponseDetail } from '../../services/discussionService';
 import { ResponseItem } from './ResponseItem';
+import { NewMessagesDivider } from './NewMessagesDivider';
+import { TypingIndicator } from './TypingIndicator';
 
 export interface ResponseListProps {
   discussionId: string;
@@ -85,6 +89,12 @@ export function ResponseList({
     buildThreadTree: enableThreading,
   });
 
+  // Read state for showing new messages divider
+  const { readState } = useReadState(discussionId);
+
+  // Typing indicator for showing who is typing
+  const { typingMessage } = useTypingIndicator({ topicId: discussionId });
+
   // Calculate effective item height based on compact mode
   const effectiveItemHeight = itemHeight ?? (compact ? COMPACT_ITEM_HEIGHT : DEFAULT_ITEM_HEIGHT);
 
@@ -100,6 +110,33 @@ export function ResponseList({
       breakOnThreadChange: true,
     });
   }, [responses]);
+
+  // Find the index where new messages divider should appear
+  // This is the first response AFTER the last-read response
+  const newMessagesDividerIndex = useMemo(() => {
+    if (!readState?.lastResponseId || !groupedResponses.length) {
+      return -1; // No divider needed
+    }
+
+    const lastReadIndex = groupedResponses.findIndex(
+      (g) => g.response.id === readState.lastResponseId,
+    );
+
+    // If last read response found and there are responses after it, show divider
+    if (lastReadIndex >= 0 && lastReadIndex < groupedResponses.length - 1) {
+      return lastReadIndex + 1;
+    }
+
+    return -1; // No new messages
+  }, [readState?.lastResponseId, groupedResponses]);
+
+  // Count of new (unread) messages
+  const newMessageCount = useMemo(() => {
+    if (newMessagesDividerIndex < 0 || !groupedResponses.length) {
+      return 0;
+    }
+    return groupedResponses.length - newMessagesDividerIndex;
+  }, [newMessagesDividerIndex, groupedResponses.length]);
 
   // CRITICAL: Memoize row renderer BEFORE any early returns to maintain consistent hook calls
   // React Error #310 occurs when hooks are called conditionally (different number between renders)
@@ -123,9 +160,12 @@ export function ResponseList({
       const grouped = groupedResponses[index];
       const response = grouped.response;
       const isHighlighted = highlightedResponseIds.has(response.id);
+      const showDivider = index === newMessagesDividerIndex;
 
       return (
         <div style={style} className="px-2" {...ariaAttributes}>
+          {/* New Messages Divider - shown before first unread response */}
+          {showDivider && <NewMessagesDivider newMessageCount={newMessageCount} className="mb-2" />}
           <div
             className={`
                 transition-all duration-300
@@ -158,6 +198,8 @@ export function ResponseList({
     onReplySubmit,
     onPreviewFeedbackChange,
     compact,
+    newMessagesDividerIndex,
+    newMessageCount,
   ]);
 
   if (isLoading) {
@@ -232,6 +274,8 @@ export function ResponseList({
         rowComponent={Row}
         rowProps={{}}
       />
+      {/* Typing Indicator - shows at the bottom when users are typing */}
+      <TypingIndicator message={typingMessage} className="mt-2 px-2" />
     </div>
   );
 }

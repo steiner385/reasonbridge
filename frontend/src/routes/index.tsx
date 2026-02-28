@@ -56,6 +56,9 @@ const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
 const ActivityFeedPage = lazy(() =>
   import('../pages/Feed').then((m) => ({ default: m.ActivityFeedPage })),
 );
+const BookmarksPage = lazy(() =>
+  import('../pages/Bookmarks').then((m) => ({ default: m.BookmarksPage })),
+);
 const TermsPage = lazy(() => import('../pages/TermsPage'));
 const PrivacyPage = lazy(() => import('../pages/PrivacyPage'));
 const ConsentPendingPage = lazy(() =>
@@ -207,6 +210,16 @@ export const routes: RouteObject[] = [
       <ProtectedRoute>
         <LazyRoute>
           <ActivityFeedPage />
+        </LazyRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/bookmarks',
+    element: (
+      <ProtectedRoute>
+        <LazyRoute>
+          <BookmarksPage />
         </LazyRoute>
       </ProtectedRoute>
     ),

@@ -102,6 +102,12 @@ model User {
   // Social integration fields (Feature: Contact Service)
   discoverableByContacts        Boolean                   @default(false) @map("discoverable_by_contacts")
   emailHash                     String?                   @map("email_hash")
+  // Feature: UI Engagement - emoji reactions
+  reactions                     ResponseReaction[]
+  // Feature: UI Engagement - bookmarks
+  bookmarks                     Bookmark[]
+  // Feature: UI Engagement - new messages divider
+  topicReadStates               UserTopicReadState[]
 
   @@index([cognitoSub])
   @@index([email])
@@ -484,6 +490,8 @@ model DiscussionTopic {
   childContentReviews  ChildContentReviewQueue[]
   // Feature #781: Provisional access for tier-restricted topics
   provisionalAccess    ProvisionalAccess[]
+  // Feature: UI Engagement - new messages divider
+  userReadStates       UserTopicReadState[]
 
   @@index([status])
   @@index([creatorId])
@@ -827,6 +835,10 @@ model Response {
   citations          Citation[]
   // Feature: Child-Friendly Mode - content review for child users
   childContentReview ChildContentReviewQueue?
+  // Feature: UI Engagement - emoji reactions
+  reactions          ResponseReaction[]
+  // Feature: UI Engagement - bookmarks
+  bookmarks          Bookmark[]
 
   @@index([topicId])
   // T004 [P] & T005 [P] - NEW: Indexes for soft delete and discussion filtering
@@ -886,6 +898,59 @@ enum VoteType {
   DOWNVOTE
 
   @@map("vote_type")
+}
+
+/// Emoji reaction on a response (👍 ❤️ 🎉 etc.)
+model ResponseReaction {
+  id         String   @id @default(uuid()) @db.Uuid
+  responseId String   @map("response_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  emoji      String   @db.VarChar(32)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([responseId, userId, emoji])
+  @@index([responseId])
+  @@index([userId])
+  @@map("response_reactions")
+}
+
+/// User bookmark on a response
+model Bookmark {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  responseId String   @map("response_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, responseId])
+  @@index([userId])
+  @@index([responseId])
+  @@map("bookmarks")
+}
+
+/// Tracks user's read position in a topic for "New Messages" divider
+model UserTopicReadState {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  topicId        String   @map("topic_id") @db.Uuid
+  lastReadAt     DateTime @map("last_read_at")
+  lastResponseId String?  @map("last_response_id") @db.Uuid
+
+  // Relations
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic DiscussionTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@index([topicId])
+  @@map("user_topic_read_state")
 }
 
 /// User alignment (support/oppose/nuanced) on a proposition

@@ -541,4 +541,67 @@ export class UsersService {
       offset,
     };
   }
+
+  /**
+   * Search users for @mention autocomplete
+   * Prioritizes topic participants over other users
+   * @param query - Search query string (matches displayName or email)
+   * @param topicId - Optional topic ID to prioritize participants
+   * @param limit - Maximum number of results (default 10)
+   * @returns Array of users with id and displayName
+   */
+  async searchUsers(
+    query: string,
+    topicId?: string,
+    limit = 10,
+  ): Promise<{ id: string; displayName: string }[]> {
+    if (!query || query.length < 1) return [];
+
+    // First, get topic participants if topicId provided
+    let participantIds: string[] = [];
+    if (topicId) {
+      if (!isValidUUID(topicId)) {
+        throw new BadRequestException(`Invalid topic ID format: expected UUID`);
+      }
+      const participants = await this.prisma.response.findMany({
+        where: { topicId },
+        select: { authorId: true },
+        distinct: ['authorId'],
+      });
+      participantIds = participants.map((p) => p.authorId);
+    }
+
+    // Search users matching query
+    const users = await this.prisma.user.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              { displayName: { contains: query, mode: 'insensitive' } },
+              { email: { contains: query, mode: 'insensitive' } },
+            ],
+          },
+          { accountStatus: 'ACTIVE' },
+        ],
+      },
+      select: { id: true, displayName: true },
+      take: limit * 2, // Get extra to sort
+      orderBy: { displayName: 'asc' },
+    });
+
+    // Sort: participants first, then others
+    const participantSet = new Set(participantIds);
+    const sorted = users.sort((a, b) => {
+      const aIsParticipant = participantSet.has(a.id);
+      const bIsParticipant = participantSet.has(b.id);
+      if (aIsParticipant && !bIsParticipant) return -1;
+      if (!aIsParticipant && bIsParticipant) return 1;
+      return 0;
+    });
+
+    return sorted.slice(0, limit).map((u) => ({
+      id: u.id,
+      displayName: u.displayName || 'Anonymous',
+    }));
+  }
 }

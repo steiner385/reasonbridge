@@ -18,6 +18,10 @@ import { PropositionsModule } from './propositions/propositions.module.js';
 import { TagsModule } from './tags/tags.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { MetricsModule } from './observability/index.js';
+import { ReactionsModule } from './reactions/reactions.module.js';
+import { BookmarksModule } from './bookmarks/bookmarks.module.js';
+import { ReadStateModule } from './read-state/read-state.module.js';
+import { GatewaysModule } from './gateways/index.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -69,6 +73,12 @@ import { MetricsModule } from './observability/index.js';
     TagsModule,
     // T249 - Activity feed integration (#245)
     ClientsModule,
+    // UI engagement features - emoji reactions, bookmarks, read state
+    ReactionsModule,
+    BookmarksModule,
+    ReadStateModule,
+    // WebSocket gateway for real-time updates (typing indicators, reactions)
+    GatewaysModule,
   ],
   controllers: [],
   providers: [],

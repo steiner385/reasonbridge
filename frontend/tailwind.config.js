@@ -171,6 +171,7 @@ export default {
         progress: 'progress 2.5s ease-in-out infinite',
         shimmer: 'shimmer 2s infinite ease-in-out',
         'shimmer-fade': 'shimmerFade 2s ease-in-out infinite',
+        'typing-bounce': 'typingBounce 1.4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -197,6 +198,10 @@ export default {
         shimmerFade: {
           '0%, 100%': { opacity: '0.6' },
           '50%': { opacity: '1' },
+        },
+        typingBounce: {
+          '0%, 60%, 100%': { transform: 'translateY(0)' },
+          '30%': { transform: 'translateY(-4px)' },
         },
       },
       // Breakpoints for responsive design (extending defaults)

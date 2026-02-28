@@ -128,6 +128,21 @@ export class UsersController {
   }
 
   /**
+   * GET /users/search - Search users for @mention autocomplete
+   * Public endpoint - no authentication required
+   * Prioritizes topic participants when topicId is provided
+   */
+  @Get('search')
+  async searchUsers(
+    @Query('q') query: string,
+    @Query('topicId') topicId?: string,
+    @Query('limit') limitStr?: string,
+  ): Promise<{ id: string; displayName: string }[]> {
+    const limit = Math.min(Math.max(parseInt(limitStr || '10', 10) || 10, 1), 50);
+    return this.usersService.searchUsers(query, topicId, limit);
+  }
+
+  /**
    * GET /users/:id - Get a user's public profile by ID
    * Public endpoint - no authentication required
    * Cached for 30 minutes (1800 seconds)

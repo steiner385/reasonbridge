@@ -21,3 +21,9 @@ export { useOnlineStatus, useIsOnline } from './useOnlineStatus';
 export type { OnlineStatusState, UseOnlineStatusOptions } from './useOnlineStatus';
 export { useDocumentMeta } from './useDocumentMeta';
 export type { DocumentMetaConfig } from './useDocumentMeta';
+export { useTypingIndicator } from './useTypingIndicator';
+export type {
+  UseTypingIndicatorOptions,
+  UseTypingIndicatorReturn,
+  TypingUser,
+} from './useTypingIndicator';

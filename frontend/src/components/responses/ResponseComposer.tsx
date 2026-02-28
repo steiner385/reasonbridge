@@ -8,10 +8,12 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { PreviewFeedbackPanel } from '../feedback';
 import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
+import { useTypingIndicator } from '../../hooks/useTypingIndicator';
 import { useAuthContext } from '../../contexts/AuthContext';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { PendingResponseNotice } from './PendingResponseNotice';
+import MentionInput from './MentionInput';
 
 export interface ResponseComposerProps {
   /**
@@ -105,6 +107,9 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
 
   const { user } = useAuthContext();
   const isMinor = user?.isMinor ?? false;
+
+  // Typing indicator - send typing events when user types
+  const { sendTyping } = useTypingIndicator({ topicId: topicId ?? '' });
 
   // Hybrid preview feedback integration (regex + AI)
   const {
@@ -233,20 +238,25 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
             Your Response
             <span className="text-fallacy-DEFAULT ml-1">*</span>
           </label>
-          <textarea
+          <MentionInput
             id="response-content"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(value) => {
+              setContent(value);
+              sendTyping(); // Send typing indicator
+            }}
             placeholder={placeholder}
-            className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 resize-y min-h-[120px] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${
+            className={
               error
                 ? 'border-fallacy-DEFAULT focus:border-fallacy-DEFAULT focus:ring-fallacy-DEFAULT/20'
-                : 'border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500/20'
-            }`}
+                : ''
+            }
             maxLength={maxLength}
             disabled={isLoading}
-            aria-invalid={!!error}
-            aria-describedby={error ? 'response-error' : 'character-count'}
+            topicId={topicId}
+            ariaLabel="Your Response"
+            minRows={5}
+            maxRows={15}
           />
           <div className="flex justify-between items-center mt-1.5">
             <span

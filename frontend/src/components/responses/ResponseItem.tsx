@@ -32,8 +32,13 @@ import Button from '../ui/Button';
 import type { ResponseDetail } from '../../services/discussionService';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
+import { useReactions } from '../../hooks/useReactions';
 import ResponseComposer from './ResponseComposer';
 import { LightweightReplyComposer } from './LightweightReplyComposer';
+import ReactionBar from './ReactionBar';
+import ShareButton from './ShareButton';
+import BookmarkButton from './BookmarkButton';
+import { MentionRenderer } from './MentionRenderer';
 
 export interface ResponseItemProps {
   response: ResponseDetail;
@@ -99,6 +104,9 @@ export function ResponseItem({
   // Use lightweight composer by default in compact mode
   const shouldUseLightweightComposer = useLightweightComposer ?? compact;
   const [showReplyForm, setShowReplyForm] = useState(false);
+
+  // Reactions hook for this response
+  const { reactions, toggleReaction, isPending: isReactionPending } = useReactions(response.id);
 
   const handleReplyClick = () => {
     if (onReply) {
@@ -252,7 +260,7 @@ export function ResponseItem({
           <p
             className={`text-gray-800 dark:text-gray-200 whitespace-pre-wrap ${compact ? 'text-sm' : ''}`}
           >
-            {response.content}
+            <MentionRenderer content={response.content} />
           </p>
         </div>
 
@@ -292,39 +300,62 @@ export function ResponseItem({
 
         {/* Actions - hover-only in compact mode on desktop, always visible on mobile */}
         <div
-          className={`flex items-center gap-4 ${
+          className={`flex items-center justify-between gap-2 ${
             compact
               ? `${!isGroupStart ? 'pl-9' : ''} mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150`
               : 'mt-4'
           }`}
         >
-          {/* Reply Button (Phase 5) */}
-          {showReplies && depth < maxDepth && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReplyClick}
-              className={`text-gray-600 dark:text-gray-400 hover:text-blue-600 ${compact ? 'text-xs py-0.5 px-1.5' : ''}`}
-            >
-              <svg
-                className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} mr-1`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {/* Left side: Reactions and Reply */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Reaction Bar */}
+            <ReactionBar
+              reactions={reactions}
+              onReactionClick={toggleReaction}
+              disabled={isReactionPending}
+              size={compact ? 'sm' : 'md'}
+              showPicker={true}
+              className="flex-shrink-0"
+            />
+
+            {/* Reply Button (Phase 5) */}
+            {showReplies && depth < maxDepth && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReplyClick}
+                className={`text-gray-600 dark:text-gray-400 hover:text-blue-600 ${compact ? 'text-xs py-0.5 px-1.5' : ''}`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                />
-              </svg>
-              Reply
-              {response.replyCount != null && response.replyCount > 0 && (
-                <span className="ml-1">({response.replyCount})</span>
-              )}
-            </Button>
-          )}
+                <svg
+                  className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} mr-1`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                  />
+                </svg>
+                Reply
+                {response.replyCount != null && response.replyCount > 0 && (
+                  <span className="ml-1">({response.replyCount})</span>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {/* Right side: Share and Bookmark */}
+          <div className="flex items-center gap-1">
+            <ShareButton
+              topicId={discussionId}
+              responseId={response.id}
+              className={compact ? 'scale-90' : ''}
+            />
+            <BookmarkButton responseId={response.id} size={compact ? 'sm' : 'md'} />
+          </div>
         </div>
 
         {/* Inline Reply Form */}
