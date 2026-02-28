@@ -1035,6 +1035,137 @@
       "type": "Synchronous/HTTP"
     },
     {
+      "description": "a request to search users for @mentions",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "active users exist matching search query"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/search",
+        "query": {
+          "q": ["john"]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "displayName": "John Doe",
+              "id": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            {
+              "displayName": "Johnny Smith",
+              "id": "660e8400-e29b-41d4-a716-446655440001"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ]
+            },
+            "$[*].displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to search users with topicId for @mentions",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "active users exist matching search query with topic participants"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/search",
+        "query": {
+          "q": ["jane"],
+          "topicId": ["aa0e8400-e29b-41d4-a716-446655440005"]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "displayName": "Jane Participant",
+              "id": "770e8400-e29b-41d4-a716-446655440002"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ]
+            },
+            "$[*].displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "a request to unfollow a user",
       "pending": false,
       "providerStates": [

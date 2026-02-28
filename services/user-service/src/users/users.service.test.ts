@@ -5,6 +5,7 @@ import { NotFoundException, BadRequestException, ConflictException } from '@nest
 const createMockPrismaService = () => ({
   user: {
     findUnique: vi.fn(),
+    findMany: vi.fn(),
     update: vi.fn(),
   },
   userFollow: {
@@ -12,6 +13,9 @@ const createMockPrismaService = () => ({
     create: vi.fn(),
     delete: vi.fn(),
     count: vi.fn(),
+  },
+  response: {
+    findMany: vi.fn(),
   },
 });
 
@@ -338,6 +342,95 @@ describe('UsersService', () => {
 
     it('should throw BadRequestException for invalid UUID', async () => {
       await expect(service.getFollowingCount('invalid-uuid')).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('searchUsers', () => {
+    const userId1 = '12345678-1234-4234-a234-123456789012';
+    const userId2 = '87654321-4321-4321-a321-210987654321';
+    const userId3 = '99999999-9999-4999-a999-999999999999';
+    const validTopicId = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
+
+    it('should return empty array for empty query', async () => {
+      const result = await service.searchUsers('');
+      expect(result).toEqual([]);
+      expect(mockPrisma.user.findMany).not.toHaveBeenCalled();
+    });
+
+    it('should search users by display name', async () => {
+      const mockUsers = [
+        { id: userId1, displayName: 'John Doe' },
+        { id: userId2, displayName: 'Jane Doe' },
+      ];
+      mockPrisma.user.findMany.mockResolvedValue(mockUsers);
+
+      const result = await service.searchUsers('doe');
+
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+        where: {
+          AND: [
+            {
+              OR: [
+                { displayName: { contains: 'doe', mode: 'insensitive' } },
+                { email: { contains: 'doe', mode: 'insensitive' } },
+              ],
+            },
+            { accountStatus: 'ACTIVE' },
+          ],
+        },
+        select: { id: true, displayName: true },
+        take: 20, // limit * 2
+        orderBy: { displayName: 'asc' },
+      });
+      expect(result).toHaveLength(2);
+      expect(result[0].displayName).toBe('John Doe');
+    });
+
+    it('should prioritize topic participants when topicId provided', async () => {
+      // User2 is a topic participant, User1 is not
+      mockPrisma.response.findMany.mockResolvedValue([{ authorId: userId2 }]);
+      mockPrisma.user.findMany.mockResolvedValue([
+        { id: userId1, displayName: 'Alice' },
+        { id: userId2, displayName: 'Bob' },
+      ]);
+
+      const result = await service.searchUsers('a', validTopicId);
+
+      expect(mockPrisma.response.findMany).toHaveBeenCalledWith({
+        where: { topicId: validTopicId },
+        select: { authorId: true },
+        distinct: ['authorId'],
+      });
+      // Bob (participant) should come first
+      expect(result[0].id).toBe(userId2);
+      expect(result[0].displayName).toBe('Bob');
+    });
+
+    it('should throw BadRequestException for invalid topicId', async () => {
+      await expect(service.searchUsers('test', 'invalid-uuid')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should respect limit parameter', async () => {
+      const mockUsers = [
+        { id: userId1, displayName: 'User 1' },
+        { id: userId2, displayName: 'User 2' },
+        { id: userId3, displayName: 'User 3' },
+      ];
+      mockPrisma.user.findMany.mockResolvedValue(mockUsers);
+
+      const result = await service.searchUsers('user', undefined, 2);
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should default displayName to Anonymous when null', async () => {
+      mockPrisma.user.findMany.mockResolvedValue([{ id: userId1, displayName: null }]);
+
+      const result = await service.searchUsers('test');
+
+      expect(result[0].displayName).toBe('Anonymous');
     });
   });
 });

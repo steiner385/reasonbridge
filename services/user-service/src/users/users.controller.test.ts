@@ -4,6 +4,7 @@ import { UsersController } from './users.controller.js';
 const createMockUsersService = () => ({
   findById: vi.fn(),
   updateProfileById: vi.fn(),
+  searchUsers: vi.fn(),
 });
 
 const createMockFeedbackPreferencesService = () => ({
@@ -122,6 +123,58 @@ describe('UsersController', () => {
       await expect(
         controller.updateCurrentUser(jwtPayload as any, updateProfileDto as any),
       ).rejects.toThrow('Display name cannot be empty');
+    });
+  });
+
+  describe('searchUsers', () => {
+    it('should search users with query', async () => {
+      const searchResults = [
+        { id: '12345678-1234-4234-a234-123456789012', displayName: 'John Doe' },
+        { id: '87654321-4321-4321-a321-210987654321', displayName: 'Jane Doe' },
+      ];
+      mockUsersService.searchUsers.mockResolvedValue(searchResults);
+
+      const result = await controller.searchUsers('doe');
+
+      expect(result).toEqual(searchResults);
+      expect(mockUsersService.searchUsers).toHaveBeenCalledWith('doe', undefined, 10);
+    });
+
+    it('should search users with topicId', async () => {
+      const topicId = '99999999-9999-4999-a999-999999999999';
+      const searchResults = [
+        { id: '12345678-1234-4234-a234-123456789012', displayName: 'John Doe' },
+      ];
+      mockUsersService.searchUsers.mockResolvedValue(searchResults);
+
+      const result = await controller.searchUsers('john', topicId);
+
+      expect(result).toEqual(searchResults);
+      expect(mockUsersService.searchUsers).toHaveBeenCalledWith('john', topicId, 10);
+    });
+
+    it('should search users with custom limit', async () => {
+      mockUsersService.searchUsers.mockResolvedValue([]);
+
+      await controller.searchUsers('test', undefined, '5');
+
+      expect(mockUsersService.searchUsers).toHaveBeenCalledWith('test', undefined, 5);
+    });
+
+    it('should cap limit at 50', async () => {
+      mockUsersService.searchUsers.mockResolvedValue([]);
+
+      await controller.searchUsers('test', undefined, '100');
+
+      expect(mockUsersService.searchUsers).toHaveBeenCalledWith('test', undefined, 50);
+    });
+
+    it('should default limit to 10 when invalid', async () => {
+      mockUsersService.searchUsers.mockResolvedValue([]);
+
+      await controller.searchUsers('test', undefined, 'invalid');
+
+      expect(mockUsersService.searchUsers).toHaveBeenCalledWith('test', undefined, 10);
     });
   });
 });
