@@ -20,8 +20,8 @@
  * header pattern where only the first message in a group shows avatar/name/time.
  */
 
-import React, { useMemo } from 'react';
-import { List } from 'react-window';
+import { useMemo, useRef, useCallback } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useResponses } from '../../hooks/useResponses';
 import { useReadState } from '../../hooks/useReadState';
 import { useTypingIndicator } from '../../hooks/useTypingIndicator';
@@ -39,8 +39,8 @@ export interface ResponseListProps {
   enableThreading?: boolean;
   /** Height of the list container in pixels (for virtual scrolling) */
   height?: number;
-  /** Height of each response item in pixels (auto-adjusted for compact mode) */
-  itemHeight?: number;
+  /** Estimated height of each response item (used for initial layout) */
+  estimatedItemHeight?: number;
   /** Map of highlighted response IDs (for proposition interaction) */
   highlightedResponseIds?: Set<string>;
   /** Callback when inline reply is submitted */
@@ -57,9 +57,9 @@ export interface ResponseListProps {
   compact?: boolean;
 }
 
-/** Default item heights for different modes */
-const DEFAULT_ITEM_HEIGHT = 220;
-const COMPACT_ITEM_HEIGHT = 80;
+/** Estimated item heights for different modes (TanStack Virtual will measure actual heights) */
+const DEFAULT_ESTIMATED_HEIGHT = 160;
+const COMPACT_ESTIMATED_HEIGHT = 100;
 
 /**
  * Adapter to make ResponseDetail compatible with GroupableResponse
@@ -75,7 +75,7 @@ export function ResponseList({
   discussionId,
   enableThreading = false,
   height = 600,
-  itemHeight,
+  estimatedItemHeight,
   highlightedResponseIds = new Set(),
   onReplySubmit,
   onPreviewFeedbackChange,
@@ -95,8 +95,12 @@ export function ResponseList({
   // Typing indicator for showing who is typing
   const { typingMessage } = useTypingIndicator({ topicId: discussionId });
 
-  // Calculate effective item height based on compact mode
-  const effectiveItemHeight = itemHeight ?? (compact ? COMPACT_ITEM_HEIGHT : DEFAULT_ITEM_HEIGHT);
+  // Ref for the scroll container (required by TanStack Virtual)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate estimated item height based on compact mode
+  const effectiveEstimatedHeight =
+    estimatedItemHeight ?? (compact ? COMPACT_ESTIMATED_HEIGHT : DEFAULT_ESTIMATED_HEIGHT);
 
   // Apply message grouping when responses are available
   // CRITICAL: This useMemo must be called unconditionally to maintain hook order
@@ -138,23 +142,57 @@ export function ResponseList({
     return groupedResponses.length - newMessagesDividerIndex;
   }, [newMessagesDividerIndex, groupedResponses.length]);
 
-  // CRITICAL: Memoize row renderer BEFORE any early returns to maintain consistent hook calls
+  // Estimate size based on content length (longer content = taller row)
+  const estimateSize = useCallback(
+    (index: number) => {
+      if (!groupedResponses || !groupedResponses[index]) {
+        return effectiveEstimatedHeight;
+      }
+      const grouped = groupedResponses[index];
+      const contentLength = grouped.response.content?.length || 0;
+      const hasCitations = (grouped.response.citations?.length || 0) > 0;
+      const hasReplies = (grouped.response.replies?.length || 0) > 0;
+
+      // Base height + content adjustment + extras
+      let estimated = effectiveEstimatedHeight;
+
+      // Add height for longer content (roughly 20px per 100 chars over 200)
+      if (contentLength > 200) {
+        estimated += Math.min((contentLength - 200) / 5, 100);
+      }
+
+      // Add height for citations
+      if (hasCitations) {
+        estimated += 60;
+      }
+
+      // Add space for new messages divider if present
+      if (index === newMessagesDividerIndex) {
+        estimated += 40;
+      }
+
+      // Add space for nested replies indicator
+      if (hasReplies) {
+        estimated += 30;
+      }
+
+      return estimated;
+    },
+    [groupedResponses, effectiveEstimatedHeight, newMessagesDividerIndex],
+  );
+
+  // CRITICAL: Initialize virtualizer BEFORE any early returns to maintain consistent hook calls
   // React Error #310 occurs when hooks are called conditionally (different number between renders)
-  // This useMemo must always be called, even when responses is null/undefined/empty
-  const Row = useMemo(() => {
-    const RowComponent = ({
-      index,
-      style,
-      ariaAttributes,
-    }: {
-      index: number;
-      style: React.CSSProperties;
-      ariaAttributes: {
-        'aria-posinset': number;
-        'aria-setsize': number;
-        role: 'listitem';
-      };
-    }) => {
+  const virtualizer = useVirtualizer({
+    count: groupedResponses.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize,
+    overscan: compact ? 5 : 3,
+  });
+
+  // Memoized render function for each row
+  const renderRow = useCallback(
+    (index: number, measureRef: (node: HTMLElement | null) => void) => {
       if (!groupedResponses || !groupedResponses[index]) return null;
 
       const grouped = groupedResponses[index];
@@ -163,7 +201,13 @@ export function ResponseList({
       const showDivider = index === newMessagesDividerIndex;
 
       return (
-        <div style={style} className="px-2" {...ariaAttributes}>
+        <div
+          ref={measureRef}
+          className="px-2"
+          role="listitem"
+          aria-posinset={index + 1}
+          aria-setsize={groupedResponses.length}
+        >
           {/* New Messages Divider - shown before first unread response */}
           {showDivider && <NewMessagesDivider newMessageCount={newMessageCount} className="mb-2" />}
           <div
@@ -187,20 +231,19 @@ export function ResponseList({
           </div>
         </div>
       );
-    };
-    RowComponent.displayName = 'ResponseRow';
-    return RowComponent;
-  }, [
-    groupedResponses,
-    discussionId,
-    enableThreading,
-    highlightedResponseIds,
-    onReplySubmit,
-    onPreviewFeedbackChange,
-    compact,
-    newMessagesDividerIndex,
-    newMessageCount,
-  ]);
+    },
+    [
+      groupedResponses,
+      discussionId,
+      enableThreading,
+      highlightedResponseIds,
+      onReplySubmit,
+      onPreviewFeedbackChange,
+      compact,
+      newMessagesDividerIndex,
+      newMessageCount,
+    ],
+  );
 
   if (isLoading) {
     return (
@@ -265,15 +308,43 @@ export function ResponseList({
   }
 
   return (
-    <div className="response-list" role="list" aria-label="Responses" data-compact={compact}>
-      <List<Record<string, never>>
-        defaultHeight={height}
-        rowCount={groupedResponses.length}
-        rowHeight={effectiveItemHeight}
-        overscanCount={compact ? 5 : 3}
-        rowComponent={Row}
-        rowProps={{}}
-      />
+    <div className="response-list" data-compact={compact}>
+      {/* Scroll container with dynamic height measurement via TanStack Virtual */}
+      <div
+        ref={scrollContainerRef}
+        className="overflow-auto"
+        style={{
+          height,
+          overflowAnchor: 'none', // Prevent scroll anchoring jitter during measurement
+        }}
+        role="list"
+        aria-label="Responses"
+      >
+        {/* Inner container sized to total virtual height */}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {/* Render only visible items */}
+          {virtualizer.getVirtualItems().map((virtualRow) => (
+            <div
+              key={virtualRow.key}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              {renderRow(virtualRow.index, virtualizer.measureElement)}
+            </div>
+          ))}
+        </div>
+      </div>
       {/* Typing Indicator - shows at the bottom when users are typing */}
       <TypingIndicator message={typingMessage} className="mt-2 px-2" />
     </div>
