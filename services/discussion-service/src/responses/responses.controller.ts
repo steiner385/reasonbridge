@@ -12,9 +12,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Delete,
   Req,
-  UseInterceptors,
   Inject,
 } from '@nestjs/common';
 // TEMPORARILY DISABLED for debugging hang issue
@@ -118,12 +116,13 @@ export class ResponsesController {
   async replyToResponse(
     @Param('responseId') responseId: string,
     @Body() replyDto: ReplyToResponseDto,
+    @Req() request: AuthRequest,
   ): Promise<ResponseDetailDto> {
-    // TODO: Extract userId from JWT token when auth is implemented
-    // For now, using a placeholder. This should be replaced with:
-    // @Req() request: AuthRequest
-    // const userId = request.user!.id;
-    const userId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+    // Get userId from X-User-Id header (set by API Gateway) or request.user
+    // Use type assertion to access custom header that API Gateway adds
+    const headers = request.headers as unknown as { 'x-user-id'?: string };
+    const userId =
+      headers['x-user-id'] || request.user?.id || '00000000-0000-0000-0000-000000000000';
 
     // Transform DTO to service format
     const replyData = {
@@ -252,7 +251,10 @@ export class ResponsesController {
       throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
     }
 
-    return this.contentModerationService.getResponsesByStatus(topicId, status.toUpperCase() as any);
+    return this.contentModerationService.getResponsesByStatus(
+      topicId,
+      status.toUpperCase() as 'VISIBLE' | 'HIDDEN' | 'REMOVED',
+    );
   }
 
   // ==================== Feature 009: Discussion Participation ====================

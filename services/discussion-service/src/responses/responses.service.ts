@@ -156,6 +156,7 @@ export class ResponsesService {
     }
 
     // Transform citedSources to JSON format if provided
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Json field accepts any serializable value
     let citedSourcesJson: any = null;
     if (createResponseDto.citedSources && createResponseDto.citedSources.length > 0) {
       citedSourcesJson = createResponseDto.citedSources.map((url) => ({
@@ -329,6 +330,7 @@ export class ResponsesService {
     }
 
     // Prepare update data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma update data with dynamic properties
     const updateData: any = {};
 
     if (updateResponseDto.content !== undefined) {
@@ -434,6 +436,7 @@ export class ResponsesService {
   /**
    * Map Prisma Response model to ResponseDto
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma response with dynamic includes requires any
   private mapToResponseDto(response: any): ResponseDto {
     const citedSources: CitedSourceDto[] | undefined = response.citedSources
       ? Array.isArray(response.citedSources)
@@ -458,11 +461,13 @@ export class ResponsesService {
       containsOpinion: response.containsOpinion,
       containsFactualClaims: response.containsFactualClaims,
       propositions: response.propositions
-        ? response.propositions.map((rp: any) => ({
-            id: rp.proposition.id,
-            statement: rp.proposition.statement,
-            relevanceScore: rp.relevanceScore ? Number(rp.relevanceScore) : undefined,
-          }))
+        ? response.propositions.map(
+            (rp: { proposition: { id: string; statement: string }; relevanceScore?: number }) => ({
+              id: rp.proposition.id,
+              statement: rp.proposition.statement,
+              relevanceScore: rp.relevanceScore ? Number(rp.relevanceScore) : undefined,
+            }),
+          )
         : undefined,
       status: response.status.toLowerCase(),
       revisionCount: response.revisionCount,
@@ -747,10 +752,6 @@ export class ResponsesService {
       throw new BadRequestException('Cannot reply to a deleted response');
     }
 
-    if (!parentResponse.discussionId) {
-      throw new BadRequestException('Parent response must belong to a discussion');
-    }
-
     // Calculate thread depth to enforce limit (T054)
     const depth = await this.calculateThreadDepth(parentResponseId);
     const MAX_THREAD_DEPTH = 10; // Allow up to 10 levels, but UI will flatten after 5
@@ -762,7 +763,16 @@ export class ResponsesService {
       );
     }
 
-    // Create the reply using the existing createResponseForDiscussion method
+    // Require discussionId for replies - legacy responses without discussions
+    // cannot accept threaded replies through this endpoint
+    if (!parentResponse.discussionId) {
+      throw new BadRequestException(
+        'Cannot reply to this response: it belongs to a legacy topic without a discussion. ' +
+          'Please use the main discussion interface to respond.',
+      );
+    }
+
+    // Create the reply using the discussion-based method
     return this.createResponseForDiscussion(userId, {
       discussionId: parentResponse.discussionId,
       content: replyDto.content,
