@@ -71,6 +71,21 @@
   display: none;
 }
 
+/* Collapsed bar state - 48px wide icon bar */
+.discussion-layout__panel--right.discussion-layout__panel--collapsed-bar {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  padding: 0;
+  overflow: visible;
+  transition: width 300ms ease-in-out;
+}
+
+/* Grid adjustment for collapsed right panel */
+.discussion-layout[data-right-collapsed="true"] {
+  grid-template-columns: var(--left-panel-width, clamp(240px, 25vw, 320px)) 1fr 48px;
+}
+
 /* ==========================================================================
    Panel Resizer Styles
    ========================================================================== */

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import CommonGroundSummaryPanel from '../common-ground/CommonGroundSummaryPanel';
 import BridgingSuggestionsSection from '../common-ground/BridgingSuggestionsSection';
 import { PropositionList, type PropositionItem } from '../common-ground/PropositionList';
@@ -11,6 +11,7 @@ import { PreviewFeedbackPanel } from '../feedback/PreviewFeedbackPanel';
 import { TopicStatusActions } from '../topics/TopicStatusActions';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { useDiscussionLayoutSafe } from '../../contexts/DiscussionLayoutContext';
 import type { Topic } from '../../types/topic';
 import { useAuthContext } from '../../contexts/AuthContext';
 import type { CommonGroundAnalysis, BridgingSuggestionsResponse } from '../../types/common-ground';
@@ -65,6 +66,10 @@ export interface MetadataPanelProps {
   height?: number;
   /** CSS class name */
   className?: string;
+  /** Callback when active tab changes (for parent state sync) */
+  onActiveTabChange?: (tab: MetadataPanelTab) => void;
+  /** Whether panel can be collapsed (shows collapse toggle) */
+  collapsible?: boolean;
 }
 
 /**
@@ -93,8 +98,14 @@ export function MetadataPanel({
   isComposing = false,
   height: _height,
   className = '',
+  onActiveTabChange,
+  collapsible = true,
 }: MetadataPanelProps) {
   const [activeTab, setActiveTab] = useState<MetadataPanelTab>('propositions');
+
+  // Get layout context for collapse functionality and external tab requests
+  // Use the safe version that returns null if outside provider (e.g., in tests)
+  const layoutContext = useDiscussionLayoutSafe();
   const [highlightedPropositionId, setHighlightedPropositionId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<MetadataPanelTab>>(
     new Set(['propositions']),
@@ -156,10 +167,35 @@ export function MetadataPanel({
     }
   }, [isComposing, activeTab]);
 
+  // Handle external tab requests from collapsed bar
+  useEffect(() => {
+    if (layoutContext?.requestedTab) {
+      // Schedule state update asynchronously to avoid cascading renders
+      const tab = layoutContext.requestedTab;
+      setTimeout(() => {
+        setActiveTab(tab);
+        onTabActivate?.(tab);
+        onActiveTabChange?.(tab);
+      }, 0);
+      // Clear the request after handling
+      layoutContext.clearRequestedTab?.();
+    }
+  }, [layoutContext?.requestedTab, onTabActivate, onActiveTabChange, layoutContext]);
+
+  // Handle collapse toggle
+  const handleCollapseToggle = useCallback(() => {
+    if (layoutContext?.togglePanel) {
+      layoutContext.togglePanel('right');
+    }
+  }, [layoutContext]);
+
   const handleTabClick = (tab: MetadataPanelTab) => {
     setActiveTab(tab);
     if (onTabActivate) {
       onTabActivate(tab);
+    }
+    if (onActiveTabChange) {
+      onActiveTabChange(tab);
     }
   };
 
@@ -346,7 +382,32 @@ export function MetadataPanel({
     <div className={`metadata-panel flex flex-col h-full ${className}`}>
       {/* Tab Header */}
       <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="flex" role="tablist" aria-label="Discussion metadata">
+        <div className="flex items-center" role="tablist" aria-label="Discussion metadata">
+          {/* Collapse Toggle (when collapsible) */}
+          {collapsible && layoutContext && (
+            <button
+              type="button"
+              onClick={handleCollapseToggle}
+              className="flex-shrink-0 w-10 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border-r border-gray-200 dark:border-gray-700"
+              aria-label="Collapse metadata panel"
+              title="Collapse panel"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          )}
           <button
             type="button"
             role="tab"
