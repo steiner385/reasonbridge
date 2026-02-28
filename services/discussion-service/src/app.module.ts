@@ -19,6 +19,7 @@ import { TagsModule } from './tags/tags.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { MetricsModule } from './observability/index.js';
 import { ReactionsModule } from './reactions/reactions.module.js';
+import { BookmarksModule } from './bookmarks/bookmarks.module.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -70,8 +71,9 @@ import { ReactionsModule } from './reactions/reactions.module.js';
     TagsModule,
     // T249 - Activity feed integration (#245)
     ClientsModule,
-    // UI engagement features - emoji reactions
+    // UI engagement features - emoji reactions and bookmarks
     ReactionsModule,
+    BookmarksModule,
   ],
   controllers: [],
   providers: [],
