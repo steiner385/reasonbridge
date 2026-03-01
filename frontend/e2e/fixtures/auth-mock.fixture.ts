@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Authentication Mock Fixture for E2E Tests
  *
  * Provides utilities to mock authenticated user sessions
@@ -70,10 +75,23 @@ export async function mockAuthenticatedUser(
   // This ensures localStorage is set BEFORE the page starts loading
   await page.context().addInitScript(
     ({ user }) => {
+      // Create a properly formatted JWT token with valid structure
+      // The app validates JWT format and checks exp claim
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+      const payload = btoa(
+        JSON.stringify({
+          sub: user.id,
+          exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+          iat: Math.floor(Date.now() / 1000),
+        }),
+      );
+      const signature = 'mock-signature-for-testing';
+      const mockJwtToken = header + '.' + payload + '.' + signature;
+
       // Store mock tokens (authToken is used by authService.getAuthToken())
-      localStorage.setItem('authToken', 'mock-jwt-token');
-      localStorage.setItem('accessToken', 'mock-access-token');
-      localStorage.setItem('refreshToken', 'mock-refresh-token');
+      localStorage.setItem('authToken', mockJwtToken);
+      localStorage.setItem('accessToken', mockJwtToken);
+      localStorage.setItem('refreshToken', mockJwtToken);
 
       // Store user data
       localStorage.setItem('user', JSON.stringify(user));
@@ -107,8 +125,8 @@ export async function mockAuthenticatedUser(
     });
   });
 
-  // Intercept user profile endpoint
-  await page.route('**/api/users/me', (route) => {
+  // Intercept user profile endpoint - use regex for reliable matching
+  await page.route(/\/api\/users\/me(\?.*)?$/, (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -246,9 +264,38 @@ export async function mockAuthenticatedEndpoints(page: Page): Promise<void> {
   });
 
   // Mock user profile endpoint with expected structure
+  // Handle /api/users/me and other user endpoints
   await page.route('**/api/users/*', (route) => {
+    const url = route.request().url();
+
+    // Handle /api/users/me - return the mock authenticated user
+    // This is needed because route.continue() goes to the network, not other route handlers
+    if (url.endsWith('/users/me') || url.includes('/users/me?')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'test-user-1',
+          email: 'test@example.com',
+          displayName: 'Test User',
+          verificationLevel: 'VERIFIED_HUMAN',
+          trustScoreAbility: 0.85,
+          trustScoreBenevolence: 0.8,
+          trustScoreIntegrity: 0.9,
+          status: 'ACTIVE',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          avatarUrl: null,
+          followerCount: 0,
+          followingCount: 0,
+          topicCount: 0,
+          responseCount: 0,
+        }),
+      });
+      return;
+    }
+
     if (route.request().method() === 'GET') {
-      const url = route.request().url();
       const userId = url.split('/').pop()?.split('?')[0] || 'test-user-1';
 
       route.fulfill({

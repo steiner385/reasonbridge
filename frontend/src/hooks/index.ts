@@ -27,3 +27,5 @@ export type {
   UseTypingIndicatorReturn,
   TypingUser,
 } from './useTypingIndicator';
+export { useVotes } from './useVotes';
+export type { UseVotesResult } from './useVotes';

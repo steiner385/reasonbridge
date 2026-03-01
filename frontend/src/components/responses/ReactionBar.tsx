@@ -148,7 +148,12 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
         const tooltipText = getTooltipText(reaction);
 
         return (
-          <div key={reaction.emoji} className="relative group">
+          <div
+            key={reaction.emoji}
+            className="relative group"
+            onMouseEnter={() => setHoveredEmoji(reaction.emoji)}
+            onMouseLeave={() => setHoveredEmoji(null)}
+          >
             <button
               onClick={() => onReactionClick(reaction.emoji)}
               disabled={disabled}
@@ -169,6 +174,8 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
               aria-label={`${reaction.emoji} reaction, ${reaction.count} ${reaction.count === 1 ? 'person' : 'people'}${reaction.userReacted ? ', you reacted' : ''}`}
               aria-pressed={reaction.userReacted}
               title={tooltipText}
+              data-testid="reaction-button"
+              data-user-reacted={reaction.userReacted ? 'true' : 'false'}
             >
               <span className={currentSize.emoji} aria-hidden="true">
                 {reaction.emoji}
@@ -195,13 +202,8 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
               </div>
             )}
 
-            {/* Invisible hover area for tooltip */}
-            <div
-              className="absolute inset-0"
-              onMouseEnter={() => setHoveredEmoji(reaction.emoji)}
-              onMouseLeave={() => setHoveredEmoji(null)}
-              aria-hidden="true"
-            />
+            {/* Invisible hover area for tooltip - pointer-events on parent handles hover */}
+            <div className="absolute inset-0 pointer-events-none" aria-hidden="true" />
           </div>
         );
       })}

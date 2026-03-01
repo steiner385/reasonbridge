@@ -133,7 +133,7 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   };
 
   return (
-    <div className={containerClasses}>
+    <div className={containerClasses} data-testid="vote-buttons">
       {/* Upvote Button */}
       <button
         onClick={handleUpvote}
@@ -141,6 +141,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
         className={upvoteClasses}
         aria-label="Upvote"
         title="Upvote"
+        data-testid="upvote-button"
+        data-active={userVote === 'up'}
       >
         <svg
           className={currentSize.icon}
@@ -166,6 +168,7 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
           text-center
           select-none
         `}
+        data-testid="vote-count"
       >
         {voteCount > 0 ? `+${voteCount}` : voteCount}
       </span>
@@ -177,6 +180,8 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
         className={downvoteClasses}
         aria-label="Downvote"
         title="Downvote"
+        data-testid="downvote-button"
+        data-active={userVote === 'down'}
       >
         <svg
           className={currentSize.icon}

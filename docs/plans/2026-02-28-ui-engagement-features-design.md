@@ -387,3 +387,147 @@ packages/db-models/prisma/
 | Mention parsing complexity | Start with simple @word pattern |
 | WebSocket scaling | Existing infra handles current load |
 | Read state storage | Index on (userId, topicId) |
+
+---
+
+## Addendum: Skipped E2E Test Enablement
+
+**Date:** 2026-03-01
+**Status:** Approved
+
+This addendum covers the implementation required to enable 13 skipped E2E tests across voting, moderation, and reaction features.
+
+### Skipped Tests Summary
+
+| Test File | Skipped Tests | Root Cause |
+|-----------|---------------|------------|
+| `response-voting.spec.ts` | 8 tests | VoteButtons not integrated, missing test IDs |
+| `response-moderation.spec.ts` | 4 tests | ResponseMenu component doesn't exist |
+| `emoji-reactions.spec.ts` | 1 test | Missing `data-user-reacted` attribute |
+
+### Backend API Status
+
+All required backend APIs already exist:
+
+| Service | Endpoint | Status |
+|---------|----------|--------|
+| discussion-service | POST/DELETE/GET `/responses/:id/vote(s)` | ✅ Exists |
+| discussion-service | PATCH `/responses/:id` | ✅ Exists |
+| discussion-service | DELETE `/responses/:id` | ✅ Exists |
+| moderation-service | POST `/moderation/safety-reports` | ✅ Exists |
+| api-gateway | Vote proxy routes | ❌ Missing |
+
+### Frontend Components
+
+#### Existing Components (Need Updates)
+
+| Component | Current State | Required Updates |
+|-----------|--------------|------------------|
+| `VoteButtons.tsx` | Complete UI, not integrated | Add test IDs, integrate into ResponseItem |
+| `ReactionBar.tsx` | Displays reactions | Add `data-user-reacted` attribute |
+| `EditResponseModal.tsx` | Complete modal | Add trigger mechanism via ResponseMenu |
+
+#### New Components Required
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `ResponseMenu.tsx` | Three-dot dropdown for actions | `components/responses/` |
+| `DeleteConfirmDialog.tsx` | Confirm before deletion | `components/responses/` |
+| `ReportDialog.tsx` | Report response form | `components/responses/` |
+
+### ResponseItem Integration
+
+Current action buttons in ResponseItem:
+- ReactionBar ✅
+- Reply ✅
+- Share ✅
+- Bookmark ✅
+
+Required additions:
+- VoteButtons (left side, before content)
+- ResponseMenu (top-right corner, on hover)
+
+```tsx
+<div className="flex gap-2">
+  <VoteButtons
+    responseId={response.id}
+    data-testid="vote-buttons"
+  />
+  <div className="flex-1">
+    {/* Response content */}
+  </div>
+  <ResponseMenu
+    responseId={response.id}
+    isOwnResponse={response.author.id === currentUser?.id}
+    onEdit={() => setIsEditing(true)}
+    onDelete={handleDelete}
+    onReport={() => setShowReportDialog(true)}
+  />
+</div>
+```
+
+### API Gateway Routes (New)
+
+Add to `services/api-gateway/src/votes/votes.controller.ts`:
+
+```typescript
+@Controller('responses/:responseId')
+export class VotesController {
+  @Post('vote')
+  @UseGuards(JwtAuthGuard)
+  async vote(@Param('responseId') responseId: string, @Body() dto: VoteDto) {
+    return this.proxy.forward('discussion-service', `/responses/${responseId}/vote`, dto);
+  }
+
+  @Delete('vote')
+  @UseGuards(JwtAuthGuard)
+  async removeVote(@Param('responseId') responseId: string) {
+    return this.proxy.forward('discussion-service', `/responses/${responseId}/vote`, null, 'DELETE');
+  }
+
+  @Get('votes')
+  async getVotes(@Param('responseId') responseId: string) {
+    return this.proxy.forward('discussion-service', `/responses/${responseId}/votes`);
+  }
+}
+```
+
+### Required Test IDs
+
+| Component | Test ID | Purpose |
+|-----------|---------|---------|
+| VoteButtons container | `data-testid="vote-buttons"` | Container selector |
+| Upvote button | `data-testid="upvote-button"` | Upvote action |
+| Downvote button | `data-testid="downvote-button"` | Downvote action |
+| Vote count | `data-testid="vote-count"` | Score display |
+| ResponseMenu trigger | `data-testid="response-menu"` | Three-dot button |
+| Edit option | `data-testid="edit-response"` | Edit menu item |
+| Delete option | `data-testid="delete-response"` | Delete menu item |
+| Report option | `data-testid="report-response"` | Report menu item |
+| Confirm dialog | `data-testid="confirm-dialog"` | Delete confirmation |
+| Report dialog | `data-testid="report-dialog"` | Report form |
+| Reaction button | `data-testid="reaction-button"` | Individual reaction |
+| Reaction button | `data-user-reacted="true/false"` | User reaction state |
+
+### Success Criteria
+
+All 13 currently skipped E2E tests pass:
+
+**response-voting.spec.ts:**
+1. ✓ should display vote counts on responses
+2. ✓ should display upvote and downvote buttons
+3. ✓ should upvote a response when upvote button is clicked
+4. ✓ should downvote a response when downvote button is clicked
+5. ✓ should remove vote when same button is clicked again
+6. ✓ should switch vote when opposite button is clicked
+7. ✓ should show visual indicator for user vote state
+8. ✓ should update vote count optimistically
+
+**response-moderation.spec.ts:**
+1. ✓ should show different options for own response vs others
+2. ✓ should show report option for other users responses
+3. ✓ should open report dialog when report is clicked
+4. ✓ should allow deleting own response
+
+**emoji-reactions.spec.ts:**
+1. ✓ should remove a reaction when clicked again

@@ -33,12 +33,19 @@ import type { ResponseDetail } from '../../services/discussionService';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { useReactions } from '../../hooks/useReactions';
+import { useVotes } from '../../hooks/useVotes';
+import { useAuthContext } from '../../contexts/AuthContext';
+import { apiClient } from '../../lib/api';
 import ResponseComposer from './ResponseComposer';
 import { LightweightReplyComposer } from './LightweightReplyComposer';
 import ReactionBar from './ReactionBar';
 import ShareButton from './ShareButton';
 import BookmarkButton from './BookmarkButton';
 import { MentionRenderer } from './MentionRenderer';
+import VoteButtons from './VoteButtons';
+import ResponseMenu from './ResponseMenu';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
+import ReportDialog, { type ReportReason } from './ReportDialog';
 
 export interface ResponseItemProps {
   response: ResponseDetail;
@@ -107,6 +114,43 @@ export function ResponseItem({
 
   // Reactions hook for this response
   const { reactions, toggleReaction, isPending: isReactionPending } = useReactions(response.id);
+
+  // Auth context for current user
+  const { user: currentUser, isLoading: isAuthLoading } = useAuthContext();
+
+  // Votes hook
+  const { voteSummary, upvote, downvote, isPending: isVotePending } = useVotes(response.id);
+
+  // Response menu state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Check if current user owns this response
+  const isOwnResponse = currentUser?.id === response.author.id;
+
+  // Handle delete
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await apiClient.delete(`/responses/${response.id}`);
+      setShowDeleteDialog(false);
+    } catch (err) {
+      console.error('Failed to delete response:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Handle report
+  const handleReport = async (reason: ReportReason, additionalInfo?: string) => {
+    await apiClient.post('/moderation/safety-reports', {
+      reporterId: currentUser?.id,
+      reason,
+      additionalInfo,
+      contextResponseId: response.id,
+    });
+  };
 
   const handleReplyClick = () => {
     if (onReply) {
@@ -214,184 +258,223 @@ export function ResponseItem({
           compact ? 'py-2 px-3 border-b border-gray-100 dark:border-gray-800 rounded-none' : ''
         } ${!isGroupStart && compact ? 'pt-1' : ''}`}
       >
-        {/* Header - only shown at group start or in non-compact mode */}
-        {isGroupStart && (
-          <div className={`flex items-start ${compact ? 'gap-2' : 'gap-3'} ${headerMargin}`}>
-            {/* Avatar */}
-            <div
-              className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}
-            >
-              {response.author.displayName.charAt(0).toUpperCase()}
+        <div className="flex gap-3">
+          {/* Vote buttons - left side (not in compact mode) */}
+          {!compact && (
+            <div className="flex-shrink-0">
+              <VoteButtons
+                voteCount={voteSummary?.score ?? 0}
+                userVote={
+                  voteSummary?.userVote === 'UPVOTE'
+                    ? 'up'
+                    : voteSummary?.userVote === 'DOWNVOTE'
+                      ? 'down'
+                      : null
+                }
+                onUpvote={upvote}
+                onDownvote={downvote}
+                disabled={isVotePending || !currentUser}
+                size="sm"
+                orientation="vertical"
+              />
             </div>
-
-            {/* Author and Timestamp */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span
-                  className={`font-semibold text-gray-900 dark:text-gray-100 ${compact ? 'text-sm' : ''}`}
+          )}
+          <div className="flex-1 min-w-0">
+            {/* Header - only shown at group start or in non-compact mode */}
+            {isGroupStart && (
+              <div className={`flex items-start ${compact ? 'gap-2' : 'gap-3'} ${headerMargin}`}>
+                {/* Avatar */}
+                <div
+                  className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}
                 >
-                  {response.author.displayName}
-                </span>
-                {/* Compact: inline separator, Non-compact: on its own line */}
-                {compact && <span className="text-gray-400">·</span>}
-                <span className={`text-gray-500 ${compact ? 'text-xs' : 'text-sm'}`}>
-                  <time dateTime={response.createdAt}>{formatDate(response.createdAt)}</time>
-                </span>
-                {/* Edit Indicator */}
-                {response.editCount > 0 && response.editedAt && (
-                  <>
-                    {compact && <span className="text-gray-400">·</span>}
-                    <span className={`text-gray-500 italic ${compact ? 'text-xs' : 'text-sm'}`}>
-                      {compact ? 'edited' : `(edited ${formatDate(response.editedAt)})`}
+                  {response.author.displayName.charAt(0).toUpperCase()}
+                </div>
+
+                {/* Author and Timestamp */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span
+                      className={`font-semibold text-gray-900 dark:text-gray-100 ${compact ? 'text-sm' : ''}`}
+                    >
+                      {response.author.displayName}
                     </span>
-                  </>
+                    {/* Compact: inline separator, Non-compact: on its own line */}
+                    {compact && <span className="text-gray-400">·</span>}
+                    <span className={`text-gray-500 ${compact ? 'text-xs' : 'text-sm'}`}>
+                      <time dateTime={response.createdAt}>{formatDate(response.createdAt)}</time>
+                    </span>
+                    {/* Edit Indicator */}
+                    {response.editCount > 0 && response.editedAt && (
+                      <>
+                        {compact && <span className="text-gray-400">·</span>}
+                        <span className={`text-gray-500 italic ${compact ? 'text-xs' : 'text-sm'}`}>
+                          {compact ? 'edited' : `(edited ${formatDate(response.editedAt)})`}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Response menu - visible on hover, only when auth state is known */}
+                {!isAuthLoading && (
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    <ResponseMenu
+                      isOwnResponse={isOwnResponse}
+                      onEdit={() => {
+                        // Edit functionality to be implemented later
+                      }}
+                      onDelete={() => setShowDeleteDialog(true)}
+                      onReport={() => setShowReportDialog(true)}
+                      size={compact ? 'sm' : 'md'}
+                    />
+                  </div>
                 )}
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Content - indented when not showing header to align with text above */}
-        <div
-          className={`prose prose-sm max-w-none ${contentMargin} ${
-            !isGroupStart && compact ? 'pl-8' : ''
-          }`}
-        >
-          <p
-            className={`text-gray-800 dark:text-gray-200 whitespace-pre-wrap ${compact ? 'text-sm' : ''}`}
-          >
-            <MentionRenderer content={response.content} />
-          </p>
-        </div>
-
-        {/* Citations */}
-        {response.citations && response.citations.length > 0 && (
-          <div
-            className={`${compact ? 'mb-1.5 p-2' : 'mb-4 p-3'} bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-700 ${
-              !isGroupStart && compact ? 'ml-8' : ''
-            }`}
-          >
-            <p
-              className={`font-medium text-gray-700 dark:text-gray-300 ${compact ? 'text-xs mb-1' : 'text-sm mb-2'}`}
+            {/* Content - indented when not showing header to align with text above */}
+            <div
+              className={`prose prose-sm max-w-none ${contentMargin} ${
+                !isGroupStart && compact ? 'pl-8' : ''
+              }`}
             >
-              Sources:
-            </p>
-            <ul className="space-y-1">
-              {response.citations.map((citation) => (
-                <li key={citation.id} className={compact ? 'text-xs' : 'text-sm'}>
-                  <a
-                    href={citation.originalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {citation.title || citation.originalUrl}
-                  </a>
-                  {citation.validationStatus === 'BROKEN' && (
-                    <span className="ml-2 text-xs text-red-700 dark:text-red-400">
-                      (broken link)
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Actions - always visible */}
-        <div
-          className={`flex items-center justify-between ${
-            compact ? `${!isGroupStart ? 'pl-8' : ''} gap-1.5 mt-1` : 'gap-2 mt-4'
-          }`}
-        >
-          {/* Left side: Reactions and Reply */}
-          <div className={`flex items-center flex-wrap ${compact ? 'gap-1.5' : 'gap-2'}`}>
-            {/* Reaction Bar */}
-            <ReactionBar
-              reactions={reactions}
-              onReactionClick={toggleReaction}
-              disabled={isReactionPending}
-              size={compact ? 'sm' : 'md'}
-              showPicker={true}
-              className="flex-shrink-0"
-            />
-
-            {/* Reply Button (Phase 5) */}
-            {showReplies && depth < maxDepth && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReplyClick}
-                className={`text-gray-600 dark:text-gray-400 hover:text-blue-600 ${compact ? 'text-xs py-0.5 px-1.5' : ''}`}
+              <p
+                className={`text-gray-800 dark:text-gray-200 whitespace-pre-wrap ${compact ? 'text-sm' : ''}`}
               >
-                <svg
-                  className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} mr-1`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                  />
-                </svg>
-                Reply
-                {response.replyCount != null && response.replyCount > 0 && (
-                  <span className="ml-1">({response.replyCount})</span>
-                )}
-              </Button>
-            )}
-          </div>
+                <MentionRenderer content={response.content} />
+              </p>
+            </div>
 
-          {/* Right side: Share and Bookmark */}
-          <div className="flex items-center gap-1">
-            <ShareButton
-              topicId={discussionId}
-              responseId={response.id}
-              className={compact ? 'scale-90' : ''}
-            />
-            <BookmarkButton responseId={response.id} size={compact ? 'sm' : 'md'} />
+            {/* Citations */}
+            {response.citations && response.citations.length > 0 && (
+              <div
+                className={`${compact ? 'mb-1.5 p-2' : 'mb-4 p-3'} bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-700 ${
+                  !isGroupStart && compact ? 'ml-8' : ''
+                }`}
+              >
+                <p
+                  className={`font-medium text-gray-700 dark:text-gray-300 ${compact ? 'text-xs mb-1' : 'text-sm mb-2'}`}
+                >
+                  Sources:
+                </p>
+                <ul className="space-y-1">
+                  {response.citations.map((citation) => (
+                    <li key={citation.id} className={compact ? 'text-xs' : 'text-sm'}>
+                      <a
+                        href={citation.originalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {citation.title || citation.originalUrl}
+                      </a>
+                      {citation.validationStatus === 'BROKEN' && (
+                        <span className="ml-2 text-xs text-red-700 dark:text-red-400">
+                          (broken link)
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Actions - always visible */}
+            <div
+              className={`flex items-center justify-between ${
+                compact ? `${!isGroupStart ? 'pl-8' : ''} gap-1.5 mt-1` : 'gap-2 mt-4'
+              }`}
+            >
+              {/* Left side: Reactions and Reply */}
+              <div className={`flex items-center flex-wrap ${compact ? 'gap-1.5' : 'gap-2'}`}>
+                {/* Reaction Bar */}
+                <ReactionBar
+                  reactions={reactions}
+                  onReactionClick={toggleReaction}
+                  disabled={isReactionPending}
+                  size={compact ? 'sm' : 'md'}
+                  showPicker={true}
+                  className="flex-shrink-0"
+                />
+
+                {/* Reply Button (Phase 5) */}
+                {showReplies && depth < maxDepth && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReplyClick}
+                    className={`text-gray-600 dark:text-gray-400 hover:text-blue-600 ${compact ? 'text-xs py-0.5 px-1.5' : ''}`}
+                  >
+                    <svg
+                      className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} mr-1`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                      />
+                    </svg>
+                    Reply
+                    {response.replyCount != null && response.replyCount > 0 && (
+                      <span className="ml-1">({response.replyCount})</span>
+                    )}
+                  </Button>
+                )}
+              </div>
+
+              {/* Right side: Share and Bookmark */}
+              <div className="flex items-center gap-1">
+                <ShareButton
+                  topicId={discussionId}
+                  responseId={response.id}
+                  className={compact ? 'scale-90' : ''}
+                />
+                <BookmarkButton responseId={response.id} size={compact ? 'sm' : 'md'} />
+              </div>
+            </div>
+
+            {/* Inline Reply Form */}
+            {showReplyForm && (
+              <div
+                className={`${compact ? 'mt-2' : 'mt-4'} ${!isGroupStart && compact ? 'pl-8' : ''}`}
+                data-testid="reply-form"
+              >
+                {shouldUseLightweightComposer ? (
+                  <LightweightReplyComposer
+                    parentId={response.id}
+                    authorName={response.author.displayName}
+                    topicId={discussionId}
+                    onSubmit={handleReplySubmit}
+                    onCancel={() => setShowReplyForm(false)}
+                    onPreviewFeedbackChange={onPreviewFeedbackChange}
+                    minLength={10}
+                    maxLength={10000}
+                    autoFocus
+                    defaultExpanded
+                  />
+                ) : (
+                  <ResponseComposer
+                    inline
+                    parentId={response.id}
+                    placeholder="Write your reply..."
+                    minLength={10}
+                    maxLength={10000}
+                    onSubmit={handleReplySubmit}
+                    onCancel={() => setShowReplyForm(false)}
+                    showCancel
+                    topicId={discussionId}
+                    onPreviewFeedbackChange={onPreviewFeedbackChange}
+                    showPreviewFeedbackInline={false}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Inline Reply Form */}
-        {showReplyForm && (
-          <div
-            className={`${compact ? 'mt-2' : 'mt-4'} ${!isGroupStart && compact ? 'pl-8' : ''}`}
-            data-testid="reply-form"
-          >
-            {shouldUseLightweightComposer ? (
-              <LightweightReplyComposer
-                parentId={response.id}
-                authorName={response.author.displayName}
-                topicId={discussionId}
-                onSubmit={handleReplySubmit}
-                onCancel={() => setShowReplyForm(false)}
-                onPreviewFeedbackChange={onPreviewFeedbackChange}
-                minLength={10}
-                maxLength={10000}
-                autoFocus
-                defaultExpanded
-              />
-            ) : (
-              <ResponseComposer
-                inline
-                parentId={response.id}
-                placeholder="Write your reply..."
-                minLength={10}
-                maxLength={10000}
-                onSubmit={handleReplySubmit}
-                onCancel={() => setShowReplyForm(false)}
-                showCancel
-                topicId={discussionId}
-                onPreviewFeedbackChange={onPreviewFeedbackChange}
-                showPreviewFeedbackInline={false}
-              />
-            )}
-          </div>
-        )}
       </Card>
 
       {/* Nested Replies (Phase 5) */}
@@ -480,6 +563,22 @@ export function ResponseItem({
           )}
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        isOpen={showDeleteDialog}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        isDeleting={isDeleting}
+      />
+
+      {/* Report dialog */}
+      <ReportDialog
+        isOpen={showReportDialog}
+        responseId={response.id}
+        onSubmit={handleReport}
+        onClose={() => setShowReportDialog(false)}
+      />
     </div>
   );
 }
