@@ -14,6 +14,33 @@ export interface ResponseMenuProps {
   size?: 'sm' | 'md';
 }
 
+/**
+ * ResponseMenu - Three-dot dropdown menu for response actions
+ *
+ * @remarks
+ * Shows different options based on ownership:
+ * - **Own response**: Edit and Delete options
+ * - **Other's response**: Report option
+ *
+ * Features:
+ * - Click-outside detection to close menu
+ * - Escape key closes menu and returns focus to trigger
+ * - Dark mode support
+ * - Configurable size variants
+ *
+ * @param props - Component props
+ * @returns Rendered dropdown menu
+ *
+ * @example
+ * ```tsx
+ * <ResponseMenu
+ *   isOwnResponse={response.author.id === currentUser?.id}
+ *   onEdit={() => setIsEditing(true)}
+ *   onDelete={() => setShowDeleteDialog(true)}
+ *   onReport={() => setShowReportDialog(true)}
+ * />
+ * ```
+ */
 const ResponseMenu: React.FC<ResponseMenuProps> = ({
   isOwnResponse,
   onEdit,
@@ -123,6 +150,7 @@ const ResponseMenu: React.FC<ResponseMenuProps> = ({
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
         >
           <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
         </svg>
@@ -156,7 +184,13 @@ const ResponseMenu: React.FC<ResponseMenuProps> = ({
                 role="menuitem"
                 data-testid="edit-response"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -179,7 +213,13 @@ const ResponseMenu: React.FC<ResponseMenuProps> = ({
                 role="menuitem"
                 data-testid="delete-response"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -203,7 +243,13 @@ const ResponseMenu: React.FC<ResponseMenuProps> = ({
               role="menuitem"
               data-testid="report-response"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
