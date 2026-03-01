@@ -8,6 +8,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ActivityProxyController } from './activity-proxy.controller.js';
 import { AiProxyController } from './ai-proxy.controller.js';
 import { AuthProxyController } from './auth-proxy.controller.js';
+import { BookmarksProxyController } from './bookmarks-proxy.controller.js';
 import {
   ContactsProxyController,
   InvitationsProxyController,
@@ -33,6 +34,7 @@ import { ProxyService } from './proxy.service.js';
     ActivityProxyController,
     AiProxyController,
     AuthProxyController,
+    BookmarksProxyController,
     ContactsProxyController,
     DemoProxyController,
     DiscussionsProxyController,

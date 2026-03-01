@@ -3,8 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { randomUUID } from 'crypto';
 import { CORRELATION_ID_HEADER, REQUEST_ID_HEADER } from './constants.js';
+
+/**
+ * Cross-platform UUID generation using Web Crypto API.
+ * Works in both Node.js 20+ and modern browsers.
+ */
+function randomUUID(): string {
+  return globalThis.crypto.randomUUID();
+}
 
 /**
  * Generate a new correlation ID (UUID v4).

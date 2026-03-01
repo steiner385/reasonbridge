@@ -3,40 +3,50 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Post, Delete, Param, Res, Headers, Body, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Query,
+  Res,
+  Headers,
+  Body,
+  Inject,
+} from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
 /**
- * ResponsesProxyController - Proxy for response-specific endpoints
+ * BookmarksProxyController - Proxy for bookmark endpoints
  *
- * Handles routes under /responses that are not topic-scoped:
- * - POST /responses/:id/replies - Reply to a specific response (threaded replies)
- * - GET /responses/:id/reactions - Get reactions for a response
- * - POST /responses/:id/reactions - Add a reaction to a response
- * - DELETE /responses/:id/reactions/:emoji - Remove a reaction from a response
+ * Handles routes under /bookmarks:
+ * - GET /bookmarks - Get user's bookmarks
+ * - GET /bookmarks/:responseId/status - Get bookmark status for a response
+ * - POST /bookmarks - Add a bookmark
+ * - DELETE /bookmarks/:responseId - Remove a bookmark
  */
-@Controller('responses')
-export class ResponsesProxyController {
+@Controller('bookmarks')
+export class BookmarksProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   /**
-   * POST /responses/:responseId/replies - Create a threaded reply to a response
+   * GET /bookmarks - Get user's bookmarks
    *
-   * Proxies to discussion-service: POST /responses/:responseId/replies
+   * Proxies to discussion-service: GET /bookmarks
    */
-  @Post(':responseId/replies')
-  async replyToResponse(
-    @Param('responseId') responseId: string,
-    @Body() body: Record<string, unknown>,
+  @Get()
+  async getBookmarks(
+    @Query() query: Record<string, string>,
     @Headers('authorization') authHeader: string | undefined,
     @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
-      method: 'POST',
-      path: `/topics/responses/${responseId}/replies`,
-      body,
+      method: 'GET',
+      path: '/bookmarks',
+      query,
       headers: {
         ...(authHeader && { Authorization: authHeader }),
         ...(userId && { 'X-User-Id': userId }),
@@ -47,12 +57,12 @@ export class ResponsesProxyController {
   }
 
   /**
-   * GET /responses/:responseId/reactions - Get reactions for a response
+   * GET /bookmarks/:responseId/status - Get bookmark status for a response
    *
-   * Proxies to discussion-service: GET /responses/:responseId/reactions
+   * Proxies to discussion-service: GET /bookmarks/:responseId/status
    */
-  @Get(':responseId/reactions')
-  async getReactions(
+  @Get(':responseId/status')
+  async getBookmarkStatus(
     @Param('responseId') responseId: string,
     @Headers('authorization') authHeader: string | undefined,
     @Headers('x-user-id') userId: string | undefined,
@@ -60,7 +70,7 @@ export class ResponsesProxyController {
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'GET',
-      path: `/responses/${responseId}/reactions`,
+      path: `/bookmarks/${responseId}/status`,
       headers: {
         ...(authHeader && { Authorization: authHeader }),
         ...(userId && { 'X-User-Id': userId }),
@@ -71,13 +81,12 @@ export class ResponsesProxyController {
   }
 
   /**
-   * POST /responses/:responseId/reactions - Add a reaction to a response
+   * POST /bookmarks - Add a bookmark
    *
-   * Proxies to discussion-service: POST /responses/:responseId/reactions
+   * Proxies to discussion-service: POST /bookmarks
    */
-  @Post(':responseId/reactions')
-  async addReaction(
-    @Param('responseId') responseId: string,
+  @Post()
+  async addBookmark(
     @Body() body: Record<string, unknown>,
     @Headers('authorization') authHeader: string | undefined,
     @Headers('x-user-id') userId: string | undefined,
@@ -85,7 +94,7 @@ export class ResponsesProxyController {
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'POST',
-      path: `/responses/${responseId}/reactions`,
+      path: '/bookmarks',
       body,
       headers: {
         ...(authHeader && { Authorization: authHeader }),
@@ -97,21 +106,20 @@ export class ResponsesProxyController {
   }
 
   /**
-   * DELETE /responses/:responseId/reactions/:emoji - Remove a reaction from a response
+   * DELETE /bookmarks/:responseId - Remove a bookmark
    *
-   * Proxies to discussion-service: DELETE /responses/:responseId/reactions/:emoji
+   * Proxies to discussion-service: DELETE /bookmarks/:responseId
    */
-  @Delete(':responseId/reactions/:emoji')
-  async removeReaction(
+  @Delete(':responseId')
+  async removeBookmark(
     @Param('responseId') responseId: string,
-    @Param('emoji') emoji: string,
     @Headers('authorization') authHeader: string | undefined,
     @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'DELETE',
-      path: `/responses/${responseId}/reactions/${emoji}`,
+      path: `/bookmarks/${responseId}`,
       headers: {
         ...(authHeader && { Authorization: authHeader }),
         ...(userId && { 'X-User-Id': userId }),

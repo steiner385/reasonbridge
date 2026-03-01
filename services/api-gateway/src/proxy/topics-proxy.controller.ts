@@ -7,6 +7,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Patch,
   Delete,
   Param,
@@ -217,6 +218,56 @@ export class TopicsProxyController {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'POST',
       path: `/topics/${id}/responses`,
+      body,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * GET /topics/:id/read-state - Get read state for a topic
+   *
+   * Proxies to discussion-service: GET /topics/:topicId/read-state
+   */
+  @Get(':id/read-state')
+  async getReadState(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'GET',
+      path: `/topics/${id}/read-state`,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * PUT /topics/:id/read-state - Update read state for a topic
+   *
+   * Proxies to discussion-service: PUT /topics/:topicId/read-state
+   */
+  @Put(':id/read-state')
+  async updateReadState(
+    @Param('id') id: string,
+    @Body() body: Record<string, any>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'PUT',
+      path: `/topics/${id}/read-state`,
       body,
       headers: {
         ...(authHeader && { Authorization: authHeader }),

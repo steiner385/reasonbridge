@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
+import { DEMO_CREDENTIALS } from '@reason-bridge/common';
 import { seedDemo } from './seed/demo-fixtures';
 import { prisma } from '../src/client.js';
 
@@ -22,39 +25,34 @@ async function main() {
 
   console.log('🌱 Seeding E2E database...');
 
-  // Create test users
-  console.log('Creating test users...');
-  const testUser1 = await prisma.user.upsert({
-    where: { cognitoSub: 'test-user-1' },
-    update: {},
-    create: {
-      email: 'testuser1@example.com',
-      cognitoSub: 'test-user-1',
-      displayName: 'Test User 1',
-      authMethod: 'EMAIL_PASSWORD',
-      trustScoreAbility: 0.75,
-      trustScoreBenevolence: 0.8,
-      trustScoreIntegrity: 0.85,
-      verificationLevel: 'BASIC',
-    },
-  });
+  // Create demo users from shared credentials (same as frontend login modal)
+  console.log('Creating demo users...');
+  const demoUsers = [];
+  for (const cred of DEMO_CREDENTIALS) {
+    const passwordHash = await bcrypt.hash(cred.password, 10);
+    const user = await prisma.user.upsert({
+      where: { email: cred.email },
+      update: {
+        passwordHash,
+        emailVerified: true,
+      },
+      create: {
+        email: cred.email,
+        cognitoSub: `demo-${uuidv4()}`,
+        displayName: cred.name,
+        authMethod: 'EMAIL_PASSWORD',
+        passwordHash,
+        emailVerified: true,
+        verificationLevel: 'BASIC',
+      },
+    });
+    demoUsers.push(user);
+  }
+  console.log(`✅ Created ${demoUsers.length} demo users (use login modal quick-login buttons)`);
 
-  const testUser2 = await prisma.user.upsert({
-    where: { cognitoSub: 'test-user-2' },
-    update: {},
-    create: {
-      email: 'verifieduser@example.com',
-      cognitoSub: 'test-user-2',
-      displayName: 'Verified User',
-      authMethod: 'EMAIL_PASSWORD',
-      trustScoreAbility: 0.9,
-      trustScoreBenevolence: 0.92,
-      trustScoreIntegrity: 0.88,
-      verificationLevel: 'VERIFIED_HUMAN',
-    },
-  });
-
-  console.log(`✅ Created users: ${testUser1.displayName}, ${testUser2.displayName}`);
+  // Use first two demo users for creating content
+  const testUser1 = demoUsers[0];
+  const testUser2 = demoUsers[1];
 
   // Create test topics (check if they exist first by title since we can't use custom IDs)
   console.log('Creating test topics...');
