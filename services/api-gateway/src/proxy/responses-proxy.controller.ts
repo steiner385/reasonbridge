@@ -15,6 +15,9 @@ import { ProxyService } from './proxy.service.js';
  * - GET /responses/:id/reactions - Get reactions for a response
  * - POST /responses/:id/reactions - Add a reaction to a response
  * - DELETE /responses/:id/reactions/:emoji - Remove a reaction from a response
+ * - GET /responses/:id/votes - Get vote summary for a response
+ * - POST /responses/:id/vote - Vote on a response
+ * - DELETE /responses/:id/vote - Remove vote from a response
  */
 @Controller('responses')
 export class ResponsesProxyController {
@@ -112,6 +115,80 @@ export class ResponsesProxyController {
     const response = await this.proxyService.proxyToDiscussionService({
       method: 'DELETE',
       path: `/responses/${responseId}/reactions/${emoji}`,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * GET /responses/:responseId/votes - Get vote summary for a response
+   *
+   * Proxies to discussion-service: GET /responses/:responseId/votes
+   */
+  @Get(':responseId/votes')
+  async getVotes(
+    @Param('responseId') responseId: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'GET',
+      path: `/responses/${responseId}/votes`,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * POST /responses/:responseId/vote - Vote on a response
+   *
+   * Proxies to discussion-service: POST /responses/:responseId/vote
+   */
+  @Post(':responseId/vote')
+  async vote(
+    @Param('responseId') responseId: string,
+    @Body() body: Record<string, unknown>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'POST',
+      path: `/responses/${responseId}/vote`,
+      body,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * DELETE /responses/:responseId/vote - Remove vote from a response
+   *
+   * Proxies to discussion-service: DELETE /responses/:responseId/vote
+   */
+  @Delete(':responseId/vote')
+  async removeVote(
+    @Param('responseId') responseId: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'DELETE',
+      path: `/responses/${responseId}/vote`,
       headers: {
         ...(authHeader && { Authorization: authHeader }),
         ...(userId && { 'X-User-Id': userId }),
