@@ -158,9 +158,9 @@ test.describe('Emoji Reactions', () => {
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    // Look for add reaction button (could be + icon or "Add Reaction" text)
+    // Look for add reaction button (EmojiPicker trigger with exact "Add reaction" label)
     const addReactionButton = page.locator(
-      '[data-testid="add-reaction-button"], button[aria-label*="reaction"], button:has-text("Add Reaction")',
+      '[data-testid="add-reaction-button"], button[aria-label="Add reaction"]',
     );
 
     const buttonExists = await addReactionButton
@@ -215,11 +215,9 @@ test.describe('Emoji Reactions', () => {
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    // Find and click add reaction button
+    // Find and click add reaction button (EmojiPicker trigger)
     const addReactionButton = page
-      .locator(
-        '[data-testid="add-reaction-button"], button[aria-label*="reaction"], button:has-text("Add Reaction")',
-      )
+      .locator('[data-testid="add-reaction-button"], button[aria-label="Add reaction"]')
       .first();
 
     const buttonExists = await addReactionButton.isVisible().catch(() => false);
@@ -356,7 +354,7 @@ test.describe('Emoji Reactions', () => {
 
     // Add reaction button should still be available even without existing reactions
     const addReactionButton = page
-      .locator('[data-testid="add-reaction-button"], button[aria-label*="reaction"]')
+      .locator('[data-testid="add-reaction-button"], button[aria-label="Add reaction"]')
       .first();
 
     const exists = await addReactionButton.isVisible().catch(() => false);
