@@ -192,7 +192,7 @@ export function ResponseList({
 
   // Memoized render function for each row
   const renderRow = useCallback(
-    (index: number, measureRef: (node: HTMLElement | null) => void) => {
+    (index: number) => {
       if (!groupedResponses || !groupedResponses[index]) return null;
 
       const grouped = groupedResponses[index];
@@ -202,8 +202,7 @@ export function ResponseList({
 
       return (
         <div
-          ref={measureRef}
-          className="px-2"
+          className="px-2 pb-3"
           role="listitem"
           aria-posinset={index + 1}
           aria-setsize={groupedResponses.length}
@@ -332,6 +331,8 @@ export function ResponseList({
           {virtualizer.getVirtualItems().map((virtualRow) => (
             <div
               key={virtualRow.key}
+              ref={virtualizer.measureElement}
+              data-index={virtualRow.index}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -340,7 +341,7 @@ export function ResponseList({
                 transform: `translateY(${virtualRow.start}px)`,
               }}
             >
-              {renderRow(virtualRow.index, virtualizer.measureElement)}
+              {renderRow(virtualRow.index)}
             </div>
           ))}
         </div>
