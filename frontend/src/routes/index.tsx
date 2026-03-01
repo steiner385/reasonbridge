@@ -32,6 +32,11 @@ const TopicsPage = lazy(() => import('../pages/Topics'));
 const DiscussionPage = lazy(() =>
   import('../pages/Topics/DiscussionPage').then((m) => ({ default: m.DiscussionPage })),
 );
+const DiscussionDetailPage = lazy(() =>
+  import('../pages/Discussions/DiscussionDetailPage').then((m) => ({
+    default: m.DiscussionDetailPage,
+  })),
+);
 const ProfilePage = lazy(() =>
   import('../pages/Profile').then((m) => ({ default: m.ProfilePage })),
 );
@@ -175,6 +180,14 @@ export const routes: RouteObject[] = [
     element: (
       <LazyRoute>
         <DiscussionPage />
+      </LazyRoute>
+    ),
+  },
+  {
+    path: '/discussions/:discussionId',
+    element: (
+      <LazyRoute>
+        <DiscussionDetailPage />
       </LazyRoute>
     ),
   },

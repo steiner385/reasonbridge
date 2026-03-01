@@ -43,7 +43,7 @@ const mockVoteSummaryWithUserUpvote = {
   upvotes: 13,
   downvotes: 3,
   score: 10,
-  userVote: 'up',
+  userVote: 'UPVOTE', // Must match VoteType: 'UPVOTE' | 'DOWNVOTE'
 };
 
 const mockTopicForVoting = {
@@ -61,12 +61,44 @@ const mockTopicForVoting = {
   tags: [],
 };
 
+// Mock discussion detail matching DiscussionDetail interface
+const mockDiscussionForVoting = {
+  id: 'test-topic-voting',
+  title: 'Topic for Testing Voting',
+  status: 'ACTIVE' as const,
+  createdAt: new Date(Date.now() - 172800000).toISOString(),
+  updatedAt: new Date().toISOString(),
+  lastActivityAt: new Date().toISOString(),
+  topicId: 'test-topic-voting',
+  creator: { id: 'user-1', displayName: 'Alice Smith' },
+  responseCount: 1,
+  participantCount: 15,
+  responses: [mockResponseWithVotes],
+};
+
 test.describe('Response Voting', () => {
   test.beforeEach(async ({ page }) => {
     await mockAuthenticatedUser(page);
     await mockAuthenticatedEndpoints(page);
 
-    // Mock topic endpoint
+    // Mock discussion detail endpoint (for DiscussionDetailPage - non-compact view)
+    // Only intercept fetch/xhr requests to API, not browser navigation
+    await page.route(/\/discussions\/test-topic-voting\/?(\?.*)?$/, (route) => {
+      const resourceType = route.request().resourceType();
+      // Only mock API fetch requests, not document navigation
+      if (resourceType === 'fetch' || resourceType === 'xhr') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockDiscussionForVoting),
+        });
+      } else {
+        // Let document navigation through to React app
+        route.continue();
+      }
+    });
+
+    // Mock topic endpoint (still needed for responses)
     await page.route(/\/topics\/test-topic-voting\/?(\?.*)?$/, (route) => {
       route.fulfill({
         status: 200,
@@ -120,99 +152,66 @@ test.describe('Response Voting', () => {
       });
     });
 
-    // Mock votes endpoint - GET
-    await page.route(/\/responses\/response-with-votes\/votes$/, (route) => {
-      if (route.request().method() === 'GET') {
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(mockVoteSummary),
-        });
-      } else {
-        route.continue();
-      }
-    });
+    // Note: Votes endpoint mock is set up in individual tests based on scenario
   });
 
   test('should display vote counts on responses', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-voting');
+    // Mock votes endpoint - user hasn't voted yet
+    await page.route(/\/responses\/response-with-votes\/votes$/, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockVoteSummary),
+      });
+    });
 
-    // Wait for response to load
+    await page.goto('/discussions/test-topic-voting');
+
+    // Wait for response to load - DiscussionDetailPage renders in non-compact mode with vote buttons
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    // Look for vote count display
-    const voteCount = page.locator('[data-testid="vote-count"], [data-testid="vote-score"]');
-    const exists = await voteCount
-      .first()
-      .isVisible()
-      .catch(() => false);
+    // Vote count should be visible in non-compact mode
+    const voteCount = page.locator('[data-testid="vote-count"]');
+    await expect(voteCount.first()).toBeVisible({ timeout: 5000 });
 
-    if (exists) {
-      const countText = await voteCount.first().textContent();
-      // Should display a number (the score)
-      expect(countText).toMatch(/\d/);
-    } else {
-      // Check for upvote/downvote buttons which may show counts
-      const voteButtons = page.locator(
-        '[data-testid="upvote-button"], [data-testid="downvote-button"]',
-      );
-      const buttonsExist = await voteButtons
-        .first()
-        .isVisible()
-        .catch(() => false);
-
-      if (!buttonsExist) {
-        test.skip();
-      }
-    }
+    const countText = await voteCount.first().textContent();
+    // Should display a number (the score)
+    expect(countText).toMatch(/\d/);
   });
 
   test('should display upvote and downvote buttons', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-voting');
+    // Mock votes endpoint - user hasn't voted yet
+    await page.route(/\/responses\/response-with-votes\/votes$/, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockVoteSummary),
+      });
+    });
+
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    // Look for vote buttons
-    const upvoteButton = page.locator(
-      '[data-testid="upvote-button"], button[aria-label*="upvote"], button:has-text("Upvote")',
-    );
-    const downvoteButton = page.locator(
-      '[data-testid="downvote-button"], button[aria-label*="downvote"], button:has-text("Downvote")',
-    );
+    // Vote buttons should be visible in non-compact mode
+    const upvoteButton = page.locator('[data-testid="upvote-button"]');
+    const downvoteButton = page.locator('[data-testid="downvote-button"]');
 
-    const upvoteExists = await upvoteButton
-      .first()
-      .isVisible()
-      .catch(() => false);
-    const downvoteExists = await downvoteButton
-      .first()
-      .isVisible()
-      .catch(() => false);
-
-    if (upvoteExists || downvoteExists) {
-      if (upvoteExists) {
-        await expect(upvoteButton.first()).toBeVisible();
-      }
-      if (downvoteExists) {
-        await expect(downvoteButton.first()).toBeVisible();
-      }
-    } else {
-      // Might appear on hover
-      const responseItem = page.locator('[data-testid="response-item"]').first();
-      await responseItem.hover();
-      await page.waitForTimeout(300);
-
-      const hoverUpvote = page.locator('[data-testid="upvote-button"]');
-      const hoverExists = await hoverUpvote.isVisible().catch(() => false);
-
-      if (!hoverExists) {
-        test.skip();
-      }
-    }
+    await expect(upvoteButton.first()).toBeVisible({ timeout: 5000 });
+    await expect(downvoteButton.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('should upvote a response when upvote button is clicked', async ({ page }) => {
+    // Mock votes GET endpoint - user hasn't voted yet
+    await page.route(/\/responses\/response-with-votes\/votes$/, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockVoteSummary),
+      });
+    });
+
     // Mock POST vote endpoint
     await page.route(/\/responses\/response-with-votes\/vote$/, (route) => {
       if (route.request().method() === 'POST') {
@@ -226,33 +225,33 @@ test.describe('Response Voting', () => {
       }
     });
 
-    await page.goto('/discussions?topic=test-topic-voting');
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    const responseItem = page.locator('[data-testid="response-item"]').first();
-    await responseItem.hover();
-
-    // Find and click upvote button
+    // Find and click upvote button (visible in non-compact mode)
     const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
-    const exists = await upvoteButton.isVisible().catch(() => false);
+    await expect(upvoteButton).toBeVisible({ timeout: 5000 });
+    await upvoteButton.click();
 
-    if (exists) {
-      await upvoteButton.click();
+    // Wait for vote to register
+    await page.waitForTimeout(500);
 
-      // Wait for vote to register
-      await page.waitForTimeout(500);
-
-      // Button should show active state
-      const isActive = await upvoteButton.getAttribute('data-active');
-      // Vote was successful if no error
-    } else {
-      test.skip();
-    }
+    // Button should show active state
+    await expect(upvoteButton).toHaveAttribute('data-active', 'true');
   });
 
   test('should downvote a response when downvote button is clicked', async ({ page }) => {
+    // Mock votes GET endpoint - user hasn't voted yet
+    await page.route(/\/responses\/response-with-votes\/votes$/, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockVoteSummary),
+      });
+    });
+
     // Mock POST vote endpoint for downvote
     await page.route(/\/responses\/response-with-votes\/vote$/, (route) => {
       if (route.request().method() === 'POST') {
@@ -263,7 +262,7 @@ test.describe('Response Voting', () => {
             upvotes: 12,
             downvotes: 4,
             score: 8,
-            userVote: 'down',
+            userVote: 'DOWNVOTE',
           }),
         });
       } else {
@@ -271,24 +270,19 @@ test.describe('Response Voting', () => {
       }
     });
 
-    await page.goto('/discussions?topic=test-topic-voting');
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    const responseItem = page.locator('[data-testid="response-item"]').first();
-    await responseItem.hover();
-
-    // Find and click downvote button
+    // Find and click downvote button (visible in non-compact mode)
     const downvoteButton = page.locator('[data-testid="downvote-button"]').first();
-    const exists = await downvoteButton.isVisible().catch(() => false);
+    await expect(downvoteButton).toBeVisible({ timeout: 5000 });
+    await downvoteButton.click();
 
-    if (exists) {
-      await downvoteButton.click();
-      await page.waitForTimeout(500);
-    } else {
-      test.skip();
-    }
+    // Wait for vote to register and button to show active state
+    await page.waitForTimeout(500);
+    await expect(downvoteButton).toHaveAttribute('data-active', 'true');
   });
 
   test('should remove vote when same button is clicked again', async ({ page }) => {
@@ -323,24 +317,21 @@ test.describe('Response Voting', () => {
       }
     });
 
-    await page.goto('/discussions?topic=test-topic-voting');
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    const responseItem = page.locator('[data-testid="response-item"]').first();
-    await responseItem.hover();
-
-    // Find active upvote button and click to toggle off
+    // Find active upvote button (should show active state) and click to toggle off
     const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
-    const exists = await upvoteButton.isVisible().catch(() => false);
+    await expect(upvoteButton).toBeVisible({ timeout: 5000 });
+    await expect(upvoteButton).toHaveAttribute('data-active', 'true');
 
-    if (exists) {
-      await upvoteButton.click();
-      await page.waitForTimeout(500);
-    } else {
-      test.skip();
-    }
+    await upvoteButton.click();
+    await page.waitForTimeout(500);
+
+    // Button should no longer be active
+    await expect(upvoteButton).not.toHaveAttribute('data-active', 'true');
   });
 
   test('should switch vote when opposite button is clicked', async ({ page }) => {
@@ -366,7 +357,7 @@ test.describe('Response Voting', () => {
             upvotes: 12,
             downvotes: 4,
             score: 8,
-            userVote: 'down',
+            userVote: 'DOWNVOTE',
           }),
         });
       } else {
@@ -374,24 +365,25 @@ test.describe('Response Voting', () => {
       }
     });
 
-    await page.goto('/discussions?topic=test-topic-voting');
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    const responseItem = page.locator('[data-testid="response-item"]').first();
-    await responseItem.hover();
+    // Upvote should be active initially
+    const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
+    await expect(upvoteButton).toBeVisible({ timeout: 5000 });
+    await expect(upvoteButton).toHaveAttribute('data-active', 'true');
 
     // Click downvote while already upvoted
     const downvoteButton = page.locator('[data-testid="downvote-button"]').first();
-    const exists = await downvoteButton.isVisible().catch(() => false);
+    await expect(downvoteButton).toBeVisible({ timeout: 5000 });
+    await downvoteButton.click();
+    await page.waitForTimeout(500);
 
-    if (exists) {
-      await downvoteButton.click();
-      await page.waitForTimeout(500);
-    } else {
-      test.skip();
-    }
+    // Downvote should now be active, upvote should not
+    await expect(downvoteButton).toHaveAttribute('data-active', 'true');
+    await expect(upvoteButton).not.toHaveAttribute('data-active', 'true');
   });
 
   test('should show visual indicator for user vote state', async ({ page }) => {
@@ -408,23 +400,28 @@ test.describe('Response Voting', () => {
       }
     });
 
-    await page.goto('/discussions?topic=test-topic-voting');
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
     // Check for active/highlighted upvote button
-    const activeUpvote = page.locator(
-      '[data-testid="upvote-button"][data-active="true"], [data-testid="upvote-button"].active',
-    );
-    const exists = await activeUpvote.isVisible().catch(() => false);
-
-    if (exists) {
-      await expect(activeUpvote).toBeVisible();
-    }
+    const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
+    await expect(upvoteButton).toBeVisible({ timeout: 5000 });
+    await expect(upvoteButton).toHaveAttribute('data-active', 'true');
   });
 
   test('should update vote count optimistically', async ({ page }) => {
+    // Mock votes GET endpoint - user hasn't voted yet
+    await page.route(/\/responses\/response-with-votes\/votes$/, (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockVoteSummary),
+      });
+    });
+
+    // Mock POST vote endpoint with delay
     await page.route(/\/responses\/response-with-votes\/vote$/, (route) => {
       // Delay response to verify optimistic update
       setTimeout(() => {
@@ -436,27 +433,27 @@ test.describe('Response Voting', () => {
       }, 1000);
     });
 
-    await page.goto('/discussions?topic=test-topic-voting');
+    await page.goto('/discussions/test-topic-voting');
 
     // Wait for response to load
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 10000 });
 
-    const responseItem = page.locator('[data-testid="response-item"]').first();
-    await responseItem.hover();
-
     const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
-    const exists = await upvoteButton.isVisible().catch(() => false);
+    await expect(upvoteButton).toBeVisible({ timeout: 5000 });
 
-    if (exists) {
-      // Click and immediately check for visual feedback
-      await upvoteButton.click();
+    // Get initial vote count
+    const voteCount = page.locator('[data-testid="vote-count"]').first();
+    const initialCount = await voteCount.textContent();
 
-      // UI should update immediately (optimistic)
-      await page.waitForTimeout(100);
+    // Click and immediately check for visual feedback
+    await upvoteButton.click();
 
-      // Button should show pending/active state before API returns
-    } else {
-      test.skip();
-    }
+    // UI should update immediately (optimistic) - button shows active
+    await page.waitForTimeout(100);
+    await expect(upvoteButton).toHaveAttribute('data-active', 'true');
+
+    // Vote count should update optimistically
+    const updatedCount = await voteCount.textContent();
+    expect(Number(updatedCount)).toBeGreaterThan(Number(initialCount));
   });
 });

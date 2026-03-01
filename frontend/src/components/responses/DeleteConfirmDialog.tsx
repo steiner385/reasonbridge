@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
 
 export interface DeleteConfirmDialogProps {
@@ -77,7 +78,8 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Use portal to escape virtual scrolling container's stacking context
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="presentation">
       <div
         className="absolute inset-0 bg-black/50"
@@ -152,7 +154,8 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

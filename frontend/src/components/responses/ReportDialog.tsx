@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
 
 export type ReportReason = 'SPAM' | 'HARASSMENT' | 'MISINFORMATION' | 'HATE_SPEECH' | 'OTHER';
@@ -109,7 +110,8 @@ const ReportDialog: React.FC<ReportDialogProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Use portal to escape virtual scrolling container's stacking context
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="presentation">
       <div
         className="absolute inset-0 bg-black/50"
@@ -206,7 +208,8 @@ const ReportDialog: React.FC<ReportDialogProps> = ({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

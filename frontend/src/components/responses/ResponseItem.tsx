@@ -116,7 +116,7 @@ export function ResponseItem({
   const { reactions, toggleReaction, isPending: isReactionPending } = useReactions(response.id);
 
   // Auth context for current user
-  const { user: currentUser } = useAuthContext();
+  const { user: currentUser, isLoading: isAuthLoading } = useAuthContext();
 
   // Votes hook
   const { voteSummary, upvote, downvote, isPending: isVotePending } = useVotes(response.id);
@@ -315,18 +315,20 @@ export function ResponseItem({
                   </div>
                 </div>
 
-                {/* Response menu - visible on hover */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                  <ResponseMenu
-                    isOwnResponse={isOwnResponse}
-                    onEdit={() => {
-                      // Edit functionality to be implemented later
-                    }}
-                    onDelete={() => setShowDeleteDialog(true)}
-                    onReport={() => setShowReportDialog(true)}
-                    size={compact ? 'sm' : 'md'}
-                  />
-                </div>
+                {/* Response menu - visible on hover, only when auth state is known */}
+                {!isAuthLoading && (
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    <ResponseMenu
+                      isOwnResponse={isOwnResponse}
+                      onEdit={() => {
+                        // Edit functionality to be implemented later
+                      }}
+                      onDelete={() => setShowDeleteDialog(true)}
+                      onReport={() => setShowReportDialog(true)}
+                      size={compact ? 'sm' : 'md'}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
