@@ -174,6 +174,8 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
               aria-label={`${reaction.emoji} reaction, ${reaction.count} ${reaction.count === 1 ? 'person' : 'people'}${reaction.userReacted ? ', you reacted' : ''}`}
               aria-pressed={reaction.userReacted}
               title={tooltipText}
+              data-testid="reaction-button"
+              data-user-reacted={reaction.userReacted ? 'true' : 'false'}
             >
               <span className={currentSize.emoji} aria-hidden="true">
                 {reaction.emoji}
