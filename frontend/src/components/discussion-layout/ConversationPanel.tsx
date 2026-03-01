@@ -5,7 +5,7 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { ResponseList } from '../responses/ResponseList';
-import ResponseComposer from '../responses/ResponseComposer';
+import { CompactComposer } from '../responses/CompactComposer';
 import { useDiscussionLayout } from '../../contexts/DiscussionLayoutContext';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -483,25 +483,25 @@ export function ConversationPanel({
       )}
 
       {/* Response List */}
-      <div ref={responseListContainerRef} className="flex-1 overflow-auto px-6 py-4">
+      <div ref={responseListContainerRef} className="flex-1 overflow-auto px-4 py-2">
         <ResponseList
           discussionId={topic.id}
           enableThreading
-          height={height ? height - 280 : 520}
+          height={height ? height - 200 : 520}
           highlightedResponseIds={highlightedResponseIds}
           onReplySubmit={handleReplySubmitWithScroll}
           onPreviewFeedbackChange={onPreviewFeedbackChange}
+          compact
         />
       </div>
 
-      {/* Response Composer (sticky bottom) */}
+      {/* Compact Composer (sticky bottom) */}
       {showComposer && (
-        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <ResponseComposer
+        <div className="flex-shrink-0 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <CompactComposer
             topicId={topic.id}
             onSubmit={onResponseSubmit || (() => Promise.resolve())}
             onPreviewFeedbackChange={onPreviewFeedbackChange}
-            showPreviewFeedbackInline={false}
           />
         </div>
       )}

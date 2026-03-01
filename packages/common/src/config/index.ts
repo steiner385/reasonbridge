@@ -7,3 +7,4 @@
  * Configuration exports
  */
 export * from './ports.js';
+export * from './demo-credentials.js';

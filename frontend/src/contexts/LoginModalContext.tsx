@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { DEMO_CREDENTIALS } from '@reason-bridge/common';
 import { useAuth } from '../hooks/useAuth';
 
 /**
@@ -27,40 +28,6 @@ export function useLoginModal() {
   }
   return context;
 }
-
-// Demo credentials
-const DEMO_CREDENTIALS = [
-  {
-    name: 'Admin Adams',
-    email: 'demo-admin@reasonbridge.demo',
-    password: 'DemoAdmin2026!',
-    role: 'Admin',
-  },
-  {
-    name: 'Mod Martinez',
-    email: 'demo-mod@reasonbridge.demo',
-    password: 'DemoMod2026!',
-    role: 'Moderator',
-  },
-  {
-    name: 'Alice Anderson',
-    email: 'demo-alice@reasonbridge.demo',
-    password: 'DemoAlice2026!',
-    role: 'Power User',
-  },
-  {
-    name: 'Bob Builder',
-    email: 'demo-bob@reasonbridge.demo',
-    password: 'DemoBob2026!',
-    role: 'Regular User',
-  },
-  {
-    name: 'New User',
-    email: 'demo-new@reasonbridge.demo',
-    password: 'DemoNew2026!',
-    role: 'New User',
-  },
-];
 
 export function LoginModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
