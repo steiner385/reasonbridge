@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import Joyride, { STATUS, EVENTS, type CallBackProps, type Step } from 'react-joyride';
 import {
   type TourId,
@@ -13,59 +13,7 @@ import {
   resetTour,
   resetAllTours,
 } from './tourSteps';
-
-/**
- * Tour context value interface
- */
-interface TourContextValue {
-  /**
-   * Start a specific tour
-   */
-  startTour: (tourId: TourId) => void;
-
-  /**
-   * Stop the current tour
-   */
-  stopTour: () => void;
-
-  /**
-   * Check if a tour has been completed
-   */
-  isTourCompleted: (tourId: TourId) => boolean;
-
-  /**
-   * Reset a specific tour (allows it to run again)
-   */
-  resetTour: (tourId: TourId) => void;
-
-  /**
-   * Reset all tours
-   */
-  resetAllTours: () => void;
-
-  /**
-   * Currently active tour ID
-   */
-  activeTourId: TourId | null;
-
-  /**
-   * Whether a tour is currently running
-   */
-  isRunning: boolean;
-}
-
-const TourContext = createContext<TourContextValue | null>(null);
-
-/**
- * Custom hook to access tour functionality
- */
-export function useTour(): TourContextValue {
-  const context = useContext(TourContext);
-  if (!context) {
-    throw new Error('useTour must be used within a TourProvider');
-  }
-  return context;
-}
+import { TourContext, type TourContextValue } from './useTour';
 
 /**
  * Props for TourProvider
@@ -100,7 +48,7 @@ export interface TourProviderProps {
  * }
  *
  * // In a component
- * import { useTour } from './components/tours/TourProvider';
+ * import { useTour } from './components/tours/useTour';
  *
  * function HelpButton() {
  *   const { startTour } = useTour();

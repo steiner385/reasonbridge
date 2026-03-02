@@ -170,20 +170,4 @@ export const Tooltip: React.FC<TooltipProps> = ({
   );
 };
 
-/**
- * TooltipProvider Component
- *
- * Wrap your app or a section with this provider to share tooltip configuration
- * across multiple tooltips. This is more efficient than using individual providers.
- *
- * @example
- * ```tsx
- * <TooltipProvider delayDuration={200}>
- *   <Tooltip content="Save">...</Tooltip>
- *   <Tooltip content="Edit">...</Tooltip>
- * </TooltipProvider>
- * ```
- */
-export const TooltipProvider = TooltipPrimitive.Provider;
-
 export default Tooltip;

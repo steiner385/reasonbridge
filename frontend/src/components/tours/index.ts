@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { TourProvider, useTour } from './TourProvider';
+export { TourProvider } from './TourProvider';
 export type { TourProviderProps } from './TourProvider';
+export { useTour } from './useTour';
+export type { TourContextValue } from './useTour';
 
 export {
   type TourId,
