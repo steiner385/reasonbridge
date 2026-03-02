@@ -1070,6 +1070,10 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
+- **2026-03-02**: Jenkins CI stability improvements
+  - Fixed PhoneVerificationButton test timeout (PR #975)
+  - Added Docker image pull retry mechanism (3 retries with 5s delay)
+  - Fixed post-stage build result preservation (prevents Allure/JUnit from overriding result)
 - **2026-02-18**: Added AI/LLM testing infrastructure and documentation
   - Bedrock response mock fixtures, prompt snapshot tests, schema validation
   - Claim extractor service with 7 claim types, golden tests, latency benchmarks
@@ -1084,3 +1088,8 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
   - All Phase 9 polish tasks complete (TSDoc, bundle validation)
 - **2026-02-01**: Consolidated pending PRs into staging branch
 - **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3
+
+# Trigger rebuild
+
+
+
