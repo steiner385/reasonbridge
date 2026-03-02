@@ -2,8 +2,8 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PhoneVerificationButton from '../PhoneVerificationButton';
 import * as api from '../../../lib/api';
@@ -16,6 +16,10 @@ vi.mock('../../../lib/api', () => ({
 describe('PhoneVerificationButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders unverified button by default', () => {
@@ -64,12 +68,22 @@ describe('PhoneVerificationButton', () => {
     expect(screen.queryByRole('heading', { name: /verify phone number/i })).not.toBeInTheDocument();
   });
 
-  it.skip('calls onVerificationSuccess after successful verification', async () => {
-    // TODO: Fix flaky test - timing out waiting for onVerificationSuccess callback
-    // The setTimeout in PhoneVerificationModal (2000ms) before calling onSuccess()
-    // may be causing race conditions in test environment
-    // Issue: Main branch build #88 FAILED due to this timeout
-    const user = userEvent.setup({ delay: null });
+  it('calls onVerificationSuccess after successful verification', async () => {
+    // Use fake timers to control the 2000ms setTimeout in PhoneVerificationModal
+    vi.useFakeTimers();
+
+    // Mock jest globally for React Testing Library compatibility with Vitest
+    // RTL checks for jest.advanceTimersByTime internally
+    const originalJest = globalThis.jest;
+    globalThis.jest = {
+      ...globalThis.jest,
+      advanceTimersByTime: vi.advanceTimersByTime.bind(vi),
+    };
+
+    // Configure userEvent to work with fake timers
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    });
     const mockOnSuccess = vi.fn();
 
     vi.mocked(api.requestPhoneVerification).mockResolvedValue({
@@ -110,14 +124,22 @@ describe('PhoneVerificationButton', () => {
     // Verify
     await user.click(screen.getByRole('button', { name: /verify code/i }));
 
-    // Wait for success callback
-    await waitFor(
-      () => {
-        expect(mockOnSuccess).toHaveBeenCalled();
-      },
-      { timeout: 3000 },
-    );
-  }, 10000);
+    // Wait for success step to appear (use specific heading text to avoid multiple matches)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /verification complete/i })).toBeInTheDocument();
+    });
+
+    // Advance timers past the 2000ms setTimeout in PhoneVerificationModal
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2500);
+    });
+
+    // Now the callback should have been called
+    expect(mockOnSuccess).toHaveBeenCalled();
+
+    // Restore original jest object
+    globalThis.jest = originalJest;
+  }, 15000);
 
   it('closes modal when cancel is clicked', async () => {
     const user = userEvent.setup({ delay: null });
