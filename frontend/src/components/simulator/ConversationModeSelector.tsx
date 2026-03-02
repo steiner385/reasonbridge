@@ -52,6 +52,7 @@ interface DifficultyConfig {
 /**
  * Conversation mode configurations with descriptions matching design doc
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const MODE_CONFIGS: ModeConfig[] = [
   {
     id: 'socratic',
@@ -142,6 +143,7 @@ export const MODE_CONFIGS: ModeConfig[] = [
 /**
  * Difficulty level configurations with descriptions matching design doc
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DIFFICULTY_CONFIGS: DifficultyConfig[] = [
   {
     id: 'novice',

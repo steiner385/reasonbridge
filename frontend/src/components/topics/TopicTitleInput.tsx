@@ -58,6 +58,7 @@ const DEFAULT_MAX_LENGTH = 200;
 /**
  * Hook to calculate topic title validation state
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTopicTitleValidation(
   value: string,
   minLength = DEFAULT_MIN_LENGTH,

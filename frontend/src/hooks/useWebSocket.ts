@@ -424,6 +424,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     return () => {
       disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoConnect, user]); // Only depend on autoConnect and user, not connect/disconnect
 
   return {

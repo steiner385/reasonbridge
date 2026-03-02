@@ -22,6 +22,7 @@ import type {
  * tones, receptiveness levels, and argumentation styles. They can be
  * overridden by fetching from the API via `getPresetPersonas()`.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_PRESET_PERSONAS: PresetPersona[] = [
   {
     id: 'socratic-mentor',

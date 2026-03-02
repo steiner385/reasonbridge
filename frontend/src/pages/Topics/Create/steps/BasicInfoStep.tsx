@@ -131,7 +131,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
         <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
           <li>Frame your title as a question to invite discussion</li>
           <li>Provide enough context for newcomers to understand the debate</li>
-          <li>Mention specific aspects you'd like to explore</li>
+          <li>Mention specific aspects you&apos;d like to explore</li>
         </ul>
       </div>
     </div>

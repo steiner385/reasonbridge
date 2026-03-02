@@ -50,6 +50,7 @@ export interface TagSelectorProps {
 /**
  * Hook for tag selection validation
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTagValidation(
   selectedTags: Tag[],
   minTags: number = 1,

@@ -177,7 +177,7 @@ export default function NotificationsPage() {
           </svg>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No notifications</h3>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-            You're all caught up! Check back later for updates.
+            You&apos;re all caught up! Check back later for updates.
           </p>
         </div>
       )}

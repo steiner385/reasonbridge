@@ -68,6 +68,7 @@ const DEFAULT_ROWS = 6;
 /**
  * Hook to calculate topic description validation state
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTopicDescriptionValidation(
   value: string,
   minLength = DEFAULT_MIN_LENGTH,

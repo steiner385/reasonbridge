@@ -86,6 +86,7 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
  * Hook to access Sidebar context
  * Must be used within SidebarProvider
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSidebarContext(): SidebarContextType {
   const context = React.useContext(SidebarContext);
   if (!context) {

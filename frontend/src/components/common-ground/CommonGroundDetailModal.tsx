@@ -198,8 +198,8 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
           TERM CONFUSION
         </span>
         <p className="text-gray-700 dark:text-gray-300 mt-3">
-          Participants are using the term <strong>"{misunderstanding.term}"</strong> with different
-          meanings, which may be causing confusion in the discussion.
+          Participants are using the term <strong>&ldquo;{misunderstanding.term}&rdquo;</strong>{' '}
+          with different meanings, which may be causing confusion in the discussion.
         </p>
       </div>
 
@@ -216,7 +216,7 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
               data-testid="definition-item"
             >
               <blockquote className="text-gray-800 dark:text-gray-200 italic border-l-4 border-purple-300 pl-3 mb-3">
-                "{def.definition}"
+                &ldquo;{def.definition}&rdquo;
               </blockquote>
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

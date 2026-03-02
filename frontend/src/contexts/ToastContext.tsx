@@ -176,6 +176,7 @@ export function ToastProvider({
  *   return <button onClick={handleSave}>Save</button>;
  * }
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast(): ToastContextType {
   const context = useContext(ToastContext);
 

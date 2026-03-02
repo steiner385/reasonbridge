@@ -182,7 +182,7 @@ const PhoneVerificationModal: React.FC<PhoneVerificationModalProps> = ({
         {step === 'phone' && (
           <div className="space-y-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              We'll send a 6-digit verification code to your phone number via SMS.
+              We&apos;ll send a 6-digit verification code to your phone number via SMS.
             </p>
             <PhoneInput
               value={phoneNumber}

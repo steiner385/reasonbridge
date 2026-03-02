@@ -96,6 +96,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
  * Hook to access Theme context
  * Must be used within ThemeProvider
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useThemeContext(): ThemeContextType {
   const context = React.useContext(ThemeContext);
   if (!context) {

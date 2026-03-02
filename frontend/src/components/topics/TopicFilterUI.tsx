@@ -307,7 +307,7 @@ export function TopicFilterUI({
             </span>
             {filters.search && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full">
-                Search: "{filters.search}"
+                Search: &ldquo;{filters.search}&rdquo;
               </span>
             )}
             {filters.status && (

@@ -138,6 +138,7 @@ export function ChildSafetyProvider({ children }: ChildSafetyProviderProps) {
  * {showPanicButton && <PanicButton />}
  * ```
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useChildSafety(): ChildSafetyState {
   const context = useContext(ChildSafetyContext);
   if (!context) {

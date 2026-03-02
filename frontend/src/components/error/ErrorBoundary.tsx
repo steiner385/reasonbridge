@@ -145,8 +145,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
               {/* Error Message */}
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">
-                We're sorry for the inconvenience. An unexpected error occurred while loading this
-                page.
+                We&apos;re sorry for the inconvenience. An unexpected error occurred while loading
+                this page.
               </p>
 
               {/* Development Mode: Show error details */}

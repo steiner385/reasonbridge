@@ -20,6 +20,7 @@ export interface PanelState {
 /**
  * Default panel state configuration
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_PANEL_STATE: PanelState = {
   leftPanelWidth: 300,
   rightPanelWidth: 360,
@@ -62,6 +63,7 @@ const DiscussionLayoutContext = createContext<DiscussionLayoutContextValue | nul
  * Hook to access discussion layout context
  * @throws Error if used outside DiscussionLayoutProvider
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useDiscussionLayout(): DiscussionLayoutContextValue {
   const context = useContext(DiscussionLayoutContext);
   if (!context) {
@@ -74,6 +76,7 @@ export function useDiscussionLayout(): DiscussionLayoutContextValue {
  * Safe hook to access discussion layout context (returns null if not in provider)
  * Use this in components that may be rendered outside the DiscussionLayoutProvider
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useDiscussionLayoutSafe(): DiscussionLayoutContextValue | null {
   return useContext(DiscussionLayoutContext);
 }
