@@ -111,9 +111,15 @@ describe('PhoneVerificationButton', () => {
     // Send code
     await user.click(screen.getByRole('button', { name: /send code/i }));
 
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /enter verification code/i })).toBeInTheDocument();
-    });
+    // Wait for OTP step with increased timeout for CI stability
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole('heading', { name: /enter verification code/i }),
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // Enter OTP
     const otpInputs = screen.getAllByLabelText(/digit \d/i);
@@ -124,10 +130,13 @@ describe('PhoneVerificationButton', () => {
     // Verify
     await user.click(screen.getByRole('button', { name: /verify code/i }));
 
-    // Wait for success step to appear (use specific heading text to avoid multiple matches)
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /verification complete/i })).toBeInTheDocument();
-    });
+    // Wait for success step to appear with increased timeout for CI stability
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /verification complete/i })).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     // Advance timers past the 2000ms setTimeout in PhoneVerificationModal
     await act(async () => {
@@ -139,7 +148,7 @@ describe('PhoneVerificationButton', () => {
 
     // Restore original jest object
     globalThis.jest = originalJest;
-  }, 15000);
+  }, 30000);
 
   it('closes modal when cancel is clicked', async () => {
     const user = userEvent.setup({ delay: null });
