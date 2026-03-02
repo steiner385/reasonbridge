@@ -7,10 +7,12 @@
  * Help Menu Component
  *
  * Persistent help menu in main navigation for re-accessing orientation content.
- * Allows users to review orientation steps at any time.
+ * Allows users to review orientation steps at any time and take guided tours.
  */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTour, type TourId } from '../tours';
 
 export interface HelpMenuProps {
   /**
@@ -20,11 +22,26 @@ export interface HelpMenuProps {
 }
 
 /**
+ * Determine which tour to show based on current route
+ */
+function getTourIdForRoute(pathname: string): TourId {
+  if (pathname.includes('/topics') || pathname.includes('/discussions')) {
+    return 'discussion';
+  }
+  if (pathname.includes('/profile')) {
+    return 'profile';
+  }
+  return 'home';
+}
+
+/**
  * HelpMenu component for navigation
  */
 const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const { startTour } = useTour();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -63,6 +80,12 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
   const handleReopenOrientation = () => {
     setIsOpen(false);
     onReopenOrientation();
+  };
+
+  const handleStartTour = () => {
+    setIsOpen(false);
+    const tourId = getTourIdForRoute(location.pathname);
+    startTour(tourId);
   };
 
   return (
@@ -125,6 +148,32 @@ const HelpMenu: React.FC<HelpMenuProps> = ({ onReopenOrientation }) => {
                 <div className="font-medium">View Orientation</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   Review how to use the platform
+                </div>
+              </div>
+            </button>
+
+            {/* Take a Tour */}
+            <button
+              onClick={handleStartTour}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+            >
+              <svg
+                className="h-5 w-5 text-primary-600 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                />
+              </svg>
+              <div>
+                <div className="font-medium">Take a Tour</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Guided walkthrough of this page
                 </div>
               </div>
             </button>

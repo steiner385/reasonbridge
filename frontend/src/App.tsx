@@ -12,6 +12,7 @@ import { MobileDrawer } from './components/layouts/MobileDrawer';
 import { OfflineIndicator } from './components/ui/OfflineIndicator';
 import { PanicButton, type SafetyReportReason } from './components/safety';
 import { LoginModalProvider } from './contexts/LoginModalContext';
+import { TourProvider } from './components/tours';
 import { useSidebar } from './hooks/useSidebar';
 import { useIsMobileViewport } from './hooks/useMediaQuery';
 import { submitSafetyReport, type SubmitSafetyReportRequest } from './lib/moderation-api';
@@ -61,65 +62,68 @@ function App() {
 
   if (isStandalonePage) {
     return (
-      <LoginModalProvider>
-        <OfflineIndicator />
-        <PanicButton onReport={handleSafetyReport} />
-        {routing}
-      </LoginModalProvider>
+      <TourProvider>
+        <LoginModalProvider>
+          <OfflineIndicator />
+          <PanicButton onReport={handleSafetyReport} />
+          {routing}
+        </LoginModalProvider>
+      </TourProvider>
     );
   }
 
   // App layout with Header + Sidebar for authenticated pages
   return (
-    <LoginModalProvider>
-      {/* Offline status indicator */}
-      <OfflineIndicator />
+    <TourProvider>
+      <LoginModalProvider>
+        {/* Offline status indicator */}
+        <OfflineIndicator />
 
-      {/* Child safety panic button - only visible to minor users */}
-      <PanicButton onReport={handleSafetyReport} />
+        {/* Child safety panic button - only visible to minor users */}
+        <PanicButton onReport={handleSafetyReport} />
 
-      {/* Skip to main content link (WCAG 2.4.1 Level A) */}
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
+        {/* Skip to main content link (WCAG 2.4.1 Level A) */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
-        <Header />
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
+          <Header />
 
-        {/* Mobile Drawer - rendered outside flex container to avoid stacking context issues */}
-        {isMobile && <MobileDrawer />}
+          {/* Mobile Drawer - rendered outside flex container to avoid stacking context issues */}
+          {isMobile && <MobileDrawer />}
 
-        <div className="flex">
-          {/* Desktop Sidebar */}
-          {!isMobile && <Sidebar />}
+          <div className="flex">
+            {/* Desktop Sidebar */}
+            {!isMobile && <Sidebar />}
 
-          {/* Main Content */}
-          <main
-            id="main-content"
-            className={`flex-1 transition-all duration-300 ${
-              !isMobile
-                ? sidebarMode === 'topics'
-                  ? isCollapsed
-                    ? 'ml-20' // Topics mode collapsed: 80px
-                    : 'ml-80' // Topics mode expanded: 320px
-                  : isCollapsed
-                    ? 'ml-20' // Full mode collapsed: 80px
-                    : 'ml-64' // Full mode expanded: 256px
-                : 'ml-0' // Mobile: no margin
-            }`}
-          >
-            <div
-              key={location.pathname + location.search}
-              className="px-4 py-6 sm:px-6 lg:px-8 route-content"
+            {/* Main Content */}
+            <main
+              id="main-content"
+              className={`flex-1 transition-all duration-300 ${
+                !isMobile
+                  ? sidebarMode === 'topics'
+                    ? isCollapsed
+                      ? 'ml-20' // Topics mode collapsed: 80px
+                      : 'ml-80' // Topics mode expanded: 320px
+                    : isCollapsed
+                      ? 'ml-20' // Full mode collapsed: 80px
+                      : 'ml-64' // Full mode expanded: 256px
+                  : 'ml-0' // Mobile: no margin
+              }`}
             >
-              {routing}
-            </div>
-          </main>
-        </div>
+              <div
+                key={location.pathname + location.search}
+                className="px-4 py-6 sm:px-6 lg:px-8 route-content"
+              >
+                {routing}
+              </div>
+            </main>
+          </div>
 
-        {/* Footer landmark for WCAG compliance */}
-        <footer
-          className={`
+          {/* Footer landmark for WCAG compliance */}
+          <footer
+            className={`
             py-4 px-4 text-center text-sm text-gray-500 dark:text-gray-400
             border-t border-gray-200 dark:border-gray-800
             transition-all duration-300
@@ -135,11 +139,12 @@ function App() {
                 : 'ml-0'
             }
           `}
-        >
-          © 2026 ReasonBridge. Building bridges through rational discussion.
-        </footer>
-      </div>
-    </LoginModalProvider>
+          >
+            © 2026 ReasonBridge. Building bridges through rational discussion.
+          </footer>
+        </div>
+      </LoginModalProvider>
+    </TourProvider>
   );
 }
 

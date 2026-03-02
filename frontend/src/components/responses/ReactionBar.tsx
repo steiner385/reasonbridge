@@ -142,7 +142,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
   const selectedEmojis = reactions.filter((r) => r.userReacted).map((r) => r.emoji);
 
   return (
-    <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-1.5 ${className}`} data-tour="reaction-bar">
       {/* Reaction buttons */}
       {reactions.map((reaction) => {
         const tooltipText = getTooltipText(reaction);

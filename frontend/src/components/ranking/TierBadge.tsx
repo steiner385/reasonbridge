@@ -6,6 +6,8 @@
 import React from 'react';
 import type { TierLevel } from '../../types/ranking';
 import { getTierInfo } from '../../types/ranking';
+import { Tooltip } from '../ui/Tooltip';
+import { getTierDescription } from '../../lib/statusDescriptions';
 
 /**
  * SVG paths for each tier icon
@@ -117,16 +119,25 @@ const TierBadge: React.FC<TierBadgeProps> = ({
   // Color styles combining light and dark mode
   const colorStyles = `${tierInfo.bgColor} ${tierInfo.darkBgColor} ${tierInfo.color} ${tierInfo.darkColor} ${tierInfo.borderColor} ${tierInfo.darkBorderColor}`;
 
+  const tooltipContent = (
+    <div className="max-w-xs">
+      <strong className="block mb-1">{tierInfo.name}</strong>
+      <p className="text-xs">{getTierDescription(tier)}</p>
+    </div>
+  );
+
   return (
-    <span
-      className={`${baseStyles} ${sizeStyles[size].badge} ${colorStyles} ${className}`}
-      role="status"
-      aria-label={`User tier: ${tierInfo.name}`}
-      title={showTooltip ? tierInfo.name : undefined}
-    >
-      <TierIcon tier={tier} className={sizeStyles[size].icon} />
-      {variant === 'full' && <span>{tierInfo.name}</span>}
-    </span>
+    <Tooltip content={tooltipContent} disabled={!showTooltip}>
+      <span
+        className={`${baseStyles} ${sizeStyles[size].badge} ${colorStyles} ${className}`}
+        role="status"
+        aria-label={`User tier: ${tierInfo.name}`}
+        data-tour="tier-badge"
+      >
+        <TierIcon tier={tier} className={sizeStyles[size].icon} />
+        {variant === 'full' && <span>{tierInfo.name}</span>}
+      </span>
+    </Tooltip>
   );
 };
 

@@ -57,3 +57,9 @@ export type { ProgressTrackerProps } from './ProgressTracker';
 
 export { default as OperationQueue } from './OperationQueue';
 export type { OperationQueueProps } from './OperationQueue';
+
+export { Tooltip, TooltipProvider } from './Tooltip';
+export type { TooltipProps } from './Tooltip';
+
+export { InfoIcon } from './InfoIcon';
+export type { InfoIconProps } from './InfoIcon';

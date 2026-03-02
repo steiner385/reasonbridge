@@ -142,6 +142,7 @@ export function Sidebar() {
         ${isCollapsed ? 'w-20' : 'w-64'}
       `}
       aria-label="Sidebar navigation"
+      data-tour="sidebar"
     >
       {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto p-4">
