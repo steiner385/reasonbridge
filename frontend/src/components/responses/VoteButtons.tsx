@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Tooltip } from '../ui/Tooltip';
 
 export interface VoteButtonsProps {
   /**
@@ -133,30 +134,31 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
   };
 
   return (
-    <div className={containerClasses} data-testid="vote-buttons">
+    <div className={containerClasses} data-testid="vote-buttons" data-tour="vote-buttons">
       {/* Upvote Button */}
-      <button
-        onClick={handleUpvote}
-        disabled={disabled}
-        className={upvoteClasses}
-        aria-label="Upvote"
-        title="Upvote"
-        data-testid="upvote-button"
-        data-active={userVote === 'up'}
-      >
-        <svg
-          className={currentSize.icon}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
+      <Tooltip content="Upvote this response to show it's helpful or well-reasoned">
+        <button
+          onClick={handleUpvote}
+          disabled={disabled}
+          className={upvoteClasses}
+          aria-label="Upvote"
+          data-testid="upvote-button"
+          data-active={userVote === 'up'}
         >
-          <path
-            fillRule="evenodd"
-            d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
+          <svg
+            className={currentSize.icon}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </Tooltip>
 
       {/* Vote Count */}
       <span
@@ -174,28 +176,29 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
       </span>
 
       {/* Downvote Button */}
-      <button
-        onClick={handleDownvote}
-        disabled={disabled}
-        className={downvoteClasses}
-        aria-label="Downvote"
-        title="Downvote"
-        data-testid="downvote-button"
-        data-active={userVote === 'down'}
-      >
-        <svg
-          className={currentSize.icon}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
+      <Tooltip content="Downvote if this response is unhelpful or poorly-reasoned">
+        <button
+          onClick={handleDownvote}
+          disabled={disabled}
+          className={downvoteClasses}
+          aria-label="Downvote"
+          data-testid="downvote-button"
+          data-active={userVote === 'down'}
         >
-          <path
-            fillRule="evenodd"
-            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
+          <svg
+            className={currentSize.icon}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </Tooltip>
     </div>
   );
 };

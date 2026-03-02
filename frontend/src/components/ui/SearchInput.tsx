@@ -38,6 +38,11 @@ export interface SearchInputProps extends Omit<
    * Custom CSS class name
    */
   className?: string;
+
+  /**
+   * Data attribute for tour targeting
+   */
+  dataTour?: string;
 }
 
 /**
@@ -77,6 +82,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
       placeholder = 'Search...',
       isLoading = false,
       className = '',
+      dataTour,
       ...props
     },
     ref,
@@ -99,7 +105,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     };
 
     return (
-      <div className={`relative ${className}`}>
+      <div className={`relative ${className}`} data-tour={dataTour}>
         {/* Search Icon */}
         <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 sm:pl-3 pointer-events-none">
           <svg

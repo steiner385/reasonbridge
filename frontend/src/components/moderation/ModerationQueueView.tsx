@@ -17,11 +17,13 @@
 import { useEffect, useState } from 'react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
+import { Tooltip } from '../ui/Tooltip';
 import {
   getModerationActions,
   approveModerationAction,
   rejectModerationAction,
 } from '../../lib/moderation-api';
+import { getModerationStatusDescription } from '../../lib/statusDescriptions';
 import type {
   ModerationAction,
   ModerationActionStatus,
@@ -387,11 +389,13 @@ export default function ModerationQueueView({
                         <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-gray-100 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700">
                           {formatActionType(action.actionType)}
                         </span>
-                        <span
-                          className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(action.status)}`}
-                        >
-                          {action.status}
-                        </span>
+                        <Tooltip content={getModerationStatusDescription(action.status)}>
+                          <span
+                            className={`text-xs font-semibold px-2 py-1 rounded-full border cursor-help ${getStatusColor(action.status)}`}
+                          >
+                            {action.status}
+                          </span>
+                        </Tooltip>
                         {action.aiRecommended && (
                           <span className="text-xs font-semibold px-2 py-1 rounded-full border bg-purple-100 text-purple-800 border-purple-200">
                             AI Recommended

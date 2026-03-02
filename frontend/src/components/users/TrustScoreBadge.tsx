@@ -11,6 +11,9 @@
 
 import type { User } from '../../types/user';
 import { VerificationLevel } from '../../types/user';
+import { Tooltip } from '../ui/Tooltip';
+import { InfoIcon } from '../ui/InfoIcon';
+import { TRUST_DIMENSION_DESCRIPTIONS } from '../../lib/statusDescriptions';
 
 interface TrustScoreBadgeProps {
   user: User;
@@ -197,14 +200,17 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
       className={`rounded-lg border ${colors.bg} ${colors.text} ${colors.border} ${sizeClasses} ${className}`}
       onClick={onClick}
       style={onClick ? { cursor: 'pointer' } : undefined}
+      data-tour="trust-score"
     >
       {/* Header with overall score */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">⭐</span>
-            <span className="font-bold text-lg">{scores.overall}%</span>
-          </div>
+          <Tooltip content={TRUST_DIMENSION_DESCRIPTIONS.overall}>
+            <div className="flex items-center gap-2 cursor-help">
+              <span className="text-2xl">⭐</span>
+              <span className="font-bold text-lg">{scores.overall}%</span>
+            </div>
+          </Tooltip>
           {showVerification && (
             <span
               className={`px-2 py-1 text-xs font-semibold rounded-full border ${verificationColors.bg} ${verificationColors.text} ${verificationColors.border}`}
@@ -237,7 +243,10 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
       {showDimensions && (
         <div className="space-y-2 text-xs border-t border-current border-opacity-20 pt-3">
           <div className="flex items-center justify-between">
-            <span>Ability</span>
+            <span className="flex items-center gap-1">
+              Ability
+              <InfoIcon content={TRUST_DIMENSION_DESCRIPTIONS.ability} size="sm" />
+            </span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 bg-gray-300 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500" style={{ width: `${scores.ability}%` }} />
@@ -246,7 +255,10 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span>Benevolence</span>
+            <span className="flex items-center gap-1">
+              Benevolence
+              <InfoIcon content={TRUST_DIMENSION_DESCRIPTIONS.benevolence} size="sm" />
+            </span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 bg-gray-300 rounded-full overflow-hidden">
                 <div className="h-full bg-green-500" style={{ width: `${scores.benevolence}%` }} />
@@ -255,7 +267,10 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span>Integrity</span>
+            <span className="flex items-center gap-1">
+              Integrity
+              <InfoIcon content={TRUST_DIMENSION_DESCRIPTIONS.integrity} size="sm" />
+            </span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 bg-gray-300 rounded-full overflow-hidden">
                 <div className="h-full bg-purple-500" style={{ width: `${scores.integrity}%` }} />

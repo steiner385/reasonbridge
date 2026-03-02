@@ -5,6 +5,8 @@
 
 import React from 'react';
 import type { Topic } from '../../types/topic';
+import { Tooltip } from '../ui/Tooltip';
+import { getTopicStatusDescription } from '../../lib/statusDescriptions';
 
 /**
  * TopicListItem props
@@ -95,11 +97,13 @@ export function TopicListItem({
         </span>
 
         {/* Status indicator dot */}
-        <div
-          className={`flex-shrink-0 w-1.5 h-1.5 rounded-full mt-1.5 ${getStatusColor(topic.status)}`}
-          title={`Status: ${topic.status}`}
-          aria-label={`Status: ${topic.status}`}
-        />
+        <Tooltip content={getTopicStatusDescription(topic.status)} side="left">
+          <div
+            className={`flex-shrink-0 w-1.5 h-1.5 rounded-full mt-1.5 ${getStatusColor(topic.status)}`}
+            role="img"
+            aria-label={`Status: ${topic.status}`}
+          />
+        </Tooltip>
       </div>
 
       {/* Metadata row */}
