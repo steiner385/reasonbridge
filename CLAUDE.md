@@ -961,6 +961,14 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Result**: npm install succeeds without workspace: protocol conflicts
    - **Lesson**: When copying files to isolated containers, be aware of monorepo-specific dependencies that may not work with vanilla npm
 
+8. **Missing @axe-core/playwright Dependency** - Fixed 2026-03-03 20:55 UTC:
+   - Build #366: E2E tests failed immediately with exit code 1 after only ~2 minutes
+   - **Error**: `Cannot find package '@axe-core/playwright' imported from /app/frontend/e2e/helpers/accessibility.ts`
+   - **Root cause**: After moving package.json aside (fix #7), npm only installs `@playwright/test` but the E2E tests also import `@axe-core/playwright` for accessibility testing
+   - **Solution**: Add `@axe-core/playwright` to the npm install command alongside `@playwright/test`
+   - **Result**: All E2E test dependencies are available in the container
+   - **Lesson**: When installing dependencies in isolated containers, ensure ALL imported packages are explicitly installed
+
 ## Active Technologies
 
 - TypeScript 5.9.3 (strict mode), React 19.2.4, Node.js 20 LTS (NestJS backend) + React Query 5.90.21, React Hook Form 7.71.2, Zod 4.3.5, Tailwind CSS 3.4.19, Socket.io-client 4.8.3 (001-profile-page)
