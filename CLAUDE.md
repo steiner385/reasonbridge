@@ -953,6 +953,14 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
    - **Result**: 320 E2E tests pass in 2.7 minutes with no OOM errors
    - **Lesson**: E2E stability requires balancing test coverage with resource constraints; prefer fewer reliable tests over many flaky tests
 
+7. **npm Workspace Protocol Error (EUNSUPPORTEDPROTOCOL)** - Fixed 2026-03-03 20:30 UTC:
+   - Build #364: E2E tests failed with exit code 1 immediately after container setup
+   - **Error**: `npm error Unsupported URL Type "workspace:": workspace:*`
+   - **Root cause**: Frontend's package.json was copied to Playwright container, but it contains pnpm workspace references (`"@reason-bridge/common": "workspace:*"`) that npm cannot process
+   - **Solution**: Move package.json aside before `npm install @playwright/test`, restore after (jenkins-lib change)
+   - **Result**: npm install succeeds without workspace: protocol conflicts
+   - **Lesson**: When copying files to isolated containers, be aware of monorepo-specific dependencies that may not work with vanilla npm
+
 ## Active Technologies
 
 - TypeScript 5.9.3 (strict mode), React 19.2.4, Node.js 20 LTS (NestJS backend) + React Query 5.90.21, React Hook Form 7.71.2, Zod 4.3.5, Tailwind CSS 3.4.19, Socket.io-client 4.8.3 (001-profile-page)
