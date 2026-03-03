@@ -1,6 +1,6 @@
 export default {
   plugins: {
-    tailwindcss: {},
+    // tailwindcss is now handled by @tailwindcss/vite plugin
     autoprefixer: {},
   },
 };
