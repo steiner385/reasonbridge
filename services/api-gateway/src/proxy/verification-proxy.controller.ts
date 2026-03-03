@@ -96,6 +96,38 @@ export class VerificationProxyController {
     res.status(response.status).send(response.data);
   }
 
+  /**
+   * GET /verification/phone/test-otp/:verificationId
+   * Retrieves plaintext OTP for E2E testing (only available in test/E2E mode)
+   */
+  @Get('phone/test-otp/:verificationId')
+  async getTestOtp(
+    @Param('verificationId') verificationId: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    // Validate UUID format before proxying
+    if (!isValidUUID(verificationId)) {
+      this.logger.warn(
+        `Invalid UUID format received for test OTP lookup: "${verificationId}" (length: ${verificationId.length})`,
+      );
+      res.status(400).send({
+        statusCode: 400,
+        message: `Invalid verification ID format: expected UUID`,
+        error: 'Bad Request',
+      });
+      return;
+    }
+
+    const response = await this.proxyService.proxyToUserService({
+      method: 'GET',
+      path: `/verification/phone/test-otp/${verificationId}`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
   @Post('video-upload-complete')
   async markVideoUploadComplete(
     @Body() body: unknown,

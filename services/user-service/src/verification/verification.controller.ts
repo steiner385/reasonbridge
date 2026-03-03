@@ -117,6 +117,31 @@ export class VerificationController {
   }
 
   /**
+   * GET /verification/phone/test-otp/:verificationId
+   * Retrieves the plaintext OTP for E2E testing (only available in test/E2E mode)
+   *
+   * This endpoint is protected and only available when NODE_ENV=test or E2E_MODE=true.
+   * It allows E2E tests to retrieve the OTP code without having to parse logs.
+   *
+   * @param verificationId - Verification record ID
+   * @returns Object containing the plaintext OTP
+   *
+   * @example
+   * // Get test OTP
+   * GET /verification/phone/test-otp/f47ac10b-58cc-4372-a567-0e02b2c3d479
+   *
+   * // Response
+   * {
+   *   "otp": "123456"
+   * }
+   */
+  @Get('phone/test-otp/:verificationId')
+  async getTestOtp(@Param('verificationId') verificationId: string) {
+    this.logger.debug(`Test OTP request for verification ${verificationId}`);
+    return this.verificationService.getTestOtp(verificationId);
+  }
+
+  /**
    * POST /verification/phone/verify
    * Verifies the OTP code sent to the user's phone number
    *
