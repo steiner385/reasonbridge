@@ -23,16 +23,24 @@ services:
       POSTGRES_USER: reasonbridge_test
       POSTGRES_PASSWORD: reasonbridge_test
       POSTGRES_DB: reasonbridge_test
+      # Reduce shared_buffers to work within memory limits (default 128MB is too high)
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8'
     # Host port removed to prevent CI conflicts - services communicate via Docker network
     # For local debugging, uncomment: ports: ['5434:5432']
+    command: >
+      postgres
+      -c shared_buffers=32MB
+      -c max_connections=50
+      -c work_mem=2MB
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U reasonbridge_test -d reasonbridge_test']
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     tmpfs:
       - /var/lib/postgresql/data
-    mem_limit: 256m
+    mem_limit: 384m
     networks:
       - reasonbridge-e2e
 
