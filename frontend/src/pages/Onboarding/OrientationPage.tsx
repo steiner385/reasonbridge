@@ -46,6 +46,7 @@ const OrientationPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   // Fetch onboarding progress to determine next step
@@ -168,7 +169,8 @@ const OrientationPage: React.FC = () => {
             Welcome to ReasonBridge
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Let's take a quick tour of how our platform helps you engage in meaningful discussions.
+            Let&apos;s take a quick tour of how our platform helps you engage in meaningful
+            discussions.
           </p>
         </div>
 

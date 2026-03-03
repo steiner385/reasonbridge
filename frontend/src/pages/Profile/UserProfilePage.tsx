@@ -59,7 +59,7 @@ function UserProfilePage() {
                 User Not Found
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                The user you're looking for doesn't exist.
+                The user you&apos;re looking for doesn&apos;t exist.
               </p>
               <Link to="/">
                 <Button variant="primary">Go to Home</Button>

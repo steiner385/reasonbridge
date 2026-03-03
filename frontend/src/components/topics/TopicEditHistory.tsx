@@ -162,7 +162,7 @@ function EditHistoryItem({ edit }: { edit: TopicEdit }) {
           {/* Edit reason */}
           {edit.changeReason && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
-              "{edit.changeReason}"
+              &ldquo;{edit.changeReason}&rdquo;
             </p>
           )}
 

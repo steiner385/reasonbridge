@@ -265,7 +265,7 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
             className="w-4 h-4 border border-gray-300 rounded focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed"
           />
           <label htmlFor="anonymous" className="text-sm text-gray-700">
-            Submit anonymously (your account won't be associated with this report)
+            Submit anonymously (your account won&apos;t be associated with this report)
           </label>
         </div>
 

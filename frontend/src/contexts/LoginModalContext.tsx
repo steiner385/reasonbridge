@@ -21,6 +21,7 @@ interface LoginModalContextType {
 
 const LoginModalContext = createContext<LoginModalContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLoginModal() {
   const context = useContext(LoginModalContext);
   if (!context) {
@@ -216,7 +217,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
             {/* Sign up link */}
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   type="button"
                   onClick={() => {

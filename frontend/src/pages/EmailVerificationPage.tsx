@@ -245,7 +245,7 @@ export const EmailVerificationPage: React.FC = () => {
           {/* Resend Link */}
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-              Didn't receive the code?
+              Didn&apos;t receive the code?
             </p>
             <button
               type="button"

@@ -111,6 +111,7 @@ function RegistrationForm({
   });
 
   // Watch birth date and country to determine if parent email should be shown
+  // eslint-disable-next-line react-hooks/incompatible-library
   const birthDate = watch('birthDate');
   const declaredCountry = watch('declaredCountry');
 

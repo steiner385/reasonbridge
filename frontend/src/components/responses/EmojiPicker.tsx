@@ -11,6 +11,7 @@ import { Tooltip } from '../ui/Tooltip';
 /**
  * Quick reaction emojis available in the picker
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const QUICK_REACTIONS = ['👍', '❤️', '🎉', '🤔', '👀', '🙌'] as const;
 
 export type QuickReaction = (typeof QUICK_REACTIONS)[number];

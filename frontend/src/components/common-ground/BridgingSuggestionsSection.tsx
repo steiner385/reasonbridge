@@ -240,7 +240,7 @@ const BridgingSuggestionsSection = ({
                       Suggested Bridging Language:
                     </h4>
                     <p className="text-base text-gray-900 dark:text-gray-100 font-medium leading-relaxed">
-                      "{suggestion.bridgingLanguage}"
+                      &ldquo;{suggestion.bridgingLanguage}&rdquo;
                     </p>
                   </div>
 

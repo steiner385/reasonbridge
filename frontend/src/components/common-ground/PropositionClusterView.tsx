@@ -313,8 +313,8 @@ const PropositionClusterView = ({
             Unclustered Propositions ({clusteringResult.unclusteredPropositionIds.length})
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            These propositions don't clearly belong to any cluster and represent unique or outlier
-            perspectives.
+            These propositions don&apos;t clearly belong to any cluster and represent unique or
+            outlier perspectives.
           </p>
           <div className="space-y-2">
             {clusteringResult.unclusteredPropositionIds.map((propId) => {

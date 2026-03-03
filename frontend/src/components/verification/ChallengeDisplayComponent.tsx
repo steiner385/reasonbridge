@@ -58,7 +58,7 @@ const ChallengeDisplayComponent: React.FC<ChallengeDisplayComponentProps> = ({
               <div className="p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Phrase to say:</p>
                 <p className="text-xl font-bold text-blue-700 break-words">
-                  "{challenge.randomValue}"
+                  &ldquo;{challenge.randomValue}&rdquo;
                 </p>
               </div>
             )}

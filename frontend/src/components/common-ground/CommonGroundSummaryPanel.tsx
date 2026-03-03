@@ -254,7 +254,7 @@ const CommonGroundSummaryPanel = ({
                       TERM CONFUSION
                     </span>
                     <h4 className="font-medium text-purple-900 dark:text-purple-300 mt-2">
-                      "{misunderstanding.term}"
+                      &ldquo;{misunderstanding.term}&rdquo;
                     </h4>
                   </div>
                 </div>
