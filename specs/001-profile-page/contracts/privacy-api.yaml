@@ -1,0 +1,234 @@
+openapi: 3.1.0
+info:
+  title: Privacy Settings API
+  version: 1.0.0
+  description: |
+    API endpoints for managing user privacy settings in reasonBridge.
+    Part of user-service.
+
+servers:
+  - url: /api
+    description: API Gateway
+
+tags:
+  - name: Privacy
+    description: Privacy settings management
+
+paths:
+  /users/me/privacy:
+    get:
+      operationId: getPrivacySettings
+      summary: Get privacy settings
+      description: Returns current user's privacy settings
+      tags:
+        - Privacy
+      responses:
+        '200':
+          description: Privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - bearerAuth: []
+
+    put:
+      operationId: updatePrivacySettings
+      summary: Update privacy settings
+      description: Update current user's privacy settings
+      tags:
+        - Privacy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePrivacyRequest'
+      responses:
+        '200':
+          description: Updated privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettings'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - bearerAuth: []
+
+    patch:
+      operationId: patchPrivacySettings
+      summary: Partially update privacy settings
+      description: Update specific privacy settings fields
+      tags:
+        - Privacy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchPrivacyRequest'
+      responses:
+        '200':
+          description: Updated privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettings'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ProfileVisibility:
+      type: string
+      description: |
+        Visibility level for profile sections:
+        - PUBLIC: Visible to everyone
+        - FOLLOWERS_ONLY: Visible only to followers
+        - PRIVATE: Visible only to self
+      enum:
+        - PUBLIC
+        - FOLLOWERS_ONLY
+        - PRIVATE
+
+    TrustVisibility:
+      type: string
+      description: |
+        Visibility level for detailed trust scores.
+        Note: PRIVATE is not allowed for trust scores (platform integrity).
+      enum:
+        - PUBLIC
+        - FOLLOWERS_ONLY
+
+    PrivacySettings:
+      type: object
+      description: User privacy preferences
+      required:
+        - activityHistory
+        - detailedTrustScores
+        - followerList
+        - followingList
+      properties:
+        activityHistory:
+          $ref: '#/components/schemas/ProfileVisibility'
+          description: |
+            Who can see your contribution history (topics, responses, validations).
+            Default: PUBLIC
+        detailedTrustScores:
+          $ref: '#/components/schemas/TrustVisibility'
+          description: |
+            Who can see your detailed trust score breakdown (Ability, Benevolence, Integrity).
+            Note: Overall trust level and tier are always visible for platform integrity.
+            Default: PUBLIC
+        followerList:
+          $ref: '#/components/schemas/ProfileVisibility'
+          description: |
+            Who can see your list of followers.
+            Default: PUBLIC
+        followingList:
+          $ref: '#/components/schemas/ProfileVisibility'
+          description: |
+            Who can see the list of users you follow.
+            Default: PUBLIC
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    UpdatePrivacyRequest:
+      type: object
+      description: Full privacy settings update
+      required:
+        - activityHistory
+        - detailedTrustScores
+        - followerList
+        - followingList
+      properties:
+        activityHistory:
+          $ref: '#/components/schemas/ProfileVisibility'
+        detailedTrustScores:
+          $ref: '#/components/schemas/TrustVisibility'
+        followerList:
+          $ref: '#/components/schemas/ProfileVisibility'
+        followingList:
+          $ref: '#/components/schemas/ProfileVisibility'
+
+    PatchPrivacyRequest:
+      type: object
+      description: Partial privacy settings update
+      minProperties: 1
+      properties:
+        activityHistory:
+          $ref: '#/components/schemas/ProfileVisibility'
+        detailedTrustScores:
+          $ref: '#/components/schemas/TrustVisibility'
+        followerList:
+          $ref: '#/components/schemas/ProfileVisibility'
+        followingList:
+          $ref: '#/components/schemas/ProfileVisibility'
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Authentication required"
+            code: "UNAUTHORIZED"
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+              - errors
+            properties:
+              message:
+                type: string
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string
+          examples:
+            invalidTrustVisibility:
+              summary: Trust scores cannot be PRIVATE
+              value:
+                message: "Validation failed"
+                errors:
+                  - field: "detailedTrustScores"
+                    message: "Trust scores visibility cannot be set to PRIVATE"

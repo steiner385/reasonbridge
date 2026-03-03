@@ -108,6 +108,9 @@ model User {
   bookmarks                     Bookmark[]
   // Feature: UI Engagement - new messages divider
   topicReadStates               UserTopicReadState[]
+  // Feature: Profile Pages - bio and privacy settings
+  bio                           String?                   @db.VarChar(300)
+  privacySettings               UserPrivacySettings?
 
   @@index([cognitoSub])
   @@index([email])
@@ -208,6 +211,35 @@ enum ProvisionalAccessStatus {
   REVOKED
 
   @@map("provisional_access_status")
+}
+
+/// Profile visibility levels for privacy settings (Feature: Profile Pages)
+/// Controls who can see specific profile sections
+enum ProfileVisibility {
+  PUBLIC
+  FOLLOWERS_ONLY
+  PRIVATE
+
+  @@map("profile_visibility")
+}
+
+/// User privacy preferences for profile sections (Feature: Profile Pages)
+/// Controls visibility of activity history, trust scores, and social connections
+model UserPrivacySettings {
+  id                  String            @id @default(uuid()) @db.Uuid
+  userId              String            @unique @map("user_id") @db.Uuid
+  activityHistory     ProfileVisibility @default(PUBLIC) @map("activity_history")
+  detailedTrustScores ProfileVisibility @default(PUBLIC) @map("detailed_trust_scores")
+  followerList        ProfileVisibility @default(PUBLIC) @map("follower_list")
+  followingList       ProfileVisibility @default(PUBLIC) @map("following_list")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_privacy_settings")
 }
 
 /// Cached user ranking data, recalculated daily (Feature #781)
@@ -357,6 +389,9 @@ model VerificationRecord {
   otpExpiresAt DateTime? @map("otp_expires_at")
   otpAttempts  Int       @default(0) @map("otp_attempts")
   phoneNumber  String?   @map("phone_number")
+
+  // Test mode only - stores unhashed OTP for E2E testing (never populated in production)
+  otpPlaintext String?   @map("otp_plaintext")
 
   // Relations
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1624,21 +1659,21 @@ model SafetyReport {
 
 /// Detection source for CSAM content
 enum CsamDetectionSource {
-  AI_DETECTION     // Detected by AI content screening
-  USER_REPORT      // Reported by platform user
+  AI_DETECTION // Detected by AI content screening
+  USER_REPORT // Reported by platform user
   MODERATOR_REVIEW // Found during moderation review
-  HASH_MATCH       // Matched known CSAM hash (PhotoDNA, etc.)
+  HASH_MATCH // Matched known CSAM hash (PhotoDNA, etc.)
 
   @@map("csam_detection_source")
 }
 
 /// Status of CSAM report to NCMEC
 enum CsamReportStatus {
-  PENDING_REVIEW   // Awaiting internal review
+  PENDING_REVIEW // Awaiting internal review
   EVIDENCE_PRESERVED // Evidence has been preserved
-  SUBMITTED_NCMEC  // Submitted to NCMEC CyberTipline
-  CONFIRMED        // NCMEC confirmed receipt
-  REJECTED         // Internal review determined not CSAM
+  SUBMITTED_NCMEC // Submitted to NCMEC CyberTipline
+  CONFIRMED // NCMEC confirmed receipt
+  REJECTED // Internal review determined not CSAM
 
   @@map("csam_report_status")
 }
@@ -1646,38 +1681,38 @@ enum CsamReportStatus {
 /// CSAM (Child Sexual Abuse Material) reports for NCMEC CyberTipline
 /// Mandatory reporting within 24 hours as required by 18 U.S.C. § 2258A
 model CsamReport {
-  id                    String              @id @default(uuid()) @db.Uuid
+  id                String              @id @default(uuid()) @db.Uuid
   /// Source of detection
-  detectionSource       CsamDetectionSource @map("detection_source")
+  detectionSource   CsamDetectionSource @map("detection_source")
   /// Current status of the report
-  status                CsamReportStatus    @default(PENDING_REVIEW)
+  status            CsamReportStatus    @default(PENDING_REVIEW)
   /// ID of the content (response, topic, etc.) that triggered the report
-  contentType           String              @map("content_type") @db.VarChar(50)
-  contentId             String              @map("content_id") @db.Uuid
+  contentType       String              @map("content_type") @db.VarChar(50)
+  contentId         String              @map("content_id") @db.Uuid
   /// User who created the flagged content (may be null if anonymous)
-  contentAuthorId       String?             @map("content_author_id") @db.Uuid
+  contentAuthorId   String?             @map("content_author_id") @db.Uuid
   /// S3 path to preserved evidence (encrypted)
-  evidenceS3Key         String?             @map("evidence_s3_key") @db.VarChar(500)
+  evidenceS3Key     String?             @map("evidence_s3_key") @db.VarChar(500)
   /// Hash of preserved content for integrity verification
-  evidenceHash          String?             @map("evidence_hash") @db.VarChar(128)
+  evidenceHash      String?             @map("evidence_hash") @db.VarChar(128)
   /// NCMEC CyberTipline report ID (assigned after submission)
-  ncmecReportId         String?             @map("ncmec_report_id") @db.VarChar(50)
+  ncmecReportId     String?             @map("ncmec_report_id") @db.VarChar(50)
   /// Timestamp when submitted to NCMEC
-  ncmecSubmittedAt      DateTime?           @map("ncmec_submitted_at")
+  ncmecSubmittedAt  DateTime?           @map("ncmec_submitted_at")
   /// Internal notes (for legal/compliance team only)
-  internalNotes         String?             @map("internal_notes") @db.Text
+  internalNotes     String?             @map("internal_notes") @db.Text
   /// Legal hold flag - prevents deletion of related data
-  isLegalHold           Boolean             @default(true) @map("is_legal_hold")
+  isLegalHold       Boolean             @default(true) @map("is_legal_hold")
   /// User ID who flagged/reported (if user-initiated)
-  reportedById          String?             @map("reported_by_id") @db.Uuid
+  reportedById      String?             @map("reported_by_id") @db.Uuid
   /// AI confidence score if AI-detected (0.0-1.0)
-  aiConfidenceScore     Decimal?            @map("ai_confidence_score") @db.Decimal(3, 2)
+  aiConfidenceScore Decimal?            @map("ai_confidence_score") @db.Decimal(3, 2)
   /// PhotoDNA or similar hash match details
-  hashMatchDetails      Json?               @map("hash_match_details")
+  hashMatchDetails  Json?               @map("hash_match_details")
   /// Deadline for NCMEC submission (24 hours from detection)
-  ncmecDeadline         DateTime            @map("ncmec_deadline")
-  createdAt             DateTime            @default(now()) @map("created_at")
-  updatedAt             DateTime            @updatedAt @map("updated_at")
+  ncmecDeadline     DateTime            @map("ncmec_deadline")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
 
   @@index([status, ncmecDeadline])
   @@index([contentType, contentId])

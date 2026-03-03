@@ -7,6 +7,7 @@ import {
   Controller,
   Get,
   Put,
+  Patch,
   Post,
   Delete,
   Body,
@@ -56,6 +57,61 @@ export class UsersProxyController {
     const response = await this.proxyService.proxyToUserService({
       method: 'PUT',
       path: '/users/me',
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * GET /users/me/privacy - Get current user's privacy settings
+   */
+  @Get('me/privacy')
+  async getPrivacySettings(
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToUserService({
+      method: 'GET',
+      path: '/users/me/privacy',
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * PUT /users/me/privacy - Update current user's privacy settings (full replace)
+   */
+  @Put('me/privacy')
+  async updatePrivacySettings(
+    @Body() body: unknown,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToUserService({
+      method: 'PUT',
+      path: '/users/me/privacy',
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * PATCH /users/me/privacy - Partially update current user's privacy settings
+   */
+  @Patch('me/privacy')
+  async patchPrivacySettings(
+    @Body() body: unknown,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToUserService({
+      method: 'PATCH',
+      path: '/users/me/privacy',
       body,
       headers: authHeader ? { Authorization: authHeader } : undefined,
     });

@@ -38,6 +38,10 @@ import {
   FollowersResponseDto,
   FollowingResponseDto,
 } from './dto/follow.dto.js';
+import {
+  UpdatePrivacySettingsDto,
+  PrivacySettingsResponseDto,
+} from './dto/privacy-settings.dto.js';
 
 /**
  * Validates that a string is a valid UUID v4 format
@@ -125,6 +129,44 @@ export class UsersController {
   ): Promise<FeedbackPreferencesResponseDto> {
     // JWT sub claim now contains user.id (UUID), not cognitoSub
     return this.feedbackPreferencesService.toggleFeedbackById(jwtPayload.sub, toggleDto.enabled);
+  }
+
+  /**
+   * GET /users/me/privacy - Get current user's privacy settings
+   * Requires Bearer token in Authorization header
+   */
+  @Get('me/privacy')
+  @UseGuards(JwtAuthGuard)
+  async getPrivacySettings(
+    @CurrentUser() jwtPayload: JwtPayload,
+  ): Promise<PrivacySettingsResponseDto> {
+    return this.usersService.getPrivacySettings(jwtPayload.sub);
+  }
+
+  /**
+   * PUT /users/me/privacy - Update current user's privacy settings
+   * Requires Bearer token in Authorization header
+   */
+  @Put('me/privacy')
+  @UseGuards(JwtAuthGuard)
+  async updatePrivacySettings(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Body() updateDto: UpdatePrivacySettingsDto,
+  ): Promise<PrivacySettingsResponseDto> {
+    return this.usersService.updatePrivacySettings(jwtPayload.sub, updateDto);
+  }
+
+  /**
+   * PATCH /users/me/privacy - Partially update current user's privacy settings
+   * Requires Bearer token in Authorization header
+   */
+  @Patch('me/privacy')
+  @UseGuards(JwtAuthGuard)
+  async patchPrivacySettings(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Body() updateDto: UpdatePrivacySettingsDto,
+  ): Promise<PrivacySettingsResponseDto> {
+    return this.usersService.updatePrivacySettings(jwtPayload.sub, updateDto);
   }
 
   /**

@@ -455,6 +455,9 @@ export class VerificationService {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + this.OTP_EXPIRY_MINUTES);
 
+    // In test/E2E mode, also store plaintext OTP for testing purposes
+    const isTestMode = process.env['NODE_ENV'] === 'test' || process.env['E2E_MODE'] === 'true';
+
     const verification = await this.prisma.verificationRecord.create({
       data: {
         id: verificationId,
@@ -466,6 +469,8 @@ export class VerificationService {
         otpExpiresAt: expiresAt,
         otpAttempts: 0,
         expiresAt,
+        // Store plaintext OTP only in test/E2E mode for automated testing
+        ...(isTestMode && { otpPlaintext: otpCode }),
       },
     });
 
@@ -590,5 +595,31 @@ export class VerificationService {
       verificationLevel: 'ENHANCED',
       trustScoreIntegrity: Number(user.trustScoreIntegrity),
     };
+  }
+
+  /**
+   * Get plaintext OTP for E2E testing (only available in test/E2E mode)
+   *
+   * @param verificationId - Verification record ID
+   * @returns Object containing the plaintext OTP
+   * @throws BadRequestException if not in test mode or OTP not found
+   */
+  async getTestOtp(verificationId: string): Promise<{ otp: string }> {
+    const isTestMode = process.env['NODE_ENV'] === 'test' || process.env['E2E_MODE'] === 'true';
+
+    if (!isTestMode) {
+      throw new BadRequestException('Test endpoint not available in production');
+    }
+
+    const record = await this.prisma.verificationRecord.findUnique({
+      where: { id: verificationId },
+      select: { otpPlaintext: true },
+    });
+
+    if (!record?.otpPlaintext) {
+      throw new BadRequestException('OTP not found for this verification');
+    }
+
+    return { otp: record.otpPlaintext };
   }
 }

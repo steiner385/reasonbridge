@@ -12,6 +12,7 @@ export class UserResponseDto {
   id!: string;
   email!: string;
   displayName!: string;
+  bio!: string | null;
   avatarUrl!: string | null;
   verificationLevel!: VerificationLevel;
   trustScoreAbility!: number;
@@ -28,6 +29,7 @@ export class UserResponseDto {
     this.id = user.id;
     this.email = user.email;
     this.displayName = user.displayName ?? '';
+    this.bio = user.bio ?? null;
     this.avatarUrl = user.avatarUrl ?? null;
     this.verificationLevel = user.verificationLevel;
     this.trustScoreAbility = Number(user.trustScoreAbility);
