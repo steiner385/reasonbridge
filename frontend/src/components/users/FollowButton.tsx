@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { forwardRef, useEffect, useCallback } from 'react';
+import { forwardRef, useEffect, useCallback, useState } from 'react';
 import { useFollow } from '../../hooks/useFollow';
 import { useAuth } from '../../hooks/useAuth';
+import Modal from '../ui/Modal';
+import Button from '../ui/Button';
 
 /**
  * FollowButton component props
@@ -13,6 +15,8 @@ import { useAuth } from '../../hooks/useAuth';
 export interface FollowButtonProps {
   /** ID of the user to follow/unfollow */
   userId: string;
+  /** Display name of the user (for confirmation dialog) */
+  userName?: string;
   /** Initial following state (if known, to avoid initial API call) */
   initialFollowing?: boolean;
   /** Size variant */
@@ -27,6 +31,8 @@ export interface FollowButtonProps {
   onError?: (error: string) => void;
   /** Whether the button is disabled */
   disabled?: boolean;
+  /** Whether to show confirmation dialog before unfollowing */
+  confirmUnfollow?: boolean;
 }
 
 /**
@@ -110,6 +116,7 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
   (
     {
       userId,
+      userName,
       initialFollowing = false,
       size = 'md',
       compact = false,
@@ -117,14 +124,18 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
       onFollowChange,
       onError,
       disabled = false,
+      confirmUnfollow = true,
     },
     ref,
   ) => {
     const { user: currentUser } = useAuth();
-    const { isFollowing, isLoading, error, toggleFollow, checkFollowStatus } = useFollow(
+    const { isFollowing, isLoading, error, toggleFollow, checkFollowStatus, unfollow } = useFollow(
       userId,
       initialFollowing,
     );
+
+    // Unfollow confirmation modal state
+    const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false);
 
     // Check follow status on mount if no initial state provided
     useEffect(() => {
@@ -146,8 +157,22 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
     }, [error, onError]);
 
     const handleClick = useCallback(async () => {
+      // Show confirmation for unfollow if enabled
+      if (isFollowing && confirmUnfollow) {
+        setShowUnfollowConfirm(true);
+        return;
+      }
       await toggleFollow();
-    }, [toggleFollow]);
+    }, [toggleFollow, isFollowing, confirmUnfollow]);
+
+    const handleConfirmUnfollow = useCallback(async () => {
+      setShowUnfollowConfirm(false);
+      await unfollow();
+    }, [unfollow]);
+
+    const handleCancelUnfollow = useCallback(() => {
+      setShowUnfollowConfirm(false);
+    }, []);
 
     // Don't show button for following yourself
     if (currentUser?.id === userId) {
@@ -194,19 +219,48 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
     };
 
     return (
-      <button
-        ref={ref}
-        type="button"
-        onClick={handleClick}
-        disabled={disabled || isLoading}
-        className={`${baseClasses} ${sizeClasses[size]} ${stateClasses} ${className}`}
-        aria-label={ariaLabel}
-        aria-pressed={isFollowing}
-        data-testid="follow-button"
-      >
-        {renderIcon()}
-        {getButtonText()}
-      </button>
+      <>
+        <button
+          ref={ref}
+          type="button"
+          onClick={handleClick}
+          disabled={disabled || isLoading}
+          className={`${baseClasses} ${sizeClasses[size]} ${stateClasses} ${className}`}
+          aria-label={ariaLabel}
+          aria-pressed={isFollowing}
+          data-testid="follow-button"
+        >
+          {renderIcon()}
+          {getButtonText()}
+        </button>
+
+        {/* Unfollow confirmation modal */}
+        <Modal
+          isOpen={showUnfollowConfirm}
+          onClose={handleCancelUnfollow}
+          title="Unfollow User"
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to unfollow{' '}
+              <span className="font-semibold">{userName || 'this user'}</span>?
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              You will no longer see their updates in your feed, and they may restrict access to
+              followers-only content.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="secondary" onClick={handleCancelUnfollow}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleConfirmUnfollow}>
+                Unfollow
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </>
     );
   },
 );

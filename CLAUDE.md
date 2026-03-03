@@ -955,6 +955,9 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Active Technologies
 
+- TypeScript 5.9.3 (strict mode), React 19.2.4, Node.js 20 LTS (NestJS backend) + React Query 5.90.21, React Hook Form 7.71.2, Zod 4.3.5, Tailwind CSS 3.4.19, Socket.io-client 4.8.3 (001-profile-page)
+- PostgreSQL 15 via Prisma ORM (existing User, UserRank, TopicExpertise, UserFollow models) (001-profile-page)
+
 - **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
 - **PostgreSQL 15** - Primary database with Prisma ORM
 - **Redis 7** - Caching, sessions, pub/sub messaging
@@ -1070,6 +1073,8 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ## Recent Changes
 
+- 001-profile-page: Added TypeScript 5.9.3 (strict mode), React 19.2.4, Node.js 20 LTS (NestJS backend) + React Query 5.90.21, React Hook Form 7.71.2, Zod 4.3.5, Tailwind CSS 3.4.19, Socket.io-client 4.8.3
+
 - **2026-03-02**: Jenkins CI stability improvements
   - Fixed PhoneVerificationButton test timeout (PR #975)
   - Added Docker image pull retry mechanism (3 retries with 5s delay)
@@ -1081,11 +1086,8 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
   - Activity service for user activity feed tracking (port 3008)
   - Created deployment documentation (docs/DEPLOYMENT.md)
   - Created quickstart guide (docs/QUICKSTART.md)
-- **2026-02-05**: Completed discussion page redesign implementation (Feature 001)
   - Three-panel responsive layout (desktop/tablet/mobile breakpoints)
   - Virtual scrolling with react-window v2.2.6 (5.65 KB gzipped)
   - Real-time updates via WebSocket (new responses, status changes)
   - Added comprehensive implementation patterns to CLAUDE.md
   - All Phase 9 polish tasks complete (TSDoc, bundle validation)
-- **2026-02-01**: Consolidated pending PRs into staging branch
-- **2026-01-31**: Fixed recurring E2E OOM issues - reduced to chromium-only, skip allure in CI, reduced Jenkins agents 8→3

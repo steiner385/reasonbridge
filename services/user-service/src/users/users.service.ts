@@ -14,6 +14,12 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
+import {
+  ProfileVisibility,
+  TrustVisibility,
+  PrivacySettingsResponseDto,
+  type UpdatePrivacySettingsDto,
+} from './dto/privacy-settings.dto.js';
 
 export interface CreateUserData {
   email: string;
@@ -603,5 +609,161 @@ export class UsersService {
       id: u.id,
       displayName: u.displayName || 'Anonymous',
     }));
+  }
+
+  /**
+   * Get a user's privacy settings
+   * Returns defaults if no settings exist yet
+   * @param userId - The user's UUID
+   * @returns Privacy settings with metadata
+   */
+  async getPrivacySettings(userId: string): Promise<PrivacySettingsResponseDto> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    // Verify user exists
+    await this.findById(userId);
+
+    // Get existing settings or create defaults
+    let settings = await this.prisma.userPrivacySettings.findUnique({
+      where: { userId },
+    });
+
+    if (!settings) {
+      // Create default settings for the user
+      settings = await this.prisma.userPrivacySettings.create({
+        data: {
+          userId,
+          activityHistory: ProfileVisibility.PUBLIC,
+          detailedTrustScores: ProfileVisibility.PUBLIC,
+          followerList: ProfileVisibility.PUBLIC,
+          followingList: ProfileVisibility.PUBLIC,
+        },
+      });
+      this.logger.log(`Created default privacy settings for user ${userId}`);
+    }
+
+    return new PrivacySettingsResponseDto(
+      userId,
+      {
+        activityHistory: settings.activityHistory as ProfileVisibility,
+        detailedTrustScores: settings.detailedTrustScores as TrustVisibility,
+        followerList: settings.followerList as ProfileVisibility,
+        followingList: settings.followingList as ProfileVisibility,
+      },
+      settings.updatedAt,
+    );
+  }
+
+  /**
+   * Update a user's privacy settings
+   * @param userId - The user's UUID
+   * @param updateDto - Partial privacy settings to update
+   * @returns Updated privacy settings with metadata
+   */
+  async updatePrivacySettings(
+    userId: string,
+    updateDto: UpdatePrivacySettingsDto,
+  ): Promise<PrivacySettingsResponseDto> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    // Verify user exists
+    await this.findById(userId);
+
+    // Upsert settings (create if not exists, update if exists)
+    const settings = await this.prisma.userPrivacySettings.upsert({
+      where: { userId },
+      create: {
+        userId,
+        activityHistory: updateDto.activityHistory ?? ProfileVisibility.PUBLIC,
+        detailedTrustScores: updateDto.detailedTrustScores ?? TrustVisibility.PUBLIC,
+        followerList: updateDto.followerList ?? ProfileVisibility.PUBLIC,
+        followingList: updateDto.followingList ?? ProfileVisibility.PUBLIC,
+      },
+      update: {
+        ...(updateDto.activityHistory !== undefined && {
+          activityHistory: updateDto.activityHistory,
+        }),
+        ...(updateDto.detailedTrustScores !== undefined && {
+          detailedTrustScores: updateDto.detailedTrustScores,
+        }),
+        ...(updateDto.followerList !== undefined && {
+          followerList: updateDto.followerList,
+        }),
+        ...(updateDto.followingList !== undefined && {
+          followingList: updateDto.followingList,
+        }),
+      },
+    });
+
+    this.logger.log(`Updated privacy settings for user ${userId}`);
+
+    return new PrivacySettingsResponseDto(
+      userId,
+      {
+        activityHistory: settings.activityHistory as ProfileVisibility,
+        detailedTrustScores: settings.detailedTrustScores as TrustVisibility,
+        followerList: settings.followerList as ProfileVisibility,
+        followingList: settings.followingList as ProfileVisibility,
+      },
+      settings.updatedAt,
+    );
+  }
+
+  /**
+   * Check if a viewer can see a specific section of a user's profile
+   * @param targetUserId - The profile being viewed
+   * @param viewerId - The user viewing the profile (null if anonymous)
+   * @param section - Which section to check
+   * @returns Whether the viewer can see the section
+   */
+  async canViewSection(
+    targetUserId: string,
+    viewerId: string | null,
+    section: 'activityHistory' | 'detailedTrustScores' | 'followerList' | 'followingList',
+  ): Promise<boolean> {
+    if (!isValidUUID(targetUserId)) {
+      return false;
+    }
+
+    // Users can always view their own profile sections
+    if (viewerId === targetUserId) {
+      return true;
+    }
+
+    // Get the target user's privacy settings
+    let settings = await this.prisma.userPrivacySettings.findUnique({
+      where: { userId: targetUserId },
+    });
+
+    // Default to public if no settings exist
+    if (!settings) {
+      return true;
+    }
+
+    const visibility = settings[section] as ProfileVisibility;
+
+    // PUBLIC is visible to everyone
+    if (visibility === ProfileVisibility.PUBLIC) {
+      return true;
+    }
+
+    // PRIVATE is visible only to the user themselves (already handled above)
+    if (visibility === ProfileVisibility.PRIVATE) {
+      return false;
+    }
+
+    // FOLLOWERS_ONLY requires checking the follow relationship
+    if (visibility === ProfileVisibility.FOLLOWERS_ONLY) {
+      if (!viewerId || !isValidUUID(viewerId)) {
+        return false;
+      }
+      return this.isFollowing(viewerId, targetUserId);
+    }
+
+    return false;
   }
 }

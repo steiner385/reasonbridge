@@ -29,3 +29,17 @@ export type {
 } from './useTypingIndicator';
 export { useVotes } from './useVotes';
 export type { UseVotesResult } from './useVotes';
+export { usePrivacySettings } from './usePrivacySettings';
+export type {
+  UsePrivacySettingsOptions,
+  UsePrivacySettingsResult,
+  PrivacySettingsResponse,
+  UpdatePrivacySettingsDto,
+} from './usePrivacySettings';
+export { useCanViewSection, getPrivacyMessage } from './useCanViewSection';
+export type {
+  ProfileSection,
+  UseCanViewSectionOptions,
+  UseCanViewSectionResult,
+  PrivacyMessageProps,
+} from './useCanViewSection';

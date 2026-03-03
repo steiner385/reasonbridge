@@ -5,26 +5,111 @@
 
 /**
  * Profile page for the current authenticated user
+ *
+ * @remarks
+ * **Features:**
+ * - View own profile with trust scores and activity stats
+ * - Edit profile via modal (display name, bio, avatar)
+ * - Quick access to settings and logout
  */
 
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '../../lib/useCurrentUser';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import { useAuth } from '../../hooks/useAuth';
+import { useUpdateProfile } from '../../hooks/useUpdateProfile';
+import { usePrivacySettings } from '../../hooks/usePrivacySettings';
+import { useToast } from '../../contexts/ToastContext';
+import type {
+  PrivacySettings as PrivacySettingsType,
+  ProfileVisibility,
+  TrustVisibility,
+} from '../../types/user';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Avatar from '../../components/ui/Avatar';
+import Modal from '../../components/ui/Modal';
 import ProfileSkeleton from '../../components/ui/skeletons/ProfileSkeleton';
+import ProfileEditForm from '../../components/profile/ProfileEditForm';
+import type { ProfileEditFormData } from '../../components/profile/ProfileEditForm';
+import { uploadAvatar, deleteAvatar } from '../../lib/api';
 
 function ProfilePage() {
   const { data: user, isLoading, isError, error } = useCurrentUser();
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const showSkeleton = useDelayedLoading(isLoading);
+
+  // Edit modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Profile update mutation
+  const updateProfileMutation = useUpdateProfile(user?.id, {
+    onSuccess: () => {
+      toast.success('Profile updated successfully!');
+      setIsEditModalOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to update profile');
+    },
+  });
+
+  // Privacy settings
+  const {
+    settings: privacySettings,
+    isPending: isPrivacySaving,
+    updateSettings: updatePrivacySettings,
+  } = usePrivacySettings();
+
+  const handlePrivacyChange = (
+    field: keyof PrivacySettingsType,
+    value: ProfileVisibility | TrustVisibility,
+  ) => {
+    updatePrivacySettings({ [field]: value });
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleEditClick = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (data: ProfileEditFormData) => {
+    updateProfileMutation.mutate(data);
+  };
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!user) return;
+    setIsUploadingAvatar(true);
+    try {
+      await uploadAvatar(user.id, file);
+      toast.success('Avatar uploaded successfully!');
+    } catch (err) {
+      toast.error('Failed to upload avatar');
+      throw err;
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user) return;
+    setIsUploadingAvatar(true);
+    try {
+      await deleteAvatar(user.id);
+      toast.success('Avatar removed');
+    } catch (err) {
+      toast.error('Failed to remove avatar');
+      throw err;
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
 
   if (showSkeleton) {
@@ -94,17 +179,30 @@ function ProfilePage() {
       {/* Profile Header */}
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Profile</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Profile</h1>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleEditClick}
+              data-testid="edit-profile-button"
+            >
+              Edit Profile
+            </Button>
+          </div>
         </CardHeader>
         <CardBody>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <Avatar src={user.avatarUrl} alt={user.displayName} size="xl" />
-              <div>
+              <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {user.displayName}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
+                {user.bio && (
+                  <p className="mt-2 text-gray-700 dark:text-gray-300 max-w-prose">{user.bio}</p>
+                )}
               </div>
             </div>
 
@@ -285,6 +383,32 @@ function ProfilePage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Profile"
+        size="md"
+      >
+        <ProfileEditForm
+          initialData={{
+            displayName: user.displayName,
+            bio: user.bio || '',
+          }}
+          currentAvatarUrl={user.avatarUrl}
+          onSubmit={handleEditSubmit}
+          onAvatarUpload={handleAvatarUpload}
+          onAvatarRemove={handleAvatarRemove}
+          onCancel={() => setIsEditModalOpen(false)}
+          isLoading={updateProfileMutation.isPending}
+          isUploadingAvatar={isUploadingAvatar}
+          error={updateProfileMutation.error?.message}
+          privacySettings={privacySettings}
+          onPrivacyChange={handlePrivacyChange}
+          isPrivacySaving={isPrivacySaving}
+        />
+      </Modal>
     </div>
   );
 }

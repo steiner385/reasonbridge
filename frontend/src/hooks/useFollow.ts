@@ -90,10 +90,12 @@ export function useFollow(
   }, [targetUserId]);
 
   /**
-   * Follow the target user
+   * Follow the target user with optimistic update
    */
   const follow = useCallback(async (): Promise<boolean> => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    // Optimistic update - set following immediately
+    const previousState = state.isFollowing;
+    setState((prev) => ({ ...prev, isFollowing: true, isLoading: true, error: null }));
 
     try {
       const response = await apiClient.post<FollowResponse>(`/users/${targetUserId}/follow`);
@@ -104,21 +106,24 @@ export function useFollow(
       });
       return true;
     } catch (error) {
+      // Rollback on error
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to follow user';
-      setState((prev) => ({
-        ...prev,
+      setState({
+        isFollowing: previousState,
         isLoading: false,
         error: errorMessage,
-      }));
+      });
       return false;
     }
-  }, [targetUserId]);
+  }, [targetUserId, state.isFollowing]);
 
   /**
-   * Unfollow the target user
+   * Unfollow the target user with optimistic update
    */
   const unfollow = useCallback(async (): Promise<boolean> => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    // Optimistic update - set not following immediately
+    const previousState = state.isFollowing;
+    setState((prev) => ({ ...prev, isFollowing: false, isLoading: true, error: null }));
 
     try {
       const response = await apiClient.delete<FollowResponse>(`/users/${targetUserId}/follow`);
@@ -129,15 +134,16 @@ export function useFollow(
       });
       return true;
     } catch (error) {
+      // Rollback on error
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to unfollow user';
-      setState((prev) => ({
-        ...prev,
+      setState({
+        isFollowing: previousState,
         isLoading: false,
         error: errorMessage,
-      }));
+      });
       return false;
     }
-  }, [targetUserId]);
+  }, [targetUserId, state.isFollowing]);
 
   /**
    * Toggle follow state

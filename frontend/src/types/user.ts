@@ -29,6 +29,7 @@ export interface User {
   email: string;
   displayName: string;
   avatarUrl?: string | null;
+  bio?: string | null;
   verificationLevel: VerificationLevel;
   trustScoreAbility: number;
   trustScoreBenevolence: number;
@@ -65,4 +66,25 @@ export interface UserProfile extends User {
 export interface UserSummary {
   id: string;
   displayName: string;
+}
+
+/**
+ * Profile visibility levels for privacy settings
+ */
+export type ProfileVisibility = 'PUBLIC' | 'FOLLOWERS_ONLY' | 'PRIVATE';
+
+/**
+ * Trust score visibility (cannot be PRIVATE for platform integrity)
+ */
+export type TrustVisibility = 'PUBLIC' | 'FOLLOWERS_ONLY';
+
+/**
+ * User privacy preferences for profile sections
+ */
+export interface PrivacySettings {
+  activityHistory: ProfileVisibility;
+  detailedTrustScores: TrustVisibility;
+  followerList: ProfileVisibility;
+  followingList: ProfileVisibility;
+  updatedAt?: string;
 }

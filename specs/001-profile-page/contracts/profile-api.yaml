@@ -1,0 +1,660 @@
+openapi: 3.1.0
+info:
+  title: User Profile API
+  version: 1.0.0
+  description: |
+    API endpoints for user profile management in reasonBridge.
+    Extends existing user-service endpoints.
+
+servers:
+  - url: /api
+    description: API Gateway
+
+tags:
+  - name: Profile
+    description: User profile operations
+  - name: Contributions
+    description: User contribution history
+
+paths:
+  /users/{id}:
+    get:
+      operationId: getUserProfile
+      summary: Get user profile
+      description: |
+        Returns public profile information for a user.
+        Some fields may be hidden based on privacy settings.
+      tags:
+        - Profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security: []  # Public endpoint
+
+  /users/me:
+    get:
+      operationId: getCurrentUserProfile
+      summary: Get current user profile
+      description: Returns full profile for authenticated user
+      tags:
+        - Profile
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileFull'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - bearerAuth: []
+
+    put:
+      operationId: updateCurrentUserProfile
+      summary: Update current user profile
+      description: Update display name, bio, and avatar
+      tags:
+        - Profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileFull'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - bearerAuth: []
+
+  /users/{id}/contributions:
+    get:
+      operationId: getUserContributions
+      summary: Get user contributions
+      description: |
+        Returns paginated list of user's contributions.
+        Respects privacy settings for the viewing user.
+      tags:
+        - Contributions
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: type
+          in: query
+          description: Filter by contribution type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ContributionType'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Contribution list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionList'
+        '403':
+          description: Access restricted by privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyRestrictedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security: []  # Optional auth for privacy check
+
+  /users/{id}/followers:
+    get:
+      operationId: getUserFollowers
+      summary: Get user followers
+      description: Returns paginated list of users following this user
+      tags:
+        - Profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Followers list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+        '403':
+          description: Access restricted by privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyRestrictedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security: []
+
+  /users/{id}/following:
+    get:
+      operationId: getUserFollowing
+      summary: Get users followed by user
+      description: Returns paginated list of users this user follows
+      tags:
+        - Profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Following list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+        '403':
+          description: Access restricted by privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyRestrictedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security: []
+
+  /users/{id}/follow:
+    post:
+      operationId: followUser
+      summary: Follow a user
+      description: Start following a user
+      tags:
+        - Profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Follow status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowStatus'
+        '400':
+          description: Cannot follow self
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+
+    delete:
+      operationId: unfollowUser
+      summary: Unfollow a user
+      description: Stop following a user
+      tags:
+        - Profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Follow status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+
+    get:
+      operationId: getFollowStatus
+      summary: Get follow status
+      description: Check if current user follows target user
+      tags:
+        - Profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Follow status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: User UUID
+      schema:
+        type: string
+        format: uuid
+
+    Limit:
+      name: limit
+      in: query
+      description: Maximum items to return
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    Offset:
+      name: offset
+      in: query
+      description: Items to skip for pagination
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+  schemas:
+    UserProfile:
+      type: object
+      description: Public user profile
+      required:
+        - id
+        - displayName
+        - verificationLevel
+        - trustLevel
+        - tierLevel
+        - followerCount
+        - followingCount
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 300
+          nullable: true
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        verificationLevel:
+          $ref: '#/components/schemas/VerificationLevel'
+        trustLevel:
+          $ref: '#/components/schemas/TrustLevel'
+        trustScores:
+          $ref: '#/components/schemas/TrustScores'
+          description: May be null if privacy restricted
+        tierLevel:
+          $ref: '#/components/schemas/TierLevel'
+        tierProgress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+        expertise:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicExpertise'
+        followerCount:
+          type: integer
+          minimum: 0
+        followingCount:
+          type: integer
+          minimum: 0
+        topicCount:
+          type: integer
+          minimum: 0
+        responseCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        isFollowing:
+          type: boolean
+          description: Whether viewer follows this user (if authenticated)
+
+    UserProfileFull:
+      allOf:
+        - $ref: '#/components/schemas/UserProfile'
+        - type: object
+          required:
+            - email
+            - privacySettings
+          properties:
+            email:
+              type: string
+              format: email
+            privacySettings:
+              $ref: '#/components/schemas/PrivacySettings'
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 3
+          maxLength: 50
+        bio:
+          type: string
+          maxLength: 300
+        avatarUrl:
+          type: string
+          format: uri
+
+    TrustScores:
+      type: object
+      description: Mayer ABI trust model scores
+      required:
+        - ability
+        - benevolence
+        - integrity
+        - overall
+      properties:
+        ability:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        benevolence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        integrity:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        overall:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Average of ability, benevolence, integrity
+
+    TrustLevel:
+      type: string
+      enum:
+        - VERY_LOW
+        - LOW
+        - MEDIUM
+        - HIGH
+        - VERY_HIGH
+
+    TierLevel:
+      type: string
+      enum:
+        - NEWCOMER
+        - CONTRIBUTOR
+        - TRUSTED
+        - LEADER
+        - EXPERT
+
+    VerificationLevel:
+      type: string
+      enum:
+        - BASIC
+        - ENHANCED
+        - VERIFIED_HUMAN
+
+    TopicExpertise:
+      type: object
+      required:
+        - tagId
+        - tagName
+        - expertiseLevel
+        - expertiseScore
+      properties:
+        tagId:
+          type: string
+          format: uuid
+        tagName:
+          type: string
+        expertiseLevel:
+          type: string
+          enum:
+            - NOVICE
+            - FAMILIAR
+            - KNOWLEDGEABLE
+            - EXPERT
+        expertiseScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        responseCount:
+          type: integer
+          minimum: 0
+
+    ContributionType:
+      type: string
+      enum:
+        - TOPIC
+        - RESPONSE
+        - VALIDATION
+
+    ContributionItem:
+      type: object
+      required:
+        - id
+        - type
+        - title
+        - topicId
+        - topicTitle
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/ContributionType'
+        title:
+          type: string
+          maxLength: 100
+        topicId:
+          type: string
+          format: uuid
+        topicTitle:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        stats:
+          type: object
+          properties:
+            upvotes:
+              type: integer
+            downvotes:
+              type: integer
+            responseCount:
+              type: integer
+            validated:
+              type: boolean
+
+    ContributionList:
+      type: object
+      required:
+        - items
+        - total
+        - hasMore
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionItem'
+        total:
+          type: integer
+          minimum: 0
+        hasMore:
+          type: boolean
+        nextOffset:
+          type: integer
+
+    UserListItem:
+      type: object
+      required:
+        - id
+        - displayName
+        - tierLevel
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        tierLevel:
+          $ref: '#/components/schemas/TierLevel'
+        verificationLevel:
+          $ref: '#/components/schemas/VerificationLevel'
+        isFollowing:
+          type: boolean
+          description: Whether viewer follows this user
+
+    UserList:
+      type: object
+      required:
+        - items
+        - total
+        - hasMore
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserListItem'
+        total:
+          type: integer
+          minimum: 0
+        hasMore:
+          type: boolean
+        nextOffset:
+          type: integer
+
+    FollowStatus:
+      type: object
+      required:
+        - isFollowing
+        - followerCount
+        - followingCount
+      properties:
+        isFollowing:
+          type: boolean
+        followerCount:
+          type: integer
+          minimum: 0
+        followingCount:
+          type: integer
+          minimum: 0
+
+    PrivacySettings:
+      $ref: './privacy-api.yaml#/components/schemas/PrivacySettings'
+
+    PrivacyRestrictedResponse:
+      type: object
+      required:
+        - message
+        - visibility
+      properties:
+        message:
+          type: string
+          example: "This information is restricted"
+        visibility:
+          type: string
+          enum:
+            - FOLLOWERS_ONLY
+            - PRIVATE
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    NotFound:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "User not found"
+            code: "USER_NOT_FOUND"
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Authentication required"
+            code: "UNAUTHORIZED"
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+              - errors
+            properties:
+              message:
+                type: string
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string
