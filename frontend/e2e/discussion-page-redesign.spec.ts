@@ -616,9 +616,8 @@ test.describe('Discussion Page - Common Ground and Bridging Suggestions', () => 
 });
 
 test.describe('Discussion Page - Tablet Responsive Layout', () => {
-  // Skip: Requires comprehensive mock setup including auth + topic mocking before navigation
-  // These CSS layout tests depend on specific component implementation details
-  test.skip(true, 'Requires auth mock setup refactoring - CSS layout tests');
+  // TODO: Rewrite to use real backend data instead of mocks
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
 
   test.use({
     viewport: { width: 1024, height: 768 },
@@ -765,9 +764,8 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
 });
 
 test.describe('Discussion Page - Mobile Responsive Layout', () => {
-  // Skip: Requires comprehensive mock setup including auth + topic mocking before navigation
-  // These CSS layout tests depend on specific component implementation details
-  test.skip(true, 'Requires auth mock setup refactoring - CSS layout tests');
+  // TODO: Rewrite to use real backend data instead of mocks
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
 
   test.use({
     viewport: { width: 375, height: 667 },
@@ -1009,8 +1007,8 @@ test.describe('Discussion Page - Real-Time Updates', () => {
 });
 
 test.describe('Discussion Page - Unsaved Changes', () => {
-  // Skip: Requires comprehensive mock setup including auth + topic mocking
-  test.skip(true, 'Requires auth mock setup refactoring');
+  // TODO: Rewrite to use real backend data instead of mocks
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
 
   test.beforeEach(async ({ page }) => {
     // Mock API endpoints to avoid hitting real backend with fake topic IDs
@@ -1065,8 +1063,8 @@ test.describe('Discussion Page - Unsaved Changes', () => {
 });
 
 test.describe('Discussion Page - Keyboard Navigation', () => {
-  // Skip: Requires comprehensive mock setup including auth + topic mocking
-  test.skip(true, 'Requires auth mock setup refactoring');
+  // TODO: Rewrite to use real backend data instead of mocks
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
 
   test.beforeEach(async ({ page }) => {
     // Mock API endpoints to avoid hitting real backend with fake topic IDs
