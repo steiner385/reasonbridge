@@ -12,17 +12,7 @@ import { test, expect } from '@playwright/test';
  * - Handling conflicting sources
  */
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env['E2E_DOCKER'] === 'true';
-
 test.describe('Fact-Check Feature', () => {
-  // Skip: Tests depend on [data-testid="topic-list-item"] and [data-testid="response-card"]
-  // which don't exist in current sidebar/response implementation
-  test.skip(true, 'Tests expect topic-list-item and response-card testids that do not exist');
-
-  // Skip backend-dependent tests when not in E2E Docker mode
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   test.beforeEach(async ({ page }) => {
     // Navigate to discussions page and select a topic
     await page.goto('/discussions');

@@ -99,6 +99,8 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
       onClick={onClick}
       fullWidth
       className={highlighted ? 'border-primary-500' : ''}
+      data-testid="response-card"
+      data-response-id={response.id}
     >
       <CardHeader action={actions} className="mb-3">
         <div className="flex items-center gap-2">

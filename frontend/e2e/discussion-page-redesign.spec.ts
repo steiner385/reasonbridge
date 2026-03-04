@@ -7,11 +7,6 @@ import { mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
  */
 
 test.describe('Discussion Page - Topic Selection Flow', () => {
-  // Skip: Tests expect [data-testid="topic-list-item"] and topic-search-input testids
-  // that don't exist in current sidebar implementation (TopicNavigationContent.tsx).
-  // The sidebar needs testids added or tests need to be rewritten for current selectors.
-  test.skip(true, 'Topic list testids missing - sidebar uses different selectors');
-
   test.beforeEach(async ({ page }) => {
     // Navigate to discussions page
     await page.goto('/discussions');
@@ -245,9 +240,6 @@ test.describe('Discussion Page - Topic Selection Flow', () => {
 });
 
 test.describe('Discussion Page - Reading Conversation with Metadata', () => {
-  // Skip: beforeEach depends on [data-testid="topic-list-item"] which doesn't exist
-  test.skip(true, 'Topic list testids missing - sidebar uses different selectors');
-
   test.beforeEach(async ({ page }) => {
     // Navigate to discussions page and select a topic
     await page.goto('/discussions');
@@ -402,9 +394,6 @@ test.describe('Discussion Page - Reading Conversation with Metadata', () => {
 });
 
 test.describe('Discussion Page - Common Ground and Bridging Suggestions', () => {
-  // Skip: beforeEach depends on [data-testid="topic-list-item"] which doesn't exist
-  test.skip(true, 'Topic list testids missing - sidebar uses different selectors');
-
   test.beforeEach(async ({ page }) => {
     // Navigate to discussions page and select a topic
     await page.goto('/discussions');

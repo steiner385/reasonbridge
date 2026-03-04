@@ -53,10 +53,7 @@ test.describe('Browse Topics and View Details', () => {
     expect(hasTopics || hasNoTopicsMessage || hasError).toBeTruthy();
   });
 
-  // Skip: Tests expect [data-testid="topic-list-item"] which doesn't exist in current sidebar implementation
-  test.skip('should navigate to topic in discussion view when clicking on a topic', async ({
-    page,
-  }) => {
+  test('should navigate to topic in discussion view when clicking on a topic', async ({ page }) => {
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -248,8 +245,7 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  // Skip: Tests expect [data-testid="topic-list-item"] which doesn't exist in current sidebar implementation
-  test.skip('should handle direct navigation to topic via URL parameter', async ({ page }) => {
+  test('should handle direct navigation to topic via URL parameter', async ({ page }) => {
     await page.goto('/discussions');
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
     await expect(firstTopic).toBeVisible();
