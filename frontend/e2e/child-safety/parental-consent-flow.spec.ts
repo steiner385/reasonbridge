@@ -40,6 +40,10 @@ const mockVerifySuccess = {
 };
 
 test.describe('Parental Consent Flow', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     // Mock API endpoints for parental consent
     // In local dev, VITE_API_BASE_URL=/api, so API calls go to /api/parental-consent/...

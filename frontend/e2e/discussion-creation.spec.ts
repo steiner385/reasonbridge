@@ -26,16 +26,10 @@ import { test, expect } from '@playwright/test';
 import { mockAuthenticatedUser, mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
 
 test.describe('Discussion Creation Flow', () => {
-  /**
-   * NOTE: All tests are skipped because DiscussionListPage is not routed.
-   * The "Start Discussion" button exists in DiscussionListPage but there's
-   * no way to navigate to it from the current routes.
-   *
-   * When implementing this feature:
-   * 1. Add route: /topics/:topicId/discussions -> DiscussionListPage
-   * 2. Update beforeEach to navigate to that route
-   * 3. Remove test.skip() calls
-   */
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  // NOTE: Also blocked because DiscussionListPage is not routed - no /topics/:topicId/discussions route exists
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
 
   test.beforeEach(async ({ page }) => {
     // Set up authentication

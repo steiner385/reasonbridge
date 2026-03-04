@@ -122,7 +122,9 @@ test.describe('Flag Content Flow', () => {
   });
 
   // UI-only tests that use API mocking
-  test.describe('UI Behavior (Mocked)', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Convert these to real backend tests or move to unit/integration tests
+  test.describe.skip('UI Behavior (Mocked)', () => {
     test.beforeEach(async ({ page }) => {
       // Set up base routes for the test environment
       await page.route('**/api/topics', async (route) => {

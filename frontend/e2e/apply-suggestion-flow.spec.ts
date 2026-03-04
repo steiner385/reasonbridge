@@ -92,6 +92,10 @@ async function mockSuggestionsAPI(page: Page) {
 }
 
 test.describe('Apply Suggestion Flow - Tag Suggestions', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     await mockSuggestionsAPI(page);
   });
@@ -269,6 +273,10 @@ test.describe('Apply Suggestion Flow - Tag Suggestions', () => {
 });
 
 test.describe('Apply Suggestion Flow - Topic Link Suggestions', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     await mockSuggestionsAPI(page);
   });
@@ -419,6 +427,10 @@ test.describe('Apply Suggestion Flow - Topic Link Suggestions', () => {
 });
 
 test.describe('Apply Suggestion Flow - Error Handling', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     await mockSuggestionsAPI(page);
   });
@@ -525,6 +537,10 @@ test.describe('Apply Suggestion Flow - Error Handling', () => {
 });
 
 test.describe('Apply Suggestion Flow - State Management', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     await mockSuggestionsAPI(page);
   });

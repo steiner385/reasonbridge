@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { mockAuthenticatedEndpoints } from './fixtures/auth-mock.fixture';
 
 /**
  * E2E tests for Discussion Page Redesign (User Story 1)
@@ -210,14 +209,18 @@ test.describe('Discussion Page - Topic Selection Flow', () => {
   });
 
   test('should redirect from /topics/:id to /discussions?topic=:id', async ({ page }) => {
-    // Mock API endpoints for this test since we use a fake topic ID
-    await mockAuthenticatedEndpoints(page);
+    // First get a real topic ID from the discussions page
+    await page.goto('/discussions');
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    const realTopicId = await firstTopic.getAttribute('data-topic-id');
+    expect(realTopicId).toBeTruthy();
 
-    // Navigate to old topic detail URL
-    await page.goto('/topics/test-topic-123');
+    // Navigate to old topic detail URL with real topic ID
+    await page.goto(`/topics/${realTopicId}`);
 
     // Should redirect to discussions page with query param
-    await expect(page).toHaveURL('/discussions?topic=test-topic-123');
+    await expect(page).toHaveURL(`/discussions?topic=${realTopicId}`);
   });
 
   test('should handle virtual scrolling for large topic lists', async ({ page }) => {
@@ -616,56 +619,43 @@ test.describe('Discussion Page - Common Ground and Bridging Suggestions', () => 
 });
 
 test.describe('Discussion Page - Tablet Responsive Layout', () => {
-  // TODO: Rewrite to use real backend data instead of mocks
-  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
-
   test.use({
     viewport: { width: 1024, height: 768 },
   });
 
-  test.beforeEach(async ({ page }) => {
-    // Mock API endpoints to avoid hitting real backend with fake topic IDs
-    await mockAuthenticatedEndpoints(page);
-  });
+  // Helper to navigate and select a real topic
+  const selectFirstTopic = async (page: import('@playwright/test').Page) => {
+    await page.goto('/discussions');
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+    await expect(page).toHaveURL(/\?topic=/);
+    await expect(page.locator('.conversation-panel h1')).toBeVisible({ timeout: 10000 });
+  };
 
   test('should hide left panel by default on tablet', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    // Wait for page to load
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Left panel should be transformed off-screen
+    // Left panel should be transformed off-screen (exists but hidden via CSS transform)
     const leftPanel = page.locator('.discussion-layout__panel--left');
     const isVisible = await leftPanel.isVisible();
-
-    // Panel exists but is hidden via CSS transform
     expect(isVisible).toBe(true);
   });
 
   test('should show hamburger menu button on tablet', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Hamburger menu button should be visible (use exact aria-label)
+    // Hamburger menu button should be visible
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await expect(hamburgerButton).toBeVisible();
   });
 
   test('should open left panel overlay when hamburger is clicked', async ({ page }) => {
-    // Navigate to discussions page
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    // Wait for discussion layout to be ready
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Wait for conversation panel to load (topic is pre-selected via URL)
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
-
-    // Click hamburger menu (use exact aria-label to avoid matching Close button)
+    // Click hamburger menu
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
-
     await page.waitForTimeout(500); // Wait for animation
 
     // Left panel should now have overlay-open class
@@ -673,24 +663,15 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     const hasOverlayClass = await leftPanel.evaluate((el) =>
       el.classList.contains('discussion-layout__panel--overlay-open'),
     );
-
     expect(hasOverlayClass).toBe(true);
   });
 
   test('should show backdrop when left panel overlay is open', async ({ page }) => {
-    // Navigate to discussions page
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    // Wait for discussion layout to be ready
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Wait for conversation panel to load (topic is pre-selected)
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
-
-    // Click hamburger menu to open overlay (use exact aria-label)
+    // Click hamburger menu to open overlay
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
-
     await page.waitForTimeout(300);
 
     // Backdrop should be visible
@@ -699,16 +680,9 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
   });
 
   test('should close left panel when backdrop is clicked', async ({ page }) => {
-    // Navigate to discussions page
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    // Wait for discussion layout to be ready
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Wait for conversation panel to load (topic is pre-selected)
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
-
-    // Open the panel (use exact aria-label)
+    // Open the panel
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
     await page.waitForTimeout(300);
@@ -716,7 +690,6 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
     // Click backdrop to close
     const backdrop = page.locator('.discussion-layout__backdrop');
     await backdrop.click();
-
     await page.waitForTimeout(500); // Wait for animation
 
     // Backdrop should no longer be visible
@@ -725,16 +698,9 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
   });
 
   test('should close left panel when close button is clicked', async ({ page }) => {
-    // Navigate to discussions page
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    // Wait for discussion layout to be ready
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Wait for conversation panel to load (topic is pre-selected)
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
-
-    // Open the panel (use exact aria-label)
+    // Open the panel
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
     await page.waitForTimeout(300);
@@ -753,9 +719,7 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
   });
 
   test('should show right panel on tablet', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Right panel should be visible on tablet
     const rightPanel = page.locator('.discussion-layout__panel--right');
@@ -764,44 +728,39 @@ test.describe('Discussion Page - Tablet Responsive Layout', () => {
 });
 
 test.describe('Discussion Page - Mobile Responsive Layout', () => {
-  // TODO: Rewrite to use real backend data instead of mocks
-  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
-
   test.use({
     viewport: { width: 375, height: 667 },
   });
 
-  test.beforeEach(async ({ page }) => {
-    // Mock API endpoints to avoid hitting real backend with fake topic IDs
-    await mockAuthenticatedEndpoints(page);
-  });
+  // Helper to navigate and select a real topic
+  const selectFirstTopic = async (page: import('@playwright/test').Page) => {
+    await page.goto('/discussions');
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+    await expect(page).toHaveURL(/\?topic=/);
+    await expect(page.locator('.conversation-panel h1')).toBeVisible({ timeout: 10000 });
+  };
 
   test('should hide left panel by default on mobile', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Left panel should be transformed off-screen
+    // Left panel should be transformed off-screen (exists but hidden via transform)
     const leftPanel = page.locator('.discussion-layout__panel--left');
     const isVisible = await leftPanel.isVisible();
-
-    expect(isVisible).toBe(true); // Exists but hidden via transform
+    expect(isVisible).toBe(true);
   });
 
   test('should show hamburger menu button on mobile', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Hamburger menu should be visible (use exact aria-label)
+    // Hamburger menu should be visible
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await expect(hamburgerButton).toBeVisible();
   });
 
   test('should display center panel as main content on mobile', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Center panel should be visible and take full width
     const centerPanel = page.locator('.discussion-layout__panel--center');
@@ -809,19 +768,11 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
   });
 
   test('should open left panel overlay when hamburger is clicked on mobile', async ({ page }) => {
-    // Navigate to discussions page
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    // Wait for discussion layout to be ready
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Wait for conversation panel to load (topic is pre-selected)
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
-
-    // Click hamburger menu (use exact aria-label to avoid matching Close button)
+    // Click hamburger menu
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
     await hamburgerButton.click();
-
     await page.waitForTimeout(500);
 
     // Left panel should have overlay-open class
@@ -829,14 +780,11 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
     const hasOverlayClass = await leftPanel.evaluate((el) =>
       el.classList.contains('discussion-layout__panel--overlay-open'),
     );
-
     expect(hasOverlayClass).toBe(true);
   });
 
   test('should show metadata as accordion sections on mobile', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Right panel should not be using tabs on mobile
     const metadataPanel = page.locator('.metadata-panel');
@@ -845,17 +793,14 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
       // Should have accordion-style buttons instead of tabs
       const accordionButtons = metadataPanel.locator('button[aria-expanded]');
       const hasAccordion = (await accordionButtons.count()) > 0;
-
       expect(hasAccordion).toBe(true);
     }
   });
 
   test('should have minimum 44px touch targets on mobile', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
+    await selectFirstTopic(page);
 
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Check hamburger button dimensions (use exact aria-label)
+    // Check hamburger button dimensions
     const hamburgerButton = page.locator('button[aria-label="Open topic navigation"]');
 
     if (await hamburgerButton.isVisible()) {
@@ -870,9 +815,7 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
   });
 
   test('should show full-viewport compose on mobile when composing', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Find and click the response composer trigger
     const composerTrigger = page
@@ -890,135 +833,25 @@ test.describe('Discussion Page - Mobile Responsive Layout', () => {
         // Should have "Back to Conversation" button
         const backButton = page.locator('button[aria-label*="Back to conversation"]');
         const hasBackButton = await backButton.isVisible();
-
         expect(hasBackButton).toBe(true);
       }
     }
   });
 });
 
-test.describe('Discussion Page - Real-Time Updates', () => {
-  // Skip: Requires WebSocket mock setup and auth token configuration
-  test.skip(true, 'Requires WebSocket mock infrastructure');
-
-  test.beforeEach(async ({ page }) => {
-    // Mock API endpoints to avoid hitting real backend with fake topic IDs
-    await mockAuthenticatedEndpoints(page);
-  });
-
-  test('should display new response notification banner when WebSocket message arrives', async ({
-    page,
-  }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Simulate WebSocket message for new response (via browser console)
-    await page.evaluate(() => {
-      // Dispatch custom event to simulate WebSocket message
-      window.dispatchEvent(
-        new CustomEvent('websocket-message', {
-          detail: {
-            type: 'NEW_RESPONSE',
-            payload: {
-              topicId: 'test-topic-1',
-              responseId: 'new-resp-1',
-              authorId: 'user-123',
-              authorName: 'Test User',
-              timestamp: new Date().toISOString(),
-            },
-          },
-        }),
-      );
-    });
-
-    await page.waitForTimeout(500);
-
-    // Look for notification banner (may or may not appear depending on WebSocket setup)
-    const hasNotificationBanner = await page.getByText(/new response/i).isVisible();
-
-    // Test passes whether banner appears or not (depends on WebSocket connection)
-    expect(hasNotificationBanner || true).toBe(true);
-  });
-
-  test('should update unread badge when new response arrives for different topic', async ({
-    page,
-  }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Simulate new response for a different topic
-    await page.evaluate(() => {
-      window.dispatchEvent(
-        new CustomEvent('websocket-message', {
-          detail: {
-            type: 'NEW_RESPONSE',
-            payload: {
-              topicId: 'test-topic-2',
-              responseId: 'new-resp-2',
-              authorId: 'user-456',
-              authorName: 'Another User',
-              timestamp: new Date().toISOString(),
-            },
-          },
-        }),
-      );
-    });
-
-    await page.waitForTimeout(500);
-
-    // Check if topic list updates (depends on WebSocket implementation)
-    const topicList = page.locator('[data-testid="topic-list"]');
-    expect(await topicList.isVisible()).toBe(true);
-  });
-
-  test('should display topic status change banner when topic is archived', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
-
-    // Simulate topic status change
-    await page.evaluate(() => {
-      window.dispatchEvent(
-        new CustomEvent('websocket-message', {
-          detail: {
-            type: 'TOPIC_STATUS_CHANGE',
-            payload: {
-              topicId: 'test-topic-1',
-              oldStatus: 'ACTIVE',
-              newStatus: 'ARCHIVED',
-              timestamp: new Date().toISOString(),
-            },
-          },
-        }),
-      );
-    });
-
-    await page.waitForTimeout(500);
-
-    // Look for status change banner (may or may not appear)
-    const hasStatusBanner =
-      (await page.getByText(/topic is now archived/i).isVisible()) ||
-      (await page.getByText(/read-only/i).isVisible());
-
-    expect(hasStatusBanner || true).toBe(true);
-  });
-});
-
 test.describe('Discussion Page - Unsaved Changes', () => {
-  // TODO: Rewrite to use real backend data instead of mocks
-  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
-
-  test.beforeEach(async ({ page }) => {
-    // Mock API endpoints to avoid hitting real backend with fake topic IDs
-    await mockAuthenticatedEndpoints(page);
-  });
+  // Helper to navigate and select a real topic
+  const selectFirstTopic = async (page: import('@playwright/test').Page) => {
+    await page.goto('/discussions');
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+    await expect(page).toHaveURL(/\?topic=/);
+    await expect(page.locator('.conversation-panel h1')).toBeVisible({ timeout: 10000 });
+  };
 
   test('should warn when switching topics with unsaved changes', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Start composing a response
     const composerTextarea = page.locator('textarea').first();
@@ -1043,9 +876,7 @@ test.describe('Discussion Page - Unsaved Changes', () => {
   });
 
   test('should allow canceling topic switch to keep unsaved changes', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Start composing
     const composerTextarea = page.locator('textarea').first();
@@ -1063,18 +894,18 @@ test.describe('Discussion Page - Unsaved Changes', () => {
 });
 
 test.describe('Discussion Page - Keyboard Navigation', () => {
-  // TODO: Rewrite to use real backend data instead of mocks
-  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
-
-  test.beforeEach(async ({ page }) => {
-    // Mock API endpoints to avoid hitting real backend with fake topic IDs
-    await mockAuthenticatedEndpoints(page);
-  });
+  // Helper to navigate and select a real topic
+  const selectFirstTopic = async (page: import('@playwright/test').Page) => {
+    await page.goto('/discussions');
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 10000 });
+    await firstTopic.click();
+    await expect(page).toHaveURL(/\?topic=/);
+    await expect(page.locator('.conversation-panel h1')).toBeVisible({ timeout: 10000 });
+  };
 
   test('should support Escape key to close modals and overlays', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Press Escape key
     await page.keyboard.press('Escape');
@@ -1086,9 +917,7 @@ test.describe('Discussion Page - Keyboard Navigation', () => {
   });
 
   test('should support tab navigation through interactive elements', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Press Tab several times
     await page.keyboard.press('Tab');
@@ -1103,9 +932,7 @@ test.describe('Discussion Page - Keyboard Navigation', () => {
   });
 
   test('should have accessible keyboard navigation for topic list', async ({ page }) => {
-    await page.goto('/discussions?topic=test-topic-1');
-
-    await page.waitForSelector('[data-testid="discussion-layout"]', { timeout: 10000 });
+    await selectFirstTopic(page);
 
     // Find a topic list item
     const topicItem = page.locator('[data-testid="topic-list-item"]').first();

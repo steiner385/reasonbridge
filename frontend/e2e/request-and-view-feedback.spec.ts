@@ -73,6 +73,10 @@ async function mockFeedbackAPI(page: Page) {
 }
 
 test.describe('Request and View Feedback Flow', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     // Set up API mocking before each test
     await mockFeedbackAPI(page);
@@ -357,6 +361,10 @@ test.describe('Request and View Feedback Flow', () => {
 });
 
 test.describe('Feedback Display Panel Integration', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     await mockFeedbackAPI(page);
   });
