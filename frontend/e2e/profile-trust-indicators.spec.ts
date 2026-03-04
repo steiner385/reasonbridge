@@ -14,16 +14,10 @@ import { loginWithDemoAccount } from './utils/auth-helpers';
  * as those features are not yet implemented.
  */
 
-// Check if running in E2E Docker environment with backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 // Demo account name used for testing
 const DEMO_ACCOUNT_NAME = 'Admin Adams';
 
 test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
-  // Skip all tests if not in E2E Docker mode (requires backend)
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   // Run tests sequentially to avoid rate limiting on login API
   test.describe.configure({ mode: 'serial' });
 

@@ -11,14 +11,9 @@
 
 import { test, expect } from '@playwright/test';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('Flag Content Flow', () => {
   // Tests that require the full backend environment
   test.describe('With Backend', () => {
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
     test('should display flag button on response cards', async ({ page }) => {
       await page.goto('/topics');
 
