@@ -134,13 +134,24 @@ export function TopicFilterUI({
               onKeyDown={handleSearchInputKeyDown}
               inputSize="md"
               fullWidth
+              data-testid="topic-filter-search-input"
             />
           </div>
-          <Button size="md" variant="primary" onClick={handleSearchFilter}>
+          <Button
+            size="md"
+            variant="primary"
+            onClick={handleSearchFilter}
+            data-testid="topic-search-button"
+          >
             Search
           </Button>
           {filters.search && (
-            <Button size="md" variant="outline" onClick={handleClearSearch}>
+            <Button
+              size="md"
+              variant="outline"
+              onClick={handleClearSearch}
+              data-testid="clear-search-button"
+            >
               Clear
             </Button>
           )}
@@ -156,6 +167,7 @@ export function TopicFilterUI({
               size="sm"
               variant={!filters.status ? 'primary' : 'outline'}
               onClick={() => handleStatusFilter(undefined)}
+              data-testid="topic-filter-status-all"
             >
               All
             </Button>
@@ -163,6 +175,7 @@ export function TopicFilterUI({
               size="sm"
               variant={filters.status === 'SEEDING' ? 'primary' : 'outline'}
               onClick={() => handleStatusFilter('SEEDING')}
+              data-testid="topic-filter-status-seeding"
             >
               Seeding
             </Button>
@@ -170,6 +183,7 @@ export function TopicFilterUI({
               size="sm"
               variant={filters.status === 'ACTIVE' ? 'primary' : 'outline'}
               onClick={() => handleStatusFilter('ACTIVE')}
+              data-testid="topic-filter-status-active"
             >
               Active
             </Button>
@@ -177,6 +191,7 @@ export function TopicFilterUI({
               size="sm"
               variant={filters.status === 'ARCHIVED' ? 'primary' : 'outline'}
               onClick={() => handleStatusFilter('ARCHIVED')}
+              data-testid="topic-filter-status-archived"
             >
               Archived
             </Button>
@@ -184,6 +199,7 @@ export function TopicFilterUI({
               size="sm"
               variant={filters.status === 'LOCKED' ? 'primary' : 'outline'}
               onClick={() => handleStatusFilter('LOCKED')}
+              data-testid="topic-filter-status-locked"
             >
               Locked
             </Button>
@@ -195,7 +211,7 @@ export function TopicFilterUI({
             </span>
             <div className="flex gap-1">
               <select
-                data-testid="sort-select"
+                data-testid="topic-sort-select"
                 aria-label="Sort by"
                 className="text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
                 value={filters.sortBy || 'createdAt'}
@@ -248,6 +264,7 @@ export function TopicFilterUI({
             size="sm"
             variant={!filters.visibility ? 'primary' : 'outline'}
             onClick={() => handleVisibilityFilter(undefined)}
+            data-testid="topic-filter-visibility-all"
           >
             All
           </Button>
@@ -255,6 +272,7 @@ export function TopicFilterUI({
             size="sm"
             variant={filters.visibility === 'PUBLIC' ? 'primary' : 'outline'}
             onClick={() => handleVisibilityFilter('PUBLIC')}
+            data-testid="topic-filter-visibility-public"
           >
             Public
           </Button>
@@ -262,6 +280,7 @@ export function TopicFilterUI({
             size="sm"
             variant={filters.visibility === 'UNLISTED' ? 'primary' : 'outline'}
             onClick={() => handleVisibilityFilter('UNLISTED')}
+            data-testid="topic-filter-visibility-unlisted"
           >
             Unlisted
           </Button>
@@ -269,6 +288,7 @@ export function TopicFilterUI({
             size="sm"
             variant={filters.visibility === 'PRIVATE' ? 'primary' : 'outline'}
             onClick={() => handleVisibilityFilter('PRIVATE')}
+            data-testid="topic-filter-visibility-private"
           >
             Private
           </Button>
@@ -286,13 +306,24 @@ export function TopicFilterUI({
                 onKeyDown={handleTagInputKeyDown}
                 inputSize="sm"
                 fullWidth
+                data-testid="tag-filter-input"
               />
             </div>
-            <Button size="sm" variant="primary" onClick={handleTagFilter}>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleTagFilter}
+              data-testid="apply-tag-filter-button"
+            >
               Apply
             </Button>
             {filters.tag && (
-              <Button size="sm" variant="outline" onClick={handleClearTag}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleClearTag}
+                data-testid="clear-tag-filter-button"
+              >
                 Clear Tag
               </Button>
             )}

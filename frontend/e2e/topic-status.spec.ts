@@ -46,7 +46,7 @@ test.describe('Topic Status Management', () => {
           'Test topic for status workflows. This is a longer description to meet the minimum character requirement for topic descriptions.',
         );
 
-      const tagInput = modal.getByLabel(/tags/i);
+      const tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('testing');
       await tagInput.press('Enter');
 
@@ -94,7 +94,7 @@ test.describe('Topic Status Management', () => {
           'Testing activation workflow for topics in SEEDING state. This description needs to be long enough to meet the minimum character requirement for topic creation validation.',
         );
 
-      const tagInput = modal.getByLabel(/tags/i);
+      const tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('test');
       await tagInput.press('Enter');
 

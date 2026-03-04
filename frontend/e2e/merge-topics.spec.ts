@@ -65,7 +65,7 @@ test.describe('Topic Merging', () => {
         .getByLabel(/description/i)
         .fill('This is the source topic that will be merged into the target topic.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('merge-test');
       await tagInput.press('Enter');
 
@@ -96,7 +96,7 @@ test.describe('Topic Merging', () => {
         .getByLabel(/description/i)
         .fill('This is the target topic that will receive the merged content.');
 
-      tagInput = modal.getByLabel(/tags/i);
+      tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('merge-test');
       await tagInput.press('Enter');
 
