@@ -26,11 +26,12 @@ import { DemoModule } from './demo/demo.module.js';
       envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
     // Rate limiting for brute force protection
+    // Use higher limits in test mode to allow E2E tests to run without throttling
     ThrottlerModule.forRoot([
       {
         name: 'default',
         ttl: 60000, // 60 seconds
-        limit: 100, // 100 requests per minute globally
+        limit: process.env['NODE_ENV'] === 'test' ? 10000 : 100, // 100 req/min in prod, 10000 in test
       },
     ]),
     PrismaModule,
