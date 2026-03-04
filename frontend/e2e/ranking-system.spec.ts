@@ -27,9 +27,6 @@ import type {
   CredentialStatus,
 } from '../src/types/ranking';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env['E2E_DOCKER'] === 'true';
-
 // Mock data for ranking system
 const mockUserRank = {
   userId: 'test-user-1',
@@ -930,8 +927,6 @@ test.describe('Ranking System', () => {
 
   // Integration tests with actual backend (E2E Docker mode)
   test.describe('Backend Integration', () => {
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
     test('should load ranking dashboard with real data', async ({ page }) => {
       // This test requires actual seeded data in the E2E environment
       await page.goto('/profile');

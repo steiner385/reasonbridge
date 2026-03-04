@@ -22,9 +22,6 @@ import { mockSocialEndpoints } from './fixtures/social-mock.fixture';
  * require real provider connections in production.
  */
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('Social Media Integration', () => {
   test.describe('Social Connections', () => {
     test('should display connected social accounts', async ({ page }) => {
@@ -433,8 +430,6 @@ test.describe('Social Media Integration', () => {
 
   // Backend-dependent tests (require E2E Docker mode)
   test.describe('Full Integration Tests', () => {
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
     test('should complete full OAuth connection flow', async ({ page }) => {
       // This would test the actual OAuth flow with real backend
       await page.goto('/settings');

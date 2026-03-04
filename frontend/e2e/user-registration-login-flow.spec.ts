@@ -23,13 +23,7 @@ const generateTestUser = () => {
   };
 };
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('User Registration and Login Flow', () => {
-  // Skip backend-dependent tests when not in E2E Docker mode
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   test('should complete full registration and login flow', async ({ page }) => {
     const testUser = generateTestUser();
 

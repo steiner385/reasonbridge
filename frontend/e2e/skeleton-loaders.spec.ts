@@ -13,13 +13,7 @@ import { test, expect } from '@playwright/test';
  * These E2E tests verify pages load successfully without errors.
  */
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('Page Loading States', () => {
-  // Skip backend-dependent tests when not in E2E Docker mode
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   test.describe('Topics Page', () => {
     test('should load topics page without errors', async ({ page }) => {
       await page.goto('/topics');
