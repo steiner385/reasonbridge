@@ -44,7 +44,7 @@ test.describe('Topic Editing', () => {
           'This is a test topic that we will edit to verify the edit functionality works correctly.',
         );
 
-      const tagInput = modal.getByLabel(/tags/i);
+      const tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('testing');
       await tagInput.press('Enter');
 
@@ -71,7 +71,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('This is the original description that we will modify later.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('original');
       await tagInput.press('Enter');
 
@@ -127,7 +127,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('Testing tag editing functionality with multiple tags to add and remove.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('original-tag');
       await tagInput.press('Enter');
       await tagInput.fill('will-remove');
@@ -149,7 +149,7 @@ test.describe('Topic Editing', () => {
       }
 
       // Add new tag
-      tagInput = modal.getByLabel(/tags/i);
+      tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('new-tag');
       await tagInput.press('Enter');
 
@@ -176,7 +176,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('This is a recent topic that should not require an edit reason.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('recent');
       await tagInput.press('Enter');
 
@@ -218,7 +218,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('Testing the flag for review functionality when editing topics.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('test');
       await tagInput.press('Enter');
 
@@ -258,7 +258,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('Testing validation errors during topic editing process.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('test');
       await tagInput.press('Enter');
 
@@ -294,7 +294,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('Testing that we cannot submit edits without making any changes to the topic.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('test');
       await tagInput.press('Enter');
 
@@ -344,7 +344,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('Testing edit history display with multiple edits to verify history tracking works.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('history');
       await tagInput.press('Enter');
 
@@ -389,7 +389,7 @@ test.describe('Topic Editing', () => {
         .getByLabel(/description/i)
         .fill('Testing that changes are properly displayed in the edit history view.');
 
-      let tagInput = modal.getByLabel(/tags/i);
+      let tagInput = modal.getByRole('combobox', { name: /tags/i });
       await tagInput.fill('test');
       await tagInput.press('Enter');
 

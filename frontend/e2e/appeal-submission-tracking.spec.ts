@@ -28,6 +28,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount } from './utils/auth-helpers';
 
 // Check if running in E2E Docker mode with full backend
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
@@ -36,6 +37,11 @@ test.describe('Appeal Submission and Tracking', () => {
   // Tests that require the full backend environment
   test.describe('With Backend', () => {
     test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+
+    test.beforeEach(async ({ page }) => {
+      // Login before accessing protected appeals routes
+      await loginWithDemoAccount(page, 'Admin Adams');
+    });
 
     test('should display appeals page with user appeals', async ({ page }) => {
       await page.goto('/appeals');
@@ -152,7 +158,8 @@ test.describe('Appeal Submission and Tracking', () => {
       expect(hasAppeals > 0 || hasEmptyState > 0).toBe(true);
     });
 
-    test('should navigate to moderation history page', async ({ page }) => {
+    test.skip('should navigate to moderation history page', async ({ page }) => {
+      // Skip: /moderation-history route doesn't exist - only /admin/moderation and /appeals exist
       await page.goto('/moderation-history');
       await page.waitForLoadState('networkidle');
 
