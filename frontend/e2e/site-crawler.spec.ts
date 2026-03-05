@@ -20,9 +20,6 @@
 
 import { test, expect, type Page } from '@playwright/test';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 // Generate unique test user credentials for authentication
 const generateTestUser = () => {
   const timestamp = Date.now();
@@ -281,9 +278,6 @@ async function crawlPage(
 }
 
 test.describe('Site Crawler - Comprehensive Validation', () => {
-  // Only run in E2E Docker mode with real backend
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   test('Crawl entire site and validate navigation, links, and buttons', async ({
     page,
     baseURL,

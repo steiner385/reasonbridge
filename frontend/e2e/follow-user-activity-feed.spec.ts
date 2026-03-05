@@ -14,9 +14,6 @@ import { test, expect } from '@playwright/test';
  * - Verifying followed users' activities appear in the feed
  */
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 /**
  * Helper to login with a demo account
  */
@@ -116,9 +113,6 @@ test.describe('Follow User and Activity Feed', () => {
   });
 
   test.describe('Follow User Flow - Backend Required', () => {
-    // Skip backend-dependent tests when not in E2E Docker mode
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
     test.beforeEach(async ({ page }) => {
       await loginWithDemoAccount(page);
     });

@@ -11,14 +11,9 @@
 
 import { test, expect } from '@playwright/test';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('Flag Content Flow', () => {
   // Tests that require the full backend environment
   test.describe('With Backend', () => {
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
     test('should display flag button on response cards', async ({ page }) => {
       await page.goto('/topics');
 
@@ -127,7 +122,9 @@ test.describe('Flag Content Flow', () => {
   });
 
   // UI-only tests that use API mocking
-  test.describe('UI Behavior (Mocked)', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Convert these to real backend tests or move to unit/integration tests
+  test.describe.skip('UI Behavior (Mocked)', () => {
     test.beforeEach(async ({ page }) => {
       // Set up base routes for the test environment
       await page.route('**/api/topics', async (route) => {

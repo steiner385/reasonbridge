@@ -16,9 +16,6 @@
 import { test, expect, Page } from '@playwright/test';
 import { loginWithDemoAccount } from '../utils/auth-helpers';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 /**
  * Helper to open edit profile modal and wait for privacy settings to load.
  * Privacy settings require an API call, so we wait for the data-dependent content.
@@ -41,9 +38,6 @@ async function openEditModalWithPrivacySettings(page: Page) {
 }
 
 test.describe('Profile Privacy Settings', () => {
-  // Check if running in E2E Docker mode with full backend
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   // Run tests sequentially to avoid rate limiting on login API
   test.describe.configure({ mode: 'serial' });
 

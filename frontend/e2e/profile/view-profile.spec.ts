@@ -17,9 +17,6 @@
 
 import { test, expect } from '@playwright/test';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 // Demo user IDs from seed data - use real seeded users for backend-dependent tests
 const DEMO_USER_IDS = {
   ADMIN_ADAMS: '11111111-0000-4000-8000-000000000001',
@@ -29,9 +26,6 @@ const DEMO_USER_IDS = {
 test.describe('View Public Profile', () => {
   test.describe('Profile Structure', () => {
     test('should render profile page with all sections', async ({ page }) => {
-      // Skip if no backend
-      test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
       // Navigate to a valid user profile (would need a seeded user)
       await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
 
@@ -45,8 +39,6 @@ test.describe('View Public Profile', () => {
     });
 
     test('should show user avatar and display name in header', async ({ page }) => {
-      test.skip(!isE2EDocker, 'Requires backend');
-
       await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
 
       // Wait for profile to load
@@ -102,8 +94,6 @@ test.describe('View Public Profile', () => {
 
   test.describe('Loading States', () => {
     test('should show skeleton loader while loading', async ({ page }) => {
-      test.skip(!isE2EDocker, 'Requires backend');
-
       // Slow down network to observe loading state
       await page.route('**/users/*', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -121,8 +111,6 @@ test.describe('View Public Profile', () => {
 
   test.describe('Trust Score Section', () => {
     test('should display trust score badge', async ({ page }) => {
-      test.skip(!isE2EDocker, 'Requires backend');
-
       await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
 
       // Wait for page to load

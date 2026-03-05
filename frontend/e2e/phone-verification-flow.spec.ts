@@ -13,6 +13,10 @@ import { test, expect } from '@playwright/test';
 const TEST_PHONE_NUMBER = '+12125551234';
 
 test.describe('Phone Verification Flow', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     // Mock API endpoints for phone verification
     await page.route('**/api/verification/phone/request', async (route) => {

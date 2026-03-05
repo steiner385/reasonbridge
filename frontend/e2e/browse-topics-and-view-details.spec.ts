@@ -10,13 +10,7 @@ import { test, expect } from '@playwright/test';
  * - Navigating back to the topics list
  */
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('Browse Topics and View Details', () => {
-  // Skip backend-dependent tests when not in E2E Docker mode
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   test('should load and display the topics list page', async ({ page }) => {
     await page.goto('/topics');
 

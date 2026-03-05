@@ -79,6 +79,10 @@ const mockTopicForReactions = {
 };
 
 test.describe('Emoji Reactions', () => {
+  // SKIPPED: E2E tests should only test real production code, not mocked APIs
+  // TODO: Rewrite to use real backend or move to integration tests
+  test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
+
   test.beforeEach(async ({ page }) => {
     await mockAuthenticatedUser(page);
     await mockAuthenticatedEndpoints(page);

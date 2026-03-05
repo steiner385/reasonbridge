@@ -36,7 +36,10 @@ const isE2EDocker = process.env.E2E_DOCKER === 'true';
 test.describe('Appeal Submission and Tracking', () => {
   // Tests that require the full backend environment
   test.describe('With Backend', () => {
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
+    test.beforeEach(async ({ page }) => {
+      // Login before accessing protected appeals routes
+      await loginWithDemoAccount(page, 'Admin Adams');
+    });
 
     test.beforeEach(async ({ page }) => {
       // Login before accessing protected appeals routes

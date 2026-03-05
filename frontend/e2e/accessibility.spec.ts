@@ -106,14 +106,8 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
   });
 });
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 test.describe('Accessibility - Page-Specific Checks', () => {
   test.describe('Topics Page', () => {
-    // Skip when backend is not available - topics page requires API data
-    test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
     // Skip: Axe-core finds accessibility violations on topics page that need UI fixes
     test.skip('topics list page has no critical accessibility violations', async ({ page }) => {
       await page.goto('/topics');

@@ -17,16 +17,10 @@
 import { test, expect } from '@playwright/test';
 import { loginWithDemoAccount } from '../utils/auth-helpers';
 
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
-
 // Demo account name used for testing
 const DEMO_ACCOUNT_NAME = 'Admin Adams';
 
 test.describe('Edit Own Profile', () => {
-  // Skip backend-dependent tests when not in E2E Docker mode
-  test.skip(!isE2EDocker, 'Requires backend - runs in E2E Docker mode only');
-
   // Run tests sequentially to avoid rate limiting on login API
   test.describe.configure({ mode: 'serial' });
 
