@@ -53,10 +53,7 @@ test.describe('Browse Topics and View Details', () => {
     expect(hasTopics || hasNoTopicsMessage || hasError).toBeTruthy();
   });
 
-  // Skip: Tests expect [data-testid="topic-list-item"] which doesn't exist in current sidebar implementation
-  test.skip('should navigate to topic in discussion view when clicking on a topic', async ({
-    page,
-  }) => {
+  test('should navigate to topic in discussion view when clicking on a topic', async ({ page }) => {
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -101,9 +98,8 @@ test.describe('Browse Topics and View Details', () => {
     expect(tabCount).toBeGreaterThan(0);
   });
 
-  // Fixed: Added proper waits after topic clicks for content to update
   // TODO: Flaky in CI - timing issues with topic switching. Tracked for investigation.
-  test.skip('should allow switching between topics using left panel', async ({ page }) => {
+  test('should allow switching between topics using left panel', async ({ page }) => {
     await page.goto('/discussions');
 
     await expect(page.locator('[data-testid="topic-list-item"]').first()).toBeVisible();
@@ -248,8 +244,7 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  // Skip: Tests expect [data-testid="topic-list-item"] which doesn't exist in current sidebar implementation
-  test.skip('should handle direct navigation to topic via URL parameter', async ({ page }) => {
+  test('should handle direct navigation to topic via URL parameter', async ({ page }) => {
     await page.goto('/discussions');
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
     await expect(firstTopic).toBeVisible();
