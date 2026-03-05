@@ -65,9 +65,7 @@ test.describe('Complete Verification Flow', () => {
     testUser = generateTestUser();
   });
 
-  // Fixed: Added auth state waits to registerAndLogin helper
-  // TODO: Flaky in CI - registration/auth state timing issues. Tracked for investigation.
-  test.skip('should navigate to verification page directly', async ({ page }) => {
+  test('should navigate to verification page directly', async ({ page }) => {
     // Register and login first (verification page requires authentication)
     await registerAndLogin(page);
 
@@ -243,9 +241,7 @@ test.describe('Complete Verification Flow', () => {
     expect(page.url()).toContain('/verification');
   });
 
-  // Fixed: Auth state now properly stabilizes after registration
-  // TODO: Flaky in CI - auth state timing issues after registration. Tracked for investigation.
-  test.skip('should maintain state during navigation', async ({ page }) => {
+  test('should maintain state during navigation', async ({ page }) => {
     // Register and login first (verification page requires authentication)
     await registerAndLogin(page);
 

@@ -58,8 +58,7 @@ test.describe('Topic Editing', () => {
       });
     });
 
-    // TODO: Flaky in CI - topic creation/editing timing issues. Tracked for investigation.
-    test.skip('should successfully edit topic title and description', async ({ page }) => {
+    test('should successfully edit topic title and description', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -115,8 +114,7 @@ test.describe('Topic Editing', () => {
       await expect(page.getByText(editedTitle)).toBeVisible({ timeout: 5000 });
     });
 
-    // TODO: Flaky in CI - topic creation/editing timing issues. Tracked for investigation.
-    test.skip('should edit topic tags', async ({ page }) => {
+    test('should edit topic tags', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -206,8 +204,7 @@ test.describe('Topic Editing', () => {
       await expect(page.getByText(/review changes/i)).toBeVisible();
     });
 
-    // TODO: Flaky in CI - topic creation/editing timing issues. Tracked for investigation.
-    test.skip('should allow flagging edit for moderation review', async ({ page }) => {
+    test('should allow flagging edit for moderation review', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -246,8 +243,7 @@ test.describe('Topic Editing', () => {
       await expect(page.getByText(/flagged for moderator review/i)).toBeVisible();
     });
 
-    // TODO: Flaky in CI - 'preview changes' button click timeout. Tracked for investigation.
-    test.skip('should display validation errors', async ({ page }) => {
+    test('should display validation errors', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -331,8 +327,7 @@ test.describe('Topic Editing', () => {
       await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
     });
 
-    // TODO: Flaky in CI - topic creation/editing timing issues. Tracked for investigation.
-    test.skip('should display edit history after editing', async ({ page }) => {
+    test('should display edit history after editing', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -377,8 +372,7 @@ test.describe('Topic Editing', () => {
       }
     });
 
-    // TODO: Flaky in CI - topic creation/editing timing issues. Tracked for investigation.
-    test.skip('should show changes in edit history', async ({ page }) => {
+    test('should show changes in edit history', async ({ page }) => {
       // Create and edit a topic
       await page.goto('/topics');
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -438,8 +432,7 @@ test.describe('Topic Editing', () => {
       await expect(page.getByRole('button', { name: /edit topic/i })).not.toBeVisible();
     });
 
-    // TODO: Flaky in CI - login/navigation timing issues. Tracked for investigation.
-    test.skip('users should not see Edit button on topics created by others', async ({ page }) => {
+    test('users should not see Edit button on topics created by others', async ({ page }) => {
       // Login as one user
       await page.goto('/');
       await page.getByRole('button', { name: /log in/i }).click();
