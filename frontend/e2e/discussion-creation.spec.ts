@@ -8,11 +8,13 @@
  * - The backend API (/discussions endpoint) exists
  * - BUT: No route exposes DiscussionListPage in the UI
  *
+ * Tracked in: https://github.com/steiner385/reasonbridge/issues/993
+ *
  * Current routing:
  * - /topics -> TopicsPage (create TOPICS via modal) - tested in create-topic.spec.ts
  * - /discussions?topic=<id> -> DiscussionPage (view/post responses)
  *
- * When this feature is implemented, it will likely add:
+ * When this feature is implemented, it will add:
  * - /topics/:topicId/discussions -> DiscussionListPage
  *
  * See also: create-topic.spec.ts for topic creation tests (which IS implemented)

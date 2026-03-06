@@ -20,10 +20,9 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   // INTENTIONALLY SKIPPED: Axe-core finds color contrast violations in dark mode.
-  // Requires UI fixes in TopicCard and Sidebar components for:
-  // - Text color contrast against dark backgrounds (4.5:1 ratio required)
-  // - Interactive element focus states
-  // TODO: Create GitHub issue for dark mode accessibility fixes
+  // CSS fixes applied: dark:text-primary-400 on links, focus-visible rings on nav.
+  // Needs E2E environment verification before un-skipping.
+  // Components fixed: TopicCard, Navigation, Sidebar, CompactSiteNav, Header.
   test.skip('Topics page should have no accessibility violations in dark mode', async ({
     page,
   }) => {
@@ -54,8 +53,8 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   // INTENTIONALLY SKIPPED: Axe-core finds color-contrast rule violations.
-  // Requires UI fixes in TopicCard component for dark mode color palette.
-  // TODO: Update dark:text-* classes in TopicCard.tsx for WCAG AA compliance
+  // CSS fixes applied: TopicCard link now uses dark:text-primary-400.
+  // Needs E2E environment verification before un-skipping.
   test.skip('Topic cards should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -100,10 +99,8 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   // INTENTIONALLY SKIPPED: Axe-core finds contrast violations on profile page.
-  // Requires UI fixes in ProfilePage and ProfileCard components for:
-  // - Bio text contrast in dark mode
-  // - Badge/chip text contrast
-  // TODO: Update dark:text-* classes in profile components for WCAG AA compliance
+  // CSS fixes applied: ProfileBio buttons have focus rings, dark mode hover states.
+  // Needs E2E environment verification and potential ProfileCard fixes.
   test.skip('Profile page should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -149,10 +146,8 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   // INTENTIONALLY SKIPPED: Axe-core finds focus indicator violations.
-  // Requires UI fixes in Sidebar/Navigation components for:
-  // - Visible focus ring on interactive elements (2px outline minimum)
-  // - Sufficient focus-visible contrast (3:1 ratio against adjacent colors)
-  // TODO: Update focus:ring-* and focus-visible:outline-* classes in nav components
+  // CSS fixes applied: focus-visible:ring-2 added to Navigation, Sidebar, CompactSiteNav, Header.
+  // Needs E2E environment verification before un-skipping.
   test.skip('Navigation sidebar should have sufficient focus indicators', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -199,11 +194,8 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   // INTENTIONALLY SKIPPED: Axe-core finds violations on common ground cards.
-  // Requires UI fixes in CommonGroundCard component for:
-  // - Card background contrast in dark mode
-  // - Score indicator text contrast
-  // - Dynamic content ARIA announcements
-  // TODO: Update common ground components for WCAG AA compliance
+  // CSS fixes applied: CommonGroundSummaryPanel buttons have focus rings.
+  // Needs E2E environment verification; may have remaining issues with dynamic content.
   test.skip('Common ground cards should respect dark mode', async ({ page }) => {
     await page.goto('/discussions');
 
@@ -252,11 +244,10 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   // INTENTIONALLY SKIPPED: Axe-core finds violations in light mode as well.
-  // Requires UI fixes across multiple components for:
+  // Focus rings added across components. May have remaining issues with:
   // - Form input label associations
-  // - Button accessible names
-  // - Link text clarity
-  // TODO: Fix light mode accessibility issues alongside dark mode fixes
+  // - Button accessible names in third-party components
+  // Needs E2E environment verification before un-skipping.
   test.skip('Light mode should also pass accessibility checks', async ({ page }) => {
     // Switch to light mode
     await page.emulateMedia({ colorScheme: 'light' });

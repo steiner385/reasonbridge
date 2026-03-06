@@ -131,7 +131,7 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
 
         <Link
           to={`/topics/${topic.id}`}
-          className="inline-block text-primary-600 hover:text-primary-700 font-medium text-sm"
+          className="inline-block text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
         >
           View Discussion →
         </Link>

@@ -118,7 +118,7 @@ export function ProfileBio({
       <div className={`${className}`}>
         <button
           onClick={() => setIsEditing(true)}
-          className="w-full py-6 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors dark:border-gray-600 dark:hover:border-primary-400"
+          className="w-full py-6 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors dark:border-gray-600 dark:text-gray-400 dark:hover:border-primary-400 dark:hover:text-primary-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           + Add a bio to tell others about yourself
         </button>
@@ -144,7 +144,7 @@ export function ProfileBio({
         {needsTruncation && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+            className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
           >
             {isExpanded ? 'Show less' : 'Show more'}
           </button>
@@ -152,7 +152,7 @@ export function ProfileBio({
         {isOwnProfile && (
           <button
             onClick={() => setIsEditing(true)}
-            className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
           >
             Edit
           </button>

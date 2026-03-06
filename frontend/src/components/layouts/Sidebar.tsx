@@ -158,6 +158,7 @@ export function Sidebar() {
             className={`
               flex items-center gap-3 rounded-lg p-3 transition-colors
               hover:bg-gray-100 dark:hover:bg-gray-800
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
               ${isCollapsed ? 'justify-center' : ''}
             `}
             aria-label={isCollapsed ? `${user.displayName} - ${user.email}` : 'View profile'}
