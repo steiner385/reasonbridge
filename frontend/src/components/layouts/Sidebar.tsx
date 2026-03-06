@@ -110,10 +110,18 @@ export function Sidebar() {
           transition-all duration-300 ease-in-out
           ${isCollapsed ? 'w-20' : 'w-80'}
         `}
+        role="navigation"
         aria-label="Topic navigation sidebar"
       >
         {/* Compact Site Navigation - always visible */}
         <CompactSiteNav isCollapsed={isCollapsed} />
+
+        {/* Topics Header - hidden when collapsed */}
+        {!isCollapsed && (
+          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Topics</h2>
+          </div>
+        )}
 
         {/* Topic Navigation Content - hidden when collapsed */}
         {!isCollapsed && (
