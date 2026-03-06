@@ -37,7 +37,7 @@ export function Header() {
             // Mobile: Hamburger menu button
             <button
               onClick={toggleMobile}
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               aria-label="Toggle mobile menu"
               aria-expanded={false}
             >
@@ -60,7 +60,7 @@ export function Header() {
             // Desktop: Sidebar collapse toggle
             <button
               onClick={toggleCollapsed}
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-expanded={!isCollapsed}
             >
@@ -82,7 +82,11 @@ export function Header() {
           )}
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2" aria-label="ReasonBridge home">
+          <Link
+            to="/"
+            className="flex items-center gap-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            aria-label="ReasonBridge home"
+          >
             {isMobile ? (
               <img
                 src="/assets/brand/logo-icon.svg"
@@ -128,7 +132,7 @@ export function Header() {
           {/* Theme toggle button */}
           <button
             onClick={toggleTheme}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDark ? (
@@ -175,7 +179,7 @@ export function Header() {
           ) : user ? (
             <Link
               to="/profile"
-              className="flex h-11 items-center gap-2 rounded-lg px-3 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex h-11 items-center gap-2 rounded-lg px-3 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               aria-label="Profile"
             >
               {user.avatarUrl ? (
@@ -194,7 +198,7 @@ export function Header() {
           ) : (
             <button
               onClick={openLoginModal}
-              className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 min-h-[44px]"
+              className="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
             >
               Log In
             </button>

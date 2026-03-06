@@ -108,7 +108,10 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
 
 test.describe('Accessibility - Page-Specific Checks', () => {
   test.describe('Topics Page', () => {
-    // Skip: Axe-core finds accessibility violations on topics page that need UI fixes
+    // INTENTIONALLY SKIPPED: Axe-core finds WCAG violations on topics page.
+    // CSS fixes applied in PR #990+: dark mode colors, focus rings added to TopicCard.
+    // Needs E2E environment verification before un-skipping.
+    // Remaining potential issues: third-party components, dynamic content.
     test.skip('topics list page has no critical accessibility violations', async ({ page }) => {
       await page.goto('/topics');
       await page.waitForLoadState('networkidle');

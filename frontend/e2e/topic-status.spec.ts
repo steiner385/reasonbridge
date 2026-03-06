@@ -163,42 +163,68 @@ test.describe('Topic Status Management', () => {
     });
 
     test('should reopen an archived topic', async ({ page }) => {
-      // Navigate to topics and find an archived one
+      // Create and archive a topic first to ensure we have one to reopen
       await page.goto('/topics');
+      await page.waitForLoadState('networkidle');
 
-      // Filter by archived status
-      await page.getByRole('button', { name: 'Archived' }).click();
-      await page.waitForTimeout(1000);
+      // Create topic
+      await page.getByRole('button', { name: /create topic/i }).click();
+      const modal = page.getByRole('dialog');
+      await expect(modal).toBeVisible();
 
-      // Look for an archived topic
-      const firstTopic = page.locator('[data-testid="topic-card"]').first();
-      if (await firstTopic.isVisible({ timeout: 3000 })) {
-        await firstTopic.click();
-      } else {
-        test.skip(true, 'No archived topics available for testing');
-      }
+      await modal.getByLabel(/title/i).fill(`Reopen Test ${Date.now()}`);
+      await modal
+        .getByLabel(/description/i)
+        .fill(
+          'Testing reopen workflow for archived topics. This description needs to be long enough to meet minimum character requirements.',
+        );
 
-      // Check if Reopen button is visible
-      const reopenButton = page.getByRole('button', { name: /reopen topic/i });
-      if (await reopenButton.isVisible({ timeout: 3000 })) {
-        await reopenButton.click();
+      const tagInput = modal.getByRole('combobox', { name: /tags/i });
+      await tagInput.fill('test');
+      await tagInput.press('Enter');
 
-        // Should show confirmation modal
-        await expect(page.getByText(/reopening this topic/i)).toBeVisible();
+      await modal.getByRole('button', { name: /create topic/i }).click();
+      await expect(modal).not.toBeVisible({ timeout: 10000 });
 
-        // Confirm
+      // Wait for navigation
+      await page.waitForURL(/\/discussions\?topic=/);
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+
+      // Activate the topic first if needed
+      const activateButton = page.getByRole('button', { name: /activate topic/i });
+      if (await activateButton.isVisible({ timeout: 3000 })) {
+        await activateButton.click();
         await page.getByRole('button', { name: /^confirm$/i }).click();
-
-        // Wait for status change
         await page.waitForTimeout(1500);
-
-        // Should now see Archive button again
-        await expect(page.getByRole('button', { name: /archive topic/i })).toBeVisible({
-          timeout: 5000,
-        });
-      } else {
-        test.skip(true, 'User is not creator of this topic');
       }
+
+      // Now archive the topic
+      const archiveButton = page.getByRole('button', { name: /archive topic/i });
+      if (await archiveButton.isVisible({ timeout: 3000 })) {
+        await archiveButton.click();
+        await page.getByRole('button', { name: /^confirm$/i }).click();
+        await page.waitForTimeout(1500);
+      }
+
+      // Now test reopening
+      const reopenButton = page.getByRole('button', { name: /reopen topic/i });
+      await expect(reopenButton).toBeVisible({ timeout: 5000 });
+      await reopenButton.click();
+
+      // Should show confirmation modal
+      await expect(page.getByText(/reopening this topic/i)).toBeVisible();
+
+      // Confirm
+      await page.getByRole('button', { name: /^confirm$/i }).click();
+
+      // Wait for status change
+      await page.waitForTimeout(1500);
+
+      // Should now see Archive button again
+      await expect(page.getByRole('button', { name: /archive topic/i })).toBeVisible({
+        timeout: 5000,
+      });
     });
 
     test('should NOT see Lock button as regular user', async ({ page }) => {
@@ -229,7 +255,9 @@ test.describe('Topic Status Management', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
     });
 
-    // Skip: Archive/Lock buttons not found - TopicStatusActions may not be rendered in MetadataPanel
+    // INTENTIONALLY SKIPPED: isModerator flag is hardcoded to false in MetadataPanel.tsx:121.
+    // Moderator role checking requires User.roles field which isn't implemented yet.
+    // Tracked in: https://github.com/steiner385/reasonbridge/issues/991
     test.skip('should see Lock button on active topics', async ({ page }) => {
       await page.goto('/discussions');
 
@@ -295,41 +323,71 @@ test.describe('Topic Status Management', () => {
     });
 
     test('should unlock a locked topic', async ({ page }) => {
-      // Navigate to topics and filter by locked status
+      // Create and lock a topic first to ensure we have one to unlock
       await page.goto('/topics');
+      await page.waitForLoadState('networkidle');
 
-      // Filter by locked status
-      await page.getByRole('button', { name: 'Locked' }).click();
-      await page.waitForTimeout(1000);
+      // Create topic
+      await page.getByRole('button', { name: /create topic/i }).click();
+      const modal = page.getByRole('dialog');
+      await expect(modal).toBeVisible();
 
-      const firstTopic = page.locator('[data-testid="topic-card"]').first();
-      if (await firstTopic.isVisible({ timeout: 3000 })) {
-        await firstTopic.click();
-      } else {
-        test.skip(true, 'No locked topics available for testing');
-      }
+      await modal.getByLabel(/title/i).fill(`Unlock Test ${Date.now()}`);
+      await modal
+        .getByLabel(/description/i)
+        .fill(
+          'Testing unlock workflow for locked topics. This description needs to be long enough to meet minimum character requirements.',
+        );
 
-      // Click Unlock button
-      const unlockButton = page.getByRole('button', { name: /unlock topic/i });
-      if (await unlockButton.isVisible({ timeout: 3000 })) {
-        await unlockButton.click();
+      const tagInput = modal.getByRole('combobox', { name: /tags/i });
+      await tagInput.fill('test');
+      await tagInput.press('Enter');
 
-        // Should show confirmation modal
-        await expect(page.getByText(/unlocking this topic/i)).toBeVisible();
+      await modal.getByRole('button', { name: /create topic/i }).click();
+      await expect(modal).not.toBeVisible({ timeout: 10000 });
 
-        // Confirm
+      // Wait for navigation
+      await page.waitForURL(/\/discussions\?topic=/);
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+
+      // Activate the topic first if in SEEDING state
+      const activateButton = page.getByRole('button', { name: /activate topic/i });
+      if (await activateButton.isVisible({ timeout: 3000 })) {
+        await activateButton.click();
         await page.getByRole('button', { name: /^confirm$/i }).click();
-
-        // Wait for status change
         await page.waitForTimeout(1500);
-
-        // Should now see Archive and Lock buttons (back to ACTIVE)
-        await expect(page.getByRole('button', { name: /archive topic/i })).toBeVisible({
-          timeout: 5000,
-        });
-      } else {
-        test.skip(true, 'Unlock button not available');
       }
+
+      // Now lock the topic (moderator can lock any topic)
+      const lockButton = page.getByRole('button', { name: /lock topic/i });
+      if (await lockButton.isVisible({ timeout: 3000 })) {
+        await lockButton.click();
+        await page.getByRole('button', { name: /^confirm$/i }).click();
+        await page.waitForTimeout(1500);
+      } else {
+        test.skip(true, 'Lock button not available - user may not have moderator permissions');
+        return;
+      }
+
+      // Now test unlocking
+      const unlockButton = page.getByRole('button', { name: /unlock topic/i });
+      await expect(unlockButton).toBeVisible({ timeout: 5000 });
+      await unlockButton.click();
+
+      // Should show confirmation modal
+      await expect(page.getByText(/unlocking this topic/i)).toBeVisible();
+
+      // Confirm
+      await page.getByRole('button', { name: /^confirm$/i }).click();
+
+      // Wait for status change
+      await page.waitForTimeout(1500);
+
+      // Should now see Archive and Lock buttons (back to ACTIVE)
+      await expect(page.getByRole('button', { name: /archive topic/i })).toBeVisible({
+        timeout: 5000,
+      });
     });
 
     test('should be able to archive topics created by others', async ({ page }) => {

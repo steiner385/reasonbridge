@@ -219,7 +219,7 @@ const CommonGroundSummaryPanel = ({
                     <button
                       type="button"
                       onClick={() => onViewAgreementZone(zone.id)}
-                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
                     >
                       View Details →
                     </button>
@@ -286,7 +286,7 @@ const CommonGroundSummaryPanel = ({
                   <button
                     type="button"
                     onClick={() => onViewMisunderstanding(misunderstanding.id)}
-                    className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+                    className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
                   >
                     View Details →
                   </button>
@@ -373,7 +373,7 @@ const CommonGroundSummaryPanel = ({
                   <button
                     type="button"
                     onClick={() => onViewDisagreement(disagreement.id)}
-                    className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+                    className="mt-3 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
                   >
                     View Details →
                   </button>

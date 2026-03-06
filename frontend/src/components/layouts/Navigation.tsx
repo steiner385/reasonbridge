@@ -41,6 +41,7 @@ function NavLink({
       title={isCollapsed ? label : undefined}
       className={`
         flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
         ${isCollapsed ? 'justify-center' : ''}
         ${
           isActive

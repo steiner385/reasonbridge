@@ -123,6 +123,8 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
         className={buttonClasses}
         aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
         aria-pressed={isBookmarked}
+        data-testid="bookmark-button"
+        data-bookmarked={isBookmarked}
         data-tour="bookmark-button"
       >
         {isBookmarked ? (

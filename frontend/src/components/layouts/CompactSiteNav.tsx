@@ -54,6 +54,7 @@ export function CompactSiteNav({ onNavigate, isCollapsed = false }: CompactSiteN
 
   const iconButtonClass = (path: string) => `
     relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
     ${
       isActive(path)
         ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'

@@ -2,6 +2,14 @@ import { test, expect } from '@playwright/test';
 
 /**
  * E2E test suite for Topic Merging (Feature 016: Topic Management)
+ *
+ * NOTE: MergeTopicsModal component exists at src/components/topics/MergeTopicsModal.tsx
+ * but is NOT currently integrated into the UI. These tests contain conditional skips
+ * that activate when the "Merge Topics" button is not found. Once the feature is
+ * wired up (button added to topics page for moderators), these tests should pass.
+ *
+ * Tracked in: https://github.com/steiner385/reasonbridge/issues/992
+ *
  * T046: Tests complete topic merge workflows including:
  * - Merging multiple topics into one (moderator only)
  * - Source topic selection
