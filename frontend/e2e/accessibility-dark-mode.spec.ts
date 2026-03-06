@@ -19,13 +19,9 @@ test.describe('Dark Mode Accessibility', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
   });
 
-  // INTENTIONALLY SKIPPED: Axe-core finds color contrast violations in dark mode.
-  // CSS fixes applied: dark:text-primary-400 on links, focus-visible rings on nav.
-  // Needs E2E environment verification before un-skipping.
+  // CSS fixes applied in PR #994: dark:text-primary-400 on links, focus-visible rings on nav.
   // Components fixed: TopicCard, Navigation, Sidebar, CompactSiteNav, Header.
-  test.skip('Topics page should have no accessibility violations in dark mode', async ({
-    page,
-  }) => {
+  test('Topics page should have no accessibility violations in dark mode', async ({ page }) => {
     // Login first (topics is protected)
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -52,10 +48,8 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // INTENTIONALLY SKIPPED: Axe-core finds color-contrast rule violations.
-  // CSS fixes applied: TopicCard link now uses dark:text-primary-400.
-  // Needs E2E environment verification before un-skipping.
-  test.skip('Topic cards should have sufficient contrast in dark mode', async ({ page }) => {
+  // CSS fixes applied in PR #994: TopicCard link now uses dark:text-primary-400.
+  test('Topic cards should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
     await page.click('button:has-text("Admin Adams")');
@@ -98,10 +92,8 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // INTENTIONALLY SKIPPED: Axe-core finds contrast violations on profile page.
-  // CSS fixes applied: ProfileBio buttons have focus rings, dark mode hover states.
-  // Needs E2E environment verification and potential ProfileCard fixes.
-  test.skip('Profile page should have sufficient contrast in dark mode', async ({ page }) => {
+  // CSS fixes applied in PR #994: ProfileBio buttons have focus rings, dark mode hover states.
+  test('Profile page should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
     await page.click('button:has-text("Admin Adams")');
@@ -145,10 +137,8 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // INTENTIONALLY SKIPPED: Axe-core finds focus indicator violations.
-  // CSS fixes applied: focus-visible:ring-2 added to Navigation, Sidebar, CompactSiteNav, Header.
-  // Needs E2E environment verification before un-skipping.
-  test.skip('Navigation sidebar should have sufficient focus indicators', async ({ page }) => {
+  // CSS fixes applied in PR #994: focus-visible:ring-2 added to Navigation, Sidebar, CompactSiteNav, Header.
+  test('Navigation sidebar should have sufficient focus indicators', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
     await page.click('button:has-text("Admin Adams")');
@@ -193,10 +183,8 @@ test.describe('Dark Mode Accessibility', () => {
     await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
-  // INTENTIONALLY SKIPPED: Axe-core finds violations on common ground cards.
-  // CSS fixes applied: CommonGroundSummaryPanel buttons have focus rings.
-  // Needs E2E environment verification; may have remaining issues with dynamic content.
-  test.skip('Common ground cards should respect dark mode', async ({ page }) => {
+  // CSS fixes applied in PR #994: CommonGroundSummaryPanel buttons have focus rings.
+  test('Common ground cards should respect dark mode', async ({ page }) => {
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -243,12 +231,8 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // INTENTIONALLY SKIPPED: Axe-core finds violations in light mode as well.
-  // Focus rings added across components. May have remaining issues with:
-  // - Form input label associations
-  // - Button accessible names in third-party components
-  // Needs E2E environment verification before un-skipping.
-  test.skip('Light mode should also pass accessibility checks', async ({ page }) => {
+  // Focus rings added across components in PR #994.
+  test('Light mode should also pass accessibility checks', async ({ page }) => {
     // Switch to light mode
     await page.emulateMedia({ colorScheme: 'light' });
 

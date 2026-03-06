@@ -107,12 +107,7 @@ export function TopicList({
   }
 
   return (
-    <div
-      className={`topic-list ${className}`}
-      data-testid="topic-list"
-      role="list"
-      aria-label="Topic list"
-    >
+    <div className={`topic-list ${className}`} data-testid="topic-list" aria-label="Topic list">
       <List<Record<string, never>>
         defaultHeight={height}
         rowCount={topics.length}

@@ -331,7 +331,7 @@ describe('MentionInput', () => {
   });
 
   describe('accessibility', () => {
-    it('should have aria-expanded when dropdown is visible', () => {
+    it('should have aria-haspopup when dropdown is visible', () => {
       mockUseMentions.mockReturnValue({
         ...defaultMentionsResult,
         query: 'john',
@@ -347,7 +347,9 @@ describe('MentionInput', () => {
 
       rerender(<MentionInput value="@john" onChange={() => {}} />);
 
-      expect(screen.getByRole('textbox')).toHaveAttribute('aria-expanded', 'true');
+      // aria-haspopup="listbox" is used instead of aria-expanded because
+      // aria-expanded is not valid on textarea elements per ARIA spec
+      expect(screen.getByRole('textbox')).toHaveAttribute('aria-haspopup', 'listbox');
     });
 
     it('should have aria-autocomplete when dropdown is visible', () => {

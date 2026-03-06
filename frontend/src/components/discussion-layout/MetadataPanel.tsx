@@ -382,8 +382,8 @@ export function MetadataPanel({
     <div className={`metadata-panel flex flex-col h-full ${className}`}>
       {/* Tab Header */}
       <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="flex items-center" role="tablist" aria-label="Discussion metadata">
-          {/* Collapse Toggle (when collapsible) */}
+        <div className="flex items-center">
+          {/* Collapse Toggle (when collapsible) - outside tablist for ARIA compliance */}
           {collapsible && layoutContext && (
             <button
               type="button"
@@ -408,13 +408,15 @@ export function MetadataPanel({
               </svg>
             </button>
           )}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'propositions'}
-            aria-controls="propositions-panel"
-            onClick={() => handleTabClick('propositions')}
-            className={`
+          {/* Tablist containing only tab buttons */}
+          <div className="flex flex-1" role="tablist" aria-label="Discussion metadata">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'propositions'}
+              aria-controls="propositions-panel"
+              onClick={() => handleTabClick('propositions')}
+              className={`
               flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
               ${
                 activeTab === 'propositions'
@@ -422,16 +424,16 @@ export function MetadataPanel({
                   : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
               }
             `}
-          >
-            Propositions
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'commonGround'}
-            aria-controls="common-ground-panel"
-            onClick={() => handleTabClick('commonGround')}
-            className={`
+            >
+              Propositions
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'commonGround'}
+              aria-controls="common-ground-panel"
+              onClick={() => handleTabClick('commonGround')}
+              className={`
               flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
               ${
                 activeTab === 'commonGround'
@@ -439,16 +441,16 @@ export function MetadataPanel({
                   : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
               }
             `}
-          >
-            Common Ground
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'bridging'}
-            aria-controls="bridging-panel"
-            onClick={() => handleTabClick('bridging')}
-            className={`
+            >
+              Common Ground
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'bridging'}
+              aria-controls="bridging-panel"
+              onClick={() => handleTabClick('bridging')}
+              className={`
               flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
               ${
                 activeTab === 'bridging'
@@ -456,17 +458,17 @@ export function MetadataPanel({
                   : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
               }
             `}
-          >
-            Bridging
-          </button>
-          {isComposing && (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'preview'}
-              aria-controls="preview-panel"
-              onClick={() => handleTabClick('preview')}
-              className={`
+            >
+              Bridging
+            </button>
+            {isComposing && (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'preview'}
+                aria-controls="preview-panel"
+                onClick={() => handleTabClick('preview')}
+                className={`
                 flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors
                 ${
                   activeTab === 'preview'
@@ -474,13 +476,14 @@ export function MetadataPanel({
                     : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'
                 }
               `}
-            >
-              Preview
-              {readyToPost && previewFeedback.length === 0 && !isLoadingPreviewFeedback && (
-                <span className="ml-1 text-green-600 dark:text-green-400">✓</span>
-              )}
-            </button>
-          )}
+              >
+                Preview
+                {readyToPost && previewFeedback.length === 0 && !isLoadingPreviewFeedback && (
+                  <span className="ml-1 text-green-600 dark:text-green-400">✓</span>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

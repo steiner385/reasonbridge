@@ -114,7 +114,11 @@ export function PropositionList({
   }
 
   return (
-    <div className={`proposition-list space-y-3 ${className}`} role="list">
+    <div
+      className={`proposition-list space-y-3 ${className}`}
+      role="group"
+      aria-label="Propositions"
+    >
       {propositions.map((proposition) => {
         const isHighlighted = highlightedPropositionId === proposition.id;
 
