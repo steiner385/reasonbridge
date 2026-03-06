@@ -259,7 +259,7 @@ export function TopicFilterUI({
 
         {/* Visibility Filter Row */}
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm font-medium text-gray-700">Visibility:</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Visibility:</span>
           <Button
             size="sm"
             variant={!filters.visibility ? 'primary' : 'outline'}

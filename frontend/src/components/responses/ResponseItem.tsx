@@ -300,14 +300,18 @@ export function ResponseItem({
                     </span>
                     {/* Compact: inline separator, Non-compact: on its own line */}
                     {compact && <span className="text-gray-400">·</span>}
-                    <span className={`text-gray-500 ${compact ? 'text-xs' : 'text-sm'}`}>
+                    <span
+                      className={`text-gray-500 dark:text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}
+                    >
                       <time dateTime={response.createdAt}>{formatDate(response.createdAt)}</time>
                     </span>
                     {/* Edit Indicator */}
                     {response.editCount > 0 && response.editedAt && (
                       <>
                         {compact && <span className="text-gray-400">·</span>}
-                        <span className={`text-gray-500 italic ${compact ? 'text-xs' : 'text-sm'}`}>
+                        <span
+                          className={`text-gray-500 dark:text-gray-400 italic ${compact ? 'text-xs' : 'text-sm'}`}
+                        >
                           {compact ? 'edited' : `(edited ${formatDate(response.editedAt)})`}
                         </span>
                       </>

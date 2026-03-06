@@ -339,7 +339,7 @@ const MentionInput: React.FC<MentionInputProps> = ({
         aria-label={ariaLabel}
         aria-autocomplete={showDropdown ? 'list' : undefined}
         aria-controls={showDropdown ? 'mention-dropdown' : undefined}
-        aria-expanded={showDropdown}
+        aria-haspopup={showDropdown ? 'listbox' : undefined}
         className={`
           w-full
           px-4 py-3
