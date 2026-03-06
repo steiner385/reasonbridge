@@ -19,7 +19,11 @@ test.describe('Dark Mode Accessibility', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
   });
 
-  // TODO: Flaky in CI - axe-core violations on dynamic content. Tracked for investigation.
+  // INTENTIONALLY SKIPPED: Axe-core finds color contrast violations in dark mode.
+  // Requires UI fixes in TopicCard and Sidebar components for:
+  // - Text color contrast against dark backgrounds (4.5:1 ratio required)
+  // - Interactive element focus states
+  // TODO: Create GitHub issue for dark mode accessibility fixes
   test.skip('Topics page should have no accessibility violations in dark mode', async ({
     page,
   }) => {
@@ -49,7 +53,9 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // TODO: Flaky in CI - axe-core violations on dynamic content. Tracked for investigation.
+  // INTENTIONALLY SKIPPED: Axe-core finds color-contrast rule violations.
+  // Requires UI fixes in TopicCard component for dark mode color palette.
+  // TODO: Update dark:text-* classes in TopicCard.tsx for WCAG AA compliance
   test.skip('Topic cards should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -93,7 +99,11 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // Skip: Axe-core finds contrast violations on profile page that need UI fixes
+  // INTENTIONALLY SKIPPED: Axe-core finds contrast violations on profile page.
+  // Requires UI fixes in ProfilePage and ProfileCard components for:
+  // - Bio text contrast in dark mode
+  // - Badge/chip text contrast
+  // TODO: Update dark:text-* classes in profile components for WCAG AA compliance
   test.skip('Profile page should have sufficient contrast in dark mode', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -138,7 +148,11 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // Skip: Axe-core finds focus indicator violations that need UI fixes
+  // INTENTIONALLY SKIPPED: Axe-core finds focus indicator violations.
+  // Requires UI fixes in Sidebar/Navigation components for:
+  // - Visible focus ring on interactive elements (2px outline minimum)
+  // - Sufficient focus-visible contrast (3:1 ratio against adjacent colors)
+  // TODO: Update focus:ring-* and focus-visible:outline-* classes in nav components
   test.skip('Navigation sidebar should have sufficient focus indicators', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Log In")');
@@ -184,9 +198,12 @@ test.describe('Dark Mode Accessibility', () => {
     await expect(page.locator('[role="main"]')).toBeVisible();
   });
 
-  // Fixed: Added dark mode variants to conversation panel and metadata panel
-  // Dark mode styles added in PR #826
-  // TODO: Flaky in CI - axe-core violations on dynamic content. Tracked for investigation.
+  // INTENTIONALLY SKIPPED: Axe-core finds violations on common ground cards.
+  // Requires UI fixes in CommonGroundCard component for:
+  // - Card background contrast in dark mode
+  // - Score indicator text contrast
+  // - Dynamic content ARIA announcements
+  // TODO: Update common ground components for WCAG AA compliance
   test.skip('Common ground cards should respect dark mode', async ({ page }) => {
     await page.goto('/discussions');
 
@@ -234,7 +251,12 @@ test.describe('Dark Mode Accessibility', () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
-  // Skip: Axe-core finds accessibility violations in light mode that need UI fixes
+  // INTENTIONALLY SKIPPED: Axe-core finds violations in light mode as well.
+  // Requires UI fixes across multiple components for:
+  // - Form input label associations
+  // - Button accessible names
+  // - Link text clarity
+  // TODO: Fix light mode accessibility issues alongside dark mode fixes
   test.skip('Light mode should also pass accessibility checks', async ({ page }) => {
     // Switch to light mode
     await page.emulateMedia({ colorScheme: 'light' });
