@@ -35,8 +35,9 @@ const createMockItem = (
   ageMinutes: number,
   status: ChildReviewStatus = 'PENDING',
 ) => {
-  const createdAt = new Date();
-  createdAt.setMinutes(createdAt.getMinutes() - ageMinutes);
+  // Use millisecond arithmetic for accurate time subtraction
+  // setMinutes() doesn't work correctly for large values (e.g., 1080+ minutes)
+  const createdAt = new Date(Date.now() - ageMinutes * 60 * 1000);
 
   return {
     id,
