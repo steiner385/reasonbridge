@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount, navigateToTopic, getFirstTopicTitle } from './helpers/demo-auth';
+import { loginWithDemoAccount, navigateToSeededTopic, SEEDED_TOPICS } from './helpers/demo-auth';
 
 test.describe('Response Posting Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -22,14 +22,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should display discussion title and existing responses', async ({ page }) => {
-    // Navigate to a seeded topic
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic (eliminates data-conditional skip)
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     // Discussion title should be visible
     await expect(page.locator('.conversation-panel h1')).toBeVisible();
@@ -46,13 +40,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should display response composer', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for topic to fully load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     // Response composer should be visible for authenticated users
     const composerTextarea = page.locator(
@@ -62,13 +51,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should validate response length (minimum characters)', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for topic to fully load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     const composerTextarea = page
       .locator(
@@ -85,13 +69,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should show character counter while typing', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     const composerTextarea = page
       .locator(
@@ -118,13 +97,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should enable submit button when content meets minimum', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     const composerTextarea = page
       .locator(
@@ -148,13 +122,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should successfully post response', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     const composerTextarea = page
       .locator(
@@ -192,13 +161,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should disable submit button while response is too short', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     const composerTextarea = page
       .locator(
@@ -229,13 +193,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should clear form after successful submission', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     const composerTextarea = page
       .locator(
@@ -262,13 +221,8 @@ test.describe('Response Posting Flow', () => {
   });
 
   test('should display response metadata', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     // Should show participant count or response count somewhere in the UI
     const hasParticipants = await page

@@ -14,7 +14,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount, navigateToTopic, getFirstTopicTitle } from './helpers/demo-auth';
+import { loginWithDemoAccount, navigateToSeededTopic } from './helpers/demo-auth';
 
 test.describe('Real-time Updates', () => {
   test.beforeEach(async ({ page }) => {
@@ -23,14 +23,8 @@ test.describe('Real-time Updates', () => {
   });
 
   test('should load topic page with WebSocket support', async ({ page }) => {
-    // Navigate to first available topic
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     // Verify the page is functional - WebSocket should be connecting in background
     await expect(page.locator('.conversation-panel h1')).toBeVisible();
@@ -51,13 +45,8 @@ test.describe('Real-time Updates', () => {
   });
 
   test('should maintain page functionality during session', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     // Verify response composer is visible (proves page is interactive)
     const composerTextarea = page.locator(
@@ -74,13 +63,8 @@ test.describe('Real-time Updates', () => {
   });
 
   test('should persist state across page interactions', async ({ page }) => {
-    const topicTitle = await getFirstTopicTitle(page);
-    test.skip(!topicTitle, 'No topics available in database');
-
-    await navigateToTopic(page, topicTitle!);
-
-    // Wait for page to load
-    await page.waitForSelector('.conversation-panel h1', { timeout: 10000 });
+    // Navigate to a known seeded topic
+    await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
     // Get initial response count
     const responseItems = page.locator('[data-testid="response-item"]');

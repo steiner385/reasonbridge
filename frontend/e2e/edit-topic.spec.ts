@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount, SEEDED_TOPICS } from './helpers/demo-auth';
 
 /**
  * E2E test suite for Topic Editing (Feature 016: Topic Management)
@@ -418,43 +419,35 @@ test.describe('Topic Editing', () => {
 
   test.describe('Permission Checks', () => {
     test('unauthenticated users should not see Edit button', async ({ page }) => {
-      // Navigate to topics without logging in
-      await page.goto('/topics');
+      // Navigate directly to a known seeded topic without logging in
+      const topic = SEEDED_TOPICS.CONGESTION_PRICING;
+      await page.goto(`/discussions?topic=${topic.id}`);
+      await page.waitForLoadState('networkidle');
 
-      const firstTopic = page.locator('[data-testid="topic-card"]').first();
-      if (await firstTopic.isVisible({ timeout: 3000 })) {
-        await firstTopic.click();
-      } else {
-        test.skip(true, 'No topics available for testing');
-      }
+      // Wait for page to load
+      await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
+        timeout: 10000,
+      });
 
-      // Should not see Edit button
+      // Should not see Edit button (not authenticated)
       await expect(page.getByRole('button', { name: /edit topic/i })).not.toBeVisible();
     });
 
     test('users should not see Edit button on topics created by others', async ({ page }) => {
-      // Login as one user
-      await page.goto('/');
-      await page.getByRole('button', { name: /log in/i }).click();
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await page.getByText('Bob Baker').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /^log in$/i }).click();
-      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+      // Login as Bob Builder
+      await loginWithDemoAccount(page, 'Bob Builder');
 
-      // Navigate to topics
-      await page.goto('/topics');
+      // Navigate to a topic created by Alice Anderson (CONGESTION_PRICING)
+      const topic = SEEDED_TOPICS.CONGESTION_PRICING;
+      await page.goto(`/discussions?topic=${topic.id}`);
+      await page.waitForLoadState('networkidle');
 
-      // Find a topic (likely created by someone else in test data)
-      const firstTopic = page.locator('[data-testid="topic-card"]').first();
-      if (await firstTopic.isVisible({ timeout: 3000 })) {
-        await firstTopic.click();
-      } else {
-        test.skip(true, 'No topics available for testing');
-      }
+      // Wait for page to load
+      await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
+        timeout: 10000,
+      });
 
-      // Should not see Edit button (unless moderator)
-      // Note: This test assumes Bob Baker is not a moderator and didn't create this topic
+      // Should not see Edit button (Bob didn't create this topic)
       const editButton = page.getByRole('button', { name: /edit topic/i });
       // Either button doesn't exist or is not visible
       const isVisible = await editButton.isVisible().catch(() => false);
