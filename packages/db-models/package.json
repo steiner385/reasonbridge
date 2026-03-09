@@ -40,7 +40,7 @@
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "7.4.2",
     "bcrypt": "^6.0.0",
-    "pg": "^8.19.0",
+    "pg": "^8.20.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

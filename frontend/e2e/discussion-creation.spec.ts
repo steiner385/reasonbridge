@@ -153,7 +153,9 @@ test.describe('Discussion Creation Flow', () => {
     await expect(page.getByText('https://example.com/source1')).toBeVisible();
 
     // Remove the citation
-    const removeButton = page.getByRole('button', { name: /remove citation/i });
+    const removeButton = page
+      .locator('span:has-text("https://example.com/source1")')
+      .getByRole('button');
     await removeButton.click();
 
     // Citation should be removed
