@@ -21,6 +21,8 @@ type AuthMethod = 'EMAIL_PASSWORD' | 'GOOGLE_OAUTH' | 'APPLE_OAUTH';
 type VerificationLevel = 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN';
 type AccountStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+// Prisma UserRole enum for database role field
+export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN';
 
 export interface DemoPersona {
   id: string;
@@ -39,6 +41,8 @@ export interface DemoPersona {
   trustScoreIntegrity: number;
   moralFoundationProfile: MoralFoundationProfile;
   status: UserStatus;
+  // Database role field (maps to Prisma UserRole enum)
+  userRole: UserRole;
   // Metadata for demos
   role: DemoRole;
   description: string;
@@ -102,6 +106,7 @@ export const ADMIN_ADAMS: DemoPersona = {
     liberty: 0.75,
   },
   status: 'ACTIVE',
+  userRole: 'ADMIN',
   role: 'admin',
   description: 'Showcase admin features, moderation queue, user management',
   activityLevel: 'high',
@@ -135,6 +140,7 @@ export const MOD_MARTINEZ: DemoPersona = {
     liberty: 0.65,
   },
   status: 'ACTIVE',
+  userRole: 'MODERATOR',
   role: 'moderator',
   description: 'Demonstrate moderation workflows, appeals handling',
   activityLevel: 'high',
@@ -168,6 +174,7 @@ export const ALICE_ANDERSON: DemoPersona = {
     liberty: 0.85,
   },
   status: 'ACTIVE',
+  userRole: 'USER',
   role: 'power_user',
   description: 'Active participant, high engagement, progressive viewpoints',
   activityLevel: 'very_high',
@@ -201,6 +208,7 @@ export const BOB_BUILDER: DemoPersona = {
     liberty: 0.6,
   },
   status: 'ACTIVE',
+  userRole: 'USER',
   role: 'regular_user',
   description: 'Typical user experience, moderate activity, balanced views',
   activityLevel: 'medium',
@@ -234,6 +242,7 @@ export const NEW_USER: DemoPersona = {
     liberty: 0.5,
   },
   status: 'ACTIVE',
+  userRole: 'USER',
   role: 'new_user',
   description: 'Onboarding experience, first-time user flow, limited history',
   activityLevel: 'low',
