@@ -14,6 +14,7 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 import { useDiscussionLayoutSafe } from '../../contexts/DiscussionLayoutContext';
 import type { Topic } from '../../types/topic';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { UserRole } from '../../types/user';
 import type { CommonGroundAnalysis, BridgingSuggestionsResponse } from '../../types/common-ground';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 
@@ -118,7 +119,7 @@ export function MetadataPanel({
   // Get auth context for creator/moderator checks
   const { user } = useAuthContext();
   const isCreator = !!(user && topic && user.id === topic.creatorId);
-  const isModerator = false; // TODO: Add moderator role check when available
+  const isModerator = !!(user?.role === UserRole.MODERATOR || user?.role === UserRole.ADMIN);
 
   const isMobile = breakpoint === 'mobile';
 

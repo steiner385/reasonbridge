@@ -255,10 +255,8 @@ test.describe('Topic Status Management', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
     });
 
-    // INTENTIONALLY SKIPPED: isModerator flag is hardcoded to false in MetadataPanel.tsx:121.
-    // Moderator role checking requires User.roles field which isn't implemented yet.
-    // Tracked in: https://github.com/steiner385/reasonbridge/issues/991
-    test.skip('should see Lock button on active topics', async ({ page }) => {
+    // Issue #991 - Moderator role checking is now implemented
+    test('should see Lock button on active topics', async ({ page }) => {
       await page.goto('/discussions');
 
       // Select an active topic from left panel

@@ -22,7 +22,7 @@
 import { DEMO_TOPIC_IDS, DEMO_TAG_IDS, DEMO_USER_IDS } from './demo-ids';
 
 // Topic status type matching Prisma schema
-type TopicStatus = 'SEEDING' | 'ACTIVE' | 'ARCHIVED';
+type TopicStatus = 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
 
 export interface DemoTopic {
   id: string;
@@ -167,6 +167,33 @@ export const DEMO_TOPICS: DemoTopic[] = [
     tagIds: [DEMO_TAG_IDS.SCIENCE, DEMO_TAG_IDS.GOVERNMENT],
     category: 'Science & Research',
     expectedEngagement: 'medium',
+  },
+  // Additional topics for E2E testing diverse states
+  {
+    id: DEMO_TOPIC_IDS.RENEWABLE_ENERGY_MANDATE,
+    title: 'Should governments mandate 100% renewable energy by 2040?',
+    description:
+      'Discuss the feasibility and implications of government mandates requiring full transition to renewable energy sources. Consider technological readiness, economic impacts, grid stability, and international competitiveness.',
+    slug: 'should-governments-mandate-100-renewable-energy-by-2040',
+    creatorId: DEMO_USER_IDS.NEW_USER,
+    status: 'SEEDING',
+    crossCuttingThemes: ['energy', 'climate', 'policy'],
+    tagIds: [DEMO_TAG_IDS.ENVIRONMENT, DEMO_TAG_IDS.GOVERNMENT],
+    category: 'Climate & Environment',
+    expectedEngagement: 'high',
+  },
+  {
+    id: DEMO_TOPIC_IDS.UNIVERSAL_BASIC_INCOME,
+    title: 'Should universal basic income replace traditional welfare programs?',
+    description:
+      'Analyze proposals for universal basic income as an alternative to existing social safety nets. Consider cost, economic effects, work incentives, and implementation challenges.',
+    slug: 'should-universal-basic-income-replace-traditional-welfare-programs',
+    creatorId: DEMO_USER_IDS.MOD_MARTINEZ,
+    status: 'LOCKED',
+    crossCuttingThemes: ['economics', 'social policy', 'work'],
+    tagIds: [DEMO_TAG_IDS.ECONOMY, DEMO_TAG_IDS.SOCIETY],
+    category: 'Work & Economy',
+    expectedEngagement: 'high',
   },
 ];
 

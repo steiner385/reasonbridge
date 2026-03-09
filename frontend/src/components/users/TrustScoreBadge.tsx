@@ -201,6 +201,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
       onClick={onClick}
       style={onClick ? { cursor: 'pointer' } : undefined}
       data-tour="trust-score"
+      data-testid="trust-score-display"
     >
       {/* Header with overall score */}
       <div className="mb-3">
@@ -214,12 +215,13 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
           {showVerification && (
             <span
               className={`px-2 py-1 text-xs font-semibold rounded-full border ${verificationColors.bg} ${verificationColors.text} ${verificationColors.border}`}
+              data-testid="verification-level"
             >
               {user.verificationLevel === 'VERIFIED_HUMAN'
-                ? 'Verified'
+                ? 'VERIFIED HUMAN'
                 : user.verificationLevel === 'ENHANCED'
-                  ? 'Enhanced'
-                  : 'Basic'}
+                  ? 'ENHANCED'
+                  : 'BASIC'}
             </span>
           )}
         </div>
@@ -227,6 +229,16 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
         <p className="text-xs opacity-75 mt-1">
           {scores.trustworthy ? '✓ Trustworthy' : '⚠ Low trust'}
         </p>
+        {/* Trust badge for verified human users */}
+        {user.verificationLevel === VerificationLevel.VERIFIED_HUMAN && (
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 mt-2 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-300"
+            data-testid="trust-badge"
+            title="This user has completed identity verification and is confirmed as a real person"
+          >
+            ✓ Verified Human
+          </span>
+        )}
       </div>
 
       {/* Overall progress bar */}
@@ -242,7 +254,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
       {/* Dimensional breakdown */}
       {showDimensions && (
         <div className="space-y-2 text-xs border-t border-current border-opacity-20 pt-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" data-testid="trust-score-ability">
             <span className="flex items-center gap-1">
               Ability
               <InfoIcon content={TRUST_DIMENSION_DESCRIPTIONS.ability} size="sm" />
@@ -254,7 +266,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
               <span className="font-semibold w-10 text-right">{scores.ability}%</span>
             </div>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" data-testid="trust-score-benevolence">
             <span className="flex items-center gap-1">
               Benevolence
               <InfoIcon content={TRUST_DIMENSION_DESCRIPTIONS.benevolence} size="sm" />
@@ -266,7 +278,7 @@ export const TrustScoreBadge: React.FC<TrustScoreBadgeProps> = ({
               <span className="font-semibold w-10 text-right">{scores.benevolence}%</span>
             </div>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" data-testid="trust-score-integrity">
             <span className="flex items-center gap-1">
               Integrity
               <InfoIcon content={TRUST_DIMENSION_DESCRIPTIONS.integrity} size="sm" />

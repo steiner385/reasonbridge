@@ -12,6 +12,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount } from './utils/auth-helpers';
 import { mockAdminUser } from './fixtures/auth-mock.fixture';
 
 // Check if running in E2E Docker mode with full backend
@@ -92,12 +93,10 @@ const mockAppeals = [
 test.describe('Moderation Dashboard', () => {
   // Tests that require the full backend environment with admin authentication
   test.describe('With Backend', () => {
-    // Skip these tests - they require admin user authentication which is not yet seeded in E2E
-    // TODO: Enable when admin user seeding and authentication is implemented in docker-compose.e2e.yml
-    test.skip(
-      true,
-      'Requires admin authentication - skipped until admin user seeding is implemented',
-    );
+    test.beforeEach(async ({ page }) => {
+      // Login as Admin Adams - already seeded in demo data
+      await loginWithDemoAccount(page, 'Admin Adams');
+    });
 
     test('should load moderation dashboard', async ({ page }) => {
       await page.goto('/admin/moderation');

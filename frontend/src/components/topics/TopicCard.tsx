@@ -129,12 +129,20 @@ function TopicCard({ topic, truncateDescription = true, className = '', onClick 
           </div>
         )}
 
-        <Link
-          to={`/topics/${topic.id}`}
-          className="inline-block text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
-        >
-          View Discussion →
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            to={`/topics/${topic.id}`}
+            className="inline-block text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
+          >
+            View Discussion →
+          </Link>
+          <Link
+            to={`/topics/${topic.id}/discussions`}
+            className="inline-block text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 font-medium text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
+          >
+            Browse Discussions
+          </Link>
+        </div>
       </CardBody>
     </Card>
   );

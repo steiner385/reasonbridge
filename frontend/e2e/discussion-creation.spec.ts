@@ -3,21 +3,13 @@
  *
  * Tests for creating discussions under topics.
  *
- * IMPORTANT: These tests are SKIPPED because the feature is not fully implemented:
- * - The DiscussionListPage and CreateDiscussionForm components exist
- * - The backend API (/discussions endpoint) exists
- * - BUT: No route exposes DiscussionListPage in the UI
+ * SKIPPED: Uses mock APIs instead of real backend.
+ * Issue #993 RESOLVED: Route /topics/:topicId/discussions now exists.
+ * TODO: Rewrite to use real backend data and remove mock APIs (Phase 1 task).
  *
- * Tracked in: https://github.com/steiner385/reasonbridge/issues/993
- *
- * Current routing:
- * - /topics -> TopicsPage (create TOPICS via modal) - tested in create-topic.spec.ts
+ * Routing:
+ * - /topics/:topicId/discussions -> DiscussionListPage (NOW EXISTS)
  * - /discussions?topic=<id> -> DiscussionPage (view/post responses)
- *
- * When this feature is implemented, it will add:
- * - /topics/:topicId/discussions -> DiscussionListPage
- *
- * See also: create-topic.spec.ts for topic creation tests (which IS implemented)
  *
  * @see services/discussion-service/src/discussions/discussions.controller.ts
  * @see frontend/src/pages/Discussions/DiscussionListPage.tsx
@@ -29,8 +21,7 @@ import { mockAuthenticatedUser, mockAuthenticatedEndpoints } from './fixtures/au
 
 test.describe('Discussion Creation Flow', () => {
   // SKIPPED: E2E tests should only test real production code, not mocked APIs
-  // TODO: Rewrite to use real backend or move to integration tests
-  // NOTE: Also blocked because DiscussionListPage is not routed - no /topics/:topicId/discussions route exists
+  // TODO: Rewrite to use real backend (Phase 1 mock-to-production rewrite)
   test.skip(true, 'Uses mock APIs - needs rewrite to use real backend');
 
   test.beforeEach(async ({ page }) => {

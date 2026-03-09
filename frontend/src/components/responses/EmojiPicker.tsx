@@ -328,6 +328,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
           aria-label="Add reaction"
           aria-expanded={isOpen}
           aria-haspopup="true"
+          data-testid="add-reaction-button"
         >
           {/* Plus/smile icon */}
           <svg

@@ -20,6 +20,15 @@ export enum UserStatus {
 }
 
 /**
+ * User role for platform permissions
+ */
+export enum UserRole {
+  USER = 'USER',
+  MODERATOR = 'MODERATOR',
+  ADMIN = 'ADMIN',
+}
+
+/**
  * Parental consent status for minor users
  */
 export type ParentConsentStatus = 'NOT_REQUIRED' | 'PENDING' | 'VERIFIED' | 'WITHDRAWN';
@@ -35,6 +44,7 @@ export interface User {
   trustScoreBenevolence: number;
   trustScoreIntegrity: number;
   status: UserStatus;
+  role?: UserRole;
   createdAt: string;
   updatedAt: string;
 
