@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { User, VerificationLevel, UserStatus } from '@prisma/client';
+import type { User, VerificationLevel, UserStatus, UserRole } from '@prisma/client';
 
 /**
  * Response DTO for user data (includes private fields like email)
@@ -22,6 +22,7 @@ export class UserResponseDto {
   positionFingerprint!: any | null;
   topicAffinities!: any | null;
   status!: UserStatus;
+  role!: UserRole;
   createdAt!: Date;
   updatedAt!: Date;
 
@@ -39,6 +40,7 @@ export class UserResponseDto {
     this.positionFingerprint = user.positionFingerprint;
     this.topicAffinities = user.topicAffinities;
     this.status = user.status;
+    this.role = user.role;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }

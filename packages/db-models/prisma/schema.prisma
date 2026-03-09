@@ -53,6 +53,7 @@ model User {
   /// Flag indicating user needs to re-verify age on next login
   requiresAgeReverification Boolean             @default(false) @map("requires_age_reverification")
   status                    UserStatus          @default(ACTIVE)
+  role                      UserRole            @default(USER) @map("user_role")
   createdAt                 DateTime            @default(now()) @map("created_at")
   updatedAt                 DateTime            @updatedAt @map("updated_at")
 
@@ -138,6 +139,18 @@ enum UserStatus {
   BANNED
 
   @@map("user_status")
+}
+
+/// User role for platform permissions
+/// USER: Standard participant (default)
+/// MODERATOR: Can lock topics, moderate content
+/// ADMIN: Full administrative access
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+
+  @@map("user_role")
 }
 
 /// User ranking tier levels for the tiered access system (Feature #781)

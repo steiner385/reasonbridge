@@ -25,16 +25,30 @@ async function main() {
 
   console.log('🌱 Seeding E2E database...');
 
+  // Map demo credential roles to database UserRole enum
+  const mapRoleToDbRole = (role: string): 'USER' | 'MODERATOR' | 'ADMIN' => {
+    switch (role) {
+      case 'Admin':
+        return 'ADMIN';
+      case 'Moderator':
+        return 'MODERATOR';
+      default:
+        return 'USER';
+    }
+  };
+
   // Create demo users from shared credentials (same as frontend login modal)
   console.log('Creating demo users...');
   const demoUsers = [];
   for (const cred of DEMO_CREDENTIALS) {
     const passwordHash = await bcrypt.hash(cred.password, 10);
+    const dbRole = mapRoleToDbRole(cred.role);
     const user = await prisma.user.upsert({
       where: { email: cred.email },
       update: {
         passwordHash,
         emailVerified: true,
+        role: dbRole,
       },
       create: {
         email: cred.email,
@@ -44,6 +58,7 @@ async function main() {
         passwordHash,
         emailVerified: true,
         verificationLevel: 'BASIC',
+        role: dbRole,
       },
     });
     demoUsers.push(user);

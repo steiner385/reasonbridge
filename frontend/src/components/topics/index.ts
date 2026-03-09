@@ -15,5 +15,8 @@ export type { CreateTopicModalProps } from './CreateTopicModal';
 export { EditTopicModal } from './EditTopicModal';
 export type { EditTopicModalProps } from './EditTopicModal';
 
+export { MergeTopicsModal } from './MergeTopicsModal';
+export type { MergeTopicsModalProps } from './MergeTopicsModal';
+
 export { PropositionInput } from './PropositionInput';
 export type { PropositionInputProps, InitialProposition } from './PropositionInput';

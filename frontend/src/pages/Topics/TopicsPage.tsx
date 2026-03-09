@@ -11,8 +11,14 @@ import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useAuthContext } from '../../contexts/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { TopicCard, TopicFilterUI, CreateTopicModal } from '../../components/topics';
+import {
+  TopicCard,
+  TopicFilterUI,
+  CreateTopicModal,
+  MergeTopicsModal,
+} from '../../components/topics';
 import TopicCardSkeleton from '../../components/ui/skeletons/TopicCardSkeleton';
+import { UserRole } from '../../types/user';
 import type { GetTopicsParams } from '../../types/topic';
 
 const WELCOME_BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
@@ -20,9 +26,14 @@ const WELCOME_BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
 function TopicsPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
+
+  // Check if user is a moderator or admin
+  const isModerator = !!(user?.role === UserRole.MODERATOR || user?.role === UserRole.ADMIN);
+
   const [filters, setFilters] = useState<GetTopicsParams>({
     page: 1,
     limit: 10,
@@ -94,16 +105,18 @@ function TopicsPage() {
               Discussion Topics
             </h1>
           </div>
-          {isAuthenticated && (
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="shrink-0"
-            >
-              Create Topic
-            </Button>
-          )}
+          <div className="flex gap-2 shrink-0">
+            {isModerator && (
+              <Button variant="secondary" size="md" onClick={() => setIsMergeModalOpen(true)}>
+                Merge Topics
+              </Button>
+            )}
+            {isAuthenticated && (
+              <Button variant="primary" size="md" onClick={() => setIsCreateModalOpen(true)}>
+                Create Topic
+              </Button>
+            )}
+          </div>
         </div>
         <p className="text-fluid-base text-gray-600 dark:text-gray-300">
           Browse and join rational discussions on various topics
@@ -252,6 +265,19 @@ function TopicsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
       />
+
+      {/* Merge Topics Modal (moderator only) */}
+      {isModerator && data?.data && (
+        <MergeTopicsModal
+          isOpen={isMergeModalOpen}
+          onClose={() => setIsMergeModalOpen(false)}
+          availableTopics={data.data}
+          onSuccess={() => {
+            // Refetch topics after successful merge
+            setFilters({ ...filters });
+          }}
+        />
+      )}
     </div>
   );
 }
