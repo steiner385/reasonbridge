@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginWithDemoAccount } from './utils/auth-helpers';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 /**
  * E2E test suite for User Story 4: Verify Human Authenticity
@@ -18,13 +18,8 @@ import { loginWithDemoAccount } from './utils/auth-helpers';
 const DEMO_ACCOUNT_NAME = 'Admin Adams';
 
 test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
-  // Run tests sequentially to avoid rate limiting on login API
+  // Run tests sequentially for consistent profile state
   test.describe.configure({ mode: 'serial' });
-
-  test.beforeEach(async ({ page }) => {
-    // Add delay between tests to avoid rate limiting (login throttler: 5 attempts per minute)
-    await page.waitForTimeout(13000);
-  });
 
   // Helper to login with demo account and navigate to profile
   const loginAndGoToProfile = async (page: Page) => {

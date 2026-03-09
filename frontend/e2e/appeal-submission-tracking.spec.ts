@@ -28,19 +28,11 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount } from './utils/auth-helpers';
-
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 test.describe('Appeal Submission and Tracking', () => {
   // Tests that require the full backend environment
   test.describe('With Backend', () => {
-    test.beforeEach(async ({ page }) => {
-      // Login before accessing protected appeals routes
-      await loginWithDemoAccount(page, 'Admin Adams');
-    });
-
     test.beforeEach(async ({ page }) => {
       // Login before accessing protected appeals routes
       await loginWithDemoAccount(page, 'Admin Adams');

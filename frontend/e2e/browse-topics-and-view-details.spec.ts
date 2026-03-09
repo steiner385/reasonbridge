@@ -107,8 +107,10 @@ test.describe('Browse Topics and View Details', () => {
     const topics = page.locator('[data-testid="topic-list-item"]');
     const topicCount = await topics.count();
 
+    // We have 12 seeded topics, so this should always pass
     if (topicCount < 2) {
-      test.skip(true, 'Need at least 2 topics');
+      console.warn('Need at least 2 topics - check that demo data is seeded correctly');
+      expect(topicCount).toBeGreaterThanOrEqual(2);
     }
 
     // Select first topic

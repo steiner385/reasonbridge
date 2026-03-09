@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { SEEDED_TOPICS } from './helpers/demo-auth';
 
 /**
  * E2E test suite for page loading states
@@ -50,50 +51,30 @@ test.describe('Page Loading States', () => {
 
   test.describe('Topic Detail Page', () => {
     test('should load topic detail page without errors', async ({ page }) => {
-      // First go to topics page
-      await page.goto('/topics');
+      // Navigate directly to a known seeded topic
+      const topic = SEEDED_TOPICS.CONGESTION_PRICING;
+      await page.goto(`/discussions?topic=${topic.id}`);
       await page.waitForLoadState('networkidle');
 
-      // Click first topic if available
-      const topicCard = page.locator('[data-testid="topic-card"]').first();
-      const hasTopics = await topicCard.isVisible().catch(() => false);
+      // Should not show error state
+      await expect(page.getByText(/error loading/i)).not.toBeVisible();
+      await expect(page.getByText(/failed to load/i)).not.toBeVisible();
 
-      if (hasTopics) {
-        await topicCard.click();
-        await page.waitForLoadState('networkidle');
-
-        // Should not show error state
-        await expect(page.getByText(/error loading/i)).not.toBeVisible();
-        await expect(page.getByText(/failed to load/i)).not.toBeVisible();
-
-        // Should show topic content
-        await expect(page.locator('.conversation-panel')).toBeVisible();
-      } else {
-        test.skip(true, 'No topics available for testing');
-      }
+      // Should show topic content
+      await expect(page.locator('.conversation-panel')).toBeVisible();
     });
 
     test('should navigate to topic via URL', async ({ page }) => {
-      // Get a topic ID from the topics page first
-      await page.goto('/topics');
+      // Navigate directly to a known seeded topic by ID
+      const topic = SEEDED_TOPICS.AI_DISCLOSURE;
+      await page.goto(`/discussions?topic=${topic.id}`);
       await page.waitForLoadState('networkidle');
 
-      const topicLink = page.locator('a[href^="/topics/"]').first();
-      const hasTopics = await topicLink.isVisible().catch(() => false);
+      // Should load without errors
+      await expect(page.getByText(/error loading/i)).not.toBeVisible();
 
-      if (hasTopics) {
-        const href = await topicLink.getAttribute('href');
-        if (href) {
-          // Navigate directly to topic URL
-          await page.goto(href);
-          await page.waitForLoadState('networkidle');
-
-          // Should load without errors
-          await expect(page.getByText(/error loading/i)).not.toBeVisible();
-        }
-      } else {
-        test.skip(true, 'No topics available for testing');
-      }
+      // Should show topic content
+      await expect(page.locator('.conversation-panel')).toBeVisible();
     });
   });
 

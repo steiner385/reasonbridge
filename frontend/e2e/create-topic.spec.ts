@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 /**
  * E2E test suite for Topic Creation (Feature 016: Topic Management)
@@ -12,28 +13,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Create Topic Flow', () => {
   test.beforeEach(async ({ page }) => {
-    // Login first (required for topic creation)
-    await page.goto('/');
-    await page.getByRole('button', { name: /log in/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-
-    // Use demo admin account for testing
-    await page.getByText('Admin Adams').click();
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
-
-    // Wait for login to complete and modal to close
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-
-    // Wait for navigation and authentication state to stabilize
-    await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+    // Login as Admin Adams (has permissions for topic creation)
+    await loginWithDemoAccount(page, 'Admin Adams');
 
     // Navigate to topics page if not already there
     if (!page.url().includes('/topics')) {
       await page.goto('/topics');
     }
+    await page.waitForLoadState('networkidle');
     await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
   });
 

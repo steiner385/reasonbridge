@@ -12,11 +12,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount } from './utils/auth-helpers';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 import { mockAdminUser } from './fixtures/auth-mock.fixture';
-
-// Check if running in E2E Docker mode with full backend
-const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
 // Mock data for testing
 const mockQueueStats = {

@@ -20,6 +20,137 @@
 
 import { expect, type Page } from '@playwright/test';
 
+// =============================================================================
+// SEEDED TOPIC CONSTANTS
+// These match the demo data in packages/db-models/prisma/seed/demo-topics.ts
+// Using these constants eliminates data-conditional test skips
+// =============================================================================
+
+export interface SeededTopic {
+  id: string;
+  title: string;
+  slug: string;
+  status: 'ACTIVE' | 'ARCHIVED' | 'SEEDING' | 'LOCKED';
+  creatorName: DemoUserName;
+}
+
+/**
+ * Known seeded topics for E2E tests.
+ * Tests should use these instead of dynamically querying for topics.
+ */
+export const SEEDED_TOPICS: Record<string, SeededTopic> = {
+  CONGESTION_PRICING: {
+    id: '11111111-0000-4000-8000-000000000101',
+    title: 'Should cities implement congestion pricing?',
+    slug: 'should-cities-implement-congestion-pricing',
+    status: 'ACTIVE',
+    creatorName: 'Alice Anderson',
+  },
+  AI_DISCLOSURE: {
+    id: '11111111-0000-4000-8000-000000000102',
+    title: 'Should AI-generated content require disclosure?',
+    slug: 'should-ai-generated-content-require-disclosure',
+    status: 'ACTIVE',
+    creatorName: 'Bob Builder',
+  },
+  STANDARDIZED_TESTING: {
+    id: '11111111-0000-4000-8000-000000000103',
+    title: 'Should standardized testing be eliminated?',
+    slug: 'should-standardized-testing-be-eliminated',
+    status: 'ACTIVE',
+    creatorName: 'Mod Martinez',
+  },
+  RETURN_TO_OFFICE: {
+    id: '11111111-0000-4000-8000-000000000104',
+    title: 'Should companies mandate return-to-office policies?',
+    slug: 'should-companies-mandate-return-to-office-policies',
+    status: 'ACTIVE',
+    creatorName: 'Alice Anderson',
+  },
+  PREVENTIVE_CARE: {
+    id: '11111111-0000-4000-8000-000000000105',
+    title: 'Should preventive care be fully covered by insurance?',
+    slug: 'should-preventive-care-be-fully-covered-by-insurance',
+    status: 'ACTIVE',
+    creatorName: 'Admin Adams',
+  },
+  AGE_VERIFICATION: {
+    id: '11111111-0000-4000-8000-000000000106',
+    title: 'Should social media have age verification requirements?',
+    slug: 'should-social-media-have-age-verification-requirements',
+    status: 'ACTIVE',
+    creatorName: 'Mod Martinez',
+  },
+  MANDATORY_VOTING: {
+    id: '11111111-0000-4000-8000-000000000107',
+    title: 'Should voting be mandatory in democracies?',
+    slug: 'should-voting-be-mandatory-in-democracies',
+    status: 'ACTIVE',
+    creatorName: 'Admin Adams',
+  },
+  PRODUCT_AI_DISCLOSURE: {
+    id: '11111111-0000-4000-8000-000000000108',
+    title: 'Should AI use in products be disclosed to consumers?',
+    slug: 'should-ai-use-in-products-be-disclosed-to-consumers',
+    status: 'ACTIVE',
+    creatorName: 'Bob Builder',
+  },
+  // ARCHIVED topic - for testing archived state
+  PLASTIC_BAN: {
+    id: '11111111-0000-4000-8000-000000000109',
+    title: 'Should single-use plastics be banned nationwide?',
+    slug: 'should-single-use-plastics-be-banned-nationwide',
+    status: 'ARCHIVED',
+    creatorName: 'Alice Anderson',
+  },
+  GOF_OVERSIGHT: {
+    id: '11111111-0000-4000-8000-000000000110',
+    title: 'Should gain-of-function research have international oversight?',
+    slug: 'should-gain-of-function-research-have-international-oversight',
+    status: 'ACTIVE',
+    creatorName: 'Admin Adams',
+  },
+  // SEEDING topic - for testing seeding state
+  RENEWABLE_ENERGY_MANDATE: {
+    id: '11111111-0000-4000-8000-000000000111',
+    title: 'Should governments mandate 100% renewable energy by 2040?',
+    slug: 'should-governments-mandate-100-renewable-energy-by-2040',
+    status: 'SEEDING',
+    creatorName: 'New User',
+  },
+  // LOCKED topic - for testing locked state
+  UNIVERSAL_BASIC_INCOME: {
+    id: '11111111-0000-4000-8000-000000000112',
+    title: 'Should universal basic income replace traditional welfare programs?',
+    slug: 'should-universal-basic-income-replace-traditional-welfare-programs',
+    status: 'LOCKED',
+    creatorName: 'Mod Martinez',
+  },
+} as const;
+
+/**
+ * Get all ACTIVE seeded topics (most common use case for tests)
+ */
+export function getActiveSeededTopics(): SeededTopic[] {
+  return Object.values(SEEDED_TOPICS).filter((t) => t.status === 'ACTIVE');
+}
+
+/**
+ * Get a seeded topic by status
+ */
+export function getSeededTopicByStatus(status: SeededTopic['status']): SeededTopic | undefined {
+  return Object.values(SEEDED_TOPICS).find((t) => t.status === status);
+}
+
+/**
+ * Get a seeded topic owned by a specific user
+ */
+export function getSeededTopicByCreator(creatorName: DemoUserName): SeededTopic | undefined {
+  return Object.values(SEEDED_TOPICS).find(
+    (t) => t.creatorName === creatorName && t.status === 'ACTIVE',
+  );
+}
+
 export type DemoUserName =
   | 'Admin Adams'
   | 'Mod Martinez'
@@ -128,19 +259,89 @@ export async function navigateToTopic(page: Page, topicTitle: string): Promise<v
 /**
  * Get the first available topic from the topics list.
  *
- * Useful when you need any topic for testing, not a specific one.
+ * IMPROVED: Now returns a known seeded topic title instead of querying the UI.
+ * This eliminates flaky data-conditional skips in tests.
  *
- * @param page - Playwright Page instance
- * @returns The title of the first topic, or null if none found
+ * @param page - Playwright Page instance (navigates to /topics to verify page loads)
+ * @returns The title of the first ACTIVE seeded topic
  */
-export async function getFirstTopicTitle(page: Page): Promise<string | null> {
+export async function getFirstTopicTitle(page: Page): Promise<string> {
+  // Navigate to topics to ensure the page is accessible
   await page.goto('/topics');
   await page.waitForLoadState('networkidle');
 
-  const topicCard = page.locator('[data-testid="topic-card"]').first();
-  if (await topicCard.isVisible({ timeout: 5000 }).catch(() => false)) {
-    const titleElement = topicCard.locator('h2, h3, [class*="title"]').first();
-    return await titleElement.textContent();
+  // Return known seeded topic - Congestion Pricing is always first alphabetically
+  // and is guaranteed to exist in the seeded database
+  return SEEDED_TOPICS.CONGESTION_PRICING.title;
+}
+
+/**
+ * Navigate directly to a seeded topic by its key.
+ *
+ * More reliable than navigating via UI clicks since it uses known slugs.
+ *
+ * @param page - Playwright Page instance
+ * @param topicKey - Key from SEEDED_TOPICS (e.g., 'CONGESTION_PRICING')
+ *
+ * @example
+ * ```typescript
+ * await navigateToSeededTopic(page, 'CONGESTION_PRICING');
+ * // Now on /discussions?topic=11111111-0000-4000-8000-000000000101
+ * ```
+ */
+export async function navigateToSeededTopic(
+  page: Page,
+  topicKey: keyof typeof SEEDED_TOPICS,
+): Promise<SeededTopic> {
+  const topic = SEEDED_TOPICS[topicKey];
+
+  // Navigate to the topic's discussion page directly
+  await page.goto(`/discussions?topic=${topic.id}`);
+  await page.waitForLoadState('networkidle');
+
+  // Wait for topic content to load
+  await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
+    timeout: 10000,
+  });
+
+  return topic;
+}
+
+/**
+ * Navigate to the first ACTIVE seeded topic.
+ *
+ * Convenience method for tests that just need any active topic.
+ *
+ * @param page - Playwright Page instance
+ * @returns The seeded topic that was navigated to
+ */
+export async function navigateToFirstActiveTopic(page: Page): Promise<SeededTopic> {
+  return navigateToSeededTopic(page, 'CONGESTION_PRICING');
+}
+
+/**
+ * Navigate to a topic owned by the specified user.
+ *
+ * Useful for tests that need to verify creator-only actions.
+ *
+ * @param page - Playwright Page instance
+ * @param creatorName - Name of the demo user who owns the topic
+ * @returns The seeded topic, or throws if no topic found for that creator
+ */
+export async function navigateToOwnedTopic(
+  page: Page,
+  creatorName: DemoUserName,
+): Promise<SeededTopic> {
+  const topic = getSeededTopicByCreator(creatorName);
+  if (!topic) {
+    throw new Error(`No ACTIVE seeded topic found for creator: ${creatorName}`);
   }
-  return null;
+
+  await page.goto(`/discussions?topic=${topic.id}`);
+  await page.waitForLoadState('networkidle');
+  await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
+    timeout: 10000,
+  });
+
+  return topic;
 }

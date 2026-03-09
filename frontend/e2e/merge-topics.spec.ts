@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 /**
  * E2E test suite for Topic Merging (Feature 016: Topic Management)
@@ -20,19 +21,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Topic Merging', () => {
   test.describe('As Moderator', () => {
     test.beforeEach(async ({ page }) => {
-      // Login as moderator (Mod Martinez)
-      await page.goto('/');
-      await page.getByRole('button', { name: /log in/i }).click();
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await page.getByText('Mod Martinez').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /^log in$/i }).click();
-      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-
-      // Wait for navigation and authentication state to stabilize
-      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+      // Login as moderator (Mod Martinez - has MODERATOR role)
+      await loginWithDemoAccount(page, 'Mod Martinez');
     });
 
     test('should see Merge Topics button on topics page', async ({ page }) => {
@@ -261,17 +251,12 @@ test.describe('Topic Merging', () => {
 
   test.describe('Permission Checks', () => {
     test('regular users should not see merge functionality', async ({ page }) => {
-      // Login as regular user (Alice Anderson)
-      await page.goto('/');
-      await page.getByRole('button', { name: /log in/i }).click();
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await page.getByText('Alice Anderson').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /^log in$/i }).click();
-      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+      // Login as regular user (Alice Anderson - has USER role)
+      await loginWithDemoAccount(page, 'Alice Anderson');
 
       // Navigate to topics
       await page.goto('/topics');
+      await page.waitForLoadState('networkidle');
 
       // Should not see Merge Topics button
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
@@ -281,6 +266,7 @@ test.describe('Topic Merging', () => {
     test('unauthenticated users should not see merge functionality', async ({ page }) => {
       // Navigate to topics without logging in
       await page.goto('/topics');
+      await page.waitForLoadState('networkidle');
 
       // Should not see Merge Topics button
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
@@ -291,13 +277,7 @@ test.describe('Topic Merging', () => {
   test.describe('Post-Merge Verification', () => {
     test.beforeEach(async ({ page }) => {
       // Login as moderator
-      await page.goto('/');
-      await page.getByRole('button', { name: /log in/i }).click();
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await page.getByText('Mod Martinez').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /^log in$/i }).click();
-      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+      await loginWithDemoAccount(page, 'Mod Martinez');
     });
 
     test('source topic should show redirect notice after merge', async ({ page }) => {
