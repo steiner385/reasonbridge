@@ -52,6 +52,7 @@ export async function seedDemoPersonas(prisma: PrismaClient): Promise<void> {
         phoneNumber: persona.phoneNumber,
         phoneVerified: persona.phoneVerified,
         status: persona.status,
+        role: persona.userRole,
       },
       create: {
         id: persona.id,
@@ -70,6 +71,7 @@ export async function seedDemoPersonas(prisma: PrismaClient): Promise<void> {
         trustScoreIntegrity: persona.trustScoreIntegrity,
         moralFoundationProfile: persona.moralFoundationProfile as unknown as Prisma.InputJsonValue,
         status: persona.status,
+        role: persona.userRole,
       },
     });
 
