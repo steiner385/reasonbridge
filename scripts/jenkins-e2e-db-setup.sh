@@ -85,24 +85,62 @@ done
 
 if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
   echo "❌ ERROR: Timeout waiting for db-seed"
+  echo "Last 50 lines of db-seed logs:"
+  docker logs "$SEED_CONTAINER" --tail 50 2>/dev/null || true
   exit 1
 fi
 
-# Verify database has expected data by checking user count
+# Always show db-seed logs for debugging (helps trace seeding issues)
+echo "📋 Last 10 lines of db-seed logs:"
+docker logs "$SEED_CONTAINER" --tail 10 2>/dev/null || echo "  (no logs available)"
+
+# Verify database has expected data by checking user count and response count
 echo "🔍 Verifying database has demo data..."
 DISCUSSION_CONTAINER="${PROJECT_NAME}-discussion-service-1"
 DB_URL="postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test"
 
 if docker ps --format '{{.Names}}' | grep -q "^${DISCUSSION_CONTAINER}$"; then
+  # Verify users exist
   USER_COUNT=$(docker exec "$DISCUSSION_CONTAINER" sh -c "
     cd /app/packages/db-models && \
     DATABASE_URL='$DB_URL' npx prisma db execute --stdin <<< 'SELECT COUNT(*) FROM \"User\";' 2>/dev/null | grep -oE '[0-9]+' | head -1
   " 2>/dev/null || echo "0")
 
   if [ "${USER_COUNT:-0}" -gt 0 ]; then
-    echo "✅ Database verified: $USER_COUNT users found"
+    echo "✅ Users verified: $USER_COUNT users found"
   else
-    echo "⚠️  Warning: Could not verify user count (may be OK)"
+    echo "❌ ERROR: No users found in database - seeding may have failed"
+    docker logs "$SEED_CONTAINER" --tail 50 2>/dev/null || true
+    exit 1
+  fi
+
+  # Verify responses exist (critical for E2E tests that wait for response-item)
+  RESPONSE_COUNT=$(docker exec "$DISCUSSION_CONTAINER" sh -c "
+    cd /app/packages/db-models && \
+    DATABASE_URL='$DB_URL' npx prisma db execute --stdin <<< 'SELECT COUNT(*) FROM \"Response\";' 2>/dev/null | grep -oE '[0-9]+' | head -1
+  " 2>/dev/null || echo "0")
+
+  if [ "${RESPONSE_COUNT:-0}" -gt 0 ]; then
+    echo "✅ Responses verified: $RESPONSE_COUNT responses found"
+  else
+    echo "❌ ERROR: No responses found in database - seeding may have failed"
+    echo "   E2E tests will fail waiting for [data-testid='response-item']"
+    docker logs "$SEED_CONTAINER" --tail 50 2>/dev/null || true
+    exit 1
+  fi
+
+  # Verify topics exist
+  TOPIC_COUNT=$(docker exec "$DISCUSSION_CONTAINER" sh -c "
+    cd /app/packages/db-models && \
+    DATABASE_URL='$DB_URL' npx prisma db execute --stdin <<< 'SELECT COUNT(*) FROM \"DiscussionTopic\";' 2>/dev/null | grep -oE '[0-9]+' | head -1
+  " 2>/dev/null || echo "0")
+
+  if [ "${TOPIC_COUNT:-0}" -gt 0 ]; then
+    echo "✅ Topics verified: $TOPIC_COUNT topics found"
+  else
+    echo "❌ ERROR: No topics found in database - seeding may have failed"
+    docker logs "$SEED_CONTAINER" --tail 50 2>/dev/null || true
+    exit 1
   fi
 else
   echo "⚠️  Warning: discussion-service not running for verification (may be OK)"
