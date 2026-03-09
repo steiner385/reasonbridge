@@ -94,17 +94,16 @@ fi
 echo "📋 Last 10 lines of db-seed logs:"
 docker logs "$SEED_CONTAINER" --tail 10 2>/dev/null || echo "  (no logs available)"
 
-# Verify database has expected data by checking user count and response count
+# Verify database has expected data by querying postgres directly
+# Using postgres container (not discussion-service) because postgres is guaranteed
+# to be ready after db-seed completes, while services may still be initializing
 echo "🔍 Verifying database has demo data..."
-DISCUSSION_CONTAINER="${PROJECT_NAME}-discussion-service-1"
-DB_URL="postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test"
+POSTGRES_CONTAINER="${PROJECT_NAME}-postgres-1"
 
-if docker ps --format '{{.Names}}' | grep -q "^${DISCUSSION_CONTAINER}$"; then
+if docker ps --format '{{.Names}}' | grep -q "^${POSTGRES_CONTAINER}$"; then
   # Verify users exist
-  USER_COUNT=$(docker exec "$DISCUSSION_CONTAINER" sh -c "
-    cd /app/packages/db-models && \
-    DATABASE_URL='$DB_URL' npx prisma db execute --stdin <<< 'SELECT COUNT(*) FROM \"User\";' 2>/dev/null | grep -oE '[0-9]+' | head -1
-  " 2>/dev/null || echo "0")
+  USER_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM "User";' 2>/dev/null || echo "0")
+  USER_COUNT=$(echo "$USER_COUNT" | tr -d '[:space:]')
 
   if [ "${USER_COUNT:-0}" -gt 0 ]; then
     echo "✅ Users verified: $USER_COUNT users found"
@@ -115,10 +114,8 @@ if docker ps --format '{{.Names}}' | grep -q "^${DISCUSSION_CONTAINER}$"; then
   fi
 
   # Verify responses exist (critical for E2E tests that wait for response-item)
-  RESPONSE_COUNT=$(docker exec "$DISCUSSION_CONTAINER" sh -c "
-    cd /app/packages/db-models && \
-    DATABASE_URL='$DB_URL' npx prisma db execute --stdin <<< 'SELECT COUNT(*) FROM \"Response\";' 2>/dev/null | grep -oE '[0-9]+' | head -1
-  " 2>/dev/null || echo "0")
+  RESPONSE_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM "Response";' 2>/dev/null || echo "0")
+  RESPONSE_COUNT=$(echo "$RESPONSE_COUNT" | tr -d '[:space:]')
 
   if [ "${RESPONSE_COUNT:-0}" -gt 0 ]; then
     echo "✅ Responses verified: $RESPONSE_COUNT responses found"
@@ -130,10 +127,8 @@ if docker ps --format '{{.Names}}' | grep -q "^${DISCUSSION_CONTAINER}$"; then
   fi
 
   # Verify topics exist
-  TOPIC_COUNT=$(docker exec "$DISCUSSION_CONTAINER" sh -c "
-    cd /app/packages/db-models && \
-    DATABASE_URL='$DB_URL' npx prisma db execute --stdin <<< 'SELECT COUNT(*) FROM \"DiscussionTopic\";' 2>/dev/null | grep -oE '[0-9]+' | head -1
-  " 2>/dev/null || echo "0")
+  TOPIC_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM "DiscussionTopic";' 2>/dev/null || echo "0")
+  TOPIC_COUNT=$(echo "$TOPIC_COUNT" | tr -d '[:space:]')
 
   if [ "${TOPIC_COUNT:-0}" -gt 0 ]; then
     echo "✅ Topics verified: $TOPIC_COUNT topics found"
@@ -143,7 +138,9 @@ if docker ps --format '{{.Names}}' | grep -q "^${DISCUSSION_CONTAINER}$"; then
     exit 1
   fi
 else
-  echo "⚠️  Warning: discussion-service not running for verification (may be OK)"
+  echo "⚠️  Warning: postgres container not found for verification"
+  echo "   Container name expected: ${POSTGRES_CONTAINER}"
+  docker ps --format '{{.Names}}' | grep -E '(postgres|db)' || echo "   No postgres containers found"
 fi
 
 echo ""
