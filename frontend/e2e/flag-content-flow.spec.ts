@@ -10,113 +10,96 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount, navigateToSeededTopic } from './helpers/demo-auth';
 
 test.describe('Flag Content Flow', () => {
   // Tests that require the full backend environment
   test.describe('With Backend', () => {
+    test.beforeEach(async ({ page }) => {
+      // Login as Alice Anderson for flagging tests
+      await loginWithDemoAccount(page, 'Alice Anderson');
+    });
+
     test('should display flag button on response cards', async ({ page }) => {
-      await page.goto('/topics');
+      // Navigate to a seeded topic with responses
+      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
-      // Wait for topics to load
-      await page.waitForSelector('[data-testid="topic-card"], a[href^="/topics/"]', {
-        state: 'visible',
-        timeout: 15000,
-      });
+      // Look for responses with flag button (either visible or within response actions)
+      // The flag button is rendered with aria-label="Report content"
+      const flagButton = page.locator('[aria-label="Report content"]').first();
 
-      // Navigate to first topic
-      const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-      const linkCount = await firstTopicLink.count();
+      // If responses exist, there should be at least one flag button
+      const responseCards = page.locator(
+        '[data-testid="response-card"], [data-testid="response-item"]',
+      );
+      const responseCount = await responseCards.count();
 
-      if (linkCount > 0) {
-        await firstTopicLink.click();
-
-        // Wait for topic detail to load
-        await page.waitForLoadState('networkidle');
-
-        // Look for responses with flag button (either visible or within response actions)
-        // The flag button is rendered with aria-label="Report content"
-        const flagButton = page.locator('[aria-label="Report content"]').first();
-
-        // If responses exist, there should be at least one flag button
-        const responseCards = page.locator('[data-testid="response-card"]');
-        const responseCount = await responseCards.count();
-
-        if (responseCount > 0) {
-          await expect(flagButton).toBeVisible();
-        }
+      if (responseCount > 0) {
+        await expect(flagButton).toBeVisible();
+      } else {
+        // No responses - test passes
+        console.log('No response cards found - topic may not have responses');
       }
     });
 
     test('should open flag modal when clicking report button', async ({ page }) => {
-      await page.goto('/topics');
+      // Navigate to seeded topic
+      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
-      // Wait for topics to load and navigate to first topic
-      await page.waitForSelector('a[href^="/topics/"]', {
-        state: 'visible',
-        timeout: 15000,
-      });
+      // Find and click the flag button
+      const flagButton = page.locator('[aria-label="Report content"]').first();
+      const flagCount = await flagButton.count();
 
-      const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-      if ((await firstTopicLink.count()) > 0) {
-        await firstTopicLink.click();
-        await page.waitForLoadState('networkidle');
+      if (flagCount > 0) {
+        await flagButton.click();
 
-        // Find and click the flag button
-        const flagButton = page.locator('[aria-label="Report content"]').first();
-        if ((await flagButton.count()) > 0) {
-          await flagButton.click();
-
-          // Verify modal opens with "Report Content" title
-          const modal = page.getByRole('dialog');
-          await expect(modal).toBeVisible();
-          await expect(modal.getByRole('heading', { name: /report content/i })).toBeVisible();
-        }
+        // Verify modal opens with "Report Content" title
+        const modal = page.getByRole('dialog');
+        await expect(modal).toBeVisible();
+        await expect(modal.getByRole('heading', { name: /report content/i })).toBeVisible();
+      } else {
+        // No flag buttons (no responses) - test passes
+        console.log('No flag buttons found - topic may not have responses');
       }
     });
 
     test('should submit flag report successfully', async ({ page }) => {
-      await page.goto('/topics');
+      // Navigate to seeded topic
+      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
-      // Navigate to topic with responses
-      await page.waitForSelector('a[href^="/topics/"]', {
-        state: 'visible',
-        timeout: 15000,
-      });
+      // Open the flag modal
+      const flagButton = page.locator('[aria-label="Report content"]').first();
+      const flagCount = await flagButton.count();
 
-      const firstTopicLink = page.locator('a[href^="/topics/"]').first();
-      if ((await firstTopicLink.count()) > 0) {
-        await firstTopicLink.click();
-        await page.waitForLoadState('networkidle');
+      if (flagCount > 0) {
+        await flagButton.click();
 
-        // Open the flag modal
-        const flagButton = page.locator('[aria-label="Report content"]').first();
-        if ((await flagButton.count()) > 0) {
-          await flagButton.click();
+        const modal = page.getByRole('dialog');
+        await expect(modal).toBeVisible();
 
-          const modal = page.getByRole('dialog');
-          await expect(modal).toBeVisible();
+        // Fill in the form
+        // Category is pre-selected, so we can select a specific one
+        await modal.locator('#category').selectOption('misinformation');
 
-          // Fill in the form
-          // Category is pre-selected, so we can select a specific one
-          await modal.locator('#category').selectOption('misinformation');
+        // Fill reason
+        await modal.locator('#reason').fill('Contains false claims about climate data');
 
-          // Fill reason
-          await modal.locator('#reason').fill('Contains false claims about climate data');
+        // Fill description
+        await modal
+          .locator('#description')
+          .fill(
+            'This response cites statistics that have been debunked by multiple scientific organizations. ' +
+              'The claims about temperature data are misleading and could confuse readers.',
+          );
 
-          // Fill description
-          await modal
-            .locator('#description')
-            .fill(
-              'This response cites statistics that have been debunked by multiple scientific organizations. ' +
-                'The claims about temperature data are misleading and could confuse readers.',
-            );
+        // Submit the form
+        await modal.getByRole('button', { name: /submit report/i }).click();
 
-          // Submit the form
-          await modal.getByRole('button', { name: /submit report/i }).click();
-
-          // Wait for success notification
-          await expect(page.getByText(/report submitted/i)).toBeVisible({ timeout: 10000 });
-        }
+        // Wait for success notification
+        await expect(page.getByText(/report submitted/i)).toBeVisible({ timeout: 10000 });
+      } else {
+        // No flag buttons (no responses) - test passes
+        console.log('No flag buttons found - topic may not have responses');
       }
     });
   });
