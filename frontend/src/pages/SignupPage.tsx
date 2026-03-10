@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import EmailSignupForm, { type EmailSignupFormData } from '../components/auth/EmailSignupForm';
 import OAuthButtons from '../components/auth/OAuthButtons';
 import { authService } from '../services/authService';
@@ -30,6 +30,7 @@ export const SignupPage: React.FC = () => {
       await authService.signup({
         email: data.email,
         password: data.password,
+        displayName: data.displayName,
         ...(referralSource && { referralSource }),
         ...(visitorSessionId && { visitorSessionId }),
       });
@@ -56,9 +57,7 @@ export const SignupPage: React.FC = () => {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Create Your Account
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Create Account</h1>
           <p className="text-gray-600 dark:text-gray-300">
             Join the discussion platform to participate in thoughtful conversations
           </p>
@@ -76,12 +75,12 @@ export const SignupPage: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-300">
               Already have an account?{' '}
-              <button
-                onClick={() => navigate('/')}
+              <Link
+                to="/login"
                 className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium focus:outline-none focus:underline"
               >
                 Sign in
-              </button>
+              </Link>
             </p>
           </div>
 

@@ -9,7 +9,9 @@ import Button from '../ui/Button';
 
 export interface EmailSignupFormData {
   email: string;
+  displayName: string;
   password: string;
+  confirmPassword: string;
 }
 
 export interface EmailSignupFormProps {
@@ -36,7 +38,9 @@ export interface EmailSignupFormProps {
 
 interface FormErrors {
   email?: string;
+  displayName?: string;
   password?: string;
+  confirmPassword?: string;
 }
 
 type PasswordStrength = 'weak' | 'medium' | 'strong';
@@ -76,7 +80,9 @@ function EmailSignupForm({
 }: EmailSignupFormProps) {
   const [formData, setFormData] = useState<EmailSignupFormData>({
     email: '',
+    displayName: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -91,6 +97,20 @@ function EmailSignupForm({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return 'Please enter a valid email address';
+    }
+    return undefined;
+  };
+
+  // Display name validation (3-50 characters)
+  const validateDisplayName = (displayName: string): string | undefined => {
+    if (!displayName) {
+      return 'Display name is required';
+    }
+    if (displayName.length < 3) {
+      return 'Display name must be at least 3 characters';
+    }
+    if (displayName.length > 50) {
+      return 'Display name must be at most 50 characters';
     }
     return undefined;
   };
@@ -118,14 +138,35 @@ function EmailSignupForm({
     return undefined;
   };
 
+  // Confirm password validation (must match password)
+  const validateConfirmPassword = (
+    confirmPassword: string,
+    password: string,
+  ): string | undefined => {
+    if (!confirmPassword) {
+      return 'Please confirm your password';
+    }
+    if (confirmPassword !== password) {
+      return 'Passwords do not match';
+    }
+    return undefined;
+  };
+
   // Validate all fields
   const validateForm = (): boolean => {
     const emailError = validateEmail(formData.email);
+    const displayNameError = validateDisplayName(formData.displayName);
     const passwordError = validatePassword(formData.password);
+    const confirmPasswordError = validateConfirmPassword(
+      formData.confirmPassword,
+      formData.password,
+    );
 
     const newErrors: FormErrors = {};
     if (emailError) newErrors.email = emailError;
+    if (displayNameError) newErrors.displayName = displayNameError;
     if (passwordError) newErrors.password = passwordError;
+    if (confirmPasswordError) newErrors.confirmPassword = confirmPasswordError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -135,7 +176,8 @@ function EmailSignupForm({
   const handleChange =
     (field: keyof EmailSignupFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      setFormData((prev) => ({ ...prev, [field]: value }));
+      const newFormData = { ...formData, [field]: value };
+      setFormData(newFormData);
 
       // Update password strength in real-time
       if (field === 'password') {
@@ -149,8 +191,14 @@ function EmailSignupForm({
           case 'email':
             fieldError = validateEmail(value);
             break;
+          case 'displayName':
+            fieldError = validateDisplayName(value);
+            break;
           case 'password':
             fieldError = validatePassword(value);
+            break;
+          case 'confirmPassword':
+            fieldError = validateConfirmPassword(value, newFormData.password);
             break;
         }
         setErrors((prev) => {
@@ -159,6 +207,20 @@ function EmailSignupForm({
             updated[field] = fieldError;
           } else {
             delete updated[field];
+          }
+          return updated;
+        });
+      }
+
+      // Re-validate confirmPassword if password changed and confirmPassword was touched
+      if (field === 'password' && touched['confirmPassword'] && newFormData.confirmPassword) {
+        const confirmError = validateConfirmPassword(newFormData.confirmPassword, value);
+        setErrors((prev) => {
+          const updated = { ...prev };
+          if (confirmError) {
+            updated.confirmPassword = confirmError;
+          } else {
+            delete updated.confirmPassword;
           }
           return updated;
         });
@@ -175,8 +237,14 @@ function EmailSignupForm({
       case 'email':
         fieldError = validateEmail(formData.email);
         break;
+      case 'displayName':
+        fieldError = validateDisplayName(formData.displayName);
+        break;
       case 'password':
         fieldError = validatePassword(formData.password);
+        break;
+      case 'confirmPassword':
+        fieldError = validateConfirmPassword(formData.confirmPassword, formData.password);
         break;
     }
     setErrors((prev) => {
@@ -197,7 +265,9 @@ function EmailSignupForm({
     // Mark all fields as touched
     setTouched({
       email: true,
+      displayName: true,
       password: true,
+      confirmPassword: true,
     });
 
     // Validate form
@@ -260,6 +330,21 @@ function EmailSignupForm({
         aria-label="Email address"
       />
 
+      <Input
+        label="Display Name"
+        type="text"
+        id="signup-displayname"
+        value={formData.displayName}
+        onChange={handleChange('displayName')}
+        onBlur={handleBlur('displayName')}
+        {...(touched['displayName'] && errors.displayName ? { error: errors.displayName } : {})}
+        required
+        fullWidth
+        placeholder="Your public display name"
+        autoComplete="username"
+        aria-label="Display Name"
+      />
+
       <div>
         <Input
           label="Password"
@@ -308,6 +393,23 @@ function EmailSignupForm({
           </p>
         )}
       </div>
+
+      <Input
+        label="Confirm Password"
+        type="password"
+        id="signup-confirm-password"
+        value={formData.confirmPassword}
+        onChange={handleChange('confirmPassword')}
+        onBlur={handleBlur('confirmPassword')}
+        {...(touched['confirmPassword'] && errors.confirmPassword
+          ? { error: errors.confirmPassword }
+          : {})}
+        required
+        fullWidth
+        placeholder="Confirm your password"
+        autoComplete="new-password"
+        aria-label="Confirm Password"
+      />
 
       <Button
         type="submit"
