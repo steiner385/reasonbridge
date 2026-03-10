@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 /**
  * E2E test suite for Orientation Flow
@@ -11,15 +12,18 @@ import { test, expect } from '@playwright/test';
  * - Help menu access
  * - Keyboard navigation
  * - Progress tracking
+ *
+ * CONVERTED: Now uses loginWithDemoAccount with API mocking for specific onboarding states
  */
 
-// TODO: Re-enable orientation tests once the orientation page component is fully implemented
-// These tests timeout in CI because the orientation overlay is not rendering properly
-// See: specs/oauth-e2e-test-plan.md for the systematic re-enablement approach
-test.describe.skip('Orientation Flow', () => {
+test.describe('Orientation Flow', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock the onboarding progress API to show orientation step
-    await page.route('**/v1/onboarding/progress', async (route) => {
+    // Login as a user first to get valid auth
+    await loginWithDemoAccount(page, 'New User');
+
+    // Mock the onboarding progress API to show orientation step (not yet viewed)
+    // Note: Fixed route pattern - no /v1/ prefix
+    await page.route('**/onboarding/progress', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -37,7 +41,7 @@ test.describe.skip('Orientation Flow', () => {
             step: 'FIRST_POST',
             title: 'Make your first post',
             description: 'Share your perspective in a discussion',
-            url: '/discussions',
+            actionUrl: '/discussions',
           },
           completedAt: null,
         }),
@@ -45,7 +49,7 @@ test.describe.skip('Orientation Flow', () => {
     });
 
     // Mock the mark orientation viewed API
-    await page.route('**/v1/onboarding/mark-orientation-viewed', async (route) => {
+    await page.route('**/onboarding/mark-orientation-viewed', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -60,7 +64,7 @@ test.describe.skip('Orientation Flow', () => {
             step: 'FIRST_POST',
             title: 'Make your first post',
             description: 'Share your perspective in a discussion',
-            url: '/discussions',
+            actionUrl: '/discussions',
           },
         }),
       });
@@ -68,6 +72,7 @@ test.describe.skip('Orientation Flow', () => {
 
     // Navigate to orientation page
     await page.goto('/onboarding/orientation');
+    await page.waitForLoadState('networkidle');
   });
 
   test('should display orientation overlay on page load', async ({ page }) => {
@@ -169,13 +174,17 @@ test.describe.skip('Orientation Flow', () => {
   });
 
   test('should update progress bar as user navigates', async ({ page }) => {
-    // Check initial progress (33%)
+    // Check initial progress (step 1 of 3 = ~33%)
     const progressBar = page.locator('[role="progressbar"]');
-    await expect(progressBar).toHaveAttribute('aria-valuenow', '33');
+    const step1Value = await progressBar.getAttribute('aria-valuenow');
+    expect(parseFloat(step1Value || '0')).toBeGreaterThanOrEqual(33);
+    expect(parseFloat(step1Value || '0')).toBeLessThan(34);
 
     // Navigate to step 2
     await page.getByRole('button', { name: /^next$/i }).click();
-    await expect(progressBar).toHaveAttribute('aria-valuenow', '67');
+    const step2Value = await progressBar.getAttribute('aria-valuenow');
+    expect(parseFloat(step2Value || '0')).toBeGreaterThanOrEqual(66);
+    expect(parseFloat(step2Value || '0')).toBeLessThan(68);
 
     // Navigate to step 3
     await page.getByRole('button', { name: /^next$/i }).click();
@@ -345,8 +354,11 @@ test.describe.skip('Orientation Flow', () => {
 
   test.describe('Loading and Error States', () => {
     test('should show loading state while fetching progress', async ({ page }) => {
-      // Mock slow API response
-      await page.route('**/v1/onboarding/progress', async (route) => {
+      // Login first
+      await loginWithDemoAccount(page, 'New User');
+
+      // Mock slow API response (fixed route pattern)
+      await page.route('**/onboarding/progress', async (route) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         await route.fulfill({
           status: 200,
@@ -374,8 +386,11 @@ test.describe.skip('Orientation Flow', () => {
     });
 
     test('should show error state on API failure', async ({ page }) => {
-      // Mock API error
-      await page.route('**/v1/onboarding/progress', async (route) => {
+      // Login first
+      await loginWithDemoAccount(page, 'New User');
+
+      // Mock API error (fixed route pattern)
+      await page.route('**/onboarding/progress', async (route) => {
         await route.fulfill({
           status: 500,
           contentType: 'application/json',
@@ -394,10 +409,13 @@ test.describe.skip('Orientation Flow', () => {
     });
 
     test('should retry on error', async ({ page }) => {
+      // Login first
+      await loginWithDemoAccount(page, 'New User');
+
       let callCount = 0;
 
-      // Mock API error first, then success
-      await page.route('**/v1/onboarding/progress', async (route) => {
+      // Mock API error first, then success (fixed route pattern)
+      await page.route('**/onboarding/progress', async (route) => {
         callCount++;
         if (callCount === 1) {
           await route.fulfill({
