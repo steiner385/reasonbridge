@@ -24,3 +24,12 @@ export class VerifyEmailRequestDto {
   })
   code!: string;
 }
+
+/**
+ * Response payload after successful email verification
+ */
+export class VerifyEmailResponseDto {
+  success!: boolean;
+  message!: string;
+  emailVerified!: boolean;
+}

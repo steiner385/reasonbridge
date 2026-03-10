@@ -18,6 +18,15 @@ export interface ParentalConsentEmailParams {
 }
 
 /**
+ * Parameters for sending email verification emails
+ */
+export interface VerificationEmailParams {
+  email: string;
+  displayName: string;
+  code: string;
+}
+
+/**
  * Service for sending emails via AWS SES
  *
  * @remarks
@@ -105,6 +114,47 @@ export class EmailService {
       this.logger.log(`Parental consent email sent to ${params.parentEmail}`);
     } catch (error) {
       this.logger.error(`Failed to send parental consent email to ${params.parentEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send an email verification email with a 6-digit code
+   *
+   * @param params - Email parameters including email, display name, and verification code
+   */
+  async sendVerificationEmail(params: VerificationEmailParams): Promise<void> {
+    const htmlBody = this.buildVerificationEmailHtml(params.displayName, params.code);
+    const textBody = this.buildVerificationEmailText(params.displayName, params.code);
+
+    const command = new SendEmailCommand({
+      Source: this.fromAddress,
+      Destination: {
+        ToAddresses: [params.email],
+      },
+      Message: {
+        Subject: {
+          Data: 'Verify Your Email - ReasonBridge',
+          Charset: 'UTF-8',
+        },
+        Body: {
+          Html: {
+            Data: htmlBody,
+            Charset: 'UTF-8',
+          },
+          Text: {
+            Data: textBody,
+            Charset: 'UTF-8',
+          },
+        },
+      },
+    });
+
+    try {
+      await this.sesClient.send(command);
+      this.logger.log(`Verification email sent to ${params.email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send verification email to ${params.email}:`, error);
       throw error;
     }
   }
@@ -215,6 +265,80 @@ ${dashboardUrl}
 From the dashboard, you can also withdraw consent if needed.
 
 If you did not expect this email, please disregard this message.
+
+Best regards,
+The ReasonBridge Team
+
+---
+(c) ${currentYear} ReasonBridge. All rights reserved.`;
+  }
+
+  private buildVerificationEmailHtml(displayName: string, code: string): string {
+    const currentYear = new Date().getFullYear();
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; border-top: none; }
+    .code-box { background-color: #EEF2FF; border: 2px dashed #4F46E5; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0; }
+    .code { font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #4F46E5; font-family: monospace; }
+    .warning { background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 15px; border-radius: 6px; margin: 20px 0; }
+    .footer { text-align: center; color: #6B7280; font-size: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header"><h1>ReasonBridge</h1><p>Verify Your Email</p></div>
+  <div class="content">
+    <p>Hello${displayName ? ` ${displayName}` : ''},</p>
+    <p>Thank you for registering with ReasonBridge! To complete your registration and verify your email address, please use the verification code below:</p>
+    <div class="code-box">
+      <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px;">Your verification code:</p>
+      <p class="code">${code}</p>
+    </div>
+    <p>Enter this code on the verification page to confirm your email address.</p>
+    <div class="warning">
+      <strong>Important:</strong>
+      <ul style="margin: 5px 0; padding-left: 20px;">
+        <li>This code expires in <strong>24 hours</strong></li>
+        <li>Never share this code with anyone</li>
+        <li>ReasonBridge will never ask for this code via phone or chat</li>
+      </ul>
+    </div>
+    <p>If you didn't create a ReasonBridge account, you can safely ignore this email.</p>
+    <p>Best regards,<br>The ReasonBridge Team</p>
+  </div>
+  <div class="footer">
+    <p>This email was sent because someone registered for ReasonBridge with this email address.</p>
+    <p>&copy; ${currentYear} ReasonBridge. All rights reserved.</p>
+  </div>
+</body>
+</html>`;
+  }
+
+  private buildVerificationEmailText(displayName: string, code: string): string {
+    const currentYear = new Date().getFullYear();
+    return `VERIFY YOUR EMAIL - REASONBRIDGE
+=========================================
+
+Hello${displayName ? ` ${displayName}` : ''},
+
+Thank you for registering with ReasonBridge! To complete your registration and verify your email address, please use the verification code below:
+
+YOUR VERIFICATION CODE: ${code}
+
+Enter this code on the verification page to confirm your email address.
+
+IMPORTANT:
+- This code expires in 24 hours
+- Never share this code with anyone
+- ReasonBridge will never ask for this code via phone or chat
+
+If you didn't create a ReasonBridge account, you can safely ignore this email.
 
 Best regards,
 The ReasonBridge Team

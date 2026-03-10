@@ -22,13 +22,24 @@ const THROTTLE_LIMITS = {
   register: isTest ? 10000 : 3, // 3/min in prod
   login: isTest ? 10000 : 5, // 5/min in prod
   refresh: isTest ? 10000 : 10, // 10/min in prod
+  verifyEmail: isTest ? 10000 : 5, // 5/min in prod
+  resendVerification: isTest ? 10000 : 3, // 3/min in prod (per spec)
 };
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';
 import { RefreshDto, RefreshResponseDto } from './dto/refresh.dto.js';
 import { RegisterDto, RegisterResponseDto } from './dto/register.dto.js';
+import { VerifyEmailRequestDto, VerifyEmailResponseDto } from './dto/verify-email.dto.js';
+import {
+  ResendVerificationRequestDto,
+  ResendVerificationResponseDto,
+} from './dto/resend-verification.dto.js';
 import { AUTH_SERVICE, type IAuthService } from './auth.interface.js';
 import { AgeVerificationService } from '../compliance/age-verification.service.js';
 import { ParentalConsentService } from '../compliance/parental-consent.service.js';
+import { VerificationService } from './verification.service.js';
+import { EmailService } from '../services/email.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -43,6 +54,9 @@ export class AuthController {
     private readonly ageVerificationService: AgeVerificationService,
     @Inject(ParentalConsentService)
     private readonly parentalConsentService: ParentalConsentService,
+    private readonly verificationService: VerificationService,
+    private readonly emailService: EmailService,
+    private readonly prisma: PrismaService,
   ) {}
 
   /**
@@ -83,7 +97,22 @@ export class AuthController {
       }
     }
 
-    // 3. If birthDate and country provided, verify age and update user record
+    // 3. Generate email verification token and send verification email
+    try {
+      const verificationCode = await this.verificationService.generateToken(user.id, user.email);
+      await this.emailService.sendVerificationEmail({
+        email: user.email,
+        displayName: user.displayName ?? '',
+        code: verificationCode,
+      });
+      this.logger.log(`Verification email sent for user ${user.id}`);
+    } catch (error) {
+      // Log the error but don't fail registration
+      // User can request verification email later via /auth/resend-verification
+      this.logger.error(`Failed to send verification email for user ${user.id}:`, error);
+    }
+
+    // 4. If birthDate and country provided, verify age and update user record
     let requiresParentalConsent = false;
     let consentAge: number | undefined;
     let consentEmailSent = false;
@@ -147,5 +176,106 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() refreshDto: RefreshDto): Promise<RefreshResponseDto> {
     return this.authService.refreshAccessToken(refreshDto.refreshToken);
+  }
+
+  /**
+   * Signup alias for register endpoint
+   * Frontend calls /auth/signup but backend has /auth/register
+   * Rate limited: 3 attempts per minute
+   */
+  @Post('signup')
+  @Throttle({ default: { limit: THROTTLE_LIMITS.register, ttl: 60000 } })
+  @HttpCode(HttpStatus.CREATED)
+  async signup(@Body() registerDto: RegisterDto): Promise<RegisterResponseDto> {
+    return this.register(registerDto);
+  }
+
+  /**
+   * Verify user email with 6-digit code
+   * Rate limited: 5 attempts per minute to prevent brute force
+   */
+  @Post('verify-email')
+  @Throttle({ default: { limit: THROTTLE_LIMITS.verifyEmail, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(@Body() dto: VerifyEmailRequestDto): Promise<VerifyEmailResponseDto> {
+    this.logger.debug(`Verifying email for: ${dto.email}`);
+
+    // Verify the token (throws if invalid/expired)
+    const userId = await this.verificationService.verifyToken(dto.email, dto.code);
+
+    // Update user's emailVerified field to true
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { emailVerified: true },
+    });
+
+    this.logger.log(`Email verified successfully for user: ${userId}`);
+
+    return {
+      success: true,
+      message: 'Email verified successfully',
+      emailVerified: true,
+    };
+  }
+
+  /**
+   * Resend email verification code
+   * Rate limited: 3 attempts per minute per spec
+   */
+  @Post('resend-verification')
+  @Throttle({ default: { limit: THROTTLE_LIMITS.resendVerification, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(
+    @Body() dto: ResendVerificationRequestDto,
+  ): Promise<ResendVerificationResponseDto> {
+    this.logger.debug(`Resending verification email for: ${dto.email}`);
+
+    // Find user by email
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true, email: true, displayName: true, emailVerified: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        error: 'USER_NOT_FOUND',
+        message: 'No user found with this email',
+      });
+    }
+
+    // Check if already verified
+    if (user.emailVerified) {
+      throw new BadRequestException({
+        error: 'ALREADY_VERIFIED',
+        message: 'Email is already verified',
+      });
+    }
+
+    // Generate new verification token
+    const code = await this.verificationService.generateToken(user.id, user.email);
+
+    // Send verification email
+    await this.emailService.sendVerificationEmail({
+      email: user.email,
+      displayName: user.displayName ?? '',
+      code,
+    });
+
+    // Calculate expiration time (24 hours from now)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    // Get remaining attempts (returns MAX_ATTEMPTS since tracking not yet implemented)
+    const remainingAttempts =
+      (await this.verificationService.getRemainingAttempts(user.email)) ?? 5;
+
+    this.logger.log(`Verification email resent for user: ${user.id}`);
+
+    return {
+      message: 'Verification email sent successfully',
+      email: user.email,
+      remainingAttempts,
+      expiresAt: expiresAt.toISOString(),
+    };
   }
 }

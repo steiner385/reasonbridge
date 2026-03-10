@@ -35,6 +35,9 @@ export const SignupPage: React.FC = () => {
         ...(visitorSessionId && { visitorSessionId }),
       });
 
+      // Store email for verification page (needed for verify-email and resend-verification APIs)
+      localStorage.setItem('pendingVerificationEmail', data.email);
+
       // Clear referral tracking data
       localStorage.removeItem('referralSource');
       localStorage.removeItem('visitorSessionId');
