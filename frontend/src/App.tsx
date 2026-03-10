@@ -56,9 +56,14 @@ function App() {
   );
 
   // Landing page and auth pages have their own complete layout
-  const isStandalonePage = ['/', '/register', '/signup', '/forgot-password'].includes(
-    location.pathname,
-  );
+  const isStandalonePage = [
+    '/',
+    '/register',
+    '/signup',
+    '/login',
+    '/verify-email',
+    '/forgot-password',
+  ].includes(location.pathname);
 
   if (isStandalonePage) {
     return (

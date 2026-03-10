@@ -22,8 +22,12 @@ const RegisterPage = lazy(() => import('../pages/Auth').then((m) => ({ default: 
 const ForgotPasswordPage = lazy(() =>
   import('../pages/Auth').then((m) => ({ default: m.ForgotPasswordPage })),
 );
+const LoginPage = lazy(() => import('../pages/Auth').then((m) => ({ default: m.LoginPage })));
 const SignupPage = lazy(() =>
   import('../pages/SignupPage').then((m) => ({ default: m.SignupPage })),
+);
+const EmailVerificationPage = lazy(() =>
+  import('../pages/EmailVerificationPage').then((m) => ({ default: m.EmailVerificationPage })),
 );
 const AuthCallbackPage = lazy(() =>
   import('../pages/AuthCallbackPage').then((m) => ({ default: m.AuthCallbackPage })),
@@ -157,6 +161,22 @@ export const routes: RouteObject[] = [
     element: (
       <LazyRoute>
         <SignupPage />
+      </LazyRoute>
+    ),
+  },
+  {
+    path: '/login',
+    element: (
+      <LazyRoute>
+        <LoginPage />
+      </LazyRoute>
+    ),
+  },
+  {
+    path: '/verify-email',
+    element: (
+      <LazyRoute>
+        <EmailVerificationPage />
       </LazyRoute>
     ),
   },
