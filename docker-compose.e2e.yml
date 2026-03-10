@@ -175,6 +175,8 @@ services:
       # Use database authentication for demo environment (supports bcrypt password hashes)
       AUTH_MODE: 'database'
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      # Fixed verification code for E2E testing (enables full signup flow testing)
+      E2E_VERIFICATION_CODE: '123456'
       # Cognito configuration (fallback, not used when AUTH_MOCK=true)
       COGNITO_USER_POOL_ID: us-east-1_test123
       COGNITO_CLIENT_ID: test_client_id

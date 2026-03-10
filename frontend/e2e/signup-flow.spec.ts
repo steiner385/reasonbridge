@@ -3,6 +3,9 @@ import { test, expect } from '@playwright/test';
 // Check if running in E2E Docker mode with full backend
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
+// E2E verification code - must match E2E_VERIFICATION_CODE env var set on user-service
+const E2E_VERIFICATION_CODE = '123456';
+
 /**
  * E2E Test Suite: Email Signup Flow
  * Task: T086
@@ -105,25 +108,38 @@ test.describe('Email Signup Flow', () => {
       });
 
       // Step 5: Enter 6-digit verification code
-      // Note: The verification page auto-submits when all 6 digits are entered.
-      // Without a test endpoint to retrieve the actual verification code,
-      // this test cannot complete the full flow. Mark as expected failure.
+      // Uses E2E_VERIFICATION_CODE which is set as env var on user-service in E2E mode
       await test.step('Enter verification code', async () => {
-        // Skip this step - without access to the actual verification code sent via email,
-        // we cannot complete verification. The auto-submit behavior means any test code
-        // will fail immediately, clearing the inputs and disabling the button.
-        //
-        // To fully test this flow, you would need:
-        // - A test endpoint to retrieve the verification code (e.g., GET /auth/test/verification-code/:email)
-        // - Or mock the email service to capture the code
-        // - Or use a test mode that accepts a known code (e.g., "000000" in test environment)
-        test.skip(true, 'Requires test infrastructure to retrieve actual verification code');
+        // Enter the known E2E verification code - fill each of the 6 digit inputs
+        const codeInputs = page.locator('input[inputmode="numeric"]');
+        const inputCount = await codeInputs.count();
+
+        if (inputCount === 6) {
+          // Individual digit inputs
+          for (let i = 0; i < 6; i++) {
+            await codeInputs.nth(i).fill(E2E_VERIFICATION_CODE[i]);
+          }
+        } else {
+          // Single input field
+          await codeInputs.first().fill(E2E_VERIFICATION_CODE);
+        }
+
+        // The component auto-submits when all 6 digits are entered
+        // Wait for navigation to complete
+        await page.waitForURL(/\/onboarding\/topics|\/topics/, { timeout: 15000 });
       });
 
       // Step 6: Verify redirect to topic selection
-      // Note: This step is skipped because step 5 is skipped (no access to real verification code)
       await test.step('Verify redirect to topic selection', async () => {
-        test.skip(true, 'Skipped because verification code step is skipped');
+        // Should be redirected to topic selection or topics page
+        const currentUrl = page.url();
+        expect(currentUrl).toMatch(/\/onboarding\/topics|\/topics/);
+
+        // Verify page content
+        const heading = page.getByRole('heading', {
+          name: /topics|interests|select|choose/i,
+        });
+        await expect(heading.first()).toBeVisible({ timeout: 5000 });
       });
     });
 

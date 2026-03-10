@@ -247,8 +247,19 @@ export class VerificationService {
 
   /**
    * Generate a random 6-digit verification code
+   *
+   * In E2E test mode (when E2E_VERIFICATION_CODE env var is set),
+   * returns the fixed test code to enable automated testing of
+   * the full signup verification flow.
    */
   private generateVerificationCode(): string {
+    // Check for E2E test mode - use fixed code for automated testing
+    const testCode = process.env['E2E_VERIFICATION_CODE'];
+    if (testCode && /^\d{6}$/.test(testCode)) {
+      this.logger.debug('Using fixed E2E test verification code');
+      return testCode;
+    }
+
     // Generate random 6-digit number
     const min = 100000;
     const max = 999999;
