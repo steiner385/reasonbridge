@@ -94,22 +94,44 @@ class AuthService {
   }
 
   /**
+   * Get the pending verification email from localStorage
+   */
+  getPendingVerificationEmail(): string | null {
+    return localStorage.getItem('pendingVerificationEmail');
+  }
+
+  /**
+   * Clear the pending verification email from localStorage
+   */
+  clearPendingVerificationEmail(): void {
+    localStorage.removeItem('pendingVerificationEmail');
+  }
+
+  /**
    * Verify email with 6-digit code
    */
   async verifyEmail(code: string): Promise<AuthResponse> {
+    const email = this.getPendingVerificationEmail();
+    if (!email) {
+      throw new Error('No pending verification email found. Please sign up again.');
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/verify-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.getAuthToken()}`,
       },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ email, code }),
     });
 
     if (!response.ok) {
       const error: ErrorResponse = await response.json();
       throw new Error(error.message || 'Email verification failed');
     }
+
+    // Clear pending email on success
+    this.clearPendingVerificationEmail();
 
     return response.json();
   }
@@ -118,16 +140,26 @@ class AuthService {
    * Resend verification email
    */
   async resendVerification(): Promise<{ message: string }> {
+    const email = this.getPendingVerificationEmail();
+    if (!email) {
+      throw new Error('No pending verification email found. Please sign up again.');
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.getAuthToken()}`,
       },
+      body: JSON.stringify({ email }),
     });
 
     if (!response.ok) {
       const error: ErrorResponse = await response.json();
+      // Handle rate limiting specifically
+      if (response.status === 429) {
+        throw new Error('Too many requests. Please try again later.');
+      }
       throw new Error(error.message || 'Failed to resend verification email');
     }
 

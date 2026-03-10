@@ -60,11 +60,14 @@ services:
   localstack:
     image: localstack/localstack:3.0
     environment:
-      SERVICES: s3,sqs,sns
+      SERVICES: s3,sqs,sns,ses
       DEBUG: 0
       # Disable telemetry to prevent DNS failures in CI environments
       DISABLE_EVENTS: 1
       DATA_DIR: ''
+    volumes:
+      # Verify SES sender identity on startup (required for sending emails)
+      - ./scripts/localstack-init/ready.d:/etc/localstack/init/ready.d:ro
     # Host port removed to prevent CI conflicts - services communicate via Docker network
     # For local debugging, uncomment: ports: ['4568:4566']
     healthcheck:

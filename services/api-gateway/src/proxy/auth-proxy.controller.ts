@@ -58,4 +58,52 @@ export class AuthProxyController {
 
     res.status(response.status).send(response.data);
   }
+
+  @Post('signup')
+  async signup(
+    @Body() body: unknown,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToUserService({
+      method: 'POST',
+      path: '/auth/signup',
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  @Post('verify-email')
+  async verifyEmail(
+    @Body() body: unknown,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToUserService({
+      method: 'POST',
+      path: '/auth/verify-email',
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  @Post('resend-verification')
+  async resendVerification(
+    @Body() body: unknown,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToUserService({
+      method: 'POST',
+      path: '/auth/resend-verification',
+      body,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
 }

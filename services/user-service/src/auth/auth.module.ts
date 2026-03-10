@@ -16,6 +16,8 @@ import { UsersModule } from '../users/users.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AUTH_SERVICE } from './auth.interface.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
+import { VerificationService } from './verification.service.js';
+import { EmailService } from '../services/email.service.js';
 
 /**
  * Provides authentication service based on environment configuration.
@@ -88,6 +90,10 @@ const authServiceProvider = {
       useFactory: (configService: ConfigService) => new AdminGuard(configService),
       inject: [ConfigService],
     },
+    // Verification and email services for verify-email and resend-verification endpoints
+    VerificationService,
+    EmailService,
+    PrismaService,
   ],
   exports: [AUTH_SERVICE, JwtAuthGuard, AdminGuard, JwtModule],
 })

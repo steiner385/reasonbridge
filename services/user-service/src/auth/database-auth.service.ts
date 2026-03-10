@@ -66,7 +66,7 @@ export class DatabaseAuthService implements IAuthService {
         displayName,
         cognitoSub: userSub,
         authMethod: 'EMAIL_PASSWORD',
-        emailVerified: true,
+        emailVerified: false, // Will be set to true after email verification
         passwordHash,
         accountStatus: 'ACTIVE',
         status: 'ACTIVE',
