@@ -102,7 +102,8 @@ POSTGRES_CONTAINER="${PROJECT_NAME}-postgres-1"
 
 if docker ps --format '{{.Names}}' | grep -q "^${POSTGRES_CONTAINER}$"; then
   # Verify users exist
-  USER_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM "User";' 2>/dev/null || echo "0")
+  # Note: Prisma maps User model to "users" table via @@map("users")
+  USER_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM users;' 2>/dev/null || echo "0")
   USER_COUNT=$(echo "$USER_COUNT" | tr -d '[:space:]')
 
   if [ "${USER_COUNT:-0}" -gt 0 ]; then
@@ -114,7 +115,8 @@ if docker ps --format '{{.Names}}' | grep -q "^${POSTGRES_CONTAINER}$"; then
   fi
 
   # Verify responses exist (critical for E2E tests that wait for response-item)
-  RESPONSE_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM "Response";' 2>/dev/null || echo "0")
+  # Note: Prisma maps Response model to "responses" table via @@map("responses")
+  RESPONSE_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM responses;' 2>/dev/null || echo "0")
   RESPONSE_COUNT=$(echo "$RESPONSE_COUNT" | tr -d '[:space:]')
 
   if [ "${RESPONSE_COUNT:-0}" -gt 0 ]; then
@@ -127,7 +129,8 @@ if docker ps --format '{{.Names}}' | grep -q "^${POSTGRES_CONTAINER}$"; then
   fi
 
   # Verify topics exist
-  TOPIC_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM "DiscussionTopic";' 2>/dev/null || echo "0")
+  # Note: Prisma maps DiscussionTopic model to "discussion_topics" table via @@map("discussion_topics")
+  TOPIC_COUNT=$(docker exec "$POSTGRES_CONTAINER" psql -U reasonbridge_test -d reasonbridge_test -tAc 'SELECT COUNT(*) FROM discussion_topics;' 2>/dev/null || echo "0")
   TOPIC_COUNT=$(echo "$TOPIC_COUNT" | tr -d '[:space:]')
 
   if [ "${TOPIC_COUNT:-0}" -gt 0 ]; then
