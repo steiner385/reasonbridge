@@ -4,10 +4,12 @@
  */
 
 import { Link } from 'react-router-dom';
+import { TrendingTopics } from '../components/recommendations';
 
 function HomePage() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Welcome Section */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-200 dark:border-gray-700">
         <h2 className="text-fluid-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Welcome to ReasonBridge
@@ -17,7 +19,8 @@ function HomePage() {
         </p>
         <div className="space-y-4 prose-reading-width">
           <p className="text-fluid-base text-gray-700 dark:text-gray-300 leading-relaxed">
-            This is the home page of the ReasonBridge application.
+            Join conversations that matter. Discover common ground and explore different
+            perspectives.
           </p>
           <nav className="flex gap-4">
             <Link
@@ -35,6 +38,9 @@ function HomePage() {
           </nav>
         </div>
       </div>
+
+      {/* Trending Topics Section */}
+      <TrendingTopics hours={24} limit={5} />
     </div>
   );
 }
