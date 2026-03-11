@@ -13,9 +13,14 @@ import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import { useAuthContext } from '../../contexts/AuthContext';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { BridgingSuggestionsSection, ShareButton } from '../../components/common-ground';
+import {
+  BridgingSuggestionsSection,
+  ShareButton,
+  CommonGroundSummaryPanel,
+} from '../../components/common-ground';
 import { EditTopicModal } from '../../components/topics';
 import { MobileActionBar } from '../../components/layouts';
+import { SimilarTopics } from '../../components/recommendations';
 import ResponseComposer from '../../components/responses/ResponseComposer';
 import TopicDetailSkeleton from '../../components/ui/skeletons/TopicDetailSkeleton';
 import { apiClient } from '../../lib/api';
@@ -27,7 +32,7 @@ function TopicDetailPage() {
   const { user } = useAuthContext();
   const queryClient = useQueryClient();
   const { data: topic, isLoading, error } = useTopic(id);
-  const { data: commonGroundAnalysis } = useCommonGroundAnalysis(id);
+  const { data: commonGroundAnalysis, isLoading: isLoadingAnalysis } = useCommonGroundAnalysis(id);
   const showSkeleton = useDelayedLoading(isLoading);
 
   // State to hold the current analysis (from HTTP or WebSocket)
@@ -379,8 +384,8 @@ function TopicDetailPage() {
         </CardBody>
       </Card>
 
-      {/* Common Ground Analysis Section - Temporarily disabled due to type mismatch between frontend/backend */}
-      {/* {!isLoadingAnalysis && liveAnalysis && (
+      {/* Common Ground Analysis Section */}
+      {!isLoadingAnalysis && liveAnalysis && (
         <div className="mb-6">
           <CommonGroundSummaryPanel
             analysis={liveAnalysis}
@@ -397,7 +402,7 @@ function TopicDetailPage() {
             }}
           />
         </div>
-      )} */}
+      )}
 
       {/* Bridging Suggestions Section */}
       {bridgingSuggestions && (
@@ -410,6 +415,13 @@ function TopicDetailPage() {
               // Future: Navigate to proposition detail or open modal
             }}
           />
+        </div>
+      )}
+
+      {/* Similar Topics Section */}
+      {id && (
+        <div className="mb-6">
+          <SimilarTopics topicId={id} limit={3} />
         </div>
       )}
 

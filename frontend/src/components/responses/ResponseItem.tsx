@@ -36,6 +36,7 @@ import { useReactions } from '../../hooks/useReactions';
 import { useVotes } from '../../hooks/useVotes';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { apiClient } from '../../lib/api';
+import { InlineTrustBadge } from '../users';
 import ResponseComposer from './ResponseComposer';
 import { LightweightReplyComposer } from './LightweightReplyComposer';
 import ReactionBar from './ReactionBar';
@@ -298,6 +299,13 @@ export function ResponseItem({
                     >
                       {response.author.displayName}
                     </span>
+                    {/* Trust score badge - shows when trust data is available */}
+                    <InlineTrustBadge
+                      trustScoreAbility={response.author.trustScoreAbility}
+                      trustScoreBenevolence={response.author.trustScoreBenevolence}
+                      trustScoreIntegrity={response.author.trustScoreIntegrity}
+                      verificationLevel={response.author.verificationLevel}
+                    />
                     {/* Compact: inline separator, Non-compact: on its own line */}
                     {compact && <span className="text-gray-400">·</span>}
                     <span
@@ -430,7 +438,7 @@ export function ResponseItem({
                 )}
               </div>
 
-              {/* Right side: Share and Bookmark */}
+              {/* Right side: Share, Bookmark, and Flag */}
               <div className="flex items-center gap-1">
                 <ShareButton
                   topicId={discussionId}
@@ -438,6 +446,32 @@ export function ResponseItem({
                   className={compact ? 'scale-90' : ''}
                 />
                 <BookmarkButton responseId={response.id} size={compact ? 'sm' : 'md'} />
+                {/* Flag button - only shown for other users' responses */}
+                {!isOwnResponse && currentUser && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowReportDialog(true)}
+                    className={`text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 ${compact ? 'p-1' : 'p-1.5'}`}
+                    aria-label="Report this response"
+                    title="Report"
+                  >
+                    <svg
+                      className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                      />
+                    </svg>
+                  </Button>
+                )}
               </div>
             </div>
 

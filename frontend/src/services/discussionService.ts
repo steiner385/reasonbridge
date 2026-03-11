@@ -27,6 +27,11 @@ export interface CreateDiscussionRequest {
 export interface UserSummary {
   id: string;
   displayName: string;
+  /** Optional trust score components - included when backend returns extended user data */
+  trustScoreAbility?: number;
+  trustScoreBenevolence?: number;
+  trustScoreIntegrity?: number;
+  verificationLevel?: 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN';
 }
 
 export interface Citation {
