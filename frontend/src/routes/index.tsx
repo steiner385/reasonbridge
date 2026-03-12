@@ -84,6 +84,9 @@ const ConsentVerifyPage = lazy(() =>
 const ParentalDashboardPage = lazy(() =>
   import('../pages/ParentalConsent').then((m) => ({ default: m.ParentalDashboardPage })),
 );
+const OrientationPage = lazy(() =>
+  import('../pages/Onboarding').then((m) => ({ default: m.OrientationPage })),
+);
 
 /**
  * Loading fallback for lazy-loaded routes
@@ -325,6 +328,17 @@ export const routes: RouteObject[] = [
       <LazyRoute>
         <ParentalDashboardPage />
       </LazyRoute>
+    ),
+  },
+  // Onboarding Routes
+  {
+    path: '/onboarding/orientation',
+    element: (
+      <ProtectedRoute>
+        <LazyRoute>
+          <OrientationPage />
+        </LazyRoute>
+      </ProtectedRoute>
     ),
   },
   {
