@@ -28,7 +28,7 @@ export default {
           300: '#99bddb',
           400: '#77a7cf',
           500: '#6b9ac4', // Soft Blue
-          600: '#567b9d',
+          600: '#4f7496', // Darkened from #567b9d to meet WCAG AA 4.5:1 contrast ratio
           700: '#405c76',
           800: '#2b3e4e',
           900: '#151f27',
