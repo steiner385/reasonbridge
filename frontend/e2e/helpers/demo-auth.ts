@@ -188,7 +188,9 @@ export async function loginWithDemoAccount(page: Page, userName: DemoUserName): 
   await expect(page.getByRole('dialog')).toBeVisible();
 
   // Click the demo user's quick-login button
-  await page.getByText(userName).click();
+  // Use button role with name pattern to avoid ambiguity when user name
+  // appears in multiple places (e.g., "New User" as name AND as tier badge)
+  await page.getByRole('button', { name: new RegExp(userName, 'i') }).click();
 
   // Click the login button in the modal
   const dialog = page.getByRole('dialog');

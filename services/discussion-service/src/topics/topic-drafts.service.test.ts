@@ -30,7 +30,7 @@ const createMockDraft = (overrides = {}) => ({
   isMatureContent: false,
   createdAt: new Date('2026-02-10'),
   updatedAt: new Date('2026-02-10'),
-  expiresAt: new Date('2026-03-12'),
+  expiresAt: new Date('2099-12-31'), // Far future to avoid expiration during tests
   ...overrides,
 });
 

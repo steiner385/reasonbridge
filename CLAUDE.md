@@ -732,7 +732,7 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 
 ## Jenkins CI/CD
 
-**Jenkins Server:** `http://jenkins.reasonBridge.org`
+**Jenkins Server:** `http://jenkins.local`
 **Credentials:** Stored in `~/.jenkins-cli.yaml`
 
 **Infrastructure:**
