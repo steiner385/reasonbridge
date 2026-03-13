@@ -133,3 +133,109 @@ export function isDemoEmail(email: string): boolean {
 export type DemoUserId = (typeof DEMO_USER_IDS)[keyof typeof DEMO_USER_IDS];
 export type DemoTopicId = (typeof DEMO_TOPIC_IDS)[keyof typeof DEMO_TOPIC_IDS];
 export type DemoTagId = (typeof DEMO_TAG_IDS)[keyof typeof DEMO_TAG_IDS];
+
+// =============================================================================
+// EXTENDED DEMO IDS (for enhanced seed data)
+// =============================================================================
+
+/**
+ * Demo namespace UUID for deterministic generation
+ * Uses UUID v5 with this namespace for reproducible IDs
+ */
+export const DEMO_NAMESPACE = '11111111-0000-4000-8000-000000000000';
+
+/**
+ * Generate a deterministic user ID for enhanced demo data
+ * Format: 11111111-0000-4000-8000-100NNNNNNNNN
+ * NNN = user index (000000001-000000999)
+ */
+export function generateEnhancedUserId(index: number): string {
+  const indexPart = index.toString().padStart(9, '0');
+  return `11111111-0000-4000-8000-100${indexPart}`;
+}
+
+/**
+ * Generate a deterministic topic ID for enhanced demo data
+ * Format: 11111111-0000-4000-8000-200CCCTTTTTT
+ * CCC = category index (001-015)
+ * TTTTTT = topic index within category (000001-000999)
+ */
+export function generateEnhancedTopicId(categoryIndex: number, topicIndex: number): string {
+  const catPart = categoryIndex.toString().padStart(3, '0');
+  const topicPart = topicIndex.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-200${catPart}${topicPart}`;
+}
+
+/**
+ * Generate a deterministic discussion ID
+ * Format: 11111111-0000-4000-8000-300TTTDDDDDD
+ * TTT = topic number (001-999)
+ * DDDDDD = discussion index (000001-999999)
+ */
+export function generateDiscussionId(topicIndex: number, discussionIndex: number): string {
+  const topicPart = topicIndex.toString().padStart(3, '0');
+  const discPart = discussionIndex.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-300${topicPart}${discPart}`;
+}
+
+/**
+ * Generate a deterministic enhanced response ID
+ * Format: 11111111-0000-4000-8000-400DDDRRRRRRR
+ * DDD = discussion index (001-999)
+ * RRRRRRR = response index (0000001-9999999)
+ */
+export function generateEnhancedResponseId(discussionIndex: number, responseIndex: number): string {
+  const discPart = discussionIndex.toString().padStart(3, '0');
+  const respPart = responseIndex.toString().padStart(7, '0');
+  return `11111111-0000-4000-8000-4${discPart}${respPart}`;
+}
+
+/**
+ * Generate a deterministic vote ID
+ * Format: 11111111-0000-4000-8000-500UUURRRRRRR
+ * UUU = user index (001-999)
+ * RRRRRRR = response/target index
+ */
+export function generateVoteId(userIndex: number, targetIndex: number): string {
+  const userPart = userIndex.toString().padStart(3, '0');
+  const targetPart = targetIndex.toString().padStart(7, '0');
+  return `11111111-0000-4000-8000-5${userPart}${targetPart}`;
+}
+
+/**
+ * Generate a deterministic reaction ID
+ * Format: 11111111-0000-4000-8000-600UUURRRRRRR
+ */
+export function generateReactionId(userIndex: number, targetIndex: number): string {
+  const userPart = userIndex.toString().padStart(3, '0');
+  const targetPart = targetIndex.toString().padStart(7, '0');
+  return `11111111-0000-4000-8000-6${userPart}${targetPart}`;
+}
+
+/**
+ * Generate a deterministic bookmark ID
+ * Format: 11111111-0000-4000-8000-700UUUTTTTTTT
+ */
+export function generateBookmarkId(userIndex: number, targetIndex: number): string {
+  const userPart = userIndex.toString().padStart(3, '0');
+  const targetPart = targetIndex.toString().padStart(7, '0');
+  return `11111111-0000-4000-8000-7${userPart}${targetPart}`;
+}
+
+/**
+ * Generate a deterministic connection ID
+ * Format: 11111111-0000-4000-8000-800UUUFFFFF
+ * UUU = user index, FFFFF = followed user index
+ */
+export function generateConnectionId(userIndex: number, followedIndex: number): string {
+  const userPart = userIndex.toString().padStart(3, '0');
+  const followedPart = followedIndex.toString().padStart(7, '0');
+  return `11111111-0000-4000-8000-8${userPart}${followedPart}`;
+}
+
+/**
+ * Check if an ID is from the enhanced demo set (100+ prefix in last segment)
+ */
+export function isEnhancedDemoId(uuid: string): boolean {
+  return uuid.startsWith('11111111-') && uuid.includes('-100');
+}
