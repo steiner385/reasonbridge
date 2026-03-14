@@ -34,7 +34,9 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "db:seed:test": "tsx prisma/seed/test-fixtures.ts"
+    "db:seed:test": "tsx prisma/seed/test-fixtures.ts",
+    "seed:demo": "tsx prisma/seed/cli.ts",
+    "seed:demo:generate": "tsx prisma/seed/cli.ts --generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
