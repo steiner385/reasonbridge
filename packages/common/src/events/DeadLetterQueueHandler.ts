@@ -284,6 +284,15 @@ export class DeadLetterQueueHandler {
   }
 
   /**
+   * Clean up AWS SDK resources.
+   * Call this when the handler is no longer needed to close HTTP connections.
+   */
+  destroy(): void {
+    this.sqsClient?.destroy();
+    this.sqsClient = null;
+  }
+
+  /**
    * Lazy initialization of SQS client
    */
   private async getSqsClient() {

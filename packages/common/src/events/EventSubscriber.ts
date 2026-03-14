@@ -422,4 +422,13 @@ export class SqsEventSubscriber extends EventSubscriber {
       );
     }
   }
+
+  /**
+   * Clean up AWS SDK resources.
+   * Call this when the subscriber is no longer needed to close HTTP connections.
+   */
+  destroy(): void {
+    this.sqsClient?.destroy();
+    this.sqsClient = null;
+  }
 }

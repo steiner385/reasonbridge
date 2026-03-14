@@ -229,4 +229,13 @@ export class SnsEventPublisher implements EventPublisher {
 
     return results;
   }
+
+  /**
+   * Clean up AWS SDK resources.
+   * Call this when the publisher is no longer needed to close HTTP connections.
+   */
+  destroy(): void {
+    this.snsClient?.destroy();
+    this.snsClient = null;
+  }
 }
