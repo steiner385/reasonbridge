@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import type { NestMiddleware } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import type { NestMiddleware, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
 
 /**
@@ -20,12 +20,39 @@ import type { Request, Response, NextFunction } from 'express';
  * For production, consider using @nestjs/throttler with Redis backing.
  */
 @Injectable()
-export class RateLimiterMiddleware implements NestMiddleware {
+export class RateLimiterMiddleware implements NestMiddleware, OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(RateLimiterMiddleware.name);
   private requestCounts: Map<string, { count: number; resetTime: number }> = new Map();
+  private cleanupIntervalId: NodeJS.Timeout | null = null;
 
   // Default configuration
   private readonly defaultLimit = 100;
   private readonly defaultWindowMs = 60 * 1000; // 1 minute
+  private readonly cleanupIntervalMs = 5 * 60 * 1000; // 5 minutes
+
+  onModuleInit(): void {
+    // Start periodic cleanup to prevent unbounded memory growth
+    this.cleanupIntervalId = setInterval(() => {
+      const beforeSize = this.requestCounts.size;
+      this.cleanup();
+      const afterSize = this.requestCounts.size;
+      if (beforeSize > afterSize) {
+        this.logger.debug(
+          `Rate limiter cleanup: removed ${beforeSize - afterSize} expired entries`,
+        );
+      }
+    }, this.cleanupIntervalMs);
+    this.logger.log('Rate limiter cleanup interval started');
+  }
+
+  onModuleDestroy(): void {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+      this.logger.log('Rate limiter cleanup interval stopped');
+    }
+    this.requestCounts.clear();
+  }
 
   /**
    * Apply rate limiting to incoming requests

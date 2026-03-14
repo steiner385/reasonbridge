@@ -32,6 +32,8 @@ export interface ExportResult {
  */
 @Injectable()
 export class CommonGroundExportService {
+  // Maximum PDF buffer size: 50MB (reasonable for a text-based PDF report)
+  private readonly MAX_PDF_BUFFER_SIZE = 50 * 1024 * 1024;
   /**
    * Export common ground analysis in the specified format
    */
@@ -62,10 +64,31 @@ export class CommonGroundExportService {
       });
 
       const chunks: Buffer[] = [];
+      let totalSize = 0;
+      let aborted = false;
 
-      doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+      doc.on('data', (chunk: Buffer) => {
+        if (aborted) return;
+
+        totalSize += chunk.length;
+        if (totalSize > this.MAX_PDF_BUFFER_SIZE) {
+          aborted = true;
+          // Clean up accumulated chunks to free memory immediately
+          chunks.length = 0;
+          reject(
+            new Error(
+              `PDF export exceeded maximum size limit of ${this.MAX_PDF_BUFFER_SIZE / 1024 / 1024}MB`,
+            ),
+          );
+          return;
+        }
+        chunks.push(chunk);
+      });
       doc.on('end', () => {
+        if (aborted) return;
         const buffer = Buffer.concat(chunks);
+        // Clear chunks array after concatenation to allow GC
+        chunks.length = 0;
         resolve({
           data: buffer,
           mimeType: 'application/pdf',
