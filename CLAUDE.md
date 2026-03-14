@@ -981,6 +981,35 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 - **Vitest 2.x** - Unit and integration testing
 - **pnpm 9.x** - Package management (workspace monorepo)
 
+## Demo Seed Data
+
+### Enhanced Demo Seeding
+
+The project includes comprehensive demo seed data for development and testing:
+
+```bash
+# Seed with default large scale (200 users, 300 topics, ~10K responses)
+cd packages/db-models && pnpm seed:demo
+
+# Generate fresh AI content (requires ANTHROPIC_API_KEY)
+pnpm seed:demo --generate
+
+# Use smaller scale for quick testing
+pnpm seed:demo --scale=small
+```
+
+**Scale profiles:**
+- `small`: 50 users, 75 topics, ~500 responses
+- `medium`: 100 users, 150 topics, ~3,000 responses
+- `large`: 200 users, 300 topics, ~10,000 responses
+
+**Features:**
+- Power-law activity distribution (10% users = 60% content)
+- 15 topic categories with diverse content
+- Threaded conversations with varied viewpoints
+- Calculated trust scores and badges
+- Deterministic IDs for test stability
+
 ## Troubleshooting
 
 ### Common Issues
