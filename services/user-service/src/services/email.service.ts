@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
@@ -38,7 +38,7 @@ export interface VerificationEmailParams {
  * In production, uses actual AWS SES.
  */
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleDestroy {
   private readonly logger = new Logger(EmailService.name);
   private readonly sesClient: SESClient;
   private readonly fromAddress: string;
@@ -61,6 +61,14 @@ export class EmailService {
     this.logger.log(
       `EmailService initialized with region: ${region}, endpoint: ${endpoint || 'AWS default'}`,
     );
+  }
+
+  /**
+   * Clean up AWS SDK resources on module shutdown
+   */
+  onModuleDestroy(): void {
+    this.sesClient.destroy();
+    this.logger.log('EmailService SES client destroyed');
   }
 
   /**

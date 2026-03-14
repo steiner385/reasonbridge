@@ -153,6 +153,14 @@ export class BedrockClient implements IAIClient {
   }
 
   /**
+   * Clean up AWS SDK resources.
+   * Call this when the client is no longer needed to close HTTP connections.
+   */
+  destroy(): void {
+    this.client.destroy();
+  }
+
+  /**
    * Convert SDK errors to AIClientError.
    */
   private handleError(error: unknown): AIClientError {

@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  Logger,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CognitoIdentityProviderClient,
@@ -16,7 +22,8 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 
 @Injectable()
-export class CognitoService {
+export class CognitoService implements OnModuleDestroy {
+  private readonly logger = new Logger(CognitoService.name);
   private readonly cognitoClient: CognitoIdentityProviderClient;
   private readonly userPoolId: string;
   private readonly clientId: string;
@@ -30,6 +37,14 @@ export class CognitoService {
 
     this.userPoolId = this.configService?.getOrThrow<string>('COGNITO_USER_POOL_ID');
     this.clientId = this.configService?.getOrThrow<string>('COGNITO_CLIENT_ID');
+  }
+
+  /**
+   * Clean up AWS SDK resources on module shutdown
+   */
+  onModuleDestroy(): void {
+    this.cognitoClient.destroy();
+    this.logger.log('CognitoService client destroyed');
   }
 
   async authenticateUser(email: string, password: string) {
