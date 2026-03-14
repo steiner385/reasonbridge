@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import { BedrockClient, type AIClientConfig } from '@reason-bridge/ai-client';
 
 /**
@@ -13,7 +13,7 @@ import { BedrockClient, type AIClientConfig } from '@reason-bridge/ai-client';
  * Integrates Claude 3 models for semantic analysis, clustering, and value detection.
  */
 @Injectable()
-export class BedrockService {
+export class BedrockService implements OnModuleDestroy {
   private readonly logger = new Logger(BedrockService.name);
   private readonly client: BedrockClient | null;
   private readonly isConfigured: boolean;
@@ -40,6 +40,16 @@ export class BedrockService {
       );
       this.client = null;
       this.isConfigured = false;
+    }
+  }
+
+  /**
+   * Clean up AWS SDK resources on module shutdown
+   */
+  onModuleDestroy(): void {
+    if (this.client) {
+      this.client.destroy();
+      this.logger.log('BedrockService client destroyed');
     }
   }
 

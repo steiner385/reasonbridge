@@ -7,7 +7,7 @@
  * Queue service for managing event publishing and subscription
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import { SnsEventPublisher } from '@reason-bridge/common';
 import { SqsEventSubscriber } from '@reason-bridge/common';
 import { DeadLetterQueueHandler } from '@reason-bridge/common';
@@ -16,13 +16,37 @@ import type { EventHandler } from '@reason-bridge/common';
 import type { QueueConfig } from './queue.config.js';
 
 @Injectable()
-export class QueueService {
+export class QueueService implements OnModuleDestroy {
   private readonly logger = new Logger(QueueService.name);
   private publisher: SnsEventPublisher | null = null;
   private subscriber: SqsEventSubscriber | null = null;
   private dlqHandler: DeadLetterQueueHandler | null = null;
 
   constructor(private readonly config: QueueConfig) {}
+
+  /**
+   * Clean up queue resources on module shutdown
+   */
+  async onModuleDestroy(): Promise<void> {
+    // Stop consuming events first
+    await this.stopConsuming();
+
+    // Destroy AWS SDK clients
+    if (this.publisher) {
+      this.publisher.destroy?.();
+      this.publisher = null;
+    }
+    if (this.subscriber) {
+      this.subscriber.destroy?.();
+      this.subscriber = null;
+    }
+    if (this.dlqHandler) {
+      this.dlqHandler.destroy?.();
+      this.dlqHandler = null;
+    }
+
+    this.logger.log('QueueService resources cleaned up');
+  }
 
   /**
    * Initialize the queue service
