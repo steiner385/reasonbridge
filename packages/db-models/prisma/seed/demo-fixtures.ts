@@ -26,6 +26,15 @@ import { DEMO_ALIGNMENTS } from './demo-alignments';
 import { DEMO_COMMON_GROUND } from './demo-common-ground';
 import { DEMO_AI_FEEDBACK } from './demo-ai-feedback';
 import { generateDemoTimestamp } from './timestamp-generator';
+import { GenerationOrchestrator } from './generators/orchestrator.js';
+import type { CachedData } from './generators/types.js';
+import type {
+  GeneratedTopic,
+  GeneratedResponse,
+  GeneratedProposition,
+  GeneratedCommonGround,
+  GeneratedBridgingSuggestion,
+} from './generators/types.js';
 
 // Re-export for convenience
 export { DEMO_PERSONAS } from './demo-personas';
@@ -461,18 +470,244 @@ export async function truncateDemoData(prisma: PrismaClient): Promise<void> {
   console.log('✅ Demo data truncated');
 }
 
+// =============================================================================
+// GENERATED CONTENT INTEGRATION
+// =============================================================================
+
+/**
+ * Get generated content (from cache or LLM)
+ */
+async function getGeneratedContent(options: { force?: boolean } = {}): Promise<CachedData | null> {
+  const useGenerated = process.env['USE_GENERATED_CONTENT'] !== 'false';
+  if (!useGenerated) {
+    console.log('USE_GENERATED_CONTENT=false, using hand-crafted data only');
+    return null;
+  }
+
+  try {
+    const orchestrator = new GenerationOrchestrator();
+    const data = await orchestrator.getData({ forceRegenerate: options.force });
+    orchestrator.destroy();
+    return data;
+  } catch (error) {
+    console.warn('Failed to get generated content, falling back to hand-crafted:', error);
+    return null;
+  }
+}
+
+/**
+ * Seed LLM-generated topics into the database
+ */
+async function seedGeneratedTopics(prisma: PrismaClient, topics: GeneratedTopic[]): Promise<void> {
+  console.log('📋 Seeding generated topics...');
+
+  for (const topic of topics) {
+    const createdAt = generateDemoTimestamp(`topic-${topic.id}`);
+
+    await prisma.discussionTopic.upsert({
+      where: { id: topic.id },
+      update: {
+        title: topic.title,
+        description: topic.description,
+        status: topic.status,
+        crossCuttingThemes: topic.crossCuttingThemes,
+      },
+      create: {
+        id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        slug: topic.slug,
+        creatorId: topic.creatorId,
+        status: topic.status,
+        crossCuttingThemes: topic.crossCuttingThemes,
+        createdAt,
+        activatedAt: topic.status !== 'SEEDING' ? createdAt : null,
+      },
+    });
+
+    // Create topic-tag associations
+    for (const tagId of topic.tagIds) {
+      await prisma.topicTag.upsert({
+        where: {
+          topicId_tagId: {
+            topicId: topic.id,
+            tagId: tagId,
+          },
+        },
+        update: {},
+        create: {
+          topicId: topic.id,
+          tagId: tagId,
+          source: 'CREATOR',
+        },
+      });
+
+      // Increment tag usage count
+      await prisma.tag.update({
+        where: { id: tagId },
+        data: { usageCount: { increment: 1 } },
+      });
+    }
+
+    console.log(`  ✓ ${topic.title.substring(0, 50)}...`);
+  }
+
+  console.log(`✅ Seeded ${topics.length} generated topics`);
+}
+
+/**
+ * Seed LLM-generated responses into the database
+ */
+async function seedGeneratedResponses(
+  prisma: PrismaClient,
+  responses: GeneratedResponse[],
+): Promise<void> {
+  console.log('💬 Seeding generated responses...');
+
+  // Sort responses to ensure parents are created before children
+  const sortedResponses = [...responses].sort((a, b) => {
+    if (a.parentId === null && b.parentId !== null) return -1;
+    if (a.parentId !== null && b.parentId === null) return 1;
+    return 0;
+  });
+
+  for (const response of sortedResponses) {
+    const createdAt = generateDemoTimestamp(`response-${response.id}`);
+
+    await prisma.response.upsert({
+      where: { id: response.id },
+      update: {
+        content: response.content,
+        citedSources: response.citedSources as unknown as Prisma.InputJsonValue,
+      },
+      create: {
+        id: response.id,
+        topicId: response.topicId,
+        authorId: response.authorId,
+        parentId: response.parentId,
+        content: response.content,
+        citedSources: response.citedSources as unknown as Prisma.InputJsonValue,
+        createdAt,
+      },
+    });
+  }
+
+  // Update response counts on topics
+  const topicResponseCounts = new Map<string, number>();
+  for (const response of responses) {
+    const count = topicResponseCounts.get(response.topicId) ?? 0;
+    topicResponseCounts.set(response.topicId, count + 1);
+  }
+
+  for (const [topicId, count] of topicResponseCounts) {
+    await prisma.discussionTopic.update({
+      where: { id: topicId },
+      data: { responseCount: { increment: count } },
+    });
+  }
+
+  console.log(`✅ Seeded ${responses.length} generated responses`);
+}
+
+/**
+ * Seed LLM-generated propositions into the database
+ */
+async function seedGeneratedPropositions(
+  prisma: PrismaClient,
+  propositions: GeneratedProposition[],
+): Promise<void> {
+  console.log('📝 Seeding generated propositions...');
+
+  for (const prop of propositions) {
+    const createdAt = generateDemoTimestamp(`proposition-${prop.id}`);
+
+    await prisma.proposition.upsert({
+      where: { id: prop.id },
+      update: {
+        statement: prop.statement,
+        supportCount: prop.supportCount,
+        opposeCount: prop.opposeCount,
+        nuancedCount: prop.nuancedCount,
+        consensusScore: prop.consensusScore,
+        status: prop.status,
+      },
+      create: {
+        id: prop.id,
+        topicId: prop.topicId,
+        statement: prop.statement,
+        source: prop.source,
+        supportCount: prop.supportCount,
+        opposeCount: prop.opposeCount,
+        nuancedCount: prop.nuancedCount,
+        consensusScore: prop.consensusScore,
+        status: prop.status,
+        createdAt,
+      },
+    });
+  }
+
+  console.log(`✅ Seeded ${propositions.length} generated propositions`);
+}
+
+/**
+ * Seed LLM-generated common ground analyses into the database
+ */
+async function seedGeneratedCommonGround(
+  prisma: PrismaClient,
+  commonGroundList: GeneratedCommonGround[],
+): Promise<void> {
+  console.log('🤝 Seeding generated common ground...');
+
+  for (const cg of commonGroundList) {
+    const createdAt = generateDemoTimestamp(`commonground-${cg.id}`);
+
+    await prisma.commonGroundAnalysis.upsert({
+      where: { id: cg.id },
+      update: {
+        agreementZones: cg.agreementZones as unknown as Prisma.InputJsonValue,
+        misunderstandings: cg.misunderstandings as unknown as Prisma.InputJsonValue,
+        genuineDisagreements: cg.genuineDisagreements as unknown as Prisma.InputJsonValue,
+        overallConsensusScore: cg.overallConsensusScore,
+      },
+      create: {
+        id: cg.id,
+        topicId: cg.topicId,
+        version: cg.version,
+        agreementZones: cg.agreementZones as unknown as Prisma.InputJsonValue,
+        misunderstandings: cg.misunderstandings as unknown as Prisma.InputJsonValue,
+        genuineDisagreements: cg.genuineDisagreements as unknown as Prisma.InputJsonValue,
+        overallConsensusScore: cg.overallConsensusScore,
+        participantCountAtGeneration: cg.participantCountAtGeneration,
+        responseCountAtGeneration: cg.responseCountAtGeneration,
+        modelVersion: cg.modelVersion,
+        createdAt,
+      },
+    });
+  }
+
+  console.log(`✅ Seeded ${commonGroundList.length} generated common ground analyses`);
+}
+
+/**
+ * Log LLM-generated bridging suggestions (no DB table yet)
+ */
+function seedGeneratedBridging(bridgingList: GeneratedBridgingSuggestion[]): void {
+  console.log(`🌉 Bridging suggestions: ${bridgingList.length} (cache only, no DB table yet)`);
+}
+
 /**
  * Main demo seed orchestrator
  *
  * Seeds all demo data in the correct dependency order:
  * 1. Personas (users)
  * 2. Tags
- * 3. Topics
- * 4. Responses
- * 5. Propositions
+ * 3. Topics (hand-crafted + generated)
+ * 4. Responses (hand-crafted + generated)
+ * 5. Propositions (hand-crafted + generated)
  * 6. Alignments
- * 7. Common ground
+ * 7. Common ground (hand-crafted + generated)
  * 8. AI feedback
+ * 9. Bridging suggestions (generated, cache only)
  */
 export async function seedDemo(
   prisma: PrismaClient,
@@ -486,22 +721,62 @@ export async function seedDemo(
     console.log('');
   }
 
+  // Get generated content (from cache or LLM)
+  const generatedContent = await getGeneratedContent(options);
+  if (generatedContent) {
+    console.log('');
+  }
+
   // Phase 2: Foundational
   await seedDemoPersonas(prisma);
   console.log('');
 
   // Phase 3: User Story 1
   await seedDemoTags(prisma);
+
+  // Seed hand-crafted topics
   await seedDemoTopics(prisma);
+  // Seed generated topics
+  if (generatedContent) {
+    await seedGeneratedTopics(prisma, generatedContent.topics);
+  }
+
+  // Seed hand-crafted responses
   await seedDemoResponses(prisma);
+  // Seed generated responses
+  if (generatedContent) {
+    await seedGeneratedResponses(prisma, generatedContent.responses);
+  }
+
+  // Seed hand-crafted propositions
   await seedDemoPropositions(prisma);
+  // Seed generated propositions
+  if (generatedContent) {
+    await seedGeneratedPropositions(prisma, generatedContent.propositions);
+  }
+
   await seedDemoAlignments(prisma);
+
+  // Seed hand-crafted common ground
   await seedDemoCommonGround(prisma);
+  // Seed generated common ground and bridging
+  if (generatedContent) {
+    await seedGeneratedCommonGround(prisma, generatedContent.commonGround);
+    seedGeneratedBridging(generatedContent.bridging);
+  }
   console.log('');
 
   // Phase 5: User Story 3
   await seedDemoAIFeedback(prisma);
   console.log('');
+
+  // Calculate totals
+  const totalTopics = DEMO_TOPICS.length + (generatedContent?.topics.length ?? 0);
+  const totalResponses = DEMO_RESPONSES.length + (generatedContent?.responses.length ?? 0);
+  const totalPropositions = DEMO_PROPOSITIONS.length + (generatedContent?.propositions.length ?? 0);
+  const totalCommonGround =
+    DEMO_COMMON_GROUND.length + (generatedContent?.commonGround.length ?? 0);
+  const totalBridging = generatedContent?.bridging.length ?? 0;
 
   // Summary
   console.log('🎉 Demo environment seed complete!');
@@ -509,12 +784,23 @@ export async function seedDemo(
   console.log('📊 Summary:');
   console.log(`  • ${DEMO_PERSONAS.length} personas`);
   console.log(`  • ${DEMO_TAGS.length} tags`);
-  console.log(`  • ${DEMO_TOPICS.length} topics`);
-  console.log(`  • ${DEMO_RESPONSES.length} responses`);
-  console.log(`  • ${DEMO_PROPOSITIONS.length} propositions`);
+  console.log(
+    `  • ${totalTopics} topics (${DEMO_TOPICS.length} hand-crafted${generatedContent ? ` + ${generatedContent.topics.length} generated` : ''})`,
+  );
+  console.log(
+    `  • ${totalResponses} responses (${DEMO_RESPONSES.length} hand-crafted${generatedContent ? ` + ${generatedContent.responses.length} generated` : ''})`,
+  );
+  console.log(
+    `  • ${totalPropositions} propositions (${DEMO_PROPOSITIONS.length} hand-crafted${generatedContent ? ` + ${generatedContent.propositions.length} generated` : ''})`,
+  );
   console.log(`  • ${DEMO_ALIGNMENTS.length} alignments`);
-  console.log(`  • ${DEMO_COMMON_GROUND.length} common ground analyses`);
+  console.log(
+    `  • ${totalCommonGround} common ground analyses (${DEMO_COMMON_GROUND.length} hand-crafted${generatedContent ? ` + ${generatedContent.commonGround.length} generated` : ''})`,
+  );
   console.log(`  • ${DEMO_AI_FEEDBACK.length} AI feedback instances`);
+  if (totalBridging > 0) {
+    console.log(`  • ${totalBridging} bridging suggestions (cache only)`);
+  }
   console.log('');
   console.log('🔑 Demo credentials:');
   for (const persona of DEMO_PERSONAS) {
