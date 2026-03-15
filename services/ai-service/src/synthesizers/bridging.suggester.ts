@@ -89,20 +89,21 @@ export class BridgingSuggester {
       const hasDisagreement =
         (alignmentCounts.SUPPORT > 0 && alignmentCounts.OPPOSE > 0) || alignmentCounts.NUANCED > 0;
 
-      if (hasDisagreement) {
-        // This proposition has multiple perspectives - good candidate for bridging
+      // Categorize based on consensus score (mutually exclusive)
+      const consensusScore = proposition.consensusScore ? Number(proposition.consensusScore) : null;
+
+      if (consensusScore !== null && consensusScore >= 0.7) {
+        // High consensus = common ground (not a conflict)
+        commonGroundAreas.push(proposition.statement.substring(0, 100));
+      } else if (hasDisagreement) {
+        // Has disagreement AND low/moderate consensus = conflict area worth bridging
         const bridgingSuggestion = this.generateBridgingSuggestion(proposition, alignmentCounts);
         suggestions.push(bridgingSuggestion);
 
-        // Track conflict areas
+        // Track as conflict area if there are opposing views
         if (alignmentCounts.SUPPORT > 0 && alignmentCounts.OPPOSE > 0) {
           conflictAreas.push(proposition.statement.substring(0, 100));
         }
-      }
-
-      // Identify common ground (high consensus or strong support)
-      if (proposition.consensusScore && Number(proposition.consensusScore) > 0.7) {
-        commonGroundAreas.push(proposition.statement.substring(0, 100));
       }
     }
 
