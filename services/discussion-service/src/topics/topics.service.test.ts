@@ -27,6 +27,8 @@ const createMockPrismaService = () => ({
   discussion: {
     create: vi.fn(),
   },
+  // For dynamic participant/response count queries
+  $queryRaw: vi.fn().mockResolvedValue([]),
 });
 
 // Mock Search Service
