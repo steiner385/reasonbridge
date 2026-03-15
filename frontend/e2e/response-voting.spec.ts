@@ -10,23 +10,15 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount } from './utils/auth-helpers';
+import { loginWithDemoAccount, navigateToSeededTopic, SEEDED_TOPICS } from './helpers/demo-auth';
 
 /**
  * Helper to navigate to a topic with responses
- * Uses seeded "Remote Work" topic which has responses
+ * Uses seeded topic via direct URL navigation (more reliable than UI clicks)
  */
 async function navigateToTopicWithResponses(page: import('@playwright/test').Page) {
-  await page.goto('/topics');
-  await page.waitForLoadState('networkidle');
-
-  // Click on first topic card (seeded topics have responses)
-  const topicCard = page.locator('[data-testid="topic-card"]').first();
-  await expect(topicCard).toBeVisible({ timeout: 10000 });
-  await topicCard.click();
-
-  // Wait for discussion page to load
-  await page.waitForLoadState('networkidle');
+  // Navigate directly to a seeded topic that has responses
+  await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
   // Wait for responses to load
   await page.waitForSelector('[data-testid="response-item"]', { timeout: 15000 });
@@ -34,7 +26,7 @@ async function navigateToTopicWithResponses(page: import('@playwright/test').Pag
 
 test.describe('Response Voting', () => {
   test.beforeEach(async ({ page }) => {
-    await loginWithDemoAccount(page);
+    await loginWithDemoAccount(page, 'Alice Anderson');
   });
 
   test('should display vote buttons on responses', async ({ page }) => {

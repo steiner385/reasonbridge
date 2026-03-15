@@ -234,12 +234,8 @@ test.describe('Topic Status Management', () => {
 
     // Issue #991 - Moderator role checking is now implemented
     test('should see Lock button on active topics', async ({ page }) => {
-      await page.goto('/discussions');
-
-      // Select an active topic from left panel
-      const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
-      await expect(firstTopic).toBeVisible();
-      await firstTopic.click();
+      // Navigate directly to a seeded active topic (more reliable than UI navigation)
+      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
       // Wait for discussion page to load
       await expect(page.locator('.conversation-panel h1')).toBeVisible();

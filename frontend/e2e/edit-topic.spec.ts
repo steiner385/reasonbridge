@@ -14,19 +14,8 @@ import { loginWithDemoAccount, SEEDED_TOPICS } from './helpers/demo-auth';
 test.describe('Topic Editing', () => {
   test.describe('As Topic Creator', () => {
     test.beforeEach(async ({ page }) => {
-      // Login as regular user (Alice Anderson)
-      await page.goto('/');
-      await page.getByRole('button', { name: /log in/i }).click();
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await page.getByText('Alice Anderson').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /^log in$/i }).click();
-      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-
-      // Wait for navigation and authentication state to stabilize
-      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+      // Login as regular user (Alice Anderson) using helper for consistency
+      await loginWithDemoAccount(page, 'Alice Anderson');
     });
 
     test('should see Edit button on own topics', async ({ page }) => {
@@ -51,9 +40,13 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
 
-      // Should see Edit button
+      // Wait for redirect to discussion page and data to load
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500); // Allow React state to update
+
+      // Should see Edit button on discussion page (creator can edit own topics)
       await expect(page.getByRole('button', { name: /edit topic/i })).toBeVisible({
         timeout: 5000,
       });
@@ -77,7 +70,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Click Edit button
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -134,7 +131,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Click Edit button
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -181,7 +182,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Click Edit button
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -222,7 +227,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Click Edit button
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -261,7 +270,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Click Edit button
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -297,7 +310,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Click Edit button
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -313,19 +330,8 @@ test.describe('Topic Editing', () => {
 
   test.describe('Edit History', () => {
     test.beforeEach(async ({ page }) => {
-      // Login as regular user
-      await page.goto('/');
-      await page.getByRole('button', { name: /log in/i }).click();
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await page.getByText('Alice Anderson').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /^log in$/i }).click();
-      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-
-      // Wait for navigation and authentication state to stabilize
-      await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+      // Login as regular user using helper for consistency
+      await loginWithDemoAccount(page, 'Alice Anderson');
     });
 
     test('should display edit history after editing', async ({ page }) => {
@@ -346,7 +352,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Make an edit
       await page.getByRole('button', { name: /edit topic/i }).click();
@@ -390,7 +400,11 @@ test.describe('Topic Editing', () => {
 
       await modal.getByRole('button', { name: /create topic/i }).click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await page.waitForTimeout(1000);
+
+      // Wait for redirect to discussion page
+      await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
 
       // Edit the topic
       await page.getByRole('button', { name: /edit topic/i }).click();
