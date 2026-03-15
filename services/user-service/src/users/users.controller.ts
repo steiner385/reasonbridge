@@ -42,6 +42,12 @@ import {
   UpdatePrivacySettingsDto,
   PrivacySettingsResponseDto,
 } from './dto/privacy-settings.dto.js';
+import { ContributionsService } from '../contributions/contributions.service.js';
+import type {
+  ContributionType,
+  ContributionsResponseDto,
+  ContributionStatsDto,
+} from '../contributions/dto/contribution.dto.js';
 
 /**
  * Validates that a string is a valid UUID v4 format
@@ -59,6 +65,8 @@ export class UsersController {
     @Inject(UsersService) private readonly usersService: UsersService,
     @Inject(FeedbackPreferencesService)
     private readonly feedbackPreferencesService: FeedbackPreferencesService,
+    @Inject(ContributionsService)
+    private readonly contributionsService: ContributionsService,
   ) {}
 
   /**
@@ -211,6 +219,49 @@ export class UsersController {
     this.logger.debug(`Fetching user by ID: ${id}`);
     const user = await this.usersService.findById(id);
     return new PublicUserResponseDto(user);
+  }
+
+  /**
+   * GET /users/:id/contributions - Get a user's contributions with pagination
+   * Public endpoint - no authentication required
+   */
+  @Get(':id/contributions')
+  @UseInterceptors(OptionalCacheInterceptor)
+  @CacheTTL(300000) // 5 minutes
+  async getUserContributions(
+    @Param('id') id: string,
+    @Query('page') pageStr?: string,
+    @Query('limit') limitStr?: string,
+    @Query('type') type?: ContributionType,
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ): Promise<ContributionsResponseDto> {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${id.substring(0, 50)}${id.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    const page = Math.max(parseInt(pageStr || '1', 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(limitStr || '20', 10) || 20, 1), 100);
+
+    return this.contributionsService.getContributions(id, { page, limit, type, sortOrder });
+  }
+
+  /**
+   * GET /users/:id/contributions/stats - Get a user's contribution statistics
+   * Public endpoint - no authentication required
+   */
+  @Get(':id/contributions/stats')
+  @UseInterceptors(OptionalCacheInterceptor)
+  @CacheTTL(300000) // 5 minutes
+  async getUserContributionStats(@Param('id') id: string): Promise<ContributionStatsDto> {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException(
+        `Invalid user ID format: expected UUID, received "${id.substring(0, 50)}${id.length > 50 ? '...' : ''}"`,
+      );
+    }
+
+    return this.contributionsService.getContributionStats(id);
   }
 
   /**

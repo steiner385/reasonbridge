@@ -11,6 +11,7 @@ import { PrismaModule } from '../prisma/prisma.module.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
 import { FeedbackPreferencesService } from '../services/feedback-preferences.service.js';
 import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interceptor.js';
+import { ContributionsService } from '../contributions/contributions.service.js';
 
 @Module({
   imports: [forwardRef(() => AuthModule), PrismaModule],
@@ -20,6 +21,7 @@ import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interce
     BotDetectorService,
     FeedbackPreferencesService,
     OptionalCacheInterceptor,
+    ContributionsService,
   ],
   exports: [UsersService, BotDetectorService, FeedbackPreferencesService],
 })

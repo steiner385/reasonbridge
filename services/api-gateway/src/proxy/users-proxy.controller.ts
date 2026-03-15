@@ -148,6 +148,64 @@ export class UsersProxyController {
   }
 
   /**
+   * GET /users/:id/contributions - Get user's contribution history
+   */
+  @Get(':id/contributions')
+  async getUserContributions(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    if (!isValidUUID(id)) {
+      res.status(400).send({
+        statusCode: 400,
+        message: `Invalid user ID format: expected UUID`,
+        error: 'Bad Request',
+      });
+      return;
+    }
+
+    // Forward query params from original request
+    const url = new URL(res.request.url, 'http://localhost');
+    const queryString = url.search;
+
+    const response = await this.proxyService.proxyToUserService({
+      method: 'GET',
+      path: `/users/${id}/contributions${queryString}`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
+   * GET /users/:id/contributions/stats - Get user's contribution statistics
+   */
+  @Get(':id/contributions/stats')
+  async getUserContributionStats(
+    @Param('id') id: string,
+    @Headers('authorization') authHeader: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    if (!isValidUUID(id)) {
+      res.status(400).send({
+        statusCode: 400,
+        message: `Invalid user ID format: expected UUID`,
+        error: 'Bad Request',
+      });
+      return;
+    }
+
+    const response = await this.proxyService.proxyToUserService({
+      method: 'GET',
+      path: `/users/${id}/contributions/stats`,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
    * Upload avatar for a user
    * Accepts base64-encoded file data in request body
    */
