@@ -159,5 +159,11 @@ describe('TopicGenerator', () => {
         'LLM API error',
       );
     });
+
+    it('should throw error for unknown category', async () => {
+      await expect(generator.generateForCategory('Unknown Category', 1, 113)).rejects.toThrow(
+        'Unknown category: Unknown Category',
+      );
+    });
   });
 });

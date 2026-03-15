@@ -53,6 +53,7 @@ const CREATOR_IDS = [
   DEMO_USER_IDS.MOD_MARTINEZ,
   DEMO_USER_IDS.ALICE_ANDERSON,
   DEMO_USER_IDS.BOB_BUILDER,
+  DEMO_USER_IDS.NEW_USER,
 ];
 
 // =============================================================================
@@ -93,7 +94,10 @@ export class TopicGenerator {
     startingTopicNumber: number,
   ): Promise<GeneratedTopic[]> {
     const categoryConfig = TOPIC_CATEGORIES.find((c) => c.name === category);
-    const tagIds = categoryConfig?.tags ?? [];
+    if (!categoryConfig) {
+      throw new Error(`Unknown category: ${category}`);
+    }
+    const tagIds = categoryConfig.tags;
 
     const prompt = this.buildPrompt(category, count);
     const schema = this.buildSchema();
