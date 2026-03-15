@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useLayoutEffect } from 'react';
 import { ResponseList } from '../responses/ResponseList';
 import { CompactComposer } from '../responses/CompactComposer';
 import { useDiscussionLayout } from '../../contexts/DiscussionLayoutContext';
@@ -55,7 +55,7 @@ export function ConversationPanel({
   topic,
   highlightedResponseIds = new Set(),
   showComposer = true,
-  height,
+  height: _height,
   onPreviewFeedbackChange,
   onCompositionStateChange: _onCompositionStateChange,
   onResponseSubmit,
@@ -78,8 +78,31 @@ export function ConversationPanel({
   } | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
+  // Measured height of the response list container for virtual scrolling
+  const [measuredHeight, setMeasuredHeight] = useState<number>(0);
 
   const showHamburgerMenu = breakpoint === 'tablet' || breakpoint === 'mobile';
+
+  // Measure the actual available height for the response list container
+  // Using ResizeObserver to handle dynamic resizing (window resize, panel resize, etc.)
+  useLayoutEffect(() => {
+    const container = responseListContainerRef.current;
+    if (!container) return;
+
+    const updateHeight = () => {
+      const rect = container.getBoundingClientRect();
+      setMeasuredHeight(rect.height);
+    };
+
+    // Initial measurement
+    updateHeight();
+
+    // Watch for size changes
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   // Subscribe to WebSocket messages for new responses
   useEffect(() => {
@@ -483,11 +506,11 @@ export function ConversationPanel({
       )}
 
       {/* Response List */}
-      <div ref={responseListContainerRef} className="flex-1 min-h-0 px-4 py-2">
+      <div ref={responseListContainerRef} className="flex-1 min-h-0 overflow-hidden">
         <ResponseList
           discussionId={topic.id}
           enableThreading
-          height={height ? height - 200 : 520}
+          height={measuredHeight || 400}
           highlightedResponseIds={highlightedResponseIds}
           onReplySubmit={handleReplySubmitWithScroll}
           onPreviewFeedbackChange={onPreviewFeedbackChange}
