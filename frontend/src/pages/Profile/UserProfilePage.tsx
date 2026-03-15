@@ -199,8 +199,8 @@ function UserProfilePage() {
             </CardHeader>
             <CardBody>
               <ProfileStats
-                topicCount={user.topicCount}
-                responseCount={user.responseCount}
+                topicCount={contributionStats?.topicCount}
+                responseCount={contributionStats?.responseCount}
                 isVisible={visibility.activityHistory}
                 privacyMessage="Follow this user to see their activity history"
               />

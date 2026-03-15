@@ -15,10 +15,10 @@ export type ContributionType = 'TOPIC' | 'RESPONSE' | 'VOTE' | 'PROPOSITION';
  */
 export class ContributionTopicContextDto {
   @ApiProperty({ description: 'Topic ID' })
-  id: string;
+  id!: string;
 
   @ApiProperty({ description: 'Topic title' })
-  title: string;
+  title!: string;
 
   @ApiPropertyOptional({ description: 'Topic status' })
   status?: string;
@@ -29,16 +29,16 @@ export class ContributionTopicContextDto {
  */
 export class ContributionItemDto {
   @ApiProperty({ description: 'Unique identifier for the contribution' })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Type of contribution',
     enum: ['TOPIC', 'RESPONSE', 'VOTE', 'PROPOSITION'],
   })
-  type: ContributionType;
+  type!: ContributionType;
 
   @ApiProperty({ description: 'ISO 8601 timestamp of when the contribution was created' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiPropertyOptional({ description: 'Content preview (for topics/responses, max 200 chars)' })
   contentPreview?: string;
@@ -73,16 +73,16 @@ export class ContributionItemDto {
  */
 export class ContributionStatsDto {
   @ApiProperty({ description: 'Number of topics created' })
-  topicCount: number;
+  topicCount!: number;
 
   @ApiProperty({ description: 'Number of responses posted' })
-  responseCount: number;
+  responseCount!: number;
 
   @ApiProperty({ description: 'Number of votes cast' })
-  voteCount: number;
+  voteCount!: number;
 
   @ApiProperty({ description: 'Number of propositions made' })
-  propositionCount: number;
+  propositionCount!: number;
 }
 
 /**
@@ -90,22 +90,22 @@ export class ContributionStatsDto {
  */
 export class PaginationDto {
   @ApiProperty({ description: 'Current page number (1-indexed)' })
-  currentPage: number;
+  currentPage!: number;
 
   @ApiProperty({ description: 'Total number of pages' })
-  totalPages: number;
+  totalPages!: number;
 
   @ApiProperty({ description: 'Total number of items' })
-  totalItems: number;
+  totalItems!: number;
 
   @ApiProperty({ description: 'Number of items per page' })
-  itemsPerPage: number;
+  itemsPerPage!: number;
 
   @ApiProperty({ description: 'Whether there is a next page' })
-  hasNextPage: boolean;
+  hasNextPage!: boolean;
 
   @ApiProperty({ description: 'Whether there is a previous page' })
-  hasPreviousPage: boolean;
+  hasPreviousPage!: boolean;
 }
 
 /**
@@ -113,8 +113,8 @@ export class PaginationDto {
  */
 export class ContributionsResponseDto {
   @ApiProperty({ description: 'Array of contribution items', type: [ContributionItemDto] })
-  data: ContributionItemDto[];
+  data!: ContributionItemDto[];
 
   @ApiProperty({ description: 'Pagination metadata', type: PaginationDto })
-  pagination: PaginationDto;
+  pagination!: PaginationDto;
 }

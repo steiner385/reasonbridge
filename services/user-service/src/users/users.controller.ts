@@ -217,8 +217,12 @@ export class UsersController {
     }
 
     this.logger.debug(`Fetching user by ID: ${id}`);
-    const user = await this.usersService.findById(id);
-    return new PublicUserResponseDto(user);
+    const [user, followerCount, followingCount] = await Promise.all([
+      this.usersService.findById(id),
+      this.usersService.getFollowerCount(id),
+      this.usersService.getFollowingCount(id),
+    ]);
+    return new PublicUserResponseDto(user, followerCount, followingCount);
   }
 
   /**
