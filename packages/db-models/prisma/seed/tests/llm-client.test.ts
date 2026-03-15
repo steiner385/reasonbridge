@@ -97,6 +97,17 @@ describe('SeedingLLMClient', () => {
       });
       expect(result).toEqual({ plain: 'block' });
     });
+
+    it('should enforce rate limiting between requests', async () => {
+      const startTime = Date.now();
+
+      await client.generateJSON('prompt 1', {});
+      await client.generateJSON('prompt 2', {});
+
+      const elapsed = Date.now() - startTime;
+      // Should take at least 500ms due to rate limiting
+      expect(elapsed).toBeGreaterThanOrEqual(500);
+    });
   });
 
   describe('retry logic', () => {
