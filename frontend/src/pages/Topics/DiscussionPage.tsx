@@ -13,6 +13,8 @@ import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useTopics } from '../../lib/useTopics';
 import { useTopic } from '../../lib/useTopic';
 import { usePropositions } from '../../hooks/usePropositions';
+import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
+import { useBridgingSuggestions } from '../../lib/useBridgingSuggestions';
 import { useToast } from '../../contexts/ToastContext';
 import { responseService } from '../../services/responseService';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
@@ -114,6 +116,16 @@ export function DiscussionPage() {
 
   // Fetch propositions for the active topic
   const { data: rawPropositions = [] } = usePropositions(activeTopic?.id || null);
+
+  // Fetch common ground analysis for the active topic
+  const { data: commonGroundAnalysis, isLoading: isLoadingCommonGround } = useCommonGroundAnalysis(
+    activeTopicId ?? undefined,
+  );
+
+  // Fetch bridging suggestions for the active topic
+  const { data: bridgingSuggestionsData, isLoading: isLoadingBridging } = useBridgingSuggestions(
+    activeTopicId ?? undefined,
+  );
 
   // Transform propositions to match PropositionItem type expected by MetadataPanel
   const propositions = useMemo(() => {
@@ -321,10 +333,10 @@ export function DiscussionPage() {
           <MetadataPanel
             topic={activeTopic}
             propositions={propositions}
-            commonGroundAnalysis={null}
-            bridgingSuggestions={null}
-            isLoadingCommonGround={false}
-            isLoadingBridging={false}
+            commonGroundAnalysis={commonGroundAnalysis ?? null}
+            bridgingSuggestions={bridgingSuggestionsData ?? null}
+            isLoadingCommonGround={isLoadingCommonGround}
+            isLoadingBridging={isLoadingBridging}
             onPropositionHover={handlePropositionHover}
             onPropositionClick={handlePropositionClick}
             onAgreementZoneClick={handleAgreementZoneClick}
