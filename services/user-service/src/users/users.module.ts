@@ -10,11 +10,17 @@ import { AuthModule } from '../auth/auth.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
 import { FeedbackPreferencesService } from '../services/feedback-preferences.service.js';
+import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interceptor.js';
 
 @Module({
   imports: [forwardRef(() => AuthModule), PrismaModule],
   controllers: [UsersController],
-  providers: [UsersService, BotDetectorService, FeedbackPreferencesService],
+  providers: [
+    UsersService,
+    BotDetectorService,
+    FeedbackPreferencesService,
+    OptionalCacheInterceptor,
+  ],
   exports: [UsersService, BotDetectorService, FeedbackPreferencesService],
 })
 export class UsersModule {}
