@@ -483,7 +483,7 @@ export function ConversationPanel({
       )}
 
       {/* Response List */}
-      <div ref={responseListContainerRef} className="flex-1 overflow-auto px-4 py-2">
+      <div ref={responseListContainerRef} className="flex-1 min-h-0 px-4 py-2">
         <ResponseList
           discussionId={topic.id}
           enableThreading
