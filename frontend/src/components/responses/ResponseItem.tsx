@@ -27,6 +27,7 @@
  */
 
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import type { ResponseDetail } from '../../services/discussionService';
@@ -284,21 +285,23 @@ export function ResponseItem({
             {/* Header - only shown at group start or in non-compact mode */}
             {isGroupStart && (
               <div className={`flex items-start ${compact ? 'gap-2' : 'gap-3'} ${headerMargin}`}>
-                {/* Avatar */}
-                <div
-                  className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}
+                {/* Avatar - links to profile */}
+                <Link
+                  to={`/profile/${response.author.id}`}
+                  className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2 dark:hover:ring-offset-gray-900 transition-shadow`}
                 >
                   {response.author.displayName.charAt(0).toUpperCase()}
-                </div>
+                </Link>
 
                 {/* Author and Timestamp */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span
-                      className={`font-semibold text-gray-900 dark:text-gray-100 ${compact ? 'text-sm' : ''}`}
+                    <Link
+                      to={`/profile/${response.author.id}`}
+                      className={`font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 hover:underline ${compact ? 'text-sm' : ''}`}
                     >
                       {response.author.displayName}
-                    </span>
+                    </Link>
                     {/* Trust score badge - shows when trust data is available */}
                     <InlineTrustBadge
                       trustScoreAbility={response.author.trustScoreAbility}
