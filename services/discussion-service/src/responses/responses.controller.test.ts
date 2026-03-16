@@ -1,6 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { ResponsesController } from './responses.controller.js';
+import type { JwtPayload } from '../auth/index.js';
+
+// Mock user for authenticated endpoints
+const mockUser: JwtPayload = {
+  sub: 'user-123',
+  email: 'user@test.com',
+  roles: ['USER'],
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + 3600,
+};
 
 const createMockResponsesService = () => ({
   getResponsesForTopic: vi.fn(),
@@ -60,12 +70,12 @@ describe('ResponsesController', () => {
       const createdResponse = { id: 'response-1', ...createDto };
       mockResponsesService.createResponse.mockResolvedValue(createdResponse);
 
-      const result = await controller.createResponse('topic-1', createDto as any);
+      const result = await controller.createResponse('topic-1', mockUser, createDto as any);
 
       expect(result).toEqual(createdResponse);
       expect(mockResponsesService.createResponse).toHaveBeenCalledWith(
         'topic-1',
-        '00000000-0000-0000-0000-000000000000', // Placeholder authorId
+        'user-123', // User ID from JWT
         createDto,
       );
     });
@@ -74,11 +84,11 @@ describe('ResponsesController', () => {
       const createDto = { content: 'Test' };
       mockResponsesService.createResponse.mockResolvedValue({ id: 'response-1' });
 
-      await controller.createResponse('topic-1', createDto as any);
+      await controller.createResponse('topic-1', mockUser, createDto as any);
 
       expect(mockResponsesService.createResponse).toHaveBeenCalledWith(
         expect.any(String),
-        '00000000-0000-0000-0000-000000000000',
+        'user-123',
         expect.any(Object),
       );
     });
@@ -90,12 +100,17 @@ describe('ResponsesController', () => {
       const updatedResponse = { id: 'response-1', content: 'Updated content' };
       mockResponsesService.updateResponse.mockResolvedValue(updatedResponse);
 
-      const result = await controller.updateResponse('topic-1', 'response-1', updateDto as any);
+      const result = await controller.updateResponse(
+        'topic-1',
+        'response-1',
+        mockUser,
+        updateDto as any,
+      );
 
       expect(result).toEqual(updatedResponse);
       expect(mockResponsesService.updateResponse).toHaveBeenCalledWith(
         'response-1',
-        '00000000-0000-0000-0000-000000000000',
+        'user-123',
         updateDto,
       );
     });
@@ -104,11 +119,11 @@ describe('ResponsesController', () => {
       const updateDto = { content: 'Updated' };
       mockResponsesService.updateResponse.mockResolvedValue({ id: 'response-1' });
 
-      await controller.updateResponse('topic-1', 'response-1', updateDto as any);
+      await controller.updateResponse('topic-1', 'response-1', mockUser, updateDto as any);
 
       expect(mockResponsesService.updateResponse).toHaveBeenCalledWith(
         'response-1',
-        '00000000-0000-0000-0000-000000000000',
+        'user-123',
         updateDto,
       );
     });
@@ -120,12 +135,17 @@ describe('ResponsesController', () => {
       const moderationResult = { responseId: 'response-1', action: 'hide', success: true };
       mockContentModerationService.hideResponse.mockResolvedValue(moderationResult);
 
-      const result = await controller.moderateResponse('topic-1', 'response-1', moderateDto as any);
+      const result = await controller.moderateResponse(
+        'topic-1',
+        'response-1',
+        mockUser,
+        moderateDto as any,
+      );
 
       expect(result).toEqual(moderationResult);
       expect(mockContentModerationService.hideResponse).toHaveBeenCalledWith(
         'response-1',
-        '00000000-0000-0000-0000-000000000000',
+        'user-123',
         moderateDto,
       );
     });
@@ -135,12 +155,17 @@ describe('ResponsesController', () => {
       const moderationResult = { responseId: 'response-1', action: 'remove', success: true };
       mockContentModerationService.removeResponse.mockResolvedValue(moderationResult);
 
-      const result = await controller.moderateResponse('topic-1', 'response-1', moderateDto as any);
+      const result = await controller.moderateResponse(
+        'topic-1',
+        'response-1',
+        mockUser,
+        moderateDto as any,
+      );
 
       expect(result).toEqual(moderationResult);
       expect(mockContentModerationService.removeResponse).toHaveBeenCalledWith(
         'response-1',
-        '00000000-0000-0000-0000-000000000000',
+        'user-123',
         moderateDto,
       );
     });
@@ -149,7 +174,7 @@ describe('ResponsesController', () => {
       const moderateDto = { action: 'hide', reason: '' };
 
       await expect(
-        controller.moderateResponse('topic-1', 'response-1', moderateDto as any),
+        controller.moderateResponse('topic-1', 'response-1', mockUser, moderateDto as any),
       ).rejects.toThrow('Reason is required for moderation actions');
     });
 
@@ -157,7 +182,7 @@ describe('ResponsesController', () => {
       const moderateDto = { action: 'hide', reason: '   ' };
 
       await expect(
-        controller.moderateResponse('topic-1', 'response-1', moderateDto as any),
+        controller.moderateResponse('topic-1', 'response-1', mockUser, moderateDto as any),
       ).rejects.toThrow('Reason is required for moderation actions');
     });
 
@@ -165,7 +190,7 @@ describe('ResponsesController', () => {
       const moderateDto = { action: 'hide' };
 
       await expect(
-        controller.moderateResponse('topic-1', 'response-1', moderateDto as any),
+        controller.moderateResponse('topic-1', 'response-1', mockUser, moderateDto as any),
       ).rejects.toThrow('Reason is required for moderation actions');
     });
 
@@ -173,7 +198,7 @@ describe('ResponsesController', () => {
       const moderateDto = { action: 'invalid', reason: 'Some reason' };
 
       await expect(
-        controller.moderateResponse('topic-1', 'response-1', moderateDto as any),
+        controller.moderateResponse('topic-1', 'response-1', mockUser, moderateDto as any),
       ).rejects.toThrow('Invalid moderation action');
     });
   });
@@ -184,12 +209,12 @@ describe('ResponsesController', () => {
       const restoreResult = { responseId: 'response-1', action: 'restore', success: true };
       mockContentModerationService.restoreResponse.mockResolvedValue(restoreResult);
 
-      const result = await controller.restoreResponse('topic-1', 'response-1', body);
+      const result = await controller.restoreResponse('topic-1', 'response-1', mockUser, body);
 
       expect(result).toEqual(restoreResult);
       expect(mockContentModerationService.restoreResponse).toHaveBeenCalledWith(
         'response-1',
-        '00000000-0000-0000-0000-000000000000',
+        'user-123',
         'False positive',
       );
     });
@@ -197,25 +222,25 @@ describe('ResponsesController', () => {
     it('should throw error when reason is missing', async () => {
       const body = { reason: '' };
 
-      await expect(controller.restoreResponse('topic-1', 'response-1', body)).rejects.toThrow(
-        'Reason is required for restoration',
-      );
+      await expect(
+        controller.restoreResponse('topic-1', 'response-1', mockUser, body),
+      ).rejects.toThrow('Reason is required for restoration');
     });
 
     it('should throw error when reason is only whitespace', async () => {
       const body = { reason: '   ' };
 
-      await expect(controller.restoreResponse('topic-1', 'response-1', body)).rejects.toThrow(
-        'Reason is required for restoration',
-      );
+      await expect(
+        controller.restoreResponse('topic-1', 'response-1', mockUser, body),
+      ).rejects.toThrow('Reason is required for restoration');
     });
 
     it('should throw error when reason is undefined', async () => {
       const body = {} as { reason: string };
 
-      await expect(controller.restoreResponse('topic-1', 'response-1', body)).rejects.toThrow(
-        'Reason is required for restoration',
-      );
+      await expect(
+        controller.restoreResponse('topic-1', 'response-1', mockUser, body),
+      ).rejects.toThrow('Reason is required for restoration');
     });
   });
 

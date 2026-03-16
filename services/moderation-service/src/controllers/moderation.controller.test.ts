@@ -1,6 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ModerationController } from './moderation.controller.js';
 import { BadRequestException } from '@nestjs/common';
+import type { JwtPayload } from '../auth/index.js';
+
+// Mock user for authenticated endpoints
+const mockUser: JwtPayload = {
+  sub: 'moderator-1',
+  email: 'moderator@test.com',
+  roles: ['MODERATOR'],
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + 3600,
+};
 
 const createMockScreeningService = () => ({
   screenContent: vi.fn(),
@@ -225,13 +235,18 @@ describe('ModerationController', () => {
   describe('createAction', () => {
     it('should throw BadRequestException if required fields missing', async () => {
       await expect(
-        controller.createAction({ targetType: '', targetId: '', actionType: '', reasoning: '' }),
+        controller.createAction(mockUser, {
+          targetType: '',
+          targetId: '',
+          actionType: '',
+          reasoning: '',
+        }),
       ).rejects.toThrow('targetType, targetId, and actionType are required');
     });
 
     it('should throw BadRequestException if reasoning is empty', async () => {
       await expect(
-        controller.createAction({
+        controller.createAction(mockUser, {
           targetType: 'response',
           targetId: 'response-1',
           actionType: 'warn',
@@ -250,10 +265,10 @@ describe('ModerationController', () => {
       const expectedResponse = { id: 'action-1', ...request };
       mockActionsService.createAction.mockResolvedValue(expectedResponse);
 
-      const result = await controller.createAction(request);
+      const result = await controller.createAction(mockUser, request);
 
       expect(result).toEqual(expectedResponse);
-      expect(mockActionsService.createAction).toHaveBeenCalledWith(request, 'system');
+      expect(mockActionsService.createAction).toHaveBeenCalledWith(request, 'moderator-1');
     });
   });
 
@@ -274,10 +289,10 @@ describe('ModerationController', () => {
       const expectedResponse = { id: 'action-1', status: 'ACTIVE' };
       mockActionsService.approveAction.mockResolvedValue(expectedResponse);
 
-      const result = await controller.approveAction('action-1', { notes: 'Approved' });
+      const result = await controller.approveAction('action-1', mockUser, { notes: 'Approved' });
 
       expect(result).toEqual(expectedResponse);
-      expect(mockActionsService.approveAction).toHaveBeenCalledWith('action-1', 'system', {
+      expect(mockActionsService.approveAction).toHaveBeenCalledWith('action-1', 'moderator-1', {
         notes: 'Approved',
       });
     });
@@ -286,7 +301,7 @@ describe('ModerationController', () => {
       const expectedResponse = { id: 'action-1', status: 'ACTIVE' };
       mockActionsService.approveAction.mockResolvedValue(expectedResponse);
 
-      const result = await controller.approveAction('action-1');
+      const result = await controller.approveAction('action-1', mockUser);
 
       expect(result).toEqual(expectedResponse);
     });
@@ -356,7 +371,7 @@ describe('ModerationController', () => {
 
   describe('createAppeal', () => {
     it('should throw BadRequestException if reason is empty', async () => {
-      await expect(controller.createAppeal('action-1', { reason: '  ' })).rejects.toThrow(
+      await expect(controller.createAppeal('action-1', mockUser, { reason: '  ' })).rejects.toThrow(
         'reason is required',
       );
     });
@@ -365,10 +380,12 @@ describe('ModerationController', () => {
       const appealResponse = { id: 'appeal-1', status: 'PENDING' };
       mockActionsService.createAppeal.mockResolvedValue(appealResponse);
 
-      const result = await controller.createAppeal('action-1', { reason: 'False positive' });
+      const result = await controller.createAppeal('action-1', mockUser, {
+        reason: 'False positive',
+      });
 
       expect(result).toEqual(appealResponse);
-      expect(mockActionsService.createAppeal).toHaveBeenCalledWith('action-1', 'system', {
+      expect(mockActionsService.createAppeal).toHaveBeenCalledWith('action-1', 'moderator-1', {
         reason: 'False positive',
       });
     });
@@ -389,13 +406,16 @@ describe('ModerationController', () => {
   describe('reviewAppeal', () => {
     it('should throw BadRequestException if decision is invalid', async () => {
       await expect(
-        controller.reviewAppeal('appeal-1', { decision: 'invalid' as any, reasoning: 'Reason' }),
+        controller.reviewAppeal('appeal-1', mockUser, {
+          decision: 'invalid' as any,
+          reasoning: 'Reason',
+        }),
       ).rejects.toThrow('decision must be either "upheld" or "denied"');
     });
 
     it('should throw BadRequestException if reasoning is empty', async () => {
       await expect(
-        controller.reviewAppeal('appeal-1', { decision: 'upheld', reasoning: '  ' }),
+        controller.reviewAppeal('appeal-1', mockUser, { decision: 'upheld', reasoning: '  ' }),
       ).rejects.toThrow('reasoning is required');
     });
 
@@ -403,13 +423,13 @@ describe('ModerationController', () => {
       const appealResponse = { id: 'appeal-1', decision: 'upheld' };
       mockActionsService.reviewAppeal.mockResolvedValue(appealResponse);
 
-      const result = await controller.reviewAppeal('appeal-1', {
+      const result = await controller.reviewAppeal('appeal-1', mockUser, {
         decision: 'upheld',
         reasoning: 'Appeal is valid',
       });
 
       expect(result).toEqual(appealResponse);
-      expect(mockActionsService.reviewAppeal).toHaveBeenCalledWith('appeal-1', 'system', {
+      expect(mockActionsService.reviewAppeal).toHaveBeenCalledWith('appeal-1', 'moderator-1', {
         decision: 'upheld',
         reasoning: 'Appeal is valid',
       });
@@ -419,25 +439,41 @@ describe('ModerationController', () => {
   describe('createTemporaryBan', () => {
     it('should throw BadRequestException if userId is empty', async () => {
       await expect(
-        controller.createTemporaryBan({ userId: '', durationDays: 7, reasoning: 'Reason' }),
+        controller.createTemporaryBan(mockUser, {
+          userId: '',
+          durationDays: 7,
+          reasoning: 'Reason',
+        }),
       ).rejects.toThrow('userId is required');
     });
 
     it('should throw BadRequestException if durationDays is 0', async () => {
       await expect(
-        controller.createTemporaryBan({ userId: 'user-1', durationDays: 0, reasoning: 'Reason' }),
+        controller.createTemporaryBan(mockUser, {
+          userId: 'user-1',
+          durationDays: 0,
+          reasoning: 'Reason',
+        }),
       ).rejects.toThrow('durationDays must be greater than 0');
     });
 
     it('should throw BadRequestException if durationDays exceeds 365', async () => {
       await expect(
-        controller.createTemporaryBan({ userId: 'user-1', durationDays: 366, reasoning: 'Reason' }),
+        controller.createTemporaryBan(mockUser, {
+          userId: 'user-1',
+          durationDays: 366,
+          reasoning: 'Reason',
+        }),
       ).rejects.toThrow('durationDays cannot exceed 365');
     });
 
     it('should throw BadRequestException if reasoning is empty', async () => {
       await expect(
-        controller.createTemporaryBan({ userId: 'user-1', durationDays: 7, reasoning: '  ' }),
+        controller.createTemporaryBan(mockUser, {
+          userId: 'user-1',
+          durationDays: 7,
+          reasoning: '  ',
+        }),
       ).rejects.toThrow('reasoning is required');
     });
 
@@ -445,7 +481,7 @@ describe('ModerationController', () => {
       const banResponse = { id: 'action-1', actionType: 'BAN' };
       mockActionsService.createTemporaryBan.mockResolvedValue(banResponse);
 
-      const result = await controller.createTemporaryBan({
+      const result = await controller.createTemporaryBan(mockUser, {
         userId: 'user-1',
         durationDays: 7,
         reasoning: 'Repeated violations',
@@ -456,7 +492,7 @@ describe('ModerationController', () => {
         'user-1',
         7,
         'Repeated violations',
-        'system',
+        'moderator-1',
       );
     });
   });
