@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardBody } from '../ui/Card';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type {
   PrivacySettings as PrivacySettingsType,
   ProfileVisibility,
@@ -116,6 +117,7 @@ function ProfileEditForm({
   const [formData, setFormData] = useState<ProfileEditFormData>(initialData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const { requireAuth } = useRequireAuth();
 
   // Display name validation (matches RegistrationForm validation)
   const validateDisplayName = (displayName: string): string | undefined => {
@@ -219,16 +221,18 @@ function ProfileEditForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields as touched
-    setTouched({ displayName: true, bio: true });
+    requireAuth(async () => {
+      // Mark all fields as touched
+      setTouched({ displayName: true, bio: true });
 
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
+      // Validate form
+      if (!validateForm()) {
+        return;
+      }
 
-    // Submit form
-    await onSubmit(formData);
+      // Submit form
+      await onSubmit(formData);
+    });
   };
 
   // Handle cancel

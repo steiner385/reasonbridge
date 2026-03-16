@@ -6,6 +6,7 @@
 import { forwardRef, useEffect, useCallback, useState } from 'react';
 import { useFollow } from '../../hooks/useFollow';
 import { useAuth } from '../../hooks/useAuth';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 
@@ -129,6 +130,7 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
     ref,
   ) => {
     const { user: currentUser } = useAuth();
+    const { requireAuth } = useRequireAuth();
     const { isFollowing, isLoading, error, toggleFollow, checkFollowStatus, unfollow } = useFollow(
       userId,
       initialFollowing,
@@ -156,19 +158,23 @@ export const FollowButton = forwardRef<HTMLButtonElement, FollowButtonProps>(
       }
     }, [error, onError]);
 
-    const handleClick = useCallback(async () => {
-      // Show confirmation for unfollow if enabled
-      if (isFollowing && confirmUnfollow) {
-        setShowUnfollowConfirm(true);
-        return;
-      }
-      await toggleFollow();
-    }, [toggleFollow, isFollowing, confirmUnfollow]);
+    const handleClick = useCallback(() => {
+      requireAuth(async () => {
+        // Show confirmation for unfollow if enabled
+        if (isFollowing && confirmUnfollow) {
+          setShowUnfollowConfirm(true);
+          return;
+        }
+        await toggleFollow();
+      });
+    }, [requireAuth, toggleFollow, isFollowing, confirmUnfollow]);
 
-    const handleConfirmUnfollow = useCallback(async () => {
-      setShowUnfollowConfirm(false);
-      await unfollow();
-    }, [unfollow]);
+    const handleConfirmUnfollow = useCallback(() => {
+      requireAuth(async () => {
+        setShowUnfollowConfirm(false);
+        await unfollow();
+      });
+    }, [requireAuth, unfollow]);
 
     const handleCancelUnfollow = useCallback(() => {
       setShowUnfollowConfirm(false);

@@ -13,6 +13,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { ModerationAction } from '../../types/moderation';
 import { useSubmitAppeal } from '../../lib/useSubmitAppeal';
 
@@ -47,6 +48,7 @@ const AppealSubmissionForm: React.FC<AppealSubmissionFormProps> = ({
   const [reason, setReason] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const { requireAuth } = useRequireAuth();
   const { submitAppeal, isLoading, isSuccess, isError, error, appealId, reset } = useSubmitAppeal();
   const prevIsOpenRef = useRef(isOpen);
 
@@ -93,18 +95,20 @@ const AppealSubmissionForm: React.FC<AppealSubmissionFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    requireAuth(async () => {
+      if (!validateForm()) {
+        return;
+      }
 
-    try {
-      await submitAppeal({
-        moderationActionId: moderationAction.id,
-        reason: reason.trim(),
-      });
-    } catch {
-      // Error is handled by the hook state
-    }
+      try {
+        await submitAppeal({
+          moderationActionId: moderationAction.id,
+          reason: reason.trim(),
+        });
+      } catch {
+        // Error is handled by the hook state
+      }
+    });
   };
 
   return (

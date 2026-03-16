@@ -3,6 +3,20 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import VoteButtons from '../VoteButtons';
 
+// Mock useRequireAuth hook
+vi.mock('../../../hooks/useRequireAuth', () => ({
+  useRequireAuth: () => ({
+    requireAuth: (callback: () => void) => callback(),
+    isAuthenticated: true,
+    user: { id: 'current-user' },
+  }),
+  default: () => ({
+    requireAuth: (callback: () => void) => callback(),
+    isAuthenticated: true,
+    user: { id: 'current-user' },
+  }),
+}));
+
 describe('VoteButtons', () => {
   const defaultProps = {
     voteCount: 0,

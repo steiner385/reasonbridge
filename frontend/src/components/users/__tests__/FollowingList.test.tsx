@@ -15,6 +15,18 @@ import { useFollow } from '../../../hooks/useFollow';
 vi.mock('../../../hooks/useFollowers');
 vi.mock('../../../hooks/useAuth');
 vi.mock('../../../hooks/useFollow');
+vi.mock('../../../hooks/useRequireAuth', () => ({
+  useRequireAuth: () => ({
+    requireAuth: (callback: () => void) => callback(),
+    isAuthenticated: true,
+    user: { id: 'current-user' },
+  }),
+  default: () => ({
+    requireAuth: (callback: () => void) => callback(),
+    isAuthenticated: true,
+    user: { id: 'current-user' },
+  }),
+}));
 
 const mockUseFollowing = useFollowing as Mock;
 const mockUseAuth = useAuth as Mock;

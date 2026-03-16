@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { Response, UpdateResponseRequest } from '../../types/response';
 
 export interface EditResponseModalProps {
@@ -62,6 +63,7 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const prevIsOpenRef = useRef(false); // Start with false to handle initial open
+  const { requireAuth } = useRequireAuth();
 
   // Initialize form with response data when modal opens (including initial render)
   useEffect(() => {
@@ -79,35 +81,38 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    // Validation
-    if (content.length < minLength) {
-      setError(`Response must be at least ${minLength} characters`);
-      return;
-    }
+    requireAuth(async () => {
+      setError(null);
 
-    if (content.length > maxLength) {
-      setError(`Response must not exceed ${maxLength} characters`);
-      return;
-    }
+      // Validation
+      if (content.length < minLength) {
+        setError(`Response must be at least ${minLength} characters`);
+        return;
+      }
 
-    const updateData: UpdateResponseRequest = {
-      content: content.trim(),
-      containsOpinion,
-      containsFactualClaims,
-    };
+      if (content.length > maxLength) {
+        setError(`Response must not exceed ${maxLength} characters`);
+        return;
+      }
 
-    if (citedSources.length > 0) {
-      updateData.citedSources = citedSources;
-    }
+      const updateData: UpdateResponseRequest = {
+        content: content.trim(),
+        containsOpinion,
+        containsFactualClaims,
+      };
 
-    try {
-      await onSubmit(response.id, updateData);
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update response');
-    }
+      if (citedSources.length > 0) {
+        updateData.citedSources = citedSources;
+      }
+
+      try {
+        await onSubmit(response.id, updateData);
+        onClose();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update response');
+      }
+    });
   };
 
   const handleAddSource = () => {

@@ -18,6 +18,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { useCreateTopic } from '../../hooks/useCreateTopic';
 import { useTopicDraft, type TopicDraftData } from '../../hooks/useTopicDraft';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { DuplicateSuggestion } from '../../services/topicService';
 import type { Tag, TagValidation } from '../../types/tag';
 import { TagSelector } from './TagSelector';
@@ -29,6 +30,7 @@ export interface CreateTopicModalProps {
 }
 
 export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModalProps) {
+  const { requireAuth } = useRequireAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<Tag[]>([]);
@@ -128,35 +130,37 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
   const handleSubmit = (e: React.FormEvent, ignoreWarning = false) => {
     e.preventDefault();
 
-    // Show warning if duplicates exist and user hasn't acknowledged
-    if (duplicates.length > 0 && !ignoreWarning) {
-      setShowDuplicateWarning(true);
-      return;
-    }
+    requireAuth(() => {
+      // Show warning if duplicates exist and user hasn't acknowledged
+      if (duplicates.length > 0 && !ignoreWarning) {
+        setShowDuplicateWarning(true);
+        return;
+      }
 
-    // Validate
-    if (title.length < 10 || title.length > 200) {
-      return; // Handled by HTML5 validation
-    }
+      // Validate
+      if (title.length < 10 || title.length > 200) {
+        return; // Handled by HTML5 validation
+      }
 
-    if (description.length < 50 || description.length > 5000) {
-      return; // Handled by HTML5 validation
-    }
+      if (description.length < 50 || description.length > 5000) {
+        return; // Handled by HTML5 validation
+      }
 
-    if (!tagValidation?.isValid) {
-      return; // Handled by TagSelector validation
-    }
+      if (!tagValidation?.isValid) {
+        return; // Handled by TagSelector validation
+      }
 
-    // Convert Tag objects to tag names for API
-    const tagNames = tags.map((tag) => tag.name);
+      // Convert Tag objects to tag names for API
+      const tagNames = tags.map((tag) => tag.name);
 
-    createTopic({
-      title,
-      description,
-      tags: tagNames,
-      visibility,
-      evidenceStandards,
-      isMatureContent,
+      createTopic({
+        title,
+        description,
+        tags: tagNames,
+        visibility,
+        evidenceStandards,
+        isMatureContent,
+      });
     });
   };
 

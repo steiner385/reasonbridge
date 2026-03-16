@@ -14,6 +14,7 @@ import {
   HttpStatus,
   Req,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 // TEMPORARILY DISABLED for debugging hang issue
 // import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
@@ -27,15 +28,7 @@ import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from './dto/moderate-response.dto.js';
 import type { ResponseDto } from './dto/response.dto.js';
-
-// Placeholder for auth guard (will be implemented in Phase 9)
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    displayName: string;
-  };
-}
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('topics')
 export class ResponsesController {
@@ -66,22 +59,19 @@ export class ResponsesController {
    * Create a new response to a discussion topic
    *
    * @param topicId - The ID of the topic to respond to
+   * @param user - Authenticated user from JWT
    * @param createResponseDto - The response data
    * @returns The created response
    */
   @Post(':topicId/responses')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createResponse(
     @Param('topicId') topicId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() createResponseDto: CreateResponseDto,
   ): Promise<ResponseDto> {
-    // TODO: Extract authorId from JWT token when auth is implemented
-    // For now, using a placeholder. This should be replaced with:
-    // @Req() request: FastifyRequest
-    // const authorId = request.user.id;
-    const authorId = '00000000-0000-0000-0000-000000000000'; // Placeholder
-
-    return this.responsesService.createResponse(topicId, authorId, createResponseDto);
+    return this.responsesService.createResponse(topicId, user.sub, createResponseDto);
   }
 
   /**
@@ -96,12 +86,14 @@ export class ResponsesController {
    * - Validate content (50-25000 chars)
    *
    * @param responseId - The ID of the parent response to reply to
+   * @param user - Authenticated user from JWT
    * @param replyDto - The reply content and optional citations
    * @returns The created reply
    * @throws NotFoundException if parent response doesn't exist
    * @throws BadRequestException if thread depth limit exceeded
    */
   @Post('responses/:responseId/replies')
+  @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 replies per minute
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Reply to a specific response' })
@@ -110,27 +102,22 @@ export class ResponsesController {
     description: 'Reply created successfully',
     type: ResponseDetailDto,
   })
+  @ApiResponse({ status: 401, description: 'Authentication required' })
   @ApiResponse({ status: 404, description: 'Parent response not found' })
   @ApiResponse({ status: 400, description: 'Thread depth limit exceeded or validation error' })
   @ApiResponse({ status: 429, description: 'Rate limit exceeded (10 replies/min)' })
   async replyToResponse(
     @Param('responseId') responseId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() replyDto: ReplyToResponseDto,
-    @Req() request: AuthRequest,
   ): Promise<ResponseDetailDto> {
-    // Get userId from X-User-Id header (set by API Gateway) or request.user
-    // Use type assertion to access custom header that API Gateway adds
-    const headers = request.headers as unknown as { 'x-user-id'?: string };
-    const userId =
-      headers['x-user-id'] || request.user?.id || '00000000-0000-0000-0000-000000000000';
-
     // Transform DTO to service format
     const replyData = {
       content: replyDto.content,
       citations: replyDto.citations?.map((c) => ({ url: c.url, title: c.title })),
     };
 
-    return this.responsesService.replyToResponse(responseId, userId, replyData);
+    return this.responsesService.replyToResponse(responseId, user.sub, replyData);
   }
 
   /**
@@ -139,23 +126,20 @@ export class ResponsesController {
    *
    * @param topicId - The ID of the topic (for route consistency)
    * @param responseId - The ID of the response to update
+   * @param user - Authenticated user from JWT
    * @param updateResponseDto - The updated response data
    * @returns The updated response
    */
   @Put(':topicId/responses/:responseId')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async updateResponse(
     @Param('topicId') topicId: string,
     @Param('responseId') responseId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() updateResponseDto: UpdateResponseDto,
   ): Promise<ResponseDto> {
-    // TODO: Extract authorId from JWT token when auth is implemented
-    // For now, using a placeholder. This should be replaced with:
-    // @Req() request: FastifyRequest
-    // const authorId = request.user.id;
-    const authorId = '00000000-0000-0000-0000-000000000000'; // Placeholder
-
-    return this.responsesService.updateResponse(responseId, authorId, updateResponseDto);
+    return this.responsesService.updateResponse(responseId, user.sub, updateResponseDto);
   }
 
   /**
@@ -164,31 +148,29 @@ export class ResponsesController {
    *
    * @param topicId - The ID of the topic (for route consistency)
    * @param responseId - The ID of the response to moderate
+   * @param user - Authenticated user from JWT (must be moderator)
    * @param moderateDto - The moderation action details
    * @returns Information about the moderation action
    */
   @Post(':topicId/responses/:responseId/moderate')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async moderateResponse(
     @Param('topicId') topicId: string,
     @Param('responseId') responseId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() moderateDto: ModerateResponseDto,
   ): Promise<ModerationActionResponseDto> {
-    // TODO: Extract moderatorId from JWT token and verify moderator permissions
-    // For now, using a placeholder. This should be replaced with:
-    // @Req() request: FastifyRequest
-    // const moderatorId = request.user.id;
-    // Verify user has moderation permissions
-    const moderatorId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+    // TODO: Add ModeratorGuard for proper role verification
 
     if (!moderateDto.reason || moderateDto.reason.trim().length === 0) {
       throw new Error('Reason is required for moderation actions');
     }
 
     if (moderateDto.action === 'hide') {
-      return this.contentModerationService.hideResponse(responseId, moderatorId, moderateDto);
+      return this.contentModerationService.hideResponse(responseId, user.sub, moderateDto);
     } else if (moderateDto.action === 'remove') {
-      return this.contentModerationService.removeResponse(responseId, moderatorId, moderateDto);
+      return this.contentModerationService.removeResponse(responseId, user.sub, moderateDto);
     }
 
     throw new Error('Invalid moderation action');
@@ -200,23 +182,25 @@ export class ResponsesController {
    *
    * @param topicId - The ID of the topic (for route consistency)
    * @param responseId - The ID of the response to restore
+   * @param user - Authenticated user from JWT (must be moderator)
    * @returns Information about the restoration
    */
   @Post(':topicId/responses/:responseId/restore')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async restoreResponse(
     @Param('topicId') topicId: string,
     @Param('responseId') responseId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() body: { reason: string },
   ): Promise<ModerationActionResponseDto> {
-    // TODO: Extract moderatorId from JWT token and verify moderator permissions
-    const moderatorId = '00000000-0000-0000-0000-000000000000'; // Placeholder
+    // TODO: Add ModeratorGuard for proper role verification
 
     if (!body.reason || body.reason.trim().length === 0) {
       throw new Error('Reason is required for restoration');
     }
 
-    return this.contentModerationService.restoreResponse(responseId, moderatorId, body.reason);
+    return this.contentModerationService.restoreResponse(responseId, user.sub, body.reason);
   }
 
   /**
@@ -264,11 +248,12 @@ export class ResponsesController {
    *
    * Rate limit: 10 responses per minute per user
    *
-   * @param req - Authenticated request with user info
+   * @param user - Authenticated user from JWT
    * @param dto - Response creation data
    * @returns The created response
    */
   @Post('responses')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ 'response-posting': { limit: 10, ttl: 60000 } }) // 10 per minute
   @ApiBearerAuth()
@@ -287,6 +272,10 @@ export class ResponsesController {
     description: 'Invalid input or discussion not active',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Discussion not found',
   })
@@ -295,12 +284,10 @@ export class ResponsesController {
     description: 'Rate limit exceeded (10 responses per minute)',
   })
   async createResponseForDiscussion(
-    @Req() req: AuthRequest,
+    @CurrentUser() user: JwtPayload,
     @Body() dto: CreateResponseDto,
   ): Promise<ResponseDetailDto> {
-    // TODO: Replace with actual auth guard in Phase 9
-    const userId = req.user?.id || 'anonymous';
-    return this.responsesService.createResponseForDiscussion(userId, dto);
+    return this.responsesService.createResponseForDiscussion(user.sub, dto);
   }
 
   /**

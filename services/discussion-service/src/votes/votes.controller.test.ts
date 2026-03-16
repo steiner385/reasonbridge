@@ -1,6 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { VotesController } from './votes.controller.js';
+import type { JwtPayload } from '../auth/index.js';
+
+// Mock user for authenticated endpoints
+const mockUser: JwtPayload = {
+  sub: 'user-1',
+  email: 'user@test.com',
+  roles: ['USER'],
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + 3600,
+};
 
 const createMockVotesService = () => ({
   voteOnResponse: vi.fn(),
@@ -30,7 +40,7 @@ describe('VotesController', () => {
       };
       mockVotesService.voteOnResponse.mockResolvedValue(vote);
 
-      const result = await controller.voteOnResponse('response-1', 'user-1', createVoteDto as any);
+      const result = await controller.voteOnResponse('response-1', mockUser, createVoteDto as any);
 
       expect(result).toEqual(vote);
       expect(mockVotesService.voteOnResponse).toHaveBeenCalledWith(
@@ -51,7 +61,7 @@ describe('VotesController', () => {
       };
       mockVotesService.voteOnResponse.mockResolvedValue(vote);
 
-      const result = await controller.voteOnResponse('response-1', 'user-1', createVoteDto as any);
+      const result = await controller.voteOnResponse('response-1', mockUser, createVoteDto as any);
 
       expect(result).toEqual(vote);
     });
@@ -60,7 +70,7 @@ describe('VotesController', () => {
       const createVoteDto = { voteType: 'UPVOTE' };
       mockVotesService.voteOnResponse.mockResolvedValue(null);
 
-      const result = await controller.voteOnResponse('response-1', 'user-1', createVoteDto as any);
+      const result = await controller.voteOnResponse('response-1', mockUser, createVoteDto as any);
 
       expect(result).toEqual({ message: 'Vote removed' });
     });
@@ -74,7 +84,7 @@ describe('VotesController', () => {
       };
       mockVotesService.voteOnResponse.mockResolvedValue(updatedVote);
 
-      const result = await controller.voteOnResponse('response-1', 'user-1', createVoteDto as any);
+      const result = await controller.voteOnResponse('response-1', mockUser, createVoteDto as any);
 
       expect(result).toEqual(updatedVote);
     });
@@ -84,7 +94,7 @@ describe('VotesController', () => {
     it('should remove vote', async () => {
       mockVotesService.removeVote.mockResolvedValue(undefined);
 
-      await controller.removeVote('response-1', 'user-1');
+      await controller.removeVote('response-1', mockUser);
 
       expect(mockVotesService.removeVote).toHaveBeenCalledWith('response-1', 'user-1');
     });
@@ -92,7 +102,7 @@ describe('VotesController', () => {
     it('should not throw when vote does not exist', async () => {
       mockVotesService.removeVote.mockResolvedValue(undefined);
 
-      await expect(controller.removeVote('response-1', 'user-1')).resolves.not.toThrow();
+      await expect(controller.removeVote('response-1', mockUser)).resolves.not.toThrow();
     });
   });
 

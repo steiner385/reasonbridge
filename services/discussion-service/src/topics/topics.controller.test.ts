@@ -1,6 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TopicsController } from './topics.controller.js';
+import type { JwtPayload } from '../auth/index.js';
+
+// Mock user for authenticated endpoints
+const mockUser: JwtPayload = {
+  sub: 'user-1',
+  email: 'user@test.com',
+  roles: ['USER'],
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + 3600,
+};
 
 const createMockTopicsService = () => ({
   getTopics: vi.fn(),
@@ -15,6 +25,10 @@ const createMockExportService = () => ({
   generateShareLink: vi.fn(),
 });
 
+const createMockAnalyticsService = () => ({
+  getTopicAnalytics: vi.fn(),
+});
+
 const createMockResponse = () => ({
   header: vi.fn().mockReturnThis(),
   send: vi.fn(),
@@ -24,12 +38,18 @@ describe('TopicsController', () => {
   let controller: TopicsController;
   let mockTopicsService: ReturnType<typeof createMockTopicsService>;
   let mockExportService: ReturnType<typeof createMockExportService>;
+  let mockAnalyticsService: ReturnType<typeof createMockAnalyticsService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockTopicsService = createMockTopicsService();
     mockExportService = createMockExportService();
-    controller = new TopicsController(mockTopicsService as any, mockExportService as any);
+    mockAnalyticsService = createMockAnalyticsService();
+    controller = new TopicsController(
+      mockTopicsService as any,
+      mockExportService as any,
+      mockAnalyticsService as any,
+    );
   });
 
   describe('getTopics', () => {
@@ -260,42 +280,13 @@ describe('TopicsController', () => {
       tags: [{ id: 'tag-1', name: 'environment', slug: 'environment' }],
     };
 
-    it('should create a topic with user ID from header', async () => {
+    it('should create a topic with authenticated user', async () => {
       mockTopicsService.createTopic.mockResolvedValue(createdTopic);
 
-      const result = await controller.createTopic(createTopicDto as any, 'user-123', {});
+      const result = await controller.createTopic(createTopicDto as any, mockUser);
 
       expect(result).toEqual(createdTopic);
-      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-123', createTopicDto);
-    });
-
-    it('should create a topic with user ID from request object', async () => {
-      mockTopicsService.createTopic.mockResolvedValue(createdTopic);
-
-      const result = await controller.createTopic(createTopicDto as any, undefined, {
-        user: { id: 'user-456' },
-      });
-
-      expect(result).toEqual(createdTopic);
-      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-456', createTopicDto);
-    });
-
-    it('should prefer header user ID over request user ID', async () => {
-      mockTopicsService.createTopic.mockResolvedValue(createdTopic);
-
-      const result = await controller.createTopic(createTopicDto as any, 'header-user', {
-        user: { id: 'request-user' },
-      });
-
-      expect(result).toEqual(createdTopic);
-      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('header-user', createTopicDto);
-    });
-
-    it('should throw error when no user ID is available', async () => {
-      await expect(controller.createTopic(createTopicDto as any, undefined, {})).rejects.toThrow(
-        'User ID not found in request. Authentication required.',
-      );
-      expect(mockTopicsService.createTopic).not.toHaveBeenCalled();
+      expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-1', createTopicDto);
     });
 
     it('should pass DTO to service correctly', async () => {
@@ -308,7 +299,7 @@ describe('TopicsController', () => {
       };
       mockTopicsService.createTopic.mockResolvedValue(createdTopic);
 
-      await controller.createTopic(fullDto as any, 'user-1', {});
+      await controller.createTopic(fullDto as any, mockUser);
 
       expect(mockTopicsService.createTopic).toHaveBeenCalledWith('user-1', fullDto);
     });

@@ -4,6 +4,20 @@ import userEvent from '@testing-library/user-event';
 import EditResponseModal from '../EditResponseModal';
 import type { Response } from '../../../types/response';
 
+// Mock useRequireAuth hook
+vi.mock('../../../hooks/useRequireAuth', () => ({
+  useRequireAuth: () => ({
+    requireAuth: (callback: () => void) => callback(),
+    isAuthenticated: true,
+    user: { id: 'current-user' },
+  }),
+  default: () => ({
+    requireAuth: (callback: () => void) => callback(),
+    isAuthenticated: true,
+    user: { id: 'current-user' },
+  }),
+}));
+
 describe('EditResponseModal', () => {
   const mockResponse: Response = {
     id: 'response-1',

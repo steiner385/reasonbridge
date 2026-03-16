@@ -9,6 +9,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { CacheModule } from './cache/cache.module.js';
 import { HealthModule } from './health/health.module.js';
+import { AuthModule } from './auth/index.js';
 import { TopicsModule } from './topics/topics.module.js';
 import { ResponsesModule } from './responses/responses.module.js';
 import { VotesModule } from './votes/votes.module.js';
@@ -37,22 +38,25 @@ import { GatewaysModule } from './gateways/index.js';
       // Look for .env files in order: local service config, then root monorepo config
       envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
+    // JWT authentication for protected endpoints
+    AuthModule,
     // T009 [P] - Rate limiting configuration
+    // Use higher limits in test mode to allow E2E tests to run without throttling
     ThrottlerModule.forRoot([
       {
         name: 'global',
         ttl: 60000, // 60 seconds
-        limit: 100, // 100 requests per minute globally
+        limit: process.env['NODE_ENV'] === 'test' ? 10000 : 100, // 100 req/min in prod, 10000 in test
       },
       {
         name: 'discussion-creation',
         ttl: 86400000, // 24 hours (1 day)
-        limit: 5, // 5 discussions per day
+        limit: process.env['NODE_ENV'] === 'test' ? 10000 : 5, // 5 per day in prod, 10000 in test
       },
       {
         name: 'response-posting',
         ttl: 60000, // 60 seconds
-        limit: 10, // 10 responses per minute
+        limit: process.env['NODE_ENV'] === 'test' ? 10000 : 10, // 10 per min in prod, 10000 in test
       },
     ]),
     PrismaModule,

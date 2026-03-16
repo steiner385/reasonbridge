@@ -15,6 +15,7 @@
 
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { AuthModule } from '../auth/index.js';
 // CacheModule removed - it's global and imported once in AppModule
 import { ResponsesController } from './responses.controller.js';
 import { ResponsesService } from './responses.service.js';
@@ -22,7 +23,7 @@ import { ContentModerationService } from './services/content-moderation.service.
 import { CommonGroundTriggerService } from '../services/common-ground-trigger.service.js';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [ResponsesController],
   providers: [ResponsesService, ContentModerationService, CommonGroundTriggerService],
   exports: [ResponsesService, ContentModerationService],
