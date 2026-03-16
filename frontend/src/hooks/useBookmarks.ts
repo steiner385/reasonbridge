@@ -12,6 +12,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookmarkService, type Bookmark, type BookmarkList } from '../services/bookmarkService';
+import { useAuth } from './useAuth';
 
 /**
  * Options for useBookmarks hook
@@ -81,14 +82,16 @@ export function useBookmarks(
   offset: number = 0,
   options: UseBookmarksOptions = {},
 ): UseBookmarksResult {
+  const { isAuthenticated } = useAuth();
   const { enabled = true, staleTime = 5 * 60 * 1000 } = options;
 
   const queryKey = ['bookmarks', { limit, offset }];
 
+  // Only fetch bookmarks if user is authenticated
   const query = useQuery<BookmarkList, Error>({
     queryKey,
     queryFn: () => bookmarkService.getBookmarks(limit, offset),
-    enabled,
+    enabled: enabled && isAuthenticated,
     staleTime,
     gcTime: 10 * 60 * 1000, // 10 minutes cache
   });
@@ -181,15 +184,17 @@ export function useBookmarkStatus(
   options: UseBookmarkStatusOptions = {},
 ): UseBookmarkStatusResult {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
   const { enabled = true } = options;
 
   const queryKey = ['bookmarkStatus', responseId];
 
-  // Query for bookmark status
+  // Query for bookmark status - only fetch if user is authenticated
+  // Unauthenticated users cannot have bookmarks, so we skip the API call
   const query = useQuery<{ isBookmarked: boolean }, Error>({
     queryKey,
     queryFn: () => bookmarkService.getBookmarkStatus(responseId),
-    enabled: enabled && !!responseId,
+    enabled: enabled && !!responseId && isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes cache
   });
