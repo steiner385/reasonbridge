@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Tooltip } from '../ui/Tooltip';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export interface VoteButtonsProps {
   /**
@@ -121,16 +122,22 @@ const VoteButtons: React.FC<VoteButtonsProps> = ({
         ? 'text-red-700'
         : 'text-gray-600 dark:text-gray-400';
 
+  const { requireAuth } = useRequireAuth();
+
   const handleUpvote = () => {
-    if (!disabled && onUpvote) {
-      onUpvote();
-    }
+    requireAuth(() => {
+      if (!disabled && onUpvote) {
+        onUpvote();
+      }
+    });
   };
 
   const handleDownvote = () => {
-    if (!disabled && onDownvote) {
-      onDownvote();
-    }
+    requireAuth(() => {
+      if (!disabled && onDownvote) {
+        onDownvote();
+      }
+    });
   };
 
   return (

@@ -139,19 +139,28 @@ export class TopicGenerator {
   private buildPrompt(category: string, count: number): string {
     return `Generate ${count} diverse discussion topics for the category "${category}".
 
+CRITICAL: Every title MUST start with "Should" and be a grammatically correct question.
+
 Each topic should:
-1. Be framed as a debatable "Should..." question
+1. Be framed as a debatable "Should..." question (e.g., "Should we X?", "Should Y be Z?")
 2. Have a description (2-3 sentences) that outlines key perspectives
 3. Include 2-3 cross-cutting themes that connect to other categories
 4. Be suitable for constructive civil discourse
 5. Avoid extreme positions; topics should have legitimate arguments on multiple sides
 
-Examples of good topics:
+Examples of CORRECT topics:
 - "Should cities implement congestion pricing?"
 - "Should AI-generated content require disclosure?"
 - "Should standardized testing be eliminated?"
+- "Should we adopt universal basic income?"
+- "Should cryptocurrency be regulated?"
 
-Generate ${count} unique topics for the "${category}" category.`;
+Examples of INCORRECT topics (DO NOT generate these formats):
+- "Universal Basic Income: Viable or Unsustainable?" (NOT a Should question)
+- "Remote Work: The Future of Employment?" (NOT a Should question)
+- "Cryptocurrency adoption" (NOT a question at all)
+
+Generate ${count} unique topics for the "${category}" category. Remember: every title MUST start with "Should".`;
   }
 
   /**
@@ -183,6 +192,33 @@ Generate ${count} unique topics for the "${category}" category.`;
   }
 
   /**
+   * Ensure title follows "Should..." format.
+   * Transforms non-compliant titles to proper question format.
+   */
+  private normalizeTitle(title: string): string {
+    const trimmed = title.trim();
+
+    // Already starts with "Should" - just ensure it ends with "?"
+    if (trimmed.toLowerCase().startsWith('should')) {
+      return trimmed.endsWith('?') ? trimmed : `${trimmed}?`;
+    }
+
+    // Handle "X: Y?" format -> "Should we consider X?"
+    if (trimmed.includes(':')) {
+      const subject = trimmed.split(':')[0]!.trim();
+      return `Should we consider ${subject.toLowerCase()}?`;
+    }
+
+    // Handle noun phrases -> "Should we adopt X?"
+    if (!trimmed.includes(' ') || trimmed.split(' ').length <= 3) {
+      return `Should we adopt ${trimmed.toLowerCase()}?`;
+    }
+
+    // For longer phrases, wrap as consideration question
+    return `Should we consider ${trimmed.toLowerCase()}?`;
+  }
+
+  /**
    * Transform an LLM response topic into a GeneratedTopic.
    */
   private transformToGeneratedTopic(
@@ -192,12 +228,13 @@ Generate ${count} unique topics for the "${category}" category.`;
     tagIds: readonly string[],
   ): GeneratedTopic {
     const topicIndex = topicNumber;
+    const normalizedTitle = this.normalizeTitle(llmTopic.title);
 
     return {
       id: generateTopicId(topicNumber),
-      title: llmTopic.title,
+      title: normalizedTitle,
       description: llmTopic.description,
-      slug: this.generateSlug(llmTopic.title),
+      slug: this.generateSlug(normalizedTitle),
       creatorId: this.selectCreator(topicIndex),
       category,
       status: this.selectStatus(topicIndex),

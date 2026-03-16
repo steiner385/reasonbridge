@@ -14,10 +14,12 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 import { ReactionsService } from './reactions.service.js';
 import type { CreateReactionDto } from './dto/create-reaction.dto.js';
 import type { ReactionDto, ReactionListDto } from './dto/reaction.dto.js';
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('responses')
 export class ReactionsController {
@@ -28,12 +30,13 @@ export class ReactionsController {
    * POST /responses/:responseId/reactions
    */
   @Post(':responseId/reactions')
+  @UseGuards(JwtAuthGuard)
   async addReaction(
     @Param('responseId') responseId: string,
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() dto: CreateReactionDto,
   ): Promise<ReactionDto> {
-    return this.reactionsService.addReaction(responseId, userId, dto);
+    return this.reactionsService.addReaction(responseId, user.sub, dto);
   }
 
   /**
@@ -41,13 +44,14 @@ export class ReactionsController {
    * DELETE /responses/:responseId/reactions/:emoji
    */
   @Delete(':responseId/reactions/:emoji')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeReaction(
     @Param('responseId') responseId: string,
     @Param('emoji') emoji: string,
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<void> {
-    return this.reactionsService.removeReaction(responseId, userId, emoji);
+    return this.reactionsService.removeReaction(responseId, user.sub, emoji);
   }
 
   /**

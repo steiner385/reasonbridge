@@ -14,10 +14,12 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 import { VotesService } from './votes.service.js';
 import { CreateVoteDto } from './dto/create-vote.dto.js';
 import type { VoteDto, VoteSummaryDto } from './dto/vote.dto.js';
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('responses')
 export class VotesController {
@@ -33,13 +35,14 @@ export class VotesController {
    * - Different vote type: Updates to new vote type
    */
   @Post(':responseId/vote')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async voteOnResponse(
     @Param('responseId') responseId: string,
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() createVoteDto: CreateVoteDto,
   ): Promise<VoteDto | { message: string }> {
-    const vote = await this.votesService.voteOnResponse(responseId, userId, createVoteDto);
+    const vote = await this.votesService.voteOnResponse(responseId, user.sub, createVoteDto);
 
     if (vote === null) {
       return { message: 'Vote removed' };
@@ -53,12 +56,13 @@ export class VotesController {
    * DELETE /responses/:responseId/vote
    */
   @Delete(':responseId/vote')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeVote(
     @Param('responseId') responseId: string,
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<void> {
-    await this.votesService.removeVote(responseId, userId);
+    await this.votesService.removeVote(responseId, user.sub);
   }
 
   /**

@@ -10,6 +10,7 @@ import { PreviewFeedbackPanel } from '../feedback';
 import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
 import { useTypingIndicator } from '../../hooks/useTypingIndicator';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { PendingResponseNotice } from './PendingResponseNotice';
@@ -107,6 +108,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
 
   const { user } = useAuthContext();
   const isMinor = user?.isMinor ?? false;
+  const { requireAuth } = useRequireAuth();
 
   // Typing indicator - send typing events when user types
   const { sendTyping } = useTypingIndicator({ topicId: topicId ?? '' });
@@ -146,51 +148,55 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    // Validation
-    if (content.length < minLength) {
-      setError(`Response must be at least ${minLength} characters`);
-      return;
-    }
+    // Require authentication before submitting
+    requireAuth(async () => {
+      setError(null);
 
-    if (content.length > maxLength) {
-      setError(`Response must not exceed ${maxLength} characters`);
-      return;
-    }
-
-    const response: CreateResponseRequest = {
-      content: content.trim(),
-      containsOpinion,
-      containsFactualClaims,
-    };
-
-    if (parentId) {
-      response.parentId = parentId;
-    }
-
-    if (citedSources.length > 0) {
-      response.citedSources = citedSources;
-    }
-
-    try {
-      await onSubmit(response);
-      // Reset form on successful submission
-      setContent('');
-      setCitedSources([]);
-      setCurrentSource('');
-      setContainsOpinion(false);
-      setContainsFactualClaims(false);
-
-      // Show pending review message for minor users
-      if (isMinor) {
-        setShowPendingReviewMessage(true);
-        // Auto-hide the message after 10 seconds
-        setTimeout(() => setShowPendingReviewMessage(false), 10000);
+      // Validation
+      if (content.length < minLength) {
+        setError(`Response must be at least ${minLength} characters`);
+        return;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit response');
-    }
+
+      if (content.length > maxLength) {
+        setError(`Response must not exceed ${maxLength} characters`);
+        return;
+      }
+
+      const response: CreateResponseRequest = {
+        content: content.trim(),
+        containsOpinion,
+        containsFactualClaims,
+      };
+
+      if (parentId) {
+        response.parentId = parentId;
+      }
+
+      if (citedSources.length > 0) {
+        response.citedSources = citedSources;
+      }
+
+      try {
+        await onSubmit(response);
+        // Reset form on successful submission
+        setContent('');
+        setCitedSources([]);
+        setCurrentSource('');
+        setContainsOpinion(false);
+        setContainsFactualClaims(false);
+
+        // Show pending review message for minor users
+        if (isMinor) {
+          setShowPendingReviewMessage(true);
+          // Auto-hide the message after 10 seconds
+          setTimeout(() => setShowPendingReviewMessage(false), 10000);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to submit response');
+      }
+    });
   };
 
   const handleAddSource = () => {

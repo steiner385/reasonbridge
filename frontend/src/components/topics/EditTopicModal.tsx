@@ -16,6 +16,7 @@
 import { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { Topic } from '../../types/topic';
 
 export interface EditTopicModalProps {
@@ -47,6 +48,7 @@ export function EditTopicModal({
   onSubmit,
   isLoading = false,
 }: EditTopicModalProps) {
+  const { requireAuth } = useRequireAuth();
   const [title, setTitle] = useState(topic.title);
   const [description, setDescription] = useState(topic.description);
   const [tags, setTags] = useState<string[]>((topic.tags || []).map((t) => t.name));
@@ -162,44 +164,46 @@ export function EditTopicModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
-      return;
-    }
+    requireAuth(async () => {
+      if (!validate()) {
+        return;
+      }
 
-    const updates: {
-      title?: string;
-      description?: string;
-      tags?: string[];
-      editReason?: string;
-      flagForReview?: boolean;
-    } = {};
+      const updates: {
+        title?: string;
+        description?: string;
+        tags?: string[];
+        editReason?: string;
+        flagForReview?: boolean;
+      } = {};
 
-    if (title !== topic.title) {
-      updates.title = title;
-    }
-    if (description !== topic.description) {
-      updates.description = description;
-    }
-    if (
-      JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).map((t) => t.name).sort())
-    ) {
-      updates.tags = tags;
-    }
-    if (editReason.trim()) {
-      updates.editReason = editReason.trim();
-    }
-    if (flagForReview) {
-      updates.flagForReview = true;
-    }
+      if (title !== topic.title) {
+        updates.title = title;
+      }
+      if (description !== topic.description) {
+        updates.description = description;
+      }
+      if (
+        JSON.stringify(tags.sort()) !== JSON.stringify((topic.tags || []).map((t) => t.name).sort())
+      ) {
+        updates.tags = tags;
+      }
+      if (editReason.trim()) {
+        updates.editReason = editReason.trim();
+      }
+      if (flagForReview) {
+        updates.flagForReview = true;
+      }
 
-    try {
-      await onSubmit(updates);
-      onClose();
-    } catch (error) {
-      setErrors({
-        form: error instanceof Error ? error.message : 'Failed to update topic',
-      });
-    }
+      try {
+        await onSubmit(updates);
+        onClose();
+      } catch (error) {
+        setErrors({
+          form: error instanceof Error ? error.message : 'Failed to update topic',
+        });
+      }
+    });
   };
 
   if (!isOpen) {

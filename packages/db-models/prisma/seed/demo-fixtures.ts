@@ -387,84 +387,50 @@ export async function seedDemoAIFeedback(prisma: PrismaClient): Promise<void> {
 
 /**
  * Truncate all demo-specific data
- * Used by environment reset functionality
+ * Uses ID prefix matching to delete both hand-crafted and LLM-generated demo data.
+ * Demo IDs use the '11111111-' prefix.
  */
 export async function truncateDemoData(prisma: PrismaClient): Promise<void> {
   console.log('🗑️  Truncating demo data...');
 
   // Delete in reverse dependency order
-  // Using deleteMany with ID filters for demo data
+  // Using raw SQL for prefix-based matching to catch all demo data (hand-crafted + LLM-generated)
+  const DEMO_PREFIX = '11111111-%';
 
-  // Delete feedback for demo responses
-  await prisma.feedback.deleteMany({
-    where: {
-      id: { in: DEMO_AI_FEEDBACK.map((f) => f.id) },
-    },
-  });
+  // Delete feedback for demo responses (by response ID prefix)
+  await prisma.$executeRaw`DELETE FROM feedback WHERE response_id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo AI feedback');
 
-  // Delete alignments for demo users
-  await prisma.alignment.deleteMany({
-    where: {
-      userId: { in: DEMO_PERSONAS.map((p) => p.id) },
-    },
-  });
+  // Delete alignments for demo users (by user ID prefix)
+  await prisma.$executeRaw`DELETE FROM alignments WHERE user_id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo alignments');
 
-  // Delete common ground analyses for demo topics
-  await prisma.commonGroundAnalysis.deleteMany({
-    where: {
-      topicId: { in: DEMO_TOPICS.map((t) => t.id) },
-    },
-  });
+  // Delete common ground analyses for demo topics (by topic ID prefix)
+  await prisma.$executeRaw`DELETE FROM common_ground_analyses WHERE topic_id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo common ground analyses');
 
-  // Delete propositions for demo topics
-  await prisma.proposition.deleteMany({
-    where: {
-      topicId: { in: DEMO_TOPICS.map((t) => t.id) },
-    },
-  });
+  // Delete propositions for demo topics (by topic ID prefix)
+  await prisma.$executeRaw`DELETE FROM propositions WHERE topic_id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo propositions');
 
-  // Delete responses from demo users
-  await prisma.response.deleteMany({
-    where: {
-      authorId: { in: DEMO_PERSONAS.map((p) => p.id) },
-    },
-  });
+  // Delete responses by author ID prefix or topic ID prefix
+  await prisma.$executeRaw`DELETE FROM responses WHERE author_id::text LIKE ${DEMO_PREFIX} OR topic_id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo responses');
 
-  // Delete topic-tag associations
-  await prisma.topicTag.deleteMany({
-    where: {
-      topicId: { in: DEMO_TOPICS.map((t) => t.id) },
-    },
-  });
+  // Delete topic-tag associations for demo topics (by topic ID prefix)
+  await prisma.$executeRaw`DELETE FROM topic_tags WHERE topic_id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo topic-tag associations');
 
-  // Delete demo topics
-  await prisma.discussionTopic.deleteMany({
-    where: {
-      id: { in: DEMO_TOPICS.map((t) => t.id) },
-    },
-  });
+  // Delete demo topics (by ID prefix)
+  await prisma.$executeRaw`DELETE FROM discussion_topics WHERE id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo topics');
 
-  // Delete demo tags
-  await prisma.tag.deleteMany({
-    where: {
-      id: { in: DEMO_TAGS.map((t) => t.id) },
-    },
-  });
+  // Delete demo tags (by ID prefix)
+  await prisma.$executeRaw`DELETE FROM tags WHERE id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo tags');
 
-  // Delete demo users
-  await prisma.user.deleteMany({
-    where: {
-      id: { in: DEMO_PERSONAS.map((p) => p.id) },
-    },
-  });
+  // Delete demo users (by ID prefix)
+  await prisma.$executeRaw`DELETE FROM users WHERE id::text LIKE ${DEMO_PREFIX}`;
   console.log('  ✓ Deleted demo users');
 
   console.log('✅ Demo data truncated');
@@ -768,6 +734,27 @@ export async function seedDemo(
 
   // Phase 5: User Story 3
   await seedDemoAIFeedback(prisma);
+  console.log('');
+
+  // Update participant counts for all demo topics
+  console.log('📊 Updating participant counts...');
+  const allTopicIds = [
+    ...DEMO_TOPICS.map((t) => t.id),
+    ...(generatedContent?.topics.map((t) => t.id) ?? []),
+  ];
+
+  for (const topicId of allTopicIds) {
+    const uniqueParticipants = await prisma.response.groupBy({
+      by: ['authorId'],
+      where: { topicId },
+    });
+
+    await prisma.discussionTopic.update({
+      where: { id: topicId },
+      data: { participantCount: uniqueParticipants.length },
+    });
+  }
+  console.log(`✅ Updated participant counts for ${allTopicIds.length} topics`);
   console.log('');
 
   // Calculate totals

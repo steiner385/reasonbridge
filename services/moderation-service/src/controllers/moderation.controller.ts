@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Body, Controller, Post, Get, BadRequestException, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  BadRequestException,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import type { ScreeningResult } from '../services/content-screening.service.js';
 import { ContentScreeningService } from '../services/content-screening.service.js';
 import type {
@@ -36,6 +45,7 @@ import type {
   PendingAppealResponse,
   ListAppealResponse,
 } from '../dto/appeal.dto.js';
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 export interface ScreenContentRequest {
   contentId: string;
@@ -164,7 +174,11 @@ export class ModerationController {
   }
 
   @Post('actions')
-  async createAction(@Body() request: CreateActionRequest): Promise<ModerationActionResponse> {
+  @UseGuards(JwtAuthGuard)
+  async createAction(
+    @CurrentUser() user: JwtPayload,
+    @Body() request: CreateActionRequest,
+  ): Promise<ModerationActionResponse> {
     if (!request.targetType || !request.targetId || !request.actionType) {
       throw new BadRequestException('targetType, targetId, and actionType are required');
     }
@@ -173,10 +187,7 @@ export class ModerationController {
       throw new BadRequestException('reasoning is required');
     }
 
-    // TODO: Extract moderator ID from JWT token when auth is implemented
-    const moderatorId = 'system';
-
-    return this.actionsService.createAction(request, moderatorId);
+    return this.actionsService.createAction(request, user.sub);
   }
 
   @Get('actions/:actionId')
@@ -185,16 +196,17 @@ export class ModerationController {
   }
 
   @Post('actions/:actionId/approve')
+  @UseGuards(JwtAuthGuard)
   async approveAction(
     @Param('actionId') actionId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request?: ApproveActionRequest,
   ): Promise<ModerationActionResponse> {
-    // TODO: Extract moderator ID from JWT token when auth is implemented
-    const moderatorId = 'system';
-    return this.actionsService.approveAction(actionId, moderatorId, request);
+    return this.actionsService.approveAction(actionId, user.sub, request);
   }
 
   @Post('actions/:actionId/reject')
+  @UseGuards(JwtAuthGuard)
   async rejectAction(
     @Param('actionId') actionId: string,
     @Body() request: RejectActionRequest,
@@ -216,6 +228,7 @@ export class ModerationController {
   }
 
   @Post('interventions/cooling-off')
+  @UseGuards(JwtAuthGuard)
   async sendCoolingOffPrompt(
     @Body()
     request: {
@@ -244,17 +257,17 @@ export class ModerationController {
   }
 
   @Post('actions/:actionId/appeal')
+  @UseGuards(JwtAuthGuard)
   async createAppeal(
     @Param('actionId') actionId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request: CreateAppealRequest,
   ): Promise<AppealResponse> {
     if (!request.reason || request.reason.trim().length === 0) {
       throw new BadRequestException('reason is required');
     }
 
-    // TODO: Extract appellant ID from JWT token when auth is implemented
-    const appellantId = 'system';
-    return this.actionsService.createAppeal(actionId, appellantId, request);
+    return this.actionsService.createAppeal(actionId, user.sub, request);
   }
 
   @Get('appeals/pending')
@@ -281,8 +294,10 @@ export class ModerationController {
   }
 
   @Post('appeals/:appealId/review')
+  @UseGuards(JwtAuthGuard)
   async reviewAppeal(
     @Param('appealId') appealId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request: ReviewAppealRequest,
   ): Promise<AppealResponse> {
     if (!request.decision || !['upheld', 'denied'].includes(request.decision)) {
@@ -293,13 +308,13 @@ export class ModerationController {
       throw new BadRequestException('reasoning is required');
     }
 
-    // TODO: Extract reviewer ID from JWT token when auth is implemented
-    const reviewerId = 'system';
-    return this.actionsService.reviewAppeal(appealId, reviewerId, request);
+    return this.actionsService.reviewAppeal(appealId, user.sub, request);
   }
 
   @Post('bans/temporary')
+  @UseGuards(JwtAuthGuard)
   async createTemporaryBan(
+    @CurrentUser() user: JwtPayload,
     @Body() request: CreateTemporaryBanRequest,
   ): Promise<ModerationActionResponse> {
     if (!request.userId || !request.userId.trim()) {
@@ -318,13 +333,11 @@ export class ModerationController {
       throw new BadRequestException('reasoning is required');
     }
 
-    // TODO: Extract moderator ID from JWT token when auth is implemented
-    const moderatorId = 'system';
     return this.actionsService.createTemporaryBan(
       request.userId,
       request.durationDays,
       request.reasoning,
-      moderatorId,
+      user.sub,
     );
   }
 
@@ -338,9 +351,10 @@ export class ModerationController {
   }
 
   @Post('bans/auto-lift')
+  @UseGuards(JwtAuthGuard)
   async autoLiftExpiredBans(): Promise<AutoLiftBansResponse> {
-    // TODO: Add auth check to ensure only admin/system can call this
-    // This endpoint should typically be called by a scheduled task
+    // TODO: Add AdminGuard for proper role check
+    // This endpoint should typically be called by a scheduled task or admin
     return this.actionsService.autoLiftExpiredBans();
   }
 
@@ -349,10 +363,12 @@ export class ModerationController {
   // ============================================================================
 
   @Post('safety-reports')
+  @UseGuards(JwtAuthGuard)
   async createSafetyReport(
+    @CurrentUser() user: JwtPayload,
     @Body()
     request: {
-      reporterId: string;
+      reporterId?: string; // Optional - will use authenticated user if not provided
       reason: SafetyReportReason;
       additionalInfo?: string;
       contextUrl?: string;
@@ -360,10 +376,6 @@ export class ModerationController {
       contextResponseId?: string;
     },
   ): Promise<SafetyReportResponse> {
-    if (!request.reporterId) {
-      throw new BadRequestException('reporterId is required');
-    }
-
     if (!request.reason) {
       throw new BadRequestException('reason is required');
     }
@@ -380,7 +392,11 @@ export class ModerationController {
       throw new BadRequestException(`reason must be one of: ${validReasons.join(', ')}`);
     }
 
-    return this.safetyReportService.createReport(request);
+    // Use authenticated user if reporterId not explicitly provided
+    return this.safetyReportService.createReport({
+      ...request,
+      reporterId: request.reporterId || user.sub,
+    });
   }
 
   @Get('safety-reports')
@@ -418,23 +434,23 @@ export class ModerationController {
   }
 
   @Post('safety-reports/:reportId/resolve')
+  @UseGuards(JwtAuthGuard)
   async resolveSafetyReport(
     @Param('reportId') reportId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request: { notes?: string },
   ): Promise<SafetyReportResponse> {
-    // TODO: Extract moderator ID from JWT token when auth is implemented
-    const moderatorId = 'system';
-    return this.safetyReportService.resolveReport(reportId, moderatorId, request.notes);
+    return this.safetyReportService.resolveReport(reportId, user.sub, request.notes);
   }
 
   @Post('safety-reports/:reportId/escalate')
+  @UseGuards(JwtAuthGuard)
   async escalateSafetyReport(
     @Param('reportId') reportId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request: { notes?: string },
   ): Promise<SafetyReportResponse> {
-    // TODO: Extract moderator ID from JWT token when auth is implemented
-    const moderatorId = 'system';
-    return this.safetyReportService.escalateReport(reportId, moderatorId, request.notes);
+    return this.safetyReportService.escalateReport(reportId, user.sub, request.notes);
   }
 
   @Get('users/:userId/safety-reports')
