@@ -47,15 +47,27 @@ export default defineConfig({
     target: 'es2020',
     rollupOptions: {
       output: {
-        manualChunks: {
+        // Rolldown (Vite 8+) requires manualChunks as a function, not an object
+        manualChunks(id: string) {
           // Core React - rarely changes, highly cacheable
-          'vendor-react': ['react', 'react-dom'],
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+            return 'vendor-react';
+          }
           // React Router - routing layer
-          'vendor-router': ['react-router-dom'],
+          if (
+            id.includes('node_modules/react-router-dom') ||
+            id.includes('node_modules/react-router/')
+          ) {
+            return 'vendor-router';
+          }
           // TanStack Query - data fetching layer
-          'vendor-query': ['@tanstack/react-query'],
+          if (id.includes('node_modules/@tanstack/react-query')) {
+            return 'vendor-query';
+          }
           // UI utilities
-          'vendor-ui': ['lucide-react'],
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-ui';
+          }
         },
       },
     },
