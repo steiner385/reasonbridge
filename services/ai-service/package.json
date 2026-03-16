@@ -51,7 +51,7 @@
     "@reason-bridge/testing-utils": "workspace:*",
     "@types/node": "25.3.5",
     "@types/pg": "^8.18.0",
-    "@vitest/ui": "^2.1.0",
+    "@vitest/ui": "^4.1.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
     "vitest": "^2.1.0",
