@@ -18,6 +18,7 @@
 import { useState, type FormEvent } from 'react';
 import { useCreateResponse } from '../../hooks/useCreateResponse';
 import { usePreviewFeedback } from '../../hooks/usePreviewFeedback';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import Button from '../ui/Button';
 import { PreviewFeedbackPanel } from '../feedback/PreviewFeedbackPanel';
 import type { CitationInput } from '../../services/discussionService';
@@ -62,6 +63,9 @@ export function CreateResponseForm({
       onSuccess?.();
     },
   });
+
+  // Auth protection for submissions
+  const { requireAuth } = useRequireAuth();
 
   // Preview feedback integration
   const {
@@ -129,15 +133,17 @@ export function CreateResponseForm({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    requireAuth(() => {
+      if (!validateForm()) {
+        return;
+      }
 
-    createResponse({
-      discussionId,
-      content: content.trim(),
-      citations: citations.length > 0 ? citations : undefined,
-      parentResponseId,
+      createResponse({
+        discussionId,
+        content: content.trim(),
+        citations: citations.length > 0 ? citations : undefined,
+        parentResponseId,
+      });
     });
   };
 

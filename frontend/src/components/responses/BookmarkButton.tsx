@@ -6,6 +6,7 @@
 import React from 'react';
 import { useBookmarkStatus } from '../../hooks/useBookmarks';
 import { useToast } from '../../contexts/ToastContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import { Tooltip } from '../ui/Tooltip';
 
 export interface BookmarkButtonProps {
@@ -62,6 +63,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   disabled = false,
 }) => {
   const toast = useToast();
+  const { requireAuth } = useRequireAuth();
   const { isBookmarked, isPending, toggleBookmark } = useBookmarkStatus(responseId);
 
   // Size classes - all sizes maintain 44px minimum touch target for WCAG 2.1 AA compliance
@@ -98,17 +100,19 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     ${className}
   `;
 
-  const handleClick = async () => {
-    if (disabled || isPending) return;
+  const handleClick = () => {
+    requireAuth(() => {
+      if (disabled || isPending) return;
 
-    try {
-      toggleBookmark();
-      // Toast will show after successful mutation (optimistic update)
-      // Note: We don't show toast immediately because of optimistic updates
-      // The mutation handlers could add toast on success/error if needed
-    } catch {
-      toast.error('Failed to update bookmark');
-    }
+      try {
+        toggleBookmark();
+        // Toast will show after successful mutation (optimistic update)
+        // Note: We don't show toast immediately because of optimistic updates
+        // The mutation handlers could add toast on success/error if needed
+      } catch {
+        toast.error('Failed to update bookmark');
+      }
+    });
   };
 
   const tooltipContent = isBookmarked

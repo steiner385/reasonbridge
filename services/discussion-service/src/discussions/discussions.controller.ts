@@ -16,7 +16,6 @@ import {
   Get,
   Body,
   Query,
-  Req,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -29,16 +28,7 @@ import type { ListDiscussionsQuery } from './discussions.service.js';
 import { CreateDiscussionDto } from './dto/create-discussion.dto.js';
 import { DiscussionResponseDto, DiscussionDetailDto } from './dto/discussion-response.dto.js';
 import { PaginatedResponseDto } from '../dto/pagination.dto.js';
-
-// Placeholder for auth guard (will be implemented in Phase 9)
-// For now, we'll extract userId from request.user
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    displayName: string;
-  };
-}
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @ApiTags('discussions')
 @Controller('discussions')
@@ -52,11 +42,12 @@ export class DiscussionsController {
    *
    * Rate limit: 5 discussions per day per user
    *
-   * @param req - Authenticated request with user info
+   * @param user - Authenticated user from JWT
    * @param dto - Discussion creation data
    * @returns The created discussion with initial response
    */
   @Post()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ 'discussion-creation': { limit: 5, ttl: 86400000 } }) // 5 per day
   @ApiBearerAuth()
@@ -75,6 +66,10 @@ export class DiscussionsController {
     description: 'Invalid input or topic not active',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Authentication required',
+  })
+  @ApiResponse({
     status: 403,
     description: 'User not verified',
   })
@@ -87,12 +82,10 @@ export class DiscussionsController {
     description: 'Rate limit exceeded (5 discussions per day)',
   })
   async createDiscussion(
-    @Req() req: AuthRequest,
+    @CurrentUser() user: JwtPayload,
     @Body() dto: CreateDiscussionDto,
   ): Promise<DiscussionDetailDto> {
-    // TODO: Replace with actual auth guard in Phase 9
-    const userId = req.user?.id || 'anonymous';
-    return this.discussionsService.createDiscussion(userId, dto);
+    return this.discussionsService.createDiscussion(user.sub, dto);
   }
 
   /**

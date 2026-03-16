@@ -9,6 +9,7 @@ import { useFilteredTopics } from '../../lib/useFilteredTopics';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import {
@@ -26,7 +27,8 @@ const WELCOME_BANNER_DISMISSED_KEY = 'reasonbridge_welcome_banner_dismissed';
 function TopicsPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthContext();
+  const { user } = useAuthContext();
+  const { requireAuth } = useRequireAuth();
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
@@ -111,11 +113,14 @@ function TopicsPage() {
                 Merge Topics
               </Button>
             )}
-            {isAuthenticated && (
-              <Button variant="primary" size="md" onClick={() => setIsCreateModalOpen(true)}>
-                Create Topic
-              </Button>
-            )}
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => requireAuth(() => setIsCreateModalOpen(true))}
+              data-testid="create-topic-button"
+            >
+              Create Topic
+            </Button>
           </div>
         </div>
         <p className="text-fluid-base text-gray-600 dark:text-gray-300">

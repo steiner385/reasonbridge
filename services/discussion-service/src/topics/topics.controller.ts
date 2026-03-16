@@ -35,6 +35,7 @@ import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-r
 import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
 import { CommonGroundExportService } from '../services/common-ground-export.service.js';
 import { TopicsAnalyticsService } from './topics-analytics.service.js';
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('topics')
 export class TopicsController {
@@ -75,26 +76,21 @@ export class TopicsController {
    * Creates merge record with 30-day rollback window
    */
   @Post('merge')
-  // TODO: Add moderator guard once auth module is integrated
-  // @UseGuards(JwtAuthGuard, ModeratorGuard)
+  @UseGuards(JwtAuthGuard)
+  // TODO: Add ModeratorGuard for proper role check
   async mergeTopics(
     @Body() mergeDto: MergeTopicsDto,
-    @Headers('x-user-id') userIdHeader: string | undefined,
+    @CurrentUser() user: JwtPayload,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
-    const userId = userIdHeader || req.user?.id || req.userId;
+    // Check moderator role (still using request context for role until role is in JWT)
     const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
-
-    if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
-    }
 
     if (!isModerator) {
       throw new Error('Only moderators can merge topics.');
     }
 
-    return this.topicsService.mergeTopics(userId, mergeDto);
+    return this.topicsService.mergeTopics(user.sub, mergeDto);
   }
 
   /**
@@ -105,22 +101,13 @@ export class TopicsController {
    * Rate limit: 5 requests per day per user (T016)
    */
   @Post()
+  @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 5, ttl: 86400000 } }) // 5 per day (86400000ms = 24h)
-  // TODO: Add authentication guard once auth module is integrated
-  // @UseGuards(JwtAuthGuard)
   async createTopic(
     @Body() createTopicDto: CreateTopicDto,
-    @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @CurrentUser() user: JwtPayload,
   ): Promise<TopicResponseDto> {
-    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
-    const userId = userIdHeader || req.user?.id || req.userId;
-
-    if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
-    }
-
-    return this.topicsService.createTopic(userId, createTopicDto);
+    return this.topicsService.createTopic(user.sub, createTopicDto);
   }
 
   /**
@@ -131,23 +118,17 @@ export class TopicsController {
    * Authorization: Topic creator or moderator
    */
   @Patch(':id/status')
-  // TODO: Add authentication guard once auth module is integrated
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateTopicStatus(
     @Param('id') id: string,
     @Body() updateStatusDto: UpdateTopicStatusDto,
-    @Headers('x-user-id') userIdHeader: string | undefined,
+    @CurrentUser() user: JwtPayload,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
-    const userId = userIdHeader || req.user?.id || req.userId;
+    // Check moderator role (still using request context for role until role is in JWT)
     const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
 
-    if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
-    }
-
-    return this.topicsService.updateTopicStatus(id, userId, updateStatusDto.status, isModerator);
+    return this.topicsService.updateTopicStatus(id, user.sub, updateStatusDto.status, isModerator);
   }
 
   /**
@@ -159,23 +140,17 @@ export class TopicsController {
    * Edit reason required for topics older than 24 hours
    */
   @Patch(':id')
-  // TODO: Add authentication guard once auth module is integrated
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateTopic(
     @Param('id') id: string,
     @Body() updateTopicDto: UpdateTopicDto,
-    @Headers('x-user-id') userIdHeader: string | undefined,
+    @CurrentUser() user: JwtPayload,
     @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // Extract userId from multiple sources (API gateway header, auth middleware, or request context)
-    const userId = userIdHeader || req.user?.id || req.userId;
+    // Check moderator role (still using request context for role until role is in JWT)
     const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
 
-    if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
-    }
-
-    return this.topicsService.updateTopic(id, userId, updateTopicDto, isModerator);
+    return this.topicsService.updateTopic(id, user.sub, updateTopicDto, isModerator);
   }
 
   /**

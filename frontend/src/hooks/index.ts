@@ -43,3 +43,4 @@ export type {
   UseCanViewSectionResult,
   PrivacyMessageProps,
 } from './useCanViewSection';
+export { useRequireAuth } from './useRequireAuth';

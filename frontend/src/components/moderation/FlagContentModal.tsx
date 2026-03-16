@@ -14,6 +14,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { FlagCategory } from '../../types/moderation';
 import { FLAG_CATEGORIES } from '../../types/moderation';
 import { useFlagContent } from '../../lib/useFlagContent';
@@ -59,6 +60,7 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const { requireAuth } = useRequireAuth();
   const { flagContent, isLoading, isSuccess, isError, error } = useFlagContent();
   const notify = useShowNotification();
   const prevIsOpenRef = useRef(isOpen);
@@ -120,22 +122,24 @@ const FlagContentModal: React.FC<FlagContentModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    requireAuth(async () => {
+      if (!validateForm()) {
+        return;
+      }
 
-    try {
-      await flagContent({
-        contentId,
-        contentType,
-        category: selectedCategory,
-        reason,
-        description,
-        isAnonymous,
-      });
-    } catch {
-      // Error is handled by the hook state
-    }
+      try {
+        await flagContent({
+          contentId,
+          contentType,
+          category: selectedCategory,
+          reason,
+          description,
+          isAnonymous,
+        });
+      } catch {
+        // Error is handled by the hook state
+      }
+    });
   };
 
   return (

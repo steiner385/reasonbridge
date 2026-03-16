@@ -17,6 +17,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTypingIndicator } from '../../hooks/useTypingIndicator';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import type { CreateResponseRequest } from '../../types/response';
 import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
@@ -63,6 +64,9 @@ export function CompactComposer({
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // Auth protection for submissions
+  const { requireAuth } = useRequireAuth();
+
   // Typing indicator
   const { sendTyping } = useTypingIndicator({ topicId });
 
@@ -95,38 +99,40 @@ export function CompactComposer({
     onPreviewFeedbackChange,
   ]);
 
-  const handleSubmit = useCallback(async () => {
-    if (isLoading) return;
+  const handleSubmit = useCallback(() => {
+    requireAuth(async () => {
+      if (isLoading) return;
 
-    const trimmed = content.trim();
-    if (trimmed.length < minLength) {
-      setError(`Message must be at least ${minLength} character${minLength > 1 ? 's' : ''}`);
-      return;
-    }
-    if (trimmed.length > maxLength) {
-      setError(`Message must not exceed ${maxLength} characters`);
-      return;
-    }
+      const trimmed = content.trim();
+      if (trimmed.length < minLength) {
+        setError(`Message must be at least ${minLength} character${minLength > 1 ? 's' : ''}`);
+        return;
+      }
+      if (trimmed.length > maxLength) {
+        setError(`Message must not exceed ${maxLength} characters`);
+        return;
+      }
 
-    setError(null);
+      setError(null);
 
-    const response: CreateResponseRequest = {
-      content: trimmed,
-      containsOpinion: false,
-      containsFactualClaims: false,
-    };
+      const response: CreateResponseRequest = {
+        content: trimmed,
+        containsOpinion: false,
+        containsFactualClaims: false,
+      };
 
-    if (parentId) {
-      response.parentId = parentId;
-    }
+      if (parentId) {
+        response.parentId = parentId;
+      }
 
-    try {
-      await onSubmit(response);
-      setContent('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message');
-    }
-  }, [content, minLength, maxLength, isLoading, parentId, onSubmit]);
+      try {
+        await onSubmit(response);
+        setContent('');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to send message');
+      }
+    });
+  }, [content, minLength, maxLength, isLoading, parentId, onSubmit, requireAuth]);
 
   const handleChange = useCallback(
     (value: string) => {

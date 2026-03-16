@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ReactionSummary } from '../../services/reactionService';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import EmojiPicker from './EmojiPicker';
 
 export interface ReactionBarProps {
@@ -90,6 +91,19 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
   maxTooltipUsers = 5,
 }) => {
   const [hoveredEmoji, setHoveredEmoji] = useState<string | null>(null);
+  const { requireAuth } = useRequireAuth();
+
+  // Wrap the reaction handler with auth check
+  const handleReactionClick = useCallback(
+    (emoji: string) => {
+      requireAuth(() => {
+        if (!disabled) {
+          onReactionClick(emoji);
+        }
+      });
+    },
+    [requireAuth, disabled, onReactionClick],
+  );
 
   // Size classes - all sizes maintain 44px minimum touch target
   const sizeClasses = {
@@ -155,7 +169,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
             onMouseLeave={() => setHoveredEmoji(null)}
           >
             <button
-              onClick={() => onReactionClick(reaction.emoji)}
+              onClick={() => handleReactionClick(reaction.emoji)}
               disabled={disabled}
               className={`
                 ${currentSize.button}
@@ -211,7 +225,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
       {/* Add reaction button (emoji picker) */}
       {showPicker && (
         <EmojiPicker
-          onSelect={onReactionClick}
+          onSelect={handleReactionClick}
           selectedEmojis={selectedEmojis}
           disabled={disabled}
           size={size}

@@ -16,11 +16,12 @@ import { SlugGeneratorService } from './slug-generator.service.js';
 import { TopicsEditService } from './topics-edit.service.js';
 import { TopicsAnalyticsService } from './topics-analytics.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { AuthModule } from '../auth/index.js';
 // CacheModule removed - it's global and imported once in AppModule
 import { PropositionsModule } from '../propositions/propositions.module.js';
 
 @Module({
-  imports: [PrismaModule, PropositionsModule],
+  imports: [PrismaModule, AuthModule, PropositionsModule],
   controllers: [
     TopicsController,
     TopicDraftsController,

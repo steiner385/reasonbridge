@@ -7,6 +7,7 @@ import React, { useState, useMemo } from 'react';
 import type { Response } from '../../types/response';
 import Button from '../ui/Button';
 import { FlagContentButton } from '../moderation';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import ResponseCard from './ResponseCard';
 
 export interface ThreadedResponseDisplayProps {
@@ -79,6 +80,7 @@ const ResponseItem: React.FC<ResponseItemProps> = ({
   isLastChild = false,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { requireAuth } = useRequireAuth();
   const hasChildren = node.children.length > 0;
 
   // Calculate indentation based on depth
@@ -134,7 +136,7 @@ const ResponseItem: React.FC<ResponseItemProps> = ({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onReply(node.id);
+                      requireAuth(() => onReply(node.id));
                     }}
                   >
                     Reply

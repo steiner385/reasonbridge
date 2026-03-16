@@ -15,10 +15,12 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 import { BookmarksService } from './bookmarks.service.js';
 import type { CreateBookmarkDto } from './dto/create-bookmark.dto.js';
 import type { BookmarkDto, BookmarkListDto, BookmarkStatusDto } from './dto/bookmark.dto.js';
+import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('bookmarks')
 export class BookmarksController {
@@ -29,11 +31,12 @@ export class BookmarksController {
    * POST /bookmarks
    */
   @Post()
+  @UseGuards(JwtAuthGuard)
   async addBookmark(
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() dto: CreateBookmarkDto,
   ): Promise<BookmarkDto> {
-    return this.bookmarksService.addBookmark(userId, dto);
+    return this.bookmarksService.addBookmark(user.sub, dto);
   }
 
   /**
@@ -41,12 +44,13 @@ export class BookmarksController {
    * DELETE /bookmarks/:responseId
    */
   @Delete(':responseId')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeBookmark(
     @Param('responseId') responseId: string,
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<void> {
-    return this.bookmarksService.removeBookmark(userId, responseId);
+    return this.bookmarksService.removeBookmark(user.sub, responseId);
   }
 
   /**
@@ -54,14 +58,15 @@ export class BookmarksController {
    * GET /bookmarks?limit=20&offset=0
    */
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getBookmarks(
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ): Promise<BookmarkListDto> {
     const parsedLimit = limit ? parseInt(limit, 10) : 20;
     const parsedOffset = offset ? parseInt(offset, 10) : 0;
-    return this.bookmarksService.getBookmarks(userId, parsedLimit, parsedOffset);
+    return this.bookmarksService.getBookmarks(user.sub, parsedLimit, parsedOffset);
   }
 
   /**
@@ -69,10 +74,11 @@ export class BookmarksController {
    * GET /bookmarks/:responseId/status
    */
   @Get(':responseId/status')
+  @UseGuards(JwtAuthGuard)
   async getBookmarkStatus(
     @Param('responseId') responseId: string,
-    @Headers('x-user-id') userId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<BookmarkStatusDto> {
-    return this.bookmarksService.getBookmarkStatus(userId, responseId);
+    return this.bookmarksService.getBookmarkStatus(user.sub, responseId);
   }
 }

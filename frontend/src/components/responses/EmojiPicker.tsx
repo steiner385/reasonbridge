@@ -7,6 +7,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type React from 'react';
 import { createPortal } from 'react-dom';
 import { Tooltip } from '../ui/Tooltip';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 /**
  * Quick reaction emojis available in the picker
@@ -280,6 +281,8 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
     [isOpen],
   );
 
+  const { requireAuth } = useRequireAuth();
+
   const handleEmojiSelect = (emoji: string) => {
     onSelect(emoji);
     setIsOpen(false);
@@ -287,9 +290,11 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
   };
 
   const handleTriggerClick = () => {
-    if (!disabled) {
-      setIsOpen((prev) => !prev);
-    }
+    requireAuth(() => {
+      if (!disabled) {
+        setIsOpen((prev) => !prev);
+      }
+    });
   };
 
   // Trigger button classes

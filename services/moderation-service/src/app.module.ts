@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './health/health.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { AuthModule } from './auth/index.js';
 import { ModerationModule } from './services/moderation.module.js';
 import { ModerationController } from './controllers/moderation.controller.js';
 import { ChildContentController } from './controllers/child-content.controller.js';
@@ -23,6 +24,8 @@ import { JobsModule } from './jobs/jobs.module.js';
     PrismaModule,
     MetricsModule,
     HealthModule,
+    // JWT authentication for protected endpoints
+    AuthModule,
     ModerationModule,
     JobsModule,
   ],

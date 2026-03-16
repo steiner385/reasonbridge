@@ -36,6 +36,7 @@ import type { PreviewFeedbackItem } from '../../lib/feedback-api';
 import { useReactions } from '../../hooks/useReactions';
 import { useVotes } from '../../hooks/useVotes';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import { apiClient } from '../../lib/api';
 import { InlineTrustBadge } from '../users';
 import ResponseComposer from './ResponseComposer';
@@ -120,8 +121,17 @@ export function ResponseItem({
   // Auth context for current user
   const { user: currentUser, isLoading: isAuthLoading } = useAuthContext();
 
+  // Require auth for interactive actions
+  const { requireAuth } = useRequireAuth();
+
   // Votes hook
-  const { voteSummary, upvote, downvote, isPending: isVotePending } = useVotes(response.id);
+  const {
+    voteSummary,
+    upvote,
+    downvote,
+    isPending: isVotePending,
+    isLoading: isVoteLoading,
+  } = useVotes(response.id);
 
   // Response menu state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -155,10 +165,12 @@ export function ResponseItem({
   };
 
   const handleReplyClick = () => {
-    if (onReply) {
-      onReply(response.id, response.parentResponseId || undefined);
-    }
-    setShowReplyForm(!showReplyForm);
+    requireAuth(() => {
+      if (onReply) {
+        onReply(response.id, response.parentResponseId || undefined);
+      }
+      setShowReplyForm(!showReplyForm);
+    });
   };
 
   const handleReplySubmit = async (replyContent: CreateResponseRequest) => {
@@ -275,7 +287,7 @@ export function ResponseItem({
                 }
                 onUpvote={upvote}
                 onDownvote={downvote}
-                disabled={isVotePending || !currentUser}
+                disabled={isVotePending || isVoteLoading}
                 size="sm"
                 orientation="vertical"
               />
@@ -400,8 +412,27 @@ export function ResponseItem({
                 compact ? `${!isGroupStart ? 'pl-8' : ''} gap-1.5 mt-1` : 'gap-2 mt-4'
               }`}
             >
-              {/* Left side: Reactions and Reply */}
+              {/* Left side: Votes (compact mode), Reactions and Reply */}
               <div className={`flex items-center flex-wrap ${compact ? 'gap-1.5' : 'gap-2'}`}>
+                {/* Vote buttons in compact mode - horizontal layout */}
+                {compact && (
+                  <VoteButtons
+                    voteCount={voteSummary?.score ?? 0}
+                    userVote={
+                      voteSummary?.userVote === 'UPVOTE'
+                        ? 'up'
+                        : voteSummary?.userVote === 'DOWNVOTE'
+                          ? 'down'
+                          : null
+                    }
+                    onUpvote={upvote}
+                    onDownvote={downvote}
+                    disabled={isVotePending || isVoteLoading}
+                    size="sm"
+                    orientation="horizontal"
+                  />
+                )}
+
                 {/* Reaction Bar */}
                 <ReactionBar
                   reactions={reactions}

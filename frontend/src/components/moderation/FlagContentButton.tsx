@@ -12,6 +12,7 @@
 
 import React, { useState } from 'react';
 import Button from '../ui/Button';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 import FlagContentModal from './FlagContentModal';
 
 export interface FlagContentButtonProps {
@@ -61,6 +62,13 @@ const FlagContentButton: React.FC<FlagContentButtonProps> = ({
   className = '',
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { requireAuth } = useRequireAuth();
+
+  const handleOpenModal = () => {
+    requireAuth(() => {
+      setIsModalOpen(true);
+    });
+  };
 
   const flagIcon = (
     <svg
@@ -92,7 +100,7 @@ const FlagContentButton: React.FC<FlagContentButtonProps> = ({
       <>
         <button
           type="button"
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenModal}
           className={`text-gray-500 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded-md p-1 ${className}`}
           title={tooltip}
           aria-label="Report content"
@@ -109,7 +117,7 @@ const FlagContentButton: React.FC<FlagContentButtonProps> = ({
       <Button
         variant="ghost"
         size={size}
-        onClick={() => setIsModalOpen(true)}
+        onClick={handleOpenModal}
         leftIcon={flagIcon}
         className={className}
         title={tooltip}

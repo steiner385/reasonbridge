@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export type ReportReason = 'SPAM' | 'HARASSMENT' | 'MISINFORMATION' | 'HATE_SPEECH' | 'OTHER';
 
@@ -58,6 +59,7 @@ const ReportDialog: React.FC<ReportDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { requireAuth } = useRequireAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -89,23 +91,25 @@ const ReportDialog: React.FC<ReportDialogProps> = ({
     };
   }, [isOpen]);
 
-  const handleSubmit = async () => {
-    if (!selectedReason) {
-      setError('Please select a reason for your report');
-      return;
-    }
+  const handleSubmit = () => {
+    requireAuth(async () => {
+      if (!selectedReason) {
+        setError('Please select a reason for your report');
+        return;
+      }
 
-    setIsSubmitting(true);
-    setError(null);
+      setIsSubmitting(true);
+      setError(null);
 
-    try {
-      await onSubmit(selectedReason, additionalInfo || undefined);
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit report');
-    } finally {
-      setIsSubmitting(false);
-    }
+      try {
+        await onSubmit(selectedReason, additionalInfo || undefined);
+        onClose();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to submit report');
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   if (!isOpen) return null;
