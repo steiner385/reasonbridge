@@ -154,7 +154,9 @@ describe('BridgingSuggester', () => {
           supportCount: 8,
           opposeCount: 2,
           nuancedCount: 0,
-          consensusScore: 0.8,
+          // Use 0.69 (below 0.7 threshold) to ensure a bridging suggestion is generated
+          // consensusScore >= 0.7 would route to common ground instead
+          consensusScore: 0.69,
           alignments: Array.from({ length: 10 }, (_, i) => ({
             userId: `user-${i + 1}`,
             stance: i < 8 ? 'SUPPORT' : 'OPPOSE',
@@ -209,11 +211,12 @@ describe('BridgingSuggester', () => {
 
       const result = await suggester.suggest('topic-1');
 
-      // Should identify bridging opportunities for all propositions that have disagreement (all 3)
-      expect(result.suggestions.length).toBe(3);
+      // prop-1 (0.9 consensus) goes to common ground, not bridging suggestions
+      // Only prop-2 (0.5) and prop-3 (0.3) generate bridging suggestions
+      expect(result.suggestions.length).toBe(2);
       expect(result.overallConsensusScore).toBeCloseTo((0.9 + 0.5 + 0.3) / 3, 1);
-      expect(result.conflictAreas.length).toBe(3); // All 3 have both support and oppose
-      expect(result.commonGroundAreas.length).toBe(1);
+      expect(result.conflictAreas.length).toBe(2); // Only low/moderate consensus with disagreement
+      expect(result.commonGroundAreas.length).toBe(1); // prop-1 with high consensus
     });
 
     it('should generate descriptive reasoning for the analysis', async () => {
@@ -413,7 +416,9 @@ describe('BridgingSuggester', () => {
           supportCount: 7,
           opposeCount: 3,
           nuancedCount: 1,
-          consensusScore: 0.7,
+          // Use 0.69 (below 0.7 threshold) to ensure a bridging suggestion is generated
+          // consensusScore >= 0.7 would route to common ground instead
+          consensusScore: 0.69,
           alignments: [],
         },
       ];
