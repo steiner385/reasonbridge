@@ -16,7 +16,9 @@ export class ToneAnalyzerService {
   // Patterns that indicate inflammatory language
   private readonly inflammatoryPatterns = [
     // Personal attacks - direct (you)
-    /you('re| are)\s+(stupid|dumb|idiot|moron|fool|ignorant|ridiculous)/gi,
+    /you('re| are)\s+(so\s+)?(stupid|dumb|an?\s+idiot|an?\s+moron|an?\s+fool|ignorant|ridiculous)/gi,
+    // Inverted form: "how stupid you are", "what an idiot you are"
+    /\b(how|what\s+an?)\s+(stupid|dumb|ignorant|ridiculous|idiotic|moronic)\s+(you\s+are|are\s+you)/gi,
     /shut\s+up/gi,
     /get\s+lost/gi,
 
@@ -24,6 +26,9 @@ export class ToneAnalyzerService {
     // Allow optional adverbs (really, very, so, etc.) between "are" and insult
     /\b(they|these\s+people|those\s+people|those\s+folks|people\s+like\s+(you|this|that))\s+(are|'re)\s+(really|very|so|completely|totally|absolutely)?\s*(stupid|dumb|idiots?|morons?|fools?|ignorant|ridiculous)/gi,
     /\b(this|that|these|those)\s+(is|are)\s+(really|very|so|completely|totally|absolutely)?\s*(stupid|dumb|idiotic|moronic|foolish|ignorant|ridiculous)/gi,
+
+    // Dismissive of entire discussion/topic (e.g., "this conversation is stupid")
+    /\b(this|that|the)\s+(\w+\s+)?(conversation|discussion|argument|debate|topic|thread|post|comment)\s+(is|are)\s+(really|very|so|completely|totally|absolutely|just)?\s*(a\s+)?(stupid|dumb|pointless|waste\s+of\s+time|ridiculous|idiotic|moronic)/gi,
 
     // Aggressive language
     /\b(hate|despise)\s+(you|your|them|this|these)/gi,

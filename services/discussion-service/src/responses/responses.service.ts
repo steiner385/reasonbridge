@@ -210,13 +210,17 @@ export class ResponsesService {
       });
     }
 
-    // Increment topic response count
+    // Count unique participants and update topic stats
+    const uniqueParticipants = await this.prisma.response.groupBy({
+      by: ['authorId'],
+      where: { topicId },
+    });
+
     await this.prisma.discussionTopic.update({
       where: { id: topicId },
       data: {
-        responseCount: {
-          increment: 1,
-        },
+        responseCount: { increment: 1 },
+        participantCount: uniqueParticipants.length,
       },
     });
 

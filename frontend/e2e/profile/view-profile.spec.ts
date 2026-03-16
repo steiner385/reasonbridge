@@ -20,6 +20,7 @@ import { test, expect } from '@playwright/test';
 // Demo user IDs from seed data - use real seeded users for backend-dependent tests
 const DEMO_USER_IDS = {
   ADMIN_ADAMS: '11111111-0000-4000-8000-000000000001',
+  MOD_MARTINEZ: '11111111-0000-4000-8000-000000000002',
   ALICE_ANDERSON: '11111111-0000-4000-8000-000000000003',
 };
 
@@ -158,6 +159,202 @@ test.describe('View Public Profile', () => {
 
       // Page should load (either content or error)
       await expect(page.locator('body')).toBeVisible();
+    });
+  });
+
+  test.describe('Activity Statistics', () => {
+    test('should display topic count and response count', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.MOD_MARTINEZ}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Mod Martinez/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Activity section should exist
+      await expect(page.getByRole('heading', { name: 'Activity' })).toBeVisible();
+
+      // Should show Topics stat with a number
+      await expect(page.getByText('Topics').first()).toBeVisible();
+
+      // Should show Responses stat with a number
+      await expect(page.getByText('Responses').first()).toBeVisible();
+    });
+
+    test('should display numeric counts for activity stats', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Alice Anderson/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Activity section should have numeric values (not "No activity statistics available")
+      const activitySection = page.locator('h2:has-text("Activity")').locator('..');
+      await expect(activitySection).not.toContainText('No activity statistics available');
+    });
+  });
+
+  test.describe('Bio Section', () => {
+    test('should display About section', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Alice Anderson/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // About section should be visible
+      await expect(page.getByRole('heading', { name: 'About' })).toBeVisible();
+    });
+
+    test('should show placeholder when bio is empty', async ({ page }) => {
+      // Mod Martinez has no bio set
+      await page.goto(`/profile/${DEMO_USER_IDS.MOD_MARTINEZ}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Mod Martinez/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Should show "No bio provided" or similar
+      await expect(page.getByText(/No bio provided/i)).toBeVisible();
+    });
+  });
+
+  test.describe('Contribution History', () => {
+    test('should display contribution history section', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Alice Anderson/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Contribution History section should be visible
+      await expect(page.getByRole('heading', { name: 'Contribution History' })).toBeVisible();
+    });
+
+    test('should display contribution filter buttons', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for contribution history to load
+      const contributionHistory = page.locator('[data-testid="contribution-history"]');
+      await expect(contributionHistory).toBeVisible({ timeout: 10000 });
+
+      // Filter buttons should be visible within the contribution history section
+      await expect(contributionHistory.getByRole('button', { name: /All/i })).toBeVisible();
+      await expect(contributionHistory.getByRole('button', { name: /Topics/i })).toBeVisible();
+      await expect(contributionHistory.getByRole('button', { name: /Responses/i })).toBeVisible();
+      await expect(contributionHistory.getByRole('button', { name: /Votes/i })).toBeVisible();
+    });
+
+    test('should filter contributions by type when clicking filter buttons', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for contribution history to load
+      const contributionHistory = page.locator('[data-testid="contribution-history"]');
+      await expect(contributionHistory).toBeVisible({ timeout: 10000 });
+
+      // Click on Topics filter within contribution history section
+      await contributionHistory.getByRole('button', { name: /Topics/i }).click();
+
+      // Wait for filter to apply
+      await page.waitForTimeout(500);
+
+      // Should show "Created topic" entries
+      await expect(page.getByText('Created topic').first()).toBeVisible({ timeout: 5000 });
+    });
+
+    test('should filter to show only responses', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for contribution history to load
+      await expect(page.locator('[data-testid="contribution-history"]')).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Click on Responses filter
+      await page.getByRole('button', { name: /Responses/i }).click();
+
+      // Wait for filter to apply
+      await page.waitForTimeout(500);
+
+      // Should show "Posted response" entries
+      await expect(page.getByText('Posted response').first()).toBeVisible({ timeout: 5000 });
+    });
+
+    test('should show contribution items with timestamps', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.MOD_MARTINEZ}`);
+
+      // Wait for contribution history to load
+      await expect(page.locator('[data-testid="contribution-history"]')).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Contributions should have time elements (e.g., "2 days ago", "1 week ago")
+      const timeElements = page.locator('time');
+      await expect(timeElements.first()).toBeVisible();
+    });
+
+    test('should link contribution items to their topics', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for contribution history to load
+      await expect(page.locator('[data-testid="contribution-history"]')).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Contribution items should be links to topics
+      const contributionLinks = page.locator(
+        '[data-testid="contribution-history"] a[href*="/topics/"]',
+      );
+      await expect(contributionLinks.first()).toBeVisible();
+    });
+
+    test('should navigate to topic when clicking contribution item', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for contribution history to load
+      await expect(page.locator('[data-testid="contribution-history"]')).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Click the first contribution link
+      const firstContribution = page
+        .locator('[data-testid="contribution-history"] a[href*="/topics/"]')
+        .first();
+      await firstContribution.click();
+
+      // Should navigate to a topic page
+      await expect(page).toHaveURL(/\/topics\//);
+    });
+  });
+
+  test.describe('Follower Counts', () => {
+    test('should display follow button in header', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Alice Anderson/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Should have the Follow button with specific testid
+      await expect(page.getByTestId('follow-button')).toBeVisible();
+    });
+
+    test('should display followers and following buttons', async ({ page }) => {
+      await page.goto(`/profile/${DEMO_USER_IDS.ALICE_ANDERSON}`);
+
+      // Wait for profile to load
+      await expect(page.getByRole('heading', { name: /Alice Anderson/i })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Should have followers and following text in the profile header
+      await expect(page.getByRole('button', { name: /followers/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /following/i })).toBeVisible();
     });
   });
 });

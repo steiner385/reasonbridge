@@ -94,6 +94,81 @@ describe('ToneAnalyzerService', () => {
       });
     });
 
+    describe('dismissive conversation/discussion patterns', () => {
+      it('should detect "this conversation is stupid"', async () => {
+        const result = await service.analyze('This conversation is stupid.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+        expect(result?.subtype).toContain('personal_attack');
+      });
+
+      it('should detect "this whole conversation is really stupid"', async () => {
+        const result = await service.analyze('This whole conversation is really stupid.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+      });
+
+      it('should detect "this discussion is pointless"', async () => {
+        const result = await service.analyze('This discussion is pointless.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+      });
+
+      it('should detect "the entire debate is ridiculous"', async () => {
+        const result = await service.analyze('The entire debate is ridiculous.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+      });
+
+      it('should detect "this argument is a waste of time"', async () => {
+        const result = await service.analyze('This argument is just a waste of time.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+      });
+
+      it('should detect "this is a stupid conversation"', async () => {
+        const result = await service.analyze('This is a stupid conversation.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+      });
+
+      it('should detect "that thread is idiotic"', async () => {
+        const result = await service.analyze('That thread is completely idiotic.');
+
+        expect(result).not.toBeNull();
+        expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+      });
+
+      it('should detect dismissive comments with adverbs', async () => {
+        const variants = [
+          'This conversation is absolutely stupid',
+          'This discussion is totally ridiculous',
+          'The debate is completely pointless',
+          'This topic is so dumb',
+        ];
+
+        for (const text of variants) {
+          const result = await service.analyze(text);
+          expect(result).not.toBeNull();
+          expect(result?.type).toBe(FeedbackType.INFLAMMATORY);
+        }
+      });
+
+      it('should NOT flag legitimate conversation references', async () => {
+        const result = await service.analyze(
+          'This conversation has been enlightening. I appreciate the diverse perspectives.',
+        );
+
+        expect(result).toBeNull();
+      });
+    });
+
     describe('hostile tone indicators detection', () => {
       it('should detect "obviously you dont" hostile tone', async () => {
         const result = await service.analyze("Obviously you don't understand basic economics.");

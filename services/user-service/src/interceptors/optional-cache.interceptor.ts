@@ -28,10 +28,13 @@ export class OptionalCacheInterceptor implements NestInterceptor {
 
   constructor(
     @Optional() @Inject(CACHE_MANAGER) private readonly cacheManager: Cache | null,
-    private readonly reflector: Reflector,
+    @Optional() private readonly reflector: Reflector | null,
   ) {
     if (!cacheManager) {
       this.logger.warn('CACHE_MANAGER not available - caching disabled');
+    }
+    if (!reflector) {
+      this.logger.warn('Reflector not available - using default TTL');
     }
   }
 
@@ -47,8 +50,8 @@ export class OptionalCacheInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const key = this.generateCacheKey(request);
 
-    // Get TTL from @CacheTTL decorator or use default
-    const ttl = this.reflector.get<number>('cache_ttl', context.getHandler()) || 300000; // 5 min default
+    // Get TTL from @CacheTTL decorator or use default (5 minutes)
+    const ttl = this.reflector?.get<number>('cache_ttl', context.getHandler()) ?? 300000;
 
     try {
       // Check cache first

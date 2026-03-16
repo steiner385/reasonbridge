@@ -49,6 +49,8 @@ const createMockPrismaService = () => ({
     create: vi.fn(),
     update: vi.fn(),
   },
+  // Required for getTopicStats which uses raw SQL for efficient aggregation
+  $queryRaw: vi.fn().mockResolvedValue([]),
 });
 
 const createMockCacheManager = () => ({

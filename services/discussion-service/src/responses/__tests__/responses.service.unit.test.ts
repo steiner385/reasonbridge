@@ -53,6 +53,7 @@ describe('ResponsesService', () => {
         create: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
+        groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
       },
       responseProposition: {
         createMany: vi.fn(),
@@ -283,20 +284,24 @@ describe('ResponsesService', () => {
       });
     });
 
-    it('should increment topic response count', async () => {
+    it('should increment topic response count and update participant count', async () => {
       prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
       prismaService.response.create.mockResolvedValue(mockResponse as any);
       prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
       prismaService.discussionTopic.update.mockResolvedValue(mockTopic as any);
+      // Mock groupBy to return 2 unique participants
+      prismaService.response.groupBy.mockResolvedValue([
+        { authorId: 'user-1' },
+        { authorId: 'user-2' },
+      ]);
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
       expect(prismaService.discussionTopic.update).toHaveBeenCalledWith({
         where: { id: 'topic-1' },
         data: {
-          responseCount: {
-            increment: 1,
-          },
+          responseCount: { increment: 1 },
+          participantCount: 2,
         },
       });
     });

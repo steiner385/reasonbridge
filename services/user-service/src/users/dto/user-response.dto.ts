@@ -53,6 +53,7 @@ export class UserResponseDto {
 export class PublicUserResponseDto {
   id!: string;
   displayName!: string;
+  bio!: string | null;
   avatarUrl!: string | null;
   verificationLevel!: VerificationLevel;
   trustScoreAbility!: number;
@@ -60,10 +61,13 @@ export class PublicUserResponseDto {
   trustScoreIntegrity!: number;
   status!: UserStatus;
   createdAt!: Date;
+  followerCount?: number;
+  followingCount?: number;
 
-  constructor(user: User) {
+  constructor(user: User, followerCount?: number, followingCount?: number) {
     this.id = user.id;
     this.displayName = user.displayName ?? '';
+    this.bio = user.bio ?? null;
     this.avatarUrl = user.avatarUrl ?? null;
     this.verificationLevel = user.verificationLevel;
     this.trustScoreAbility = Number(user.trustScoreAbility);
@@ -71,5 +75,7 @@ export class PublicUserResponseDto {
     this.trustScoreIntegrity = Number(user.trustScoreIntegrity);
     this.status = user.status;
     this.createdAt = user.createdAt;
+    this.followerCount = followerCount;
+    this.followingCount = followingCount;
   }
 }

@@ -17,7 +17,7 @@ const VECTOR_SIZE = 1536; // text-embedding-3-small dimensions
 export class QdrantService implements OnModuleInit {
   private readonly logger = new Logger(QdrantService.name);
   private readonly collectionName: string;
-  private readonly enabled: boolean;
+  private enabled: boolean;
 
   constructor(@Optional() @Inject('QDRANT_CLIENT') private readonly client: QdrantClient | null) {
     this.collectionName = process.env['QDRANT_COLLECTION'] || 'feedback_embeddings';
@@ -57,8 +57,12 @@ export class QdrantService implements OnModuleInit {
         });
       }
     } catch (error) {
-      this.logger.error('Failed to initialize Qdrant collection', error);
-      throw error;
+      this.logger.warn(
+        'Qdrant unavailable - similarity search disabled. Error: ' +
+          (error instanceof Error ? error.message : String(error)),
+      );
+      // Graceful degradation: disable Qdrant instead of crashing
+      this.enabled = false;
     }
   }
 

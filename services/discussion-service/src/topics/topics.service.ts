@@ -183,27 +183,34 @@ export class TopicsService implements OnModuleInit {
       this.prisma.discussionTopic.count({ where }),
     ]);
 
+    // Calculate participant and response counts dynamically
+    const topicIds = topics.map((t) => t.id);
+    const topicStats = await this.getTopicStats(topicIds);
+
     // Map to DTOs
-    const data: TopicResponseDto[] = topics.map((topic) => ({
-      id: topic.id,
-      title: topic.title,
-      description: topic.description,
-      creatorId: topic.creatorId,
-      status: topic.status,
-      visibility: topic.visibility,
-      slug: topic.slug,
-      evidenceStandards: topic.evidenceStandards,
-      minimumDiversityScore: topic.minimumDiversityScore.toNumber(),
-      currentDiversityScore: topic.currentDiversityScore?.toNumber() ?? null,
-      participantCount: topic.participantCount,
-      responseCount: topic.responseCount,
-      crossCuttingThemes: topic.crossCuttingThemes,
-      createdAt: topic.createdAt,
-      activatedAt: topic.activatedAt,
-      archivedAt: topic.archivedAt,
-      tags: topic.tags.map((tt) => tt.tag),
-      isMatureContent: topic.isMatureContent,
-    }));
+    const data: TopicResponseDto[] = topics.map((topic) => {
+      const stats = topicStats.get(topic.id) ?? { participantCount: 0, responseCount: 0 };
+      return {
+        id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        creatorId: topic.creatorId,
+        status: topic.status,
+        visibility: topic.visibility,
+        slug: topic.slug,
+        evidenceStandards: topic.evidenceStandards,
+        minimumDiversityScore: topic.minimumDiversityScore.toNumber(),
+        currentDiversityScore: topic.currentDiversityScore?.toNumber() ?? null,
+        participantCount: stats.participantCount,
+        responseCount: stats.responseCount,
+        crossCuttingThemes: topic.crossCuttingThemes,
+        createdAt: topic.createdAt,
+        activatedAt: topic.activatedAt,
+        archivedAt: topic.archivedAt,
+        tags: topic.tags.map((tt) => tt.tag),
+        isMatureContent: topic.isMatureContent,
+      };
+    });
 
     const result = {
       data,
@@ -243,6 +250,10 @@ export class TopicsService implements OnModuleInit {
       throw new NotFoundException(`Topic with ID ${id} not found`);
     }
 
+    // Calculate participant and response counts dynamically
+    const topicStats = await this.getTopicStats([id]);
+    const stats = topicStats.get(id) ?? { participantCount: 0, responseCount: 0 };
+
     return {
       id: topic.id,
       title: topic.title,
@@ -254,8 +265,8 @@ export class TopicsService implements OnModuleInit {
       evidenceStandards: topic.evidenceStandards,
       minimumDiversityScore: topic.minimumDiversityScore.toNumber(),
       currentDiversityScore: topic.currentDiversityScore?.toNumber() ?? null,
-      participantCount: topic.participantCount,
-      responseCount: topic.responseCount,
+      participantCount: stats.participantCount,
+      responseCount: stats.responseCount,
       crossCuttingThemes: topic.crossCuttingThemes,
       createdAt: topic.createdAt,
       activatedAt: topic.activatedAt,
@@ -468,27 +479,34 @@ export class TopicsService implements OnModuleInit {
       this.prisma.discussionTopic.count({ where }),
     ]);
 
+    // Calculate participant and response counts dynamically
+    const topicIds = topics.map((t) => t.id);
+    const topicStats = await this.getTopicStats(topicIds);
+
     // Map to DTOs
-    const data: TopicResponseDto[] = topics.map((topic) => ({
-      id: topic.id,
-      title: topic.title,
-      description: topic.description,
-      creatorId: topic.creatorId,
-      status: topic.status,
-      visibility: topic.visibility,
-      slug: topic.slug,
-      evidenceStandards: topic.evidenceStandards,
-      minimumDiversityScore: topic.minimumDiversityScore.toNumber(),
-      currentDiversityScore: topic.currentDiversityScore?.toNumber() ?? null,
-      participantCount: topic.participantCount,
-      responseCount: topic.responseCount,
-      crossCuttingThemes: topic.crossCuttingThemes,
-      createdAt: topic.createdAt,
-      activatedAt: topic.activatedAt,
-      archivedAt: topic.archivedAt,
-      tags: topic.tags.map((tt) => tt.tag),
-      isMatureContent: topic.isMatureContent,
-    }));
+    const data: TopicResponseDto[] = topics.map((topic) => {
+      const stats = topicStats.get(topic.id) ?? { participantCount: 0, responseCount: 0 };
+      return {
+        id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        creatorId: topic.creatorId,
+        status: topic.status,
+        visibility: topic.visibility,
+        slug: topic.slug,
+        evidenceStandards: topic.evidenceStandards,
+        minimumDiversityScore: topic.minimumDiversityScore.toNumber(),
+        currentDiversityScore: topic.currentDiversityScore?.toNumber() ?? null,
+        participantCount: stats.participantCount,
+        responseCount: stats.responseCount,
+        crossCuttingThemes: topic.crossCuttingThemes,
+        createdAt: topic.createdAt,
+        activatedAt: topic.activatedAt,
+        archivedAt: topic.archivedAt,
+        tags: topic.tags.map((tt) => tt.tag),
+        isMatureContent: topic.isMatureContent,
+      };
+    });
 
     return {
       data,
@@ -1231,5 +1249,43 @@ export class TopicsService implements OnModuleInit {
         }
       });
     });
+  }
+
+  /**
+   * Get dynamic stats for multiple topics (participant count and response count)
+   * Calculates counts from responses rather than using stored columns
+   *
+   * @param topicIds - Array of topic IDs to get stats for
+   * @returns Map of topicId -> { participantCount, responseCount }
+   */
+  private async getTopicStats(
+    topicIds: string[],
+  ): Promise<Map<string, { participantCount: number; responseCount: number }>> {
+    if (topicIds.length === 0) {
+      return new Map();
+    }
+
+    // Use raw SQL for efficient aggregation
+    const results = await this.prisma.$queryRaw<
+      { topic_id: string; participant_count: bigint; response_count: bigint }[]
+    >`
+      SELECT
+        topic_id,
+        COUNT(DISTINCT author_id) as participant_count,
+        COUNT(*) as response_count
+      FROM responses
+      WHERE topic_id = ANY(${topicIds})
+      GROUP BY topic_id
+    `;
+
+    const statsMap = new Map<string, { participantCount: number; responseCount: number }>();
+    for (const row of results) {
+      statsMap.set(row.topic_id, {
+        participantCount: Number(row.participant_count),
+        responseCount: Number(row.response_count),
+      });
+    }
+
+    return statsMap;
   }
 }

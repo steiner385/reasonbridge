@@ -14,6 +14,7 @@ const createMockPrismaService = () => ({
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
   },
   responseProposition: {
     createMany: vi.fn(),
@@ -305,7 +306,7 @@ describe('ResponsesService', () => {
       expect(mockCommonGroundTrigger.checkAndTrigger).toHaveBeenCalledWith('topic-1');
     });
 
-    it('should increment topic response count', async () => {
+    it('should increment topic response count and update participant count', async () => {
       const mockResponse = createMockResponse();
       mockPrisma.discussionTopic.findUnique.mockResolvedValue({
         id: 'topic-1',
@@ -315,12 +316,17 @@ describe('ResponsesService', () => {
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
       mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
+      // Mock groupBy to return unique participants
+      mockPrisma.response.groupBy.mockResolvedValue([
+        { authorId: 'user-1' },
+        { authorId: 'user-2' },
+      ]);
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
       expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith({
         where: { id: 'topic-1' },
-        data: { responseCount: { increment: 1 } },
+        data: { responseCount: { increment: 1 }, participantCount: 2 },
       });
     });
 

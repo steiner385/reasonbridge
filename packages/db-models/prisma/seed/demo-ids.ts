@@ -116,6 +116,28 @@ export function generateCommonGroundId(topicNumber: number, analysisSequence: nu
 }
 
 /**
+ * Generate a deterministic topic ID
+ * Format: 11111111-0000-4000-8000-000000000TTT
+ * TTT = topic number (101-999)
+ */
+export function generateTopicId(topicNumber: number): string {
+  const topicPart = topicNumber.toString().padStart(3, '0');
+  return `11111111-0000-4000-8000-000000000${topicPart}`;
+}
+
+/**
+ * Generate a deterministic bridging suggestion ID
+ * Format: 11111111-0000-4000-8000-004TTTBBBBBB
+ * TTT = topic number (101-999)
+ * BBBBBB = bridging sequence (000001-999999)
+ */
+export function generateBridgingId(topicNumber: number, bridgingSequence: number): string {
+  const topicPart = topicNumber.toString().padStart(3, '0');
+  const bridgingPart = bridgingSequence.toString().padStart(6, '0');
+  return `11111111-0000-4000-8000-004${topicPart}${bridgingPart}`;
+}
+
+/**
  * Check if a UUID belongs to the demo environment
  */
 export function isDemoId(uuid: string): boolean {

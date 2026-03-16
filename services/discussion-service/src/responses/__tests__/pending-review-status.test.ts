@@ -34,6 +34,7 @@ describe('ResponsesService - PENDING_REVIEW Status', () => {
         findUnique: vi.fn(),
         findMany: vi.fn(),
         create: vi.fn(),
+        groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
       },
       user: {
         findUnique: vi.fn(),
