@@ -42,9 +42,9 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.16",
-    "@pact-foundation/pact": "^16.2.0",
+    "@pact-foundation/pact": "^16.3.0",
     "@types/jsonwebtoken": "^9.0.5",
-    "@types/node": "25.3.5",
+    "@types/node": "25.5.0",
     "@vitest/coverage-v8": "^4.0.18",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",

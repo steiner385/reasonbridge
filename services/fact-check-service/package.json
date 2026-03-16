@@ -25,8 +25,8 @@
     "@nestjs/core": "^11.1.16",
     "@nestjs/platform-fastify": "^11.1.16",
     "@nestjs/swagger": "^11.2.6",
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "7.4.2",
+    "@prisma/adapter-pg": "^7.5.0",
+    "@prisma/client": "7.5.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "@willsoto/nestjs-prometheus": "^6.0.2",
@@ -40,7 +40,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@types/node": "25.3.5",
+    "@types/node": "25.5.0",
     "@types/pg": "^8.18.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
