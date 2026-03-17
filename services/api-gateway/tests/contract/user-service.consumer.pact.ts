@@ -34,20 +34,38 @@ const provider = new PactV4({
 
 /**
  * Helper function to make HTTP requests to the mock server
+ * Includes retry logic for transient connection failures
  */
 async function fetchFromProvider(
   baseUrl: string,
   endpoint: string,
   options: RequestInit = {},
+  retries = 3,
 ): Promise<Response> {
   const url = `${baseUrl}${endpoint}`;
-  return fetch(url, {
+  const mergedOptions: RequestInit = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    ...options,
-  });
+  };
+
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, mergedOptions);
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      // Only retry on connection errors, not HTTP errors
+      if (attempt < retries) {
+        // Small delay before retry to allow mock server to stabilize
+        await new Promise((resolve) => setTimeout(resolve, 50 * attempt));
+      }
+    }
+  }
+  throw lastError;
 }
 
 describe('User Service Consumer Contract Tests', () => {
