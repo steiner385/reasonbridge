@@ -6,6 +6,7 @@ settings:
 
 overrides:
   '@nestjs/platform-fastify@<11.1.10': '>=11.1.11'
+  '@types/pg': 8.11.11
   class-validator: ^0.15.1
   fastify: ^5.8.2
 
@@ -312,8 +313,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -414,8 +415,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -487,8 +488,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -590,8 +591,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@vitest/ui':
         specifier: ^4.1.0
         version: 4.1.0(vitest@2.1.9)
@@ -763,8 +764,8 @@ importers:
         specifier: ^25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@vitest/coverage-v8':
         specifier: ^2.1.8
         version: 2.1.9(vitest@2.1.9)
@@ -887,8 +888,8 @@ importers:
         specifier: 0.17.5
         version: 0.17.5
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@types/supertest':
         specifier: ^7.2.0
         version: 7.2.0
@@ -975,8 +976,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -1063,8 +1064,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@vitest/ui':
         specifier: ^4.1.0
         version: 4.1.0(vitest@2.1.9)
@@ -1154,8 +1155,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@types/socket.io':
         specifier: ^3.0.2
         version: 3.0.2
@@ -1248,8 +1249,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -1399,8 +1400,8 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.11.11
-        version: 8.18.0
+        specifier: 8.11.11
+        version: 8.11.11
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -4019,9 +4020,6 @@ packages:
 
   '@types/pg@8.11.11':
     resolution: {integrity: sha512-kGT1qKM8wJQ5qlawUrEkXgvMSXoV213KfMGXcwfDwUIfUHXqXYXOfS1nE1LINRJVVVx5wCm70XnFlMHaIcQAfw==}
-
-  '@types/pg@8.18.0':
-    resolution: {integrity: sha512-gT+oueVQkqnj6ajGJXblFR4iavIXWsGAFCk3dP4Kki5+a9R4NMt0JARdk6s8cUKcfUoqP5dAtDSLU8xYUTFV+Q==}
 
   '@types/qs@6.14.0':
     resolution: {integrity: sha512-eOunJqu0K1923aExK6y8p6fsihYEn/BYuQ4g0CxAAgFc4b/ZLN4CrsRZ55srTdqoiLzU2B2evC+apEIxprEzkQ==}
@@ -11708,12 +11706,6 @@ snapshots:
       '@types/node': 25.5.0
       pg-protocol: 1.13.0
       pg-types: 4.1.0
-
-  '@types/pg@8.18.0':
-    dependencies:
-      '@types/node': 25.5.0
-      pg-protocol: 1.13.0
-      pg-types: 2.2.0
 
   '@types/qs@6.14.0': {}
 

@@ -97,6 +97,7 @@
   "pnpm": {
     "overrides": {
       "@nestjs/platform-fastify@<11.1.10": ">=11.1.11",
+      "@types/pg": "8.11.11",
       "class-validator": "^0.15.1",
       "fastify": "^5.8.2"
     },
