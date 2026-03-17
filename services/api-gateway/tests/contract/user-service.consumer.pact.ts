@@ -239,9 +239,11 @@ describe('User Service Consumer Contract Tests', () => {
         .given('authenticated user exists and can request verification')
         .uponReceiving('a request to initiate phone verification')
         .withRequest('POST', '/verifications/request', (builder) => {
+          // Use literal values in request body to ensure exact matching
+          // Matchers in request bodies can cause flakiness due to serialization order
           builder.headers({ 'Content-Type': 'application/json' }).jsonBody({
-            type: string('PHONE'),
-            phoneNumber: string('+1234567890'),
+            phoneNumber: '+1234567890',
+            type: 'PHONE',
           });
         })
         .willRespondWith(201, (builder) => {
@@ -254,11 +256,12 @@ describe('User Service Consumer Contract Tests', () => {
           });
         })
         .executeTest(async (mockServer) => {
+          // Match alphabetical order of keys for consistent JSON serialization
           const response = await fetchFromProvider(mockServer.url, '/verifications/request', {
             method: 'POST',
             body: JSON.stringify({
-              type: 'PHONE',
               phoneNumber: '+1234567890',
+              type: 'PHONE',
             }),
           });
 
