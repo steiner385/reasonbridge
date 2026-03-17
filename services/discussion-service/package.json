@@ -55,7 +55,7 @@
     "@reason-bridge/testing-utils": "workspace:*",
     "@types/node": "25.5.0",
     "@types/pdfkit": "0.17.5",
-    "@types/pg": "^8.18.0",
+    "@types/pg": "^8.11.11",
     "@types/supertest": "^7.2.0",
     "supertest": "^7.2.2",
     "tsx": "^4.7.0",

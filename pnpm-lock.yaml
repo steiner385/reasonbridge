@@ -312,7 +312,7 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@types/uuid':
         specifier: ^11.0.0
@@ -414,7 +414,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       typescript:
         specifier: 5.9.3
@@ -487,7 +487,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       tsx:
         specifier: ^4.7.0
@@ -590,7 +590,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@vitest/ui':
         specifier: ^4.1.0
@@ -763,7 +763,7 @@ importers:
         specifier: ^25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@vitest/coverage-v8':
         specifier: ^2.1.8
@@ -887,7 +887,7 @@ importers:
         specifier: 0.17.5
         version: 0.17.5
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@types/supertest':
         specifier: ^7.2.0
@@ -975,7 +975,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       tsx:
         specifier: ^4.7.0
@@ -1063,7 +1063,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@vitest/ui':
         specifier: ^4.1.0
@@ -1154,7 +1154,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@types/socket.io':
         specifier: ^3.0.2
@@ -1248,7 +1248,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       tsx:
         specifier: ^4.7.0
@@ -1399,7 +1399,7 @@ importers:
         specifier: 25.5.0
         version: 25.5.0
       '@types/pg':
-        specifier: ^8.18.0
+        specifier: ^8.11.11
         version: 8.18.0
       '@types/uuid':
         specifier: ^11.0.0
@@ -2947,7 +2947,6 @@ packages:
   '@pact-foundation/pact-core@19.1.0':
     resolution: {integrity: sha512-2jyns+jkgLZK79ovM3aMSYHaMyu6dWmwOQjykj0GUhs37G5jXPffSsmBR1fm//KSf244OvuyELrAsWC+FnUHgg==}
     engines: {node: '>=20'}
-    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.3.0':
@@ -7106,9 +7105,6 @@ packages:
     resolution: {integrity: sha512-gB+R+Xud1gLFuRD/QgOIgGOBE2KCQPaPwkzBBGC9oG69pHTkhQeIuejVIk3/cnDyX39av2AxomQiyPT13WKHQA==}
     peerDependencies:
       pg: '>=8.0'
-
-  pg-protocol@1.12.0:
-    resolution: {integrity: sha512-uOANXNRACNdElMXJ0tPz6RBM0XQ61nONGAwlt8da5zs/iUOOCLBQOHSXnrC6fMsvtjxbOJrZZl5IScGv+7mpbg==}
 
   pg-protocol@1.13.0:
     resolution: {integrity: sha512-zzdvXfS6v89r6v7OcFCHfHlyG/wvry1ALxZo4LqgUoy7W9xhBDMaqOuMiF3qEV45VqsN6rdlcehHrfDtlCPc8w==}
@@ -11716,7 +11712,7 @@ snapshots:
   '@types/pg@8.18.0':
     dependencies:
       '@types/node': 25.5.0
-      pg-protocol: 1.12.0
+      pg-protocol: 1.13.0
       pg-types: 2.2.0
 
   '@types/qs@6.14.0': {}
@@ -15179,8 +15175,6 @@ snapshots:
   pg-pool@3.13.0(pg@8.20.0):
     dependencies:
       pg: 8.20.0
-
-  pg-protocol@1.12.0: {}
 
   pg-protocol@1.13.0: {}
 

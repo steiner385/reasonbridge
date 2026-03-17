@@ -50,7 +50,7 @@
     "@nestjs/testing": "11.1.17",
     "@reason-bridge/testing-utils": "workspace:*",
     "@types/node": "25.5.0",
-    "@types/pg": "^8.18.0",
+    "@types/pg": "^8.11.11",
     "@vitest/ui": "^4.1.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3",
