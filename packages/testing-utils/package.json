@@ -59,20 +59,20 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@pact-foundation/pact": "^16.2.0",
-    "@prisma/client": "7.4.2",
-    "@prisma/adapter-pg": "^7.4.2",
+    "@pact-foundation/pact": "^16.3.0",
+    "@prisma/client": "7.5.0",
+    "@prisma/adapter-pg": "^7.5.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "msw": "^2.12.10",
+    "msw": "^2.12.11",
     "pg": "^8.20.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@types/node": "25.3.5",
-    "@types/pg": "^8.18.0",
+    "@types/node": "25.5.0",
+    "@types/pg": "^8.11.11",
     "typescript": "5.9.3",
     "vitest": "^2.1.0"
   },

@@ -34,20 +34,38 @@ const provider = new PactV4({
 
 /**
  * Helper function to make HTTP requests to the mock server
+ * Includes retry logic for transient connection failures
  */
 async function fetchFromProvider(
   baseUrl: string,
   endpoint: string,
   options: RequestInit = {},
+  retries = 3,
 ): Promise<Response> {
   const url = `${baseUrl}${endpoint}`;
-  return fetch(url, {
+  const mergedOptions: RequestInit = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    ...options,
-  });
+  };
+
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, mergedOptions);
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      // Only retry on connection errors, not HTTP errors
+      if (attempt < retries) {
+        // Small delay before retry to allow mock server to stabilize
+        await new Promise((resolve) => setTimeout(resolve, 50 * attempt));
+      }
+    }
+  }
+  throw lastError;
 }
 
 describe('User Service Consumer Contract Tests', () => {
@@ -221,9 +239,11 @@ describe('User Service Consumer Contract Tests', () => {
         .given('authenticated user exists and can request verification')
         .uponReceiving('a request to initiate phone verification')
         .withRequest('POST', '/verifications/request', (builder) => {
+          // Use literal values in request body to ensure exact matching
+          // Matchers in request bodies can cause flakiness due to serialization order
           builder.headers({ 'Content-Type': 'application/json' }).jsonBody({
-            type: string('PHONE'),
-            phoneNumber: string('+1234567890'),
+            phoneNumber: '+1234567890',
+            type: 'PHONE',
           });
         })
         .willRespondWith(201, (builder) => {
@@ -236,11 +256,12 @@ describe('User Service Consumer Contract Tests', () => {
           });
         })
         .executeTest(async (mockServer) => {
+          // Match alphabetical order of keys for consistent JSON serialization
           const response = await fetchFromProvider(mockServer.url, '/verifications/request', {
             method: 'POST',
             body: JSON.stringify({
-              type: 'PHONE',
               phoneNumber: '+1234567890',
+              type: 'PHONE',
             }),
           });
 
