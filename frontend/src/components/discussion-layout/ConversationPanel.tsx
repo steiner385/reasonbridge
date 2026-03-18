@@ -199,14 +199,14 @@ export function ConversationPanel({
     return (
       <div className={`conversation-panel flex flex-col h-full ${className}`}>
         {/* Header with hamburger button for topic selection */}
-        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
+        <div className="shrink-0 px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
           <div className="flex items-center gap-4">
             {/* Hamburger Menu Button (Tablet/Mobile) */}
             {showHamburgerMenu && toggleLeftPanelOverlay && (
               <button
                 type="button"
                 onClick={toggleLeftPanelOverlay}
-                className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors xl:hidden"
+                className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors xl:hidden"
                 aria-label="Open topic navigation"
               >
                 <svg
@@ -259,14 +259,14 @@ export function ConversationPanel({
   return (
     <div className={`conversation-panel flex flex-col h-full ${className}`}>
       {/* Topic Header */}
-      <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700 sticky top-0 z-10">
+      <div className="shrink-0 px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700 sticky top-0 z-10">
         <div className="flex items-start justify-between gap-4">
           {/* Hamburger Menu Button (Tablet/Mobile) */}
           {showHamburgerMenu && toggleLeftPanelOverlay && (
             <button
               type="button"
               onClick={toggleLeftPanelOverlay}
-              className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
+              className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
               aria-label="Open topic navigation"
             >
               <svg
@@ -299,7 +299,7 @@ export function ConversationPanel({
           </div>
 
           {/* Topic Status Badge and Actions */}
-          <div className="flex-shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-2">
             <span
               className={`
                 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
@@ -417,7 +417,7 @@ export function ConversationPanel({
 
       {/* New Responses Notification Banner */}
       {newResponseCount > 0 && (
-        <div className="flex-shrink-0 px-6 py-3 bg-primary-50 dark:bg-primary-900/30 border-b border-primary-200 dark:border-primary-700">
+        <div className="shrink-0 px-6 py-3 bg-primary-50 dark:bg-primary-900/30 border-b border-primary-200 dark:border-primary-700">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm text-primary-900 dark:text-primary-100">
               <svg
@@ -451,7 +451,7 @@ export function ConversationPanel({
       {/* Topic Status Change Banner */}
       {topicStatusChange && (
         <div
-          className={`flex-shrink-0 px-6 py-3 border-b ${
+          className={`shrink-0 px-6 py-3 border-b ${
             topicStatusChange.newStatus === 'ARCHIVED'
               ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700'
               : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
@@ -523,7 +523,7 @@ export function ConversationPanel({
 
       {/* Compact Composer (sticky bottom) */}
       {showComposer && (
-        <div className="flex-shrink-0 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div className="shrink-0 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <CompactComposer
             topicId={topic.id}
             onSubmit={onResponseSubmit || (() => Promise.resolve())}

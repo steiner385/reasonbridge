@@ -129,7 +129,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
           )}
           {children}
         </div>
-        {action && <div className="ml-2 sm:ml-4 flex-shrink-0">{action}</div>}
+        {action && <div className="ml-2 sm:ml-4 shrink-0">{action}</div>}
       </div>
     );
   },

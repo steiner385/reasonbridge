@@ -162,7 +162,7 @@ export const ExpandedComposer = forwardRef<HTMLTextAreaElement, ExpandedComposer
                 className="flex items-center gap-2 text-xs bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded"
               >
                 <svg
-                  className="w-3 h-3 text-blue-500 flex-shrink-0"
+                  className="w-3 h-3 text-blue-500 shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

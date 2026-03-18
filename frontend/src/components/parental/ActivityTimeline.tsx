@@ -190,7 +190,7 @@ export function ActivityTimeline({
             <li key={activity.id} className="relative flex gap-3 pl-1">
               {/* Icon */}
               <div
-                className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${iconConfig.color}`}
+                className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${iconConfig.color}`}
               >
                 <svg
                   className="w-4 h-4"

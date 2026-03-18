@@ -75,7 +75,7 @@ function SimilarTopicCard({ topic }: { topic: SimilarTopic }) {
 
         {/* Similarity score badge */}
         <span
-          className={`flex-shrink-0 px-2 py-1 text-xs font-medium rounded ${getSimilarityColor(topic.similarityScore)}`}
+          className={`shrink-0 px-2 py-1 text-xs font-medium rounded ${getSimilarityColor(topic.similarityScore)}`}
           title={`${similarityPercent}% similar`}
         >
           {similarityPercent}%

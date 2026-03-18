@@ -144,7 +144,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
       `}
     >
       {/* Icon */}
-      <div className="flex-shrink-0">{icons[variant]}</div>
+      <div className="shrink-0">{icons[variant]}</div>
 
       {/* Message */}
       <div className="flex-1 text-sm font-medium">{message}</div>
@@ -152,7 +152,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
       {/* Dismiss Button */}
       <button
         onClick={() => onDismiss(id)}
-        className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+        className="shrink-0 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
         aria-label="Dismiss notification"
       >
         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

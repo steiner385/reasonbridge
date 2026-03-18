@@ -403,7 +403,7 @@ export default function ModerationQueueView({
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
                         {formatDate(action.createdAt)}
                       </span>
                     </div>

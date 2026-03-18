@@ -97,7 +97,7 @@ export function ProfileHeader({
   return (
     <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 ${className}`}>
       {/* Avatar */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <Avatar
           src={user.avatarUrl}
           alt={user.displayName}
@@ -160,7 +160,7 @@ export function ProfileHeader({
       </div>
 
       {/* Actions */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {isOwnProfile ? (
           <button
             onClick={onEditClick}

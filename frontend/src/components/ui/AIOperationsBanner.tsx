@@ -43,9 +43,9 @@ export function AIOperationsBanner({ operations }: AIOperationsBannerProps) {
     >
       <div className="flex items-start gap-3">
         {hasErrors ? (
-          <AlertCircle className="h-5 w-5 text-red-700 dark:text-red-400 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-5 w-5 text-red-700 dark:text-red-400 shrink-0 mt-0.5" />
         ) : (
-          <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5 animate-spin" />
+          <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 animate-spin" />
         )}
 
         <div className="flex-1 min-w-0">
@@ -70,7 +70,7 @@ export function AIOperationsBanner({ operations }: AIOperationsBannerProps) {
                 }`}
               >
                 <span
-                  className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                  className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
                     operation.status === 'error'
                       ? 'bg-red-600 dark:bg-red-400'
                       : 'bg-blue-600 dark:bg-blue-400'

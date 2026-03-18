@@ -72,7 +72,7 @@ export function ExpertiseSection({
           aria-label="Expertise badges"
         >
           {displayExpertise.map((exp) => (
-            <div key={exp.tagId} className="flex-shrink-0" role="listitem">
+            <div key={exp.tagId} className="shrink-0" role="listitem">
               <ExpertiseBadge expertise={exp} variant="full" size="sm" showTag />
             </div>
           ))}
@@ -80,7 +80,7 @@ export function ExpertiseSection({
             <button
               type="button"
               onClick={onSeeAll}
-              className="flex-shrink-0 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400
+              className="shrink-0 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400
                 hover:text-blue-700 dark:hover:text-blue-300 transition-colors
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             >

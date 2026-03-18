@@ -159,7 +159,7 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
             <div className={`grid grid-cols-3 ${currentSize.gap} ${currentSize.text}`}>
               {/* Support */}
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 bg-green-500 rounded-sm flex-shrink-0" />
+                <div className="w-3 h-3 bg-green-500 rounded-sm shrink-0" />
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {supportCount}
@@ -170,7 +170,7 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
 
               {/* Oppose */}
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 bg-red-500 rounded-sm flex-shrink-0" />
+                <div className="w-3 h-3 bg-red-500 rounded-sm shrink-0" />
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {opposeCount}
@@ -181,7 +181,7 @@ const AlignmentSummary: React.FC<AlignmentSummaryProps> = ({
 
               {/* Nuanced */}
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 bg-blue-500 rounded-sm flex-shrink-0" />
+                <div className="w-3 h-3 bg-blue-500 rounded-sm shrink-0" />
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {nuancedCount}

@@ -484,7 +484,7 @@ export const PersonaSelector: React.FC<PersonaSelectorProps> = ({
         {localSelection && !isLoading && (
           <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="w-10 h-10 rounded-full bg-primary-500 dark:bg-primary-400 flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-white"

@@ -109,9 +109,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             />
           </svg>
         )}
-        {!isLoading && leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+        {!isLoading && leftIcon && <span className="shrink-0">{leftIcon}</span>}
         {children}
-        {!isLoading && rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+        {!isLoading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
       </button>
     );
   },

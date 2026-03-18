@@ -139,7 +139,7 @@ const TierGateBanner: React.FC<TierGateBannerProps> = ({
     >
       {/* Header with warning icon and message */}
       <div className="flex items-start gap-3">
-        <WarningIcon className="h-5 w-5 flex-shrink-0 text-amber-500 dark:text-amber-400" />
+        <WarningIcon className="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" />
         <div className="flex-1 space-y-3">
           {/* Restriction message */}
           <div className="space-y-1">

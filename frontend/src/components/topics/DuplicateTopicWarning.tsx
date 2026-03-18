@@ -126,7 +126,7 @@ export function DuplicateTopicWarning({
       data-testid="duplicate-topic-warning"
     >
       <div className="flex items-start gap-3">
-        <WarningIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+        <WarningIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
 
         <div className="flex-1 min-w-0">
           {/* Header */}
@@ -157,7 +157,7 @@ export function DuplicateTopicWarning({
                         className="font-medium text-sm text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1 text-left"
                       >
                         <span className="truncate">{duplicate.title}</span>
-                        <ExternalLinkIcon className="flex-shrink-0" />
+                        <ExternalLinkIcon className="shrink-0" />
                       </button>
                     ) : (
                       <h5 className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
@@ -167,7 +167,7 @@ export function DuplicateTopicWarning({
                   </div>
 
                   {/* Similarity Score */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     {!compact && (
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {getMatchTypeBadge(duplicate.matchType)}

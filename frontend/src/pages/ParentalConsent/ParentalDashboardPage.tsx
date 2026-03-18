@@ -282,7 +282,7 @@ function ParentalDashboardPage() {
           <Card variant="default" padding="lg" className="border-red-200 dark:border-red-800">
             <CardBody>
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center shrink-0">
                   <svg
                     className="w-5 h-5 text-red-700 dark:text-red-400"
                     fill="none"

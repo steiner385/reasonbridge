@@ -144,7 +144,7 @@ function ConnectionRow({
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={`
-            flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+            shrink-0 w-10 h-10 rounded-full flex items-center justify-center
             bg-white dark:bg-gray-800 shadow-sm
           `}
         >
@@ -168,7 +168,7 @@ function ConnectionRow({
       </div>
 
       {/* Action button */}
-      <div className="flex-shrink-0 ml-3">
+      <div className="shrink-0 ml-3">
         {isConnected ? (
           <Button
             variant="outline"

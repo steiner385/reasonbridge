@@ -101,7 +101,7 @@ export function NotificationItem({ notification, onMarkAsRead, onClose }: Notifi
       )}
 
       {/* Icon */}
-      <div className={`flex-shrink-0 rounded-full p-2 ${config.bgColor}`}>
+      <div className={`shrink-0 rounded-full p-2 ${config.bgColor}`}>
         <Icon className={`h-4 w-4 ${config.color}`} />
       </div>
 
@@ -133,7 +133,7 @@ export function NotificationItem({ notification, onMarkAsRead, onClose }: Notifi
             e.stopPropagation();
             onMarkAsRead(id);
           }}
-          className="flex-shrink-0 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          className="shrink-0 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           title="Mark as read"
         >
           <CheckCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />

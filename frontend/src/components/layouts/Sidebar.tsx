@@ -175,10 +175,10 @@ export function Sidebar() {
               <img
                 src={user.avatarUrl}
                 alt=""
-                className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+                className="h-10 w-10 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
                 {user.displayName.charAt(0).toUpperCase()}
               </div>
             )}

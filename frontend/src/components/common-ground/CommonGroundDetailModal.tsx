@@ -243,7 +243,7 @@ const MisunderstandingDetail: React.FC<{ misunderstanding: Misunderstanding }> =
           data-testid="clarification-suggestion"
         >
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg
                 className="w-5 h-5 text-blue-600"
                 fill="none"

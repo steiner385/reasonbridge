@@ -92,7 +92,7 @@ export function ContributionItem({
     >
       <div className="flex items-start gap-3">
         {/* Type icon */}
-        <span className="text-xl flex-shrink-0" aria-hidden="true">
+        <span className="text-xl shrink-0" aria-hidden="true">
           {icon}
         </span>
 
@@ -107,7 +107,7 @@ export function ContributionItem({
             </span>
             <time
               dateTime={new Date(contribution.createdAt).toISOString()}
-              className="text-xs text-gray-500 dark:text-gray-500 flex-shrink-0"
+              className="text-xs text-gray-500 dark:text-gray-500 shrink-0"
             >
               {formatRelativeDate(contribution.createdAt)}
             </time>

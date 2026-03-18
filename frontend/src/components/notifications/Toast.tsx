@@ -84,7 +84,7 @@ export function Toast({ id, type, title, message, duration = 5000, action, onClo
       role="alert"
       aria-live="assertive"
     >
-      <div className="flex-shrink-0 mt-0.5">{styles.icon}</div>
+      <div className="shrink-0 mt-0.5">{styles.icon}</div>
       <div className="flex-1 min-w-0">
         <h3 className={`font-semibold ${textColor.title}`}>{title}</h3>
         {message && <p className={`text-sm mt-1 ${textColor.message}`}>{message}</p>}
@@ -99,7 +99,7 @@ export function Toast({ id, type, title, message, duration = 5000, action, onClo
       </div>
       <button
         onClick={() => onClose(id)}
-        className={`flex-shrink-0 ${textColor.title} hover:opacity-70 transition-opacity`}
+        className={`shrink-0 ${textColor.title} hover:opacity-70 transition-opacity`}
         aria-label="Close notification"
       >
         <X className="w-5 h-5" />

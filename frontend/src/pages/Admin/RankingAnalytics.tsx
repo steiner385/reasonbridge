@@ -51,7 +51,7 @@ function TierBar({ distribution, maxCount }: { distribution: TierDistribution; m
 
   return (
     <div data-testid={`tier-bar-${distribution.tier}`} className="flex items-center gap-4 py-2">
-      <div className="w-28 flex-shrink-0">
+      <div className="w-28 shrink-0">
         <span className={`text-sm font-medium ${tierInfo.color} ${tierInfo.darkColor}`}>
           {tierInfo.name}
         </span>

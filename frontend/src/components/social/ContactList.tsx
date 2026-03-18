@@ -171,7 +171,7 @@ function ContactRow({ contact, onInvite }: ContactRowProps) {
         {/* Avatar placeholder */}
         <div
           className={`
-            flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+            shrink-0 w-10 h-10 rounded-full flex items-center justify-center
             bg-gray-200 dark:bg-gray-700
           `}
         >
@@ -197,7 +197,7 @@ function ContactRow({ contact, onInvite }: ContactRowProps) {
       </div>
 
       {/* Action button */}
-      <div className="flex-shrink-0 ml-3">
+      <div className="shrink-0 ml-3">
         {isOnPlatform ? (
           <span
             className={`

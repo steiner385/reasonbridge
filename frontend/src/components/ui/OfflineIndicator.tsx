@@ -88,7 +88,7 @@ export function OfflineIndicator({
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             {/* Offline Icon */}
             <svg
-              className="h-5 w-5 flex-shrink-0"
+              className="h-5 w-5 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -126,7 +126,7 @@ export function OfflineIndicator({
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             {/* Online Icon */}
             <svg
-              className="h-5 w-5 flex-shrink-0"
+              className="h-5 w-5 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

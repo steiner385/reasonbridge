@@ -183,7 +183,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                     onClick={(e) => e.stopPropagation()}
                   >
                     <svg
-                      className="h-3 w-3 flex-shrink-0"
+                      className="h-3 w-3 shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

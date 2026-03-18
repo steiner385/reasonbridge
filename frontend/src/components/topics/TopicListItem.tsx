@@ -99,7 +99,7 @@ export function TopicListItem({
         {/* Status indicator dot */}
         <Tooltip content={getTopicStatusDescription(topic.status)} side="left">
           <div
-            className={`flex-shrink-0 w-1.5 h-1.5 rounded-full mt-1.5 ${getStatusColor(topic.status)}`}
+            className={`shrink-0 w-1.5 h-1.5 rounded-full mt-1.5 ${getStatusColor(topic.status)}`}
             role="img"
             aria-label={`Status: ${topic.status}`}
           />

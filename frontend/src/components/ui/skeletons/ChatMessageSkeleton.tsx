@@ -63,7 +63,7 @@ export function ChatMessageSkeleton({
       <div className={`flex items-start gap-3 max-w-[80%] ${isPersona ? '' : 'flex-row-reverse'}`}>
         {/* Avatar skeleton */}
         <div
-          className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"
+          className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0"
           aria-hidden="true"
           data-testid={`${testId}-avatar`}
         />

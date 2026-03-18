@@ -112,7 +112,7 @@ export function CredentialReviewCard({
           </div>
 
           {/* Created Date */}
-          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0 ml-2">
             {formatDate(credential.createdAt)}
           </span>
         </div>

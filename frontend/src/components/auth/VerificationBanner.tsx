@@ -75,7 +75,7 @@ function VerificationBanner({ email, onResendSuccess, className = '' }: Verifica
     >
       <div className="flex items-start">
         {/* Icon */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <svg
             className="h-5 w-5 text-yellow-400"
             fill="currentColor"

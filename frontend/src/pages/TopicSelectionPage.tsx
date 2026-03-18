@@ -371,7 +371,7 @@ export const TopicSelectionPage: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
             <svg
-              className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5"
+              className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5"
               fill="currentColor"
               viewBox="0 0 20 20"
               aria-hidden="true"

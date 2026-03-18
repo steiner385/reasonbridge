@@ -52,11 +52,11 @@ function NavLink({
       aria-current={isActive ? 'page' : undefined}
       aria-label={isCollapsed ? label : undefined}
     >
-      <span className="flex-shrink-0 w-5 h-5">{icon}</span>
+      <span className="shrink-0 w-5 h-5">{icon}</span>
       {!isCollapsed && <span className="flex-1 font-medium">{label}</span>}
       {!isCollapsed && badge !== undefined && badge > 0 && (
         <span
-          className="flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary-600 text-white"
+          className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary-600 text-white"
           aria-label={`${badge} unread`}
         >
           {badge > 99 ? '99+' : badge}

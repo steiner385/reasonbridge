@@ -227,7 +227,7 @@ const MentionDropdown: React.FC<MentionDropdownProps> = ({
             onMouseEnter={() => onHighlightChange(index)}
           >
             {/* Avatar */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               {user.avatarUrl ? (
                 <img
                   src={user.avatarUrl}
