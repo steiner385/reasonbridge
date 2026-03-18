@@ -9,6 +9,7 @@ import { GatewaysModule } from '../gateways/gateways.module.js';
 import { CommonGroundNotificationHandler } from './common-ground-notification.handler.js';
 import { ModerationNotificationHandler } from './moderation-notification.handler.js';
 import { FollowNotificationHandler } from './follow-notification.handler.js';
+import { MentionNotificationHandler } from './mention-notification.handler.js';
 
 /**
  * Module for event handlers
@@ -19,11 +20,13 @@ import { FollowNotificationHandler } from './follow-notification.handler.js';
     CommonGroundNotificationHandler,
     ModerationNotificationHandler,
     FollowNotificationHandler,
+    MentionNotificationHandler,
   ],
   exports: [
     CommonGroundNotificationHandler,
     ModerationNotificationHandler,
     FollowNotificationHandler,
+    MentionNotificationHandler,
   ],
 })
 export class HandlersModule {}
