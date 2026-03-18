@@ -196,14 +196,15 @@ export async function loginWithDemoAccount(page: Page, userName: DemoUserName): 
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: /^log in$/i }).click();
 
-  // Wait for modal to close and authentication to complete
-  await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+  // Wait for login modal to close and authentication to complete
+  // Use specific selector to avoid confusion with other modals
+  await expect(page.locator('[data-testid="login-modal"]')).not.toBeVisible({ timeout: 10000 });
 
   // Critical: Wait for auth state to fully stabilize
   // This includes token storage and React state propagation
   await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(200); // Allow async localStorage writes to complete
+  await page.waitForTimeout(500); // Allow async localStorage writes and state propagation to complete
 }
 
 /**

@@ -104,6 +104,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
           role="dialog"
           aria-modal="true"
           aria-labelledby="login-modal-title"
+          data-testid="login-modal"
         >
           <div
             className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
