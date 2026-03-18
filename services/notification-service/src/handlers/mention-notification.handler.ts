@@ -47,9 +47,10 @@ export class MentionNotificationHandler {
     MENTION_REGEX.lastIndex = 0;
 
     while ((match = MENTION_REGEX.exec(content)) !== null) {
+      // Non-null assertions are safe: regex guarantees these capture groups exist when match succeeds
       mentions.push({
-        displayName: match[1],
-        userId: match[2],
+        displayName: match[1]!,
+        userId: match[2]!,
       });
     }
 
