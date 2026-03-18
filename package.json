@@ -34,7 +34,7 @@
     "test:unit:coverage": "vitest run --coverage --passWithNoTests",
     "test:integration": "vitest run --config vitest.integration.config.ts --passWithNoTests",
     "test:e2e": "pnpm --filter frontend test:e2e",
-    "test:contract": "vitest run --config vitest.contract.config.ts --passWithNoTests",
+    "test:contract": "vitest run --config vitest.contract.config.ts --workspace vitest.contract.workspace.ts --passWithNoTests",
     "lint": "eslint . && pnpm --filter @reason-bridge/frontend lint",
     "lint:fix": "eslint . --fix && pnpm --filter @reason-bridge/frontend lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",

@@ -10,8 +10,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Include unit tests (.test.ts) and contract tests (.pact.ts)
-    include: ['src/**/*.test.ts', 'tests/contract/**/*.pact.ts'],
+    // Include unit tests only - pact tests run via root vitest.contract.config.ts
+    include: ['src/**/*.test.ts'],
     exclude: ['**/node_modules/**', '**/dist/**'],
     coverage: {
       provider: 'v8',
