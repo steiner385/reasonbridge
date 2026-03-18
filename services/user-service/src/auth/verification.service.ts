@@ -57,6 +57,18 @@ export class VerificationService {
         },
       });
 
+      // In E2E mode, delete any existing tokens with the same code to avoid
+      // unique constraint violations (token column has global uniqueness).
+      // This is safe in E2E because tests run sequentially and verification
+      // flows complete quickly.
+      if (process.env['E2E_VERIFICATION_CODE']) {
+        await this.prisma.verificationToken.deleteMany({
+          where: {
+            token: code,
+          },
+        });
+      }
+
       // Create new verification token
       // TODO: Add email and attempts fields to VerificationToken schema
       await this.prisma.verificationToken.create({
