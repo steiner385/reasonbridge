@@ -31,7 +31,7 @@ test.describe('Topic Status Management', () => {
 
       // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
-      const modal = page.getByRole('dialog');
+      const modal = page.locator('[data-testid="create-topic-modal"]');
       await expect(modal).toBeVisible();
 
       await modal.getByLabel(/title/i).fill(`Status Test ${Date.now()}`);
@@ -78,7 +78,7 @@ test.describe('Topic Status Management', () => {
       await page.waitForLoadState('networkidle');
 
       await page.getByRole('button', { name: /create topic/i }).click();
-      const modal = page.getByRole('dialog');
+      const modal = page.locator('[data-testid="create-topic-modal"]');
 
       await modal.getByLabel(/title/i).fill(`Activate Test ${Date.now()}`);
       await modal
@@ -159,7 +159,7 @@ test.describe('Topic Status Management', () => {
 
       // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
-      const modal = page.getByRole('dialog');
+      const modal = page.locator('[data-testid="create-topic-modal"]');
       await expect(modal).toBeVisible();
 
       await modal.getByLabel(/title/i).fill(`Reopen Test ${Date.now()}`);
@@ -295,7 +295,7 @@ test.describe('Topic Status Management', () => {
 
       // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
-      const modal = page.getByRole('dialog');
+      const modal = page.locator('[data-testid="create-topic-modal"]');
       await expect(modal).toBeVisible();
 
       await modal.getByLabel(/title/i).fill(`Unlock Test ${Date.now()}`);

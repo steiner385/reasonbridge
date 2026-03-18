@@ -177,9 +177,11 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
       }}
       title="Create New Discussion Topic"
       size="lg"
+      data-testid="create-topic-modal"
       footer={
         <div className="flex gap-3 justify-end">
           <Button
+            type="button"
             variant="secondary"
             onClick={() => {
               resetForm();
@@ -190,6 +192,7 @@ export function CreateTopicModal({ isOpen, onClose, onSuccess }: CreateTopicModa
             Cancel
           </Button>
           <Button
+            type="button"
             variant="primary"
             onClick={(e) => handleSubmit(e, showDuplicateWarning)}
             disabled={isPending || titleError || descriptionError || !tagsValid}

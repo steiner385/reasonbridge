@@ -33,14 +33,14 @@ test.describe('Create Topic Flow', () => {
     await page.getByRole('button', { name: /create topic/i }).click();
 
     // Modal should be visible with correct title
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
     await expect(modal.getByRole('heading', { name: 'Create New Discussion Topic' })).toBeVisible();
   });
 
   test('should render all required form fields', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Check for title input
     const titleInput = modal.getByLabel(/title/i);
@@ -70,7 +70,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should show validation error for title too short', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Enter title that's too short (< 10 chars)
     const titleInput = modal.getByLabel(/title/i);
@@ -85,7 +85,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should show validation error for description too short', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Enter description that's too short (< 50 chars)
     const descriptionInput = modal.getByLabel(/description/i);
@@ -100,7 +100,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should show error if no tags are added', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Check that error message is shown when no tags present
     await expect(modal.getByText(/at least 1 tag required/i)).toBeVisible();
@@ -112,7 +112,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should allow adding and removing tags', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Use combobox role to specifically target the input, not the listbox
     const tagInput = modal.getByRole('combobox', { name: /tags/i });
@@ -138,7 +138,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should allow adding tag by pressing Enter', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Use combobox role to specifically target the input
     const tagInput = modal.getByRole('combobox', { name: /tags/i });
@@ -156,7 +156,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should limit tags to maximum of 5', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Use combobox role to specifically target the input
     const tagInput = modal.getByRole('combobox', { name: /tags/i });
@@ -179,7 +179,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should successfully create a new topic', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Fill in valid data with unique title to avoid collision with seeded topics
     // Use UUID to ensure completely unique title that won't trigger similarity matching
@@ -228,7 +228,7 @@ test.describe('Create Topic Flow', () => {
   test('should show duplicate warning when similar topics exist', async ({ page }) => {
     // First, create a topic
     await page.getByRole('button', { name: /create topic/i }).click();
-    let modal = page.getByRole('dialog');
+    let modal = page.locator('[data-testid="create-topic-modal"]');
 
     const uniqueTitle = `Climate Change Discussion ${Date.now()}`;
     const description =
@@ -251,7 +251,7 @@ test.describe('Create Topic Flow', () => {
 
     // Try to create a very similar topic
     await page.getByRole('button', { name: /create topic/i }).click();
-    modal = page.getByRole('dialog');
+    modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Use almost identical title and description
     await modal.getByLabel(/title/i).fill(`Climate Change Discussion ${Date.now()}`);
@@ -277,7 +277,7 @@ test.describe('Create Topic Flow', () => {
   // Skip: Duplicate detection workflow timing issues - modal doesn't close within timeout
   test.skip('should allow creating topic despite duplicate warning', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Fill in data that might trigger duplicate detection
     await modal.getByLabel(/title/i).fill('Climate policy discussion on carbon emissions');
@@ -307,7 +307,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should close modal when clicking Cancel', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Click cancel button
     await modal.getByRole('button', { name: /cancel/i }).click();
@@ -318,7 +318,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should close modal and reset form when clicking close icon', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    let modal = page.getByRole('dialog');
+    let modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Fill in some data
     await modal.getByLabel(/title/i).fill('Test Topic Title');
@@ -333,7 +333,7 @@ test.describe('Create Topic Flow', () => {
 
     // Reopen modal
     await page.getByRole('button', { name: /create topic/i }).click();
-    modal = page.getByRole('dialog');
+    modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Form should be reset
     await expect(modal.getByLabel(/title/i)).toHaveValue('');
@@ -342,7 +342,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should show loading state while creating topic', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Fill in valid data
     await modal.getByLabel(/title/i).fill('Testing Loading State for Topic Creation');
@@ -368,7 +368,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should display character counts for title and description', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // Check initial character counts
     await expect(modal.getByText('0/200')).toBeVisible(); // Title counter
@@ -387,7 +387,7 @@ test.describe('Create Topic Flow', () => {
 
   test('should have accessible form structure', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
 
     // All inputs should have labels
     await expect(modal.getByLabel(/title/i)).toBeVisible();

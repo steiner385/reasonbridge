@@ -52,15 +52,15 @@ export async function login(page: Page, user: TestUser): Promise<void> {
   // Click login button in header
   await page.getByRole('button', { name: /log in/i }).click();
 
-  // Wait for login modal
-  await page.waitForSelector('[role="dialog"]', { state: 'visible' });
+  // Wait for login modal (use specific selector to avoid confusion with other modals)
+  await page.waitForSelector('[data-testid="login-modal"]', { state: 'visible' });
 
   // Check if demo accounts are available
   const demoAccount = page.getByText(user.displayName);
+  const dialog = page.locator('[data-testid="login-modal"]');
   if (await demoAccount.isVisible({ timeout: 2000 }).catch(() => false)) {
     // Use demo account login
     await demoAccount.click();
-    const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: /^log in$/i }).click();
   } else {
     // Use email/password login
@@ -70,11 +70,11 @@ export async function login(page: Page, user: TestUser): Promise<void> {
   }
 
   // Wait for login to complete
-  await page.waitForSelector('[role="dialog"]', { state: 'hidden', timeout: 10000 });
+  await page.waitForSelector('[data-testid="login-modal"]', { state: 'hidden', timeout: 10000 });
 
   // Wait for auth state to stabilize
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(500);
 }
 
 /**
@@ -90,21 +90,21 @@ export async function loginWithDemoAccount(
   await page.goto('/');
   await page.getByRole('button', { name: /log in/i }).click();
 
-  // Wait for login modal
-  await page.waitForSelector('[role="dialog"]', { state: 'visible' });
+  // Wait for login modal (use specific selector to avoid confusion with other modals)
+  await page.waitForSelector('[data-testid="login-modal"]', { state: 'visible' });
 
   // Select demo account
   await page.getByText(accountName).click();
-  const dialog = page.getByRole('dialog');
+  const dialog = page.locator('[data-testid="login-modal"]');
   await dialog.getByRole('button', { name: /^log in$/i }).click();
 
   // Wait for login to complete
-  await page.waitForSelector('[role="dialog"]', { state: 'hidden', timeout: 10000 });
+  await page.waitForSelector('[data-testid="login-modal"]', { state: 'hidden', timeout: 10000 });
 
   // Wait for navigation and auth state to stabilize
   await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(500);
 }
 
 /**

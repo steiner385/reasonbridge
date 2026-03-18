@@ -32,15 +32,15 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Login first (required for topic creation)
     await page.getByRole('button', { name: /log in/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
+    const loginModal = page.locator('[data-testid="login-modal"]');
+    await expect(loginModal).toBeVisible();
 
     // Use demo admin account for testing
     await page.getByText('Admin Adams').click();
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
+    await loginModal.getByRole('button', { name: /^log in$/i }).click();
 
     // Wait for login to complete and modal to close
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+    await expect(loginModal).not.toBeVisible({ timeout: 10000 });
 
     // Wait for navigation and authentication state to stabilize
     await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
@@ -61,7 +61,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
   test('should auto-save draft to localStorage when typing', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Type a title that meets minimum length (10+ chars)
@@ -95,7 +95,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Should show draft restoration prompt
@@ -125,7 +125,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Click Restore Draft
@@ -153,7 +153,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Click Start Fresh
@@ -173,7 +173,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
   test('should clear draft when clicking Cancel button', async ({ page }) => {
     // First, create a draft by typing and waiting for auto-save
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Type content to trigger auto-save
@@ -199,7 +199,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
   test('should clear draft after successful topic creation', async ({ page }) => {
     // Create a draft
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     const uniqueTitle = `E2E Draft Clear Test ${Date.now()}`;
@@ -255,7 +255,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Click Restore Draft
@@ -280,7 +280,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Open modal
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Draft prompt should NOT be visible
@@ -292,7 +292,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
   test('should not save draft if content is below minimum length', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Type content below minimum (10 chars)
@@ -308,7 +308,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
   test('should show save status indicator while auto-saving', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     // Type content to trigger auto-save
@@ -324,7 +324,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
   test('should persist draft across page reload', async ({ page }) => {
     // Open modal and type content
     await page.getByRole('button', { name: /create topic/i }).click();
-    let modal = page.getByRole('dialog');
+    let modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
 
     const testTitle = 'Draft Persistence Across Reload Test';
@@ -355,7 +355,7 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Open modal again - should show draft prompt
     await page.getByRole('button', { name: /create topic/i }).click();
-    modal = page.getByRole('dialog');
+    modal = page.locator('[data-testid="create-topic-modal"]');
     await expect(modal).toBeVisible();
     await expect(modal.getByText(/unsaved draft found/i)).toBeVisible();
   });

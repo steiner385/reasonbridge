@@ -50,6 +50,11 @@ export interface ModalProps {
    * Whether to show the close button
    */
   showCloseButton?: boolean;
+
+  /**
+   * Optional data-testid for E2E test selectors
+   */
+  'data-testid'?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -62,6 +67,7 @@ const Modal: React.FC<ModalProps> = ({
   closeOnBackdropClick = true,
   closeOnEscape = true,
   showCloseButton = true,
+  'data-testid': dataTestId,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -145,6 +151,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
+      data-testid={dataTestId}
     >
       {/* Backdrop */}
       <div
