@@ -53,14 +53,14 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
     <div
       role="status"
       aria-live="polite"
-      className={`bg-gradient-to-r from-primary-50 to-accent dark:from-primary-900/30 dark:to-accent/20 border border-primary-200 dark:border-primary-700 rounded-lg p-4 mb-6 transition-all duration-200 ${
+      className={`bg-linear-to-r from-primary-50 to-accent dark:from-primary-900/30 dark:to-accent/20 border border-primary-200 dark:border-primary-700 rounded-lg p-4 mb-6 transition-all duration-200 ${
         isClosing ? 'opacity-0 transform -translate-y-2' : 'opacity-100'
       }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <svg
-            className="w-6 h-6 text-primary-500 dark:text-primary-400 flex-shrink-0 mt-0.5"
+            className="w-6 h-6 text-primary-500 dark:text-primary-400 shrink-0 mt-0.5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

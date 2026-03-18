@@ -73,7 +73,7 @@ function BookmarkCard({ bookmark, onRemove, isRemoving }: BookmarkCardProps) {
     >
       <div className="flex items-start gap-4">
         {/* Bookmark icon */}
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -125,7 +125,7 @@ function BookmarkCard({ bookmark, onRemove, isRemoving }: BookmarkCardProps) {
         <button
           onClick={onRemove}
           disabled={isRemoving}
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 disabled:opacity-50 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-red-400"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 disabled:opacity-50 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-red-400"
           aria-label="Remove bookmark"
           title="Remove bookmark"
         >

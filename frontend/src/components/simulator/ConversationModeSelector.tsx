@@ -322,7 +322,7 @@ export const ConversationModeSelector: React.FC<ConversationModeSelectorProps> =
                   {/* Icon */}
                   <div
                     className={`
-                      flex-shrink-0 p-2 rounded-lg transition-colors duration-200
+                      shrink-0 p-2 rounded-lg transition-colors duration-200
                       ${
                         isSelected
                           ? 'bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300'

@@ -171,7 +171,7 @@ export function CompactComposer({
           onClick={handleSubmit}
           disabled={!isValid || isLoading}
           className={`
-            flex-shrink-0 p-2.5 m-1 rounded-md transition-all
+            shrink-0 p-2.5 m-1 rounded-md transition-all
             ${
               isValid && !isLoading
                 ? 'bg-primary-600 hover:bg-primary-700 text-white'

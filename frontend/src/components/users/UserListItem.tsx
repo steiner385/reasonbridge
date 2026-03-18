@@ -62,7 +62,7 @@ export function UserListItem({
     >
       <Link to={`/users/${user.id}`} className="flex items-center gap-3 flex-1 min-w-0">
         {/* Avatar placeholder */}
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-medium text-sm">
+        <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-medium text-sm">
           {initials}
         </div>
 

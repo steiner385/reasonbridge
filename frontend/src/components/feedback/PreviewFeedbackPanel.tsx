@@ -53,10 +53,10 @@ const FeedbackSkeleton: React.FC = () => (
  * Prominent AI loading banner with ReasonBridge logo animation
  */
 const AILoadingBanner: React.FC = () => (
-  <div className="mb-4 rounded-lg border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 p-4 shadow-sm">
+  <div className="mb-4 rounded-lg border-2 border-blue-200 bg-linear-to-r from-blue-50 to-purple-50 p-4 shadow-sm">
     <div className="flex items-start gap-4">
       {/* ReasonBridge logo animation */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <LoadingBridge size="lg" label="AI analyzing content" />
       </div>
 
@@ -72,7 +72,7 @@ const AILoadingBanner: React.FC = () => (
         {/* Animated progress bar */}
         <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-[progress_2.5s_ease-in-out_infinite]"
+            className="absolute inset-y-0 left-0 bg-linear-to-r from-blue-500 to-purple-500 rounded-full animate-[progress_2.5s_ease-in-out_infinite]"
             style={{
               width: '100%',
             }}
@@ -144,7 +144,7 @@ export const PreviewFeedbackPanel: React.FC<PreviewFeedbackPanelProps> = ({
               Feedback Preview
             </h3>
             {isAIFeedback && !isAILoading && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-linear-to-r from-purple-100 to-blue-100 text-purple-800 border border-purple-200">
                 ✨ AI-Enhanced
               </span>
             )}

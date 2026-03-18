@@ -160,7 +160,7 @@ function CollectItem({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
       <svg
-        className="w-4 h-4 text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0"
+        className="w-4 h-4 text-green-500 dark:text-green-400 mt-0.5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -181,7 +181,7 @@ function DontDoItem({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
       <svg
-        className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0"
+        className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

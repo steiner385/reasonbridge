@@ -19,7 +19,7 @@ export function ResponseGenerationSkeleton({ personaName }: ResponseGenerationSk
     <div className="space-y-4" aria-label="Generating AI response">
       {/* AI Thinking Header */}
       <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-        <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-spin flex-shrink-0" />
+        <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-spin shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
             {personaName ? `${personaName} is thinking...` : 'AI is thinking...'}

@@ -68,7 +68,7 @@ export function PendingResponseNotice({
       <div className="flex items-start gap-3">
         {/* Clock with checkmark icon - friendly and reassuring */}
         <svg
-          className="h-5 w-5 text-sky-500 dark:text-sky-400 mt-0.5 flex-shrink-0"
+          className="h-5 w-5 text-sky-500 dark:text-sky-400 mt-0.5 shrink-0"
           fill="currentColor"
           viewBox="0 0 20 20"
           aria-hidden="true"

@@ -100,7 +100,7 @@ const SuggestedTitleSection: React.FC<{
 
       <div className="space-y-2 mb-3">
         <div className="flex items-start gap-2">
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-16 flex-shrink-0 pt-0.5">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-16 shrink-0 pt-0.5">
             Current:
           </span>
           <span className="text-sm text-gray-600 dark:text-gray-300 line-through">
@@ -108,7 +108,7 @@ const SuggestedTitleSection: React.FC<{
           </span>
         </div>
         <div className="flex items-start gap-2">
-          <span className="text-xs font-medium text-blue-600 dark:text-blue-400 w-16 flex-shrink-0 pt-0.5">
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-400 w-16 shrink-0 pt-0.5">
             Suggested:
           </span>
           <span className="text-sm text-blue-800 dark:text-blue-200 font-medium">

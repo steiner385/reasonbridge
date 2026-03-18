@@ -275,7 +275,7 @@ export function ResponseItem({
         <div className="flex gap-3">
           {/* Vote buttons - left side (not in compact mode) */}
           {!compact && (
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <VoteButtons
                 voteCount={voteSummary?.score ?? 0}
                 userVote={
@@ -300,7 +300,7 @@ export function ResponseItem({
                 {/* Avatar - links to profile */}
                 <Link
                   to={`/profile/${response.author.id}`}
-                  className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2 dark:hover:ring-offset-gray-900 transition-shadow`}
+                  className={`${avatarSize} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold shrink-0 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2 dark:hover:ring-offset-gray-900 transition-shadow`}
                 >
                   {response.author.displayName.charAt(0).toUpperCase()}
                 </Link>
@@ -344,7 +344,7 @@ export function ResponseItem({
 
                 {/* Response menu - visible on hover, only when auth state is known */}
                 {!isAuthLoading && (
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <ResponseMenu
                       isOwnResponse={isOwnResponse}
                       onEdit={() => {
@@ -440,7 +440,7 @@ export function ResponseItem({
                   disabled={isReactionPending}
                   size={compact ? 'sm' : 'md'}
                   showPicker={true}
-                  className="flex-shrink-0"
+                  className="shrink-0"
                 />
 
                 {/* Reply Button (Phase 5) */}

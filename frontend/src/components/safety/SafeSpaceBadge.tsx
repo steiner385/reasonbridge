@@ -67,7 +67,7 @@ export function SafeSpaceBadge({
     floating:
       'px-3 py-1.5 text-sm rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 shadow-lg',
     header:
-      'px-4 py-2 text-sm rounded-xl bg-gradient-to-r from-teal-100 to-cyan-100 text-teal-800 dark:from-teal-900/30 dark:to-cyan-900/30 dark:text-teal-300',
+      'px-4 py-2 text-sm rounded-xl bg-linear-to-r from-teal-100 to-cyan-100 text-teal-800 dark:from-teal-900/30 dark:to-cyan-900/30 dark:text-teal-300',
   };
 
   const iconSizes = {

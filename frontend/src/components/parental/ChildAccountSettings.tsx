@@ -217,7 +217,7 @@ export function ChildAccountSettings({
                   aria-label={`Toggle ${info.label}`}
                   disabled={disabled}
                   onClick={() => handleFeatureToggle(feature)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
                     disabled
                       ? 'cursor-not-allowed opacity-50'
                       : enabled
@@ -325,7 +325,7 @@ export function ChildAccountSettings({
               disabled={disabled}
               onClick={handleDigestToggle}
               data-testid="digest-toggle"
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
                 disabled
                   ? 'cursor-not-allowed opacity-50'
                   : localSettings.receiveActivityDigest

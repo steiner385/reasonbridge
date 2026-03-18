@@ -59,7 +59,7 @@ function ProgressStepIndicator({
     >
       {/* Step indicator circle */}
       <div
-        className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+        className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
           isCompleted
             ? 'bg-green-500 dark:bg-green-600 text-white'
             : isActive
@@ -138,7 +138,7 @@ function ListSectionSkeleton({
         {Array.from({ length: itemCount }, (_, i) => (
           <div key={i} className="flex items-start gap-2">
             <div
-              className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 mt-1.5 flex-shrink-0 animate-pulse"
+              className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 mt-1.5 shrink-0 animate-pulse"
               aria-hidden="true"
             />
             <SkeletonText lines={1} size="sm" className="flex-1" />

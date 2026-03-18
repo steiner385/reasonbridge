@@ -107,7 +107,7 @@ export function TopicNavigationContent({
   return (
     <div className={`topic-navigation-content flex flex-col h-full ${className}`}>
       {/* Search and Filter */}
-      <div className="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
         <TopicSearchFilter
           value={searchQuery}
           onChange={setSearchQuery}
@@ -154,7 +154,7 @@ export function TopicNavigationContent({
       </div>
 
       {/* Topic count footer */}
-      <div className="flex-shrink-0 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="shrink-0 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <p className="text-xs text-gray-500 dark:text-gray-400">
           {filteredTopics.length} {filteredTopics.length === 1 ? 'topic' : 'topics'}
           {(searchQuery || statusFilter) && ' (filtered)'}

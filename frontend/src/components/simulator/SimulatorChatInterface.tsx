@@ -173,7 +173,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       >
         {/* Avatar */}
         <div
-          className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${
+          className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${
             isUser ? 'bg-blue-500 dark:bg-blue-600' : 'bg-purple-500 dark:bg-purple-600'
           }`}
           aria-hidden="true"
@@ -348,7 +348,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         type="submit"
         variant="primary"
         disabled={disabled || !inputValue.trim()}
-        className="flex-shrink-0"
+        className="shrink-0"
         aria-label="Send message"
         data-testid="send-button"
       >

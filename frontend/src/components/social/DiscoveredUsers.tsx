@@ -130,7 +130,7 @@ function UserRow({ user, onInvite }: UserRowProps) {
         {/* Avatar with initials */}
         <div
           className={`
-            flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center
+            shrink-0 w-12 h-12 rounded-full flex items-center justify-center
             ${avatarColor} text-white font-semibold text-sm
           `}
         >

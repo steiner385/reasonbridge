@@ -431,7 +431,7 @@ export const ArgumentFeedbackPanel: React.FC<ArgumentFeedbackPanelProps> = ({
                   data-testid={`unsupported-claim-${index}`}
                 >
                   <span
-                    className="w-1.5 h-1.5 rounded-full bg-orange-400 dark:bg-orange-500 mt-1.5 flex-shrink-0"
+                    className="w-1.5 h-1.5 rounded-full bg-orange-400 dark:bg-orange-500 mt-1.5 shrink-0"
                     aria-hidden="true"
                   />
                   {claim}
@@ -512,7 +512,7 @@ export const ArgumentFeedbackPanel: React.FC<ArgumentFeedbackPanelProps> = ({
                   className="flex items-start gap-3"
                   data-testid={`suggestion-${index}`}
                 >
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium flex items-center justify-center">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium flex items-center justify-center">
                     {index + 1}
                   </span>
                   <span className="text-sm text-gray-700 dark:text-gray-300">{suggestion}</span>

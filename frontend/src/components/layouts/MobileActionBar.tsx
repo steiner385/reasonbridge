@@ -47,7 +47,7 @@ function MobileActionBar({ children, show = true, className = '' }: MobileAction
       `}
     >
       {/* Gradient backdrop to separate from content */}
-      <div className="absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 -top-8 h-8 bg-linear-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
 
       {/* Action bar container */}
       <div

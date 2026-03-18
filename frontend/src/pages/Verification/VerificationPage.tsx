@@ -48,7 +48,7 @@ export const VerificationPage: React.FC = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="h-6 w-6 flex-shrink-0 text-blue-600 dark:text-blue-400"
+              className="h-6 w-6 shrink-0 text-blue-600 dark:text-blue-400"
             >
               <path
                 strokeLinecap="round"

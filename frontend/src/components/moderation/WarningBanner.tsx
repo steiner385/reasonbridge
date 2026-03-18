@@ -257,7 +257,7 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <div className="flex-shrink-0 mt-0.5">{getIcon(warning.actionType, warning.severity)}</div>
+        <div className="shrink-0 mt-0.5">{getIcon(warning.actionType, warning.severity)}</div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
@@ -297,7 +297,7 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
           <button
             type="button"
             onClick={handleDismiss}
-            className={`flex-shrink-0 inline-flex text-gray-400 ${textColors.button} rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
+            className={`shrink-0 inline-flex text-gray-400 ${textColors.button} rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
             aria-label="Dismiss warning"
           >
             <svg

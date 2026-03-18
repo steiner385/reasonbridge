@@ -90,11 +90,11 @@ const SourceCard: React.FC<{ source: FactCheckSource }> = ({ source }) => {
             className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
           >
             <span className="truncate">{source.title}</span>
-            <ExternalLinkIcon className="h-3 w-3 flex-shrink-0" />
+            <ExternalLinkIcon className="h-3 w-3 shrink-0" />
           </a>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{source.provider}</p>
         </div>
-        <div className="flex-shrink-0 text-right">
+        <div className="shrink-0 text-right">
           <span className={`text-xs font-medium ${credibilityColor}`}>
             {Math.round(source.credibilityScore * 100)}%
           </span>
@@ -157,7 +157,7 @@ const ClaimResult: React.FC<{
             )}
           </div>
         </div>
-        <ChevronIcon className="h-5 w-5 text-gray-400 flex-shrink-0" expanded={expanded} />
+        <ChevronIcon className="h-5 w-5 text-gray-400 shrink-0" expanded={expanded} />
       </button>
 
       {/* Expanded content */}

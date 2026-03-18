@@ -50,7 +50,7 @@ function TrendingTopicCard({ topic, compact }: { topic: TrendingTopic; compact: 
       <div className="flex items-start gap-3">
         {/* Rank badge */}
         <div
-          className={`flex-shrink-0 ${compact ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-bold flex items-center justify-center`}
+          className={`shrink-0 ${compact ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-bold flex items-center justify-center`}
         >
           #{topic.rank}
         </div>

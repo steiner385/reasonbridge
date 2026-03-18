@@ -34,7 +34,7 @@ function ResponseSkeleton({
         <div className="flex gap-4">
           {/* Avatar */}
           {showAvatar && (
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <SkeletonAvatar size="md" data-testid={`${testId}-avatar`} />
             </div>
           )}

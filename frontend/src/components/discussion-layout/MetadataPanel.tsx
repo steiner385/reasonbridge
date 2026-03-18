@@ -382,14 +382,14 @@ export function MetadataPanel({
   return (
     <div className={`metadata-panel flex flex-col h-full ${className}`}>
       {/* Tab Header */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      <div className="shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex items-center">
           {/* Collapse Toggle (when collapsible) - outside tablist for ARIA compliance */}
           {collapsible && layoutContext && (
             <button
               type="button"
               onClick={handleCollapseToggle}
-              className="flex-shrink-0 w-10 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border-r border-gray-200 dark:border-gray-700"
+              className="shrink-0 w-10 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border-r border-gray-200 dark:border-gray-700"
               aria-label="Collapse metadata panel"
               title="Collapse panel"
             >

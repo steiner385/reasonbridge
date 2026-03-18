@@ -34,9 +34,9 @@ export const Step1PropositionBased: React.FC = () => {
 
         <div className="space-y-4">
           {/* Example Proposition 1 */}
-          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border-l-4 border-green-500">
+          <div className="bg-linear-to-r from-green-50 to-green-100 rounded-lg p-4 border-l-4 border-green-500">
             <div className="flex items-start">
-              <div className="flex-shrink-0 mr-4">
+              <div className="shrink-0 mr-4">
                 <svg
                   className="h-6 w-6 text-green-600"
                   fill="currentColor"
@@ -62,9 +62,9 @@ export const Step1PropositionBased: React.FC = () => {
           </div>
 
           {/* Example Proposition 2 */}
-          <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500">
+          <div className="bg-linear-to-r from-yellow-50 to-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500">
             <div className="flex items-start">
-              <div className="flex-shrink-0 mr-4">
+              <div className="shrink-0 mr-4">
                 <svg
                   className="h-6 w-6 text-yellow-600"
                   fill="currentColor"
@@ -90,9 +90,9 @@ export const Step1PropositionBased: React.FC = () => {
           </div>
 
           {/* Example Proposition 3 */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
+          <div className="bg-linear-to-r from-blue-50 to-blue-100 rounded-lg p-4 border-l-4 border-blue-500">
             <div className="flex items-start">
-              <div className="flex-shrink-0 mr-4">
+              <div className="shrink-0 mr-4">
                 <svg
                   className="h-6 w-6 text-blue-600"
                   fill="currentColor"
@@ -149,7 +149,7 @@ export const Step2AIFeedback: React.FC = () => {
           {/* Common Ground Finding */}
           <div className="bg-green-50 rounded-lg p-5 border border-green-200">
             <div className="flex items-start mb-3">
-              <div className="flex-shrink-0 mr-3">
+              <div className="shrink-0 mr-3">
                 <div className="bg-green-500 rounded-full p-2">
                   <svg
                     className="h-5 w-5 text-white"
@@ -174,7 +174,7 @@ export const Step2AIFeedback: React.FC = () => {
           {/* Bridging Opportunity */}
           <div className="bg-blue-50 rounded-lg p-5 border border-blue-200">
             <div className="flex items-start mb-3">
-              <div className="flex-shrink-0 mr-3">
+              <div className="shrink-0 mr-3">
                 <div className="bg-blue-500 rounded-full p-2">
                   <svg
                     className="h-5 w-5 text-white"
@@ -199,7 +199,7 @@ export const Step2AIFeedback: React.FC = () => {
           {/* Diverse Perspectives */}
           <div className="bg-purple-50 rounded-lg p-5 border border-purple-200">
             <div className="flex items-start mb-3">
-              <div className="flex-shrink-0 mr-3">
+              <div className="shrink-0 mr-3">
                 <div className="bg-purple-500 rounded-full p-2">
                   <svg
                     className="h-5 w-5 text-white"
@@ -256,11 +256,11 @@ export const Step3CommonGround: React.FC = () => {
 
         <div className="space-y-6">
           {/* Agreement Spectrum Visualization */}
-          <div className="bg-gradient-to-r from-red-50 via-yellow-50 to-green-50 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+          <div className="bg-linear-to-r from-red-50 via-yellow-50 to-green-50 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
             <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
               Agreement Spectrum
             </h4>
-            <div className="relative h-8 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full">
+            <div className="relative h-8 bg-linear-to-r from-red-400 via-yellow-400 to-green-400 rounded-full">
               {/* Sample distribution markers */}
               <div className="absolute top-0 left-[15%] w-1 h-full bg-gray-800 opacity-30"></div>
               <div className="absolute top-0 left-[35%] w-1 h-full bg-gray-800 opacity-30"></div>
@@ -342,7 +342,7 @@ export const Step3CommonGround: React.FC = () => {
             <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300 dark:text-gray-300">
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0"
+                  className="h-5 w-5 text-primary-600 mr-2 shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
@@ -357,7 +357,7 @@ export const Step3CommonGround: React.FC = () => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0"
+                  className="h-5 w-5 text-primary-600 mr-2 shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
@@ -372,7 +372,7 @@ export const Step3CommonGround: React.FC = () => {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0"
+                  className="h-5 w-5 text-primary-600 mr-2 shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"

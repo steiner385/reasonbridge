@@ -319,7 +319,7 @@ export function InvitationCard({
         {/* Icon */}
         <div
           className={`
-            flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+            shrink-0 w-10 h-10 rounded-full flex items-center justify-center
             ${
               isReceived
                 ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
@@ -348,7 +348,7 @@ export function InvitationCard({
 
         {/* Status badge (for sent invitations or non-pending received) */}
         {(!isReceived || !isPending) && (
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <StatusBadge status={invitation.status} />
           </div>
         )}

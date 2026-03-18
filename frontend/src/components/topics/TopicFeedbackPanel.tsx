@@ -136,9 +136,9 @@ const FeedbackSkeleton: React.FC = () => (
  * AI Loading banner for topic analysis
  */
 const AILoadingBanner: React.FC = () => (
-  <div className="mb-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4">
+  <div className="mb-4 rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4">
     <div className="flex items-start gap-4">
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <LoadingBridge size="md" label="Analyzing topic" />
       </div>
       <div className="flex-1 min-w-0">
@@ -213,7 +213,7 @@ export const TopicFeedbackPanel: React.FC<TopicFeedbackPanelProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Topic Review</h3>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-linear-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
               ✨ AI-Powered
             </span>
           </div>

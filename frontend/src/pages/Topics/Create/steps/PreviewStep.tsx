@@ -53,7 +53,7 @@ export function PreviewStep({ data, duplicates, showDuplicateWarning }: PreviewS
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <svg
-              className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0"
+              className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -181,7 +181,7 @@ export function PreviewStep({ data, duplicates, showDuplicateWarning }: PreviewS
       <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <svg
-            className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0"
+            className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

@@ -104,7 +104,7 @@ function ProgressTracker({
         <span className="font-medium text-gray-700 dark:text-gray-300 truncate pr-2">
           {currentStepName}
         </span>
-        <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">
+        <span className="text-gray-500 dark:text-gray-400 shrink-0">
           Step {clampedStep + 1} of {totalSteps}
         </span>
       </div>
@@ -148,7 +148,7 @@ function ProgressTracker({
                 {/* Status indicator */}
                 <div
                   className={`
-                    flex items-center justify-center rounded-full flex-shrink-0
+                    flex items-center justify-center rounded-full shrink-0
                     ${sizeStyles.stepIcon}
                     ${
                       isCompleted

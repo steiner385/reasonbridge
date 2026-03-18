@@ -135,7 +135,7 @@ function OperationItem({ operation, onRetry, onDismiss }: OperationItemProps) {
       {/* Status icon */}
       <Icon
         className={`
-          h-4 w-4 flex-shrink-0
+          h-4 w-4 shrink-0
           ${config.iconClass}
           ${config.animate ? 'animate-spin' : ''}
         `}
@@ -159,7 +159,7 @@ function OperationItem({ operation, onRetry, onDismiss }: OperationItemProps) {
                 aria-valuemax={100}
               />
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+            <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
               {formatTime(elapsedMs)} / {formatTime(operation.estimatedMs!)}
             </span>
           </div>
@@ -174,7 +174,7 @@ function OperationItem({ operation, onRetry, onDismiss }: OperationItemProps) {
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex items-center gap-1 shrink-0">
         {/* Retry button for failed operations */}
         {operation.status === 'failed' && onRetry && (
           <button
