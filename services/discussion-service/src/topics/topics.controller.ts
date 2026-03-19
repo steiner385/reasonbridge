@@ -30,6 +30,8 @@ import { UpdateTopicDto } from './dto/update-topic.dto.js';
 import { UpdateTopicStatusDto } from './dto/update-topic-status.dto.js';
 import { MergeTopicsDto } from './dto/merge-topics.dto.js';
 import { GetCommonGroundQueryDto } from './dto/common-ground-query.dto.js';
+import { AddTopicTagDto, type AddTagResponseDto } from './dto/add-topic-tag.dto.js';
+import { CreateTopicLinkDto, type TopicLinkResponseDto } from './dto/topic-link.dto.js';
 import { ExportCommonGroundQueryDto } from './dto/export-common-ground-query.dto.js';
 import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-response.dto.js';
 import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
@@ -174,6 +176,76 @@ export class TopicsController {
   async getTopicEditHistory(@Param('id') id: string, @Query('limit') limit?: string): Promise<any> {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     return this.topicsService.getTopicEditHistory(id, limitNum);
+  }
+
+  /**
+   * Add a tag to a topic
+   * Feature: AI Suggestion Actions (#1054)
+   *
+   * Used when users accept AI-suggested tags or add their own tags.
+   * Tracks tag source for AI feedback loop.
+   *
+   * Authentication: Required (user must be logged in)
+   */
+  @Post(':id/tags')
+  @UseGuards(JwtAuthGuard)
+  async addTagToTopic(
+    @Param('id') id: string,
+    @Body() addTagDto: AddTopicTagDto,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AddTagResponseDto> {
+    // CREATOR is only used during topic creation; for this endpoint default to AI_SUGGESTED
+    const source =
+      addTagDto.source === 'AI_SUGGESTED' || addTagDto.source === 'COMMUNITY'
+        ? addTagDto.source
+        : 'AI_SUGGESTED';
+    const tag = await this.topicsService.addTagToTopic(id, user.sub, addTagDto.tag, source);
+
+    return {
+      success: true,
+      tag,
+      topicId: id,
+      source,
+    };
+  }
+
+  /**
+   * Create a link between topics
+   * Feature: AI Suggestion Actions (#1054)
+   *
+   * Used when users accept AI-suggested topic links or propose their own.
+   * Creates a pending link that can be confirmed by the community.
+   *
+   * Authentication: Required (user must be logged in)
+   */
+  @Post(':id/links')
+  @UseGuards(JwtAuthGuard)
+  async createTopicLink(
+    @Param('id') id: string,
+    @Body() createLinkDto: CreateTopicLinkDto,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<TopicLinkResponseDto> {
+    const linkSource = createLinkDto.linkSource || 'AI_SUGGESTED';
+    const link = await this.topicsService.createTopicLink(
+      id,
+      user.sub,
+      createLinkDto.targetTopicId,
+      createLinkDto.relationshipType,
+      linkSource,
+    );
+
+    return {
+      id: link.id,
+      sourceTopicId: link.sourceTopicId,
+      targetTopicId: link.targetTopicId,
+      relationshipType: createLinkDto.relationshipType,
+      linkSource,
+      confirmationStatus: 'PENDING',
+      proposerId: user.sub,
+      confirmedByCount: 0,
+      rejectedByCount: 0,
+      createdAt: new Date(),
+    };
   }
 
   /**

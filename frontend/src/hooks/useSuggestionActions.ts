@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import type { TopicLink } from '../types/suggestions';
+import { apiClient } from '../lib/api';
 
 export interface ApplyTagOptions {
   topicId: string;
@@ -46,18 +47,17 @@ export function useSuggestionActions() {
 
   /**
    * Apply a tag suggestion to a topic
+   * Feature: AI Suggestion Actions (#1054)
    */
   const applyTag = useCallback(async (options: ApplyTagOptions) => {
     setState((prev) => ({ ...prev, isApplying: true, error: null }));
 
     try {
-      // TODO: Call backend API to add tag to topic
-      // For now, this is a stub that simulates the API call
-      // Future implementation will call:
-      // await apiClient.post(`/topics/${options.topicId}/tags`, { tag: options.tag, source: 'AI_SUGGESTED' })
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // Call backend API to add tag to topic
+      await apiClient.post(`/topics/${options.topicId}/tags`, {
+        tag: options.tag,
+        source: 'AI_SUGGESTED',
+      });
 
       setState((prev) => ({
         ...prev,
@@ -80,22 +80,30 @@ export function useSuggestionActions() {
 
   /**
    * Apply a topic link suggestion
+   * Feature: AI Suggestion Actions (#1054)
    */
   const applyTopicLink = useCallback(async (options: ApplyTopicLinkOptions) => {
     setState((prev) => ({ ...prev, isApplying: true, error: null }));
 
     try {
-      // TODO: Call backend API to create topic link
-      // For now, this is a stub that simulates the API call
-      // Future implementation will call:
-      // await apiClient.post(`/topics/${options.topicId}/links`, {
-      //   targetTopicId: options.link.targetTopicId,
-      //   relationshipType: options.link.relationshipType,
-      //   linkSource: 'AI_SUGGESTED'
-      // })
+      // Map frontend relationship types to backend enum values
+      const relationshipTypeMap: Record<string, string> = {
+        supports: 'BUILDS_ON',
+        contradicts: 'CONTRADICTS',
+        extends: 'BUILDS_ON',
+        questions: 'RESPONDS_TO',
+        relates_to: 'RELATED',
+      };
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const backendRelationshipType =
+        relationshipTypeMap[options.link.relationshipType] || 'RELATED';
+
+      // Call backend API to create topic link
+      await apiClient.post(`/topics/${options.topicId}/links`, {
+        targetTopicId: options.link.targetTopicId,
+        relationshipType: backendRelationshipType,
+        linkSource: 'AI_SUGGESTED',
+      });
 
       const linkKey = `${options.link.targetTopicId}-${options.link.relationshipType}`;
       setState((prev) => ({
