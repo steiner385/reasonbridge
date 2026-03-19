@@ -23,3 +23,5 @@ export { default as VoteButtons } from './VoteButtons';
 export type { VoteButtonsProps } from './VoteButtons';
 export { TypingIndicator, default as TypingIndicatorDefault } from './TypingIndicator';
 export type { TypingIndicatorProps } from './TypingIndicator';
+export { NewMessagesDivider, default as NewMessagesDividerDefault } from './NewMessagesDivider';
+export type { NewMessagesDividerProps } from './NewMessagesDivider';
