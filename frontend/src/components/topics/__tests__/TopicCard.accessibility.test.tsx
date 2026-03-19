@@ -3,7 +3,15 @@ import { render } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { BrowserRouter } from 'react-router-dom';
 import TopicCard from '../TopicCard';
+import { ToastProvider } from '../../../contexts/ToastContext';
 import type { Topic } from '../../../types/topic';
+
+// Wrapper component with all required providers
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <BrowserRouter>
+    <ToastProvider>{children}</ToastProvider>
+  </BrowserRouter>
+);
 
 // Extend Vitest's expect with jest-axe matchers
 expect.extend(toHaveNoViolations);
@@ -28,9 +36,9 @@ const mockTopic: Topic = {
 describe('TopicCard Accessibility Tests', () => {
   it('should have no accessibility violations in light mode', async () => {
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={mockTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container, {
@@ -48,9 +56,9 @@ describe('TopicCard Accessibility Tests', () => {
   it('should have no accessibility violations with ARCHIVED status', async () => {
     const archivedTopic = { ...mockTopic, status: 'ARCHIVED' as const };
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={archivedTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container);
@@ -60,9 +68,9 @@ describe('TopicCard Accessibility Tests', () => {
   it('should have no accessibility violations with SEEDING status', async () => {
     const seedingTopic = { ...mockTopic, status: 'SEEDING' as const };
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={seedingTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container);
@@ -71,9 +79,9 @@ describe('TopicCard Accessibility Tests', () => {
 
   it('should have sufficient contrast for all text elements', async () => {
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={mockTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     // Run axe with specific color-contrast rules
@@ -90,9 +98,9 @@ describe('TopicCard Accessibility Tests', () => {
 
   it('should maintain accessibility when truncating description', async () => {
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={mockTopic} truncateDescription={true} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container);
@@ -101,9 +109,9 @@ describe('TopicCard Accessibility Tests', () => {
 
   it('should have accessible link text', async () => {
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={mockTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container, {
@@ -117,9 +125,9 @@ describe('TopicCard Accessibility Tests', () => {
 
   it('should have proper heading structure', async () => {
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={mockTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container, {
@@ -133,9 +141,9 @@ describe('TopicCard Accessibility Tests', () => {
 
   it('should support keyboard navigation', async () => {
     const { container } = render(
-      <BrowserRouter>
+      <TestWrapper>
         <TopicCard topic={mockTopic} />
-      </BrowserRouter>,
+      </TestWrapper>,
     );
 
     const results = await axe(container, {
