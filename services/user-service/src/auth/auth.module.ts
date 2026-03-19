@@ -12,6 +12,8 @@ import { MockAuthService } from './mock-auth.service.js';
 import { DatabaseAuthService } from './database-auth.service.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { AdminGuard } from './guards/admin.guard.js';
+import { ModeratorGuard } from './guards/moderator.guard.js';
+import { RolesGuard } from './guards/roles.guard.js';
 import { UsersModule } from '../users/users.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AUTH_SERVICE } from './auth.interface.js';
@@ -84,17 +86,26 @@ const authServiceProvider = {
         new JwtAuthGuard(jwtService, configService),
       inject: [JwtService, ConfigService],
     },
-    // Factory provider for AdminGuard
+    // Factory provider for AdminGuard (now includes PrismaService for role-based checks)
     {
       provide: AdminGuard,
-      useFactory: (configService: ConfigService) => new AdminGuard(configService),
-      inject: [ConfigService],
+      useFactory: (configService: ConfigService, prisma: PrismaService) =>
+        new AdminGuard(configService, prisma),
+      inject: [ConfigService, PrismaService],
     },
+    // Factory provider for ModeratorGuard
+    {
+      provide: ModeratorGuard,
+      useFactory: (prisma: PrismaService) => new ModeratorGuard(prisma),
+      inject: [PrismaService],
+    },
+    // Factory provider for RolesGuard (requires Reflector for reading @Roles metadata)
+    RolesGuard,
     // Verification and email services for verify-email and resend-verification endpoints
     VerificationService,
     EmailService,
     PrismaService,
   ],
-  exports: [AUTH_SERVICE, JwtAuthGuard, AdminGuard, JwtModule],
+  exports: [AUTH_SERVICE, JwtAuthGuard, AdminGuard, ModeratorGuard, RolesGuard, JwtModule],
 })
 export class AuthModule {}
