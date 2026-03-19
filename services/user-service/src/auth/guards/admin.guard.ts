@@ -11,6 +11,8 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UserRole } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import type { JwtPayload } from '../jwt-auth.guard.js';
 
 /**
@@ -19,9 +21,10 @@ import type { JwtPayload } from '../jwt-auth.guard.js';
  * This guard should be used AFTER JwtAuthGuard to ensure the user is authenticated.
  * It checks if the authenticated user has admin privileges.
  *
- * Admin users are determined by:
- * 1. Environment variable ADMIN_USERS (comma-separated list of cognitoSub values)
- * 2. Demo admin user (demo-admin cognitoSub) when DEMO_MODE is enabled
+ * Admin users are determined by (in order of precedence):
+ * 1. User's role in the database (UserRole.ADMIN)
+ * 2. Environment variable ADMIN_USERS (comma-separated list of cognitoSub values) - legacy support
+ * 3. Demo admin user (demo-admin cognitoSub) when DEMO_MODE is enabled
  *
  * Usage:
  * ```typescript
@@ -35,19 +38,22 @@ import type { JwtPayload } from '../jwt-auth.guard.js';
  * Always use JwtAuthGuard before AdminGuard to ensure user is authenticated.
  *
  * @example
- * Environment configuration:
+ * Environment configuration (legacy, prefer database roles):
  * ADMIN_USERS=cognito-sub-1,cognito-sub-2,cognito-sub-3
  */
 @Injectable()
 export class AdminGuard implements CanActivate {
   private readonly logger = new Logger(AdminGuard.name);
-  private readonly adminUsers: Set<string>;
+  private readonly legacyAdminUsers: Set<string>;
   private readonly demoMode: boolean;
 
-  constructor(private readonly configService: ConfigService) {
-    // Parse admin users from environment variable
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
+    // Parse admin users from environment variable (legacy support)
     const adminUsersEnv = this.configService.get<string>('ADMIN_USERS') ?? '';
-    this.adminUsers = new Set(
+    this.legacyAdminUsers = new Set(
       adminUsersEnv
         .split(',')
         .map((id) => id.trim())
@@ -59,10 +65,12 @@ export class AdminGuard implements CanActivate {
 
     // In demo mode, add the demo admin user
     if (this.demoMode) {
-      this.adminUsers.add('demo-admin');
+      this.legacyAdminUsers.add('demo-admin');
     }
 
-    this.logger.debug(`AdminGuard initialized with ${this.adminUsers.size} admin users`);
+    this.logger.debug(
+      `AdminGuard initialized with ${this.legacyAdminUsers.size} legacy admin users`,
+    );
   }
 
   /**
@@ -71,33 +79,55 @@ export class AdminGuard implements CanActivate {
    * @param context - Execution context containing the request
    * @returns true if user is an admin, throws ForbiddenException otherwise
    */
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request.user as JwtPayload | undefined;
+    const jwtPayload = request.user as JwtPayload | undefined;
 
-    if (!user) {
+    if (!jwtPayload) {
       this.logger.warn('AdminGuard: No user found in request. Ensure JwtAuthGuard runs first.');
       throw new ForbiddenException('Access denied: authentication required');
     }
 
-    const userId = user.sub;
+    const cognitoSub = jwtPayload.sub;
 
-    if (!this.isAdmin(userId)) {
-      this.logger.warn(`AdminGuard: Access denied for user ${userId}`);
+    // Check legacy admin users first (for backward compatibility)
+    if (this.legacyAdminUsers.has(cognitoSub)) {
+      this.logger.debug(`AdminGuard: Admin access granted for legacy admin ${cognitoSub}`);
+      return true;
+    }
+
+    // Look up the user's role from the database
+    const user = await this.prisma.user.findUnique({
+      where: { cognitoSub },
+      select: { id: true, role: true },
+    });
+
+    if (!user) {
+      this.logger.warn(`AdminGuard: User not found for cognitoSub ${cognitoSub}`);
+      throw new ForbiddenException('Access denied: user not found');
+    }
+
+    if (user.role !== UserRole.ADMIN) {
+      this.logger.warn(`AdminGuard: Access denied for user ${user.id} with role ${user.role}`);
       throw new ForbiddenException('Access denied: admin privileges required');
     }
 
-    this.logger.debug(`AdminGuard: Admin access granted for user ${userId}`);
+    // Attach user info to request for downstream use
+    request.userRole = user.role;
+    request.userId = user.id;
+
+    this.logger.debug(`AdminGuard: Admin access granted for user ${user.id}`);
     return true;
   }
 
   /**
-   * Check if a user ID is in the admin list
+   * Check if a user ID is in the legacy admin list
    *
    * @param userId - The cognitoSub (user ID) to check
-   * @returns true if the user is an admin
+   * @returns true if the user is a legacy admin
+   * @deprecated Use database role checking instead
    */
-  isAdmin(userId: string): boolean {
-    return this.adminUsers.has(userId);
+  isLegacyAdmin(userId: string): boolean {
+    return this.legacyAdminUsers.has(userId);
   }
 }

@@ -1,11 +1,25 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationGateway } from './notification.gateway.js';
 
-const createMockSocket = () => ({
+/**
+ * Create a mock socket with optional authentication
+ */
+const createMockSocket = (
+  options: {
+    userId?: string;
+    token?: string;
+  } = {},
+) => ({
   id: 'socket-1',
   join: vi.fn().mockResolvedValue(undefined),
   leave: vi.fn().mockResolvedValue(undefined),
   emit: vi.fn(),
+  handshake: {
+    auth: options.token ? { token: options.token } : {},
+  },
+  // For authenticated sockets
+  userId: options.userId,
+  user: options.userId ? { sub: options.userId, email: 'test@example.com' } : undefined,
 });
 
 const createMockServer = () => ({
@@ -151,8 +165,8 @@ describe('NotificationGateway', () => {
   });
 
   describe('handleSubscribeModeration', () => {
-    it('should join moderation room and emit confirmation', async () => {
-      const mockSocket = createMockSocket();
+    it('should join moderation room for authenticated users', async () => {
+      const mockSocket = createMockSocket({ userId: 'user-1' });
 
       await gateway.handleSubscribeModeration({}, mockSocket as any);
 
@@ -160,6 +174,18 @@ describe('NotificationGateway', () => {
       expect(mockSocket.emit).toHaveBeenCalledWith('subscription:confirmed', {
         type: 'moderation',
         room: 'moderation:actions',
+      });
+    });
+
+    it('should reject unauthenticated users', async () => {
+      const mockSocket = createMockSocket(); // No userId
+
+      await gateway.handleSubscribeModeration({}, mockSocket as any);
+
+      expect(mockSocket.join).not.toHaveBeenCalled();
+      expect(mockSocket.emit).toHaveBeenCalledWith('subscription:error', {
+        type: 'moderation',
+        message: 'Authentication required for moderation updates',
       });
     });
   });
@@ -268,6 +294,71 @@ describe('NotificationGateway', () => {
           newScores: event.payload.newScores,
         }),
       );
+    });
+  });
+
+  describe('handleSubscribePersonal', () => {
+    it('should allow authenticated user to subscribe to own notifications', async () => {
+      const mockSocket = createMockSocket({ userId: 'user-1' });
+
+      await gateway.handleSubscribePersonal({ userId: 'user-1' }, mockSocket as any);
+
+      expect(mockSocket.join).toHaveBeenCalledWith('user:user-1:notifications');
+      expect(mockSocket.emit).toHaveBeenCalledWith('subscription:confirmed', {
+        type: 'personal',
+        userId: 'user-1',
+        room: 'user:user-1:notifications',
+      });
+    });
+
+    it('should reject unauthenticated users', async () => {
+      const mockSocket = createMockSocket(); // No userId
+
+      await gateway.handleSubscribePersonal({ userId: 'user-1' }, mockSocket as any);
+
+      expect(mockSocket.join).not.toHaveBeenCalled();
+      expect(mockSocket.emit).toHaveBeenCalledWith('subscription:error', {
+        type: 'personal',
+        message: 'Authentication required for personal notifications',
+      });
+    });
+
+    it("should reject user subscribing to another user's notifications", async () => {
+      const mockSocket = createMockSocket({ userId: 'user-1' });
+
+      await gateway.handleSubscribePersonal({ userId: 'user-2' }, mockSocket as any);
+
+      expect(mockSocket.join).not.toHaveBeenCalled();
+      expect(mockSocket.emit).toHaveBeenCalledWith('subscription:error', {
+        type: 'personal',
+        message: "Cannot subscribe to another user's notifications",
+      });
+    });
+  });
+
+  describe('handleSubscribeSafetyReports', () => {
+    it('should allow authenticated user to subscribe to safety reports', async () => {
+      const mockSocket = createMockSocket({ userId: 'mod-1' });
+
+      await gateway.handleSubscribeSafetyReports({}, mockSocket as any);
+
+      expect(mockSocket.join).toHaveBeenCalledWith('safety:reports');
+      expect(mockSocket.emit).toHaveBeenCalledWith('subscription:confirmed', {
+        type: 'safety-reports',
+        room: 'safety:reports',
+      });
+    });
+
+    it('should reject unauthenticated users', async () => {
+      const mockSocket = createMockSocket(); // No userId
+
+      await gateway.handleSubscribeSafetyReports({}, mockSocket as any);
+
+      expect(mockSocket.join).not.toHaveBeenCalled();
+      expect(mockSocket.emit).toHaveBeenCalledWith('subscription:error', {
+        type: 'safety-reports',
+        message: 'Authentication required for safety report notifications',
+      });
     });
   });
 });

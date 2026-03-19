@@ -446,14 +446,32 @@ You are receiving this email because you are a verified parent on ReasonBridge.
     request: ParentNotificationRequest,
     contact: ParentContact,
   ): Promise<void> {
-    // TODO: Implement notification logging when NotificationLog model is added
-    // For now, just log to console
-    this.logger.debug(`Logged notification ${notificationId}`, {
-      childId: request.childId,
-      type: request.type,
-      priority: request.priority,
-      parentEmail: contact.email,
-    });
+    try {
+      await this.prisma.notificationLog.create({
+        data: {
+          channel: 'EMAIL',
+          status: 'SENT',
+          recipientEmail: contact.email,
+          externalId: notificationId,
+          metadata: {
+            childId: request.childId,
+            type: request.type,
+            priority: request.priority,
+            title: request.title,
+          },
+        },
+      });
+
+      this.logger.debug(`Logged notification ${notificationId}`, {
+        childId: request.childId,
+        type: request.type,
+        priority: request.priority,
+        parentEmail: contact.email,
+      });
+    } catch (error) {
+      // Log but don't fail the notification if logging fails
+      this.logger.warn(`Failed to log notification ${notificationId}: ${error}`);
+    }
   }
 
   /**

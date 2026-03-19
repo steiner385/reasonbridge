@@ -5,12 +5,14 @@
  * Unit tests for AdminGuard
  *
  * Tests the admin authorization guard that restricts access to admin-only endpoints.
+ * AdminGuard now supports both database role checking and legacy environment variable approach.
  *
  * @see services/user-service/src/auth/guards/admin.guard.ts
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ForbiddenException, ExecutionContext } from '@nestjs/common';
+import { ForbiddenException, type ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UserRole } from '@prisma/client';
 import { AdminGuard } from '../admin.guard.js';
 
 /**
@@ -33,114 +35,179 @@ const createMockConfigService = (config: Record<string, string> = {}) => {
   } as unknown as ConfigService;
 };
 
+/**
+ * Create a mock PrismaService
+ */
+const createMockPrismaService = () => ({
+  user: {
+    findUnique: vi.fn(),
+  },
+});
+
 describe('AdminGuard', () => {
-  describe('with ADMIN_USERS configured', () => {
+  describe('with database role checking', () => {
     let guard: AdminGuard;
-    let mockConfigService: ConfigService;
+    let mockPrisma: ReturnType<typeof createMockPrismaService>;
 
     beforeEach(() => {
       vi.clearAllMocks();
-      mockConfigService = createMockConfigService({
-        ADMIN_USERS: 'admin-123,admin-456,admin-789',
+      const mockConfigService = createMockConfigService({
+        ADMIN_USERS: '',
         DEMO_MODE: 'false',
       });
-      guard = new AdminGuard(mockConfigService);
+      mockPrisma = createMockPrismaService();
+      guard = new AdminGuard(mockConfigService, mockPrisma as any);
     });
 
-    it('should allow access for admin user in ADMIN_USERS list', () => {
-      const context = createMockContext({ sub: 'admin-123', email: 'admin@example.com' });
+    it('should allow access for user with ADMIN role in database', async () => {
+      const context = createMockContext({ sub: 'user-123', email: 'admin@example.com' });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'db-user-id',
+        role: UserRole.ADMIN,
+      });
 
-      const result = guard.canActivate(context);
+      const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { cognitoSub: 'user-123' },
+        select: { id: true, role: true },
+      });
     });
 
-    it('should allow access for another admin in ADMIN_USERS list', () => {
-      const context = createMockContext({ sub: 'admin-456', email: 'admin2@example.com' });
+    it('should deny access for user with MODERATOR role', async () => {
+      const context = createMockContext({ sub: 'user-123', email: 'mod@example.com' });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'db-user-id',
+        role: UserRole.MODERATOR,
+      });
 
-      const result = guard.canActivate(context);
-
-      expect(result).toBe(true);
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow('admin privileges required');
     });
 
-    it('should deny access for non-admin user', () => {
-      const context = createMockContext({ sub: 'regular-user-123', email: 'user@example.com' });
+    it('should deny access for user with USER role', async () => {
+      const context = createMockContext({ sub: 'user-123', email: 'user@example.com' });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'db-user-id',
+        role: UserRole.USER,
+      });
 
-      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-      expect(() => guard.canActivate(context)).toThrow('admin privileges required');
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow('admin privileges required');
     });
 
-    it('should throw ForbiddenException when no user in request', () => {
+    it('should throw ForbiddenException when user not found in database', async () => {
+      const context = createMockContext({ sub: 'nonexistent-user', email: 'unknown@example.com' });
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow('user not found');
+    });
+
+    it('should throw ForbiddenException when no user in request', async () => {
       const context = createMockContext(undefined);
 
-      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-      expect(() => guard.canActivate(context)).toThrow('authentication required');
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow('authentication required');
     });
 
-    it('should throw ForbiddenException when user is null', () => {
-      const context = createMockContext(null);
+    it('should attach userId and userRole to request on success', async () => {
+      const request = { user: { sub: 'user-123', email: 'admin@example.com' } };
+      const context = {
+        switchToHttp: () => ({
+          getRequest: () => request,
+        }),
+      } as unknown as ExecutionContext;
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'db-user-id',
+        role: UserRole.ADMIN,
+      });
 
-      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
+      await guard.canActivate(context);
+
+      expect(request).toHaveProperty('userId', 'db-user-id');
+      expect(request).toHaveProperty('userRole', UserRole.ADMIN);
+    });
+  });
+
+  describe('with legacy ADMIN_USERS configured', () => {
+    let guard: AdminGuard;
+    let mockPrisma: ReturnType<typeof createMockPrismaService>;
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      const mockConfigService = createMockConfigService({
+        ADMIN_USERS: 'legacy-admin-123,legacy-admin-456',
+        DEMO_MODE: 'false',
+      });
+      mockPrisma = createMockPrismaService();
+      guard = new AdminGuard(mockConfigService, mockPrisma as any);
+    });
+
+    it('should allow access for user in legacy ADMIN_USERS list without DB lookup', async () => {
+      const context = createMockContext({ sub: 'legacy-admin-123', email: 'admin@example.com' });
+
+      const result = await guard.canActivate(context);
+
+      expect(result).toBe(true);
+      // Should not query database for legacy admins
+      expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to database check for non-legacy admin users', async () => {
+      const context = createMockContext({ sub: 'db-admin-user', email: 'admin@example.com' });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'db-user-id',
+        role: UserRole.ADMIN,
+      });
+
+      const result = await guard.canActivate(context);
+
+      expect(result).toBe(true);
+      expect(mockPrisma.user.findUnique).toHaveBeenCalled();
     });
   });
 
   describe('with DEMO_MODE enabled', () => {
     let guard: AdminGuard;
-    let mockConfigService: ConfigService;
+    let mockPrisma: ReturnType<typeof createMockPrismaService>;
 
     beforeEach(() => {
       vi.clearAllMocks();
-      mockConfigService = createMockConfigService({
-        ADMIN_USERS: 'admin-123',
+      const mockConfigService = createMockConfigService({
+        ADMIN_USERS: '',
         DEMO_MODE: 'true',
       });
-      guard = new AdminGuard(mockConfigService);
+      mockPrisma = createMockPrismaService();
+      guard = new AdminGuard(mockConfigService, mockPrisma as any);
     });
 
-    it('should allow access for demo-admin in demo mode', () => {
+    it('should allow access for demo-admin in demo mode', async () => {
       const context = createMockContext({ sub: 'demo-admin', email: 'demo-admin@example.com' });
 
-      const result = guard.canActivate(context);
+      const result = await guard.canActivate(context);
 
       expect(result).toBe(true);
+      // Should not query database for demo admin
+      expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
     });
 
-    it('should still allow access for regular admins in demo mode', () => {
-      const context = createMockContext({ sub: 'admin-123', email: 'admin@example.com' });
-
-      const result = guard.canActivate(context);
-
-      expect(result).toBe(true);
-    });
-
-    it('should deny access for non-admin users in demo mode', () => {
+    it('should still check database for non-demo-admin users in demo mode', async () => {
       const context = createMockContext({ sub: 'regular-user', email: 'user@example.com' });
-
-      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-    });
-  });
-
-  describe('without ADMIN_USERS configured', () => {
-    let guard: AdminGuard;
-    let mockConfigService: ConfigService;
-
-    beforeEach(() => {
-      vi.clearAllMocks();
-      mockConfigService = createMockConfigService({
-        DEMO_MODE: 'false',
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'db-user-id',
+        role: UserRole.USER,
       });
-      guard = new AdminGuard(mockConfigService);
-    });
 
-    it('should deny access for all users when no admins configured', () => {
-      const context = createMockContext({ sub: 'user-123', email: 'user@example.com' });
-
-      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      expect(mockPrisma.user.findUnique).toHaveBeenCalled();
     });
   });
 
-  describe('isAdmin method', () => {
+  describe('isLegacyAdmin method', () => {
     let guard: AdminGuard;
+    let mockPrisma: ReturnType<typeof createMockPrismaService>;
 
     beforeEach(() => {
       vi.clearAllMocks();
@@ -148,47 +215,22 @@ describe('AdminGuard', () => {
         ADMIN_USERS: 'admin-1,admin-2',
         DEMO_MODE: 'true',
       });
-      guard = new AdminGuard(mockConfigService);
+      mockPrisma = createMockPrismaService();
+      guard = new AdminGuard(mockConfigService, mockPrisma as any);
     });
 
-    it('should return true for configured admin', () => {
-      expect(guard.isAdmin('admin-1')).toBe(true);
-      expect(guard.isAdmin('admin-2')).toBe(true);
+    it('should return true for configured legacy admin', () => {
+      expect(guard.isLegacyAdmin('admin-1')).toBe(true);
+      expect(guard.isLegacyAdmin('admin-2')).toBe(true);
     });
 
     it('should return true for demo-admin in demo mode', () => {
-      expect(guard.isAdmin('demo-admin')).toBe(true);
+      expect(guard.isLegacyAdmin('demo-admin')).toBe(true);
     });
 
-    it('should return false for non-admin', () => {
-      expect(guard.isAdmin('random-user')).toBe(false);
-      expect(guard.isAdmin('')).toBe(false);
-    });
-  });
-
-  describe('ADMIN_USERS parsing', () => {
-    it('should handle whitespace in ADMIN_USERS list', () => {
-      const mockConfigService = createMockConfigService({
-        ADMIN_USERS: ' admin-1 , admin-2 , admin-3 ',
-        DEMO_MODE: 'false',
-      });
-      const guard = new AdminGuard(mockConfigService);
-
-      expect(guard.isAdmin('admin-1')).toBe(true);
-      expect(guard.isAdmin('admin-2')).toBe(true);
-      expect(guard.isAdmin('admin-3')).toBe(true);
-    });
-
-    it('should handle empty entries in ADMIN_USERS list', () => {
-      const mockConfigService = createMockConfigService({
-        ADMIN_USERS: 'admin-1,,admin-2,',
-        DEMO_MODE: 'false',
-      });
-      const guard = new AdminGuard(mockConfigService);
-
-      expect(guard.isAdmin('admin-1')).toBe(true);
-      expect(guard.isAdmin('admin-2')).toBe(true);
-      expect(guard.isAdmin('')).toBe(false);
+    it('should return false for non-legacy admin', () => {
+      expect(guard.isLegacyAdmin('random-user')).toBe(false);
+      expect(guard.isLegacyAdmin('')).toBe(false);
     });
   });
 });

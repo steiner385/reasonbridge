@@ -44,3 +44,9 @@ export type {
   PrivacyMessageProps,
 } from './useCanViewSection';
 export { useRequireAuth } from './useRequireAuth';
+export { useKeyboardNavigation, DEFAULT_SHORTCUTS } from './useKeyboardNavigation';
+export type {
+  KeyboardShortcut,
+  UseKeyboardNavigationOptions,
+  UseKeyboardNavigationReturn,
+} from './useKeyboardNavigation';

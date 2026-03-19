@@ -13,7 +13,7 @@ import {
   type OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, Injectable, Optional } from '@nestjs/common';
 import type {
   CommonGroundGeneratedEvent,
   CommonGroundUpdatedEvent,
@@ -23,11 +23,26 @@ import type {
   UserTrustUpdatedEvent,
   SafetyReportCreatedEvent,
 } from '@reason-bridge/event-schemas/moderation';
+import { JwtVerificationService, type JwtPayload } from '../auth/jwt-verification.service.js';
+
+/**
+ * Extended Socket interface with user data from JWT validation
+ */
+interface AuthenticatedSocket extends Socket {
+  user?: JwtPayload;
+  userId?: string;
+}
 
 /**
  * WebSocket Gateway for real-time notifications
  * Handles Socket.io connections and broadcasts events to subscribed clients
+ *
+ * @remarks
+ * All connections are authenticated via JWT from the handshake auth object.
+ * Unauthenticated connections are allowed but limited to public subscriptions.
+ * Authenticated connections have access to personalized notifications.
  */
+@Injectable()
 @WebSocketGateway({
   cors: {
     origin: process.env['FRONTEND_URL'] || 'http://localhost:5173',
@@ -41,15 +56,50 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
   private readonly logger = new Logger(NotificationGateway.name);
 
+  constructor(@Optional() private readonly jwtVerificationService?: JwtVerificationService) {}
+
   /**
    * Handle new WebSocket connections
+   * Validates JWT from handshake auth and attaches user info to socket
    */
-  handleConnection(client: Socket): void {
+  async handleConnection(client: AuthenticatedSocket): Promise<void> {
     this.logger.log(`Client connected: ${client.id}`);
 
-    // TODO: Add authentication validation using JWT from handshake
-    // const token = client.handshake.auth.token;
-    // Validate token and attach userId to socket
+    // Extract token from handshake auth
+    const token = client.handshake.auth?.['token'] as string | undefined;
+
+    if (token && this.jwtVerificationService) {
+      try {
+        const payload = await this.jwtVerificationService.verifyToken(token);
+
+        if (payload) {
+          // Attach user info to socket for use in subscription handlers
+          client.user = payload;
+          client.userId = payload.userId ?? payload.sub;
+          this.logger.log(`Client ${client.id} authenticated as user ${client.userId}`);
+
+          // Emit authentication success
+          client.emit('auth:success', {
+            userId: client.userId,
+            message: 'Authentication successful',
+          });
+        } else {
+          this.logger.warn(`Client ${client.id} provided invalid token`);
+          client.emit('auth:failed', {
+            message: 'Invalid or expired token',
+          });
+          // Don't disconnect - allow unauthenticated access to public subscriptions
+        }
+      } catch (error) {
+        this.logger.error(`Error validating token for client ${client.id}:`, error);
+        client.emit('auth:failed', {
+          message: 'Token validation error',
+        });
+      }
+    } else if (!token) {
+      this.logger.debug(`Client ${client.id} connected without authentication token`);
+      // Allow unauthenticated connections for public subscriptions (e.g., topic updates)
+    }
   }
 
   /**
@@ -156,16 +206,32 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
   /**
    * Subscribe to moderation action updates
+   * Requires authentication - moderators and admins only
    */
   @SubscribeMessage('subscribe:moderation')
   async handleSubscribeModeration(
-    @MessageBody() data: Record<string, any>,
-    @ConnectedSocket() client: Socket,
+    @MessageBody() _data: Record<string, any>,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ): Promise<void> {
+    // Require authentication for moderation updates
+    if (!client.userId) {
+      this.logger.warn(
+        `Client ${client.id} attempted to subscribe to moderation updates without authentication`,
+      );
+      client.emit('subscription:error', {
+        type: 'moderation',
+        message: 'Authentication required for moderation updates',
+      });
+      return;
+    }
+
+    // Note: Role-based authorization should be checked here
+    // For now, we allow all authenticated users (role check can be added later with Prisma lookup)
+
     const room = 'moderation:actions';
 
     await client.join(room);
-    this.logger.log(`Client ${client.id} subscribed to moderation updates`);
+    this.logger.log(`Client ${client.id} (user ${client.userId}) subscribed to moderation updates`);
 
     client.emit('subscription:confirmed', {
       type: 'moderation',
@@ -282,14 +348,39 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
   /**
    * Subscribe to personal notifications for a specific user
-   * Clients should call this after authenticating to receive follow notifications, etc.
+   * Requires authentication - only allows subscription to the authenticated user's own notifications
    */
   @SubscribeMessage('subscribe:personal')
   async handleSubscribePersonal(
     @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ): Promise<void> {
     const { userId } = data;
+
+    // Require authentication for personal notifications
+    if (!client.userId) {
+      this.logger.warn(
+        `Client ${client.id} attempted to subscribe to personal notifications without authentication`,
+      );
+      client.emit('subscription:error', {
+        type: 'personal',
+        message: 'Authentication required for personal notifications',
+      });
+      return;
+    }
+
+    // Ensure users can only subscribe to their own notifications
+    if (client.userId !== userId) {
+      this.logger.warn(
+        `Client ${client.id} (user ${client.userId}) attempted to subscribe to notifications for different user ${userId}`,
+      );
+      client.emit('subscription:error', {
+        type: 'personal',
+        message: "Cannot subscribe to another user's notifications",
+      });
+      return;
+    }
+
     const room = `user:${userId}:notifications`;
 
     await client.join(room);
@@ -343,16 +434,34 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   /**
    * Subscribe to safety report notifications (for moderators)
    * Used to receive real-time alerts when children submit panic button reports
+   * Requires authentication - should be limited to moderators/admins
    */
   @SubscribeMessage('subscribe:safety-reports')
   async handleSubscribeSafetyReports(
     @MessageBody() _data: Record<string, unknown>,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ): Promise<void> {
+    // Require authentication for safety report notifications
+    if (!client.userId) {
+      this.logger.warn(
+        `Client ${client.id} attempted to subscribe to safety reports without authentication`,
+      );
+      client.emit('subscription:error', {
+        type: 'safety-reports',
+        message: 'Authentication required for safety report notifications',
+      });
+      return;
+    }
+
+    // Note: Role-based authorization should be checked here (MODERATOR or ADMIN)
+    // For now, we allow all authenticated users (role check can be added later with Prisma lookup)
+
     const room = 'safety:reports';
 
     await client.join(room);
-    this.logger.log(`Client ${client.id} subscribed to safety report notifications`);
+    this.logger.log(
+      `Client ${client.id} (user ${client.userId}) subscribed to safety report notifications`,
+    );
 
     client.emit('subscription:confirmed', {
       type: 'safety-reports',

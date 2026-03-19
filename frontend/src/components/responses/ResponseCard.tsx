@@ -6,6 +6,7 @@
 import React from 'react';
 import Card, { CardHeader, CardBody, CardFooter } from '../ui/Card';
 import { Tooltip } from '../ui/Tooltip';
+import MarkdownRenderer from '../ui/MarkdownRenderer';
 import { useAuthContext } from '../../contexts/AuthContext';
 import type { Response } from '../../types/response';
 import { getResponseStatusDescription } from '../../lib/statusDescriptions';
@@ -137,9 +138,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
       </CardHeader>
 
       <CardBody>
-        <div className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
-          {displayContent}
-        </div>
+        <MarkdownRenderer content={displayContent} className="prose-sm" />
 
         {isTruncated && (
           <button

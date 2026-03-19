@@ -63,3 +63,16 @@ export type { TooltipProps } from './Tooltip';
 
 export { InfoIcon } from './InfoIcon';
 export type { InfoIconProps } from './InfoIcon';
+
+export { default as MarkdownRenderer } from './MarkdownRenderer';
+export type { MarkdownRendererProps } from './MarkdownRenderer';
+
+export { default as KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
+export type {
+  KeyboardShortcutsHelpProps,
+  KeyboardShortcut as KeyboardShortcutDisplay,
+  ShortcutCategory,
+} from './KeyboardShortcutsHelp';
+
+export { default as CommandPalette } from './CommandPalette';
+export type { CommandPaletteProps, CommandItem } from './CommandPalette';

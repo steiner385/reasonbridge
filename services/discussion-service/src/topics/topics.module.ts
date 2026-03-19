@@ -38,6 +38,6 @@ import { PropositionsModule } from '../propositions/propositions.module.js';
     TopicsEditService,
     TopicsAnalyticsService,
   ],
-  exports: [TopicsService, TopicDraftsService, TopicLinksService],
+  exports: [TopicsService, TopicDraftsService, TopicLinksService, TopicsSearchService],
 })
 export class TopicsModule {}
