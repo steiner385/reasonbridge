@@ -63,3 +63,6 @@ export type { TooltipProps } from './Tooltip';
 
 export { InfoIcon } from './InfoIcon';
 export type { InfoIconProps } from './InfoIcon';
+
+export { default as MarkdownRenderer } from './MarkdownRenderer';
+export type { MarkdownRendererProps } from './MarkdownRenderer';

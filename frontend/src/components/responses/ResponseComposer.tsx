@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import MarkdownRenderer from '../ui/MarkdownRenderer';
 import { PreviewFeedbackPanel } from '../feedback';
 import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
 import { useTypingIndicator } from '../../hooks/useTypingIndicator';
@@ -105,6 +106,7 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const [containsFactualClaims, setContainsFactualClaims] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPendingReviewMessage, setShowPendingReviewMessage] = useState(false);
+  const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
 
   const { user } = useAuthContext();
   const isMinor = user?.isMinor ?? false;
@@ -227,6 +229,35 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
   const characterCount = content.length;
   const isValid = characterCount >= minLength && characterCount <= maxLength;
 
+  /**
+   * Insert markdown formatting at the cursor position
+   */
+  const insertMarkdown = useCallback(
+    (prefix: string, suffix: string = '', placeholder: string = '') => {
+      // Get the textarea element to access selection
+      const textarea = document.getElementById('response-content') as HTMLTextAreaElement | null;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = content.substring(start, end);
+      const textToInsert = selectedText || placeholder;
+
+      const newContent =
+        content.substring(0, start) + prefix + textToInsert + suffix + content.substring(end);
+
+      setContent(newContent);
+
+      // Set cursor position after the operation
+      setTimeout(() => {
+        const newCursorPos = start + prefix.length + textToInsert.length + suffix.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        textarea.focus();
+      }, 0);
+    },
+    [content],
+  );
+
   return (
     <div className="space-y-4">
       {/* Pending Review Message for Minor Users */}
@@ -237,13 +268,148 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="response-content"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+          <div className="flex items-center justify-between mb-1.5">
+            <label
+              htmlFor="response-content"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Your Response
+              <span className="text-fallacy-DEFAULT ml-1">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowMarkdownPreview(!showMarkdownPreview)}
+              className={`text-xs px-2 py-1 rounded transition-colors ${
+                showMarkdownPreview
+                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+              aria-pressed={showMarkdownPreview}
+              data-testid="preview-toggle"
+            >
+              {showMarkdownPreview ? 'Hide Preview' : 'Show Preview'}
+            </button>
+          </div>
+
+          {/* Markdown Formatting Toolbar */}
+          <div
+            className="flex flex-wrap gap-1 mb-2 pb-2 border-b border-gray-200 dark:border-gray-700"
+            role="toolbar"
+            aria-label="Markdown formatting"
+            data-testid="markdown-toolbar"
           >
-            Your Response
-            <span className="text-fallacy-DEFAULT ml-1">*</span>
-          </label>
+            <button
+              type="button"
+              onClick={() => insertMarkdown('**', '**', 'bold')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Bold (Ctrl+B)"
+              aria-label="Bold"
+              data-testid="toolbar-bold"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 4a1 1 0 011-1h5a4 4 0 014 4 4 4 0 01-1.5 3.12A4.5 4.5 0 0114 14.5 4.5 4.5 0 019.5 19H5a1 1 0 01-1-1V4zm3 5h2a2 2 0 100-4H7v4zm0 2v4h2.5a2.5 2.5 0 100-5H7z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => insertMarkdown('*', '*', 'italic')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Italic (Ctrl+I)"
+              aria-label="Italic"
+              data-testid="toolbar-italic"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h6a1 1 0 110 2h-2.28l-2.38 12H12a1 1 0 110 2H6a1 1 0 110-2h2.28l2.38-12H9a1 1 0 01-1-1z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => insertMarkdown('[', '](url)', 'link text')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Insert Link"
+              aria-label="Insert Link"
+              data-testid="toolbar-link"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                />
+              </svg>
+            </button>
+            <div className="w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+            <button
+              type="button"
+              onClick={() => insertMarkdown('`', '`', 'code')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Inline Code"
+              aria-label="Inline Code"
+              data-testid="toolbar-code"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => insertMarkdown('> ', '', 'quote')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Blockquote"
+              aria-label="Blockquote"
+              data-testid="toolbar-quote"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586l-4.707-4.707A1 1 0 013 6V3zm2 2v.586l4.707 4.707A1 1 0 0110 11v4.586l1-1V11a1 1 0 01.293-.707L16 5.586V5H5z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            <div className="w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+            <button
+              type="button"
+              onClick={() => insertMarkdown('- ', '', 'list item')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Bullet List"
+              aria-label="Bullet List"
+              data-testid="toolbar-bullet-list"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => insertMarkdown('1. ', '', 'list item')}
+              className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              title="Numbered List"
+              aria-label="Numbered List"
+              data-testid="toolbar-numbered-list"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                />
+              </svg>
+            </button>
+          </div>
+
           <MentionInput
             id="response-content"
             value={content}
@@ -278,7 +444,23 @@ const ResponseComposer: React.FC<ResponseComposerProps> = ({
               {characterCount} / {maxLength} characters
               {characterCount < minLength && characterCount > 0 && ` (minimum ${minLength})`}
             </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              Supports Markdown formatting
+            </span>
           </div>
+
+          {/* Live Markdown Preview */}
+          {showMarkdownPreview && content.length > 0 && (
+            <div
+              className="mt-3 p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg"
+              data-testid="markdown-preview"
+            >
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                Preview
+              </div>
+              <MarkdownRenderer content={content} className="prose-sm max-w-none" />
+            </div>
+          )}
 
           {/* Hybrid Preview Feedback - shows when content >= 20 chars */}
           {characterCount >= 20 && (
