@@ -1270,6 +1270,211 @@ export class TopicsService implements OnModuleInit {
   }
 
   /**
+   * Add a tag to a topic (from AI suggestion or community)
+   * Feature: AI Suggestion Actions (#1054)
+   *
+   * @param topicId - ID of the topic
+   * @param userId - ID of the user adding the tag
+   * @param tagName - Name of the tag to add
+   * @param source - Source of the tag (AI_SUGGESTED or COMMUNITY)
+   * @returns Added tag information
+   */
+  async addTagToTopic(
+    topicId: string,
+    userId: string,
+    tagName: string,
+    source: 'AI_SUGGESTED' | 'COMMUNITY' = 'AI_SUGGESTED',
+  ): Promise<{ id: string; name: string; slug: string }> {
+    // Step 1: Verify topic exists
+    const topic = await this.prisma.discussionTopic.findUnique({
+      where: { id: topicId },
+      select: { id: true, status: true },
+    });
+
+    if (!topic) {
+      throw new NotFoundException(`Topic with ID ${topicId} not found`);
+    }
+
+    // Step 2: Don't allow adding tags to archived/locked topics
+    if (topic.status === 'ARCHIVED' || topic.status === 'LOCKED') {
+      throw new BadRequestException(`Cannot add tags to ${topic.status.toLowerCase()} topics`);
+    }
+
+    // Step 3: Normalize and find/create tag
+    const normalizedName = tagName.trim().toLowerCase();
+    const tagSlug = normalizedName.replace(/\s+/g, '-');
+
+    let tag = await this.prisma.tag.findFirst({
+      where: {
+        OR: [{ name: { equals: normalizedName, mode: 'insensitive' } }, { slug: tagSlug }],
+      },
+    });
+
+    if (!tag) {
+      tag = await this.prisma.tag.create({
+        data: {
+          name: normalizedName,
+          slug: tagSlug,
+          usageCount: 1,
+          aiSynonyms: [],
+        },
+      });
+    }
+
+    // Step 4: Check if tag already exists on topic
+    const existingTopicTag = await this.prisma.topicTag.findUnique({
+      where: {
+        topicId_tagId: {
+          topicId,
+          tagId: tag.id,
+        },
+      },
+    });
+
+    if (existingTopicTag) {
+      throw new ConflictException('Tag already exists on this topic');
+    }
+
+    // Step 5: Create topic-tag association
+    await this.prisma.topicTag.create({
+      data: {
+        topicId,
+        tagId: tag.id,
+        source,
+      },
+    });
+
+    // Step 6: Increment tag usage count
+    await this.prisma.tag.update({
+      where: { id: tag.id },
+      data: { usageCount: { increment: 1 } },
+    });
+
+    // Step 7: Track suggestion acceptance for AI feedback loop
+    // TODO: Add 'AI_SUGGESTION_ACCEPTED' to ActivityType enum in activity-client.service.ts
+    // For now, we track this through the TopicTag.source field
+    // Future: this.activityClient.createEvent({ userId, activityType: 'AI_SUGGESTION_ACCEPTED', ... })
+    if (source === 'AI_SUGGESTED') {
+      // The TopicTag record with source='AI_SUGGESTED' provides the audit trail
+      // This can be queried for AI feedback: SELECT * FROM topic_tags WHERE source = 'AI_SUGGESTED'
+    }
+
+    // Step 8: Invalidate caches
+    await this.cacheManager?.del('topics:list');
+
+    return {
+      id: tag.id,
+      name: tag.name,
+      slug: tag.slug,
+    };
+  }
+
+  /**
+   * Create a link between two topics
+   * Feature: AI Suggestion Actions (#1054)
+   *
+   * @param sourceTopicId - ID of the source topic
+   * @param userId - ID of the user creating the link
+   * @param targetTopicId - ID of the target topic to link to
+   * @param relationshipType - Type of relationship
+   * @param linkSource - Source of the link (AI_SUGGESTED or USER_PROPOSED)
+   * @returns Created topic link
+   */
+  async createTopicLink(
+    sourceTopicId: string,
+    userId: string,
+    targetTopicId: string,
+    relationshipType:
+      | 'BUILDS_ON'
+      | 'RESPONDS_TO'
+      | 'CONTRADICTS'
+      | 'RELATED'
+      | 'SHARES_PROPOSITION',
+    linkSource: 'AI_SUGGESTED' | 'USER_PROPOSED' = 'AI_SUGGESTED',
+  ): Promise<{
+    id: string;
+    sourceTopicId: string;
+    targetTopicId: string;
+    relationshipType: string;
+    linkSource: string;
+  }> {
+    // Step 1: Verify source topic exists
+    const sourceTopic = await this.prisma.discussionTopic.findUnique({
+      where: { id: sourceTopicId },
+      select: { id: true, status: true, title: true },
+    });
+
+    if (!sourceTopic) {
+      throw new NotFoundException(`Source topic with ID ${sourceTopicId} not found`);
+    }
+
+    // Step 2: Verify target topic exists
+    const targetTopic = await this.prisma.discussionTopic.findUnique({
+      where: { id: targetTopicId },
+      select: { id: true, title: true },
+    });
+
+    if (!targetTopic) {
+      throw new NotFoundException(`Target topic with ID ${targetTopicId} not found`);
+    }
+
+    // Step 3: Prevent self-linking
+    if (sourceTopicId === targetTopicId) {
+      throw new BadRequestException('Cannot link a topic to itself');
+    }
+
+    // Step 4: Don't allow linking from archived/locked topics
+    if (sourceTopic.status === 'ARCHIVED' || sourceTopic.status === 'LOCKED') {
+      throw new BadRequestException(
+        `Cannot create links from ${sourceTopic.status.toLowerCase()} topics`,
+      );
+    }
+
+    // Step 5: Check for existing link with same relationship type
+    const existingLink = await this.prisma.topicLink.findUnique({
+      where: {
+        sourceTopicId_targetTopicId_relationshipType: {
+          sourceTopicId,
+          targetTopicId,
+          relationshipType,
+        },
+      },
+    });
+
+    if (existingLink) {
+      throw new ConflictException('A link with this relationship type already exists');
+    }
+
+    // Step 6: Create the link
+    const link = await this.prisma.topicLink.create({
+      data: {
+        sourceTopicId,
+        targetTopicId,
+        relationshipType,
+        linkSource,
+        proposerId: userId,
+        confirmationStatus: 'PENDING',
+      },
+    });
+
+    // Step 7: Track suggestion acceptance for AI feedback loop
+    // TODO: Add 'AI_SUGGESTION_ACCEPTED' to ActivityType enum in activity-client.service.ts
+    // For now, we track this through the TopicLink.linkSource field
+    if (linkSource === 'AI_SUGGESTED') {
+      // The TopicLink record with linkSource='AI_SUGGESTED' provides the audit trail
+      // This can be queried for AI feedback: SELECT * FROM topic_links WHERE link_source = 'AI_SUGGESTED'
+    }
+
+    return {
+      id: link.id,
+      sourceTopicId: link.sourceTopicId,
+      targetTopicId: link.targetTopicId,
+      relationshipType: link.relationshipType,
+      linkSource: link.linkSource,
+    };
+  }
+
+  /**
    * Get dynamic stats for multiple topics (participant count and response count)
    * Calculates counts from responses rather than using stored columns
    *
