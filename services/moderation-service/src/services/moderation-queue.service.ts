@@ -76,11 +76,10 @@ export class ModerationQueueService {
       items.push(...appeals);
     }
 
-    // Reports will be added once the Report model is implemented
-    // if (!type || type === 'report') {
-    //   const reports = await this.getPendingReports(priority, pageSize, cursor);
-    //   items.push(...reports);
-    // }
+    if (!type || type === 'report') {
+      const reports = await this.getPendingReports(priority, pageSize, cursor);
+      items.push(...reports);
+    }
 
     // Sort items by priority and creation time
     const sortedItems = this.sortQueueItems(items).slice(0, pageSize);
@@ -93,9 +92,9 @@ export class ModerationQueueService {
     if (!type || type === 'appeal') {
       totalCount += await this.countPendingAppeals();
     }
-    // if (!type || type === 'report') {
-    //   totalCount += await this.countPendingReports();
-    // }
+    if (!type || type === 'report') {
+      totalCount += await this.countPendingReports();
+    }
 
     return {
       items: sortedItems,
@@ -107,17 +106,17 @@ export class ModerationQueueService {
    * Get queue statistics including counts and resolution metrics
    */
   async getQueueStats(): Promise<QueueStats> {
-    const [pendingActions, pendingAppeals, metrics] = await Promise.all([
+    const [pendingActions, pendingAppeals, pendingReports, metrics] = await Promise.all([
       this.countPendingActions(),
       this.countPendingAppeals(),
-      // this.countPendingReports(), // TODO: add when Report model is implemented
+      this.countPendingReports(),
       this.calculateMetrics(),
     ]);
 
     return {
       pendingActions,
       pendingAppeals,
-      pendingReports: 0, // TODO: update when Report model is implemented
+      pendingReports,
       avgResolutionTimeMinutes: metrics.avgResolutionTimeMinutes,
       oldestItemAge: metrics.oldestItemAge,
     };
@@ -180,32 +179,31 @@ export class ModerationQueueService {
     }));
   }
 
-  // /**
-  //  * Get pending reports (from users)
-  //  * TODO: Implement when Report model is added to Prisma schema
-  //  */
-  // private async getPendingReports(
-  //   priority?: string,
-  //   limit: number = 20,
-  //   cursor?: string,
-  // ): Promise<QueueItem[]> {
-  //   const reports = await this.prisma.report.findMany({
-  //     where: {
-  //       status: 'PENDING',
-  //     },
-  //     orderBy: [{ createdAt: 'asc' }],
-  //     take: limit,
-  //     ...(cursor && { skip: 1, cursor: { id: cursor } }),
-  //   });
-  //
-  //   return reports.map((report) => ({
-  //     type: 'report' as const,
-  //     id: report.id,
-  //     priority: this.calculateReportPriority(report),
-  //     waitTime: this.calculateWaitTime(report.createdAt),
-  //     summary: `Report: ${report.reason.substring(0, 30)}...`,
-  //   }));
-  // }
+  /**
+   * Get pending reports (from users)
+   */
+  private async getPendingReports(
+    _priority?: string,
+    limit: number = 20,
+    cursor?: string,
+  ): Promise<QueueItem[]> {
+    const reports = await this.prisma.report.findMany({
+      where: {
+        status: 'PENDING',
+      },
+      orderBy: [{ createdAt: 'asc' }],
+      take: limit,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    return reports.map((report) => ({
+      type: 'report' as const,
+      id: report.id,
+      priority: this.calculateReportPriority(report),
+      waitTime: this.calculateWaitTime(report.createdAt),
+      summary: `Report: ${report.category} on ${report.contentType} ${report.contentId.substring(0, 8)}`,
+    }));
+  }
 
   /**
    * Count pending moderation actions
@@ -229,15 +227,14 @@ export class ModerationQueueService {
     });
   }
 
-  // /**
-  //  * Count pending reports
-  //  * TODO: Implement when Report model is added
-  //  */
-  // private async countPendingReports(): Promise<number> {
-  //   return this.prisma.report.count({
-  //     where: { status: 'PENDING' },
-  //   });
-  // }
+  /**
+   * Count pending reports
+   */
+  private async countPendingReports(): Promise<number> {
+    return this.prisma.report.count({
+      where: { status: 'PENDING' },
+    });
+  }
 
   /**
    * Calculate priority for a moderation action
@@ -268,19 +265,25 @@ export class ModerationQueueService {
     return 'normal';
   }
 
-  // /**
-  //  * Calculate priority for a report
-  //  * TODO: Use when Report model is implemented
-  //  */
-  // private calculateReportPriority(report: any): 'high' | 'normal' | 'low' {
-  //   // High priority: reports of severe violations
-  //   if (report.reason && report.reason.toLowerCase().includes('violence')) {
-  //     return 'high';
-  //   }
-  //
-  //   // Normal priority: default
-  //   return 'normal';
-  // }
+  /**
+   * Calculate priority for a report
+   */
+  private calculateReportPriority(report: any): 'high' | 'normal' | 'low' {
+    // High priority: severe violation categories
+    const highPriorityCategories = ['VIOLENCE', 'HATE_SPEECH', 'HARASSMENT'];
+    if (highPriorityCategories.includes(report.category)) {
+      return 'high';
+    }
+
+    // Normal priority: moderate violations
+    const normalPriorityCategories = ['MISINFORMATION', 'COPYRIGHT'];
+    if (normalPriorityCategories.includes(report.category)) {
+      return 'normal';
+    }
+
+    // Low priority: spam and other
+    return 'low';
+  }
 
   /**
    * Calculate wait time as ISO 8601 duration
@@ -384,13 +387,12 @@ export class ModerationQueueService {
       orderBy: { createdAt: 'asc' },
     });
 
-    // TODO: Add oldestReport once Report model is implemented
-    // const oldestReport = await this.prisma.report.findFirst({
-    //   where: { status: 'PENDING' },
-    //   orderBy: { createdAt: 'asc' },
-    // });
+    const oldestReport = await this.prisma.report.findFirst({
+      where: { status: 'PENDING' },
+      orderBy: { createdAt: 'asc' },
+    });
 
-    const oldestItems = [oldestAction, oldestAppeal].filter(Boolean);
+    const oldestItems = [oldestAction, oldestAppeal, oldestReport].filter(Boolean);
     if (oldestItems.length > 0) {
       const oldest = oldestItems.reduce((min, item) => {
         return (min?.createdAt || new Date()).getTime() > (item?.createdAt || new Date()).getTime()

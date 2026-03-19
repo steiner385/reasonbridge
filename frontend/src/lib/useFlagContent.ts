@@ -5,10 +5,19 @@
 
 /**
  * Hook for flagging content via the moderation API
+ *
+ * Uses the /moderation/reports endpoint (Issue #1046)
  */
 
 import { useState } from 'react';
-import type { FlagContentRequest, FlagContentResponse } from '../types/moderation';
+import type {
+  FlagContentRequest,
+  FlagContentResponse,
+  FlagCategory,
+  Report,
+  ReportCategory,
+  ReportContentType,
+} from '../types/moderation';
 import { apiClient } from './api';
 
 export interface UseFlagContentState {
@@ -22,6 +31,35 @@ export interface UseFlagContentState {
 export interface UseFlagContentResult extends UseFlagContentState {
   flagContent: (request: FlagContentRequest) => Promise<FlagContentResponse>;
   reset: () => void;
+}
+
+/**
+ * Map frontend FlagCategory to backend ReportCategory
+ */
+function mapCategoryToReportCategory(category: FlagCategory): ReportCategory {
+  const mapping: Record<FlagCategory, ReportCategory> = {
+    inappropriate: 'OTHER',
+    spam: 'SPAM',
+    misinformation: 'MISINFORMATION',
+    harassment: 'HARASSMENT',
+    'hate-speech': 'HATE_SPEECH',
+    violence: 'VIOLENCE',
+    copyright: 'COPYRIGHT',
+    privacy: 'OTHER', // No direct mapping, use OTHER
+    other: 'OTHER',
+  };
+  return mapping[category] || 'OTHER';
+}
+
+/**
+ * Map frontend content type to backend ReportContentType
+ */
+function mapContentType(contentType: FlagContentRequest['contentType']): ReportContentType {
+  // 'comment' and 'other' map to 'response' in the backend
+  if (contentType === 'comment' || contentType === 'other') {
+    return 'response';
+  }
+  return contentType as ReportContentType;
 }
 
 /**
@@ -43,12 +81,26 @@ export function useFlagContent(): UseFlagContentResult {
     setFlagId(null);
 
     try {
-      const response = await apiClient.post<FlagContentResponse>('/moderation/flag', request);
+      // Build report request for new /moderation/reports endpoint
+      const reportRequest = {
+        contentType: mapContentType(request.contentType),
+        contentId: request.contentId,
+        category: mapCategoryToReportCategory(request.category),
+        description: request.description || request.reason,
+      };
+
+      const report = await apiClient.post<Report>('/moderation/reports', reportRequest);
 
       setIsSuccess(true);
-      setFlagId(response.flagId);
+      setFlagId(report.id);
 
-      return response;
+      // Return legacy FlagContentResponse shape for backwards compatibility
+      return {
+        flagId: report.id,
+        status: report.status === 'PENDING' ? 'submitted' : 'processing',
+        createdAt: report.createdAt,
+        message: 'Report submitted successfully',
+      };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to flag content';
       setIsError(true);
