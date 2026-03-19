@@ -5,6 +5,7 @@
 
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { AiClientService } from '../clients/ai-client.service.js';
 
 /**
  * Interface for duplicate topic suggestions
@@ -30,7 +31,10 @@ export interface DuplicateSuggestion {
 export class TopicsSearchService {
   private readonly logger = new Logger(TopicsSearchService.name);
 
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    private readonly aiClient: AiClientService,
+  ) {}
 
   /**
    * Full-text search using PostgreSQL tsvector
@@ -149,22 +153,44 @@ export class TopicsSearchService {
       return [];
     }
 
-    // Step 2: For borderline cases (0.7-0.8 similarity), use semantic check
-    // This is where we would integrate AI embeddings for semantic similarity
-    // For now, return trigram results (semantic matching is TODO for AI service integration)
+    // Step 2: For borderline cases (0.7-0.8 similarity), use semantic analysis
     const borderlineCases = trigramMatches.filter(
       (match) => match.similarityScore >= 0.7 && match.similarityScore < 0.8,
     );
 
     if (borderlineCases.length > 0) {
       this.logger.debug(
-        `Found ${borderlineCases.length} borderline cases that could benefit from semantic analysis`,
+        `Found ${borderlineCases.length} borderline cases - applying semantic analysis`,
       );
-      // TODO: Call AI service for semantic similarity on borderline cases
-      // const semanticScores = await this.aiService.compareSimilarity(description, borderlineCases);
+
+      // Convert to AI client format and analyze
+      const candidates = trigramMatches.map((match) => ({
+        id: match.id,
+        title: match.title,
+        description: match.description,
+        trigramScore: match.similarityScore,
+      }));
+
+      const semanticResult = await this.aiClient.analyzeDuplicates(title, description, candidates);
+
+      // Map semantic results back to DuplicateSuggestion format
+      const enhancedMatches: DuplicateSuggestion[] = semanticResult.results.map((result) => ({
+        id: result.id,
+        title: result.title,
+        description: result.description,
+        similarityScore: result.combinedScore,
+        matchType: result.matchType,
+      }));
+
+      this.logger.log(
+        `Semantic analysis complete (${semanticResult.analysisMethod}): ` +
+          `${enhancedMatches.length} matches, top score: ${enhancedMatches[0]?.similarityScore ?? 0}`,
+      );
+
+      return enhancedMatches;
     }
 
-    // Return all matches sorted by similarity score
+    // No borderline cases - return trigram results sorted by score
     const sortedMatches = trigramMatches.sort((a, b) => b.similarityScore - a.similarityScore);
 
     this.logger.log(
