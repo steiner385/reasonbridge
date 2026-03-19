@@ -4,11 +4,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
-
-// TODO: Add @Cron decorator when @nestjs/schedule is installed
-// import { Cron, CronExpression } from '@nestjs/schedule';
-// @Cron(CronExpression.EVERY_DAY_AT_3AM)
 
 /**
  * Scheduled job for annual age re-verification of minor users
@@ -44,6 +41,7 @@ export class AgeReverificationJob {
    * 2. Flags them for re-verification (requiresAgeReverification = true)
    * 3. Users will be prompted to re-verify on their next login
    */
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleCron(): Promise<void> {
     this.logger.log('Starting age re-verification check...');
 

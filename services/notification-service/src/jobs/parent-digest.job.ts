@@ -4,12 +4,10 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
 import { generateParentDigestEmail } from '../templates/index.js';
-
-// TODO: Enable @nestjs/schedule when dependency is added
-// import { Cron } from '@nestjs/schedule';
 
 /**
  * Data required for a child's activity summary in the parent digest.
@@ -82,7 +80,7 @@ export class ParentDigestJob {
    * - Month: * (any)
    * - Day of week: 0 (Sunday)
    */
-  // @Cron('0 9 * * 0')
+  @Cron('0 9 * * 0')
   async handleCron(): Promise<void> {
     this.logger.log('Starting weekly parent digest job...');
 
