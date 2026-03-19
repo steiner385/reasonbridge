@@ -4,6 +4,7 @@
  */
 
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { SlaMonitorJob } from './sla-monitor.job.js';
 
@@ -13,19 +14,9 @@ import { SlaMonitorJob } from './sla-monitor.job.js';
  * @remarks
  * Contains cron jobs that run on a schedule:
  * - SlaMonitorJob: SLA compliance checks every 5 minutes
- *
- * TODO: Enable @nestjs/schedule when dependency is added:
- * ```typescript
- * import { ScheduleModule } from '@nestjs/schedule';
- *
- * @Module({
- *   imports: [ScheduleModule.forRoot(), PrismaModule],
- *   ...
- * })
- * ```
  */
 @Module({
-  imports: [PrismaModule],
+  imports: [ScheduleModule.forRoot(), PrismaModule],
   providers: [SlaMonitorJob],
   exports: [SlaMonitorJob],
 })

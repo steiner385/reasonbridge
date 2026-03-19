@@ -4,11 +4,9 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { ReviewPriority, ChildReviewStatus } from '@prisma/client';
-
-// TODO: Enable @nestjs/schedule when dependency is added
-// import { Cron } from '@nestjs/schedule';
 
 /**
  * SLA time limits in minutes for each priority level.
@@ -144,7 +142,7 @@ export class SlaMonitorJob {
    *
    * @returns Result of the compliance check including counts and actions taken
    */
-  // @Cron('*/5 * * * *')
+  @Cron('*/5 * * * *')
   async checkSlaCompliance(): Promise<SlaComplianceResult> {
     this.logger.log('Starting SLA compliance check...');
     const checkedAt = new Date();

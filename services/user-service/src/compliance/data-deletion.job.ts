@@ -4,11 +4,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { DataDeletionService } from './data-deletion.service.js';
-
-// TODO: Add @Cron decorator when @nestjs/schedule is installed
-// import { Cron, CronExpression } from '@nestjs/schedule';
-// @Cron(CronExpression.EVERY_HOUR)
 
 /**
  * Scheduled job for processing data deletion requests after 48-hour grace period
@@ -53,6 +50,7 @@ export class DataDeletionJob {
    * The 48-hour grace period is enforced by the DataDeletionService.createDeletionRequest()
    * method which sets scheduledFor = requestedAt + 48 hours.
    */
+  @Cron(CronExpression.EVERY_HOUR)
   async handleCron(): Promise<void> {
     this.logger.log('Starting data deletion processing job...');
 

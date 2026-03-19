@@ -6,6 +6,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { CacheModule } from './cache/cache.module.js';
@@ -25,6 +26,8 @@ import { DemoModule } from './demo/demo.module.js';
       // Look for .env files in order: local service config, then root monorepo config
       envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
+    // Enable scheduled jobs for compliance features
+    ScheduleModule.forRoot(),
     // Rate limiting for brute force protection
     // Use higher limits in test mode to allow E2E tests to run without throttling
     ThrottlerModule.forRoot([
