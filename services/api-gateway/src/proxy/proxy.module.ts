@@ -16,6 +16,7 @@ import {
 import { DemoProxyController } from './demo-proxy.controller.js';
 import { DiscussionsProxyController } from './discussions-proxy.controller.js';
 import { ModerationProxyController } from './moderation-proxy.controller.js';
+import { NotificationProxyController } from './notification-proxy.controller.js';
 import { ResponsesProxyController } from './responses-proxy.controller.js';
 import { TopicsProxyController } from './topics-proxy.controller.js';
 import { UsersProxyController } from './users-proxy.controller.js';
@@ -40,6 +41,7 @@ import { ProxyService } from './proxy.service.js';
     DiscussionsProxyController,
     InvitationsProxyController,
     ModerationProxyController,
+    NotificationProxyController,
     ResponsesProxyController,
     TopicsProxyController,
     UsersProxyController,

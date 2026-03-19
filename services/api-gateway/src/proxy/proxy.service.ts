@@ -68,6 +68,7 @@ export class ProxyService {
   private readonly moderationService: ServiceConfig;
   private readonly activityService: ServiceConfig;
   private readonly contactService: ServiceConfig;
+  private readonly notificationService: ServiceConfig;
 
   constructor(
     @Inject(HttpService) private readonly httpService: HttpService,
@@ -123,6 +124,15 @@ export class ProxyService {
       timeout: getConfig<number>('CONTACT_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
       retryAttempts: getConfig<number>('CONTACT_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
+
+    this.notificationService = {
+      url: getConfig<string>('NOTIFICATION_SERVICE_URL', getServiceUrl('NOTIFICATION_SERVICE')),
+      timeout: getConfig<number>('NOTIFICATION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      retryAttempts: getConfig<number>(
+        'NOTIFICATION_SERVICE_RETRY_ATTEMPTS',
+        DEFAULT_RETRY_ATTEMPTS,
+      ),
+    };
   }
 
   async proxyToUserService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
@@ -147,6 +157,10 @@ export class ProxyService {
 
   async proxyToContactService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
     return this.proxyWithResilience<T>('contact-service', this.contactService, request);
+  }
+
+  async proxyToNotificationService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
+    return this.proxyWithResilience<T>('notification-service', this.notificationService, request);
   }
 
   /**

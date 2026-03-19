@@ -4,19 +4,33 @@
  */
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { JwtVerificationService } from './jwt-verification.service.js';
+import { JwtAuthGuard } from './jwt-auth.guard.js';
 
 /**
  * Auth Module for notification-service
  *
- * Provides JWT verification capabilities for WebSocket connections.
- * This is a lightweight auth module that only handles token verification,
- * not full authentication flows.
+ * Provides JWT verification capabilities for both WebSocket connections
+ * and HTTP endpoints.
  */
 @Module({
-  imports: [ConfigModule],
-  providers: [JwtVerificationService],
-  exports: [JwtVerificationService],
+  imports: [
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') ?? 'mock-jwt-secret-for-testing',
+        signOptions: {
+          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ??
+            '24h') as `${number}${'s' | 'm' | 'h' | 'd'}`,
+        },
+      }),
+    }),
+  ],
+  providers: [JwtVerificationService, JwtAuthGuard],
+  exports: [JwtVerificationService, JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}
