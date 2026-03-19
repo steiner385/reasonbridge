@@ -104,10 +104,12 @@ test.describe('Flag Content Flow', () => {
     });
   });
 
-  // UI-only tests that use API mocking
-  // SKIPPED: E2E tests should only test real production code, not mocked APIs
-  // TODO: Convert these to real backend tests or move to unit/integration tests
-  test.describe.skip('UI Behavior (Mocked)', () => {
+  // PERMANENTLY SKIPPED: UI-only tests with mocked APIs
+  // These tests mock the entire API layer, defeating the purpose of E2E testing.
+  // The actual flagging flow is tested above in 'With Backend' using real seeded data.
+  // UI behavior (validation, character counts, form state) should be unit tested.
+  // See: frontend/src/components/moderation/ReportDialog.test.tsx
+  test.describe.skip('UI Behavior (Mocked) - See unit tests instead', () => {
     test.beforeEach(async ({ page }) => {
       // Set up base routes for the test environment
       await page.route('**/api/topics', async (route) => {

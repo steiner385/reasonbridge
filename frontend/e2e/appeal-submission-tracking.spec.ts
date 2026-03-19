@@ -347,47 +347,7 @@ test.describe('Appeal Submission and Tracking', () => {
     });
   });
 
-  // SKIPPED: UI-only mocked tests
-  // These tests have unreliable auth timing with mockAuthenticatedUser in E2E environment
-  // TODO: Enable when authentication mocking is improved or real backend seeding is available
-  test.describe.skip('Appeal Status Page (Mocked)', () => {
-    test('should display page heading and description', async () => {
-      // This test would verify heading and description are visible
-    });
-
-    test('should display appeal cards with status badges', async () => {
-      // This test would verify appeal cards show correct status badges
-    });
-
-    test('should expand and collapse appeal details', async () => {
-      // This test would verify accordion expand/collapse behavior
-    });
-
-    test('should show moderation action details when expanded', async () => {
-      // This test would verify original moderation action is shown
-    });
-
-    test('should show decision reasoning for resolved appeals', async () => {
-      // This test would verify moderator decision is shown for resolved appeals
-    });
-
-    test('should display error message on API failure', async () => {
-      // This test would verify error state is shown when API fails
-    });
-  });
-
-  // SKIPPED: Appeal Form mocked tests
-  test.describe.skip('Appeal Submission Form (Mocked)', () => {
-    test('should reset form when modal is reopened', async () => {
-      // This test would verify form state resets between modal opens
-    });
-
-    test('should disable form controls while submitting', async () => {
-      // This test would verify loading state during submission
-    });
-
-    test('should handle API error gracefully', async () => {
-      // This test would verify error handling for failed submissions
-    });
-  });
+  // NOTE: Additional appeal page tests (status badges, accordion behavior, error states)
+  // should be implemented as integration tests with real backend seeding, not E2E mocks.
+  // See: services/moderation-service/src/appeals/ for backend implementation.
 });

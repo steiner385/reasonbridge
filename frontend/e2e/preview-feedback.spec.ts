@@ -201,9 +201,7 @@ test.describe('Preview Feedback - User Story 1: View Feedback While Composing', 
     await expect(page.getByText('Feedback Preview')).toBeVisible();
   });
 
-  // SKIPPED: Timing issue in CI - timeout waiting for "Found 2 areas for improvement"
-  // TODO: Investigate debounce timing or increase timeout
-  test.skip('T011: feedback updates when draft content is modified', async ({ page }) => {
+  test('T011: feedback updates when draft content is modified', async ({ page }) => {
     let requestCount = 0;
     await page.route('**/ai/feedback/preview', async (route) => {
       requestCount++;
@@ -221,15 +219,21 @@ test.describe('Preview Feedback - User Story 1: View Feedback While Composing', 
     const textarea = page.locator('textarea[id="response-content"]');
 
     // Type initial content with issues
+    // Use waitForResponse to ensure API call completes before asserting
+    const firstFeedbackPromise = page.waitForResponse('**/ai/feedback/preview');
     await textarea.fill("You're wrong and everyone knows it!");
-    await expect(page.getByText('Found 2 areas for improvement')).toBeVisible({ timeout: 2000 });
+    await firstFeedbackPromise;
+    // Increased timeout to account for debounce (500ms) + API (100ms) + render time
+    await expect(page.getByText('Found 2 areas for improvement')).toBeVisible({ timeout: 5000 });
 
     // Modify to constructive content
+    const secondFeedbackPromise = page.waitForResponse('**/ai/feedback/preview');
     await textarea.fill(
       'I understand your perspective, but I have a different view based on the evidence.',
     );
+    await secondFeedbackPromise;
     await expect(page.getByText('Your response looks constructive!')).toBeVisible({
-      timeout: 2000,
+      timeout: 5000,
     });
 
     // Verify multiple requests were made
