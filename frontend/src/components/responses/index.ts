@@ -25,3 +25,7 @@ export { TypingIndicator, default as TypingIndicatorDefault } from './TypingIndi
 export type { TypingIndicatorProps } from './TypingIndicator';
 export { NewMessagesDivider, default as NewMessagesDividerDefault } from './NewMessagesDivider';
 export type { NewMessagesDividerProps } from './NewMessagesDivider';
+export { default as ReactionBar } from './ReactionBar';
+export type { ReactionBarProps } from './ReactionBar';
+export { default as EmojiPicker, QUICK_REACTIONS } from './EmojiPicker';
+export type { EmojiPickerProps, QuickReaction } from './EmojiPicker';
