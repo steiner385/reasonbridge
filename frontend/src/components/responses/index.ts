@@ -21,3 +21,5 @@ export { default as ThreadedResponseDisplay } from './ThreadedResponseDisplay';
 export type { ThreadedResponseDisplayProps } from './ThreadedResponseDisplay';
 export { default as VoteButtons } from './VoteButtons';
 export type { VoteButtonsProps } from './VoteButtons';
+export { TypingIndicator, default as TypingIndicatorDefault } from './TypingIndicator';
+export type { TypingIndicatorProps } from './TypingIndicator';
