@@ -73,3 +73,6 @@ export type {
   KeyboardShortcut as KeyboardShortcutDisplay,
   ShortcutCategory,
 } from './KeyboardShortcutsHelp';
+
+export { default as CommandPalette } from './CommandPalette';
+export type { CommandPaletteProps, CommandItem } from './CommandPalette';

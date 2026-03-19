@@ -18,6 +18,18 @@
 import '@testing-library/jest-dom';
 import { server } from './test/mocks/server';
 
+// Mock ResizeObserver which is not available in jsdom
+// Required for components using cmdk, react-window, etc.
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+// Mock scrollIntoView which is not fully implemented in jsdom
+// Required for components using cmdk
+Element.prototype.scrollIntoView = function () {};
+
 // Start MSW server before all tests
 beforeAll(() => {
   server.listen({
