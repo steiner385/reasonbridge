@@ -4,8 +4,8 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-// TODO: Integrate with AuthContext once it's implemented
-// import { useAuth } from '../contexts/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
+import { authService } from '../services/authService';
 
 /**
  * WebSocket message types for real-time updates
@@ -202,9 +202,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     heartbeatInterval = 30000,
   } = options;
 
-  // TODO: Uncomment when AuthContext is implemented
-  // const { user } = useAuth();
-  const user: { token?: string } | null = null; // Placeholder until AuthContext is implemented
+  const { user, isAuthenticated } = useAuthContext();
   const [state, setState] = useState<WebSocketState>('disconnected');
   const [error, setError] = useState<string | null>(null);
 
@@ -291,10 +289,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }
 
     // Don't connect if not authenticated
-    if (!user) {
+    if (!isAuthenticated || !user) {
       setError('User not authenticated');
       return;
     }
+
+    // Get auth token for WebSocket authentication
+    const token = authService.getAuthToken();
 
     setState('connecting');
     setError(null);
@@ -310,10 +311,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         startHeartbeat();
 
         // Send authentication token
-        // TODO: Implement proper authentication when AuthContext is available
-        // if (user && 'token' in user && user.token) {
-        //   ws.send(JSON.stringify({ type: 'AUTH', token: user.token }));
-        // }
+        if (token) {
+          ws.send(JSON.stringify({ type: 'AUTH', token }));
+        }
       };
 
       ws.onmessage = handleMessage;
@@ -344,6 +344,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }
   }, [
     user,
+    isAuthenticated,
     state,
     getWebSocketUrl,
     handleMessage,
@@ -414,10 +415,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
   }, []);
 
   /**
-   * Auto-connect on mount if enabled
+   * Auto-connect on mount if enabled and authenticated
    */
   useEffect(() => {
-    if (autoConnect && user) {
+    if (autoConnect && isAuthenticated) {
       connect();
     }
 
@@ -425,7 +426,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
       disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoConnect, user]); // Only depend on autoConnect and user, not connect/disconnect
+  }, [autoConnect, isAuthenticated]); // Only depend on autoConnect and isAuthenticated, not connect/disconnect
 
   return {
     state,

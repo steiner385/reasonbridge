@@ -3,11 +3,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { apiClient, ApiError } from '../lib/api';
+
+/**
+ * API response type from the backend
+ */
+interface NotificationApiResponse {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  body: string;
+  actionUrl: string | null;
+  metadata: {
+    actorId?: string;
+    actorUsername?: string;
+    actorAvatarUrl?: string;
+    relatedContentType?: 'topic' | 'response' | 'user';
+    relatedContentId?: string;
+    relatedContentTitle?: string;
+  } | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+}
+
+interface NotificationListApiResponse {
+  notifications: NotificationApiResponse[];
+  total: number;
+  unreadCount: number;
+}
 
 export interface PageNotification {
   id: string;
-  type: 'comment' | 'mention' | 'system' | 'response' | 'like';
+  type: 'comment' | 'mention' | 'system' | 'response' | 'like' | 'follow' | 'common_ground';
   message: string;
   /** Optional actor information */
   actor?: {
@@ -38,135 +68,138 @@ interface UseNotificationsReturn {
 }
 
 /**
+ * Map backend notification type to frontend type
+ */
+function mapNotificationType(
+  backendType: string,
+): 'comment' | 'mention' | 'system' | 'response' | 'like' | 'follow' | 'common_ground' {
+  const typeMap: Record<string, PageNotification['type']> = {
+    mention: 'mention',
+    follow: 'follow',
+    common_ground: 'common_ground',
+    response: 'response',
+    reply: 'comment',
+    like: 'like',
+    system: 'system',
+  };
+  return typeMap[backendType] || 'system';
+}
+
+/**
+ * Transform backend notification to frontend format
+ */
+function transformNotification(apiNotification: NotificationApiResponse): PageNotification {
+  const notification: PageNotification = {
+    id: apiNotification.id,
+    type: mapNotificationType(apiNotification.type),
+    message: apiNotification.body,
+    timestamp: apiNotification.createdAt,
+    read: apiNotification.isRead,
+    url: apiNotification.actionUrl ?? undefined,
+  };
+
+  // Extract actor information from metadata
+  if (apiNotification.metadata?.actorId && apiNotification.metadata?.actorUsername) {
+    notification.actor = {
+      id: apiNotification.metadata.actorId,
+      username: apiNotification.metadata.actorUsername,
+      avatarUrl: apiNotification.metadata.actorAvatarUrl,
+    };
+  }
+
+  // Extract related content from metadata
+  if (apiNotification.metadata?.relatedContentType && apiNotification.metadata?.relatedContentId) {
+    notification.relatedContent = {
+      type: apiNotification.metadata.relatedContentType,
+      id: apiNotification.metadata.relatedContentId,
+      title: apiNotification.metadata.relatedContentTitle,
+    };
+  }
+
+  return notification;
+}
+
+/**
  * Hook for fetching and managing page notifications
  *
- * TODO: Connect to real API endpoint when backend is ready
- * Currently uses mock data for UI development
+ * Connects to the notification-service REST API for:
+ * - Fetching user notifications with pagination
+ * - Marking individual notifications as read
+ * - Marking all notifications as read
  */
 export function useNotifications(): UseNotificationsReturn {
   const [notifications, setNotifications] = useState<PageNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Mock data for initial implementation
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setIsLoading(true);
-      try {
-        // TODO: Replace with actual API call
-        // const data = await apiClient.get<PageNotification[]>('/notifications');
+  const fetchNotifications = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-        // Mock data matching NotificationsPage structure
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
+    try {
+      const response = await apiClient.get<NotificationListApiResponse>('/notifications', {
+        params: { limit: 50 },
+      });
 
-        const mockNotifications: PageNotification[] = [
-          {
-            id: '1',
-            type: 'comment',
-            message: 'Alex Johnson commented on your post about climate change',
-            actor: {
-              id: 'user-1',
-              username: 'alexj',
-              avatarUrl: undefined,
-            },
-            relatedContent: {
-              type: 'response',
-              id: 'response-123',
-              title: 'Climate Change Discussion',
-            },
-            timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 min ago
-            read: false,
-            url: '/topics/topic-123#response-123',
-          },
-          {
-            id: '2',
-            type: 'mention',
-            message: 'Sam Davis mentioned you in a response',
-            actor: {
-              id: 'user-2',
-              username: 'samd',
-            },
-            relatedContent: {
-              type: 'response',
-              id: 'response-456',
-            },
-            timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 min ago
-            read: false,
-            url: '/topics/topic-456#response-456',
-          },
-          {
-            id: '3',
-            type: 'response',
-            message: 'Taylor Chen responded to your topic',
-            actor: {
-              id: 'user-3',
-              username: 'taylorc',
-            },
-            relatedContent: {
-              type: 'topic',
-              id: 'topic-789',
-              title: 'Education Reform',
-            },
-            timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
-            read: true,
-            url: '/topics/topic-789',
-          },
-          {
-            id: '4',
-            type: 'system',
-            message: 'Your response received 10 likes',
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-            read: true,
-          },
-          {
-            id: '5',
-            type: 'comment',
-            message: 'Jordan Lee commented on your response',
-            actor: {
-              id: 'user-4',
-              username: 'jordanl',
-            },
-            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-            read: true,
-            url: '/topics/topic-999#response-999',
-          },
-        ];
-
-        setNotifications(mockNotifications);
-        setError(null);
-      } catch (err) {
+      const transformedNotifications = response.notifications.map(transformNotification);
+      setNotifications(transformedNotifications);
+      setUnreadCount(response.unreadCount);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // Handle 401 unauthorized - user not logged in
+        if (err.status === 401) {
+          setNotifications([]);
+          setUnreadCount(0);
+          return;
+        }
+        setError(new Error(`Failed to fetch notifications: ${err.message}`));
+      } else {
         setError(err instanceof Error ? err : new Error('Failed to fetch notifications'));
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchNotifications();
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
-  const markAsRead = async (id: string) => {
-    // TODO: Call API endpoint: PATCH /notifications/:id
-    // await apiClient.patch(`/notifications/${id}`, { read: true });
+  const markAsRead = useCallback(
+    async (id: string) => {
+      try {
+        await apiClient.patch<NotificationApiResponse>(`/notifications/${id}/read`);
 
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  };
+        // Optimistically update local state
+        setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (err) {
+        // Refetch on error to sync state
+        await fetchNotifications();
+        throw err;
+      }
+    },
+    [fetchNotifications],
+  );
 
-  const markAllAsRead = async () => {
-    // TODO: Call API endpoint: PATCH /notifications/mark-all-read
-    // await apiClient.patch('/notifications/mark-all-read');
+  const markAllAsRead = useCallback(async () => {
+    try {
+      await apiClient.patch<{ count: number; message: string }>('/notifications/mark-all-read');
 
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+      // Optimistically update local state
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      // Refetch on error to sync state
+      await fetchNotifications();
+      throw err;
+    }
+  }, [fetchNotifications]);
 
-  const refetch = async () => {
-    // TODO: Re-fetch notifications from API
-    // For now, just reset loading state
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setIsLoading(false);
-  };
+  const refetch = useCallback(async () => {
+    await fetchNotifications();
+  }, [fetchNotifications]);
 
   return {
     notifications,
