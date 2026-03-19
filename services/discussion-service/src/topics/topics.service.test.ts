@@ -31,9 +31,10 @@ const createMockPrismaService = () => ({
   $queryRaw: vi.fn().mockResolvedValue([]),
 });
 
-// Mock Search Service
+// Mock Search Service (TopicsSearchService)
 const createMockSearchService = () => ({
   isUniqueEnough: vi.fn().mockResolvedValue({ isUnique: true, suggestions: [] }),
+  fullTextSearch: vi.fn().mockResolvedValue([]),
 });
 
 // Mock Slug Generator
@@ -253,26 +254,49 @@ describe('TopicsService', () => {
   });
 
   describe('searchTopics', () => {
-    it('should search topics by query string', async () => {
-      mockPrisma.discussionTopic.findMany.mockResolvedValue([]);
-      mockPrisma.discussionTopic.count.mockResolvedValue(0);
+    it('should search topics by query string using fullTextSearch', async () => {
+      // fullTextSearch returns topic IDs with ranks
+      mockSearchService.fullTextSearch.mockResolvedValue([
+        { id: 'topic-1', rank: 0.9 },
+        { id: 'topic-2', rank: 0.7 },
+      ]);
+      mockPrisma.discussionTopic.findMany.mockResolvedValue([
+        createMockTopic({ id: 'topic-1' }),
+        createMockTopic({ id: 'topic-2' }),
+      ]);
+      mockPrisma.discussionTopic.count.mockResolvedValue(2);
 
       await service.searchTopics({ q: 'climate' });
 
+      // Should call fullTextSearch with the query
+      expect(mockSearchService.fullTextSearch).toHaveBeenCalledWith('climate', expect.any(Number));
+      // Should filter by IDs returned from fullTextSearch
       expect(mockPrisma.discussionTopic.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            OR: [
-              { title: { contains: 'climate', mode: 'insensitive' } },
-              { description: { contains: 'climate', mode: 'insensitive' } },
-            ],
+            id: { in: ['topic-1', 'topic-2'] },
           }),
         }),
       );
     });
 
+    it('should return empty results when no search matches', async () => {
+      mockSearchService.fullTextSearch.mockResolvedValue([]);
+
+      const result = await service.searchTopics({ q: 'nonexistent' });
+
+      expect(mockSearchService.fullTextSearch).toHaveBeenCalled();
+      expect(mockPrisma.discussionTopic.findMany).not.toHaveBeenCalled();
+      expect(result.data).toHaveLength(0);
+      expect(result.meta.total).toBe(0);
+    });
+
     it('should handle pagination in search', async () => {
-      mockPrisma.discussionTopic.findMany.mockResolvedValue([]);
+      mockSearchService.fullTextSearch.mockResolvedValue([
+        { id: 'topic-1', rank: 0.9 },
+        { id: 'topic-2', rank: 0.8 },
+      ]);
+      mockPrisma.discussionTopic.findMany.mockResolvedValue([createMockTopic()]);
       mockPrisma.discussionTopic.count.mockResolvedValue(50);
 
       const result = await service.searchTopics({ q: 'test', page: 2, limit: 10 });

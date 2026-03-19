@@ -87,6 +87,9 @@ const ParentalDashboardPage = lazy(() =>
 const OrientationPage = lazy(() =>
   import('../pages/Onboarding').then((m) => ({ default: m.OrientationPage })),
 );
+const SearchResultsPage = lazy(() =>
+  import('../pages/Search').then((m) => ({ default: m.SearchResultsPage })),
+);
 
 /**
  * Loading fallback for lazy-loaded routes
@@ -202,6 +205,14 @@ export const routes: RouteObject[] = [
   {
     path: '/topics/:id',
     element: <TopicRedirect />,
+  },
+  {
+    path: '/search',
+    element: (
+      <LazyRoute>
+        <SearchResultsPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/discussions',

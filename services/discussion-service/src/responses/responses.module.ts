@@ -19,13 +19,19 @@ import { AuthModule } from '../auth/index.js';
 // CacheModule removed - it's global and imported once in AppModule
 import { ResponsesController } from './responses.controller.js';
 import { ResponsesService } from './responses.service.js';
+import { ResponsesSearchService } from './responses-search.service.js';
 import { ContentModerationService } from './services/content-moderation.service.js';
 import { CommonGroundTriggerService } from '../services/common-ground-trigger.service.js';
 
 @Module({
   imports: [PrismaModule, AuthModule],
   controllers: [ResponsesController],
-  providers: [ResponsesService, ContentModerationService, CommonGroundTriggerService],
-  exports: [ResponsesService, ContentModerationService],
+  providers: [
+    ResponsesService,
+    ResponsesSearchService,
+    ContentModerationService,
+    CommonGroundTriggerService,
+  ],
+  exports: [ResponsesService, ResponsesSearchService, ContentModerationService],
 })
 export class ResponsesModule {}

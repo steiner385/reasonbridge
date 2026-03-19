@@ -445,11 +445,29 @@ export class TopicsService implements OnModuleInit {
     // Build where clause for search
     const where: Prisma.DiscussionTopicWhereInput = {};
 
+    // Use full-text search if query provided
+    let searchResults: Array<{ id: string; rank: number }> = [];
     if (q) {
-      where.OR = [
-        { title: { contains: q, mode: 'insensitive' } },
-        { description: { contains: q, mode: 'insensitive' } },
-      ];
+      // Use TopicsSearchService for full-text search (tsvector + GIN index)
+      searchResults = await this.searchService.fullTextSearch(q, limit * 10);
+
+      if (searchResults.length === 0) {
+        // No search results, return empty response
+        return {
+          data: [],
+          meta: {
+            total: 0,
+            page,
+            limit,
+            totalPages: 0,
+          },
+        };
+      }
+
+      // Filter by search result IDs
+      where.id = {
+        in: searchResults.map((r) => r.id),
+      };
     }
 
     // Calculate pagination
