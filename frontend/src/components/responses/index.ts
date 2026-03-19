@@ -29,3 +29,5 @@ export { default as ReactionBar } from './ReactionBar';
 export type { ReactionBarProps } from './ReactionBar';
 export { default as EmojiPicker, QUICK_REACTIONS } from './EmojiPicker';
 export type { EmojiPickerProps, QuickReaction } from './EmojiPicker';
+export { default as BookmarkButton } from './BookmarkButton';
+export type { BookmarkButtonProps } from './BookmarkButton';
