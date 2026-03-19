@@ -25,6 +25,17 @@ import { ModerationQueueService } from '../services/moderation-queue.service.js'
 import type { QueueStats } from '../services/moderation-queue.service.js';
 import { SafetyReportService } from '../services/safety-report.service.js';
 import type { SafetyReportResponse, SafetyReportStats } from '../services/safety-report.service.js';
+import { ReportService } from '../services/report.service.js';
+import type {
+  CreateReportRequest,
+  UpdateReportStatusRequest,
+  ReportResponse,
+  ListReportsResponse,
+  ReportStatsResponse,
+  ReportCategory,
+  ReportStatus,
+  ReportContentType,
+} from '../dto/report.dto.js';
 import type { SafetyReportReason, SafetyReportStatus, ReviewPriority } from '@prisma/client';
 import type {
   CreateActionRequest,
@@ -65,6 +76,7 @@ export class ModerationController {
     private readonly actionsService: ModerationActionsService,
     private readonly queueService: ModerationQueueService,
     private readonly safetyReportService: SafetyReportService,
+    private readonly reportService: ReportService,
   ) {}
 
   @Post('screen')
@@ -459,5 +471,121 @@ export class ModerationController {
     @Query('limit') limit: number = 20,
   ): Promise<SafetyReportResponse[]> {
     return this.safetyReportService.getReportsByReporter(userId, limit);
+  }
+
+  // ============================================================================
+  // CONTENT REPORT ENDPOINTS (Issue #1046)
+  // ============================================================================
+
+  @Post('reports')
+  @UseGuards(JwtAuthGuard)
+  async createReport(
+    @CurrentUser() user: JwtPayload,
+    @Body() request: CreateReportRequest,
+  ): Promise<ReportResponse> {
+    if (!request.contentType) {
+      throw new BadRequestException('contentType is required');
+    }
+
+    if (!request.contentId) {
+      throw new BadRequestException('contentId is required');
+    }
+
+    if (!request.category) {
+      throw new BadRequestException('category is required');
+    }
+
+    const validContentTypes: ReportContentType[] = ['topic', 'response', 'user'];
+    if (!validContentTypes.includes(request.contentType)) {
+      throw new BadRequestException(`contentType must be one of: ${validContentTypes.join(', ')}`);
+    }
+
+    const validCategories: ReportCategory[] = [
+      'SPAM',
+      'HARASSMENT',
+      'MISINFORMATION',
+      'HATE_SPEECH',
+      'VIOLENCE',
+      'COPYRIGHT',
+      'OTHER',
+    ];
+    if (!validCategories.includes(request.category)) {
+      throw new BadRequestException(`category must be one of: ${validCategories.join(', ')}`);
+    }
+
+    return this.reportService.createReport(request, user.sub);
+  }
+
+  @Get('reports')
+  async listReports(
+    @Query('status') status?: string,
+    @Query('category') category?: string,
+    @Query('contentType') contentType?: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<ListReportsResponse> {
+    const statusEnum = status?.toUpperCase() as ReportStatus | undefined;
+    const categoryEnum = category?.toUpperCase() as ReportCategory | undefined;
+    const contentTypeEnum = contentType?.toLowerCase() as ReportContentType | undefined;
+
+    return this.reportService.getReports({
+      status: statusEnum,
+      category: categoryEnum,
+      contentType: contentTypeEnum,
+      limit,
+      cursor,
+    });
+  }
+
+  @Get('reports/stats')
+  async getReportStats(): Promise<ReportStatsResponse> {
+    return this.reportService.getReportStats();
+  }
+
+  @Get('reports/pending')
+  async getPendingReports(@Query('limit') limit: number = 20): Promise<ReportResponse[]> {
+    return this.reportService.getPendingReports(limit);
+  }
+
+  @Get('reports/:reportId')
+  async getReport(@Param('reportId') reportId: string): Promise<ReportResponse> {
+    return this.reportService.getReportById(reportId);
+  }
+
+  @Post('reports/:reportId/status')
+  @UseGuards(JwtAuthGuard)
+  async updateReportStatus(
+    @Param('reportId') reportId: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() request: UpdateReportStatusRequest,
+  ): Promise<ReportResponse> {
+    if (!request.status) {
+      throw new BadRequestException('status is required');
+    }
+
+    const validStatuses: ReportStatus[] = ['PENDING', 'REVIEWING', 'RESOLVED', 'DISMISSED'];
+    if (!validStatuses.includes(request.status)) {
+      throw new BadRequestException(`status must be one of: ${validStatuses.join(', ')}`);
+    }
+
+    // Require resolution for terminal statuses
+    if ((request.status === 'RESOLVED' || request.status === 'DISMISSED') && !request.resolution) {
+      throw new BadRequestException('resolution is required when status is RESOLVED or DISMISSED');
+    }
+
+    return this.reportService.updateReportStatus(reportId, request, user.sub);
+  }
+
+  @Get('content/:contentType/:contentId/reports')
+  async getContentReports(
+    @Param('contentType') contentType: string,
+    @Param('contentId') contentId: string,
+  ): Promise<ReportResponse[]> {
+    const validContentTypes: ReportContentType[] = ['topic', 'response', 'user'];
+    if (!validContentTypes.includes(contentType as ReportContentType)) {
+      throw new BadRequestException(`contentType must be one of: ${validContentTypes.join(', ')}`);
+    }
+
+    return this.reportService.getReportsByContent(contentType, contentId);
   }
 }

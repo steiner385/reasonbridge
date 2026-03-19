@@ -168,12 +168,90 @@ export interface SafetyReportCreatedEvent extends BaseEvent<
 }
 
 /**
- * Event types for moderation service - extended with safety reports
+ * Event types for moderation service - extended with safety reports and content reports
  */
 export const MODERATION_EVENT_TYPES_EXTENDED = {
   ...MODERATION_EVENT_TYPES,
   SAFETY_REPORT_CREATED: 'safety.report.created',
+  REPORT_CREATED: 'report.created',
+  REPORT_STATUS_CHANGED: 'report.status.changed',
 } as const;
+
+// ============================================================================
+// CONTENT REPORT EVENTS (Issue #1046)
+// ============================================================================
+
+/**
+ * Category of reported content
+ */
+export type ReportCategory =
+  | 'SPAM'
+  | 'HARASSMENT'
+  | 'MISINFORMATION'
+  | 'HATE_SPEECH'
+  | 'VIOLENCE'
+  | 'COPYRIGHT'
+  | 'OTHER';
+
+/**
+ * Status of a content report
+ */
+export type ReportStatus = 'PENDING' | 'REVIEWING' | 'RESOLVED' | 'DISMISSED';
+
+/**
+ * Payload for report.created event
+ * Published when a user submits a content report
+ */
+export interface ReportCreatedPayload {
+  /** Unique report ID */
+  reportId: string;
+  /** ID of the user who submitted the report */
+  reporterId: string;
+  /** Type of content being reported */
+  contentType: 'topic' | 'response' | 'user';
+  /** ID of the content being reported */
+  contentId: string;
+  /** Category of the report */
+  category: ReportCategory;
+  /** When the report was created */
+  createdAt: string;
+}
+
+/**
+ * Event published when a content report is created
+ */
+export interface ReportCreatedEvent extends BaseEvent<'report.created', ReportCreatedPayload> {
+  type: 'report.created';
+}
+
+/**
+ * Payload for report.status.changed event
+ * Published when a report's status is updated
+ */
+export interface ReportStatusChangedPayload {
+  /** Report ID */
+  reportId: string;
+  /** Previous status */
+  previousStatus: ReportStatus;
+  /** New status */
+  newStatus: ReportStatus;
+  /** ID of the moderator who changed the status */
+  moderatorId: string;
+  /** Resolution notes (for RESOLVED/DISMISSED) */
+  resolution?: string;
+  /** When the status was changed */
+  changedAt: string;
+}
+
+/**
+ * Event published when a report's status changes
+ */
+export interface ReportStatusChangedEvent extends BaseEvent<
+  'report.status.changed',
+  ReportStatusChangedPayload
+> {
+  type: 'report.status.changed';
+}
 
 /**
  * Union type of all moderation service events
@@ -181,4 +259,6 @@ export const MODERATION_EVENT_TYPES_EXTENDED = {
 export type ModerationEvent =
   | ModerationActionRequestedEvent
   | UserTrustUpdatedEvent
-  | SafetyReportCreatedEvent;
+  | SafetyReportCreatedEvent
+  | ReportCreatedEvent
+  | ReportStatusChangedEvent;

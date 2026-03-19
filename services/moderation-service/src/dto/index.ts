@@ -28,3 +28,16 @@ export type {
   PendingAppealResponse,
   ListAppealResponse,
 } from './appeal.dto.js';
+
+export type {
+  ReportContentType,
+  ReportCategory,
+  ReportStatus,
+  CreateReportRequest,
+  UpdateReportStatusRequest,
+  ReportFiltersDto,
+  ReporterInfo,
+  ReportResponse,
+  ListReportsResponse,
+  ReportStatsResponse,
+} from './report.dto.js';

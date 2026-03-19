@@ -290,3 +290,129 @@ export interface SafetyReportsStats {
   submittedToday: number;
   awaitingEvidence: number;
 }
+
+// ============================================================================
+// CONTENT REPORT TYPES (Issue #1046)
+// ============================================================================
+
+/**
+ * Content Report Status
+ */
+export type ReportStatus = 'PENDING' | 'REVIEWING' | 'RESOLVED' | 'DISMISSED';
+
+/**
+ * Content Report Category
+ */
+export type ReportCategory =
+  | 'SPAM'
+  | 'HARASSMENT'
+  | 'MISINFORMATION'
+  | 'HATE_SPEECH'
+  | 'VIOLENCE'
+  | 'COPYRIGHT'
+  | 'OTHER';
+
+/**
+ * Content type that can be reported
+ */
+export type ReportContentType = 'topic' | 'response' | 'user';
+
+/**
+ * User info for reporters and moderators
+ */
+export interface ReportUserInfo {
+  id: string;
+  displayName: string | null;
+}
+
+/**
+ * Content Report
+ */
+export interface Report {
+  id: string;
+  reporterId: string;
+  reporter: ReportUserInfo | null;
+  contentType: ReportContentType;
+  contentId: string;
+  category: ReportCategory;
+  description: string | null;
+  status: ReportStatus;
+  moderatorId: string | null;
+  moderator: ReportUserInfo | null;
+  resolution: string | null;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+}
+
+/**
+ * Create Report Request
+ */
+export interface CreateReportRequest {
+  contentType: ReportContentType;
+  contentId: string;
+  category: ReportCategory;
+  description?: string;
+}
+
+/**
+ * Update Report Status Request
+ */
+export interface UpdateReportStatusRequest {
+  status: ReportStatus;
+  resolution?: string;
+}
+
+/**
+ * Report List Response
+ */
+export interface ReportListResponse {
+  reports: Report[];
+  nextCursor: string | null;
+  totalCount: number;
+}
+
+/**
+ * Report Statistics
+ */
+export interface ReportStats {
+  byStatus: Record<ReportStatus, number>;
+  byCategory: Record<ReportCategory, number>;
+  totalPending: number;
+  avgResolutionTimeMinutes: number;
+  oldestPendingAge: string;
+}
+
+/**
+ * Report category display information
+ */
+export const REPORT_CATEGORIES: Record<ReportCategory, { label: string; description: string }> = {
+  SPAM: {
+    label: 'Spam',
+    description: 'Repetitive, commercial, or off-topic content',
+  },
+  HARASSMENT: {
+    label: 'Harassment',
+    description: 'Targets or harasses individuals or groups',
+  },
+  MISINFORMATION: {
+    label: 'Misinformation',
+    description: 'Contains false or misleading information',
+  },
+  HATE_SPEECH: {
+    label: 'Hate Speech',
+    description: 'Contains hateful, discriminatory, or prejudiced language',
+  },
+  VIOLENCE: {
+    label: 'Violence',
+    description: 'Promotes or glorifies violence',
+  },
+  COPYRIGHT: {
+    label: 'Copyright Violation',
+    description: 'Infringes on intellectual property rights',
+  },
+  OTHER: {
+    label: 'Other',
+    description: 'Another reason not listed above',
+  },
+};

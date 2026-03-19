@@ -114,6 +114,9 @@ model User {
   privacySettings               UserPrivacySettings?
   // Feature: Notification Service (Issue #1044)
   notifications                 Notification[]
+  // Feature: Content Reporting (Issue #1046)
+  reportsSubmitted              Report[]              @relation("ReportsSubmitted")
+  reportsModerated              Report[]              @relation("ReportsModerated")
 
   @@index([cognitoSub])
   @@index([email])
@@ -1310,6 +1313,57 @@ enum AppealStatus {
   DENIED
 
   @@map("appeal_status")
+}
+
+/// Status of a content report
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+
+  @@map("report_status")
+}
+
+/// Category of reported content
+enum ReportCategory {
+  SPAM
+  HARASSMENT
+  MISINFORMATION
+  HATE_SPEECH
+  VIOLENCE
+  COPYRIGHT
+  OTHER
+
+  @@map("report_category")
+}
+
+/// Content report submitted by users for moderation review
+/// Tracks user-flagged content through the moderation workflow
+model Report {
+  id          String         @id @default(uuid()) @db.Uuid
+  reporterId  String         @map("reporter_id") @db.Uuid
+  contentType String         @map("content_type") @db.VarChar(50) // "topic", "response", "user"
+  contentId   String         @map("content_id") @db.Uuid
+  category    ReportCategory
+  description String?        @db.Text
+  status      ReportStatus   @default(PENDING)
+  moderatorId String?        @map("moderator_id") @db.Uuid
+  resolution  String?        @db.Text
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  resolvedAt  DateTime?      @map("resolved_at")
+
+  // Relations
+  reporter  User  @relation("ReportsSubmitted", fields: [reporterId], references: [id], onDelete: Cascade)
+  moderator User? @relation("ReportsModerated", fields: [moderatorId], references: [id])
+
+  @@index([status])
+  @@index([contentType, contentId])
+  @@index([reporterId])
+  @@index([createdAt])
+  @@index([category])
+  @@map("reports")
 }
 
 // ============================================================================
