@@ -5,6 +5,9 @@ const createMockPrismaService = () => ({
   discussionTopic: {
     findUnique: vi.fn(),
   },
+  notification: {
+    createMany: vi.fn().mockResolvedValue({ count: 0 }),
+  },
 });
 
 const createMockNotificationGateway = () => ({

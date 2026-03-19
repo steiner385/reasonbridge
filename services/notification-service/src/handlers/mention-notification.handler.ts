@@ -5,6 +5,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import type { ResponseCreatedEvent } from '@reason-bridge/event-schemas/discussion';
@@ -181,8 +182,7 @@ export class MentionNotificationHandler {
   }
 
   /**
-   * Create notification records
-   * NOTE: This currently logs notifications until the Notification model is implemented in the database
+   * Create notification records in the database
    */
   private async createNotifications(params: {
     recipientIds: string[];
@@ -194,16 +194,8 @@ export class MentionNotificationHandler {
   }): Promise<void> {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
-    // Log notification details (placeholder until Notification model exists in schema)
-    this.logger.log(`Would create ${recipientIds.length} notification(s) of type "${type}"`);
-    this.logger.debug(
-      `Notification details: title="${title}", body="${body}", actionUrl="${actionUrl}"`,
-    );
-    this.logger.debug(`Recipients: ${recipientIds.join(', ')}`);
-    this.logger.debug(`Metadata: ${JSON.stringify(metadata)}`);
+    this.logger.log(`Creating ${recipientIds.length} notification(s) of type "${type}"`);
 
-    // TODO: Uncomment when Notification model is added to Prisma schema (see task T198)
-    /*
     await this.prisma.notification.createMany({
       data: recipientIds.map((userId) => ({
         userId,
@@ -211,10 +203,9 @@ export class MentionNotificationHandler {
         title,
         body,
         actionUrl,
-        metadata: JSON.stringify(metadata),
+        metadata: metadata as Prisma.InputJsonValue,
         isRead: false,
       })),
     });
-    */
   }
 }
