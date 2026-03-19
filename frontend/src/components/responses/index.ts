@@ -31,3 +31,5 @@ export { default as EmojiPicker, QUICK_REACTIONS } from './EmojiPicker';
 export type { EmojiPickerProps, QuickReaction } from './EmojiPicker';
 export { default as BookmarkButton } from './BookmarkButton';
 export type { BookmarkButtonProps } from './BookmarkButton';
+export { default as QuotePreview } from './QuotePreview';
+export type { QuotePreviewProps } from './QuotePreview';
