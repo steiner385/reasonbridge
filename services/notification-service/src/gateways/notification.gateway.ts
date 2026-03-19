@@ -66,7 +66,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
     this.logger.log(`Client connected: ${client.id}`);
 
     // Extract token from handshake auth
-    const token = client.handshake.auth?.token as string | undefined;
+    const token = client.handshake.auth?.['token'] as string | undefined;
 
     if (token && this.jwtVerificationService) {
       try {
