@@ -31,7 +31,7 @@ import { UpdateTopicStatusDto } from './dto/update-topic-status.dto.js';
 import { MergeTopicsDto } from './dto/merge-topics.dto.js';
 import { GetCommonGroundQueryDto } from './dto/common-ground-query.dto.js';
 import { AddTopicTagDto, type AddTagResponseDto } from './dto/add-topic-tag.dto.js';
-import { CreateTopicLinkDto, type TopicLinkResponseDto } from './dto/topic-link.dto.js';
+// Topic link DTOs moved to topic-links.controller.ts
 import { ExportCommonGroundQueryDto } from './dto/export-common-ground-query.dto.js';
 import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-response.dto.js';
 import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
@@ -209,44 +209,9 @@ export class TopicsController {
     };
   }
 
-  /**
-   * Create a link between topics
-   * Feature: AI Suggestion Actions (#1054)
-   *
-   * Used when users accept AI-suggested topic links or propose their own.
-   * Creates a pending link that can be confirmed by the community.
-   *
-   * Authentication: Required (user must be logged in)
-   */
-  @Post(':id/links')
-  @UseGuards(JwtAuthGuard)
-  async createTopicLink(
-    @Param('id') id: string,
-    @Body() createLinkDto: CreateTopicLinkDto,
-    @CurrentUser() user: JwtPayload,
-  ): Promise<TopicLinkResponseDto> {
-    const linkSource = createLinkDto.linkSource || 'AI_SUGGESTED';
-    const link = await this.topicsService.createTopicLink(
-      id,
-      user.sub,
-      createLinkDto.targetTopicId,
-      createLinkDto.relationshipType,
-      linkSource,
-    );
-
-    return {
-      id: link.id,
-      sourceTopicId: link.sourceTopicId,
-      targetTopicId: link.targetTopicId,
-      relationshipType: createLinkDto.relationshipType,
-      linkSource,
-      confirmationStatus: 'PENDING',
-      proposerId: user.sub,
-      confirmedByCount: 0,
-      rejectedByCount: 0,
-      createdAt: new Date(),
-    };
-  }
+  // NOTE: Topic link creation is handled by TopicLinksController at topics/:topicId/links
+  // The duplicate route was removed to fix FST_ERR_DUPLICATED_ROUTE error.
+  // See: topic-links.controller.ts for POST /topics/:topicId/links
 
   /**
    * Get analytics for a topic
