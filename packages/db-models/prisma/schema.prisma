@@ -1452,6 +1452,8 @@ model ParentalConsent {
 enum VerificationTokenType {
   EMAIL_VERIFICATION
   PASSWORD_RESET
+
+  @@map("verification_token_type")
 }
 
 /// Email verification token for signup flow and password reset
