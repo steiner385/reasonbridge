@@ -6,6 +6,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
+import { SmsService } from './sms.service.js';
+import { PushService } from './push.service.js';
 
 /**
  * Types of parent notifications
@@ -124,6 +126,8 @@ export class ParentNotificationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    private readonly smsService: SmsService,
+    private readonly pushService: PushService,
   ) {
     this.baseUrl = process.env['APP_BASE_URL'] || 'http://localhost:5173';
   }
@@ -284,7 +288,12 @@ export class ParentNotificationService {
   private async getParentContact(childId: string): Promise<ParentContact | null> {
     const child = await this.prisma.user.findUnique({
       where: { id: childId },
-      include: {
+      select: {
+        parentEmail: true,
+        parentPhone: true,
+        notifyByEmail: true,
+        notifyByPush: true,
+        notifyBySms: true,
         parentalConsent: {
           select: {
             parentEmail: true,
@@ -299,31 +308,73 @@ export class ParentNotificationService {
 
     const email = child.parentalConsent?.parentEmail || child.parentEmail;
 
-    if (!email) {
+    if (!email && !child.parentPhone) {
       return null;
     }
 
     return {
-      email,
-      phone: null, // TODO: Add parentPhone field to User model for SMS notifications
-      name: this.extractParentName(email),
+      email: email || null,
+      phone: child.parentPhone || null,
+      name: email ? this.extractParentName(email) : 'Parent',
       notificationPreferences: {
-        emailEnabled: true, // Default to email for now
-        pushEnabled: false, // TODO: Implement push notifications
-        smsEnabled: false, // TODO: Implement SMS for IMMEDIATE priority
+        emailEnabled: child.notifyByEmail,
+        pushEnabled: child.notifyByPush,
+        smsEnabled: child.notifyBySms,
       },
     };
   }
 
   /**
    * Deliver notification via appropriate channel
+   *
+   * Priority-based delivery:
+   * - IMMEDIATE: SMS (if enabled) + Push + Email
+   * - URGENT: Push + Email
+   * - HIGH/NORMAL: Email only
    */
   private async deliverNotification(
     notificationId: string,
     request: ParentNotificationRequest,
     contact: ParentContact,
   ): Promise<{ success: boolean; method: 'email' | 'push' | 'sms'; error?: string }> {
-    // For now, email is the only delivery method
+    const errors: string[] = [];
+
+    // For IMMEDIATE priority, try SMS first (e.g., grooming detection, stranger contact)
+    if (
+      request.priority === 'IMMEDIATE' &&
+      contact.phone &&
+      contact.notificationPreferences.smsEnabled
+    ) {
+      const smsResult = await this.smsService.sendParentAlert(
+        contact.phone,
+        contact.name,
+        request.type,
+        request.title,
+      );
+
+      if (smsResult.success) {
+        this.logger.log(`Parent notification ${notificationId} delivered via SMS`);
+        // Also send email for detailed information
+        this.sendEmailFallback(notificationId, request, contact).catch((err) =>
+          this.logger.warn(`Email fallback failed for ${notificationId}: ${err}`),
+        );
+        return { success: true, method: 'sms' };
+      }
+      errors.push(`SMS: ${smsResult.error}`);
+    }
+
+    // For IMMEDIATE and URGENT, try push notification
+    if (
+      (request.priority === 'IMMEDIATE' || request.priority === 'URGENT') &&
+      contact.notificationPreferences.pushEnabled &&
+      this.pushService.isAvailable()
+    ) {
+      // Note: We'd need to fetch the FCM token from somewhere (future: add fcmToken to ParentContact)
+      // For now, push is prepared but token retrieval needs to be implemented
+      this.logger.debug('Push notification prepared but FCM token retrieval not yet implemented');
+    }
+
+    // Email as primary or fallback method
     if (contact.email && contact.notificationPreferences.emailEnabled) {
       try {
         const emailContent = this.generateEmail(request, contact.name);
@@ -340,15 +391,35 @@ export class ParentNotificationService {
         return { success: true, method: 'email' };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return { success: false, method: 'email', error: errorMessage };
+        errors.push(`Email: ${errorMessage}`);
       }
     }
 
     return {
       success: false,
       method: 'email',
-      error: 'No enabled delivery method available',
+      error: errors.length > 0 ? errors.join('; ') : 'No enabled delivery method available',
     };
+  }
+
+  /**
+   * Send email as a follow-up to SMS (for detailed information)
+   */
+  private async sendEmailFallback(
+    notificationId: string,
+    request: ParentNotificationRequest,
+    contact: ParentContact,
+  ): Promise<void> {
+    if (!contact.email) return;
+
+    const emailContent = this.generateEmail(request, contact.name);
+    await this.emailService.sendDigestEmail({
+      to: contact.email,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      text: emailContent.text,
+    });
+    this.logger.log(`Email follow-up sent for notification ${notificationId}`);
   }
 
   /**

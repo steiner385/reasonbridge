@@ -1105,6 +1105,9 @@ importers:
       '@aws-sdk/client-ses':
         specifier: ^3.1010.0
         version: 3.1010.0
+      '@aws-sdk/client-sns':
+        specifier: ^3.1010.0
+        version: 3.1010.0
       '@fastify/swagger':
         specifier: ^9.7.0
         version: 9.7.0
@@ -2984,6 +2987,7 @@ packages:
   '@pact-foundation/pact-core@19.1.0':
     resolution: {integrity: sha512-2jyns+jkgLZK79ovM3aMSYHaMyu6dWmwOQjykj0GUhs37G5jXPffSsmBR1fm//KSf244OvuyELrAsWC+FnUHgg==}
     engines: {node: '>=20'}
+    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@16.3.0':
