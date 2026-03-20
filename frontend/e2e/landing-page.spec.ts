@@ -181,15 +181,15 @@ test.describe('Landing Page - Topics Section Interactions', () => {
     });
   });
 
-  test('should scroll to topics section when clicking See How It Works', async ({ page }) => {
+  test('should scroll to How It Works section when clicking See How It Works', async ({ page }) => {
     await page.goto('/');
 
     // Click the "See How It Works" button
     await page.getByRole('button', { name: /see how it works/i }).click();
 
-    // Topics section should be in view
-    const topicsSection = page.locator('#topics-section');
-    await expect(topicsSection).toBeInViewport();
+    // How It Works section should be in view
+    const howItWorksSection = page.locator('#how-it-works');
+    await expect(howItWorksSection).toBeInViewport();
   });
 
   test('should display topics section with real seeded topics', async ({ page }) => {
