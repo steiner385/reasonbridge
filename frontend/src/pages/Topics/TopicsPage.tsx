@@ -12,6 +12,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import ErrorState from '../../components/ui/ErrorState';
 import {
   TopicCard,
   TopicFilterUI,
@@ -52,7 +53,7 @@ function TopicsPage() {
     canonical: `${window.location.origin}/topics`,
   });
 
-  const { data, isLoading, error } = useFilteredTopics(filters);
+  const { data, isLoading, error, refetch } = useFilteredTopics(filters);
   const showSkeleton = useDelayedLoading(isLoading);
 
   // Check for welcome param and dismissed state
@@ -86,14 +87,12 @@ function TopicsPage() {
   if (error) {
     return (
       <div className="max-w-6xl mx-auto">
-        <Card variant="elevated" padding="lg">
-          <div className="text-center text-fallacy-DEFAULT dark:text-red-400">
-            <h2 className="text-xl font-semibold mb-2">Error Loading Topics</h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              {error instanceof Error ? error.message : 'Failed to load topics'}
-            </p>
-          </div>
-        </Card>
+        <ErrorState
+          title="Error Loading Topics"
+          message={error instanceof Error ? error.message : 'Failed to load topics'}
+          onRetry={() => refetch()}
+          retryLabel="Try Again"
+        />
       </div>
     );
   }

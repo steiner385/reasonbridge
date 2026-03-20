@@ -58,7 +58,7 @@ export function MobileDrawer() {
     [sidebarMode, isMobileOpen],
   );
 
-  const { data, isLoading, error } = useTopics(topicsParams);
+  const { data, isLoading, error, refetch } = useTopics(topicsParams);
 
   const topics = useMemo(() => data?.data || [], [data?.data]);
   const errorMessage = error ? 'Failed to load topics' : null;
@@ -248,6 +248,7 @@ export function MobileDrawer() {
                 unreadMap={unreadMap}
                 isLoading={isLoading}
                 error={errorMessage}
+                onRetry={() => refetch()}
                 height={typeof window !== 'undefined' ? window.innerHeight - 180 : 400}
                 onTopicSelect={handleTopicSelect}
               />
