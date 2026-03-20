@@ -12,11 +12,17 @@ describe('ParentNotificationService', () => {
   let service: ParentNotificationService;
   let prisma: any;
   let emailService: any;
+  let smsService: any;
+  let pushService: any;
 
   const mockChild = {
     id: 'child-123',
     displayName: 'TestChild',
     parentEmail: 'parent@example.com',
+    parentPhone: null,
+    notifyByEmail: true,
+    notifyByPush: false,
+    notifyBySms: false,
     parentalConsent: {
       parentEmail: 'consent-parent@example.com',
     },
@@ -35,7 +41,18 @@ describe('ParentNotificationService', () => {
       sendDigestEmail: vi.fn().mockResolvedValue(undefined),
     };
 
-    service = new ParentNotificationService(prisma, emailService);
+    smsService = {
+      sendParentAlert: vi.fn().mockResolvedValue({ success: false, error: 'SMS not enabled' }),
+      sendSms: vi.fn().mockResolvedValue({ success: false, error: 'SMS not enabled' }),
+    };
+
+    pushService = {
+      isAvailable: vi.fn().mockReturnValue(false),
+      sendPush: vi.fn().mockResolvedValue({ success: false, error: 'Push not available' }),
+      sendParentAlert: vi.fn().mockResolvedValue({ success: false, error: 'Push not available' }),
+    };
+
+    service = new ParentNotificationService(prisma, emailService, smsService, pushService);
   });
 
   describe('notifyParent', () => {
@@ -108,7 +125,7 @@ describe('ParentNotificationService', () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Email failed');
+      expect(result.error).toContain('Email failed');
     });
 
     it('should include [URGENT] prefix for IMMEDIATE priority', async () => {
