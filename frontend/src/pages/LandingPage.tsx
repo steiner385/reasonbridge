@@ -164,13 +164,68 @@ export const LandingPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => {
-                    const topicsSection = document.getElementById('topics-section');
-                    topicsSection?.scrollIntoView({ behavior: 'smooth' });
+                    const howItWorksSection = document.getElementById('how-it-works');
+                    howItWorksSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="px-8 py-4 text-lg font-semibold bg-transparent border-2 border-white dark:border-gray-300 text-white dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white dark:focus:ring-gray-300"
                 >
                   See How It Works
                 </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section id="how-it-works" className="py-16 bg-gray-100 dark:bg-gray-800/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
+              How It Works
+            </h3>
+            <p className="text-xl text-gray-600 dark:text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+              Three simple steps to finding common ground
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Step 1 */}
+              <div className="relative text-center">
+                <div className="w-12 h-12 mx-auto mb-4 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  1
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Join a Discussion
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Browse active topics or start your own. Pick issues that matter to you and share
+                  your perspective through structured responses.
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="relative text-center">
+                <div className="w-12 h-12 mx-auto mb-4 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  2
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  AI Analyzes Responses
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Our AI identifies areas of agreement, highlights shared values, and surfaces
+                  common ground that might otherwise be missed.
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="relative text-center">
+                <div className="w-12 h-12 mx-auto mb-4 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                  3
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Discover Common Ground
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300">
+                  See a visual summary of where participants agree. Build on shared understanding to
+                  have more productive conversations.
+                </p>
               </div>
             </div>
           </div>
