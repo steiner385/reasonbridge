@@ -25,6 +25,8 @@ export interface TopicNavigationContentProps {
   height?: number;
   /** Optional callback when a topic is selected */
   onTopicSelect?: (topicId: string) => void;
+  /** Optional callback to retry loading topics */
+  onRetry?: () => void;
   /** CSS class name */
   className?: string;
 }
@@ -62,6 +64,7 @@ export function TopicNavigationContent({
   error = null,
   height = 400,
   onTopicSelect,
+  onRetry,
   className = '',
 }: TopicNavigationContentProps) {
   const { activeTopicId, navigateToTopic } = useTopicNavigation();
@@ -122,10 +125,18 @@ export function TopicNavigationContent({
       <div className="flex-1 overflow-hidden">
         {error && (
           <div
-            className="mx-3 my-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            className="mx-3 my-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
             role="alert"
           >
-            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+            <p className="text-sm text-red-800 dark:text-red-200 mb-2">{error}</p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="text-xs px-3 py-1.5 text-white bg-primary-600 hover:bg-primary-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                Try Again
+              </button>
+            )}
           </div>
         )}
 

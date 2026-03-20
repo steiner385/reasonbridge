@@ -56,7 +56,7 @@ export function Sidebar() {
     [sidebarMode],
   );
 
-  const { data, isLoading, error } = useTopics(topicsParams);
+  const { data, isLoading, error, refetch } = useTopics(topicsParams);
 
   const topics = useMemo(() => data?.data || [], [data?.data]);
   const errorMessage = error ? 'Failed to load topics' : null;
@@ -130,6 +130,7 @@ export function Sidebar() {
               unreadMap={unreadMap}
               isLoading={isLoading}
               error={errorMessage}
+              onRetry={() => refetch()}
               height={typeof window !== 'undefined' ? window.innerHeight - 120 : 600}
             />
           </div>

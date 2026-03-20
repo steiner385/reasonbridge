@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
 import { useLoginModal } from '../contexts/LoginModalContext';
@@ -48,32 +48,32 @@ export const LandingPage: React.FC = () => {
   // Redirect authenticated users to /topics?welcome=true
   useAuthRedirect();
 
+  // Fetch topics function - extracted for retry capability
+  const fetchTopics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/topics?limit=5&sortBy=participantCount&sortOrder=desc');
+      if (!response.ok) {
+        throw new Error('Failed to fetch topics');
+      }
+      const data: TopicsResponse = await response.json();
+      setTopics(data.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load topics');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Fetch topics for landing page display (only if not authenticated)
   useEffect(() => {
     // Skip fetch if user is authenticated - they'll be redirected anyway
     if (isAuthenticatedSync) {
       return;
     }
-
-    const fetchTopics = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/topics?limit=5&sortBy=participantCount&sortOrder=desc');
-        if (!response.ok) {
-          throw new Error('Failed to fetch topics');
-        }
-        const data: TopicsResponse = await response.json();
-        setTopics(data.data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load topics');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTopics();
-  }, [isAuthenticatedSync]);
+  }, [isAuthenticatedSync, fetchTopics]);
 
   // Prevent landing page flash by returning loading state for authenticated users
   // The useAuthRedirect hook will handle the actual redirect via useEffect
@@ -342,8 +342,16 @@ export const LandingPage: React.FC = () => {
             )}
 
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
-                <p className="text-red-700 dark:text-red-400">Unable to load topics: {error}</p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
+                <p className="text-red-700 dark:text-red-400 mb-4">
+                  Unable to load topics: {error}
+                </p>
+                <button
+                  onClick={fetchTopics}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  Try Again
+                </button>
               </div>
             )}
 
