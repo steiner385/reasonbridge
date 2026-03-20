@@ -5,17 +5,18 @@
 
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { VerificationTokenType } from '@prisma/client';
 import { randomBytes } from 'crypto';
 
 /**
  * Verification Token Service
  *
- * Manages email verification tokens for user signup and email confirmation.
+ * Manages verification tokens for user signup, email confirmation, and password reset.
  * Generates, validates, and cleans up verification tokens.
  *
  * Token lifecycle:
- * 1. Generate 6-digit code on signup
- * 2. Store in database with 24-hour expiration
+ * 1. Generate 6-digit code on signup or password reset request
+ * 2. Store in database with type-specific expiration (24 hours for email, 15 minutes for password reset)
  * 3. Verify code on confirmation
  * 4. Invalidate after successful verification or expiration
  */
@@ -24,6 +25,7 @@ export class VerificationService {
   private readonly logger = new Logger(VerificationService.name);
   private readonly TOKEN_LENGTH = 6;
   private readonly TOKEN_EXPIRATION_HOURS = 24;
+  private readonly PASSWORD_RESET_EXPIRATION_MINUTES = 15;
   private readonly MAX_ATTEMPTS = 5;
 
   constructor(private readonly prisma: PrismaService) {}
@@ -33,23 +35,33 @@ export class VerificationService {
    *
    * @param userId - User ID
    * @param email - User's email address
+   * @param type - Token type (EMAIL_VERIFICATION or PASSWORD_RESET)
    * @returns 6-digit verification code
    */
-  async generateToken(userId: string, email: string): Promise<string> {
+  async generateToken(
+    userId: string,
+    email: string,
+    type: VerificationTokenType = VerificationTokenType.EMAIL_VERIFICATION,
+  ): Promise<string> {
     try {
-      this.logger.debug(`Generating verification token for user: ${userId}`);
+      this.logger.debug(`Generating ${type} token for user: ${userId}`);
 
       // Generate random 6-digit code
       const code = this.generateVerificationCode();
 
-      // Calculate expiration time (24 hours from now)
+      // Calculate expiration time based on token type
       const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + this.TOKEN_EXPIRATION_HOURS);
+      if (type === VerificationTokenType.PASSWORD_RESET) {
+        expiresAt.setMinutes(expiresAt.getMinutes() + this.PASSWORD_RESET_EXPIRATION_MINUTES);
+      } else {
+        expiresAt.setHours(expiresAt.getHours() + this.TOKEN_EXPIRATION_HOURS);
+      }
 
-      // Invalidate any existing tokens for this user
+      // Invalidate any existing tokens of the same type for this user
       await this.prisma.verificationToken.updateMany({
         where: {
           userId,
+          type,
           used: false,
         },
         data: {
@@ -75,15 +87,16 @@ export class VerificationService {
         data: {
           userId,
           token: code,
+          type,
           expiresAt,
           used: false,
         },
       });
 
-      this.logger.log(`Verification token generated for user: ${userId}`);
+      this.logger.log(`${type} token generated for user: ${userId}`);
       return code;
     } catch (error: any) {
-      this.logger.error(`Failed to generate verification token: ${error.message}`, error.stack);
+      this.logger.error(`Failed to generate ${type} token: ${error.message}`, error.stack);
       throw new BadRequestException('Failed to generate verification token');
     }
   }
@@ -93,12 +106,17 @@ export class VerificationService {
    *
    * @param email - User's email address
    * @param code - 6-digit verification code
+   * @param type - Token type (EMAIL_VERIFICATION or PASSWORD_RESET)
    * @returns User ID if verification succeeds
    * @throws BadRequestException if code is invalid, expired, or max attempts exceeded
    */
-  async verifyToken(email: string, code: string): Promise<string> {
+  async verifyToken(
+    email: string,
+    code: string,
+    type: VerificationTokenType = VerificationTokenType.EMAIL_VERIFICATION,
+  ): Promise<string> {
     try {
-      this.logger.debug(`Verifying token for email: ${email}`);
+      this.logger.debug(`Verifying ${type} token for email: ${email}`);
 
       // TODO: Add attempts tracking to prevent brute force attacks
       // Look up user by email first
@@ -115,10 +133,11 @@ export class VerificationService {
         });
       }
 
-      // Find the most recent unused token for this user
+      // Find the most recent unused token of the specified type for this user
       const token = await this.prisma.verificationToken.findFirst({
         where: {
           userId: user.id,
+          type,
           used: false,
         },
         orderBy: {
@@ -127,7 +146,7 @@ export class VerificationService {
       });
 
       if (!token) {
-        this.logger.warn(`No verification token found for email: ${email}`);
+        this.logger.warn(`No ${type} token found for email: ${email}`);
         throw new NotFoundException({
           error: 'TOKEN_NOT_FOUND',
           message: 'No verification code found for this email',
@@ -139,10 +158,14 @@ export class VerificationService {
 
       // Check if token has expired
       if (new Date() > token.expiresAt) {
-        this.logger.warn(`Verification token expired for email: ${email}`);
+        const expiryMessage =
+          type === VerificationTokenType.PASSWORD_RESET
+            ? 'valid for 15 minutes'
+            : 'valid for 24 hours';
+        this.logger.warn(`${type} token expired for email: ${email}`);
         throw new BadRequestException({
           error: 'EXPIRED_CODE',
-          message: 'Verification code has expired (valid for 24 hours)',
+          message: `Verification code has expired (${expiryMessage})`,
           details: {
             canResend: true,
           },
@@ -151,7 +174,7 @@ export class VerificationService {
 
       // Check if code matches
       if (token.token !== code) {
-        this.logger.warn(`Invalid verification code for email: ${email}`);
+        this.logger.warn(`Invalid ${type} code for email: ${email}`);
 
         throw new BadRequestException({
           error: 'INVALID_CODE',
@@ -168,14 +191,14 @@ export class VerificationService {
         },
       });
 
-      this.logger.log(`Verification successful for email: ${email}`);
+      this.logger.log(`${type} verification successful for email: ${email}`);
       return token.userId;
     } catch (error: any) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error(`Verification failed: ${error.message}`, error.stack);
+      this.logger.error(`${type} verification failed: ${error.message}`, error.stack);
       throw new BadRequestException('Verification failed');
     }
   }
