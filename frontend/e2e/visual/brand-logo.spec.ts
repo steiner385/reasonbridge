@@ -1,8 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// TODO: Re-enable brand logo tests once header/logo components are implemented
-// These tests fail in CI because the expected elements don't exist yet
-test.describe.skip('Brand Identity - Logo Display', () => {
+test.describe('Brand Identity - Logo Display', () => {
   test('ReasonBridge logo displays correctly in header', async ({ page }) => {
     await page.goto('/');
 
@@ -10,9 +8,9 @@ test.describe.skip('Brand Identity - Logo Display', () => {
     const headerLogo = page.locator('header img[alt*="ReasonBridge"]').first();
     await expect(headerLogo).toBeVisible();
 
-    // Verify logo source uses reasonbridge-logo
+    // Verify logo source uses brand logo assets
     const logoSrc = await headerLogo.getAttribute('src');
-    expect(logoSrc).toMatch(/reasonbridge-logo/);
+    expect(logoSrc).toMatch(/logo-(icon|full)\.svg/);
 
     // Visual snapshot of header with logo
     await expect(page.locator('header')).toHaveScreenshot('header-with-logo.png');
@@ -23,6 +21,6 @@ test.describe.skip('Brand Identity - Logo Display', () => {
 
     // Check that favicon link exists in head
     const faviconLink = page.locator('link[rel="icon"]').first();
-    await expect(faviconLink).toHaveAttribute('href', /reasonbridge-icon/);
+    await expect(faviconLink).toHaveAttribute('href', /favicon/);
   });
 });

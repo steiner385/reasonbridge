@@ -90,11 +90,15 @@ export function Header() {
             {isMobile ? (
               <img
                 src="/assets/brand/logo-icon.svg"
-                alt=""
+                alt="ReasonBridge"
                 className="h-8 w-8 dark:brightness-110"
               />
             ) : (
-              <img src="/assets/brand/logo-full.svg" alt="" className="h-8 dark:brightness-110" />
+              <img
+                src="/assets/brand/logo-full.svg"
+                alt="ReasonBridge"
+                className="h-8 dark:brightness-110"
+              />
             )}
           </Link>
         </div>
