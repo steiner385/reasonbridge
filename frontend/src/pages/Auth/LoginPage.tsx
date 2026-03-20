@@ -40,21 +40,8 @@ function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        {/* Login Form - includes its own Sign In heading */}
+        {/* Login Form - includes "Don't have an account?" link */}
         <LoginForm onSubmit={handleSubmit} isLoading={isLoading} error={error} />
-
-        {/* Footer Links */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Don&apos;t have an account?{' '}
-            <Link
-              to="/signup"
-              className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-            >
-              Create one
-            </Link>
-          </p>
-        </div>
 
         {/* Back to Home */}
         <div className="mt-4 text-center">
