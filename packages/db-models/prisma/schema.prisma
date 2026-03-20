@@ -47,7 +47,13 @@ model User {
   declaredCountry           String?             @map("declared_country") @db.VarChar(2) // ISO 3166-1 alpha-2
   regionalConsentAge        Int?                @map("regional_consent_age")
   parentEmail               String?             @map("parent_email")
+  parentPhone               String?             @map("parent_phone")
   parentConsentStatus       ParentConsentStatus @default(NOT_REQUIRED) @map("parent_consent_status")
+  // Notification preferences (Issue #1051)
+  notifyByEmail             Boolean             @default(true) @map("notify_by_email")
+  notifyByPush              Boolean             @default(false) @map("notify_by_push")
+  notifyBySms               Boolean             @default(false) @map("notify_by_sms")
+  fcmToken                  String?             @map("fcm_token")
   /// Timestamp of last age verification (for annual re-verification)
   lastAgeVerifiedAt         DateTime?           @map("last_age_verified_at")
   /// Flag indicating user needs to re-verify age on next login
