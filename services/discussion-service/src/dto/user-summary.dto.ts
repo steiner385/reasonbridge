@@ -10,6 +10,7 @@
  * without exposing sensitive fields
  */
 
+import { createHash } from 'crypto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -55,12 +56,32 @@ export class UserSummaryDto {
 export function mapToUserSummary(user: {
   id: string;
   displayName: string | null;
+  avatarUrl?: string | null;
+  email?: string | null;
   verificationLevel: string;
 }): UserSummaryDto {
   return {
     id: user.id,
     displayName: user.displayName,
-    avatarUrl: null, // TODO: Add avatar support when implemented
+    avatarUrl: user.avatarUrl ?? getGravatarUrl(user.email),
     verificationLevel: user.verificationLevel as any,
   };
+}
+
+/**
+ * Generate Gravatar URL from email address
+ * Uses MD5 hash of lowercase email per Gravatar specification
+ * @param email - User email address
+ * @param size - Avatar size in pixels (default 80)
+ * @returns Gravatar URL or null if no email provided
+ */
+export function getGravatarUrl(email?: string | null, size = 80): string | null {
+  if (!email) return null;
+
+  // Gravatar expects lowercase, trimmed email
+  const normalizedEmail = email.toLowerCase().trim();
+  const hash = createHash('md5').update(normalizedEmail).digest('hex');
+
+  // Use 'identicon' as default for users without Gravatar accounts
+  return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon`;
 }

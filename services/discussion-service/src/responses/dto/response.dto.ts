@@ -15,7 +15,9 @@ export interface CitedSourceDto {
 
 export interface UserSummaryDto {
   id: string;
-  displayName: string;
+  displayName: string | null;
+  avatarUrl?: string | null;
+  verificationLevel?: 'BASIC' | 'ENHANCED' | 'VERIFIED_HUMAN';
 }
 
 export interface ResponsePropositionDto {

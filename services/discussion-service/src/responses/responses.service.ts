@@ -18,6 +18,7 @@ import { CreateResponseDto } from './dto/create-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
 import type { ResponseDto, CitedSourceDto, UserSummaryDto } from './dto/response.dto.js';
+import { getGravatarUrl } from '../dto/user-summary.dto.js';
 import { DiscussionLogger } from '../utils/logger.js';
 import { validateCitationUrl } from '../utils/ssrf-validator.js';
 
@@ -79,6 +80,9 @@ export class ResponsesService {
           select: {
             id: true,
             displayName: true,
+            avatarUrl: true,
+            email: true,
+            verificationLevel: true,
           },
         },
         propositions: {
@@ -193,6 +197,9 @@ export class ResponsesService {
           select: {
             id: true,
             displayName: true,
+            avatarUrl: true,
+            email: true,
+            verificationLevel: true,
           },
         },
       },
@@ -254,6 +261,9 @@ export class ResponsesService {
           select: {
             id: true,
             displayName: true,
+            avatarUrl: true,
+            email: true,
+            verificationLevel: true,
           },
         },
         propositions: {
@@ -374,6 +384,9 @@ export class ResponsesService {
           select: {
             id: true,
             displayName: true,
+            avatarUrl: true,
+            email: true,
+            verificationLevel: true,
           },
         },
         propositions: {
@@ -452,6 +465,8 @@ export class ResponsesService {
       ? {
           id: response.author.id,
           displayName: response.author.displayName,
+          avatarUrl: response.author.avatarUrl ?? getGravatarUrl(response.author.email),
+          verificationLevel: response.author.verificationLevel,
         }
       : undefined;
 
@@ -663,7 +678,13 @@ export class ResponsesService {
         where: { id: response.id },
         include: {
           author: {
-            select: { id: true, displayName: true, verificationLevel: true },
+            select: {
+              id: true,
+              displayName: true,
+              avatarUrl: true,
+              email: true,
+              verificationLevel: true,
+            },
           },
           citations: true,
         },
@@ -692,6 +713,7 @@ export class ResponsesService {
       author: {
         id: result.author.id,
         displayName: result.author.displayName,
+        avatarUrl: result.author.avatarUrl ?? getGravatarUrl(result.author.email),
         verificationLevel: result.author.verificationLevel,
       },
       parentResponseId: result.parentId,
@@ -914,7 +936,13 @@ export class ResponsesService {
       },
       include: {
         author: {
-          select: { id: true, displayName: true, verificationLevel: true },
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+            email: true,
+            verificationLevel: true,
+          },
         },
         citations: true,
         _count: {
@@ -932,6 +960,7 @@ export class ResponsesService {
       author: {
         id: response.author.id,
         displayName: response.author.displayName,
+        avatarUrl: response.author.avatarUrl ?? getGravatarUrl(response.author.email),
         verificationLevel: response.author.verificationLevel,
       },
       parentResponseId: response.parentId,

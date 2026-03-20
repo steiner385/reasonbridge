@@ -28,6 +28,7 @@ import {
   createPaginationMeta,
   PaginatedResponseDto,
 } from '../dto/pagination.dto.js';
+import { getGravatarUrl } from '../dto/user-summary.dto.js';
 
 export interface ListDiscussionsQuery extends PaginationQueryDto {
   topicId?: string;
@@ -59,7 +60,14 @@ export class DiscussionsService {
     // FR-001: Verify user is verified (emailVerified === true)
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, displayName: true, emailVerified: true, verificationLevel: true },
+      select: {
+        id: true,
+        displayName: true,
+        avatarUrl: true,
+        email: true,
+        emailVerified: true,
+        verificationLevel: true,
+      },
     });
 
     if (!user) {
@@ -170,13 +178,25 @@ export class DiscussionsService {
         where: { id: discussion.id },
         include: {
           creator: {
-            select: { id: true, displayName: true, verificationLevel: true },
+            select: {
+              id: true,
+              displayName: true,
+              avatarUrl: true,
+              email: true,
+              verificationLevel: true,
+            },
           },
           responses: {
             where: { deletedAt: null },
             include: {
               author: {
-                select: { id: true, displayName: true, verificationLevel: true },
+                select: {
+                  id: true,
+                  displayName: true,
+                  avatarUrl: true,
+                  email: true,
+                  verificationLevel: true,
+                },
               },
               citations: true,
             },
@@ -213,6 +233,8 @@ export class DiscussionsService {
         author: {
           id: response.author.id,
           displayName: response.author.displayName,
+          avatarUrl: response.author.avatarUrl ?? getGravatarUrl(response.author.email),
+          verificationLevel: response.author.verificationLevel,
         },
         parentResponseId: response.parentId,
         citations: response.citations.map((citation) => ({
@@ -271,7 +293,13 @@ export class DiscussionsService {
         where,
         include: {
           creator: {
-            select: { id: true, displayName: true, verificationLevel: true },
+            select: {
+              id: true,
+              displayName: true,
+              avatarUrl: true,
+              email: true,
+              verificationLevel: true,
+            },
           },
         },
         orderBy: {
