@@ -24,6 +24,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module.js';
 import { ReadStateModule } from './read-state/read-state.module.js';
 import { GatewaysModule } from './gateways/index.js';
 import { SearchModule } from './search/search.module.js';
+import { LinkPreviewModule } from './link-preview/link-preview.module.js';
 
 /**
  * T009 [P] - Main application module with rate limiting configuration
@@ -86,6 +87,8 @@ import { SearchModule } from './search/search.module.js';
     GatewaysModule,
     // Feature #1040: Unified full-text search
     SearchModule,
+    // Feature #1042: Link preview metadata fetching
+    LinkPreviewModule,
   ],
   controllers: [],
   providers: [],

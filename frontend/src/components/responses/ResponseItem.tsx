@@ -39,6 +39,8 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
 import { apiClient } from '../../lib/api';
 import { InlineTrustBadge } from '../users';
+import { useLinkPreviews } from '../../hooks/useLinkPreviews';
+import { extractUrls } from '../../services/linkPreviewService';
 import ResponseComposer from './ResponseComposer';
 import { LightweightReplyComposer } from './LightweightReplyComposer';
 import ReactionBar from './ReactionBar';
@@ -49,6 +51,7 @@ import VoteButtons from './VoteButtons';
 import ResponseMenu from './ResponseMenu';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 import ReportDialog, { type ReportReason } from './ReportDialog';
+import LinkPreviewCard from './LinkPreviewCard';
 
 export interface ResponseItemProps {
   response: ResponseDetail;
@@ -132,6 +135,13 @@ export function ResponseItem({
     isPending: isVotePending,
     isLoading: isVoteLoading,
   } = useVotes(response.id);
+
+  // Link previews for URLs in content
+  const contentUrls = useMemo(() => extractUrls(response.content), [response.content]);
+  const { previews, isLoading: isPreviewsLoading } = useLinkPreviews(response.content, {
+    enabled: contentUrls.length > 0,
+    maxUrls: 3, // Limit to 3 previews per response
+  });
 
   // Response menu state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -403,6 +413,38 @@ export function ResponseItem({
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Link Previews for URLs in content */}
+            {contentUrls.length > 0 && (
+              <div
+                className={`space-y-2 ${compact ? 'mt-2' : 'mt-3'} ${
+                  !isGroupStart && compact ? 'ml-8' : ''
+                }`}
+              >
+                {contentUrls.map((url) => {
+                  const preview = previews.get(url);
+                  if (!preview && !isPreviewsLoading) return null;
+                  return (
+                    <LinkPreviewCard
+                      key={url}
+                      preview={
+                        preview || {
+                          url,
+                          title: null,
+                          description: null,
+                          image: null,
+                          siteName: null,
+                          favicon: null,
+                          type: null,
+                        }
+                      }
+                      isLoading={isPreviewsLoading}
+                      compact={compact}
+                    />
+                  );
+                })}
               </div>
             )}
 
