@@ -133,7 +133,7 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
           <p className="text-sm text-center text-gray-600 dark:text-gray-300">
             Don&apos;t have an account?{' '}
             <Link
-              to="/register"
+              to="/signup"
               className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
               Create one
