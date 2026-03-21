@@ -20,6 +20,7 @@ import {
   PrivacySettingsResponseDto,
   type UpdatePrivacySettingsDto,
 } from './dto/privacy-settings.dto.js';
+import { AvatarUrls } from '../services/s3.service.js';
 
 export interface CreateUserData {
   email: string;
@@ -765,5 +766,53 @@ export class UsersService {
     }
 
     return false;
+  }
+
+  /**
+   * Update user's avatar URLs and hash
+   * @param userId - User ID
+   * @param avatarUrls - Structured URLs for all avatar variants
+   * @param avatarHash - Hash used for S3 folder path
+   * @throws BadRequestException if userId is not a valid UUID
+   * @throws NotFoundException if user is not found
+   */
+  async updateAvatarUrls(
+    userId: string,
+    avatarUrls: AvatarUrls,
+    avatarHash: string,
+  ): Promise<void> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    // Verify user exists
+    await this.findById(userId);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrls,
+        avatarHash,
+      },
+    });
+  }
+
+  /**
+   * Get user's avatar hash for S3 folder management
+   * @param userId - User ID
+   * @returns Avatar hash or null if not set
+   * @throws BadRequestException if userId is not a valid UUID
+   */
+  async getAvatarHash(userId: string): Promise<string | null> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarHash: true },
+    });
+
+    return user?.avatarHash ?? null;
   }
 }
