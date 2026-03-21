@@ -72,5 +72,13 @@ describe('ImageProcessorService', () => {
       await expect(service.processAvatar(input)).rejects.toThrow(BadRequestException);
       await expect(service.processAvatar(input)).rejects.toThrow('Invalid image file');
     });
+
+    it('should throw for files larger than 10MB', async () => {
+      // Create a buffer larger than 10MB
+      const largeBuffer = Buffer.alloc(11 * 1024 * 1024);
+
+      await expect(service.processAvatar(largeBuffer)).rejects.toThrow(BadRequestException);
+      await expect(service.processAvatar(largeBuffer)).rejects.toThrow('File too large');
+    });
   });
 });

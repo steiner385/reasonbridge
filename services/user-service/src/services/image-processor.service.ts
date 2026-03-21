@@ -18,6 +18,8 @@ export interface ProcessedImage {
 export class ImageProcessorService {
   private readonly logger = new Logger(ImageProcessorService.name);
 
+  private readonly MAX_INPUT_SIZE = 10 * 1024 * 1024; // 10MB
+
   private readonly sizes = {
     small: 32,
     medium: 128,
@@ -28,17 +30,21 @@ export class ImageProcessorService {
     jpegQuality: 85,
     webpQuality: 85,
     resizeFit: 'cover' as const,
-    stripMetadata: true,
     background: { r: 255, g: 255, b: 255 },
   };
 
   async processAvatar(input: Buffer): Promise<ProcessedImage[]> {
+    // Check input size for DoS protection
+    if (input.length > this.MAX_INPUT_SIZE) {
+      throw new BadRequestException('File too large');
+    }
+
     // Validate image
     let metadata: sharp.Metadata;
     try {
       metadata = await sharp(input).metadata();
     } catch (error) {
-      this.logger.warn('Failed to read image metadata');
+      this.logger.warn('Failed to read image metadata', error);
       throw new BadRequestException('Invalid image file');
     }
 
