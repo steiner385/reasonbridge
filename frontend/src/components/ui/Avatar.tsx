@@ -5,6 +5,7 @@
 
 import { User as UserIcon } from 'lucide-react';
 import type { User } from '../../types/user';
+import { getMD5Hash } from '../../lib/crypto';
 
 export interface AvatarProps {
   /**
@@ -27,19 +28,17 @@ type AvatarSizeKey = 'small' | 'medium' | 'large';
 
 /**
  * Generate a Gravatar URL from an email address
+ * Uses MD5 hash of lowercase, trimmed email per Gravatar specification
+ * @param email - User email address
+ * @param size - Avatar size in pixels (default 200)
+ * @returns Gravatar URL
  */
 function getGravatarUrl(email: string, size = 200): string {
-  const hash = email.trim().toLowerCase();
-  // Note: In production, this should use a proper MD5 hash
-  // For now, we'll use a simple hash function
-  let hashValue = 0;
-  for (let i = 0; i < hash.length; i++) {
-    const char = hash.charCodeAt(i);
-    hashValue = (hashValue << 5) - hashValue + char;
-    hashValue = hashValue & hashValue;
-  }
-  const md5Hash = Math.abs(hashValue).toString(16).padStart(32, '0');
-  return `https://www.gravatar.com/avatar/${md5Hash}?s=${size}&d=identicon`;
+  // Gravatar expects lowercase, trimmed email
+  const normalizedEmail = email.toLowerCase().trim();
+  const hash = getMD5Hash(normalizedEmail);
+  // Use 'identicon' as default for users without Gravatar accounts
+  return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon`;
 }
 
 /**
@@ -114,7 +113,15 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
       <div className={baseClasses} {...testAttributes}>
         <picture className="w-full h-full">
           <source srcSet={urls.webp} type="image/webp" />
-          <img src={urls.jpg} alt={user.displayName} className="w-full h-full object-cover" />
+          <img
+            src={urls.jpg}
+            alt={user.displayName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to icon if image fails to load
+              e.currentTarget.style.display = 'none';
+            }}
+          />
         </picture>
       </div>
     );
@@ -124,7 +131,15 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
   const fallbackSrc = user.avatarUrl || getGravatarUrl(user.email);
   return (
     <div className={baseClasses} {...testAttributes}>
-      <img src={fallbackSrc} alt={user.displayName} className="w-full h-full object-cover" />
+      <img
+        src={fallbackSrc}
+        alt={user.displayName}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          // Fallback to icon if image fails to load
+          e.currentTarget.style.display = 'none';
+        }}
+      />
     </div>
   );
 }
