@@ -20,7 +20,7 @@ import {
   PrivacySettingsResponseDto,
   type UpdatePrivacySettingsDto,
 } from './dto/privacy-settings.dto.js';
-import { AvatarUrls } from '../services/s3.service.js';
+import type { AvatarUrls } from '../services/s3.service.js';
 
 export interface CreateUserData {
   email: string;
@@ -791,7 +791,7 @@ export class UsersService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        avatarUrls,
+        avatarUrls: avatarUrls as never,
         avatarHash,
       },
     });

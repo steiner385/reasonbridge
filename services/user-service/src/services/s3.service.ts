@@ -14,7 +14,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { ProcessedImage } from './image-processor.service';
+import type { ProcessedImage } from './image-processor.service';
 
 export interface UploadResult {
   key: string;
