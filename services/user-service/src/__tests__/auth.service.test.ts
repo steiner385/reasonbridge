@@ -1,12 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth/auth.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UserRepository } from '../repositories/user.repository.js';
@@ -16,6 +14,8 @@ import { CognitoService } from '../auth/cognito.service.js';
 import { GoogleOAuthService } from '../auth/oauth/google-oauth.service.js';
 import { AppleOAuthService } from '../auth/oauth/apple-oauth.service.js';
 import { VerificationService } from '../auth/verification.service.js';
+import { EmailService } from '../services/email.service.js';
+import { ConfigService } from '@nestjs/config';
 import { OAuthProvider } from '../auth/dto/oauth.dto.js';
 
 // Mock Prisma enums for tests (avoid importing from @prisma/client directly)
@@ -136,6 +136,11 @@ describe('AuthService - Unit Tests', () => {
     getRemainingAttempts: vi.fn(),
   };
 
+  const mockEmailService = {
+    sendPasswordResetEmail: vi.fn(),
+    sendVerificationEmail: vi.fn(),
+  };
+
   const mockPrismaService = {
     $transaction: vi.fn((callback) => callback(mockPrismaService)),
     user: {
@@ -162,37 +167,35 @@ describe('AuthService - Unit Tests', () => {
     }),
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Clear all mocks
     vi.clearAllMocks();
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        { provide: PrismaService, useValue: mockPrismaService },
-        { provide: UserRepository, useValue: mockUserRepository },
-        { provide: OnboardingProgressRepository, useValue: mockOnboardingProgressRepository },
-        { provide: VisitorSessionRepository, useValue: mockVisitorSessionRepository },
-        { provide: CognitoService, useValue: mockCognitoService },
-        { provide: GoogleOAuthService, useValue: mockGoogleOAuthService },
-        { provide: AppleOAuthService, useValue: mockAppleOAuthService },
-        { provide: VerificationService, useValue: mockVerificationService },
-        { provide: ConfigService, useValue: mockConfigService },
-      ],
-    }).compile();
-
-    authService = module.get<AuthService>(AuthService);
-    userRepository = module.get<UserRepository>(UserRepository);
-    onboardingProgressRepository = module.get<OnboardingProgressRepository>(
-      OnboardingProgressRepository,
+    // Direct instantiation with mocks - bypasses NestJS DI issues with vi.mock
+    authService = new AuthService(
+      mockPrismaService as unknown as PrismaService,
+      mockUserRepository as unknown as UserRepository,
+      mockOnboardingProgressRepository as unknown as OnboardingProgressRepository,
+      mockVisitorSessionRepository as unknown as VisitorSessionRepository,
+      mockCognitoService as unknown as CognitoService,
+      mockGoogleOAuthService as unknown as GoogleOAuthService,
+      mockAppleOAuthService as unknown as AppleOAuthService,
+      mockVerificationService as unknown as VerificationService,
+      mockConfigService as unknown as ConfigService,
+      mockEmailService as unknown as EmailService,
     );
-    visitorSessionRepository = module.get<VisitorSessionRepository>(VisitorSessionRepository);
-    cognitoService = module.get<CognitoService>(CognitoService);
-    googleOAuthService = module.get<GoogleOAuthService>(GoogleOAuthService);
-    appleOAuthService = module.get<AppleOAuthService>(AppleOAuthService);
-    verificationService = module.get<VerificationService>(VerificationService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    configService = module.get<ConfigService>(ConfigService);
+
+    // Keep references for test assertions
+    userRepository = mockUserRepository as unknown as UserRepository;
+    onboardingProgressRepository =
+      mockOnboardingProgressRepository as unknown as OnboardingProgressRepository;
+    visitorSessionRepository = mockVisitorSessionRepository as unknown as VisitorSessionRepository;
+    cognitoService = mockCognitoService as unknown as CognitoService;
+    googleOAuthService = mockGoogleOAuthService as unknown as GoogleOAuthService;
+    appleOAuthService = mockAppleOAuthService as unknown as AppleOAuthService;
+    verificationService = mockVerificationService as unknown as VerificationService;
+    prismaService = mockPrismaService as unknown as PrismaService;
+    configService = mockConfigService as unknown as ConfigService;
   });
 
   afterEach(() => {
@@ -240,7 +243,11 @@ describe('AuthService - Unit Tests', () => {
       expect(result.user.email).toBe(signupDto.email);
       expect(result.onboardingProgress.currentStep).toBe(OnboardingStep.VERIFICATION);
       expect(mockUserRepository.existsByEmail).toHaveBeenCalledWith(signupDto.email);
-      expect(mockCognitoService.signUp).toHaveBeenCalledWith(signupDto.email, signupDto.password);
+      expect(mockCognitoService.signUp).toHaveBeenCalledWith(
+        signupDto.email,
+        signupDto.password,
+        signupDto.displayName,
+      );
       expect(mockUserRepository.create).toHaveBeenCalled();
       expect(mockOnboardingProgressRepository.create).toHaveBeenCalled();
       expect(mockVisitorSessionRepository.convertToUser).toHaveBeenCalledWith(
@@ -365,13 +372,8 @@ describe('AuthService - Unit Tests', () => {
       // Act
       const result = await authService.signup(signupDto);
 
-      // Assert
-      expect(mockOnboardingProgressRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentStep: OnboardingStep.VERIFICATION,
-          emailVerified: false,
-        }),
-      );
+      // Assert - onboardingProgressRepository.create only takes userId as argument
+      expect(mockOnboardingProgressRepository.create).toHaveBeenCalledWith('user-123');
       expect(result.onboardingProgress.currentStep).toBe(OnboardingStep.VERIFICATION);
     });
   });
@@ -772,14 +774,9 @@ describe('AuthService - Unit Tests', () => {
       // Act
       const result = await authService.handleOAuthCallback(OAuthProvider.GOOGLE, callbackQuery);
 
-      // Assert
+      // Assert - onboardingProgressRepository.create only takes userId as argument
       expect(result.onboardingProgress.currentStep).toBe(OnboardingStep.VERIFICATION);
-      expect(mockOnboardingProgressRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currentStep: OnboardingStep.VERIFICATION,
-          emailVerified: false,
-        }),
-      );
+      expect(mockOnboardingProgressRepository.create).toHaveBeenCalledWith('user-123');
     });
   });
 
@@ -929,6 +926,13 @@ describe('AuthService - Unit Tests', () => {
   // ==================== EDGE CASES ====================
 
   describe('edge cases', () => {
+    beforeEach(() => {
+      // Reset $transaction mock to success behavior (may have been set to reject in error scenarios)
+      mockPrismaService.$transaction.mockImplementation((callback: any) =>
+        callback(mockPrismaService),
+      );
+    });
+
     it('should handle email with different casing', async () => {
       // Arrange
       const signupDto = {
@@ -1020,6 +1024,129 @@ describe('AuthService - Unit Tests', () => {
           displayName: expect.any(String),
         }),
       );
+    });
+  });
+
+  // ==================== PASSWORD RESET TESTS ====================
+
+  describe('requestPasswordReset', () => {
+    it('should generate token and send email for existing user', async () => {
+      // Arrange
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        email: 'test@example.com',
+        passwordHash: 'hashed-password',
+      });
+      mockVerificationService.generateToken.mockResolvedValue('123456');
+      mockEmailService.sendPasswordResetEmail.mockResolvedValue(undefined);
+
+      // Act
+      await authService.requestPasswordReset('test@example.com');
+
+      // Assert
+      expect(mockVerificationService.generateToken).toHaveBeenCalledWith(
+        'user-1',
+        'test@example.com',
+        'PASSWORD_RESET',
+      );
+      expect(mockEmailService.sendPasswordResetEmail).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        code: '123456',
+      });
+    });
+
+    it('should silently succeed for non-existent user', async () => {
+      // Arrange
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(authService.requestPasswordReset('unknown@example.com')).resolves.not.toThrow();
+      expect(mockVerificationService.generateToken).not.toHaveBeenCalled();
+      expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+
+    it('should silently succeed for OAuth user without password', async () => {
+      // Arrange
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        email: 'oauth@example.com',
+        passwordHash: null,
+      });
+
+      // Act & Assert
+      await expect(authService.requestPasswordReset('oauth@example.com')).resolves.not.toThrow();
+      expect(mockVerificationService.generateToken).not.toHaveBeenCalled();
+      expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+
+    it('should silently succeed even if email sending fails', async () => {
+      // Arrange
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        email: 'test@example.com',
+        passwordHash: 'hashed-password',
+      });
+      mockVerificationService.generateToken.mockResolvedValue('123456');
+      mockEmailService.sendPasswordResetEmail.mockRejectedValue(new Error('Email service down'));
+
+      // Act & Assert - should not throw despite email failure (prevents enumeration)
+      await expect(authService.requestPasswordReset('test@example.com')).resolves.not.toThrow();
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset password with valid code', async () => {
+      // Arrange
+      mockVerificationService.verifyToken.mockResolvedValue('user-1');
+      mockPrismaService.user.update.mockResolvedValue({ id: 'user-1' });
+
+      // Act
+      await authService.resetPassword('test@example.com', '123456', 'NewPassword123!');
+
+      // Assert
+      expect(mockVerificationService.verifyToken).toHaveBeenCalledWith(
+        'test@example.com',
+        '123456',
+        'PASSWORD_RESET',
+      );
+      expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: { passwordHash: expect.any(String) },
+      });
+    });
+
+    it('should reject weak password', async () => {
+      // Act & Assert
+      await expect(authService.resetPassword('test@example.com', '123456', 'weak')).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockVerificationService.verifyToken).not.toHaveBeenCalled();
+    });
+
+    it('should reject invalid code', async () => {
+      // Arrange
+      mockVerificationService.verifyToken.mockRejectedValue(
+        new BadRequestException({ error: 'INVALID_CODE' }),
+      );
+
+      // Act & Assert
+      await expect(
+        authService.resetPassword('test@example.com', '000000', 'NewPassword123!'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should hash password with bcrypt before saving', async () => {
+      // Arrange
+      mockVerificationService.verifyToken.mockResolvedValue('user-1');
+      mockPrismaService.user.update.mockResolvedValue({ id: 'user-1' });
+
+      // Act
+      await authService.resetPassword('test@example.com', '123456', 'NewPassword123!');
+
+      // Assert - verify password hash is not the plaintext password
+      const updateCall = mockPrismaService.user.update.mock.calls[0][0];
+      expect(updateCall.data.passwordHash).not.toBe('NewPassword123!');
+      expect(updateCall.data.passwordHash.length).toBeGreaterThan(50); // bcrypt hashes are ~60 chars
     });
   });
 });

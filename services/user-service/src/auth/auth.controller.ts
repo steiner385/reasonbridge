@@ -24,6 +24,8 @@ const THROTTLE_LIMITS = {
   refresh: isTest ? 10000 : 10, // 10/min in prod
   verifyEmail: isTest ? 10000 : 5, // 5/min in prod
   resendVerification: isTest ? 10000 : 3, // 3/min in prod (per spec)
+  forgotPassword: isTest ? 10000 : 3, // 3/min in prod
+  resetPassword: isTest ? 10000 : 5, // 5/min in prod
 };
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';
 import { RefreshDto, RefreshResponseDto } from './dto/refresh.dto.js';
@@ -33,6 +35,8 @@ import {
   ResendVerificationRequestDto,
   ResendVerificationResponseDto,
 } from './dto/resend-verification.dto.js';
+import { ForgotPasswordRequestDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto.js';
+import { ResetPasswordRequestDto, ResetPasswordResponseDto } from './dto/reset-password.dto.js';
 import { AUTH_SERVICE, type IAuthService } from './auth.interface.js';
 import { AgeVerificationService } from '../compliance/age-verification.service.js';
 import { ParentalConsentService } from '../compliance/parental-consent.service.js';
@@ -276,6 +280,37 @@ export class AuthController {
       email: user.email,
       remainingAttempts,
       expiresAt: expiresAt.toISOString(),
+    };
+  }
+
+  /**
+   * Request a password reset code
+   * Rate limited: 3 attempts per minute to prevent abuse
+   * Always returns success to prevent email enumeration
+   */
+  @Post('forgot-password')
+  @Throttle({ default: { limit: THROTTLE_LIMITS.forgotPassword, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordRequestDto): Promise<ForgotPasswordResponseDto> {
+    await this.authService.requestPasswordReset(dto.email);
+
+    return {
+      message: 'If an account exists with this email, a password reset code has been sent.',
+    };
+  }
+
+  /**
+   * Reset password with verification code
+   * Rate limited: 5 attempts per minute to prevent brute force
+   */
+  @Post('reset-password')
+  @Throttle({ default: { limit: THROTTLE_LIMITS.resetPassword, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordRequestDto): Promise<ResetPasswordResponseDto> {
+    await this.authService.resetPassword(dto.email, dto.code, dto.newPassword);
+
+    return {
+      message: 'Password reset successful. You can now log in with your new password.',
     };
   }
 }

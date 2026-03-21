@@ -94,6 +94,50 @@ class AuthService {
   }
 
   /**
+   * Request a password reset code
+   */
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const error: ErrorResponse = await response.json();
+      throw new Error(error.message || 'Failed to request password reset');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Reset password with verification code
+   */
+  async resetPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, code, newPassword }),
+    });
+
+    if (!response.ok) {
+      const error: ErrorResponse = await response.json();
+      throw new Error(error.message || 'Failed to reset password');
+    }
+
+    return response.json();
+  }
+
+  /**
    * Get the pending verification email from localStorage
    */
   getPendingVerificationEmail(): string | null {
