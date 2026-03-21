@@ -22,6 +22,9 @@ const RegisterPage = lazy(() => import('../pages/Auth').then((m) => ({ default: 
 const ForgotPasswordPage = lazy(() =>
   import('../pages/Auth').then((m) => ({ default: m.ForgotPasswordPage })),
 );
+const ResetPasswordPage = lazy(() =>
+  import('../pages/Auth').then((m) => ({ default: m.ResetPasswordPage })),
+);
 const LoginPage = lazy(() => import('../pages/Auth').then((m) => ({ default: m.LoginPage })));
 const SignupPage = lazy(() =>
   import('../pages/SignupPage').then((m) => ({ default: m.SignupPage })),
@@ -159,6 +162,14 @@ export const routes: RouteObject[] = [
     element: (
       <LazyRoute>
         <ForgotPasswordPage />
+      </LazyRoute>
+    ),
+  },
+  {
+    path: '/reset-password',
+    element: (
+      <LazyRoute>
+        <ResetPasswordPage />
       </LazyRoute>
     ),
   },

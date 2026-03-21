@@ -63,6 +63,7 @@ function App() {
     '/login',
     '/verify-email',
     '/forgot-password',
+    '/reset-password',
   ].includes(location.pathname);
 
   if (isStandalonePage) {
