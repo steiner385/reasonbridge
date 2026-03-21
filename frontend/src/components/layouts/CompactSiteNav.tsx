@@ -6,6 +6,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
 import { useAuth } from '../../hooks/useAuth';
+import Avatar from '../ui/Avatar';
 
 /**
  * CompactSiteNav props
@@ -189,13 +190,7 @@ export function CompactSiteNav({ onNavigate, isCollapsed = false }: CompactSiteN
             aria-label={`Profile: ${user.displayName}`}
             aria-current={isActive('/profile') ? 'page' : undefined}
           >
-            {user.avatarUrl ? (
-              <img src={user.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
-            ) : (
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary-600 text-xs font-semibold text-white">
-                {user.displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <Avatar user={user} size="xs" className="w-7 h-7" />
           </Link>
         )}
       </nav>
@@ -333,13 +328,7 @@ export function CompactSiteNav({ onNavigate, isCollapsed = false }: CompactSiteN
             aria-label={`Profile: ${user.displayName}`}
             aria-current={isActive('/profile') ? 'page' : undefined}
           >
-            {user.avatarUrl ? (
-              <img src={user.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
-            ) : (
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary-600 text-xs font-semibold text-white">
-                {user.displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <Avatar user={user} size="xs" className="w-7 h-7" />
           </Link>
         )}
       </div>

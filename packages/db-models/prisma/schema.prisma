@@ -41,6 +41,10 @@ model User {
   // Profile photo fields (Issue #785)
   avatarUrl                 String?             @map("avatar_url")
   avatarS3Key               String?             @map("avatar_s3_key")
+  // Multi-resolution avatar URLs (Feature: User Avatars #1053)
+  avatarUrls                Json?               @map("avatar_urls")
+  // Avatar hash for S3 folder path management (Feature: User Avatars #1053)
+  avatarHash                String?             @map("avatar_hash")
   // Child safety fields (Feature: Child-Friendly Mode)
   birthDate                 DateTime?           @map("birth_date") @db.Date
   isMinor                   Boolean             @default(false) @map("is_minor")

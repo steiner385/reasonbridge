@@ -194,7 +194,7 @@ function ProfilePage() {
         <CardBody>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <Avatar src={user.avatarUrl} alt={user.displayName} size="xl" />
+              <Avatar user={user} size="xl" />
               <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {user.displayName}

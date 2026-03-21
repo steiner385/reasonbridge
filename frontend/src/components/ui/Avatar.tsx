@@ -3,18 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { User } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
+import type { User } from '../../types/user';
+import { getMD5Hash } from '../../lib/crypto';
 
 export interface AvatarProps {
   /**
-   * URL of the avatar image
+   * User object with avatar information
    */
-  src?: string | null;
-
-  /**
-   * Alt text for the avatar image
-   */
-  alt?: string;
+  user?: User | null;
 
   /**
    * Size of the avatar
@@ -27,16 +24,35 @@ export interface AvatarProps {
   className?: string;
 }
 
+type AvatarSizeKey = 'small' | 'medium' | 'large';
+
+/**
+ * Generate a Gravatar URL from an email address
+ * Uses MD5 hash of lowercase, trimmed email per Gravatar specification
+ * @param email - User email address
+ * @param size - Avatar size in pixels (default 200)
+ * @returns Gravatar URL
+ */
+function getGravatarUrl(email: string, size = 200): string {
+  // Gravatar expects lowercase, trimmed email
+  const normalizedEmail = email.toLowerCase().trim();
+  const hash = getMD5Hash(normalizedEmail);
+  // Use 'identicon' as default for users without Gravatar accounts
+  return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon`;
+}
+
 /**
  * Avatar component for displaying user profile images
  *
  * Features:
- * - Multiple size variants
- * - Fallback to user icon when no image
+ * - Multiple size variants (xs, sm, md, lg, xl)
+ * - Multi-resolution support with WebP/JPEG fallback
+ * - Backwards compatibility with legacy avatarUrl field
+ * - Fallback to Gravatar when no avatar is available
  * - Dark mode support
  * - Accessible alt text
  */
-export function Avatar({ src, alt = 'User avatar', size = 'md', className = '' }: AvatarProps) {
+export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
   const sizeClasses = {
     xs: 'w-6 h-6',
     sm: 'w-8 h-8',
@@ -61,19 +77,68 @@ export function Avatar({ src, alt = 'User avatar', size = 'md', className = '' }
     ${className}
   `;
 
-  if (src) {
+  // Map size props to avatar size keys
+  const sizeMap: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', AvatarSizeKey> = {
+    xs: 'small',
+    sm: 'small',
+    md: 'medium',
+    lg: 'large',
+    xl: 'large',
+  };
+  const sizeKey = sizeMap[size];
+
+  // Test attributes for testing
+  const testAttributes = {
+    'data-testid': 'avatar',
+    'data-size': size,
+    'data-alt': user?.displayName || 'User avatar',
+  };
+
+  // If no user, show default icon
+  if (!user) {
     return (
-      <div className={baseClasses}>
-        <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <div className={baseClasses} {...testAttributes}>
+        <UserIcon
+          className={`${iconSizeClasses[size]} text-gray-400 dark:text-gray-500`}
+          aria-hidden="true"
+        />
       </div>
     );
   }
 
+  // Use new structured avatarUrls if available
+  const urls = user.avatarUrls?.[sizeKey];
+  if (urls?.webp && urls?.jpg) {
+    return (
+      <div className={baseClasses} {...testAttributes}>
+        <picture className="w-full h-full">
+          <source srcSet={urls.webp} type="image/webp" />
+          <img
+            src={urls.jpg}
+            alt={user.displayName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to icon if image fails to load
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        </picture>
+      </div>
+    );
+  }
+
+  // Legacy fallback: use avatarUrl or Gravatar
+  const fallbackSrc = user.avatarUrl || getGravatarUrl(user.email);
   return (
-    <div className={baseClasses}>
-      <User
-        className={`${iconSizeClasses[size]} text-gray-400 dark:text-gray-500`}
-        aria-hidden="true"
+    <div className={baseClasses} {...testAttributes}>
+      <img
+        src={fallbackSrc}
+        alt={user.displayName}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          // Fallback to icon if image fails to load
+          e.currentTarget.style.display = 'none';
+        }}
       />
     </div>
   );

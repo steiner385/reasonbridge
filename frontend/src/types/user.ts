@@ -33,11 +33,22 @@ export enum UserRole {
  */
 export type ParentConsentStatus = 'NOT_REQUIRED' | 'PENDING' | 'VERIFIED' | 'WITHDRAWN';
 
+/**
+ * Structured avatar URLs for multiple sizes and formats
+ * Used for optimized avatar delivery with WebP/JPEG fallback
+ */
+export interface AvatarUrls {
+  small: { webp: string; jpg: string };
+  medium: { webp: string; jpg: string };
+  large: { webp: string; jpg: string };
+}
+
 export interface User {
   id: string;
   email: string;
   displayName: string;
-  avatarUrl?: string | null;
+  avatarUrl?: string | null; // Keep for backwards compatibility
+  avatarUrls?: AvatarUrls | null; // New structured URLs
   bio?: string | null;
   verificationLevel: VerificationLevel;
   trustScoreAbility: number;

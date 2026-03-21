@@ -184,8 +184,8 @@ describe('Sidebar Component', () => {
     it('should still show user avatar when collapsed', () => {
       renderSidebar();
 
-      // Avatar initial should still be visible
-      expect(screen.getByText('T')).toBeInTheDocument();
+      // Avatar component should be visible (as Gravatar or image)
+      expect(screen.getByTestId('avatar')).toBeInTheDocument();
     });
 
     it('should have title attribute on profile link when collapsed', () => {
