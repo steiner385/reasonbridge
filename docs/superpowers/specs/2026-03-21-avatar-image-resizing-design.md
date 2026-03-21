@@ -17,6 +17,18 @@ Enhance avatar upload to automatically resize images into multiple optimized var
 - Discard original after processing
 - Maintain backwards compatibility with existing avatars
 
+## Accepted Input Formats
+
+| MIME Type | Support |
+|-----------|---------|
+| `image/jpeg` | ✅ Supported |
+| `image/png` | ✅ Supported |
+| `image/webp` | ✅ Supported |
+| `image/gif` | ✅ First frame extracted (no animation) |
+| `image/heic`, `image/heif` | ❌ Not supported (return 400) |
+
+Validation occurs before processing. Return 400 with "Unsupported image format" for unsupported types.
+
 ## Architecture
 
 ```
@@ -51,8 +63,9 @@ model User {
   avatarUrl     String?  @map("avatar_url")
   avatarS3Key   String?  @map("avatar_s3_key")
 
-  // New field:
+  // New fields:
   avatarUrls    Json?    @map("avatar_urls")
+  avatarHash    String?  @map("avatar_hash")  // For S3 folder deletion
 }
 ```
 
@@ -86,6 +99,16 @@ reason-bridge-avatars/
             └── large.jpg     (512x512)
 ```
 
+**Hash generation:** First 8 characters of SHA-256 hash of original file buffer.
+```typescript
+const hash = crypto.createHash('sha256').update(buffer).digest('hex').substring(0, 8);
+// Example: avatars/user123/a3f2b1c8/small.webp
+```
+
+**S3 upload headers:** Each variant uploaded with:
+- `Content-Type`: `image/webp` or `image/jpeg`
+- `Cache-Control`: `public, max-age=31536000, immutable` (1 year, content-addressed)
+
 **Changes from current structure:**
 - Add hash subdirectory to group variants together
 - Use descriptive names (`small.webp`) instead of hash-based names
@@ -114,6 +137,15 @@ class ImageProcessorService {
     large: 512,
   };
 
+  // Sharp configuration
+  private readonly config = {
+    jpegQuality: 85,
+    webpQuality: 85,
+    resizeFit: 'cover' as const,  // Crop to fill square (center crop)
+    stripMetadata: true,           // Remove EXIF for privacy
+    background: { r: 255, g: 255, b: 255 },  // White background for JPG
+  };
+
   async processAvatar(input: Buffer): Promise<ProcessedImage[]>;
   // Returns 6 variants, throws if invalid image
 }
@@ -122,11 +154,15 @@ class ImageProcessorService {
 ### S3Service (Modified)
 
 ```typescript
-// New method for batch upload
+// New method for batch upload with proper headers
 async uploadAvatarVariants(
   userId: string,
+  hash: string,
   variants: ProcessedImage[]
 ): Promise<AvatarUrls>
+// Uploads each variant with:
+//   Content-Type: 'image/webp' or 'image/jpeg'
+//   Cache-Control: 'public, max-age=31536000, immutable'
 
 // New method for folder deletion
 async deleteAvatarFolder(userId: string, hash: string): Promise<void>
@@ -136,18 +172,60 @@ async deleteAvatarFolder(userId: string, hash: string): Promise<void>
 
 ```typescript
 async uploadAvatar(userId: string, file: Buffer, mimeType: string) {
-  // 1. Process image → 6 variants
+  // 1. Validate MIME type (throw 400 if unsupported)
+  this.validateMimeType(mimeType);
+
+  // 2. Get old hash for cleanup (before processing)
+  const user = await this.usersService.findById(userId);
+  const oldHash = user.avatarHash;
+
+  // 3. Generate new hash from file content
+  const newHash = crypto.createHash('sha256').update(file).digest('hex').substring(0, 8);
+
+  // 4. Process image → 6 variants
   const variants = await this.imageProcessor.processAvatar(file);
 
-  // 2. Upload all variants to S3
-  const avatarUrls = await this.s3Service.uploadAvatarVariants(userId, variants);
+  // 5. Upload all variants to S3
+  const avatarUrls = await this.s3Service.uploadAvatarVariants(userId, newHash, variants);
 
-  // 3. Update user.avatarUrls in database
-  await this.usersService.updateAvatarUrls(userId, avatarUrls);
+  // 6. Update database (avatarUrls + avatarHash)
+  await this.usersService.updateAvatarUrls(userId, avatarUrls, newHash);
 
-  // 4. Delete old avatar folder if exists
-  // (handled internally)
+  // 7. Delete old avatar folder asynchronously (non-blocking)
+  if (oldHash && oldHash !== newHash) {
+    this.s3Service.deleteAvatarFolder(userId, oldHash).catch((err) => {
+      this.logger.warn(`Failed to delete old avatar folder: ${err.message}`);
+    });
+  }
+
+  return { avatarUrls };
 }
+```
+
+## API Contract
+
+**Upload Avatar Endpoint:**
+```
+POST /api/users/:userId/avatar
+Content-Type: multipart/form-data
+
+Request:
+  - file: Binary image data (JPEG, PNG, WebP, or GIF)
+
+Response 200:
+{
+  "avatarUrls": {
+    "small":  { "webp": "https://cdn.../small.webp", "jpg": "https://cdn.../small.jpg" },
+    "medium": { "webp": "https://cdn.../medium.webp", "jpg": "https://cdn.../medium.jpg" },
+    "large":  { "webp": "https://cdn.../large.webp", "jpg": "https://cdn.../large.jpg" }
+  }
+}
+
+Response 400:
+{ "error": "Invalid image file" | "Image must be at least 32x32 pixels" | "Unsupported image format" }
+
+Response 500:
+{ "error": "Failed to process image" }
 ```
 
 ## Frontend Changes
@@ -178,22 +256,35 @@ interface AvatarProps {
   className?: string;
 }
 
+type AvatarSizeKey = 'small' | 'medium' | 'large';
+
 function Avatar({ user, size, className }: AvatarProps) {
-  const sizeMap = { sm: 'small', md: 'medium', lg: 'large' };
+  const sizeMap: Record<'sm' | 'md' | 'lg', AvatarSizeKey> = {
+    sm: 'small',
+    md: 'medium',
+    lg: 'large',
+  };
   const sizeKey = sizeMap[size];
 
   // Fallback logic: avatarUrls → avatarUrl → Gravatar
-  if (user.avatarUrls?.[sizeKey]) {
+  const urls = user.avatarUrls?.[sizeKey];
+  if (urls?.webp && urls?.jpg) {
     return (
-      <picture>
-        <source srcSet={user.avatarUrls[sizeKey].webp} type="image/webp" />
-        <img src={user.avatarUrls[sizeKey].jpg} alt={user.displayName} />
+      <picture className={className}>
+        <source srcSet={urls.webp} type="image/webp" />
+        <img src={urls.jpg} alt={user.displayName} className={className} />
       </picture>
     );
   }
 
   // Legacy fallback
-  return <img src={user.avatarUrl || getGravatarUrl(user.email)} alt={...} />;
+  return (
+    <img
+      src={user.avatarUrl || getGravatarUrl(user.email)}
+      alt={user.displayName}
+      className={className}
+    />
+  );
 }
 ```
 
