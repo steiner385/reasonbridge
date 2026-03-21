@@ -12,6 +12,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
 import { useTopics } from '../../lib/useTopics';
+import Avatar from '../ui/Avatar';
 import { Navigation } from './Navigation';
 import { CompactSiteNav } from './CompactSiteNav';
 
@@ -271,17 +272,7 @@ export function MobileDrawer() {
                   aria-label="View profile"
                 >
                   {/* Avatar */}
-                  {user.avatarUrl ? (
-                    <img
-                      src={user.avatarUrl}
-                      alt=""
-                      className="h-10 w-10 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-                      {user.displayName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <Avatar user={user} size="md" className="shrink-0" />
 
                   {/* User Info */}
                   <div className="flex-1 overflow-hidden">
