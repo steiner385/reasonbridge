@@ -1448,18 +1448,28 @@ model ParentalConsent {
   @@map("parental_consents")
 }
 
-/// Email verification token for signup flow
+/// Token types for verification flows
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+
+  @@map("verification_token_type")
+}
+
+/// Email verification token for signup flow and password reset
 model VerificationToken {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  token     String    @unique @db.VarChar(6)
-  createdAt DateTime  @default(now()) @map("created_at")
-  expiresAt DateTime  @map("expires_at")
-  used      Boolean   @default(false)
-  usedAt    DateTime? @map("used_at")
+  id        String                @id @default(uuid()) @db.Uuid
+  userId    String                @map("user_id") @db.Uuid
+  token     String                @unique @db.VarChar(6)
+  type      VerificationTokenType @default(EMAIL_VERIFICATION)
+  createdAt DateTime              @default(now()) @map("created_at")
+  expiresAt DateTime              @map("expires_at")
+  used      Boolean               @default(false)
+  usedAt    DateTime?             @map("used_at")
 
   @@index([userId])
   @@index([expiresAt])
+  @@index([type])
   @@map("verification_tokens")
 }
 

@@ -27,6 +27,14 @@ export interface VerificationEmailParams {
 }
 
 /**
+ * Parameters for sending password reset emails
+ */
+export interface PasswordResetEmailParams {
+  email: string;
+  code: string;
+}
+
+/**
  * Service for sending emails via AWS SES
  *
  * @remarks
@@ -163,6 +171,48 @@ export class EmailService implements OnModuleDestroy {
       this.logger.log(`Verification email sent to ${params.email}`);
     } catch (error) {
       this.logger.error(`Failed to send verification email to ${params.email}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send a password reset email with a 6-digit code
+   *
+   * @param params - Email parameters including email and reset code
+   */
+  async sendPasswordResetEmail(params: PasswordResetEmailParams): Promise<void> {
+    const resetUrl = `${this.appBaseUrl}/reset-password`;
+    const htmlBody = this.buildPasswordResetEmailHtml(params.code, resetUrl);
+    const textBody = this.buildPasswordResetEmailText(params.code, resetUrl);
+
+    const command = new SendEmailCommand({
+      Source: this.fromAddress,
+      Destination: {
+        ToAddresses: [params.email],
+      },
+      Message: {
+        Subject: {
+          Data: 'Reset Your Password - ReasonBridge',
+          Charset: 'UTF-8',
+        },
+        Body: {
+          Html: {
+            Data: htmlBody,
+            Charset: 'UTF-8',
+          },
+          Text: {
+            Data: textBody,
+            Charset: 'UTF-8',
+          },
+        },
+      },
+    });
+
+    try {
+      await this.sesClient.send(command);
+      this.logger.log(`Password reset email sent to ${params.email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send password reset email to ${params.email}:`, error);
       throw error;
     }
   }
@@ -353,5 +403,66 @@ The ReasonBridge Team
 
 ---
 (c) ${currentYear} ReasonBridge. All rights reserved.`;
+  }
+
+  /**
+   * Build HTML body for password reset email
+   */
+  private buildPasswordResetEmailHtml(code: string, resetUrl: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">Reset Your Password</h1>
+
+    <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+      You requested to reset your password. Use the code below to complete the process:
+    </p>
+
+    <div style="background-color: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 24px;">
+      <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0369a1;">${code}</span>
+    </div>
+
+    <p style="color: #4a4a4a; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+      Enter this code at: <a href="${resetUrl}" style="color: #0ea5e9; text-decoration: none;">${resetUrl}</a>
+    </p>
+
+    <p style="color: #dc2626; font-size: 14px; margin-bottom: 24px;">
+      <strong>This code expires in 15 minutes.</strong>
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;">
+
+    <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">
+      If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+    </p>
+  </div>
+</body>
+</html>
+    `.trim();
+  }
+
+  /**
+   * Build plain text body for password reset email
+   */
+  private buildPasswordResetEmailText(code: string, resetUrl: string): string {
+    return `
+Reset Your Password - ReasonBridge
+
+You requested to reset your password. Use the code below to complete the process:
+
+Your reset code: ${code}
+
+Enter this code at: ${resetUrl}
+
+This code expires in 15 minutes.
+
+If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+    `.trim();
   }
 }

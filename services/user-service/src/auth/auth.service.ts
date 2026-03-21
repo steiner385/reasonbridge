@@ -25,8 +25,10 @@ import { CognitoService } from './cognito.service';
 import { GoogleOAuthService } from './oauth/google-oauth.service';
 import { AppleOAuthService } from './oauth/apple-oauth.service';
 import { VerificationService } from './verification.service';
+import { EmailService } from '../services/email.service';
 import { validatePassword, validateEmail } from '@reason-bridge/common';
 import { SignupRequestDto } from './dto/signup.dto';
+import bcrypt from 'bcrypt';
 import { VerifyEmailRequestDto } from './dto/verify-email.dto';
 import {
   ResendVerificationRequestDto,
@@ -41,7 +43,7 @@ import {
 import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponseDto, VerificationEmailSentResponseDto } from './dto/auth-response.dto';
 import { UserProfileDto, OnboardingProgressDto } from '../dto/common.dto';
-import { AuthMethod, OnboardingStep } from '@prisma/client';
+import { AuthMethod, OnboardingStep, VerificationTokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 const { sign: jwtSign } = jwt;
 
@@ -72,6 +74,7 @@ export class AuthService {
     private readonly appleOAuthService: AppleOAuthService,
     private readonly verificationService: VerificationService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -462,6 +465,96 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Request a password reset code
+   * Always returns success to prevent email enumeration
+   *
+   * @param email - User's email address
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    this.logger.log(`Password reset requested for: ${redactEmail(email)}`);
+
+    // Find user by email (silently fail if not found)
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      select: { id: true, email: true, passwordHash: true },
+    });
+
+    if (!user) {
+      this.logger.debug(`No user found for email: ${redactEmail(email)}, silently ignoring`);
+      return; // Silent return to prevent email enumeration
+    }
+
+    // Only allow password reset for users with password auth
+    if (!user.passwordHash) {
+      this.logger.debug(
+        `User ${redactEmail(email)} has no password (OAuth user), silently ignoring`,
+      );
+      return; // Silent return - OAuth users can't reset password
+    }
+
+    try {
+      // Generate password reset token (15 min expiry)
+      const code = await this.verificationService.generateToken(
+        user.id,
+        user.email,
+        VerificationTokenType.PASSWORD_RESET,
+      );
+
+      // Send password reset email
+      await this.emailService.sendPasswordResetEmail({
+        email: user.email,
+        code,
+      });
+
+      this.logger.log(`Password reset email sent for: ${redactEmail(email)}`);
+    } catch (error: unknown) {
+      // Log error but don't expose to user (prevents enumeration)
+      const errorObj = error as { message?: string };
+      this.logger.error(`Failed to send password reset email: ${errorObj.message}`);
+      // Don't throw - always return success to user
+    }
+  }
+
+  /**
+   * Reset user password with verification code
+   *
+   * @param email - User's email address
+   * @param code - 6-digit verification code
+   * @param newPassword - New password
+   */
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    this.logger.log(`Password reset attempt for: ${redactEmail(email)}`);
+
+    // Validate password strength
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new BadRequestException({
+        message: 'Password does not meet requirements',
+        errors: passwordValidation.errors,
+      });
+    }
+
+    // Verify the code (throws if invalid)
+    const userId = await this.verificationService.verifyToken(
+      email,
+      code,
+      VerificationTokenType.PASSWORD_RESET,
+    );
+
+    // Hash the new password
+    const saltRounds = 12;
+    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update user's password
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    this.logger.log(`Password reset successful for user: ${userId}`);
   }
 
   /**

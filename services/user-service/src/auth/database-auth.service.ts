@@ -214,4 +214,26 @@ export class DatabaseAuthService implements IAuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }
+
+  /**
+   * Request a password reset for the given email.
+   * Not supported in database auth mode - use the main AuthService instead.
+   */
+  async requestPasswordReset(_email: string): Promise<void> {
+    // In database auth mode, password reset is handled by the main AuthService
+    // which has access to VerificationService and EmailService.
+    // This stub exists only to satisfy the interface.
+    throw new Error('Password reset not supported in database auth mode');
+  }
+
+  /**
+   * Reset the password using a verification code.
+   * Not supported in database auth mode - use the main AuthService instead.
+   */
+  async resetPassword(_email: string, _code: string, _newPassword: string): Promise<void> {
+    // In database auth mode, password reset is handled by the main AuthService
+    // which has access to VerificationService and EmailService.
+    // This stub exists only to satisfy the interface.
+    throw new Error('Password reset not supported in database auth mode');
+  }
 }
