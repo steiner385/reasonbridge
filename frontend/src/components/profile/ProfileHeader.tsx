@@ -98,12 +98,7 @@ export function ProfileHeader({
     <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 ${className}`}>
       {/* Avatar */}
       <div className="shrink-0">
-        <Avatar
-          src={user.avatarUrl}
-          alt={user.displayName}
-          size="xl"
-          className="w-24 h-24 sm:w-28 sm:h-28"
-        />
+        <Avatar user={user} size="xl" className="w-24 h-24 sm:w-28 sm:h-28" />
       </div>
 
       {/* User Info */}

@@ -11,8 +11,16 @@ import { VerificationLevel, UserStatus } from '../../../types/user';
 
 // Mock child components
 vi.mock('../../ui/Avatar', () => ({
-  default: ({ alt, size, className }: { alt: string; size: string; className?: string }) => (
-    <div data-testid="avatar" data-alt={alt} data-size={size} className={className} />
+  default: ({
+    user,
+    size,
+    className,
+  }: {
+    user: { displayName: string };
+    size: string;
+    className?: string;
+  }) => (
+    <div data-testid="avatar" data-alt={user.displayName} data-size={size} className={className} />
   ),
 }));
 
