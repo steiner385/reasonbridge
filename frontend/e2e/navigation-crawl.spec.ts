@@ -125,15 +125,18 @@ test.describe('Navigation Crawl - Full Coverage', () => {
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Auth Redirect Tests - Protected routes should redirect when unauthenticated
-  // Note: Skip for now as the application may not enforce auth redirects on all routes.
-  // Enable when auth guards are implemented on protected routes.
+  // These tests verify that routes wrapped with ProtectedRoute redirect to landing page
+  // Skip in E2E Docker mode - mock validation doesn't work with real backend
   // ═══════════════════════════════════════════════════════════════════════════
 
-  test.describe.skip('Auth Redirects', () => {
+  test.describe('Auth Redirects', () => {
+    // Skip in E2E Docker mode - redirect detection requires controlled environment
+    test.skip(isE2EDocker, 'Auth redirects require controlled environment - skip in E2E Docker');
+
     const authRoutes = getAuthenticatedRoutes();
 
     for (const route of authRoutes) {
-      test(`${route.name} (${resolvePath(route)}) redirects to login when unauthenticated`, async ({
+      test(`${route.name} (${resolvePath(route)}) redirects to landing when unauthenticated`, async ({
         page,
       }) => {
         const errorCollector = new ErrorCollector(page);
@@ -142,9 +145,9 @@ test.describe('Navigation Crawl - Full Coverage', () => {
         const validator = new PageValidator(page, errorCollector);
         const result = await validator.validateRoute(route);
 
-        // Should redirect to login
-        expect(result.redirectedTo, 'Expected redirect to login page').toBeDefined();
-        expect(result.redirectedTo).toContain('/login');
+        // Should redirect to landing page (ProtectedRoute redirects to '/')
+        expect(result.redirectedTo, 'Expected redirect to landing page').toBeDefined();
+        expect(result.redirectedTo).toBe('/');
 
         // No uncaught errors during redirect
         const uncaughtErrors = result.errors.filter((e) => e.type === 'uncaught');
