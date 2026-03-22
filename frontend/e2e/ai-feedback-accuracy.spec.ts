@@ -111,9 +111,9 @@ async function typeAndWaitForFeedback(
   }
 }
 
-// SKIPPED: Requires AWS Bedrock credentials (not available in CI)
+// NOTE: Requires AWS Bedrock credentials (automatically skipped in CI via @ai tag grep filter)
 // Run manually with: E2E_DOCKER=true PLAYWRIGHT_BASE_URL=http://localhost:9080 AWS_REGION=us-east-1 npx playwright test ai-feedback-accuracy.spec.ts
-test.describe.skip('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
+test.describe('AI Feedback Accuracy - Nuanced Tone Detection @ai', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAlice(page);
     await navigateToTopicComposer(page);
