@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Route Registry for Navigation Crawl E2E Tests
  *
  * Single source of truth for all application routes.
@@ -90,17 +95,18 @@ export const ROUTE_REGISTRY: RouteDefinition[] = [
   {
     path: '/simulator',
     name: 'Discussion Simulator',
-    requiresAuth: false,
+    requiresAuth: true, // Uses ProtectedRoute wrapper
     isDynamic: false,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Profile Routes - User profiles
+  // Note: /profile doesn't use ProtectedRoute wrapper - it handles missing auth itself
   // ═══════════════════════════════════════════════════════════════════════════
   {
     path: '/profile',
     name: 'My Profile',
-    requiresAuth: true,
+    requiresAuth: false, // No ProtectedRoute wrapper - page handles unauthenticated state
     isDynamic: false,
   },
   {
