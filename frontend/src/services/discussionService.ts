@@ -44,6 +44,9 @@ export interface Citation {
   createdAt: string;
 }
 
+/** Response visibility status matching backend ResponseStatus enum */
+export type ResponseStatus = 'VISIBLE' | 'HIDDEN' | 'REMOVED' | 'PENDING_REVIEW';
+
 export interface ResponseDetail {
   id: string;
   discussionId: string;
@@ -59,6 +62,12 @@ export interface ResponseDetail {
   updatedAt: string;
   replyCount?: number;
   replies?: ResponseDetail[];
+  /** Whether the response contains opinion statements */
+  containsOpinion?: boolean;
+  /** Whether the response contains factual claims */
+  containsFactualClaims?: boolean;
+  /** Moderation status of the response */
+  status?: ResponseStatus;
 }
 
 export interface DiscussionResponse {

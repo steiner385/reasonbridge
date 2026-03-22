@@ -29,6 +29,13 @@ export interface ReplyToResponseRequest {
   citations?: CitationInput[];
 }
 
+export interface UpdateResponseRequest {
+  content: string;
+  citedSources?: string[];
+  containsOpinion?: boolean;
+  containsFactualClaims?: boolean;
+}
+
 class ResponseService {
   private getAuthHeaders(): HeadersInit {
     // Check both localStorage (remember me) and sessionStorage (current session)
@@ -80,6 +87,33 @@ class ResponseService {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to create reply');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Update an existing response
+   *
+   * @param topicId - The ID of the topic containing the response
+   * @param responseId - The ID of the response to update
+   * @param data - The updated response data
+   * @returns The updated response
+   */
+  async updateResponse(
+    topicId: string,
+    responseId: string,
+    data: UpdateResponseRequest,
+  ): Promise<ResponseDetail> {
+    const response = await fetch(`${API_BASE_URL}/topics/${topicId}/responses/${responseId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update response');
     }
 
     return response.json();

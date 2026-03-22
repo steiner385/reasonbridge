@@ -28,6 +28,7 @@
 
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import type { ResponseDetail } from '../../services/discussionService';
@@ -41,6 +42,8 @@ import { apiClient } from '../../lib/api';
 import { InlineTrustBadge } from '../users';
 import { useLinkPreviews } from '../../hooks/useLinkPreviews';
 import { extractUrls } from '../../services/linkPreviewService';
+import { responseService, type UpdateResponseRequest } from '../../services/responseService';
+import { useToast } from '../../contexts/ToastContext';
 import ResponseComposer from './ResponseComposer';
 import { LightweightReplyComposer } from './LightweightReplyComposer';
 import ReactionBar from './ReactionBar';
@@ -52,6 +55,7 @@ import ResponseMenu from './ResponseMenu';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 import ReportDialog, { type ReportReason } from './ReportDialog';
 import LinkPreviewCard from './LinkPreviewCard';
+import EditResponseModal from './EditResponseModal';
 
 export interface ResponseItemProps {
   response: ResponseDetail;
@@ -147,6 +151,12 @@ export function ResponseItem({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Query client for cache invalidation after edit
+  const queryClient = useQueryClient();
+  const toast = useToast();
 
   // Check if current user owns this response
   const isOwnResponse = currentUser?.id === response.author.id;
@@ -172,6 +182,25 @@ export function ResponseItem({
       additionalInfo,
       contextResponseId: response.id,
     });
+  };
+
+  // Handle edit submission
+  const handleEditSubmit = async (responseId: string, data: UpdateResponseRequest) => {
+    setIsUpdating(true);
+    try {
+      await responseService.updateResponse(discussionId, responseId, data);
+      // Invalidate responses query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['responses', discussionId] });
+      queryClient.invalidateQueries({ queryKey: ['topics', discussionId, 'responses'] });
+      toast.success('Response updated successfully');
+      setShowEditModal(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update response';
+      toast.error(message);
+      throw err; // Re-throw so EditResponseModal can handle the error state
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleReplyClick = () => {
@@ -357,9 +386,7 @@ export function ResponseItem({
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <ResponseMenu
                       isOwnResponse={isOwnResponse}
-                      onEdit={() => {
-                        // Edit functionality to be implemented later
-                      }}
+                      onEdit={() => setShowEditModal(true)}
                       onDelete={() => setShowDeleteDialog(true)}
                       onReport={() => setShowReportDialog(true)}
                       size={compact ? 'sm' : 'md'}
@@ -587,6 +614,35 @@ export function ResponseItem({
                 )}
               </div>
             )}
+
+            {/* Moderated Content Notice */}
+            {(response.status === 'HIDDEN' || response.status === 'REMOVED') && (
+              <div
+                className={`${compact ? 'mt-2 p-2' : 'mt-4 p-3'} ${
+                  !isGroupStart && compact ? 'ml-8' : ''
+                } bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-700`}
+                data-testid="moderated-content-notice"
+              >
+                <div className="flex items-center gap-2 text-sm">
+                  <svg
+                    className="h-4 w-4 text-amber-500 shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    This response has been {response.status === 'HIDDEN' ? 'hidden' : 'removed'} by
+                    moderators.
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </Card>
@@ -692,6 +748,15 @@ export function ResponseItem({
         responseId={response.id}
         onSubmit={handleReport}
         onClose={() => setShowReportDialog(false)}
+      />
+
+      {/* Edit response modal */}
+      <EditResponseModal
+        isOpen={showEditModal}
+        response={response}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditSubmit}
+        isLoading={isUpdating}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EditResponseModal from '../EditResponseModal';
-import type { Response } from '../../../types/response';
+import type { ResponseDetail } from '../../../services/discussionService';
 
 // Mock useRequireAuth hook
 vi.mock('../../../hooks/useRequireAuth', () => ({
@@ -19,15 +19,38 @@ vi.mock('../../../hooks/useRequireAuth', () => ({
 }));
 
 describe('EditResponseModal', () => {
-  const mockResponse: Response = {
+  const mockResponse: ResponseDetail = {
     id: 'response-1',
+    discussionId: 'disc-1',
     content: 'This is my original response content',
-    authorId: 'user-1',
-    citedSources: [{ url: 'https://example.com/source1' }, { url: 'https://example.com/source2' }],
+    author: { id: 'user-1', displayName: 'Test User' },
+    parentResponseId: null,
+    citations: [
+      {
+        id: 'cite-1',
+        originalUrl: 'https://example.com/source1',
+        normalizedUrl: 'https://example.com/source1',
+        title: null,
+        validationStatus: 'ACTIVE',
+        validatedAt: null,
+        createdAt: '2024-01-01T00:00:00Z',
+      },
+      {
+        id: 'cite-2',
+        originalUrl: 'https://example.com/source2',
+        normalizedUrl: 'https://example.com/source2',
+        title: null,
+        validationStatus: 'ACTIVE',
+        validatedAt: null,
+        createdAt: '2024-01-01T00:00:00Z',
+      },
+    ],
     containsOpinion: true,
     containsFactualClaims: false,
-    status: 'active',
-    revisionCount: 0,
+    version: 1,
+    editCount: 0,
+    editedAt: null,
+    deletedAt: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

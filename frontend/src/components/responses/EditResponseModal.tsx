@@ -8,7 +8,8 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
-import type { Response, UpdateResponseRequest } from '../../types/response';
+import type { UpdateResponseRequest } from '../../types/response';
+import type { ResponseDetail } from '../../services/discussionService';
 
 export interface EditResponseModalProps {
   /**
@@ -24,7 +25,7 @@ export interface EditResponseModalProps {
   /**
    * The response being edited
    */
-  response: Response;
+  response: ResponseDetail;
 
   /**
    * Callback when the edit is submitted
@@ -71,9 +72,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
       // Safe: setState in response to prop change (modal opening), not during render
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setContent(response.content);
-      setCitedSources(response.citedSources?.map((s) => s.url) || []);
-      setContainsOpinion(response.containsOpinion);
-      setContainsFactualClaims(response.containsFactualClaims);
+      // ResponseDetail uses 'citations' with 'originalUrl', extract URLs for editing
+      setCitedSources(response.citations?.map((c) => c.originalUrl) || []);
+      setContainsOpinion(response.containsOpinion ?? false);
+      setContainsFactualClaims(response.containsFactualClaims ?? false);
       setError(null);
     }
     prevIsOpenRef.current = isOpen;
@@ -150,10 +152,10 @@ const EditResponseModal: React.FC<EditResponseModalProps> = ({
   const isValid = characterCount >= minLength && characterCount <= maxLength;
   const hasChanges =
     content.trim() !== response.content ||
-    citedSources.length !== (response.citedSources?.length || 0) ||
-    citedSources.some((source, i) => source !== response.citedSources?.[i]?.url) ||
-    containsOpinion !== response.containsOpinion ||
-    containsFactualClaims !== response.containsFactualClaims;
+    citedSources.length !== (response.citations?.length || 0) ||
+    citedSources.some((source, i) => source !== response.citations?.[i]?.originalUrl) ||
+    containsOpinion !== (response.containsOpinion ?? false) ||
+    containsFactualClaims !== (response.containsFactualClaims ?? false);
 
   const footer = (
     <>
