@@ -811,16 +811,18 @@ export class ResponsesService {
    * T054 [US3] - Calculate thread depth for a response
    *
    * Recursively traverses up the parent chain to determine how deep
-   * in the thread tree a response is.
+   * in the thread tree a response is. Includes a safeguard against
+   * infinite loops from circular references.
    *
    * @param responseId - The ID of the response to calculate depth for
-   * @returns The depth (0 for top-level, 1 for first reply, etc.)
+   * @returns The depth (0 for top-level, 1 for first reply, etc.), capped at MAX_DEPTH
    */
   async calculateThreadDepth(responseId: string): Promise<number> {
+    const MAX_DEPTH = 10; // Safeguard against circular references
     let depth = 0;
     let currentId: string | null = responseId;
 
-    while (currentId) {
+    while (currentId && depth < MAX_DEPTH) {
       const response: { parentId: string | null } | null = await this.prisma.response.findUnique({
         where: { id: currentId },
         select: { parentId: true },

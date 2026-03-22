@@ -380,22 +380,17 @@ describe('ResponsesService - Threading', () => {
       expect(depth).toBe(0);
     });
 
-    it.skip('should stop at max iterations to prevent infinite loops', async () => {
-      // SKIP: This test creates a circular reference that causes OOM because
-      // calculateThreadDepth doesn't have a max iteration safeguard.
-      // The implementation uses MAX_THREAD_DEPTH (10) for creating responses but
-      // not for depth calculation traversal. Need to add a safeguard in the
-      // implementation before enabling this test.
-      //
-      // TODO: Add max iteration limit to calculateThreadDepth() and enable this test
+    it('should stop at max iterations to prevent infinite loops', async () => {
+      // Simulate a circular reference (shouldn't happen in practice, but defensive)
+      // response-1 -> response-2 -> response-1 -> response-2 -> ...
       prismaService.response.findUnique.mockImplementation(async ({ where }: any) => {
         return { parentId: where.id === 'response-1' ? 'response-2' : 'response-1' };
       });
 
       const depth = await service.calculateThreadDepth('response-1');
 
-      // Should eventually break out at MAX_THREAD_DEPTH
-      expect(depth).toBeLessThanOrEqual(10);
+      // Should break out at MAX_DEPTH (10) to prevent infinite loop
+      expect(depth).toBe(10);
     });
   });
 
