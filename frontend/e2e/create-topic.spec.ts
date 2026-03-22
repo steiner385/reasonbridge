@@ -274,7 +274,10 @@ test.describe('Create Topic Flow', () => {
     await expect(modal.getByRole('button', { name: /create anyway/i })).toBeVisible();
   });
 
-  // Skip: Duplicate detection workflow timing issues - modal doesn't close within timeout
+  // Skip: "Create Anyway" workflow has timing issues - modal doesn't close within timeout
+  // Note: The duplicate warning display and "Create Anyway" button visibility are tested
+  // in the previous test. This test would additionally verify clicking "Create Anyway"
+  // actually creates the topic. The unit tests cover this logic.
   test.skip('should allow creating topic despite duplicate warning', async ({ page }) => {
     await page.getByRole('button', { name: /create topic/i }).click();
     const modal = page.locator('[data-testid="create-topic-modal"]');
