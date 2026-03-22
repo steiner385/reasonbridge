@@ -10,7 +10,7 @@ async function navigateToTopicsAndWaitForAuth(page: Page) {
   // Wait for page heading to confirm page is ready
   await expect(page.getByRole('heading', { name: /discussion topics/i })).toBeVisible();
   // Wait for auth state to propagate (moderator-only features depend on user role)
-  await page.waitForSelector('[data-testid="user-avatar"], [aria-label*="Account"]', {
+  await page.waitForSelector('[data-testid="avatar"], [aria-label="Profile"]', {
     timeout: 10000,
   });
 }
