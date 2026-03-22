@@ -33,21 +33,38 @@ const provider = new PactV4({
 });
 
 /**
- * Helper function to make HTTP requests to the mock server
+ * Helper function to make HTTP requests to the mock server with retry logic.
+ * Retries help handle transient network issues in CI environments.
  */
 async function fetchFromProvider(
   baseUrl: string,
   endpoint: string,
   options: RequestInit = {},
+  retries = 2,
 ): Promise<Response> {
   const url = `${baseUrl}${endpoint}`;
-  return fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < retries) {
+        // Wait before retry (50ms, 100ms)
+        await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)));
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 describe('AI Service Consumer Contract Tests', () => {
