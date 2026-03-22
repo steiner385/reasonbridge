@@ -53,45 +53,61 @@ test.describe('Browse Topics and View Details', () => {
     expect(hasTopics || hasNoTopicsMessage || hasError).toBeTruthy();
   });
 
-  // SKIPPED: Test expects 3-panel layout with left panel containing [data-testid="topic-list-item"].
-  // Current implementation uses 2-panel layout (hideSidebar=true in DiscussionPage.tsx:308).
-  // Global Sidebar handles topic navigation externally, not within DiscussionLayout.
-  // Re-enable when tests are rewritten for current 2-panel architecture.
-  test.skip('should navigate to topic in discussion view when clicking on a topic', async ({
-    page,
-  }) => {
+  /**
+   * Tests topic selection via the global Sidebar.
+   * The Sidebar displays topic list items on desktop viewports (≥768px)
+   * when navigating to /discussions (topics mode).
+   */
+  test('should navigate to topic in discussion view when clicking on a topic', async ({ page }) => {
     await page.goto('/discussions');
+    await page.waitForLoadState('networkidle');
 
+    // Wait for Sidebar to load topic list items
+    // The Sidebar fetches topics when in "topics" mode (/discussions route)
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
-    await expect(firstTopic).toBeVisible();
+    await expect(firstTopic).toBeVisible({ timeout: 15000 });
 
+    // Get the topic title from the sidebar item
     const topicTitle = await firstTopic.locator('[data-testid="topic-title"]').textContent();
+
+    // Click the topic in the Sidebar
     await firstTopic.click();
 
     // Verify URL updates with topic query parameter
     await expect(page).toHaveURL(/\/discussions\?topic=/);
 
-    // Verify conversation panel displays the topic
-    const conversationHeader = page.locator('.conversation-panel h1');
-    await expect(conversationHeader).toContainText(topicTitle!.trim());
+    // Wait for conversation panel to load the topic
+    await page.waitForLoadState('networkidle');
 
-    // Verify three-panel layout is visible
-    await expect(page.locator('[role="navigation"]').first()).toBeVisible();
+    // Verify conversation panel displays the topic title
+    const conversationHeader = page.locator('.conversation-panel h1[data-testid="topic-title"]');
+    await expect(conversationHeader).toContainText(topicTitle!.trim(), { timeout: 10000 });
+
+    // Verify 2-panel layout is visible (center + right panels in DiscussionLayout)
+    // The Sidebar is separate from DiscussionLayout
     await expect(page.locator('[role="main"]')).toBeVisible();
     await expect(page.locator('[role="complementary"]').first()).toBeVisible();
   });
 
-  // SKIPPED: Test expects 3-panel layout with left panel containing [data-testid="topic-list-item"].
-  // Current implementation uses 2-panel layout (hideSidebar=true).
-  // Re-enable when tests are rewritten for current 2-panel architecture.
-  test.skip('should display topic metadata in right panel', async ({ page }) => {
+  /**
+   * Tests that the right panel shows metadata tabs when a topic is selected.
+   */
+  test('should display topic metadata in right panel', async ({ page }) => {
     await page.goto('/discussions');
+    await page.waitForLoadState('networkidle');
 
+    // Wait for Sidebar to load topic list items
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
-    await expect(firstTopic).toBeVisible();
-    await firstTopic.click();
+    await expect(firstTopic).toBeVisible({ timeout: 15000 });
 
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+    // Click the topic in the Sidebar
+    await firstTopic.click();
+    await page.waitForLoadState('networkidle');
+
+    // Verify conversation panel shows topic content
+    await expect(page.locator('.conversation-panel h1[data-testid="topic-title"]')).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify right panel (metadata) is visible
     const rightPanel = page.locator('[role="complementary"]').first();
@@ -107,13 +123,17 @@ test.describe('Browse Topics and View Details', () => {
     expect(tabCount).toBeGreaterThan(0);
   });
 
-  // SKIPPED: Test expects 3-panel layout with left panel containing [data-testid="topic-list-item"].
-  // Current implementation uses 2-panel layout (hideSidebar=true).
-  // Re-enable when tests are rewritten for current 2-panel architecture.
-  test.skip('should allow switching between topics using left panel', async ({ page }) => {
+  /**
+   * Tests switching between topics using the Sidebar.
+   */
+  test('should allow switching between topics using sidebar', async ({ page }) => {
     await page.goto('/discussions');
+    await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('[data-testid="topic-list-item"]').first()).toBeVisible();
+    // Wait for Sidebar to load topic list items
+    await expect(page.locator('[data-testid="topic-list-item"]').first()).toBeVisible({
+      timeout: 15000,
+    });
 
     const topics = page.locator('[data-testid="topic-list-item"]');
     const topicCount = await topics.count();
@@ -131,8 +151,8 @@ test.describe('Browse Topics and View Details', () => {
 
     // Wait for conversation panel to load with topic content
     await page.waitForLoadState('networkidle');
-    const h1 = page.locator('.conversation-panel h1');
-    await expect(h1).toBeVisible();
+    const h1 = page.locator('.conversation-panel h1[data-testid="topic-title"]');
+    await expect(h1).toBeVisible({ timeout: 10000 });
     await expect(h1).toContainText(firstTopicTitle!.trim(), { timeout: 5000 });
 
     // Select second topic
@@ -144,8 +164,8 @@ test.describe('Browse Topics and View Details', () => {
     await page.waitForLoadState('networkidle');
     await expect(h1).toContainText(secondTopicTitle!.trim(), { timeout: 5000 });
 
-    // Left panel should still be visible
-    await expect(page.locator('[role="navigation"]').first()).toBeVisible();
+    // Sidebar should still be visible (it's separate from DiscussionLayout)
+    await expect(page.locator('aside[aria-label="Topic navigation sidebar"]')).toBeVisible();
   });
 
   test('should handle pagination on topics list', async ({ page }) => {
@@ -257,14 +277,18 @@ test.describe('Browse Topics and View Details', () => {
     }
   });
 
-  // SKIPPED: Test expects 3-panel layout with left panel containing [data-testid="topic-list-item"].
-  // Current implementation uses 2-panel layout (hideSidebar=true).
-  // Re-enable when tests are rewritten for current 2-panel architecture.
-  test.skip('should handle direct navigation to topic via URL parameter', async ({ page }) => {
+  /**
+   * Tests direct navigation to a specific topic via URL query parameter.
+   */
+  test('should handle direct navigation to topic via URL parameter', async ({ page }) => {
+    // First, navigate to discussions and select a topic to get its ID
     await page.goto('/discussions');
-    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
-    await expect(firstTopic).toBeVisible();
+    await page.waitForLoadState('networkidle');
 
+    const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
+    await expect(firstTopic).toBeVisible({ timeout: 15000 });
+
+    // Click to navigate and get the topic ID from URL
     await firstTopic.click();
     await page.waitForURL(/topic=/);
 
@@ -272,15 +296,25 @@ test.describe('Browse Topics and View Details', () => {
     const topicId = new URL(currentUrl).searchParams.get('topic');
     expect(topicId).toBeTruthy();
 
+    // Get the topic title for verification
+    const topicTitle = await page
+      .locator('.conversation-panel h1[data-testid="topic-title"]')
+      .textContent();
+
+    // Navigate away to home page
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
-    // Test direct navigation
+    // Test direct navigation with topic parameter
     await page.goto(`/discussions?topic=${topicId}`);
+    await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('.conversation-panel h1')).toBeVisible();
+    // Verify conversation panel shows the topic
+    const h1 = page.locator('.conversation-panel h1[data-testid="topic-title"]');
+    await expect(h1).toBeVisible({ timeout: 10000 });
+    await expect(h1).toContainText(topicTitle!.trim());
 
-    // Verify all three panels
-    await expect(page.locator('[role="navigation"]').first()).toBeVisible();
+    // Verify 2-panel layout is visible
     await expect(page.locator('[role="main"]')).toBeVisible();
     await expect(page.locator('[role="complementary"]').first()).toBeVisible();
   });
