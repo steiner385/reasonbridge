@@ -348,3 +348,84 @@ export async function navigateToOwnedTopic(
 
   return topic;
 }
+
+/**
+ * Wait for responses to load on the current page.
+ *
+ * Uses polling to handle slow backend startup in CI environments.
+ * This is more reliable than a single isVisible() check with catch.
+ *
+ * @param page - Playwright Page instance
+ * @param options - Configuration options
+ * @returns true if responses loaded, false otherwise
+ *
+ * @example
+ * ```typescript
+ * await navigateToSeededTopic(page, 'CONGESTION_PRICING');
+ * const hasResponses = await waitForResponsesToLoad(page);
+ * if (!hasResponses) {
+ *   test.skip(true, 'No responses loaded - backend may be starting up');
+ * }
+ * ```
+ */
+export async function waitForResponsesToLoad(
+  page: Page,
+  options: {
+    /** Maximum time to wait in milliseconds (default: 30000 for CI cold-starts) */
+    timeout?: number;
+    /** Polling interval in milliseconds (default: 1000) */
+    pollInterval?: number;
+    /** Minimum number of responses expected (default: 1) */
+    minResponses?: number;
+  } = {},
+): Promise<boolean> {
+  const { timeout = 30000, pollInterval = 1000, minResponses = 1 } = options;
+
+  const startTime = Date.now();
+  const responseSelector = '[data-testid="response-item"]';
+
+  while (Date.now() - startTime < timeout) {
+    const count = await page.locator(responseSelector).count();
+    if (count >= minResponses) {
+      return true;
+    }
+
+    // Wait before next poll
+    await page.waitForTimeout(pollInterval);
+  }
+
+  return false;
+}
+
+/**
+ * Navigate to a seeded topic and wait for responses to load.
+ *
+ * Combines navigateToSeededTopic with waitForResponsesToLoad for a more
+ * reliable test setup. Recommended for tests that interact with responses.
+ *
+ * @param page - Playwright Page instance
+ * @param topicKey - Key from SEEDED_TOPICS
+ * @param options - Wait options
+ * @returns Object with topic info and whether responses loaded
+ *
+ * @example
+ * ```typescript
+ * const { topic, hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
+ * if (!hasResponses) {
+ *   test.skip(true, 'Responses not loaded - backend may be starting up');
+ * }
+ * ```
+ */
+export async function navigateToTopicWithResponses(
+  page: Page,
+  topicKey: keyof typeof SEEDED_TOPICS,
+  options: {
+    timeout?: number;
+    pollInterval?: number;
+    minResponses?: number;
+  } = {},
+): Promise<{ topic: SeededTopic; hasResponses: boolean }> {
+  const topic = await navigateToSeededTopic(page, topicKey);
+  const hasResponses = await waitForResponsesToLoad(page, options);
+  return { topic, hasResponses };
+}

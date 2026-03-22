@@ -11,7 +11,12 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount, navigateToSeededTopic } from './helpers/demo-auth';
+import {
+  loginWithDemoAccount,
+  navigateToSeededTopic,
+  navigateToTopicWithResponses,
+  waitForResponsesToLoad,
+} from './helpers/demo-auth';
 
 test.describe('Guest Read-Only Mode', () => {
   test.describe('Guests should see login modal when interacting', () => {
@@ -21,18 +26,10 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     test('should prompt login when clicking upvote button', async ({ page }) => {
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItems = page.locator('[data-testid="response-item"]');
-      const hasResponses = await responseItems
-        .first()
-        .isVisible({ timeout: 15000 })
-        .catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
 
@@ -53,18 +50,10 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     test('should prompt login when clicking downvote button', async ({ page }) => {
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItems = page.locator('[data-testid="response-item"]');
-      const hasResponses = await responseItems
-        .first()
-        .isVisible({ timeout: 15000 })
-        .catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
 
@@ -85,17 +74,14 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     test('should prompt login when clicking bookmark button', async ({ page }) => {
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItem = page.locator('[data-testid="response-item"]').first();
-      const hasResponses = await responseItem.isVisible({ timeout: 15000 }).catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
+
+      const responseItem = page.locator('[data-testid="response-item"]').first();
 
       // Hover to reveal action buttons
       await responseItem.hover();
@@ -123,17 +109,14 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     test('should prompt login when clicking add reaction button', async ({ page }) => {
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItem = page.locator('[data-testid="response-item"]').first();
-      const hasResponses = await responseItem.isVisible({ timeout: 15000 }).catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
+
+      const responseItem = page.locator('[data-testid="response-item"]').first();
 
       // Hover to reveal action buttons
       await responseItem.hover();
@@ -219,19 +202,10 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     test('should prompt login when clicking follow button on user profile', async ({ page }) => {
-      // Navigate to a topic with responses and click on an author's profile
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - use waitFor for proper async waiting
-      const responseItems = page.locator('[data-testid="response-item"]');
-      const hasResponses = await responseItems
-        .first()
-        .waitFor({ state: 'visible', timeout: 15000 })
-        .then(() => true)
-        .catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - cannot navigate to author profile');
+        test.skip(true, 'No responses loaded - cannot navigate to author profile');
         return;
       }
 
@@ -296,127 +270,115 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     // This test can be flaky due to rate limiting when running in parallel with other login tests
-    test(
-      'should allow guest to login from modal and then vote',
-      { retries: 2 },
-      async ({ page }) => {
-        // Give this test extra time due to potential rate limit retries
-        test.setTimeout(60000);
+    // Note: Test implements its own retry logic for rate limiting (see maxRetries loop below)
+    test('should allow guest to login from modal and then vote', async ({ page }) => {
+      // Give this test extra time due to potential rate limit retries
+      test.setTimeout(60000);
 
-        // Start fresh as guest (no beforeEach login in this describe block)
-        await page.context().clearCookies();
-        await page.goto('/');
-        await page.evaluate(() => {
-          localStorage.clear();
-          sessionStorage.clear();
-        });
-        await page.reload();
-        await page.waitForLoadState('networkidle');
+      // Start fresh as guest (no beforeEach login in this describe block)
+      await page.context().clearCookies();
+      await page.goto('/');
+      await page.evaluate(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+      });
+      await page.reload();
+      await page.waitForLoadState('networkidle');
 
-        // Navigate to a topic with responses
-        await navigateToSeededTopic(page, 'CONGESTION_PRICING');
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
+      if (!hasResponses) {
+        test.skip(true, 'No responses loaded - backend may be starting up');
+        return;
+      }
 
-        // Wait for responses to load - use waitFor for proper async waiting
-        const responseItems = page.locator('[data-testid="response-item"]');
-        const hasResponses = await responseItems
-          .first()
-          .waitFor({ state: 'visible', timeout: 15000 })
-          .then(() => true)
-          .catch(() => false);
+      // Find and click upvote button as guest - use the FIRST response
+      // (We'll login as Bob who can vote on Alice's first response)
+      const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
+      const upvoteExists = await upvoteButton
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
 
-        if (!hasResponses) {
-          test.skip(true, 'No responses available - backend may not be running');
-          return;
+      if (!upvoteExists) {
+        test.skip(true, 'Upvote button not visible in UI');
+        return;
+      }
+
+      await upvoteButton.click();
+
+      // Login modal should appear
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+      // Login using the modal as Bob (not Alice to avoid rate limiting with other tests)
+      const dialog = page.getByRole('dialog');
+      const maxRetries = 3;
+      let loginSuccess = false;
+
+      for (let attempt = 0; attempt < maxRetries && !loginSuccess; attempt++) {
+        // Make sure dialog is open before attempting login
+        if (!(await dialog.isVisible())) {
+          await upvoteButton.click();
+          await expect(dialog).toBeVisible({ timeout: 5000 });
         }
 
-        // Find and click upvote button as guest - use the FIRST response
-        // (We'll login as Bob who can vote on Alice's first response)
-        const upvoteButton = page.locator('[data-testid="upvote-button"]').first();
-        const upvoteExists = await upvoteButton
-          .waitFor({ state: 'visible', timeout: 5000 })
-          .then(() => true)
-          .catch(() => false);
+        await page.getByRole('button', { name: /Bob Builder/i }).click();
+        await dialog.getByRole('button', { name: /^log in$/i }).click();
 
-        if (!upvoteExists) {
-          test.skip(true, 'Upvote button not visible in UI');
-          return;
-        }
+        // Wait a moment and check for rate limit error
+        await page.waitForTimeout(1000);
+        const throttlerError = page.locator('text=ThrottlerException');
+        const hasThrottlerError = await throttlerError.isVisible().catch(() => false);
 
-        await upvoteButton.click();
-
-        // Login modal should appear
-        await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
-
-        // Login using the modal as Bob (not Alice to avoid rate limiting with other tests)
-        const dialog = page.getByRole('dialog');
-        const maxRetries = 3;
-        let loginSuccess = false;
-
-        for (let attempt = 0; attempt < maxRetries && !loginSuccess; attempt++) {
-          // Make sure dialog is open before attempting login
-          if (!(await dialog.isVisible())) {
-            await upvoteButton.click();
-            await expect(dialog).toBeVisible({ timeout: 5000 });
+        if (hasThrottlerError) {
+          // Close the modal and wait before retry
+          const closeButton = dialog
+            .locator('[aria-label="Close"]')
+            .or(dialog.locator('button:has-text("×")'));
+          const closeExists = await closeButton
+            .first()
+            .isVisible()
+            .catch(() => false);
+          if (closeExists) {
+            await closeButton.first().click();
+            await expect(dialog).not.toBeVisible({ timeout: 3000 });
           }
-
-          await page.getByRole('button', { name: /Bob Builder/i }).click();
-          await dialog.getByRole('button', { name: /^log in$/i }).click();
-
-          // Wait a moment and check for rate limit error
-          await page.waitForTimeout(1000);
-          const throttlerError = page.locator('text=ThrottlerException');
-          const hasThrottlerError = await throttlerError.isVisible().catch(() => false);
-
-          if (hasThrottlerError) {
-            // Close the modal and wait before retry
-            const closeButton = dialog
-              .locator('[aria-label="Close"]')
-              .or(dialog.locator('button:has-text("×")'));
-            const closeExists = await closeButton
-              .first()
-              .isVisible()
-              .catch(() => false);
-            if (closeExists) {
-              await closeButton.first().click();
-              await expect(dialog).not.toBeVisible({ timeout: 3000 });
-            }
-            // Wait for rate limit to expire (longer each retry)
-            await page.waitForTimeout(3000 * (attempt + 1));
-            continue;
-          }
-
-          loginSuccess = true;
+          // Wait for rate limit to expire (longer each retry)
+          await page.waitForTimeout(3000 * (attempt + 1));
+          continue;
         }
 
-        // Wait for modal to close and authentication to complete
-        await expect(dialog).not.toBeVisible({ timeout: 10000 });
+        loginSuccess = true;
+      }
 
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500); // Allow token propagation
+      // Wait for modal to close and authentication to complete
+      await expect(dialog).not.toBeVisible({ timeout: 10000 });
 
-        // After login, the app may redirect to /topics?welcome=true
-        // Navigate back to the discussion page to continue the vote flow
-        await navigateToSeededTopic(page, 'CONGESTION_PRICING');
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500); // Allow token propagation
 
-        // Re-locate the upvote button (we're on a new page) - use first() for Alice's response (Bob can vote on it)
-        const upvoteButtonAfterLogin = page.locator('[data-testid="upvote-button"]').first();
-        await expect(upvoteButtonAfterLogin).toBeVisible({ timeout: 10000 });
+      // After login, the app may redirect to /topics?welcome=true
+      // Navigate back to the discussion page to continue the vote flow
+      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
-        // Get initial vote state (may be true if Alice already voted from seed data)
-        const initialActiveState = await upvoteButtonAfterLogin.getAttribute('data-active');
+      // Re-locate the upvote button (we're on a new page) - use first() for Alice's response (Bob can vote on it)
+      const upvoteButtonAfterLogin = page.locator('[data-testid="upvote-button"]').first();
+      await expect(upvoteButtonAfterLogin).toBeVisible({ timeout: 10000 });
 
-        await upvoteButtonAfterLogin.click();
+      // Get initial vote state (may be true if Alice already voted from seed data)
+      const initialActiveState = await upvoteButtonAfterLogin.getAttribute('data-active');
 
-        // Login modal should NOT appear (user is now authenticated)
-        await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 3000 });
+      await upvoteButtonAfterLogin.click();
 
-        // Vote should toggle: if was active, now inactive; if inactive, now active
-        const expectedState = initialActiveState === 'true' ? 'false' : 'true';
-        await expect(upvoteButtonAfterLogin).toHaveAttribute('data-active', expectedState, {
-          timeout: 10000,
-        });
-      },
-    );
+      // Login modal should NOT appear (user is now authenticated)
+      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 3000 });
+
+      // Vote should toggle: if was active, now inactive; if inactive, now active
+      const expectedState = initialActiveState === 'true' ? 'false' : 'true';
+      await expect(upvoteButtonAfterLogin).toHaveAttribute('data-active', expectedState, {
+        timeout: 10000,
+      });
+    });
   });
 
   test.describe('Authenticated users should have full functionality', () => {
@@ -444,19 +406,10 @@ test.describe('Guest Read-Only Mode', () => {
         return;
       }
 
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItems = page.locator('[data-testid="response-item"]');
-      const hasResponses = await responseItems
-        .first()
-        .waitFor({ state: 'visible', timeout: 15000 })
-        .then(() => true)
-        .catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
 
@@ -496,17 +449,14 @@ test.describe('Guest Read-Only Mode', () => {
         return;
       }
 
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItem = page.locator('[data-testid="response-item"]').first();
-      const hasResponses = await responseItem.isVisible({ timeout: 15000 }).catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
+
+      const responseItem = page.locator('[data-testid="response-item"]').first();
 
       // Hover to reveal action buttons
       await responseItem.hover();
@@ -590,37 +540,22 @@ test.describe('Guest Read-Only Mode', () => {
     });
 
     test('should allow guest to view responses', async ({ page }) => {
-      // Navigate to a topic with responses
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load - skip if no responses available
-      const responseItems = page.locator('[data-testid="response-item"]');
-      const hasResponses = await responseItems
-        .first()
-        .isVisible({ timeout: 15000 })
-        .catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - backend may not be running');
+        test.skip(true, 'No responses loaded - backend may be starting up');
         return;
       }
 
+      const responseItems = page.locator('[data-testid="response-item"]');
       await expect(responseItems.first()).toBeVisible();
     });
 
     test('should allow guest to view user profiles', async ({ page }) => {
-      // Navigate to a topic with responses and click on an author's profile
-      await navigateToSeededTopic(page, 'CONGESTION_PRICING');
-
-      // Wait for responses to load
-      const responseItems = page.locator('[data-testid="response-item"]');
-      const hasResponses = await responseItems
-        .first()
-        .isVisible({ timeout: 15000 })
-        .catch(() => false);
-
+      // Navigate to a topic with responses (30s timeout for CI cold-starts)
+      const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
       if (!hasResponses) {
-        test.skip(true, 'No responses available - cannot navigate to author profile');
+        test.skip(true, 'No responses loaded - cannot navigate to author profile');
         return;
       }
 
