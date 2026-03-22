@@ -28,8 +28,19 @@ test.describe('Debug Moderator Role', () => {
     await page.goto('/topics');
     await page.waitForLoadState('networkidle');
 
-    // Give some time for the response to be logged
-    await page.waitForTimeout(1000);
+    // Wait for auth state to be fully loaded - user avatar indicates auth complete
+    console.log('⏳ Waiting for auth state to load...');
+    try {
+      await page.waitForSelector('[data-testid="user-avatar"], [aria-label*="Account"]', {
+        timeout: 10000,
+      });
+      console.log('✅ Auth indicator found - user is logged in');
+    } catch {
+      console.log('⚠️ Auth indicator not found within 10s');
+    }
+
+    // Additional wait for any React state updates
+    await page.waitForTimeout(500);
 
     // Log the intercepted response
     console.log('📋 Captured user response:', JSON.stringify(userResponse, null, 2));
@@ -37,6 +48,19 @@ test.describe('Debug Moderator Role', () => {
     // Verify the role in the API response
     expect(userResponse).not.toBeNull();
     expect(userResponse?.role).toBe('MODERATOR');
+
+    // Check if React has the correct user state
+    const reactUserState = await page.evaluate(() => {
+      // Access React internals to get user state (if available)
+      const root = document.getElementById('root');
+      if (root) {
+        // @ts-expect-error - accessing React internals
+        const reactRoot = root._reactRootContainer;
+        console.log('React root found:', !!reactRoot);
+      }
+      return null;
+    });
+    console.log('🔧 React user state check:', reactUserState);
 
     // Also check if the Merge Topics button is visible
     const mergeButton = page.getByRole('button', { name: /merge topics/i });
@@ -57,6 +81,15 @@ test.describe('Debug Moderator Role', () => {
         };
       });
       console.log('🔐 Auth state:', JSON.stringify(authState, null, 2));
+
+      // Log all buttons on the page for debugging
+      const allButtons = await page.locator('button').allTextContents();
+      console.log('📋 All buttons on page:', allButtons.join(', '));
+
+      // Check for the Create Topic button to verify page loaded correctly
+      const createButton = page.getByRole('button', { name: /create topic/i });
+      const createButtonVisible = await createButton.isVisible();
+      console.log(`📝 Create Topic button visible: ${createButtonVisible}`);
     } else {
       console.log('✅ Merge Topics button IS visible');
     }
