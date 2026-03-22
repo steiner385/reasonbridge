@@ -7,13 +7,25 @@
  *
  * Architecture:
  *   - This stub: Lives in main reasonBridge repo (rarely changes)
- *   - Real pipeline: Lives in reasonbridge-jenkins-lib repo (frequently updated)
- *   - Jenkins scans: Main repo branches, finds this stub, loads real pipeline from jenkins-lib
+ *   - Shared functions: Lives in jenkins-config repo (jenkins-shared-lib)
+ *   - Project pipeline: Lives in reasonbridge-jenkins-lib repo (reasonbridgeMultibranchPipeline)
+ *   - Jenkins scans: Main repo branches, finds this stub, loads libraries, executes pipeline
  *
- * Note: jenkins-lib updated with fixed container cleanup (grep instead of broken docker name filter)
+ * Library Loading Order:
+ *   1. jenkins-shared-lib (common functions: githubStatusReporter, dockerCleanup, etc.)
+ *   2. reasonbridge-lib (project-specific: reasonbridgeMultibranchPipeline)
  */
 
-// Load the shared library and execute the real pipeline
+// First, load the shared library with common functions
+// This must be loaded first so functions are available to reasonbridge-lib
+library identifier: 'jenkins-shared-lib@main',
+    retriever: modernSCM([
+        $class: 'GitSCMSource',
+        remote: 'https://github.com/steiner385/jenkins-config.git',
+        credentialsId: 'github-credentials'
+    ])
+
+// Then load the project-specific library
 library identifier: 'reasonbridge-lib@main',
     retriever: modernSCM([
         $class: 'GitSCMSource',
