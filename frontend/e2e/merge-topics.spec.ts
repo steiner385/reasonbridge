@@ -1,5 +1,19 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { loginWithDemoAccount } from './helpers/demo-auth';
+
+/**
+ * Navigate to topics page with proper waiting for auth state to load
+ */
+async function navigateToTopicsAndWaitForAuth(page: Page) {
+  await page.goto('/topics');
+  await page.waitForLoadState('networkidle');
+  // Wait for page heading to confirm page is ready
+  await expect(page.getByRole('heading', { name: /discussion topics/i })).toBeVisible();
+  // Wait for auth state to propagate (moderator-only features depend on user role)
+  await page.waitForSelector('[data-testid="user-avatar"], [aria-label*="Account"]', {
+    timeout: 10000,
+  });
+}
 
 /**
  * E2E test suite for Topic Merging (Feature 016: Topic Management)
@@ -26,27 +40,17 @@ test.describe('Topic Merging', () => {
     });
 
     test('should see Merge Topics button on topics page', async ({ page }) => {
-      // Navigate to topics
-      await page.goto('/topics');
+      // Navigate to topics and wait for auth state
+      await navigateToTopicsAndWaitForAuth(page);
 
-      // Moderators should see Merge Topics button (or similar merge action)
-      // This might be in a moderator tools menu or directly visible
+      // Moderators should see Merge Topics button
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
-      // Check if button exists (might be hidden in menu or conditional on selection)
-      const buttonExists = await mergeButton.count().then((count) => count > 0);
-
-      if (buttonExists) {
-        // Button exists, that's good for moderators
-        expect(buttonExists).toBeTruthy();
-      } else {
-        // If no direct button, skip this test (UI design may vary)
-        test.skip(true, 'Merge button not found - UI may differ');
-      }
+      await expect(mergeButton).toBeVisible({ timeout: 5000 });
     });
 
     test('should successfully merge two topics', async ({ page }) => {
       // For this test, we'll create two test topics to merge
-      await page.goto('/topics');
+      await navigateToTopicsAndWaitForAuth(page);
 
       // Create first topic (source)
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -76,8 +80,7 @@ test.describe('Topic Merging', () => {
       }
 
       // Go back to topics list
-      await page.goto('/topics');
-      await page.waitForTimeout(500);
+      await navigateToTopicsAndWaitForAuth(page);
 
       // Create second topic (target)
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -109,7 +112,7 @@ test.describe('Topic Merging', () => {
       // Now attempt to merge
       // Note: The actual UI for initiating merge may vary
       // This is a placeholder for the merge workflow
-      await page.goto('/topics');
+      await navigateToTopicsAndWaitForAuth(page);
 
       // Look for merge button or moderator menu
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
@@ -171,7 +174,7 @@ test.describe('Topic Merging', () => {
     });
 
     test('should show validation error for missing merge reason', async ({ page }) => {
-      await page.goto('/topics');
+      await navigateToTopicsAndWaitForAuth(page);
 
       // Look for merge button
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
@@ -202,7 +205,7 @@ test.describe('Topic Merging', () => {
     });
 
     test('should prevent merging target topic into itself', async ({ page }) => {
-      await page.goto('/topics');
+      await navigateToTopicsAndWaitForAuth(page);
 
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
       if (await mergeButton.isVisible({ timeout: 2000 })) {
