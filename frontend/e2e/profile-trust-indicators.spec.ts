@@ -8,10 +8,18 @@ import { loginWithDemoAccount } from './helpers/demo-auth';
  * - Trust badge display on user profiles
  * - Trust score display (Mayer ABI: ability, benevolence, integrity)
  * - Verification status indicators
+ * - Phone verification flow (implemented)
  * - Profile integration with trust indicators
  *
- * Note: Phone/ID verification forms, bot detection, and CAPTCHA tests are skipped
- * as those features are not yet implemented.
+ * Features NOT YET IMPLEMENTED (backend exists, frontend UI missing):
+ * - Government ID verification upload flow (VerificationPage shows "not yet available")
+ * - Bot detection indicator UI (backend: services/user-service/src/services/bot-detector.service.ts)
+ * - CAPTCHA for suspicious account activity
+ *
+ * When these features are built, add E2E tests for:
+ * - ID upload and document type selection
+ * - Warning badges on suspicious accounts
+ * - CAPTCHA triggering for rapid account creation
  */
 
 // Demo account name used for testing
@@ -194,20 +202,6 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
         .first();
       await expect(verificationLevel).toBeVisible({ timeout: 10000 });
     });
-  });
-
-  test.describe.skip('IDVerificationFlow', () => {
-    // TODO: Implement ID verification flow tests when feature is built
-    test('should provide government ID upload option', async () => {});
-    test('should accept government ID document images', async () => {});
-    test('should collect document type', async () => {});
-  });
-
-  test.describe.skip('Bot Detection Indicators', () => {
-    // TODO: Implement bot detection tests when feature is built
-    test('should show warning badge on suspicious accounts', async () => {});
-    test('should show caution indicator on low trust score accounts', async () => {});
-    test('should trigger CAPTCHA for rapid account creation attempts', async () => {});
   });
 
   test.describe('ProfilePage Integration with Trust Indicators', () => {
