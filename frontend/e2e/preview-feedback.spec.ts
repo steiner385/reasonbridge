@@ -10,12 +10,45 @@
  * - T036-T038: Sensitivity level control
  *
  * @see specs/014-realtime-preview-feedback/
+ *
+ * ## Mock-Only Testing Pattern
+ *
+ * **WHY THESE TESTS SKIP IN E2E DOCKER MODE:**
+ *
+ * These tests use Playwright route mocking (`page.route()`) to intercept API calls
+ * and return controlled responses. This is intentional for testing UI behavior with
+ * predictable data. However, when running with a real backend (E2E_DOCKER=true),
+ * the route mocking conflicts with actual API calls:
+ *
+ * 1. **Route Priority**: Real backend responses can override mocked routes
+ * 2. **Data Inconsistency**: Real AI feedback varies; tests need deterministic data
+ * 3. **Cost/Latency**: Real AI feedback requires Bedrock calls (~$0.01, 1-5s each)
+ *
+ * **THIS IS BY DESIGN** - Not a bug or incomplete implementation.
+ *
+ * ## When These Tests Run
+ *
+ * | Environment | E2E_DOCKER | Tests Run? | Reason |
+ * |-------------|------------|------------|--------|
+ * | Local dev   | undefined  | YES        | No backend interference |
+ * | CI (mock)   | undefined  | YES        | Isolated testing |
+ * | CI (e2e)    | true       | SKIPPED    | Real backend active |
+ *
+ * ## Alternative Coverage
+ *
+ * Real AI feedback behavior is tested in:
+ * - `ai-feedback-accuracy.spec.ts` (@ai tagged, manual smoke tests)
+ * - Unit tests: `PreviewFeedbackPanel.test.tsx`, `usePreviewFeedback.test.ts`
+ * - Integration tests: `ai-service/__tests__/feedback.integration.test.ts`
  */
 
 import { test, expect, type Page } from '@playwright/test';
 
-// Skip in E2E Docker mode - these tests use mocked APIs and require mock isolation
-// In E2E Docker mode, the real backend would interfere with route mocking
+/**
+ * Skip in E2E Docker mode - these tests use mocked APIs and require mock isolation.
+ * In E2E Docker mode, the real backend would interfere with route mocking.
+ * See file header for full explanation of this design pattern.
+ */
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
 test.describe.configure({ mode: 'serial' });
