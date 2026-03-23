@@ -137,11 +137,18 @@ test.describe('Emoji Reactions', () => {
     }
   });
 
-  // MOCK-ONLY: Tests below require mocked APIs to simulate specific reaction states
+  /**
+   * PERMANENTLY SKIPPED: Mock-only tests
+   *
+   * These tests require mocked APIs to simulate specific reaction states
+   * (existing reactions, reaction counts, user-reacted state) that cannot
+   * be reliably set up with real backend data.
+   *
+   * UI behavior is covered via:
+   * - Unit tests: frontend/src/components/responses/__tests__/ReactionButton.test.tsx
+   * - Above E2E tests cover the happy path with real backend
+   */
   test.describe('Mock-dependent tests', () => {
-    // INTENTIONALLY SKIPPED: These tests require mocked APIs to simulate specific
-    // scenarios (existing reactions, reaction counts, user-reacted state) that
-    // cannot be reliably set up with real backend data.
     test.skip(true, 'Mock-only tests - simulates specific reaction states');
 
     test('should display existing reactions on a response', async () => {

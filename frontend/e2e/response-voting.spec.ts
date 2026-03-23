@@ -123,13 +123,18 @@ test.describe('Response Voting', () => {
     await expect(upvoteButton).not.toHaveAttribute('data-active', 'true');
   });
 
-  // MOCK-ONLY: Tests below require mocked APIs to verify specific UI behaviors
-  // that cannot be reliably triggered with real backend data
-
+  /**
+   * PERMANENTLY SKIPPED: Mock-only tests
+   *
+   * These tests require mocked APIs to simulate specific vote states
+   * (existing votes, optimistic updates, vote counts) that cannot be
+   * reliably set up with real backend data.
+   *
+   * UI behavior is covered via:
+   * - Unit tests: frontend/src/components/responses/__tests__/VoteButtons.test.tsx
+   * - Above E2E tests cover upvote/downvote/toggle with real backend
+   */
   test.describe('Mock-dependent tests', () => {
-    // INTENTIONALLY SKIPPED: These tests require mocked APIs to simulate specific
-    // scenarios (existing vote states, optimistic updates) that cannot be reliably
-    // set up with real backend data.
     test.skip(true, 'Mock-only tests - simulates specific API states');
 
     test('should display vote counts on responses', async () => {

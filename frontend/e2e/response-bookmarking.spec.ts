@@ -140,11 +140,18 @@ test.describe('Response Bookmarking', () => {
     await expect(page).toHaveURL(/bookmarks/);
   });
 
-  // MOCK-ONLY: Tests below require mocked APIs to simulate specific bookmark states
+  /**
+   * PERMANENTLY SKIPPED: Mock-only tests
+   *
+   * These tests require mocked APIs to simulate specific bookmark states
+   * (existing bookmarks, bookmark counts, persistence) that cannot be
+   * reliably set up with real backend data.
+   *
+   * UI behavior is covered via:
+   * - Unit tests: frontend/src/components/responses/__tests__/BookmarkButton.test.tsx
+   * - Above E2E tests cover add/toggle bookmark with real backend
+   */
   test.describe('Mock-dependent tests', () => {
-    // INTENTIONALLY SKIPPED: These tests require mocked APIs to simulate specific
-    // scenarios (existing bookmarks, bookmark counts) that cannot be reliably
-    // set up with real backend data.
     test.skip(true, 'Mock-only tests - simulates specific bookmark states');
 
     test('should show filled bookmark icon for bookmarked responses', async () => {
