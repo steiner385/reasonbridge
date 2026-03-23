@@ -3,20 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Styles } from 'react-joyride';
+import type { Styles, Options } from 'react-joyride';
+
+/**
+ * Custom options for Joyride tour with dark mode support
+ * These go in the `options` prop, not `styles`
+ */
+export const getTourOptions = (isDark: boolean): Partial<Options> => ({
+  arrowColor: isDark ? '#1f2937' : '#ffffff',
+  backgroundColor: isDark ? '#1f2937' : '#ffffff',
+  overlayColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
+  primaryColor: isDark ? '#60a5fa' : '#2563eb',
+  textColor: isDark ? '#e5e7eb' : '#1f2937',
+  zIndex: 10000,
+});
 
 /**
  * Custom styles for Joyride tour tooltips with dark mode support
  */
-export const getTourStyles = (isDark: boolean): Styles => ({
-  options: {
-    arrowColor: isDark ? '#1f2937' : '#ffffff',
-    backgroundColor: isDark ? '#1f2937' : '#ffffff',
-    overlayColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
-    primaryColor: isDark ? '#60a5fa' : '#2563eb',
-    textColor: isDark ? '#e5e7eb' : '#1f2937',
-    zIndex: 10000,
-  },
+export const getTourStyles = (isDark: boolean): Partial<Styles> => ({
   tooltip: {
     borderRadius: '0.75rem',
     padding: '1.25rem',
@@ -42,7 +47,7 @@ export const getTourStyles = (isDark: boolean): Styles => ({
   tooltipFooter: {
     marginTop: '1rem',
   },
-  buttonNext: {
+  buttonPrimary: {
     backgroundColor: isDark ? '#2563eb' : '#3b82f6',
     color: '#ffffff',
     borderRadius: '0.5rem',
@@ -92,20 +97,8 @@ export const getTourStyles = (isDark: boolean): Styles => ({
     backgroundColor: isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(37, 99, 235, 0.2)',
     border: `2px solid ${isDark ? '#3b82f6' : '#2563eb'}`,
   },
-  spotlight: {
-    borderRadius: '0.5rem',
-  },
-  spotlightLegacy: {
-    borderRadius: '0.5rem',
-  },
   overlay: {
     mixBlendMode: 'normal',
-  },
-  overlayLegacy: {
-    mixBlendMode: 'normal',
-  },
-  overlayLegacyCenter: {
-    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
   },
   tooltipFooterSpacer: {
     flex: 1,

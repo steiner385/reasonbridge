@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import Joyride, { STATUS, EVENTS, type CallBackProps, type Step } from 'react-joyride';
+import { Joyride, STATUS, EVENTS, type EventData, type Step } from 'react-joyride';
 import {
   type TourId,
   getTourSteps,
@@ -85,7 +85,7 @@ export function TourProvider({ children }: TourProviderProps) {
    * Handle Joyride callbacks
    */
   const handleJoyrideCallback = useCallback(
-    (data: CallBackProps) => {
+    (data: EventData) => {
       const { status, type } = data;
 
       // Handle tour completion
@@ -143,11 +143,8 @@ export function TourProvider({ children }: TourProviderProps) {
         steps={steps}
         run={isRunning}
         continuous
-        showSkipButton
-        showProgress
         scrollToFirstStep
-        disableOverlayClose
-        callback={handleJoyrideCallback}
+        onEvent={handleJoyrideCallback}
         locale={{
           back: 'Back',
           close: 'Close',
@@ -155,15 +152,18 @@ export function TourProvider({ children }: TourProviderProps) {
           next: 'Next',
           skip: 'Skip tour',
         }}
+        options={{
+          zIndex: 10000,
+          primaryColor: '#2563eb', // primary-600
+          textColor: '#1f2937', // gray-800
+          backgroundColor: '#ffffff',
+          arrowColor: '#ffffff',
+          overlayColor: 'rgba(0, 0, 0, 0.5)',
+          overlayClickAction: false,
+          buttons: ['back', 'close', 'primary', 'skip'],
+          showProgress: true,
+        }}
         styles={{
-          options: {
-            zIndex: 10000,
-            primaryColor: '#2563eb', // primary-600
-            textColor: '#1f2937', // gray-800
-            backgroundColor: '#ffffff',
-            arrowColor: '#ffffff',
-            overlayColor: 'rgba(0, 0, 0, 0.5)',
-          },
           tooltip: {
             borderRadius: 8,
             padding: 16,
@@ -177,7 +177,7 @@ export function TourProvider({ children }: TourProviderProps) {
             fontSize: 14,
             lineHeight: 1.5,
           },
-          buttonNext: {
+          buttonPrimary: {
             backgroundColor: '#2563eb',
             borderRadius: 6,
             padding: '8px 16px',
@@ -192,9 +192,6 @@ export function TourProvider({ children }: TourProviderProps) {
           buttonSkip: {
             color: '#9ca3af',
             fontSize: 14,
-          },
-          spotlight: {
-            borderRadius: 8,
           },
         }}
       />
