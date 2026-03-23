@@ -11,13 +11,11 @@ import { test, expect } from '@playwright/test';
  * - Fact-check badge displays
  * - Handling conflicting sources
  *
- * SKIPPED: Fact-check UI components are built but not yet integrated into
- * the response card UI. The backend service and frontend components exist,
- * but ResponseCard does not yet render FactCheckButton or FactCheckResultDisplay.
- * Re-enable these tests after completing UI integration (spec 004-fact-check-integration).
+ * UI integration completed: 2026-03-23
+ * Components integrated: FactCheckButton, FactCheckResultDisplay, ClaimHighlighter
  */
 
-test.describe.skip('Fact-Check Feature', () => {
+test.describe('Fact-Check Feature', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to discussions page and select a topic
     await page.goto('/discussions');
@@ -273,8 +271,8 @@ test.describe.skip('Fact-Check Feature', () => {
   });
 });
 
-test.describe.skip('Fact-Check UI Components', () => {
-  // SKIPPED: Fact-check components not yet integrated into pages
+test.describe('Fact-Check UI Components', () => {
+  // UI integration completed: 2026-03-23 - FactCheckButton, FactCheckResultDisplay, ClaimHighlighter
 
   test('should render fact-check badge with correct variants', async ({ page }) => {
     // Navigate to a page that has fact-check components
