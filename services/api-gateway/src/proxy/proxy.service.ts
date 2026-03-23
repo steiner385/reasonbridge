@@ -69,6 +69,7 @@ export class ProxyService {
   private readonly activityService: ServiceConfig;
   private readonly contactService: ServiceConfig;
   private readonly notificationService: ServiceConfig;
+  private readonly factCheckService: ServiceConfig;
 
   constructor(
     @Inject(HttpService) private readonly httpService: HttpService,
@@ -133,6 +134,13 @@ export class ProxyService {
         DEFAULT_RETRY_ATTEMPTS,
       ),
     };
+
+    this.factCheckService = {
+      url: getConfig<string>('FACT_CHECK_SERVICE_URL', getServiceUrl('FACT_CHECK_SERVICE')),
+      // Fact-checking can be slow due to external API calls
+      timeout: getConfig<number>('FACT_CHECK_SERVICE_TIMEOUT', 15000),
+      retryAttempts: getConfig<number>('FACT_CHECK_SERVICE_RETRY_ATTEMPTS', 2),
+    };
   }
 
   async proxyToUserService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
@@ -161,6 +169,10 @@ export class ProxyService {
 
   async proxyToNotificationService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
     return this.proxyWithResilience<T>('notification-service', this.notificationService, request);
+  }
+
+  async proxyToFactCheckService<T = unknown>(request: ProxyRequest): Promise<AxiosResponse<T>> {
+    return this.proxyWithResilience<T>('fact-check-service', this.factCheckService, request);
   }
 
   /**

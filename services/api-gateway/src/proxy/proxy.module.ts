@@ -21,6 +21,7 @@ import { ResponsesProxyController } from './responses-proxy.controller.js';
 import { TopicsProxyController } from './topics-proxy.controller.js';
 import { UsersProxyController } from './users-proxy.controller.js';
 import { VerificationProxyController } from './verification-proxy.controller.js';
+import { FactCheckProxyController } from './fact-check-proxy.controller.js';
 import { ProxyService } from './proxy.service.js';
 
 @Module({
@@ -46,6 +47,7 @@ import { ProxyService } from './proxy.service.js';
     TopicsProxyController,
     UsersProxyController,
     VerificationProxyController,
+    FactCheckProxyController,
   ],
   providers: [ProxyService],
   exports: [ProxyService],
