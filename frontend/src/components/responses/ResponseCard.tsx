@@ -3,11 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Card, { CardHeader, CardBody, CardFooter } from '../ui/Card';
 import { Tooltip } from '../ui/Tooltip';
 import MarkdownRenderer from '../ui/MarkdownRenderer';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { useFactCheckSafe } from '../../contexts/FactCheckContext';
+import { useToast } from '../../contexts/ToastContext';
+import FactCheckButton from '../fact-check/FactCheckButton';
+import FactCheckResultDisplay from '../fact-check/FactCheckResultDisplay';
+import ClaimHighlighter from '../fact-check/ClaimHighlighter';
 import type { Response } from '../../types/response';
 import { getResponseStatusDescription } from '../../lib/statusDescriptions';
 
@@ -58,8 +63,20 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
   showPropositions = false,
 }) => {
   const { user } = useAuthContext();
+  const toast = useToast();
   const isAuthor = user?.id === response.authorId;
   const isPendingReview = response.status === 'PENDING_REVIEW';
+
+  // Fact-check integration - only available when inside FactCheckProvider
+  const factCheckState = useFactCheckSafe(response.id);
+  const factCheckError = factCheckState?.error ?? null;
+
+  // Handle fact-check error display
+  useEffect(() => {
+    if (factCheckError) {
+      toast.error(factCheckError);
+    }
+  }, [factCheckError, toast]);
   // Format timestamp
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -138,7 +155,11 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
       </CardHeader>
 
       <CardBody>
-        <MarkdownRenderer content={displayContent} className="prose-sm" />
+        {factCheckState?.claims ? (
+          <ClaimHighlighter content={displayContent} claims={factCheckState.claims} />
+        ) : (
+          <MarkdownRenderer content={displayContent} className="prose-sm" />
+        )}
 
         {isTruncated && (
           <button
@@ -229,6 +250,45 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
           </div>
         )}
       </CardBody>
+
+      {/* Fact-check action bar */}
+      {factCheckState && (
+        <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-4">
+          <FactCheckButton
+            responseId={response.id}
+            content={response.content}
+            compact
+            onResults={(results) => {
+              if (results.length > 0) {
+                const hasConflicts = results.some((r) => r.hasConflictingSources);
+                if (hasConflicts) {
+                  toast.warning('Some sources have conflicting information');
+                }
+              }
+            }}
+            onStatusChange={(status) => {
+              if (status === 'no-results') {
+                toast.info('No related context found for this response');
+              }
+            }}
+          />
+          {factCheckState.status === 'success' && factCheckState.results && (
+            <span className="text-xs text-gray-500">
+              {factCheckState.results.length} claim
+              {factCheckState.results.length !== 1 ? 's' : ''} checked
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Fact-check results */}
+      {factCheckState?.status === 'success' &&
+        factCheckState.results &&
+        factCheckState.results.length > 0 && (
+          <div className="px-4 pb-4">
+            <FactCheckResultDisplay results={factCheckState.results} compact />
+          </div>
+        )}
 
       {/* Author's pending review notice - child-friendly message */}
       {isPendingReview && isAuthor && (

@@ -16,6 +16,7 @@ import { usePropositions } from '../../hooks/usePropositions';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
 import { useBridgingSuggestions } from '../../lib/useBridgingSuggestions';
 import { useToast } from '../../contexts/ToastContext';
+import { FactCheckProvider } from '../../contexts/FactCheckContext';
 import { responseService } from '../../services/responseService';
 import type { PreviewFeedbackItem, FeedbackSensitivity } from '../../lib/feedback-api';
 import type { CreateResponseRequest } from '../../types/response';
@@ -276,7 +277,7 @@ export function DiscussionPage() {
   // For now, these are null/empty - will be implemented later in Phase 4
 
   return (
-    <>
+    <FactCheckProvider>
       {/* Unsaved Changes Confirmation Dialog */}
       {showUnsavedChangesDialog && (
         <div
@@ -352,6 +353,6 @@ export function DiscussionPage() {
           />
         }
       />
-    </>
+    </FactCheckProvider>
   );
 }

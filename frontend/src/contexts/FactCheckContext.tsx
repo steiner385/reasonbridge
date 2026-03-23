@@ -184,3 +184,41 @@ export function useFactCheck(responseId: string) {
     clear: () => context.clearResults(responseId),
   };
 }
+
+/**
+ * Safe version of useFactCheck that returns null when not inside FactCheckProvider
+ *
+ * @param responseId - The response ID to get fact-check state for
+ * @returns Object with status, results, error, claims, and action functions, or null if no provider
+ *
+ * @example
+ * ```tsx
+ * const factCheck = useFactCheckSafe('response-123');
+ *
+ * // Check if fact-checking is available
+ * if (factCheck) {
+ *   // Render fact-check UI
+ * }
+ * ```
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export function useFactCheckSafe(responseId: string) {
+  const context = useContext(FactCheckContext);
+
+  // Always compute state and claims to maintain consistent hook call order
+  const state = context?.getState(responseId);
+  const claims = context?.getHighlightedClaims(responseId);
+
+  if (!context) {
+    return null;
+  }
+
+  return {
+    status: state!.status,
+    results: state!.results,
+    error: state!.error,
+    claims: claims ?? null,
+    checkClaims: (content: string) => context.checkClaims(responseId, content),
+    clear: () => context.clearResults(responseId),
+  };
+}
