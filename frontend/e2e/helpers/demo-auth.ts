@@ -128,6 +128,33 @@ export const SEEDED_TOPICS: Record<string, SeededTopic> = {
   },
 } as const;
 
+// =============================================================================
+// SEEDED MODERATED RESPONSES
+// These responses have HIDDEN or REMOVED status for testing moderation UI
+// Located in CONGESTION_PRICING topic
+// =============================================================================
+
+export interface SeededModeratedResponse {
+  id: string;
+  topicId: string;
+  status: 'HIDDEN' | 'REMOVED';
+}
+
+export const SEEDED_MODERATED_RESPONSES = {
+  /** Response hidden by moderator - should show "[Content hidden]" notice */
+  HIDDEN_RESPONSE: {
+    id: '11111111-0000-4000-8000-000101000006',
+    topicId: SEEDED_TOPICS.CONGESTION_PRICING.id,
+    status: 'HIDDEN' as const,
+  },
+  /** Response removed for policy violations - should show "[Content removed]" notice */
+  REMOVED_RESPONSE: {
+    id: '11111111-0000-4000-8000-000101000007',
+    topicId: SEEDED_TOPICS.CONGESTION_PRICING.id,
+    status: 'REMOVED' as const,
+  },
+} as const;
+
 /**
  * Get all ACTIVE seeded topics (most common use case for tests)
  */

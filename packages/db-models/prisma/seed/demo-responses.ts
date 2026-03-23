@@ -14,6 +14,8 @@ import { DEMO_TOPIC_IDS, DEMO_USER_IDS, generateResponseId } from './demo-ids';
 
 export type ViewpointType = 'support' | 'oppose' | 'nuanced';
 
+export type ResponseStatusType = 'VISIBLE' | 'HIDDEN' | 'REMOVED';
+
 export interface DemoResponse {
   id: string;
   topicId: string;
@@ -22,6 +24,7 @@ export interface DemoResponse {
   content: string;
   viewpoint: ViewpointType;
   citedSources: CitedSource[];
+  status?: ResponseStatusType; // Default: 'VISIBLE'
 }
 
 interface CitedSource {
@@ -120,6 +123,27 @@ function generateCongestionPricingResponses(): DemoResponse[] {
         "I appreciate the equity focus, but exemptions and discounts add complexity and reduce effectiveness. At some point, so many exemptions exist that the policy doesn't work anymore.",
       viewpoint: 'oppose',
       citedSources: [],
+    },
+    // Moderated responses for E2E testing
+    {
+      id: generateResponseId(tn, 6),
+      topicId,
+      authorId: DEMO_USER_IDS.NEW_USER,
+      parentId: null,
+      content: '[This response has been hidden by a moderator for violating community guidelines.]',
+      viewpoint: 'oppose',
+      citedSources: [],
+      status: 'HIDDEN',
+    },
+    {
+      id: generateResponseId(tn, 7),
+      topicId,
+      authorId: DEMO_USER_IDS.NEW_USER,
+      parentId: null,
+      content: '[This response has been removed for repeated policy violations.]',
+      viewpoint: 'oppose',
+      citedSources: [],
+      status: 'REMOVED',
     },
   ];
 }

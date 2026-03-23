@@ -198,6 +198,7 @@ export async function seedDemoResponses(prisma: PrismaClient): Promise<void> {
       update: {
         content: response.content,
         citedSources: response.citedSources as unknown as Prisma.InputJsonValue,
+        status: response.status || 'VISIBLE',
       },
       create: {
         id: response.id,
@@ -206,6 +207,7 @@ export async function seedDemoResponses(prisma: PrismaClient): Promise<void> {
         parentId: response.parentId,
         content: response.content,
         citedSources: response.citedSources as unknown as Prisma.InputJsonValue,
+        status: response.status || 'VISIBLE',
         createdAt,
       },
     });
