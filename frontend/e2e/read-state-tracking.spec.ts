@@ -79,11 +79,18 @@ test.describe('Read State Tracking', () => {
     await expect(responses.first()).toBeVisible();
   });
 
-  // MOCK-ONLY: Tests below require mocked APIs to simulate specific read state scenarios
+  /**
+   * PERMANENTLY SKIPPED: Mock-only tests
+   *
+   * These tests require mocked APIs to simulate specific read state scenarios
+   * (new messages divider, unread counts, WebSocket updates) that cannot be
+   * reliably set up with real backend data without polluting other tests.
+   *
+   * UI behavior is covered via:
+   * - Unit tests: frontend/src/hooks/__tests__/useReadState.test.ts
+   * - Above E2E tests cover basic read state persistence with real backend
+   */
   test.describe('Mock-dependent tests', () => {
-    // INTENTIONALLY SKIPPED: These tests require mocked APIs to simulate specific
-    // scenarios (new messages divider, unread counts) that cannot be reliably
-    // set up with real backend data without polluting other tests.
     test.skip(true, 'Mock-only tests - simulates specific read state scenarios');
 
     test('should display new messages divider for unread responses', async () => {
