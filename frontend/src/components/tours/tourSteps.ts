@@ -21,7 +21,7 @@ export const homePageTourSteps: Step[] = [
       'Welcome to ReasonBridge! This is the topic list where you can find discussions on various subjects. Click any topic to join the conversation.',
     title: 'Browse Topics',
     placement: 'right',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="search-input"]',
@@ -64,7 +64,7 @@ export const discussionTourSteps: Step[] = [
       'This is the discussion view. Here you can read responses, share your thoughts, and find common ground with others.',
     title: 'Welcome to the Discussion',
     placement: 'bottom',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="response-composer"]',
@@ -127,7 +127,7 @@ export const profileTourSteps: Step[] = [
       'This is your profile page. Here you can see your contribution history, trust score, and settings.',
     title: 'Your Profile',
     placement: 'bottom',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="trust-score"]',

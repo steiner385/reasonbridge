@@ -138,8 +138,8 @@ importers:
         specifier: ^7.72.0
         version: 7.72.0(react@19.2.4)
       react-joyride:
-        specifier: ^2.9.0
-        version: 2.9.3(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^3.0.0
+        version: 3.0.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.2.14)(react@19.2.4)
@@ -2415,6 +2415,9 @@ packages:
   '@fastify/cors@11.2.0':
     resolution: {integrity: sha512-LbLHBuSAdGdSFZYTLVA3+Ch2t+sA6nq3Ejc6XLAKiQ6ViS2qFnvicpj0htsx03FyYeLs04HfRNBsz/a8SvbcUw==}
 
+  '@fastify/deepmerge@3.2.1':
+    resolution: {integrity: sha512-N5Oqvltoa2r9z1tbx4xjky0oRR60v+T47Ic4J1ukoVQcptLOrIdRnCSdTGmOmajZuHVKlTnfcmrjyqsGEW1ztA==}
+
   '@fastify/error@4.2.0':
     resolution: {integrity: sha512-RSo3sVDXfHskiBZKBPRgnQTtIqpi/7zhJOEmAxCiBcM7d0uwdGdxLlsCaLzGs8v8NnxIRlfG0N51p5yFaOentQ==}
 
@@ -2448,26 +2451,31 @@ packages:
   '@fastify/swagger@9.7.0':
     resolution: {integrity: sha512-Vp1SC1GC2Hrkd3faFILv86BzUNyFz5N4/xdExqtCgkGASOzn/x+eMe4qXIGq7cdT6wif/P/oa6r1Ruqx19paZA==}
 
-  '@floating-ui/core@1.7.4':
-    resolution: {integrity: sha512-C3HlIdsBxszvm5McXlB8PeOEWfBhcGBTZGkGlWc2U0KFY5IwG5OQEuQ8rq52DZmcHDlPLd+YFBK+cZcytwIFWg==}
+  '@floating-ui/core@1.7.5':
+    resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
 
-  '@floating-ui/dom@1.7.5':
-    resolution: {integrity: sha512-N0bD2kIPInNHUHehXhMke1rBGs1dwqvC9O9KYMyyjK7iXt7GAhnro7UlcuYcGdS/yYOlq0MAVgrow8IbWJwyqg==}
+  '@floating-ui/dom@1.7.6':
+    resolution: {integrity: sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ==}
 
-  '@floating-ui/react-dom@2.1.7':
-    resolution: {integrity: sha512-0tLRojf/1Go2JgEVm+3Frg9A3IW8bJgKgdO0BN5RkF//ufuz2joZM63Npau2ff3J6lUVYgDSNzNkR+aH3IVfjg==}
+  '@floating-ui/react-dom@2.1.8':
+    resolution: {integrity: sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
-  '@floating-ui/utils@0.2.10':
-    resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+  '@floating-ui/utils@0.2.11':
+    resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@gilbarbara/deep-equal@0.1.2':
-    resolution: {integrity: sha512-jk+qzItoEb0D0xSSmrKDDzf9sheQj/BAPxlgNxgmOaA3mxpUa6ndJLYGZKsJnIVEQSD8zcTbyILz7I0HcnBCRA==}
+  '@gilbarbara/deep-equal@0.4.1':
+    resolution: {integrity: sha512-QF2BGeQjsa59T59XvFdR3is5jrl28Eg0J6giXAC5919bcqvR8XP4B+07tpbs6Y6/IQd4FBncaL2WVXIBgSxt4w==}
 
-  '@gilbarbara/deep-equal@0.3.1':
-    resolution: {integrity: sha512-I7xWjLs2YSVMc5gGx1Z3ZG1lgFpITPndpi8Ku55GeEIKpACCPQNS/OTqQbxgTCfq0Ncvcc+CrFov96itVh6Qvw==}
+  '@gilbarbara/hooks@0.11.0':
+    resolution: {integrity: sha512-CIVazdxqFRplUfm9wZL3/0X1TURJekhPMWGFdWzEmyJrGPiotX2yxA1KiB8N7VnhawIaMtb2Apnda4Y6DRwi2Q==}
+    peerDependencies:
+      react: 16.8 - 19
+
+  '@gilbarbara/types@0.2.2':
+    resolution: {integrity: sha512-QuQDBRRcm1Q8AbSac2W1YElurOhprj3Iko/o+P1fJxUWS4rOGKMVli98OXS7uo4z+cKAif6a+L9bcZFSyauQpQ==}
 
   '@hono/node-server@1.19.9':
     resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
@@ -5378,10 +5386,6 @@ packages:
   decode-named-character-reference@1.3.0:
     resolution: {integrity: sha512-GtpQYB283KrPp6nRw50q3U9/VfOutZOe103qlN7BPP6Ad27xYnOIWv4lPzo8HCAL+mMZofJ9KEy30fq6MfaK6Q==}
 
-  deep-diff@1.0.2:
-    resolution: {integrity: sha512-aWS3UIVH+NPGCD1kki+DCU9Dua032iSsO43LqQpcs4R3+dVv7tX0qBGjiVHJHjplsoUM2XRO/KB92glqc68awg==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-
   deep-eql@4.1.4:
     resolution: {integrity: sha512-SUwdGfqdKOwxCPeVYjwSyRpJ7Z+fhpwIAtmCUdZIWZ/YP5R9WAsyuSgpLVDi9bjWoN2LXHNss/dk3urXtdQxGg==}
     engines: {node: '>=6'}
@@ -6450,11 +6454,8 @@ packages:
     resolution: {integrity: sha512-2HvIEKRoqS62guEC+qBjpvRubdX910WCMuJTZ+I9yvqKU2/12eSL549HMwtabb4oupdj2sMP50k+XJfB/8JE6w==}
     engines: {node: '>=8'}
 
-  is-lite@0.8.2:
-    resolution: {integrity: sha512-JZfH47qTsslwaAsqbMI3Q6HNNjUuq6Cmzzww50TdP5Esb6e1y2sK2UAaZZuzfAzpoI2AkxoPQapZdlDuP6Vlsw==}
-
-  is-lite@1.2.1:
-    resolution: {integrity: sha512-pgF+L5bxC+10hLBgf6R2P4ZZUBOQIIacbdo8YvuCP8/JvsWxG7aZ9p10DYuLtifFci4l3VITphhMlMV4Y+urPw==}
+  is-lite@2.0.0:
+    resolution: {integrity: sha512-70f2BMIQlbSUXVKaZUd9a9fJH3IH1PDckV0m4BIIO4LjnNYvOh4Ng7vXIXEwpA0KDZknRq+7fHwGTu0jIdx28g==}
 
   is-map@2.0.3:
     resolution: {integrity: sha512-1Qed0/Hr2m+YqxnM09CjA2d/i6YZNfF6R2oRAOj36eUdS6qIV/huPJNSEpKbupewFs+ZsJlxsjjPbc0/afW6Lw==}
@@ -7657,10 +7658,6 @@ packages:
   png-js@1.0.0:
     resolution: {integrity: sha512-k+YsbhpA9e+EFfKjTCH3VW6aoKlyNYI6NYdTfDL4CIvFnvsuO84ttonmZE7rc+v23SLTH8XX+5w/Ak9v0xGY4g==}
 
-  popper.js@1.16.1:
-    resolution: {integrity: sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==}
-    deprecated: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
-
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -7878,12 +7875,6 @@ packages:
     peerDependencies:
       react: ^19.2.4
 
-  react-floater@0.7.9:
-    resolution: {integrity: sha512-NXqyp9o8FAXOATOEo0ZpyaQ2KPb4cmPMXGWkx377QtJkIXHlHRAGer7ai0r0C1kG5gf+KJ6Gy+gdNIiosvSicg==}
-    peerDependencies:
-      react: 15 - 18
-      react-dom: 15 - 18
-
   react-hook-form@7.72.0:
     resolution: {integrity: sha512-V4v6jubaf6JAurEaVnT9aUPKFbNtDgohj5CIgVGyPHvT9wRx5OZHVjz31GsxnPNI278XMu+ruFz+wGOscHaLKw==}
     engines: {node: '>=18.0.0'}
@@ -7905,11 +7896,11 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-joyride@2.9.3:
-    resolution: {integrity: sha512-1+Mg34XK5zaqJ63eeBhqdbk7dlGCFp36FXwsEvgpjqrtyywX2C6h9vr3jgxP0bGHCw8Ilsp/nRDzNVq6HJ3rNw==}
+  react-joyride@3.0.0:
+    resolution: {integrity: sha512-ut5kZEu0fZauOVW0JnX0s6Vcia/mAFxSLUIV7nu8025U47PktqN1fnLtMqE+IzgGac8F3id9IPd/U9APmWYvkA==}
     peerDependencies:
-      react: 15 - 18
-      react-dom: 15 - 18
+      react: 16.8 - 19
+      react-dom: 16.8 - 19
 
   react-markdown@10.1.0:
     resolution: {integrity: sha512-qKxVopLT/TyA6BX3Ue5NwabOsAzm0Q7kAPwq6L+wWDwisYs7R8vZ0nRXqq6rkueboxpkjvLGU9fWifiX/ZZFxQ==}
@@ -8631,12 +8622,6 @@ packages:
     resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
     engines: {node: '>=20'}
 
-  tree-changes@0.11.3:
-    resolution: {integrity: sha512-r14mvDZ6tqz8PRQmlFKjhUVngu4VZ9d92ON3tp0EGpFBE6PAHOq8Bx8m8ahbNoGE3uI/npjYcJiqVydyOiYXag==}
-
-  tree-changes@0.9.3:
-    resolution: {integrity: sha512-vvvS+O6kEeGRzMglTKbc19ltLWNtmNt1cpBoSYLj/iEcPVvpJasemKOlxBrmZaCtDJoF+4bwv3m01UKYi8mukQ==}
-
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
@@ -8837,6 +8822,11 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  use-sync-external-store@1.6.0:
+    resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -10573,6 +10563,8 @@ snapshots:
       fastify-plugin: 5.1.0
       toad-cache: 3.7.0
 
+  '@fastify/deepmerge@3.2.1': {}
+
   '@fastify/error@4.2.0': {}
 
   '@fastify/fast-json-stringify-compiler@5.0.3':
@@ -10635,26 +10627,33 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@floating-ui/core@1.7.4':
+  '@floating-ui/core@1.7.5':
     dependencies:
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/utils': 0.2.11
 
-  '@floating-ui/dom@1.7.5':
+  '@floating-ui/dom@1.7.6':
     dependencies:
-      '@floating-ui/core': 1.7.4
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/core': 1.7.5
+      '@floating-ui/utils': 0.2.11
 
-  '@floating-ui/react-dom@2.1.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@floating-ui/react-dom@2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@floating-ui/dom': 1.7.5
+      '@floating-ui/dom': 1.7.6
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@floating-ui/utils@0.2.10': {}
+  '@floating-ui/utils@0.2.11': {}
 
-  '@gilbarbara/deep-equal@0.1.2': {}
+  '@gilbarbara/deep-equal@0.4.1': {}
 
-  '@gilbarbara/deep-equal@0.3.1': {}
+  '@gilbarbara/hooks@0.11.0(react@19.2.4)':
+    dependencies:
+      '@gilbarbara/deep-equal': 0.4.1
+      react: 19.2.4
+
+  '@gilbarbara/types@0.2.2':
+    dependencies:
+      type-fest: 4.41.0
 
   '@hono/node-server@1.19.9(hono@4.11.4)':
     dependencies:
@@ -11520,7 +11519,7 @@ snapshots:
 
   '@radix-ui/react-popper@1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@floating-ui/react-dom': 2.1.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@floating-ui/react-dom': 2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-arrow': 1.1.7(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.14)(react@19.2.4)
       '@radix-ui/react-context': 1.1.2(@types/react@19.2.14)(react@19.2.4)
@@ -13676,8 +13675,6 @@ snapshots:
     dependencies:
       character-entities: 2.0.2
 
-  deep-diff@1.0.2: {}
-
   deep-eql@4.1.4:
     dependencies:
       type-detect: 4.1.0
@@ -15073,9 +15070,7 @@ snapshots:
 
   is-interactive@1.0.0: {}
 
-  is-lite@0.8.2: {}
-
-  is-lite@1.2.1: {}
+  is-lite@2.0.0: {}
 
   is-map@2.0.3: {}
 
@@ -16539,8 +16534,6 @@ snapshots:
 
   png-js@1.0.0: {}
 
-  popper.js@1.16.1: {}
-
   possible-typed-array-names@1.1.0: {}
 
   postcss-load-config@6.0.1(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(yaml@2.8.3):
@@ -16775,16 +16768,6 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
-  react-floater@0.7.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      deepmerge: 4.3.1
-      is-lite: 0.8.2
-      popper.js: 1.16.1
-      prop-types: 15.8.1
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      tree-changes: 0.9.3
-
   react-hook-form@7.72.0(react@19.2.4):
     dependencies:
       react: 19.2.4
@@ -16800,21 +16783,20 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-joyride@2.9.3(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  react-joyride@3.0.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
-      '@gilbarbara/deep-equal': 0.3.1
-      deep-diff: 1.0.2
-      deepmerge: 4.3.1
-      is-lite: 1.2.1
+      '@fastify/deepmerge': 3.2.1
+      '@floating-ui/react-dom': 2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@gilbarbara/deep-equal': 0.4.1
+      '@gilbarbara/hooks': 0.11.0(react@19.2.4)
+      '@gilbarbara/types': 0.2.2
+      is-lite: 2.0.0
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      react-floater: 0.7.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-innertext: 1.1.5(@types/react@19.2.14)(react@19.2.4)
-      react-is: 16.13.1
       scroll: 3.0.1
       scrollparent: 2.1.0
-      tree-changes: 0.11.3
-      type-fest: 4.41.0
+      use-sync-external-store: 1.6.0(react@19.2.4)
     transitivePeerDependencies:
       - '@types/react'
 
@@ -17696,16 +17678,6 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  tree-changes@0.11.3:
-    dependencies:
-      '@gilbarbara/deep-equal': 0.3.1
-      is-lite: 1.2.1
-
-  tree-changes@0.9.3:
-    dependencies:
-      '@gilbarbara/deep-equal': 0.1.2
-      is-lite: 0.8.2
-
   tree-kill@1.2.2: {}
 
   trim-lines@3.0.1: {}
@@ -17952,6 +17924,10 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.14
+
+  use-sync-external-store@1.6.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
 
   util-deprecate@1.0.2: {}
 

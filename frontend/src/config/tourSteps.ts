@@ -13,7 +13,7 @@ export const homeTourSteps: Step[] = [
     target: 'body',
     content: "Welcome to ReasonBridge! Let's take a quick tour to get you started.",
     placement: 'center',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="nav-topics"]',
@@ -45,7 +45,7 @@ export const topicsTourSteps: Step[] = [
     target: 'body',
     content: 'This is the Topics page where you can explore ongoing discussions.',
     placement: 'center',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="topic-filters"]',
@@ -73,7 +73,7 @@ export const discussionTourSteps: Step[] = [
     target: 'body',
     content: 'Welcome to the discussion! Here you can read and contribute to the conversation.',
     placement: 'center',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="topic-stats"]',
@@ -103,7 +103,7 @@ export const profileTourSteps: Step[] = [
     target: 'body',
     content: 'This is your profile page where you can manage your account and view your activity.',
     placement: 'center',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="edit-profile"]',
@@ -128,13 +128,11 @@ export const profileTourSteps: Step[] = [
 export const defaultTourOptions = {
   continuous: true,
   showProgress: true,
-  showSkipButton: true,
-  disableOverlayClose: false,
-  disableCloseOnEsc: false,
-  spotlightClicks: true,
-  styles: {
-    options: {
-      zIndex: 10000,
-    },
+  options: {
+    zIndex: 10000,
+    overlayClickAction: 'close' as const,
+    dismissKeyAction: 'close' as const,
+    blockTargetInteraction: false,
+    buttons: ['back', 'close', 'primary', 'skip'] as const,
   },
 };
