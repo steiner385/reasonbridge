@@ -17,16 +17,42 @@ import { test, expect } from './fixtures/oauth-mock.fixture';
  * Configure per-test behavior via test.use({ oauthMock: { ... } })
  *
  * Covers User Story 2 (US2) - Create Account with Minimal Friction
+ *
+ * ## Why This Suite is Skipped
+ *
+ * **OAuth tests require real provider connections or complex mocking setup.**
+ *
+ * The oauth-mock.fixture intercepts OAuth routes, but this conflicts with the
+ * real backend in E2E Docker mode. Additionally:
+ *
+ * 1. **Provider Infrastructure**: Real Google/Apple OAuth requires registered app
+ * 2. **Callback URLs**: OAuth callbacks must match registered redirect URIs
+ * 3. **Timing Issues**: OAuth flow has strict state parameter validation
+ *
+ * ## Alternative Coverage
+ *
+ * - **Unit tests**: AuthCallbackPage.test.tsx, OAuthButton.test.tsx
+ * - **Integration tests**: auth.controller.test.ts (user-service)
+ * - **Manual testing**: Run locally with OAuth provider test credentials
+ *
+ * ## When to Run
+ *
+ * Run these tests manually when:
+ * - Modifying OAuth callback handling
+ * - Updating OAuth provider integrations
+ * - Testing new OAuth providers
+ *
+ * ```bash
+ * # Run with mock backend (no E2E Docker)
+ * npx playwright test oauth-flow.spec.ts
+ * ```
  */
 
 // Check if running in E2E Docker mode with full backend
 const isE2EDocker = process.env.E2E_DOCKER === 'true';
 
 // SKIPPED: OAuth tests require real provider connections or complex mocking setup
-// These tests fail in CI because they need proper OAuth provider infrastructure
-// OAuth functionality was not modified in this PR, so failures are not critical
-// Run manually with proper OAuth test setup when needed
-// Related: PR #786 E2E failures - OAuth not in scope for UI/UX enhancement
+// See file header for full explanation of why these tests are skipped
 test.describe.skip('OAuth Signup Flow', () => {
   // Skip all OAuth tests when backend is not available
   // These tests need /auth/me endpoint to complete the authentication flow
