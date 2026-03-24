@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useIsMobileViewport } from '../../hooks/useMediaQuery';
 import { useTheme } from '../../hooks/useTheme';
 import { useLoginModal } from '../../contexts/LoginModalContext';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationDropdown } from '../notifications/NotificationDropdown';
+import HelpMenu from '../onboarding/HelpMenu';
 import Avatar from '../ui/Avatar';
 
 /**
@@ -24,6 +25,11 @@ export function Header() {
   const { isDark, toggleTheme } = useTheme();
   const { openModal: openLoginModal } = useLoginModal();
   const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleReopenOrientation = () => {
+    navigate('/orientation');
+  };
 
   return (
     <header
@@ -174,6 +180,9 @@ export function Header() {
               </svg>
             )}
           </button>
+
+          {/* Help menu */}
+          <HelpMenu onReopenOrientation={handleReopenOrientation} />
 
           {/* Notifications dropdown */}
           <NotificationDropdown />
