@@ -228,6 +228,28 @@ export class TopicsProxyController {
     res.status(response.status).send(response.data);
   }
 
+  @Put(':id/responses/:responseId')
+  async updateResponse(
+    @Param('id') id: string,
+    @Param('responseId') responseId: string,
+    @Body() body: Record<string, any>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'PUT',
+      path: `/topics/${id}/responses/${responseId}`,
+      body,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
   /**
    * GET /topics/:id/read-state - Get read state for a topic
    *
