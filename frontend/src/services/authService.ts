@@ -347,7 +347,7 @@ class AuthService {
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401) {
       // Attempt to refresh token
-      const refreshed = await this.refreshAccessToken();
+      const refreshed = await this.refreshAccessTokenInternal();
       if (refreshed) {
         // Retry request with new token
         const newHeaders = {
@@ -372,8 +372,17 @@ class AuthService {
 
   /**
    * Refresh the access token using the refresh token
+   * Public method for explicit token refresh (e.g., session continuation)
+   * @returns true if refresh succeeded, false otherwise
    */
-  private async refreshAccessToken(): Promise<boolean> {
+  async refreshToken(): Promise<boolean> {
+    return this.refreshAccessTokenInternal();
+  }
+
+  /**
+   * Internal method to refresh the access token using the refresh token
+   */
+  private async refreshAccessTokenInternal(): Promise<boolean> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
       return false;
