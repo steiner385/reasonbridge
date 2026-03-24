@@ -156,6 +156,20 @@ export const SEEDED_MODERATED_RESPONSES = {
 } as const;
 
 /**
+ * Seeded responses owned by specific demo users
+ * Used for testing edit/delete functionality
+ */
+export const SEEDED_USER_RESPONSES = {
+  /** Alice Anderson's first response in CONGESTION_PRICING topic */
+  ALICE_CONGESTION_RESPONSE: {
+    id: '11111111-0000-4000-8000-000101000001',
+    topicId: SEEDED_TOPICS.CONGESTION_PRICING.id,
+    authorName: 'Alice Anderson',
+    content: 'Congestion pricing has worked remarkably well in cities like Stockholm and London.',
+  },
+} as const;
+
+/**
  * Get all ACTIVE seeded topics (most common use case for tests)
  */
 export function getActiveSeededTopics(): SeededTopic[] {
