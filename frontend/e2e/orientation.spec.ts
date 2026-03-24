@@ -295,9 +295,7 @@ test.describe('Orientation Flow', () => {
     await expect(page.getByText(/let's take a quick tour/i)).toBeVisible();
   });
 
-  // SKIPPED: HelpMenu component exists at components/onboarding/HelpMenu.tsx
-  // but is not integrated into Header.tsx. Re-enable after HelpMenu is wired into Header.
-  test.describe.skip('Help Menu Integration', () => {
+  test.describe('Help Menu Integration', () => {
     test.beforeEach(async ({ page }) => {
       // Navigate to home page instead of orientation
       await page.goto('/');
