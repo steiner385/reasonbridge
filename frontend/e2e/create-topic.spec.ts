@@ -274,38 +274,60 @@ test.describe('Create Topic Flow', () => {
     await expect(modal.getByRole('button', { name: /create anyway/i })).toBeVisible();
   });
 
-  // Skip: "Create Anyway" workflow has timing issues - modal doesn't close within timeout
-  // Note: The duplicate warning display and "Create Anyway" button visibility are tested
-  // in the previous test. This test would additionally verify clicking "Create Anyway"
-  // actually creates the topic. The unit tests cover this logic.
-  test.skip('should allow creating topic despite duplicate warning', async ({ page }) => {
+  test('should allow creating topic despite duplicate warning', async ({ page }) => {
+    // Step 1: Create an initial topic to trigger duplicate detection later
     await page.getByRole('button', { name: /create topic/i }).click();
-    const modal = page.locator('[data-testid="create-topic-modal"]');
+    let modal = page.locator('[data-testid="create-topic-modal"]');
 
-    // Fill in data that might trigger duplicate detection
-    await modal.getByLabel(/title/i).fill('Climate policy discussion on carbon emissions');
-    await modal
-      .getByLabel(/description/i)
-      .fill(
-        'A comprehensive discussion about climate policy focusing on carbon emissions ' +
-          'and their impact on the environment. We need to explore various policy options.',
-      );
+    const baseTitle = `Duplicate Test Topic ${Date.now()}`;
+    const baseDescription =
+      'This is a comprehensive discussion about software architecture patterns ' +
+      'and their impact on system maintainability. We explore various approaches.';
 
-    const tagInput = modal.getByRole('combobox', { name: /tags/i });
-    await tagInput.fill('climate');
+    await modal.getByLabel(/title/i).fill(baseTitle);
+    await modal.getByLabel(/description/i).fill(baseDescription);
+
+    let tagInput = modal.getByRole('combobox', { name: /tags/i });
+    await tagInput.fill('architecture');
+    await tagInput.press('Enter');
+    await tagInput.fill('software');
     await tagInput.press('Enter');
 
-    // Submit once
+    await modal.getByRole('button', { name: /create topic/i }).click();
+    await expect(modal).not.toBeVisible({ timeout: 15000 });
+
+    // Step 2: Navigate back to topics and try to create a similar topic
+    await page.goto('/topics');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('button', { name: /create topic/i }).click();
+    modal = page.locator('[data-testid="create-topic-modal"]');
+
+    // Use similar title and description to trigger duplicate detection
+    await modal.getByLabel(/title/i).fill(`Duplicate Test Topic ${Date.now()}`);
+    await modal.getByLabel(/description/i).fill(baseDescription);
+
+    tagInput = modal.getByRole('combobox', { name: /tags/i });
+    await tagInput.fill('architecture');
+    await tagInput.press('Enter');
+    await tagInput.fill('software');
+    await tagInput.press('Enter');
+
+    // Submit to trigger duplicate detection
     await modal.getByRole('button', { name: /create topic/i }).click();
 
-    // If duplicate warning appears, click "Create Anyway"
+    // Wait for duplicate warning and "Create Anyway" button
     const createAnywayButton = modal.getByRole('button', { name: /create anyway/i });
-    if (await createAnywayButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await createAnywayButton.click();
-    }
+    await expect(createAnywayButton).toBeVisible({ timeout: 10000 });
 
-    // Should eventually create the topic
-    await expect(modal).not.toBeVisible({ timeout: 10000 });
+    // Click "Create Anyway" to proceed despite warning
+    await createAnywayButton.click();
+
+    // Topic should be created - modal closes or navigates to new topic
+    await Promise.race([
+      expect(modal).not.toBeVisible({ timeout: 15000 }),
+      expect(page).toHaveURL(/\/topics\/[\w-]+/, { timeout: 15000 }),
+    ]);
   });
 
   test('should close modal when clicking Cancel', async ({ page }) => {
