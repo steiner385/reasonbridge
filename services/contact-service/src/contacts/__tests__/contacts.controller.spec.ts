@@ -6,10 +6,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ContactsController } from '../contacts.controller.js';
 import { SocialProviderDto } from '../../connections/dto/initiate-connection.dto.js';
+import type { JwtPayload } from '../../auth/jwt-auth.guard.js';
 
 describe('ContactsController', () => {
   let controller: ContactsController;
   let mockService: any;
+  let mockUser: JwtPayload;
 
   beforeEach(() => {
     mockService = {
@@ -17,6 +19,13 @@ describe('ContactsController', () => {
       getContacts: vi.fn(),
     };
     controller = new ContactsController(mockService);
+    mockUser = {
+      sub: 'test-user-id',
+      email: 'test@example.com',
+      userId: 'test-user-id',
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000),
+    };
   });
 
   describe('importContacts', () => {
@@ -27,9 +36,11 @@ describe('ContactsController', () => {
         provider: 'GOOGLE',
       });
 
-      const result = await controller.importContacts({ provider: SocialProviderDto.GOOGLE });
+      const result = await controller.importContacts(mockUser, {
+        provider: SocialProviderDto.GOOGLE,
+      });
 
-      expect(mockService.importContacts).toHaveBeenCalledWith(expect.any(String), 'GOOGLE');
+      expect(mockService.importContacts).toHaveBeenCalledWith('test-user-id', 'GOOGLE');
       expect(result.imported).toBe(10);
     });
 
@@ -40,9 +51,9 @@ describe('ContactsController', () => {
         provider: 'GOOGLE',
       });
 
-      const result = await controller.importContacts({});
+      const result = await controller.importContacts(mockUser, {});
 
-      expect(mockService.importContacts).toHaveBeenCalledWith(expect.any(String), 'GOOGLE');
+      expect(mockService.importContacts).toHaveBeenCalledWith('test-user-id', 'GOOGLE');
       expect(result.provider).toBe('GOOGLE');
     });
   });
@@ -56,9 +67,9 @@ describe('ContactsController', () => {
       });
 
       const query = { matched: true, provider: SocialProviderDto.GOOGLE, limit: 20, offset: 10 };
-      await controller.getContacts(query);
+      await controller.getContacts(mockUser, query);
 
-      expect(mockService.getContacts).toHaveBeenCalledWith(expect.any(String), query);
+      expect(mockService.getContacts).toHaveBeenCalledWith('test-user-id', query);
     });
 
     it('should return paginated contacts', async () => {
@@ -68,7 +79,7 @@ describe('ContactsController', () => {
         hasMore: true,
       });
 
-      const result = await controller.getContacts({ limit: 10, offset: 0 });
+      const result = await controller.getContacts(mockUser, { limit: 10, offset: 0 });
 
       expect(result.contacts).toHaveLength(1);
       expect(result.hasMore).toBe(true);

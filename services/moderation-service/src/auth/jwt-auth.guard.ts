@@ -16,9 +16,10 @@ import { JwtService } from '@nestjs/jwt';
 import * as jwksClient from 'jwks-rsa';
 
 export interface JwtPayload {
-  sub: string; // Cognito user ID (cognitoSub)
+  sub: string; // Cognito user ID (cognitoSub) or database user ID
   email: string;
-  'cognito:username': string;
+  'cognito:username'?: string;
+  userId?: string; // Database user ID (for database auth mode)
   exp: number;
   iat: number;
 }

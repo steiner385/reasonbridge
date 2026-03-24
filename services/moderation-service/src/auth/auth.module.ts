@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { AdminGuard } from './admin.guard.js';
 
 /**
  * Authentication module for moderation-service.
@@ -17,7 +18,8 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
  * Usage:
  * 1. Import AuthModule in the feature module
  * 2. Use @UseGuards(JwtAuthGuard) on protected endpoints
- * 3. Use @CurrentUser() to extract the authenticated user's payload
+ * 3. Use @UseGuards(JwtAuthGuard, AdminGuard) for admin-only endpoints
+ * 4. Use @CurrentUser() to extract the authenticated user's payload
  */
 @Module({
   imports: [
@@ -36,7 +38,8 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
         new JwtAuthGuard(jwtService, configService),
       inject: [JwtService, ConfigService],
     },
+    AdminGuard,
   ],
-  exports: [JwtAuthGuard, JwtModule],
+  exports: [JwtAuthGuard, AdminGuard, JwtModule],
 })
 export class AuthModule {}
