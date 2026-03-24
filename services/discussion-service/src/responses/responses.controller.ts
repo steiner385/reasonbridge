@@ -28,7 +28,7 @@ import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from './dto/moderate-response.dto.js';
 import type { ResponseDto } from './dto/response.dto.js';
-import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
+import { JwtAuthGuard, ModeratorGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('topics')
 export class ResponsesController {
@@ -153,7 +153,7 @@ export class ResponsesController {
    * @returns Information about the moderation action
    */
   @Post(':topicId/responses/:responseId/moderate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   @HttpCode(HttpStatus.OK)
   async moderateResponse(
     @Param('topicId') topicId: string,
@@ -161,8 +161,6 @@ export class ResponsesController {
     @CurrentUser() user: JwtPayload,
     @Body() moderateDto: ModerateResponseDto,
   ): Promise<ModerationActionResponseDto> {
-    // TODO: Add ModeratorGuard for proper role verification
-
     if (!moderateDto.reason || moderateDto.reason.trim().length === 0) {
       throw new Error('Reason is required for moderation actions');
     }
@@ -186,7 +184,7 @@ export class ResponsesController {
    * @returns Information about the restoration
    */
   @Post(':topicId/responses/:responseId/restore')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   @HttpCode(HttpStatus.OK)
   async restoreResponse(
     @Param('topicId') topicId: string,
@@ -194,8 +192,6 @@ export class ResponsesController {
     @CurrentUser() user: JwtPayload,
     @Body() body: { reason: string },
   ): Promise<ModerationActionResponseDto> {
-    // TODO: Add ModeratorGuard for proper role verification
-
     if (!body.reason || body.reason.trim().length === 0) {
       throw new Error('Reason is required for restoration');
     }

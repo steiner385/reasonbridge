@@ -37,7 +37,7 @@ import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-r
 import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
 import { CommonGroundExportService } from '../services/common-ground-export.service.js';
 import { TopicsAnalyticsService } from './topics-analytics.service.js';
-import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
+import { JwtAuthGuard, ModeratorGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 @Controller('topics')
 export class TopicsController {
@@ -78,20 +78,11 @@ export class TopicsController {
    * Creates merge record with 30-day rollback window
    */
   @Post('merge')
-  @UseGuards(JwtAuthGuard)
-  // TODO: Add ModeratorGuard for proper role check
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async mergeTopics(
     @Body() mergeDto: MergeTopicsDto,
     @CurrentUser() user: JwtPayload,
-    @Request() req: any,
   ): Promise<TopicResponseDto> {
-    // Check moderator role (still using request context for role until role is in JWT)
-    const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
-
-    if (!isModerator) {
-      throw new Error('Only moderators can merge topics.');
-    }
-
     return this.topicsService.mergeTopics(user.sub, mergeDto);
   }
 

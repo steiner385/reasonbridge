@@ -24,6 +24,12 @@ export interface JwtPayload {
   iat: number;
 }
 
+/**
+ * JWT Auth Guard for HTTP endpoints
+ *
+ * Supports both mock/development mode (HS256 with secret) and
+ * production mode (RS256 with Cognito JWKS).
+ */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   private readonly jwksClient?: jwksClient.JwksClient;
@@ -32,27 +38,14 @@ export class JwtAuthGuard implements CanActivate {
   private readonly useMockAuth: boolean;
   private readonly jwtSecret?: string;
 
-  /**
-   * Constructor with optional dependencies
-   *
-   * @param jwtService - JWT service for token verification (optional, will use lazy loading)
-   * @param configService - Config service for reading environment variables (optional, uses env vars as fallback)
-   *
-   * @remarks
-   * Dependencies are optional to allow NestJS to instantiate this guard during route setup.
-   * When dependencies are not available, the guard falls back to environment variables.
-   * The actual JwtService is resolved lazily during canActivate if not provided.
-   */
   constructor(
     @Optional() @Inject(JwtService) private jwtService?: JwtService,
     @Optional() @Inject(ConfigService) private configService?: ConfigService,
   ) {
-    // Read config via ConfigService if available, otherwise use environment variables
     const getConfig = (key: string) => this.configService?.get<string>(key) ?? process.env[key];
 
     this.region = getConfig('AWS_REGION') ?? 'us-east-1';
 
-    // Determine auth mode - database auth and mock auth both use local JWT verification
     const authMode = getConfig('AUTH_MODE');
     const nodeEnv = getConfig('NODE_ENV');
     this.useMockAuth =
@@ -61,13 +54,11 @@ export class JwtAuthGuard implements CanActivate {
       getConfig('AUTH_MOCK') === 'true' ||
       nodeEnv === 'test' ||
       nodeEnv === 'development' ||
-      !nodeEnv; // Default to mock auth if NODE_ENV is not set
+      !nodeEnv;
 
     if (this.useMockAuth) {
-      // Mock mode - use simple JWT secret
       this.jwtSecret = getConfig('JWT_SECRET') ?? 'mock-jwt-secret-for-testing';
     } else {
-      // Production mode - use Cognito JWKS
       this.userPoolId = getConfig('COGNITO_USER_POOL_ID');
       if (!this.userPoolId) {
         throw new Error('COGNITO_USER_POOL_ID is required in production mode');
@@ -75,7 +66,7 @@ export class JwtAuthGuard implements CanActivate {
       this.jwksClient = jwksClient.default({
         jwksUri: `https://cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}/.well-known/jwks.json`,
         cache: true,
-        cacheMaxAge: 86400000, // 24 hours in milliseconds
+        cacheMaxAge: 86400000,
       });
     }
   }
@@ -98,13 +89,11 @@ export class JwtAuthGuard implements CanActivate {
       }
 
       if (this.useMockAuth) {
-        // Mock mode - verify with simple JWT secret
         payload = this.jwtService.verify<JwtPayload>(token, {
           secret: this.jwtSecret!,
           algorithms: ['HS256'],
         });
       } else {
-        // Production mode - verify with Cognito JWKS
         const decodedToken = this.jwtService.decode(token, { complete: true }) as {
           header: { kid: string };
           payload: JwtPayload;
@@ -123,7 +112,7 @@ export class JwtAuthGuard implements CanActivate {
         });
       }
 
-      // Attach the payload to the request object for use in controllers
+      // Attach the payload to the request object
       request.user = payload;
 
       return true;
@@ -131,8 +120,6 @@ export class JwtAuthGuard implements CanActivate {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-
-      // Log for debugging but don't expose details
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

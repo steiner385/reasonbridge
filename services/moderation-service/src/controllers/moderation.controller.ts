@@ -56,7 +56,7 @@ import type {
   PendingAppealResponse,
   ListAppealResponse,
 } from '../dto/appeal.dto.js';
-import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
+import { JwtAuthGuard, AdminGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
 export interface ScreenContentRequest {
   contentId: string;
@@ -363,10 +363,9 @@ export class ModerationController {
   }
 
   @Post('bans/auto-lift')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async autoLiftExpiredBans(): Promise<AutoLiftBansResponse> {
-    // TODO: Add AdminGuard for proper role check
-    // This endpoint should typically be called by a scheduled task or admin
+    // This endpoint should be called by a scheduled task or admin
     return this.actionsService.autoLiftExpiredBans();
   }
 

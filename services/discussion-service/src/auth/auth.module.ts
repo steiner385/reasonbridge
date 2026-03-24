@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { OptionalAuthGuard } from './guards/optional-auth.guard.js';
+import { ModeratorGuard } from './guards/moderator.guard.js';
 
 /**
  * Authentication module for discussion-service.
@@ -19,7 +20,8 @@ import { OptionalAuthGuard } from './guards/optional-auth.guard.js';
  * 1. Import AuthModule in the feature module
  * 2. Use @UseGuards(JwtAuthGuard) on protected endpoints
  * 3. Use @UseGuards(OptionalAuthGuard) for endpoints accessible to both authenticated and anonymous users
- * 4. Use @CurrentUser() to extract the authenticated user's payload
+ * 4. Use @UseGuards(JwtAuthGuard, ModeratorGuard) for moderator-only endpoints
+ * 5. Use @CurrentUser() to extract the authenticated user's payload
  */
 @Module({
   imports: [
@@ -45,7 +47,8 @@ import { OptionalAuthGuard } from './guards/optional-auth.guard.js';
         new OptionalAuthGuard(jwtService, configService),
       inject: [JwtService, ConfigService],
     },
+    ModeratorGuard,
   ],
-  exports: [JwtAuthGuard, OptionalAuthGuard, JwtModule],
+  exports: [JwtAuthGuard, OptionalAuthGuard, ModeratorGuard, JwtModule],
 })
 export class AuthModule {}

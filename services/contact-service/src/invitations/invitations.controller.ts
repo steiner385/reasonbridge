@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Get, Post, Body, Param, Query, Req, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Req, Logger, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { InvitationsService } from './invitations.service.js';
 import { CreateInvitationDto, CreateInvitationResponseDto } from './dto/create-invitation.dto.js';
@@ -14,10 +14,12 @@ import {
   DeclineInvitationResponseDto,
 } from './dto/invitation-response.dto.js';
 import { AuthenticatedRequest } from '../types/request.js';
+import { JwtAuthGuard } from '../auth/index.js';
 
 @ApiTags('Invitations')
 @ApiBearerAuth()
 @Controller('invitations')
+@UseGuards(JwtAuthGuard)
 export class InvitationsController {
   private readonly logger = new Logger(InvitationsController.name);
 
