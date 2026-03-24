@@ -179,12 +179,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Handle continue session button
-   * For now, just closes the modal. In future, this could refresh the token.
+   * Refreshes the token to extend the session
    */
-  const handleContinueSession = useCallback(() => {
+  const handleContinueSession = useCallback(async () => {
     setShowSessionModal(false);
-    // TODO: Implement token refresh in future enhancement
-  }, []);
+
+    try {
+      const refreshed = await authService.refreshToken();
+      if (refreshed) {
+        toast.success('Session extended successfully');
+      } else {
+        // Refresh failed, log the user out
+        toast.error('Session could not be extended. Please log in again.');
+        logout();
+      }
+    } catch (error) {
+      console.error('Failed to refresh session:', error);
+      toast.error('Session could not be extended. Please log in again.');
+      logout();
+    }
+  }, [logout, toast]);
 
   /**
    * Handle session expiration logout
@@ -196,15 +210,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [logout]);
 
   /**
-   * Session expiration checking
-   * Check token expiry every minute and show warning 5 minutes before expiry
+   * Proactive token refresh and session expiration checking
+   *
+   * Strategy:
+   * - 10+ minutes before expiry: Do nothing
+   * - 5-10 minutes before expiry: Silently refresh token in background
+   * - 0-5 minutes before expiry: Show warning modal (if refresh failed or user inactive)
+   * - Token expired: Auto-logout
    */
   useEffect(() => {
     if (!user) {
       return; // Not authenticated, no need to check
     }
 
-    const checkTokenExpiry = () => {
+    // Track if we've already attempted a proactive refresh in this window
+    let proactiveRefreshAttempted = false;
+
+    const checkTokenExpiry = async () => {
       const token = authService.getAuthToken();
       if (!token) {
         return;
@@ -212,13 +234,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const timeLeft = getJWTTimeUntilExpiry(token);
 
-      // Show warning modal 5 minutes (300 seconds) before expiry
+      // Token expired, auto-logout
+      if (timeLeft <= 0) {
+        logout();
+        return;
+      }
+
+      // 5-10 minutes before expiry: Attempt silent background refresh
+      if (timeLeft > 300 && timeLeft <= 600 && !proactiveRefreshAttempted) {
+        proactiveRefreshAttempted = true;
+        try {
+          const refreshed = await authService.refreshToken();
+          if (refreshed) {
+            // Reset the flag since we got a new token
+            proactiveRefreshAttempted = false;
+          }
+          // If refresh failed, we'll show the modal when timeLeft <= 300
+        } catch (error) {
+          console.error('Proactive token refresh failed:', error);
+          // Will show modal when timeLeft <= 300
+        }
+        return;
+      }
+
+      // 0-5 minutes before expiry: Show warning modal
       if (timeLeft > 0 && timeLeft <= 300) {
         setSessionTimeRemaining(Math.floor(timeLeft));
         setShowSessionModal(true);
-      } else if (timeLeft === 0) {
-        // Token expired, auto-logout
-        logout();
       }
     };
 
