@@ -42,6 +42,10 @@ import {
   UpdatePrivacySettingsDto,
   PrivacySettingsResponseDto,
 } from './dto/privacy-settings.dto.js';
+import {
+  UpdateNotificationPreferencesDto,
+  NotificationPreferencesResponseDto,
+} from './dto/notification-preferences.dto.js';
 import { ContributionsService } from '../contributions/contributions.service.js';
 import type {
   ContributionType,
@@ -175,6 +179,32 @@ export class UsersController {
     @Body() updateDto: UpdatePrivacySettingsDto,
   ): Promise<PrivacySettingsResponseDto> {
     return this.usersService.updatePrivacySettings(jwtPayload.sub, updateDto);
+  }
+
+  /**
+   * GET /users/me/notifications - Get current user's notification preferences
+   * Requires Bearer token in Authorization header
+   */
+  @Get('me/notifications')
+  @UseGuards(JwtAuthGuard)
+  async getNotificationPreferences(
+    @CurrentUser() jwtPayload: JwtPayload,
+  ): Promise<NotificationPreferencesResponseDto> {
+    return this.usersService.getNotificationPreferences(jwtPayload.sub);
+  }
+
+  /**
+   * PATCH /users/me/notifications - Update current user's notification preferences
+   * Allows partial updates of notification preferences
+   * Requires Bearer token in Authorization header
+   */
+  @Patch('me/notifications')
+  @UseGuards(JwtAuthGuard)
+  async updateNotificationPreferences(
+    @CurrentUser() jwtPayload: JwtPayload,
+    @Body() updateDto: UpdateNotificationPreferencesDto,
+  ): Promise<NotificationPreferencesResponseDto> {
+    return this.usersService.updateNotificationPreferences(jwtPayload.sub, updateDto);
   }
 
   /**
