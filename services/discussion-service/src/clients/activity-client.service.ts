@@ -8,7 +8,11 @@ import { getServiceUrl } from '@reason-bridge/common';
 
 interface CreateActivityEventDto {
   userId: string;
-  activityType: 'TOPIC_CREATED' | 'RESPONSE_POSTED' | 'DISCUSSION_JOINED';
+  activityType:
+    | 'TOPIC_CREATED'
+    | 'RESPONSE_POSTED'
+    | 'DISCUSSION_JOINED'
+    | 'AI_SUGGESTION_ACCEPTED';
   targetId: string;
   targetType: 'TOPIC' | 'RESPONSE' | 'DISCUSSION';
   targetTitle?: string;

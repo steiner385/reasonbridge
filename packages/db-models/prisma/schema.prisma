@@ -1562,6 +1562,7 @@ enum ActivityType {
   TOPIC_CREATED
   RESPONSE_POSTED
   DISCUSSION_JOINED
+  AI_SUGGESTION_ACCEPTED
 
   @@map("activity_type")
 }
