@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
+import { NotificationDeliveryService } from '../services/notification-delivery.service.js';
 import type { UserFollowedEvent, UserUnfollowedEvent } from '@reason-bridge/event-schemas/user';
 
 /**
@@ -19,6 +20,7 @@ export class FollowNotificationHandler {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationGateway: NotificationGateway,
+    private readonly deliveryService: NotificationDeliveryService,
   ) {}
 
   /**
@@ -62,13 +64,15 @@ export class FollowNotificationHandler {
       const title = 'New follower';
       const body = `${followerName} started following you`;
 
+      const actionUrl = `/users/${event.payload.followerId}`;
+
       // Notify the user who was followed
-      await this.createNotifications({
+      const notificationIds = await this.createNotifications({
         recipientIds: [event.payload.followedId],
         type: 'follow',
         title,
         body,
-        actionUrl: `/users/${event.payload.followerId}`,
+        actionUrl,
         metadata: {
           followerId: event.payload.followerId,
           followerName,
@@ -77,6 +81,23 @@ export class FollowNotificationHandler {
       });
 
       this.logger.log(`Created follow notification for user ${event.payload.followedId}`);
+
+      // Deliver notification via email/push based on user preferences
+      const notificationId = notificationIds[0];
+      if (notificationId) {
+        // Fire and forget - don't block on delivery
+        this.deliveryService
+          .deliverNotification(event.payload.followedId, {
+            id: notificationId,
+            type: 'follow',
+            title,
+            body,
+            actionUrl,
+          })
+          .catch((err) => {
+            this.logger.error(`Failed to deliver notification ${notificationId}: ${err}`);
+          });
+      }
 
       // Emit WebSocket event for real-time delivery
       this.notificationGateway.emitToUser(event.payload.followedId, 'notification:follow', {
@@ -117,6 +138,7 @@ export class FollowNotificationHandler {
 
   /**
    * Create notification records in the database
+   * @returns Array of created notification IDs
    */
   private async createNotifications(params: {
     recipientIds: string[];
@@ -125,21 +147,29 @@ export class FollowNotificationHandler {
     body: string;
     actionUrl: string;
     metadata: Record<string, unknown>;
-  }): Promise<void> {
+  }): Promise<string[]> {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
     this.logger.log(`Creating ${recipientIds.length} notification(s) of type "${type}"`);
 
-    await this.prisma.notification.createMany({
-      data: recipientIds.map((userId) => ({
-        userId,
-        type,
-        title,
-        body,
-        actionUrl,
-        metadata: metadata as Prisma.InputJsonValue,
-        isRead: false,
-      })),
-    });
+    // Create notifications individually to get IDs back
+    const notifications = await Promise.all(
+      recipientIds.map((userId) =>
+        this.prisma.notification.create({
+          data: {
+            userId,
+            type,
+            title,
+            body,
+            actionUrl,
+            metadata: metadata as Prisma.InputJsonValue,
+            isRead: false,
+          },
+          select: { id: true },
+        }),
+      ),
+    );
+
+    return notifications.map((n) => n.id);
   }
 }

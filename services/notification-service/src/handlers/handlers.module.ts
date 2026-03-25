@@ -6,6 +6,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { GatewaysModule } from '../gateways/gateways.module.js';
+import { ServicesModule } from '../services/services.module.js';
 import { CommonGroundNotificationHandler } from './common-ground-notification.handler.js';
 import { ModerationNotificationHandler } from './moderation-notification.handler.js';
 import { FollowNotificationHandler } from './follow-notification.handler.js';
@@ -15,7 +16,7 @@ import { MentionNotificationHandler } from './mention-notification.handler.js';
  * Module for event handlers
  */
 @Module({
-  imports: [PrismaModule, GatewaysModule],
+  imports: [PrismaModule, GatewaysModule, ServicesModule],
   providers: [
     CommonGroundNotificationHandler,
     ModerationNotificationHandler,
