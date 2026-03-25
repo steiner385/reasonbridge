@@ -1288,7 +1288,7 @@ export class TopicsService implements OnModuleInit {
     // Step 1: Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },
-      select: { id: true, status: true },
+      select: { id: true, status: true, title: true, slug: true },
     });
 
     if (!topic) {
@@ -1351,12 +1351,15 @@ export class TopicsService implements OnModuleInit {
     });
 
     // Step 7: Track suggestion acceptance for AI feedback loop
-    // TODO: Add 'AI_SUGGESTION_ACCEPTED' to ActivityType enum in activity-client.service.ts
-    // For now, we track this through the TopicTag.source field
-    // Future: this.activityClient.createEvent({ userId, activityType: 'AI_SUGGESTION_ACCEPTED', ... })
     if (source === 'AI_SUGGESTED') {
-      // The TopicTag record with source='AI_SUGGESTED' provides the audit trail
-      // This can be queried for AI feedback: SELECT * FROM topic_tags WHERE source = 'AI_SUGGESTED'
+      this.activityClient.createEvent({
+        userId,
+        activityType: 'AI_SUGGESTION_ACCEPTED',
+        targetId: topicId,
+        targetType: 'TOPIC',
+        targetTitle: topic.title,
+        targetSlug: topic.slug,
+      });
     }
 
     // Step 8: Invalidate caches
@@ -1401,7 +1404,7 @@ export class TopicsService implements OnModuleInit {
     // Step 1: Verify source topic exists
     const sourceTopic = await this.prisma.discussionTopic.findUnique({
       where: { id: sourceTopicId },
-      select: { id: true, status: true, title: true },
+      select: { id: true, status: true, title: true, slug: true },
     });
 
     if (!sourceTopic) {
@@ -1458,11 +1461,15 @@ export class TopicsService implements OnModuleInit {
     });
 
     // Step 7: Track suggestion acceptance for AI feedback loop
-    // TODO: Add 'AI_SUGGESTION_ACCEPTED' to ActivityType enum in activity-client.service.ts
-    // For now, we track this through the TopicLink.linkSource field
     if (linkSource === 'AI_SUGGESTED') {
-      // The TopicLink record with linkSource='AI_SUGGESTED' provides the audit trail
-      // This can be queried for AI feedback: SELECT * FROM topic_links WHERE link_source = 'AI_SUGGESTED'
+      this.activityClient.createEvent({
+        userId,
+        activityType: 'AI_SUGGESTION_ACCEPTED',
+        targetId: sourceTopicId,
+        targetType: 'TOPIC',
+        targetTitle: sourceTopic.title,
+        targetSlug: sourceTopic.slug,
+      });
     }
 
     return {
