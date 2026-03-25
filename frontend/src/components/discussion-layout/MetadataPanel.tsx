@@ -71,6 +71,8 @@ export interface MetadataPanelProps {
   onActiveTabChange?: (tab: MetadataPanelTab) => void;
   /** Whether panel can be collapsed (shows collapse toggle) */
   collapsible?: boolean;
+  /** Callback to refresh common ground analysis data */
+  onRefreshCommonGround?: () => void;
 }
 
 /**
@@ -101,6 +103,7 @@ export function MetadataPanel({
   className = '',
   onActiveTabChange,
   collapsible = true,
+  onRefreshCommonGround,
 }: MetadataPanelProps) {
   const [activeTab, setActiveTab] = useState<MetadataPanelTab>('propositions');
 
@@ -151,8 +154,10 @@ export function MetadataPanel({
   // Handle refreshing common ground analysis
   const handleRefreshCommonGround = () => {
     setHasCommonGroundUpdate(false);
-    // TODO: Trigger refetch of common ground analysis from API
-    // This will be implemented when we have real API integration
+    // Trigger refetch of common ground analysis from API
+    if (onRefreshCommonGround) {
+      onRefreshCommonGround();
+    }
     if (onTabActivate) {
       onTabActivate('commonGround');
     }
