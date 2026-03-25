@@ -12,6 +12,7 @@ import { GatewaysModule } from './gateways/gateways.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { ServicesModule } from './services/services.module.js';
 import { NotificationModule } from './notifications/notification.module.js';
+import { InternalModule } from './internal/internal.module.js';
 import { MetricsModule } from './observability/index.js';
 
 @Module({
@@ -29,6 +30,7 @@ import { MetricsModule } from './observability/index.js';
     JobsModule,
     ServicesModule,
     NotificationModule,
+    InternalModule,
   ],
   controllers: [],
   providers: [],
