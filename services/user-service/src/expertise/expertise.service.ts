@@ -249,7 +249,8 @@ export class ExpertiseService {
     }
 
     const responseIds = responses.map((r) => r.id);
-    const firstResponseDate = responses[0].createdAt;
+    // Safe to use ! since we already checked responses.length > 0 above
+    const firstResponseDate = responses[0]!.createdAt;
 
     // Calculate quality score from votes and feedback
     const avgQualityScore = await this.calculateQualityScore(responseIds);
