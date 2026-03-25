@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { User, VerificationLevel, UserStatus, UserRole } from '@prisma/client';
+import type {
+  User,
+  VerificationLevel,
+  UserStatus,
+  UserRole,
+  UserPrivacySettings,
+} from '@prisma/client';
+import { PrivacySettingsDto, ProfileVisibility, TrustVisibility } from './privacy-settings.dto.js';
 
 /**
  * Response DTO for user data (includes private fields like email)
@@ -63,8 +70,13 @@ export class PublicUserResponseDto {
   createdAt!: Date;
   followerCount?: number;
   followingCount?: number;
+  privacySettings!: PrivacySettingsDto;
 
-  constructor(user: User, followerCount?: number, followingCount?: number) {
+  constructor(
+    user: User & { privacySettings?: UserPrivacySettings | null },
+    followerCount?: number,
+    followingCount?: number,
+  ) {
     this.id = user.id;
     this.displayName = user.displayName ?? '';
     this.bio = user.bio ?? null;
@@ -77,5 +89,17 @@ export class PublicUserResponseDto {
     this.createdAt = user.createdAt;
     this.followerCount = followerCount;
     this.followingCount = followingCount;
+
+    // Map privacy settings or use defaults if not set
+    if (user.privacySettings) {
+      this.privacySettings = {
+        activityHistory: user.privacySettings.activityHistory as ProfileVisibility,
+        detailedTrustScores: user.privacySettings.detailedTrustScores as TrustVisibility,
+        followerList: user.privacySettings.followerList as ProfileVisibility,
+        followingList: user.privacySettings.followingList as ProfileVisibility,
+      };
+    } else {
+      this.privacySettings = PrivacySettingsDto.getDefaults();
+    }
   }
 }

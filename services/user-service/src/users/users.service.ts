@@ -126,6 +126,9 @@ export class UsersService {
 
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: {
+        privacySettings: true,
+      },
     });
 
     if (!user) {
