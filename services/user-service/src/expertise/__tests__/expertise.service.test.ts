@@ -141,7 +141,10 @@ describe('ExpertiseService', () => {
       count: ReturnType<typeof vi.fn>;
       aggregate: ReturnType<typeof vi.fn>;
       findFirst: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
     };
+    vote: { groupBy: ReturnType<typeof vi.fn> };
+    feedback: { groupBy: ReturnType<typeof vi.fn> };
     domainCredential: { findMany: ReturnType<typeof vi.fn> };
   };
   let mockExpertiseCalculator: ExpertiseCalculatorService;
@@ -167,6 +170,13 @@ describe('ExpertiseService', () => {
         count: vi.fn(),
         aggregate: vi.fn(),
         findFirst: vi.fn(),
+        findMany: vi.fn(),
+      },
+      vote: {
+        groupBy: vi.fn(),
+      },
+      feedback: {
+        groupBy: vi.fn(),
       },
       domainCredential: {
         findMany: vi.fn(),
@@ -438,9 +448,18 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(25); // Category response count
-      mockPrisma.response.findFirst.mockResolvedValue({
-        createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-      });
+      mockPrisma.response.findMany.mockResolvedValue([
+        { id: 'resp-1', createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
+        { id: 'resp-2', createdAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000) },
+      ]);
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'UPVOTE', _count: { id: 15 } },
+        { voteType: 'DOWNVOTE', _count: { id: 5 } },
+      ]);
+      mockPrisma.feedback.groupBy.mockResolvedValue([
+        { userHelpfulRating: 'HELPFUL', _count: { id: 8 } },
+        { userHelpfulRating: 'NOT_HELPFUL', _count: { id: 2 } },
+      ]);
       mockPrisma.domainCredential.findMany.mockResolvedValue([]);
       mockPrisma.topicExpertise.upsert.mockImplementation(async (args) => ({
         ...createMockTopicExpertise(),
@@ -497,9 +516,11 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(10);
-      mockPrisma.response.findFirst.mockResolvedValue({
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      });
+      mockPrisma.response.findMany.mockResolvedValue([
+        { id: 'resp-1', createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      ]);
+      mockPrisma.vote.groupBy.mockResolvedValue([]);
+      mockPrisma.feedback.groupBy.mockResolvedValue([]);
       mockPrisma.domainCredential.findMany.mockResolvedValue(mockCredentials);
       mockPrisma.topicExpertise.upsert.mockImplementation(async (args) => ({
         ...createMockTopicExpertise(),
@@ -522,9 +543,9 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(10);
-      mockPrisma.response.findFirst.mockResolvedValue({
-        createdAt: new Date(),
-      });
+      mockPrisma.response.findMany.mockResolvedValue([{ id: 'resp-1', createdAt: new Date() }]);
+      mockPrisma.vote.groupBy.mockResolvedValue([]);
+      mockPrisma.feedback.groupBy.mockResolvedValue([]);
       mockPrisma.domainCredential.findMany.mockResolvedValue([]);
       mockPrisma.topicExpertise.upsert.mockResolvedValue({
         ...createMockTopicExpertise(),
@@ -560,7 +581,10 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(0);
-      mockPrisma.response.findFirst.mockResolvedValue(null);
+      mockPrisma.response.findMany.mockResolvedValue([]);
+      // Note: vote and feedback groupBy won't be called when no responses exist
+      mockPrisma.vote.groupBy.mockResolvedValue([]);
+      mockPrisma.feedback.groupBy.mockResolvedValue([]);
       mockPrisma.domainCredential.findMany.mockResolvedValue([]);
       mockPrisma.topicExpertise.upsert.mockImplementation(async (args) => ({
         ...createMockTopicExpertise(),
@@ -583,9 +607,17 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(50); // Max engagement
-      mockPrisma.response.findFirst.mockResolvedValue({
-        createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000), // Max tenure
-      });
+      mockPrisma.response.findMany.mockResolvedValue([
+        { id: 'resp-1', createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) }, // Max tenure
+      ]);
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'UPVOTE', _count: { id: 100 } },
+        { voteType: 'DOWNVOTE', _count: { id: 10 } },
+      ]);
+      mockPrisma.feedback.groupBy.mockResolvedValue([
+        { userHelpfulRating: 'HELPFUL', _count: { id: 50 } },
+        { userHelpfulRating: 'NOT_HELPFUL', _count: { id: 5 } },
+      ]);
       mockPrisma.domainCredential.findMany.mockResolvedValue([
         { boostValue: { toNumber: () => 0.5 }, status: 'VERIFIED' },
       ]);
