@@ -7,6 +7,14 @@ const createMockPrismaService = () => ({
   },
   notification: {
     createMany: vi.fn().mockResolvedValue({ count: 0 }),
+    create: vi
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve({ id: `notif-${Math.random().toString(36).slice(2)}` }),
+      ),
+  },
+  response: {
+    findMany: vi.fn().mockResolvedValue([]),
   },
 });
 
@@ -15,16 +23,26 @@ const createMockNotificationGateway = () => ({
   emitCommonGroundUpdated: vi.fn(),
 });
 
+const createMockDeliveryService = () => ({
+  deliverNotification: vi.fn().mockResolvedValue(undefined),
+});
+
 describe('CommonGroundNotificationHandler', () => {
   let handler: CommonGroundNotificationHandler;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockGateway: ReturnType<typeof createMockNotificationGateway>;
+  let mockDeliveryService: ReturnType<typeof createMockDeliveryService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockGateway = createMockNotificationGateway();
-    handler = new CommonGroundNotificationHandler(mockPrisma as any, mockGateway as any);
+    mockDeliveryService = createMockDeliveryService();
+    handler = new CommonGroundNotificationHandler(
+      mockPrisma as any,
+      mockGateway as any,
+      mockDeliveryService as any,
+    );
   });
 
   describe('handleCommonGroundGenerated', () => {
@@ -325,6 +343,93 @@ describe('CommonGroundNotificationHandler', () => {
       );
 
       expect(mockGateway.emitCommonGroundUpdated).toHaveBeenCalled();
+    });
+  });
+
+  describe('participant tracking', () => {
+    const createEvent = (overrides = {}) => ({
+      type: 'common-ground.generated' as const,
+      timestamp: new Date().toISOString(),
+      payload: {
+        topicId: 'topic-1',
+        version: 1,
+        agreementZones: [{ id: 'zone-1', summary: 'Agreement on X' }],
+        misunderstandings: [],
+        genuineDisagreements: [],
+        overallConsensusScore: 0.75,
+        ...overrides,
+      },
+    });
+
+    it('should notify all topic participants including creator', async () => {
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        title: 'Test Topic',
+        creatorId: 'user-1',
+        participantCount: 3,
+      });
+
+      // Other participants (not the creator)
+      mockPrisma.response.findMany.mockResolvedValue([
+        { authorId: 'user-2' },
+        { authorId: 'user-3' },
+      ]);
+
+      await handler.handleCommonGroundGenerated(createEvent());
+
+      // Should query for participants excluding creator
+      expect(mockPrisma.response.findMany).toHaveBeenCalledWith({
+        where: {
+          topicId: 'topic-1',
+          authorId: { not: 'user-1' },
+        },
+        select: { authorId: true },
+        distinct: ['authorId'],
+      });
+
+      // Should create 3 notifications (1 creator + 2 other participants)
+      expect(mockPrisma.notification.create).toHaveBeenCalledTimes(3);
+    });
+
+    it('should notify only creator when no other participants', async () => {
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        title: 'Test Topic',
+        creatorId: 'user-1',
+        participantCount: 1,
+      });
+
+      // No other participants
+      mockPrisma.response.findMany.mockResolvedValue([]);
+
+      await handler.handleCommonGroundGenerated(createEvent());
+
+      // Should create 1 notification (just creator)
+      expect(mockPrisma.notification.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('should deliver notifications to all participants', async () => {
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        title: 'Test Topic',
+        creatorId: 'user-1',
+        participantCount: 2,
+      });
+
+      mockPrisma.response.findMany.mockResolvedValue([{ authorId: 'user-2' }]);
+
+      await handler.handleCommonGroundGenerated(createEvent());
+
+      // Should deliver to both creator and participant
+      expect(mockDeliveryService.deliverNotification).toHaveBeenCalledTimes(2);
+      expect(mockDeliveryService.deliverNotification).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ type: 'common_ground' }),
+      );
+      expect(mockDeliveryService.deliverNotification).toHaveBeenCalledWith(
+        'user-2',
+        expect.objectContaining({ type: 'common_ground' }),
+      );
     });
   });
 });

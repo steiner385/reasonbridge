@@ -21,6 +21,7 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
   let handler: CommonGroundNotificationHandler;
   let gateway: NotificationGateway;
   let mockPrisma: any;
+  let mockDeliveryService: any;
 
   beforeEach(() => {
     const logger = new Logger();
@@ -29,6 +30,16 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
     mockPrisma = {
       discussionTopic: {
         findUnique: vi.fn().mockResolvedValue(mockTopic),
+      },
+      notification: {
+        create: vi
+          .fn()
+          .mockImplementation(() =>
+            Promise.resolve({ id: `notif-${Math.random().toString(36).slice(2)}` }),
+          ),
+      },
+      response: {
+        findMany: vi.fn().mockResolvedValue([]),
       },
     };
 
@@ -47,8 +58,17 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
       handleUnsubscribeCommonGround: vi.fn(),
     } as any;
 
+    // Mock delivery service
+    mockDeliveryService = {
+      deliverNotification: vi.fn().mockResolvedValue(undefined),
+    };
+
     // Create handler with injected dependencies
-    handler = new CommonGroundNotificationHandler(mockPrisma as PrismaService, gateway);
+    handler = new CommonGroundNotificationHandler(
+      mockPrisma as PrismaService,
+      gateway,
+      mockDeliveryService,
+    );
   });
 
   afterEach(() => {

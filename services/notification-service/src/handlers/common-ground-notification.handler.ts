@@ -62,9 +62,15 @@ export class CommonGroundNotificationHandler {
         overallConsensusScore,
       );
 
-      // TODO: Fetch topic participants when participant tracking is implemented
-      // For now, notify topic creator only
-      const recipientIds = [topic.creatorId];
+      // Get all topic participants (response authors) excluding the creator
+      const otherParticipants = await this.getTopicParticipants(topic.id, topic.creatorId);
+
+      // Include topic creator and all other participants
+      const recipientIds = [topic.creatorId, ...otherParticipants];
+
+      this.logger.debug(
+        `Notifying ${recipientIds.length} participants (1 creator + ${otherParticipants.length} others)`,
+      );
 
       const actionUrl = `/topics/${topic.id}/common-ground`;
 
@@ -150,9 +156,15 @@ export class CommonGroundNotificationHandler {
       const title = `New insights in "${topic.title}"`;
       const body = this.buildUpdatedNotificationBody(changes);
 
-      // TODO: Fetch topic participants when participant tracking is implemented
-      // For now, notify topic creator only
-      const recipientIds = [topic.creatorId];
+      // Get all topic participants (response authors) excluding the creator
+      const otherParticipants = await this.getTopicParticipants(topic.id, topic.creatorId);
+
+      // Include topic creator and all other participants
+      const recipientIds = [topic.creatorId, ...otherParticipants];
+
+      this.logger.debug(
+        `Notifying ${recipientIds.length} participants (1 creator + ${otherParticipants.length} others)`,
+      );
 
       const actionUrl = `/topics/${topic.id}/common-ground`;
 
@@ -206,6 +218,28 @@ export class CommonGroundNotificationHandler {
       );
       throw error;
     }
+  }
+
+  /**
+   * Get all unique participants for a topic by querying response authors
+   * Excludes the topic creator since they're already included
+   *
+   * @param topicId - Topic ID to get participants for
+   * @param excludeUserId - Optional user ID to exclude (typically the topic creator)
+   * @returns Array of unique user IDs who have contributed responses
+   */
+  private async getTopicParticipants(topicId: string, excludeUserId?: string): Promise<string[]> {
+    // Query distinct author IDs from responses for this topic
+    const participants = await this.prisma.response.findMany({
+      where: {
+        topicId,
+        ...(excludeUserId && { authorId: { not: excludeUserId } }),
+      },
+      select: { authorId: true },
+      distinct: ['authorId'],
+    });
+
+    return participants.map((p) => p.authorId);
   }
 
   /**
