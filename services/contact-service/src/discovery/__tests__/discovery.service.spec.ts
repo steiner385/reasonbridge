@@ -15,6 +15,7 @@ describe('DiscoveryService', () => {
       importedContact: {
         findMany: vi.fn(),
         updateMany: vi.fn(),
+        groupBy: vi.fn(),
       },
       user: {
         findMany: vi.fn(),
@@ -25,12 +26,15 @@ describe('DiscoveryService', () => {
 
   describe('discoverUsers', () => {
     it('should find users matching imported contact email hashes', async () => {
-      // User's imported contacts
-      mockPrisma.importedContact.findMany.mockResolvedValue([
-        { id: 'c1', emailHash: 'hash1', matchedUserId: null },
-        { id: 'c2', emailHash: 'hash2', matchedUserId: null },
-        { id: 'c3', emailHash: 'hash3', matchedUserId: null },
-      ]);
+      // User's imported contacts (first call)
+      mockPrisma.importedContact.findMany
+        .mockResolvedValueOnce([
+          { id: 'c1', emailHash: 'hash1', matchedUserId: null },
+          { id: 'c2', emailHash: 'hash2', matchedUserId: null },
+          { id: 'c3', emailHash: 'hash3', matchedUserId: null },
+        ])
+        // Second call for mutual contacts calculation (matched contacts)
+        .mockResolvedValueOnce([]);
 
       // Discoverable users matching those hashes
       mockPrisma.user.findMany.mockResolvedValue([
@@ -44,6 +48,7 @@ describe('DiscoveryService', () => {
       ]);
 
       mockPrisma.importedContact.updateMany.mockResolvedValue({ count: 2 });
+      mockPrisma.importedContact.groupBy.mockResolvedValue([]);
 
       const result = await service.discoverUsers('owner-123', { limit: 50, offset: 0 });
 
@@ -54,9 +59,12 @@ describe('DiscoveryService', () => {
     });
 
     it('should only find users with discoverableByContacts=true', async () => {
-      mockPrisma.importedContact.findMany.mockResolvedValue([{ id: 'c1', emailHash: 'hash1' }]);
+      mockPrisma.importedContact.findMany
+        .mockResolvedValueOnce([{ id: 'c1', emailHash: 'hash1' }])
+        .mockResolvedValueOnce([]); // For mutual contacts
       mockPrisma.user.findMany.mockResolvedValue([]);
       mockPrisma.importedContact.updateMany.mockResolvedValue({ count: 0 });
+      mockPrisma.importedContact.groupBy.mockResolvedValue([]);
 
       await service.discoverUsers('owner-123', {});
 
@@ -70,11 +78,14 @@ describe('DiscoveryService', () => {
     });
 
     it('should update matchedUserId on imported contacts', async () => {
-      mockPrisma.importedContact.findMany.mockResolvedValue([{ id: 'c1', emailHash: 'hash1' }]);
+      mockPrisma.importedContact.findMany
+        .mockResolvedValueOnce([{ id: 'c1', emailHash: 'hash1' }])
+        .mockResolvedValueOnce([]); // For mutual contacts
       mockPrisma.user.findMany.mockResolvedValue([
         { id: 'user-1', displayName: 'John', emailHash: 'hash1' },
       ]);
       mockPrisma.importedContact.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.importedContact.groupBy.mockResolvedValue([]);
 
       await service.discoverUsers('owner-123', {});
 
@@ -100,10 +111,11 @@ describe('DiscoveryService', () => {
     });
 
     it('should exclude the owner from discovered users', async () => {
-      mockPrisma.importedContact.findMany.mockResolvedValue([
-        { id: 'c1', emailHash: 'owner-hash' },
-      ]);
+      mockPrisma.importedContact.findMany
+        .mockResolvedValueOnce([{ id: 'c1', emailHash: 'owner-hash' }])
+        .mockResolvedValueOnce([]); // For mutual contacts
       mockPrisma.user.findMany.mockResolvedValue([]);
+      mockPrisma.importedContact.groupBy.mockResolvedValue([]);
 
       await service.discoverUsers('owner-123', {});
 
@@ -117,8 +129,11 @@ describe('DiscoveryService', () => {
     });
 
     it('should respect pagination parameters', async () => {
-      mockPrisma.importedContact.findMany.mockResolvedValue([{ id: 'c1', emailHash: 'hash1' }]);
+      mockPrisma.importedContact.findMany
+        .mockResolvedValueOnce([{ id: 'c1', emailHash: 'hash1' }])
+        .mockResolvedValueOnce([]); // For mutual contacts
       mockPrisma.user.findMany.mockResolvedValue([]);
+      mockPrisma.importedContact.groupBy.mockResolvedValue([]);
 
       await service.discoverUsers('owner-123', { limit: 10, offset: 20 });
 
@@ -128,6 +143,34 @@ describe('DiscoveryService', () => {
           skip: 20,
         }),
       );
+    });
+
+    it('should calculate mutual contacts correctly', async () => {
+      // User's imported contacts (first call)
+      mockPrisma.importedContact.findMany
+        .mockResolvedValueOnce([
+          { id: 'c1', emailHash: 'hash1', matchedUserId: null },
+          { id: 'c2', emailHash: 'hash2', matchedUserId: 'contact-user-1' },
+        ])
+        // Second call: owner's matched contacts for mutual calculation
+        .mockResolvedValueOnce([{ matchedUserId: 'contact-user-1' }]);
+
+      // Discovered user
+      mockPrisma.user.findMany.mockResolvedValue([
+        { id: 'discovered-user-1', displayName: 'John', emailHash: 'hash1' },
+      ]);
+
+      mockPrisma.importedContact.updateMany.mockResolvedValue({ count: 1 });
+
+      // groupBy returns that contact-user-1 also has discovered-user-1 as a contact
+      mockPrisma.importedContact.groupBy.mockResolvedValue([
+        { matchedUserId: 'discovered-user-1', _count: { ownerId: 1 } },
+      ]);
+
+      const result = await service.discoverUsers('owner-123', {});
+
+      expect(result.users).toHaveLength(1);
+      expect(result.users[0].mutualContacts).toBe(1);
     });
   });
 });
