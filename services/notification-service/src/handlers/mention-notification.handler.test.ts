@@ -16,7 +16,7 @@ const createMockPrismaService = () => ({
     findUnique: vi.fn(),
   },
   notification: {
-    createMany: vi.fn().mockResolvedValue({ count: 0 }),
+    create: vi.fn().mockResolvedValue({ id: 'notification-123' }),
   },
 });
 
@@ -24,16 +24,26 @@ const createMockNotificationGateway = () => ({
   emitToUser: vi.fn(),
 });
 
+const createMockDeliveryService = () => ({
+  deliverNotification: vi.fn().mockResolvedValue({ channels: [] }),
+});
+
 describe('MentionNotificationHandler', () => {
   let handler: MentionNotificationHandler;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockGateway: ReturnType<typeof createMockNotificationGateway>;
+  let mockDeliveryService: ReturnType<typeof createMockDeliveryService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockGateway = createMockNotificationGateway();
-    handler = new MentionNotificationHandler(mockPrisma as any, mockGateway as any);
+    mockDeliveryService = createMockDeliveryService();
+    handler = new MentionNotificationHandler(
+      mockPrisma as any,
+      mockGateway as any,
+      mockDeliveryService as any,
+    );
   });
 
   describe('parseMentions', () => {

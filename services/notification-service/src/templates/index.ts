@@ -16,3 +16,5 @@ export {
   type ParentDigestData,
   type EmailTemplate,
 } from './parent-digest.template.js';
+
+export { generateNotificationEmail, type NotificationEmailData } from './notification.template.js';

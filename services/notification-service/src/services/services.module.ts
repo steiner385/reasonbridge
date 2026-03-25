@@ -9,13 +9,14 @@ import { EmailModule } from '../email/email.module.js';
 import { ParentNotificationService } from './parent-notification.service.js';
 import { SmsService } from './sms.service.js';
 import { PushService } from './push.service.js';
+import { NotificationDeliveryService } from './notification-delivery.service.js';
 
 /**
  * Module for notification services
  */
 @Module({
   imports: [PrismaModule, EmailModule],
-  providers: [ParentNotificationService, SmsService, PushService],
-  exports: [ParentNotificationService, SmsService, PushService],
+  providers: [ParentNotificationService, SmsService, PushService, NotificationDeliveryService],
+  exports: [ParentNotificationService, SmsService, PushService, NotificationDeliveryService],
 })
 export class ServicesModule {}

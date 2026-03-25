@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
+import { NotificationDeliveryService } from '../services/notification-delivery.service.js';
 import type {
   ModerationActionRequestedEvent,
   UserTrustUpdatedEvent,
@@ -23,6 +24,7 @@ export class ModerationNotificationHandler {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationGateway: NotificationGateway,
+    private readonly deliveryService: NotificationDeliveryService,
   ) {}
 
   /**
@@ -168,7 +170,7 @@ export class ModerationNotificationHandler {
       const actionUrl = `/profile/${event.payload.userId}/trust`;
 
       // Create notifications
-      await this.createNotifications({
+      const notificationIds = await this.createNotifications({
         recipientIds,
         type: 'trust_update',
         title,
@@ -186,6 +188,23 @@ export class ModerationNotificationHandler {
       this.logger.log(
         `Created ${recipientIds.length} trust update notification(s) for user ${event.payload.userId}`,
       );
+
+      // Deliver notification via email/push based on user preferences
+      const notificationId = notificationIds[0];
+      if (notificationId) {
+        // Fire and forget - don't block on delivery
+        this.deliveryService
+          .deliverNotification(event.payload.userId, {
+            id: notificationId,
+            type: 'moderation',
+            title,
+            body,
+            actionUrl,
+          })
+          .catch((err) => {
+            this.logger.error(`Failed to deliver notification ${notificationId}: ${err}`);
+          });
+      }
 
       // Emit WebSocket event for real-time delivery
       this.notificationGateway.emitUserTrustUpdated(event);
@@ -396,6 +415,7 @@ export class ModerationNotificationHandler {
 
   /**
    * Create notification records in the database
+   * @returns Array of created notification IDs
    */
   private async createNotifications(params: {
     recipientIds: string[];
@@ -403,24 +423,34 @@ export class ModerationNotificationHandler {
     title: string;
     body: string;
     actionUrl: string;
-    metadata: Record<string, any>;
-  }): Promise<void> {
+    metadata: Record<string, unknown>;
+  }): Promise<string[]> {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
     this.logger.log(`Creating ${recipientIds.length} notification(s) of type "${type}"`);
 
-    await this.prisma.notification.createMany({
-      data: recipientIds.map((userId) => ({
-        userId,
-        type,
-        title,
-        body,
-        actionUrl,
-        metadata: metadata as Prisma.InputJsonValue,
-        isRead: false,
-      })),
-    });
+    if (recipientIds.length === 0) {
+      return [];
+    }
 
-    // WebSocket events are now emitted by calling handler methods
+    // Create notifications individually to get IDs back
+    const notifications = await Promise.all(
+      recipientIds.map((userId) =>
+        this.prisma.notification.create({
+          data: {
+            userId,
+            type,
+            title,
+            body,
+            actionUrl,
+            metadata: metadata as Prisma.InputJsonValue,
+            isRead: false,
+          },
+          select: { id: true },
+        }),
+      ),
+    );
+
+    return notifications.map((n) => n.id);
   }
 }

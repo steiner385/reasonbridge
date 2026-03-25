@@ -8,6 +8,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
+import { NotificationDeliveryService } from '../services/notification-delivery.service.js';
 import type { ResponseCreatedEvent } from '@reason-bridge/event-schemas/discussion';
 
 /**
@@ -33,6 +34,7 @@ export class MentionNotificationHandler {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationGateway: NotificationGateway,
+    private readonly deliveryService: NotificationDeliveryService,
   ) {}
 
   /**
@@ -137,7 +139,7 @@ export class MentionNotificationHandler {
       const actionUrl = `/topics/${topic.slug}?response=${responseId}`;
 
       // Create notifications for each mentioned user
-      await this.createNotifications({
+      const notificationIds = await this.createNotifications({
         recipientIds: validUserIds,
         type: 'mention',
         title,
@@ -155,6 +157,26 @@ export class MentionNotificationHandler {
       });
 
       this.logger.log(`Created mention notifications for ${validUserIds.length} user(s)`);
+
+      // Deliver notifications via email/push based on user preferences
+      for (let i = 0; i < validUserIds.length; i++) {
+        const userId = validUserIds[i]!;
+        const notificationId = notificationIds[i];
+        if (notificationId) {
+          // Fire and forget - don't block on delivery
+          this.deliveryService
+            .deliverNotification(userId, {
+              id: notificationId,
+              type: 'mention',
+              title,
+              body,
+              actionUrl,
+            })
+            .catch((err) => {
+              this.logger.error(`Failed to deliver notification ${notificationId}: ${err}`);
+            });
+        }
+      }
 
       // Emit WebSocket events for real-time delivery
       for (const userId of validUserIds) {
@@ -183,6 +205,7 @@ export class MentionNotificationHandler {
 
   /**
    * Create notification records in the database
+   * @returns Array of created notification IDs
    */
   private async createNotifications(params: {
     recipientIds: string[];
@@ -191,21 +214,29 @@ export class MentionNotificationHandler {
     body: string;
     actionUrl: string;
     metadata: Record<string, unknown>;
-  }): Promise<void> {
+  }): Promise<string[]> {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
     this.logger.log(`Creating ${recipientIds.length} notification(s) of type "${type}"`);
 
-    await this.prisma.notification.createMany({
-      data: recipientIds.map((userId) => ({
-        userId,
-        type,
-        title,
-        body,
-        actionUrl,
-        metadata: metadata as Prisma.InputJsonValue,
-        isRead: false,
-      })),
-    });
+    // Create notifications individually to get IDs back
+    const notifications = await Promise.all(
+      recipientIds.map((userId) =>
+        this.prisma.notification.create({
+          data: {
+            userId,
+            type,
+            title,
+            body,
+            actionUrl,
+            metadata: metadata as Prisma.InputJsonValue,
+            isRead: false,
+          },
+          select: { id: true },
+        }),
+      ),
+    );
+
+    return notifications.map((n) => n.id);
   }
 }
