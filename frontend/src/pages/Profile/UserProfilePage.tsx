@@ -26,6 +26,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useUser } from '../../lib/useUser';
 import { useDelayedLoading } from '../../hooks/useDelayedLoading';
 import { useCanViewSection } from '../../hooks/useCanViewSection';
+import { useUserRank } from '../../hooks/useUserRank';
 import {
   useProfileContributions,
   useContributionStats,
@@ -46,13 +47,14 @@ import {
   FollowingModal,
 } from '../../components/profile';
 import { UserNotFound } from '../../components/users';
-import type { TierLevel, TopicExpertise } from '../../types/ranking';
+import type { TopicExpertise } from '../../types/ranking';
 import type { ContributionType } from '../../types/contribution';
 import { UserStatus } from '../../types/user';
 
 function UserProfilePage() {
   const { id } = useParams<{ id: string }>();
   const { data: user, isLoading, isError, error } = useUser(id);
+  const { data: userRank } = useUserRank(id);
   const showSkeleton = useDelayedLoading(isLoading);
 
   // Contribution filter state
@@ -66,10 +68,9 @@ function UserProfilePage() {
   const queryClient = useQueryClient();
 
   // Privacy-aware section visibility
-  // NOTE: privacySettings would come from user profile endpoint when available
   const { visibility, isOwner } = useCanViewSection({
     targetUserId: id || '',
-    privacySettings: undefined, // TODO: Add when user endpoint returns privacy settings
+    privacySettings: user?.privacySettings,
   });
 
   // Local follower count adjustment (for optimistic UI update)
@@ -149,8 +150,8 @@ function UserProfilePage() {
     );
   }
 
-  // TODO: Fetch tier level from ranking service when available
-  const tierLevel: TierLevel | undefined = undefined;
+  // Get tier level from ranking data
+  const tierLevel = userRank?.tierLevel;
 
   // Mock expertise data for now (would come from API)
   const topExpertise: TopicExpertise[] = [];

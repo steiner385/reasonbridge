@@ -82,6 +82,11 @@ export interface UserProfile extends User {
    * Parental consent status for minor users
    */
   parentConsentStatus?: ParentConsentStatus;
+
+  /**
+   * User's privacy settings for profile sections
+   */
+  privacySettings?: PrivacySettings;
 }
 
 export interface UserSummary {
