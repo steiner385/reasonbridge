@@ -5,6 +5,9 @@
 
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
+import { useNotificationPreferences } from '../../hooks/useNotificationPreferences';
+import { useToast } from '../../contexts/ToastContext';
+import { useAuthContext } from '../../contexts/AuthContext';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 
 /**
@@ -14,9 +17,32 @@ import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 
 export function SettingsPage() {
   const { mode, setTheme } = useTheme();
+  const { isAuthenticated } = useAuthContext();
+  const toast = useToast();
+  const {
+    preferences: notificationPrefs,
+    pushAvailable,
+    isLoading: notificationsLoading,
+    isPending: notificationsPending,
+    updatePreferencesAsync,
+  } = useNotificationPreferences({ enabled: isAuthenticated });
 
   const handleThemeChange = (newMode: 'light' | 'dark' | 'auto') => {
     setTheme(newMode);
+  };
+
+  const handleNotificationToggle = async (
+    field: 'emailNotifications' | 'pushNotifications' | 'weeklyDigest',
+  ) => {
+    if (!notificationPrefs) return;
+
+    const newValue = !notificationPrefs[field];
+    try {
+      await updatePreferencesAsync({ [field]: newValue });
+      toast.success('Notification preferences updated');
+    } catch {
+      toast.error('Failed to update preferences');
+    }
   };
 
   return (
@@ -139,6 +165,131 @@ export function SettingsPage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Notification Settings */}
+      {isAuthenticated && (
+        <Card>
+          <CardHeader
+            title="Notifications"
+            subtitle="Choose how you want to be notified about activity"
+          />
+          <CardBody>
+            {notificationsLoading ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Email Notifications Toggle */}
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Email Notifications
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Receive notifications via email for mentions, follows, and important updates
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleNotificationToggle('emailNotifications')}
+                    disabled={notificationsPending}
+                    className={`
+                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      ${notificationPrefs?.emailNotifications ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'}
+                    `}
+                    role="switch"
+                    aria-checked={notificationPrefs?.emailNotifications ?? false}
+                    aria-label="Toggle email notifications"
+                  >
+                    <span
+                      className={`
+                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                        ${notificationPrefs?.emailNotifications ? 'translate-x-6' : 'translate-x-1'}
+                      `}
+                    />
+                  </button>
+                </div>
+
+                {/* Push Notifications Toggle */}
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Push Notifications
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Receive real-time notifications in your browser
+                      {!pushAvailable && (
+                        <span className="block text-xs text-amber-600 dark:text-amber-400 mt-1">
+                          Browser notifications not set up yet
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleNotificationToggle('pushNotifications')}
+                    disabled={notificationsPending || !pushAvailable}
+                    className={`
+                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      ${notificationPrefs?.pushNotifications ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'}
+                    `}
+                    role="switch"
+                    aria-checked={notificationPrefs?.pushNotifications ?? false}
+                    aria-label="Toggle push notifications"
+                  >
+                    <span
+                      className={`
+                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                        ${notificationPrefs?.pushNotifications ? 'translate-x-6' : 'translate-x-1'}
+                      `}
+                    />
+                  </button>
+                </div>
+
+                {/* Weekly Digest Toggle */}
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Weekly Digest
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Receive a weekly summary of activity and new discussions
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleNotificationToggle('weeklyDigest')}
+                    disabled={notificationsPending}
+                    className={`
+                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      ${notificationPrefs?.weeklyDigest ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-600'}
+                    `}
+                    role="switch"
+                    aria-checked={notificationPrefs?.weeklyDigest ?? false}
+                    aria-label="Toggle weekly digest"
+                  >
+                    <span
+                      className={`
+                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                        ${notificationPrefs?.weeklyDigest ? 'translate-x-6' : 'translate-x-1'}
+                      `}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      )}
 
       {/* Other Settings Sections */}
       <Card>

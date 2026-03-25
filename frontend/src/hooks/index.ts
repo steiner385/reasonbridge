@@ -36,6 +36,14 @@ export type {
   PrivacySettingsResponse,
   UpdatePrivacySettingsDto,
 } from './usePrivacySettings';
+export { useNotificationPreferences } from './useNotificationPreferences';
+export type {
+  UseNotificationPreferencesOptions,
+  UseNotificationPreferencesResult,
+  NotificationPreferencesResponse,
+  UpdateNotificationPreferencesDto,
+  NotificationPreferences,
+} from './useNotificationPreferences';
 export { useCanViewSection, getPrivacyMessage } from './useCanViewSection';
 export type {
   ProfileSection,

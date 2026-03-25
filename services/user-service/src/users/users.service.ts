@@ -20,6 +20,10 @@ import {
   PrivacySettingsResponseDto,
   type UpdatePrivacySettingsDto,
 } from './dto/privacy-settings.dto.js';
+import {
+  NotificationPreferencesResponseDto,
+  type UpdateNotificationPreferencesDto,
+} from './dto/notification-preferences.dto.js';
 import type { AvatarUrls } from '../services/s3.service.js';
 
 export interface CreateUserData {
@@ -814,5 +818,103 @@ export class UsersService {
     });
 
     return user?.avatarHash ?? null;
+  }
+
+  /**
+   * Get a user's notification preferences
+   * @param userId - The user's UUID
+   * @returns Notification preferences with metadata
+   */
+  async getNotificationPreferences(userId: string): Promise<NotificationPreferencesResponseDto> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        notifyByEmail: true,
+        notifyByPush: true,
+        fcmToken: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
+    return new NotificationPreferencesResponseDto(
+      userId,
+      {
+        emailNotifications: user.notifyByEmail,
+        pushNotifications: user.notifyByPush,
+        // weeklyDigest is stored as notifyByEmail for now (single email preference)
+        // TODO: Add separate weeklyDigest field to User model if needed
+        weeklyDigest: user.notifyByEmail,
+      },
+      user.updatedAt,
+      !!user.fcmToken,
+    );
+  }
+
+  /**
+   * Update a user's notification preferences
+   * @param userId - The user's UUID
+   * @param updateDto - Partial notification preferences to update
+   * @returns Updated notification preferences with metadata
+   */
+  async updateNotificationPreferences(
+    userId: string,
+    updateDto: UpdateNotificationPreferencesDto,
+  ): Promise<NotificationPreferencesResponseDto> {
+    if (!isValidUUID(userId)) {
+      throw new BadRequestException(`Invalid user ID format: expected UUID`);
+    }
+
+    // Verify user exists
+    await this.findById(userId);
+
+    // Build update data
+    const updateData: { notifyByEmail?: boolean; notifyByPush?: boolean } = {};
+
+    if (updateDto.emailNotifications !== undefined) {
+      updateData.notifyByEmail = updateDto.emailNotifications;
+    }
+
+    if (updateDto.pushNotifications !== undefined) {
+      updateData.notifyByPush = updateDto.pushNotifications;
+    }
+
+    // weeklyDigest uses the same field as emailNotifications for now
+    if (updateDto.weeklyDigest !== undefined && updateDto.emailNotifications === undefined) {
+      updateData.notifyByEmail = updateDto.weeklyDigest;
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        notifyByEmail: true,
+        notifyByPush: true,
+        fcmToken: true,
+        updatedAt: true,
+      },
+    });
+
+    this.logger.log(`Updated notification preferences for user ${userId}`);
+
+    return new NotificationPreferencesResponseDto(
+      userId,
+      {
+        emailNotifications: user.notifyByEmail,
+        pushNotifications: user.notifyByPush,
+        weeklyDigest: user.notifyByEmail,
+      },
+      user.updatedAt,
+      !!user.fcmToken,
+    );
   }
 }
