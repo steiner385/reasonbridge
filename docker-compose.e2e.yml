@@ -214,6 +214,7 @@ services:
       AWS_PROFILE: default
       # Use cross-region inference profile for on-demand access
       BEDROCK_MODEL_ID: us.anthropic.claude-3-5-sonnet-20241022-v2:0
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3002:3002'
     volumes:
@@ -242,6 +243,7 @@ services:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       ACTIVITY_SERVICE_URL: http://activity-service:3008
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3007:3007'
     depends_on:
@@ -267,6 +269,7 @@ services:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:3002
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3003:3003'
     depends_on:
@@ -317,6 +320,7 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
+      JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3005:3005'
     depends_on:

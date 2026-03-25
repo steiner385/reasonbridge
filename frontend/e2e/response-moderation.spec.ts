@@ -365,13 +365,9 @@ test.describe('Response Moderation', () => {
     await expect(dialog).not.toBeVisible();
   });
 
-  // SKIPPED: This test requires authenticated PUT requests, which fail in local E2E mode
-  // due to JWT_SECRET mismatch between services. The root .env has one secret while
-  // .env.local has another, and services started at different times may use different values.
-  // The edit functionality IS implemented - see ResponseItem.tsx handleEditSubmit().
-  // The API gateway route is added - see topics-proxy.controller.ts updateResponse().
-  // To fix: Ensure all services use consistent JWT_SECRET from root .env file.
-  test.skip('should allow editing own response', async ({ page }) => {
+  // Test for editing own response - requires JWT_SECRET to be consistent across all services
+  // Fixed: Added JWT_SECRET to discussion-service and moderation-service in docker-compose.e2e.yml
+  test('should allow editing own response', async ({ page }) => {
     // Navigate to known seeded topic where Alice has a response
     await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
