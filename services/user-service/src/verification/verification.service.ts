@@ -12,6 +12,7 @@ import { randomUUID } from 'crypto';
 import { VerificationType, VerificationStatus } from '@prisma/client';
 import { OtpService } from './services/otp.service.js';
 import { PhoneValidationService } from './services/phone-validation.service.js';
+import { SmsClient } from '../clients/sms.client.js';
 import {
   PhoneVerificationRequestDto,
   PhoneVerificationVerifyDto,
@@ -36,6 +37,7 @@ export class VerificationService {
     private videoVerificationService: VideoVerificationService,
     private otpService: OtpService,
     private phoneValidationService: PhoneValidationService,
+    private smsClient: SmsClient,
   ) {}
 
   /**
@@ -474,11 +476,36 @@ export class VerificationService {
       },
     });
 
-    // TODO: In production, integrate with SMS provider (Twilio, AWS SNS, etc.)
-    // For now, log the OTP to console for development/testing
-    this.logger.log(
-      `[DEV MODE] OTP for ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}: ${otpCode}`,
-    );
+    // Send OTP via SMS (through notification-service)
+    // In dev/test mode without notification-service, also log to console
+    const isDevMode = process.env['NODE_ENV'] === 'development' || isTestMode;
+
+    if (isDevMode) {
+      this.logger.log(
+        `[DEV MODE] OTP for ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}: ${otpCode}`,
+      );
+    }
+
+    // Send SMS via notification-service
+    const smsResult = await this.smsClient.sendVerificationCode(normalizedPhone, otpCode);
+
+    if (!smsResult.success) {
+      this.logger.warn(
+        `SMS delivery failed for ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}: ${smsResult.error}`,
+      );
+      // In production, we might want to throw here, but for now we'll continue
+      // since the OTP was created and can be tested via dev mode logging or test endpoint
+      if (!isDevMode) {
+        // Clean up the verification record if SMS failed in production
+        await this.prisma.verificationRecord.delete({ where: { id: verification.id } });
+        throw new BadRequestException('Failed to send verification code. Please try again later.');
+      }
+    } else {
+      this.logger.log(
+        `OTP sent to ${this.phoneValidationService.maskPhoneNumber(normalizedPhone)}, messageId: ${smsResult.messageId}`,
+      );
+    }
+
     this.logger.log(`OTP expires at: ${expiresAt.toISOString()}`);
 
     return {
