@@ -145,13 +145,20 @@ export function DiscussionPage() {
 
   // Handle proposition hover - highlight related responses
   // Memoized with useCallback to prevent unnecessary re-renders
-  const handlePropositionHover = useCallback((propositionId: string | null) => {
-    if (propositionId === null) {
-      setHighlightedResponseIds(new Set());
-    }
-    // TODO: Fetch related response IDs from proposition data
-    // For now, this is a placeholder - will be implemented with real data
-  }, []);
+  const handlePropositionHover = useCallback(
+    (propositionId: string | null) => {
+      if (propositionId === null) {
+        setHighlightedResponseIds(new Set());
+        return;
+      }
+      // Find the proposition and highlight its related responses
+      const proposition = propositions.find((p) => p.id === propositionId);
+      if (proposition) {
+        setHighlightedResponseIds(new Set(proposition.relatedResponseIds));
+      }
+    },
+    [propositions],
+  );
 
   // Handle proposition click - scroll to and highlight related responses
   // Memoized with useCallback to prevent unnecessary re-renders
@@ -224,6 +231,20 @@ export function DiscussionPage() {
     }
   }, []);
 
+  // Handle refetching responses (called when user clicks "Load new responses")
+  const handleRefetchResponses = useCallback(() => {
+    if (activeTopicId) {
+      queryClient.invalidateQueries({ queryKey: ['responses', activeTopicId] });
+    }
+  }, [queryClient, activeTopicId]);
+
+  // Handle refreshing common ground analysis (called when user clicks "Refresh")
+  const handleRefreshCommonGround = useCallback(() => {
+    if (activeTopicId) {
+      queryClient.invalidateQueries({ queryKey: ['commonGroundAnalysis', activeTopicId] });
+    }
+  }, [queryClient, activeTopicId]);
+
   // Handle inline reply submission (memoized to prevent unnecessary re-renders)
   const handleReplySubmit = useCallback(
     async (response: CreateResponseRequest) => {
@@ -272,9 +293,11 @@ export function DiscussionPage() {
     setPendingTopicId(null);
   };
 
-  // TODO: Implement lazy loading for common ground and bridging suggestions (T045, T046)
-  // TODO: Fetch real propositions data - for now empty array
-  // For now, these are null/empty - will be implemented later in Phase 4
+  // Data fetching is implemented above via React Query hooks:
+  // - usePropositions: fetches propositions for the active topic
+  // - useCommonGroundAnalysis: fetches common ground analysis (refetch via handleRefreshCommonGround)
+  // - useBridgingSuggestions: fetches bridging suggestions
+  // Optional optimization: implement tab-based lazy loading via onTabActivate callback
 
   return (
     <FactCheckProvider>
@@ -328,6 +351,7 @@ export function DiscussionPage() {
             onPreviewFeedbackChange={handlePreviewFeedbackChange}
             onCompositionStateChange={handleCompositionStateChange}
             onReplySubmit={handleReplySubmit}
+            onRefetchResponses={handleRefetchResponses}
           />
         }
         rightPanel={
@@ -350,6 +374,7 @@ export function DiscussionPage() {
             onPreviewSensitivityChange={setPreviewSensitivity}
             isComposing={isComposing}
             height={typeof window !== 'undefined' ? window.innerHeight : 800}
+            onRefreshCommonGround={handleRefreshCommonGround}
           />
         }
       />

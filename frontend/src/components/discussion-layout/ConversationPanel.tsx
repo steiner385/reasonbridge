@@ -43,6 +43,8 @@ export interface ConversationPanelProps {
   onResponseSubmit?: (response: CreateResponseRequest) => Promise<void>;
   /** Callback when inline reply is submitted */
   onReplySubmit?: (response: CreateResponseRequest) => Promise<void>;
+  /** Callback to refetch responses (for loading new responses) */
+  onRefetchResponses?: () => void;
   /** CSS class name */
   className?: string;
 }
@@ -60,6 +62,7 @@ export function ConversationPanel({
   onCompositionStateChange: _onCompositionStateChange,
   onResponseSubmit,
   onReplySubmit,
+  onRefetchResponses,
   className = '',
 }: ConversationPanelProps) {
   // CRITICAL: All hooks must be called BEFORE any conditional returns
@@ -184,10 +187,12 @@ export function ConversationPanel({
   // Handle loading new responses
   const handleLoadNewResponses = useCallback(() => {
     setNewResponseCount(0);
-    // TODO: Trigger refetch of responses from API
-    // This will be implemented when we have real API integration
+    // Trigger refetch of responses from API
+    if (onRefetchResponses) {
+      onRefetchResponses();
+    }
     scrollToBottom();
-  }, [scrollToBottom]);
+  }, [scrollToBottom, onRefetchResponses]);
 
   // Handle dismissing topic status change banner
   const handleDismissStatusChange = useCallback(() => {
