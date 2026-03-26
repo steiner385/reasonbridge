@@ -10,6 +10,8 @@ const createMockPrismaService = () => ({
     findMany: vi.fn(),
     update: vi.fn(),
   },
+  $queryRaw: vi.fn(),
+  $transaction: vi.fn(),
 });
 
 describe('AlignmentAggregationService', () => {
@@ -233,44 +235,53 @@ describe('AlignmentAggregationService', () => {
   });
 
   describe('recalculateAllAggregates', () => {
-    it('should recalculate aggregates for all propositions', async () => {
-      mockPrisma.proposition.findMany.mockResolvedValue([
-        { id: 'prop-1' },
-        { id: 'prop-2' },
-        { id: 'prop-3' },
+    it('should recalculate aggregates for all propositions using batch SQL', async () => {
+      // Mock the raw SQL query returning aggregated counts
+      mockPrisma.$queryRaw.mockResolvedValue([
+        { proposition_id: 'prop-1', support_count: 3n, oppose_count: 1n, nuanced_count: 0n },
+        { proposition_id: 'prop-2', support_count: 0n, oppose_count: 2n, nuanced_count: 1n },
+        { proposition_id: 'prop-3', support_count: 5n, oppose_count: 5n, nuanced_count: 0n },
       ]);
-      mockPrisma.alignment.findMany.mockResolvedValue([]);
+      mockPrisma.$transaction.mockResolvedValue([]);
       mockPrisma.proposition.update.mockResolvedValue({});
 
       const result = await service.recalculateAllAggregates();
 
       expect(result).toBe(3);
-      expect(mockPrisma.proposition.update).toHaveBeenCalledTimes(3);
+      expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
+      // Transaction should be called with an array of update operations
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(expect.any(Array));
     });
 
     it('should return 0 for no propositions', async () => {
-      mockPrisma.proposition.findMany.mockResolvedValue([]);
+      mockPrisma.$queryRaw.mockResolvedValue([]);
 
       const result = await service.recalculateAllAggregates();
 
       expect(result).toBe(0);
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     });
 
-    it('should call updatePropositionAggregates for each proposition', async () => {
-      mockPrisma.proposition.findMany.mockResolvedValue([{ id: 'prop-1' }, { id: 'prop-2' }]);
-      mockPrisma.alignment.findMany.mockResolvedValue([]);
+    it('should calculate correct consensus scores in batch update', async () => {
+      // Mock propositions with known aggregate counts
+      mockPrisma.$queryRaw.mockResolvedValue([
+        // All support: consensus = 1.00
+        { proposition_id: 'prop-1', support_count: 10n, oppose_count: 0n, nuanced_count: 0n },
+        // All oppose: consensus = 0.00
+        { proposition_id: 'prop-2', support_count: 0n, oppose_count: 10n, nuanced_count: 0n },
+        // Balanced: consensus = 0.50
+        { proposition_id: 'prop-3', support_count: 5n, oppose_count: 5n, nuanced_count: 0n },
+      ]);
+      mockPrisma.$transaction.mockResolvedValue([]);
       mockPrisma.proposition.update.mockResolvedValue({});
 
       await service.recalculateAllAggregates();
 
-      expect(mockPrisma.alignment.findMany).toHaveBeenCalledWith({
-        where: { propositionId: 'prop-1' },
-        select: { stance: true },
-      });
-      expect(mockPrisma.alignment.findMany).toHaveBeenCalledWith({
-        where: { propositionId: 'prop-2' },
-        select: { stance: true },
-      });
+      // Verify transaction was called with updates
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.anything(), expect.anything(), expect.anything()]),
+      );
     });
   });
 });

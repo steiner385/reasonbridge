@@ -221,25 +221,33 @@ export class CommonGroundNotificationHandler {
   }
 
   /**
-   * Get all unique participants for a topic by querying response authors
-   * Excludes the topic creator since they're already included
+   * Get all unique participants for a topic by querying response authors.
+   * Uses raw SQL DISTINCT for optimal performance on large topics.
+   * Excludes the topic creator since they're already included.
    *
    * @param topicId - Topic ID to get participants for
    * @param excludeUserId - Optional user ID to exclude (typically the topic creator)
    * @returns Array of unique user IDs who have contributed responses
    */
   private async getTopicParticipants(topicId: string, excludeUserId?: string): Promise<string[]> {
-    // Query distinct author IDs from responses for this topic
-    const participants = await this.prisma.response.findMany({
-      where: {
-        topicId,
-        ...(excludeUserId && { authorId: { not: excludeUserId } }),
-      },
-      select: { authorId: true },
-      distinct: ['authorId'],
-    });
+    // Use raw SQL DISTINCT for optimal performance on large topics
+    // This is more efficient than Prisma's distinct which may fetch more data
+    if (excludeUserId) {
+      const participants = await this.prisma.$queryRaw<{ author_id: string }[]>`
+        SELECT DISTINCT author_id
+        FROM responses
+        WHERE topic_id = ${topicId}::uuid
+          AND author_id != ${excludeUserId}::uuid
+      `;
+      return participants.map((p) => p.author_id);
+    }
 
-    return participants.map((p) => p.authorId);
+    const participants = await this.prisma.$queryRaw<{ author_id: string }[]>`
+      SELECT DISTINCT author_id
+      FROM responses
+      WHERE topic_id = ${topicId}::uuid
+    `;
+    return participants.map((p) => p.author_id);
   }
 
   /**
@@ -324,8 +332,10 @@ export class CommonGroundNotificationHandler {
   }
 
   /**
-   * Create notification records in the database
-   * @returns Array of created notification IDs
+   * Create notification records in the database using batch insert.
+   * Uses createMany for efficient bulk insert, then queries back the IDs.
+   *
+   * @returns Array of created notification IDs in the same order as recipientIds
    */
   private async createNotifications(params: {
     recipientIds: string[];
@@ -337,26 +347,40 @@ export class CommonGroundNotificationHandler {
   }): Promise<string[]> {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
+    if (recipientIds.length === 0) {
+      return [];
+    }
+
     this.logger.log(`Creating ${recipientIds.length} notification(s) of type "${type}"`);
 
-    // Create notifications individually to get IDs back
-    const notifications = await Promise.all(
-      recipientIds.map((userId) =>
-        this.prisma.notification.create({
-          data: {
-            userId,
-            type,
-            title,
-            body,
-            actionUrl,
-            metadata: metadata as Prisma.InputJsonValue,
-            isRead: false,
-          },
-          select: { id: true },
-        }),
-      ),
-    );
+    // Use batch insert for efficiency (single INSERT statement)
+    const createdAt = new Date();
+    await this.prisma.notification.createMany({
+      data: recipientIds.map((userId) => ({
+        userId,
+        type,
+        title,
+        body,
+        actionUrl,
+        metadata: metadata as Prisma.InputJsonValue,
+        isRead: false,
+        createdAt,
+      })),
+    });
 
-    return notifications.map((n) => n.id);
+    // Query back the created notifications to get IDs
+    // Filter by exact createdAt timestamp and type to get only the batch we just created
+    const notifications = await this.prisma.notification.findMany({
+      where: {
+        userId: { in: recipientIds },
+        type,
+        createdAt,
+      },
+      select: { id: true, userId: true },
+    });
+
+    // Return IDs in the same order as recipientIds
+    const idByUserId = new Map(notifications.map((n) => [n.userId, n.id]));
+    return recipientIds.map((userId) => idByUserId.get(userId) ?? '');
   }
 }

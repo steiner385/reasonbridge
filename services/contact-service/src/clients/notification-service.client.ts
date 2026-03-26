@@ -62,13 +62,35 @@ export interface InvitationAcceptedNotificationParams {
  * });
  * ```
  */
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 @Injectable()
 export class NotificationServiceClient {
   private readonly logger = new Logger(NotificationServiceClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -133,7 +155,7 @@ export class NotificationServiceClient {
     metadata: Record<string, string | undefined>;
   }): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/notifications`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/notifications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -145,7 +167,11 @@ export class NotificationServiceClient {
         );
       }
     } catch (error) {
-      this.logger.warn(`Error sending ${payload.type} notification: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn(`Request to send ${payload.type} notification timed out`);
+      } else {
+        this.logger.warn(`Error sending ${payload.type} notification: ${(error as Error).message}`);
+      }
     }
   }
 }
