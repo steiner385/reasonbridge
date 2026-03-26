@@ -116,7 +116,7 @@ export class InternalSlaBreachController {
     return this.prisma.user.findMany({
       where: {
         role: { in: ['MODERATOR', 'ADMIN'] },
-        isActive: true,
+        accountStatus: 'ACTIVE',
       },
       select: {
         id: true,
@@ -157,13 +157,16 @@ export class InternalSlaBreachController {
             title,
             body,
             actionUrl,
-            metadata: {
-              breachCount: breaches.length,
-              urgentCount,
-              highCount,
-              checkedAt,
-              breaches: breaches.slice(0, 10), // Include first 10 for quick reference
-            },
+            // Use JSON.parse/stringify to ensure plain JSON compatibility with Prisma
+            metadata: JSON.parse(
+              JSON.stringify({
+                breachCount: breaches.length,
+                urgentCount,
+                highCount,
+                checkedAt,
+                breaches: breaches.slice(0, 10),
+              }),
+            ),
           },
         }),
       ),
