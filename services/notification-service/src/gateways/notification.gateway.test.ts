@@ -336,6 +336,69 @@ describe('NotificationGateway', () => {
     });
   });
 
+  describe('emitSlaBreachNotification', () => {
+    it('should broadcast to moderation room with SLA breach data', () => {
+      const data = {
+        breaches: [
+          {
+            queueId: 'queue-1',
+            priority: 'URGENT',
+            ageMinutes: 90,
+            slaMinutes: 60,
+            breachPercent: 150,
+            responseId: 'response-1',
+            topicId: 'topic-1',
+          },
+          {
+            queueId: 'queue-2',
+            priority: 'HIGH',
+            ageMinutes: 300,
+            slaMinutes: 240,
+            breachPercent: 125,
+            responseId: 'response-2',
+            topicId: 'topic-2',
+          },
+        ],
+        checkedAt: '2026-03-26T10:00:00Z',
+        timestamp: '2026-03-26T10:00:01Z',
+      };
+
+      gateway.emitSlaBreachNotification(data);
+
+      expect(mockServer.to).toHaveBeenCalledWith('moderation:actions');
+      expect(mockServer.emit).toHaveBeenCalledWith('moderation:sla-breach', {
+        breaches: data.breaches,
+        checkedAt: data.checkedAt,
+        timestamp: data.timestamp,
+        breachCount: 2,
+      });
+    });
+
+    it('should include correct breach count in emission', () => {
+      const data = {
+        breaches: [
+          {
+            queueId: 'queue-1',
+            priority: 'NORMAL',
+            ageMinutes: 2000,
+            slaMinutes: 1440,
+            breachPercent: 139,
+            responseId: 'response-1',
+            topicId: 'topic-1',
+          },
+        ],
+        checkedAt: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
+      };
+
+      gateway.emitSlaBreachNotification(data);
+
+      const emitCall = mockServer.emit.mock.calls[0];
+      expect(emitCall[0]).toBe('moderation:sla-breach');
+      expect(emitCall[1].breachCount).toBe(1);
+    });
+  });
+
   describe('handleSubscribeSafetyReports', () => {
     it('should allow authenticated user to subscribe to safety reports', async () => {
       const mockSocket = createMockSocket({ userId: 'mod-1' });
