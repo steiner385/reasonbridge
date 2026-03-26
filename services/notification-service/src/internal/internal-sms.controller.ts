@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards } from '@nestjs/common';
+import { InternalApiKeyGuard } from './internal-api-key.guard.js';
 import { IsString, IsNotEmpty, Matches, MaxLength } from 'class-validator';
 import { SmsService, type SmsResult } from '../services/sms.service.js';
 
@@ -52,6 +53,7 @@ export interface SendSmsResponseDto {
  * - Uses fire-and-forget pattern on client side but returns result for error handling
  */
 @Controller('internal/sms')
+@UseGuards(InternalApiKeyGuard)
 export class InternalSmsController {
   private readonly logger = new Logger(InternalSmsController.name);
 

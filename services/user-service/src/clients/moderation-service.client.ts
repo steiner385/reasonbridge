@@ -55,9 +55,24 @@ export interface BotFlagResult {
 export class ModerationServiceClient {
   private readonly logger = new Logger(ModerationServiceClient.name);
   private readonly baseUrl: string;
+  private readonly internalApiKey: string | undefined;
 
   constructor() {
     this.baseUrl = process.env['MODERATION_SERVICE_URL'] || getServiceUrl('MODERATION_SERVICE');
+    this.internalApiKey = process.env['INTERNAL_API_KEY'];
+  }
+
+  /**
+   * Build headers for internal API requests
+   */
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (this.internalApiKey) {
+      headers['X-Internal-Api-Key'] = this.internalApiKey;
+    }
+    return headers;
   }
 
   /**
@@ -75,7 +90,7 @@ export class ModerationServiceClient {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           ...request,
           detectedAt: new Date().toISOString(),

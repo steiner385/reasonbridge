@@ -38,9 +38,24 @@ export interface SmsDeliveryResult {
 export class SmsClient {
   private readonly logger = new Logger(SmsClient.name);
   private readonly baseUrl: string;
+  private readonly internalApiKey: string | undefined;
 
   constructor() {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
+    this.internalApiKey = process.env['INTERNAL_API_KEY'];
+  }
+
+  /**
+   * Build headers for internal API requests
+   */
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (this.internalApiKey) {
+      headers['X-Internal-Api-Key'] = this.internalApiKey;
+    }
+    return headers;
   }
 
   /**
@@ -59,7 +74,7 @@ export class SmsClient {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({ phoneNumber, code }),
       });
 

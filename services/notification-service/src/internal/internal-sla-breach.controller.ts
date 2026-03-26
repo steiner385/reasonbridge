@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Logger, UseGuards } from '@nestjs/common';
+import { InternalApiKeyGuard } from './internal-api-key.guard.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 
@@ -50,6 +51,7 @@ export interface SlaBreachNotificationResponse {
  * service-to-service communication only.
  */
 @Controller('internal/sla-breach')
+@UseGuards(InternalApiKeyGuard)
 export class InternalSlaBreachController {
   private readonly logger = new Logger(InternalSlaBreachController.name);
 

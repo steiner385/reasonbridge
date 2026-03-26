@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Logger, UseGuards } from '@nestjs/common';
+import { InternalApiKeyGuard } from './internal-api-key.guard.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /**
@@ -42,6 +43,7 @@ export interface BotFlaggedResponse {
  * service-to-service communication only.
  */
 @Controller('internal/bot-flagged')
+@UseGuards(InternalApiKeyGuard)
 export class InternalBotFlaggedController {
   private readonly logger = new Logger(InternalBotFlaggedController.name);
 
