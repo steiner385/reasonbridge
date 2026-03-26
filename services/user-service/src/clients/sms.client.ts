@@ -15,6 +15,9 @@ export interface SmsDeliveryResult {
   error?: string;
 }
 
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 /**
  * SMS Client for notification-service
  *
@@ -38,9 +41,28 @@ export interface SmsDeliveryResult {
 export class SmsClient {
   private readonly logger = new Logger(SmsClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -57,7 +79,7 @@ export class SmsClient {
     const endpoint = `${this.baseUrl}/internal/sms/verification-code`;
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await this.fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phoneNumber, code }),
@@ -86,6 +108,13 @@ export class SmsClient {
 
       return result;
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.error(`SMS delivery timed out for ${this.maskPhone(phoneNumber)}`);
+        return {
+          success: false,
+          error: 'Request timed out',
+        };
+      }
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error sending SMS to ${this.maskPhone(phoneNumber)}: ${errorMessage}`);
       return {
