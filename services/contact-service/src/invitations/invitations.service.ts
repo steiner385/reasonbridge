@@ -13,6 +13,7 @@ import {
 import { randomBytes } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { DiscussionServiceClient } from '../clients/discussion-service.client.js';
 import { CreateInvitationDto, CreateInvitationResponseDto } from './dto/create-invitation.dto.js';
 import {
   InvitationListQueryDto,
@@ -27,7 +28,10 @@ const INVITATION_EXPIRY_DAYS = 7;
 export class InvitationsService {
   private readonly logger = new Logger(InvitationsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly discussionClient: DiscussionServiceClient,
+  ) {}
 
   async createInvitation(
     inviterId: string,
@@ -118,7 +122,8 @@ export class InvitationsService {
 
     this.logger.log(`Invitation ${invitationId} accepted by user ${userId}`);
 
-    // TODO: Call discussion-service to grant topic access
+    // Grant topic access (fire-and-forget - failures are logged but don't block acceptance)
+    await this.discussionClient.grantTopicAccess(invitation.topicId, userId, invitationId);
 
     return {
       success: true,

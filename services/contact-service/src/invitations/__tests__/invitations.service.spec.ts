@@ -9,6 +9,7 @@ import { InvitationsService } from '../invitations.service.js';
 describe('InvitationsService', () => {
   let service: InvitationsService;
   let mockPrisma: any;
+  let mockDiscussionClient: any;
 
   beforeEach(() => {
     mockPrisma = {
@@ -21,7 +22,12 @@ describe('InvitationsService', () => {
         count: vi.fn(),
       },
     };
-    service = new InvitationsService(mockPrisma);
+    mockDiscussionClient = {
+      grantTopicAccess: vi.fn().mockResolvedValue(true),
+      getTopicById: vi.fn(),
+      canUserAccessTopic: vi.fn(),
+    };
+    service = new InvitationsService(mockPrisma, mockDiscussionClient);
   });
 
   describe('createInvitation', () => {
