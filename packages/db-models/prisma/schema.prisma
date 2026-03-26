@@ -1461,6 +1461,7 @@ enum VerificationTokenType {
 }
 
 /// Email verification token for signup flow and password reset
+/// Includes brute force protection via attempts tracking
 model VerificationToken {
   id        String                @id @default(uuid()) @db.Uuid
   userId    String                @map("user_id") @db.Uuid
@@ -1470,6 +1471,10 @@ model VerificationToken {
   expiresAt DateTime              @map("expires_at")
   used      Boolean               @default(false)
   usedAt    DateTime?             @map("used_at")
+  /// Number of failed verification attempts (brute force protection)
+  attempts  Int                   @default(0)
+  /// Timestamp when token was locked due to max failed attempts
+  lockedAt  DateTime?             @map("locked_at")
 
   @@index([userId])
   @@index([expiresAt])

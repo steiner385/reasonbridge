@@ -81,8 +81,7 @@ export class VerificationService {
         });
       }
 
-      // Create new verification token
-      // TODO: Add email and attempts fields to VerificationToken schema
+      // Create new verification token with attempts initialized to 0
       await this.prisma.verificationToken.create({
         data: {
           userId,
@@ -90,6 +89,8 @@ export class VerificationService {
           type,
           expiresAt,
           used: false,
+          attempts: 0,
+          lockedAt: null,
         },
       });
 
@@ -118,7 +119,6 @@ export class VerificationService {
     try {
       this.logger.debug(`Verifying ${type} token for email: ${email}`);
 
-      // TODO: Add attempts tracking to prevent brute force attacks
       // Look up user by email first
       const user = await this.prisma.user.findUnique({
         where: { email },
@@ -156,6 +156,19 @@ export class VerificationService {
         });
       }
 
+      // Check if token is locked due to too many failed attempts
+      if (token.lockedAt) {
+        this.logger.warn(`${type} token locked for email: ${email} (too many failed attempts)`);
+        throw new BadRequestException({
+          error: 'TOKEN_LOCKED',
+          message: 'Verification code has been locked due to too many failed attempts',
+          details: {
+            canResend: true,
+            hint: 'Request a new verification code',
+          },
+        });
+      }
+
       // Check if token has expired
       if (new Date() > token.expiresAt) {
         const expiryMessage =
@@ -174,11 +187,43 @@ export class VerificationService {
 
       // Check if code matches
       if (token.token !== code) {
-        this.logger.warn(`Invalid ${type} code for email: ${email}`);
+        // Increment attempts counter
+        const newAttempts = token.attempts + 1;
+        const isLocked = newAttempts >= this.MAX_ATTEMPTS;
+        const remainingAttempts = Math.max(0, this.MAX_ATTEMPTS - newAttempts);
 
+        // Update token with incremented attempts and lock if necessary
+        await this.prisma.verificationToken.update({
+          where: { id: token.id },
+          data: {
+            attempts: newAttempts,
+            lockedAt: isLocked ? new Date() : null,
+          },
+        });
+
+        if (isLocked) {
+          this.logger.warn(
+            `${type} token locked for email: ${email} after ${newAttempts} failed attempts`,
+          );
+          throw new BadRequestException({
+            error: 'TOKEN_LOCKED',
+            message: 'Verification code has been locked due to too many failed attempts',
+            details: {
+              canResend: true,
+              hint: 'Request a new verification code',
+            },
+          });
+        }
+
+        this.logger.warn(
+          `Invalid ${type} code for email: ${email} (attempt ${newAttempts}/${this.MAX_ATTEMPTS})`,
+        );
         throw new BadRequestException({
           error: 'INVALID_CODE',
-          message: 'Verification code is invalid or expired',
+          message: 'Verification code is invalid',
+          details: {
+            remainingAttempts,
+          },
         });
       }
 
@@ -228,11 +273,8 @@ export class VerificationService {
    *
    * @param email - User's email address
    * @returns Number of remaining attempts, or null if no token found
-   * @deprecated Attempts tracking not yet implemented in schema
    */
   async getRemainingAttempts(email: string): Promise<number | null> {
-    // TODO: Implement attempts tracking in VerificationToken schema
-    // For now, return MAX_ATTEMPTS to indicate feature is not active
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: { id: true },
@@ -256,8 +298,12 @@ export class VerificationService {
       return null;
     }
 
-    // Return MAX_ATTEMPTS since we're not tracking attempts yet
-    return this.MAX_ATTEMPTS;
+    // Return 0 if token is locked, otherwise remaining attempts
+    if (token.lockedAt) {
+      return 0;
+    }
+
+    return Math.max(0, this.MAX_ATTEMPTS - token.attempts);
   }
 
   /**
