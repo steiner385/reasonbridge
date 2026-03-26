@@ -95,9 +95,8 @@ export class RankingService {
     // Calculate engagement score (0-1 scale, maxes out at MAX_ENGAGEMENT_RESPONSES)
     const engagementScore = Math.min(1, responseCount / MAX_ENGAGEMENT_RESPONSES);
 
-    // Calculate quality score (placeholder - would be based on response quality metrics)
-    // For now, use trust average as a proxy
-    const qualityScore = trustAverage;
+    // Calculate quality score from response votes and feedback
+    const qualityScore = await this.calculateQualityScore(userId);
 
     // Calculate account age in days
     const accountAgeDays = this.calculateAccountAgeDays(user.createdAt);
@@ -229,6 +228,89 @@ export class RankingService {
   private calculateAccountAgeDays(createdAt: Date): number {
     const ageMs = Date.now() - createdAt.getTime();
     return ageMs / (1000 * 60 * 60 * 24);
+  }
+
+  /**
+   * Calculate quality score from votes and feedback for all user responses.
+   *
+   * The quality score is calculated as a weighted combination of:
+   * - Vote ratio: upvotes / (upvotes + downvotes) - weight 0.6
+   * - Feedback helpfulness: helpful / (helpful + not_helpful) - weight 0.4
+   *
+   * If no data is available for a signal, it defaults to 0.5 (neutral).
+   *
+   * @param userId - The user's unique identifier
+   * @returns Quality score between 0 and 1
+   */
+  private async calculateQualityScore(userId: string): Promise<number> {
+    // Get all response IDs for this user
+    const responses = await this.prisma.response.findMany({
+      where: { authorId: userId },
+      select: { id: true },
+    });
+
+    if (responses.length === 0) {
+      return 0.5; // Neutral default for users with no responses
+    }
+
+    const responseIds = responses.map((r) => r.id);
+
+    // Get vote counts
+    const voteCounts = await this.prisma.vote.groupBy({
+      by: ['voteType'],
+      where: {
+        responseId: { in: responseIds },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    let upvotes = 0;
+    let downvotes = 0;
+    for (const vc of voteCounts) {
+      if (vc.voteType === 'UPVOTE') {
+        upvotes = vc._count.id;
+      } else if (vc.voteType === 'DOWNVOTE') {
+        downvotes = vc._count.id;
+      }
+    }
+
+    // Get feedback helpfulness ratings
+    const feedbackCounts = await this.prisma.feedback.groupBy({
+      by: ['userHelpfulRating'],
+      where: {
+        responseId: { in: responseIds },
+        userHelpfulRating: { not: null },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    let helpful = 0;
+    let notHelpful = 0;
+    for (const fc of feedbackCounts) {
+      if (fc.userHelpfulRating === 'HELPFUL') {
+        helpful = fc._count.id;
+      } else if (fc.userHelpfulRating === 'NOT_HELPFUL') {
+        notHelpful = fc._count.id;
+      }
+    }
+
+    // Calculate vote ratio (0.5 default if no votes)
+    const totalVotes = upvotes + downvotes;
+    const voteRatio = totalVotes > 0 ? upvotes / totalVotes : 0.5;
+
+    // Calculate feedback ratio (0.5 default if no feedback)
+    const totalFeedback = helpful + notHelpful;
+    const feedbackRatio = totalFeedback > 0 ? helpful / totalFeedback : 0.5;
+
+    // Weighted combination: votes (60%), feedback (40%)
+    // This weights community votes more heavily than AI feedback helpfulness
+    const qualityScore = voteRatio * 0.6 + feedbackRatio * 0.4;
+
+    return qualityScore;
   }
 
   /**

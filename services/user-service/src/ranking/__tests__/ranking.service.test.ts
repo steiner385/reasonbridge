@@ -130,7 +130,12 @@ describe('RankingService', () => {
       findMany: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
     };
-    response: { count: ReturnType<typeof vi.fn> };
+    response: {
+      count: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
+    vote: { groupBy: ReturnType<typeof vi.fn> };
+    feedback: { groupBy: ReturnType<typeof vi.fn> };
   };
   let mockRankingCalculator: RankingCalculatorService;
   let mockTrustScoreCalculator: TrustScoreCalculator;
@@ -150,6 +155,13 @@ describe('RankingService', () => {
       },
       response: {
         count: vi.fn(),
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+      vote: {
+        groupBy: vi.fn().mockResolvedValue([]),
+      },
+      feedback: {
+        groupBy: vi.fn().mockResolvedValue([]),
       },
     };
 
@@ -552,6 +564,164 @@ describe('RankingService', () => {
       const result = await service.getUserRank('user-123');
 
       expect(result.badges).toEqual(['first-response', 'verified-human', 'top-contributor']);
+    });
+  });
+
+  describe('quality score calculation', () => {
+    it('should return 0.5 (neutral) when user has no responses', async () => {
+      const mockUser = createMockUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.response.count.mockResolvedValue(0);
+      mockPrisma.response.findMany.mockResolvedValue([]);
+      mockPrisma.userRank.upsert.mockImplementation(async (args) => {
+        return {
+          ...createMockUserRank(),
+          qualityScore: args.create.qualityScore,
+          user: mockUser,
+        };
+      });
+
+      const result = await service.recalculateUserRank('user-123');
+
+      // With no responses, quality score should be 0.5 (neutral)
+      expect(result.qualityScore).toBe(0.5);
+    });
+
+    it('should calculate quality score from upvotes and downvotes', async () => {
+      const mockUser = createMockUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.response.count.mockResolvedValue(10);
+      mockPrisma.response.findMany.mockResolvedValue([{ id: 'response-1' }, { id: 'response-2' }]);
+      // 80 upvotes, 20 downvotes = 80% vote ratio
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'UPVOTE', _count: { id: 80 } },
+        { voteType: 'DOWNVOTE', _count: { id: 20 } },
+      ]);
+      // No feedback = 0.5 default
+      mockPrisma.feedback.groupBy.mockResolvedValue([]);
+      mockPrisma.userRank.upsert.mockImplementation(async (args) => {
+        return {
+          ...createMockUserRank(),
+          qualityScore: args.create.qualityScore,
+          user: mockUser,
+        };
+      });
+
+      const result = await service.recalculateUserRank('user-123');
+
+      // Expected: 0.8 * 0.6 + 0.5 * 0.4 = 0.48 + 0.2 = 0.68
+      expect(result.qualityScore).toBeCloseTo(0.68, 2);
+    });
+
+    it('should calculate quality score from feedback helpfulness ratings', async () => {
+      const mockUser = createMockUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.response.count.mockResolvedValue(10);
+      mockPrisma.response.findMany.mockResolvedValue([{ id: 'response-1' }, { id: 'response-2' }]);
+      // No votes = 0.5 default
+      mockPrisma.vote.groupBy.mockResolvedValue([]);
+      // 90 helpful, 10 not helpful = 90% feedback ratio
+      mockPrisma.feedback.groupBy.mockResolvedValue([
+        { userHelpfulRating: 'HELPFUL', _count: { id: 90 } },
+        { userHelpfulRating: 'NOT_HELPFUL', _count: { id: 10 } },
+      ]);
+      mockPrisma.userRank.upsert.mockImplementation(async (args) => {
+        return {
+          ...createMockUserRank(),
+          qualityScore: args.create.qualityScore,
+          user: mockUser,
+        };
+      });
+
+      const result = await service.recalculateUserRank('user-123');
+
+      // Expected: 0.5 * 0.6 + 0.9 * 0.4 = 0.3 + 0.36 = 0.66
+      expect(result.qualityScore).toBeCloseTo(0.66, 2);
+    });
+
+    it('should combine votes and feedback for quality score', async () => {
+      const mockUser = createMockUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.response.count.mockResolvedValue(10);
+      mockPrisma.response.findMany.mockResolvedValue([{ id: 'response-1' }, { id: 'response-2' }]);
+      // 60 upvotes, 40 downvotes = 60% vote ratio
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'UPVOTE', _count: { id: 60 } },
+        { voteType: 'DOWNVOTE', _count: { id: 40 } },
+      ]);
+      // 70 helpful, 30 not helpful = 70% feedback ratio
+      mockPrisma.feedback.groupBy.mockResolvedValue([
+        { userHelpfulRating: 'HELPFUL', _count: { id: 70 } },
+        { userHelpfulRating: 'NOT_HELPFUL', _count: { id: 30 } },
+      ]);
+      mockPrisma.userRank.upsert.mockImplementation(async (args) => {
+        return {
+          ...createMockUserRank(),
+          qualityScore: args.create.qualityScore,
+          user: mockUser,
+        };
+      });
+
+      const result = await service.recalculateUserRank('user-123');
+
+      // Expected: 0.6 * 0.6 + 0.7 * 0.4 = 0.36 + 0.28 = 0.64
+      expect(result.qualityScore).toBeCloseTo(0.64, 2);
+    });
+
+    it('should handle all negative votes correctly', async () => {
+      const mockUser = createMockUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.response.count.mockResolvedValue(10);
+      mockPrisma.response.findMany.mockResolvedValue([{ id: 'response-1' }]);
+      // 0 upvotes, 100 downvotes = 0% vote ratio
+      mockPrisma.vote.groupBy.mockResolvedValue([{ voteType: 'DOWNVOTE', _count: { id: 100 } }]);
+      // 0 helpful, 100 not helpful = 0% feedback ratio
+      mockPrisma.feedback.groupBy.mockResolvedValue([
+        { userHelpfulRating: 'NOT_HELPFUL', _count: { id: 100 } },
+      ]);
+      mockPrisma.userRank.upsert.mockImplementation(async (args) => {
+        return {
+          ...createMockUserRank(),
+          qualityScore: args.create.qualityScore,
+          user: mockUser,
+        };
+      });
+
+      const result = await service.recalculateUserRank('user-123');
+
+      // Expected: 0 * 0.6 + 0 * 0.4 = 0
+      expect(result.qualityScore).toBe(0);
+    });
+
+    it('should handle perfect quality score correctly', async () => {
+      const mockUser = createMockUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.response.count.mockResolvedValue(10);
+      mockPrisma.response.findMany.mockResolvedValue([{ id: 'response-1' }]);
+      // 100 upvotes, 0 downvotes = 100% vote ratio
+      mockPrisma.vote.groupBy.mockResolvedValue([{ voteType: 'UPVOTE', _count: { id: 100 } }]);
+      // 100 helpful, 0 not helpful = 100% feedback ratio
+      mockPrisma.feedback.groupBy.mockResolvedValue([
+        { userHelpfulRating: 'HELPFUL', _count: { id: 100 } },
+      ]);
+      mockPrisma.userRank.upsert.mockImplementation(async (args) => {
+        return {
+          ...createMockUserRank(),
+          qualityScore: args.create.qualityScore,
+          user: mockUser,
+        };
+      });
+
+      const result = await service.recalculateUserRank('user-123');
+
+      // Expected: 1.0 * 0.6 + 1.0 * 0.4 = 1.0
+      expect(result.qualityScore).toBe(1);
     });
   });
 });
