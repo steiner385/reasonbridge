@@ -112,8 +112,7 @@ test.describe('Follow User and Activity Feed', () => {
       // Find and navigate to a user profile
       const userLink = page.locator('a[href^="/profile/"]').first();
       if (!(await userLink.isVisible({ timeout: 5000 }).catch(() => false))) {
-        // No user links visible - skip gracefully
-        test.skip();
+        test.skip(true, 'No user profile links visible in topic');
         return;
       }
       await userLink.click();
@@ -122,8 +121,7 @@ test.describe('Follow User and Activity Feed', () => {
       // Check for follow button (only shows for other users, not self)
       const followButton = page.getByTestId('follow-button');
       if (!(await followButton.isVisible({ timeout: 5000 }).catch(() => false))) {
-        // User is viewing own profile - follow button won't appear
-        test.skip();
+        test.skip(true, 'Follow button not visible - may be own profile');
         return;
       }
 
