@@ -7,9 +7,11 @@ import { Module } from '@nestjs/common';
 import { TopicsController } from './topics.controller.js';
 import { TopicDraftsController } from './topic-drafts.controller.js';
 import { TopicLinksController, LinkedTopicsController } from './topic-links.controller.js';
+import { TopicAccessController } from './topic-access.controller.js';
 import { TopicsService } from './topics.service.js';
 import { TopicDraftsService } from './topic-drafts.service.js';
 import { TopicLinksService } from './topic-links.service.js';
+import { TopicAccessService } from './topic-access.service.js';
 import { CommonGroundExportService } from '../services/common-ground-export.service.js';
 import { TopicsSearchService } from './topics-search.service.js';
 import { SlugGeneratorService } from './slug-generator.service.js';
@@ -27,17 +29,25 @@ import { PropositionsModule } from '../propositions/propositions.module.js';
     TopicDraftsController,
     TopicLinksController,
     LinkedTopicsController,
+    TopicAccessController,
   ],
   providers: [
     TopicsService,
     TopicDraftsService,
     TopicLinksService,
+    TopicAccessService,
     CommonGroundExportService,
     TopicsSearchService,
     SlugGeneratorService,
     TopicsEditService,
     TopicsAnalyticsService,
   ],
-  exports: [TopicsService, TopicDraftsService, TopicLinksService, TopicsSearchService],
+  exports: [
+    TopicsService,
+    TopicDraftsService,
+    TopicLinksService,
+    TopicsSearchService,
+    TopicAccessService,
+  ],
 })
 export class TopicsModule {}

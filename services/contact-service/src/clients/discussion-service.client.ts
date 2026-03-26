@@ -111,4 +111,40 @@ export class DiscussionServiceClient {
       return false;
     }
   }
+
+  /**
+   * Grant a user access to a topic.
+   * Fire-and-forget pattern: returns true on success, false on error.
+   * Does not throw exceptions - errors are logged but not propagated.
+   *
+   * @param topicId - The ID of the topic to grant access to
+   * @param userId - The ID of the user to grant access to
+   * @param invitationId - The ID of the invitation that triggered this grant
+   * @returns true if access was granted successfully, false on error
+   */
+  async grantTopicAccess(topicId: string, userId: string, invitationId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/topics/${topicId}/access/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'INVITATION',
+          invitationId,
+        }),
+      });
+
+      if (!response.ok) {
+        this.logger.warn(
+          `Failed to grant topic access for topic ${topicId}, user ${userId}: ${response.status}`,
+        );
+        return false;
+      }
+
+      this.logger.log(`Granted access to topic ${topicId} for user ${userId}`);
+      return true;
+    } catch (error) {
+      this.logger.warn(`Error granting topic access for ${topicId}: ${(error as Error).message}`);
+      return false;
+    }
+  }
 }

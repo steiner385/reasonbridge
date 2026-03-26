@@ -1893,6 +1893,36 @@ model TopicInvitation {
   @@map("topic_invitations")
 }
 
+/// Source of topic access grant
+enum AccessSource {
+  INVITATION   // Granted via accepted invitation
+  DIRECT_GRANT // Granted directly by topic creator/moderator
+  CREATOR      // Automatic access for topic creator
+
+  @@map("access_source")
+}
+
+/// Explicit topic access grants for private/unlisted topics
+/// Created when users are invited to private topics and accept
+model TopicAccess {
+  id        String   @id @default(uuid()) @db.Uuid
+  topicId   String   @map("topic_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  grantedBy String?  @map("granted_by") @db.Uuid
+  grantedAt DateTime @default(now()) @map("granted_at")
+
+  // Source of access grant
+  source AccessSource @default(INVITATION)
+
+  // Optional reference to the invitation that granted access
+  invitationId String? @map("invitation_id") @db.Uuid
+
+  @@unique([topicId, userId])
+  @@index([userId])
+  @@index([topicId])
+  @@map("topic_access")
+}
+
 // ============================================================================
 // NOTIFICATION SERVICE ENTITIES
 // ============================================================================
