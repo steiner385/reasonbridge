@@ -17,7 +17,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ReactionsService } from './reactions.service.js';
-import type { CreateReactionDto } from './dto/create-reaction.dto.js';
+import { CreateReactionDto } from './dto/create-reaction.dto.js';
 import type { ReactionDto, ReactionListDto } from './dto/reaction.dto.js';
 import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 
