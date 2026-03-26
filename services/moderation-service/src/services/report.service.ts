@@ -393,6 +393,7 @@ export class ReportService {
       HATE_SPEECH: 0,
       VIOLENCE: 0,
       COPYRIGHT: 0,
+      BOT_SUSPICION: 0,
       OTHER: 0,
     };
 

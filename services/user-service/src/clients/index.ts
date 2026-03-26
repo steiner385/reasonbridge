@@ -5,3 +5,6 @@
 
 export { SmsClient } from './sms.client.js';
 export type { SmsDeliveryResult } from './sms.client.js';
+
+export { ModerationServiceClient } from './moderation-service.client.js';
+export type { BotFlagRequest, BotFlagResult } from './moderation-service.client.js';

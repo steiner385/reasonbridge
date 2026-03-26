@@ -191,6 +191,7 @@ export type ReportCategory =
   | 'HATE_SPEECH'
   | 'VIOLENCE'
   | 'COPYRIGHT'
+  | 'BOT_SUSPICION'
   | 'OTHER';
 
 /**

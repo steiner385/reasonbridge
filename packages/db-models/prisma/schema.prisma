@@ -1343,6 +1343,7 @@ enum ReportCategory {
   HATE_SPEECH
   VIOLENCE
   COPYRIGHT
+  BOT_SUSPICION  // Automated detection of bot-like behavior
   OTHER
 
   @@map("report_category")

@@ -12,6 +12,7 @@ import { BotDetectorService } from '../services/bot-detector.service.js';
 import { FeedbackPreferencesService } from '../services/feedback-preferences.service.js';
 import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interceptor.js';
 import { ContributionsService } from '../contributions/contributions.service.js';
+import { ModerationServiceClient } from '../clients/moderation-service.client.js';
 
 @Module({
   imports: [forwardRef(() => AuthModule), PrismaModule],
@@ -22,6 +23,7 @@ import { ContributionsService } from '../contributions/contributions.service.js'
     FeedbackPreferencesService,
     OptionalCacheInterceptor,
     ContributionsService,
+    ModerationServiceClient,
   ],
   exports: [UsersService, BotDetectorService, FeedbackPreferencesService],
 })
