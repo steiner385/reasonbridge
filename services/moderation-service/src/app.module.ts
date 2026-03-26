@@ -13,6 +13,7 @@ import { ModerationController } from './controllers/moderation.controller.js';
 import { ChildContentController } from './controllers/child-content.controller.js';
 import { MetricsModule } from './observability/index.js';
 import { JobsModule } from './jobs/jobs.module.js';
+import { InternalModule } from './internal/internal.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { JobsModule } from './jobs/jobs.module.js';
     AuthModule,
     ModerationModule,
     JobsModule,
+    InternalModule,
   ],
   controllers: [ModerationController, ChildContentController],
   providers: [],

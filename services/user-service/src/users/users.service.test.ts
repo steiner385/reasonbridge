@@ -8,6 +8,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
+import { ModerationServiceClient } from '../clients/moderation-service.client.js';
 import { AvatarUrls } from '../services/s3.service.js';
 
 describe('UsersService', () => {
@@ -22,9 +23,17 @@ describe('UsersService', () => {
 
   const mockBotDetectorService = {} as unknown as BotDetectorService;
 
+  const mockModerationServiceClient = {
+    flagUserAsBot: vi.fn().mockResolvedValue({ success: true, reportId: 'report-123' }),
+  } as unknown as ModerationServiceClient;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new UsersService(mockPrismaService, mockBotDetectorService);
+    service = new UsersService(
+      mockPrismaService,
+      mockBotDetectorService,
+      mockModerationServiceClient,
+    );
   });
 
   describe('updateAvatarUrls', () => {

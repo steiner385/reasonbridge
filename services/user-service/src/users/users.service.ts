@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BotDetectorService } from '../services/bot-detector.service.js';
+import { ModerationServiceClient } from '../clients/moderation-service.client.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
 import {
   ProfileVisibility,
@@ -47,6 +48,7 @@ export class UsersService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(BotDetectorService) private readonly botDetector: BotDetectorService,
+    @Inject(ModerationServiceClient) private readonly moderationClient: ModerationServiceClient,
   ) {}
 
   /**
@@ -185,9 +187,28 @@ export class UsersService {
   async checkAndHandleBotPatterns(userId: string) {
     const detectionResult = await this.botDetector.detectNewAccountBotPatterns(userId);
 
-    // If suspicious patterns detected, mark for manual review
-    // User is notified that additional verification is required (part of verification flow)
-    // TODO: integrate with moderation service for review queue when implemented
+    // If suspicious patterns detected, flag for moderator review
+    // Uses fire-and-forget pattern - failures don't block the detection flow
+    if (detectionResult.isSuspicious) {
+      this.logger.log(
+        `Bot patterns detected for user ${userId}, risk score: ${detectionResult.riskScore}`,
+      );
+
+      // Flag user for moderation review (fire-and-forget)
+      this.moderationClient
+        .flagUserAsBot({
+          userId,
+          riskScore: detectionResult.riskScore,
+          patterns: detectionResult.patterns,
+          reasoning: detectionResult.reasoning,
+        })
+        .catch((error) => {
+          // Log but don't throw - moderation is non-blocking
+          this.logger.warn(
+            `Failed to flag user ${userId} for moderation: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        });
+    }
 
     return detectionResult;
   }
