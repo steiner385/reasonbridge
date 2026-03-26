@@ -6,6 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationServiceClient } from '../clients/notification-service.client.js';
 import type { ReviewPriority, ChildReviewStatus } from '@prisma/client';
 
 /**
@@ -132,7 +133,10 @@ export interface SlaComplianceResult {
 export class SlaMonitorJob {
   private readonly logger = new Logger(SlaMonitorJob.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationClient: NotificationServiceClient,
+  ) {}
 
   /**
    * Main cron handler - runs every 5 minutes
@@ -321,9 +325,10 @@ export class SlaMonitorJob {
    * @returns Number of notifications sent
    *
    * @remarks
-   * This method logs warnings for breached items and prepares notification data.
-   * In production, this would integrate with the notification-service to send
-   * real-time alerts via email, Slack, or push notifications.
+   * This method:
+   * 1. Logs warnings for breached items
+   * 2. Sends notifications to notification-service for real-time moderator alerts
+   * 3. Broadcasts via WebSocket to connected moderator dashboards
    */
   async notifyAdminsOfBreaches(breachedItems: StaleQueueItem[]): Promise<number> {
     if (breachedItems.length === 0) {
@@ -358,13 +363,15 @@ export class SlaMonitorJob {
       })),
     });
 
-    // TODO: Send to notification-service or pub/sub for real-time admin alerts
-    // Future integrations:
-    // - Push notification to on-call moderators
-    // - Email escalation to moderation lead
-    // - Slack/Teams channel notification
-    // - Dashboard real-time alert
-    // - PagerDuty integration for URGENT breaches
+    // Send to notification-service for real-time moderator alerts
+    // Fire-and-forget pattern - failures are logged but don't block the SLA check
+    const result = await this.notificationClient.sendSlaBreachNotification(notifications);
+
+    if (result) {
+      this.logger.log(
+        `SLA breach notifications sent: ${result.notificationsSent} in-app, WebSocket broadcast: ${result.broadcastSent}`,
+      );
+    }
 
     return notifications.length;
   }

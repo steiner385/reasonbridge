@@ -27,6 +27,17 @@ const createMockPrismaService = () => ({
 });
 
 /**
+ * Create mock NotificationServiceClient
+ */
+const createMockNotificationClient = () => ({
+  sendSlaBreachNotification: vi.fn().mockResolvedValue({
+    success: true,
+    notificationsSent: 1,
+    broadcastSent: true,
+  }),
+});
+
+/**
  * Helper to create a mock queue item at a specific age
  */
 const createMockItem = (
@@ -53,12 +64,14 @@ const createMockItem = (
 describe('SlaMonitorJob', () => {
   let job: SlaMonitorJob;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
+  let mockNotificationClient: ReturnType<typeof createMockNotificationClient>;
   let loggerSpy: { log: MockInstance; warn: MockInstance; error: MockInstance };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
-    job = new SlaMonitorJob(mockPrisma as any);
+    mockNotificationClient = createMockNotificationClient();
+    job = new SlaMonitorJob(mockPrisma as any, mockNotificationClient as any);
 
     // Spy on the job's logger
     loggerSpy = {
@@ -429,9 +442,10 @@ describe('SlaMonitorJob', () => {
 
       expect(result).toBe(0);
       expect(loggerSpy.error).not.toHaveBeenCalled();
+      expect(mockNotificationClient.sendSlaBreachNotification).not.toHaveBeenCalled();
     });
 
-    it('should log error for each breached item', async () => {
+    it('should log error for each breached item and send notification', async () => {
       const breachedItems: StaleQueueItem[] = [
         {
           id: 'breach-1',
@@ -478,6 +492,21 @@ describe('SlaMonitorJob', () => {
         expect.stringContaining('SLA BREACH SUMMARY'),
         expect.any(Object),
       );
+
+      // Should call notification service
+      expect(mockNotificationClient.sendSlaBreachNotification).toHaveBeenCalledTimes(1);
+      expect(mockNotificationClient.sendSlaBreachNotification).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            queueId: 'breach-1',
+            priority: 'URGENT',
+          }),
+          expect.objectContaining({
+            queueId: 'breach-2',
+            priority: 'HIGH',
+          }),
+        ]),
+      );
     });
 
     it('should include correct breach percentage in notification', async () => {
@@ -501,6 +530,33 @@ describe('SlaMonitorJob', () => {
       await job.notifyAdminsOfBreaches(breachedItems);
 
       expect(loggerSpy.error).toHaveBeenCalledWith(expect.stringContaining('150%'));
+    });
+
+    it('should handle notification service failure gracefully', async () => {
+      mockNotificationClient.sendSlaBreachNotification.mockResolvedValue(null);
+
+      const breachedItems: StaleQueueItem[] = [
+        {
+          id: 'breach-1',
+          responseId: 'response-1',
+          topicId: 'topic-1',
+          authorId: 'author-1',
+          priority: 'URGENT',
+          status: 'PENDING',
+          createdAt: new Date(),
+          ageMinutes: 90,
+          slaMinutes: 60,
+          slaPercent: 150,
+          isBreached: true,
+          shouldEscalate: true,
+        },
+      ];
+
+      // Should not throw, just return breach count
+      const result = await job.notifyAdminsOfBreaches(breachedItems);
+
+      expect(result).toBe(1);
+      expect(mockNotificationClient.sendSlaBreachNotification).toHaveBeenCalled();
     });
   });
 

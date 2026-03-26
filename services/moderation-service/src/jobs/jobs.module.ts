@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { SlaMonitorJob } from './sla-monitor.job.js';
+import { NotificationServiceClient } from '../clients/notification-service.client.js';
 
 /**
  * Module for scheduled jobs in the moderation service.
@@ -17,7 +18,7 @@ import { SlaMonitorJob } from './sla-monitor.job.js';
  */
 @Module({
   imports: [ScheduleModule.forRoot(), PrismaModule],
-  providers: [SlaMonitorJob],
+  providers: [SlaMonitorJob, NotificationServiceClient],
   exports: [SlaMonitorJob],
 })
 export class JobsModule {}

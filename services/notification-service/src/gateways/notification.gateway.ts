@@ -516,4 +516,40 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       `Broadcasted safety.report.created event (priority: ${event.payload.priority}) for report ${event.payload.reportId} to room ${room}`,
     );
   }
+
+  /**
+   * Broadcast SLA breach notification to subscribed moderators.
+   * Called by InternalSlaBreachController when moderation-service reports breaches.
+   *
+   * @remarks
+   * SLA breaches indicate items in the moderation queue that have exceeded
+   * their target review time. This real-time notification ensures moderators
+   * are immediately alerted to address the backlog.
+   */
+  emitSlaBreachNotification(data: {
+    breaches: Array<{
+      queueId: string;
+      priority: string;
+      ageMinutes: number;
+      slaMinutes: number;
+      breachPercent: number;
+      responseId: string;
+      topicId: string;
+    }>;
+    checkedAt: string;
+    timestamp: string;
+  }): void {
+    const room = 'moderation:actions';
+
+    this.server.to(room).emit('moderation:sla-breach', {
+      breachCount: data.breaches.length,
+      breaches: data.breaches,
+      checkedAt: data.checkedAt,
+      timestamp: data.timestamp,
+    });
+
+    this.logger.log(
+      `Broadcasted moderation:sla-breach event with ${data.breaches.length} breaches to room ${room}`,
+    );
+  }
 }

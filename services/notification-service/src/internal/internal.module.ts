@@ -5,7 +5,10 @@
 
 import { Module } from '@nestjs/common';
 import { ServicesModule } from '../services/services.module.js';
+import { PrismaModule } from '../prisma/prisma.module.js';
+import { GatewaysModule } from '../gateways/gateways.module.js';
 import { InternalSmsController } from './internal-sms.controller.js';
+import { InternalSlaBreachController } from './internal-sla-breach.controller.js';
 
 /**
  * Internal Module
@@ -15,7 +18,7 @@ import { InternalSmsController } from './internal-sms.controller.js';
  * for internal microservice calls only.
  */
 @Module({
-  imports: [ServicesModule],
-  controllers: [InternalSmsController],
+  imports: [ServicesModule, PrismaModule, GatewaysModule],
+  controllers: [InternalSmsController, InternalSlaBreachController],
 })
 export class InternalModule {}
