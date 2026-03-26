@@ -95,7 +95,7 @@ describe('InternalSlaBreachController', () => {
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         where: {
           role: { in: ['MODERATOR', 'ADMIN'] },
-          isActive: true,
+          accountStatus: 'ACTIVE',
         },
         select: {
           id: true,
