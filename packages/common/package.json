@@ -25,6 +25,10 @@
     "./validation": {
       "types": "./dist/validation/index.d.ts",
       "import": "./dist/validation/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js"
     }
   },
   "files": [
@@ -42,15 +46,30 @@
     "@reason-bridge/event-schemas": "workspace:*"
   },
   "peerDependencies": {
-    "@nestjs/common": "^10.0.0 || ^11.0.0"
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/config": "^3.0.0 || ^4.0.0",
+    "@nestjs/jwt": "^10.0.0 || ^11.0.0",
+    "jwks-rsa": "^3.0.0 || ^4.0.0"
   },
   "peerDependenciesMeta": {
     "@nestjs/common": {
+      "optional": true
+    },
+    "@nestjs/config": {
+      "optional": true
+    },
+    "@nestjs/jwt": {
+      "optional": true
+    },
+    "jwks-rsa": {
       "optional": true
     }
   },
   "devDependencies": {
     "@nestjs/common": "^11.1.17",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/jwt": "^11.0.2",
+    "jwks-rsa": "^4.0.1",
     "typescript": "5.9.3"
   },
   "engines": {
