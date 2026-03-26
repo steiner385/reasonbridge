@@ -227,12 +227,8 @@ export class ExpertiseService {
     userId: string,
     tagId: string,
   ): Promise<{ avgQualityScore: number; firstResponseDate: Date | null }> {
-    // Note: Response model doesn't have a qualityScore field directly.
-    // For now, we use a placeholder approach. In a real implementation,
-    // this would come from feedback scores, endorsements, or AI analysis.
-    // For this implementation, we'll query and calculate based on available data.
-
-    const firstResponse = await this.prisma.response.findFirst({
+    // Get all response IDs for this user in topics with the specified tag
+    const responses = await this.prisma.response.findMany({
       where: {
         authorId: userId,
         topic: {
@@ -242,18 +238,102 @@ export class ExpertiseService {
         },
       },
       orderBy: { createdAt: 'asc' },
-      select: { createdAt: true },
+      select: { id: true, createdAt: true },
     });
 
-    // Calculate average quality score from feedback if available
-    // For now, default to 0.5 (neutral) as a placeholder
-    // TODO: Implement actual quality score calculation from response feedback
-    const avgQualityScore = 0.5;
+    if (responses.length === 0) {
+      return {
+        avgQualityScore: 0.5, // Neutral default for users with no responses
+        firstResponseDate: null,
+      };
+    }
+
+    const responseIds = responses.map((r) => r.id);
+    // Safe to use ! since we already checked responses.length > 0 above
+    const firstResponseDate = responses[0]!.createdAt;
+
+    // Calculate quality score from votes and feedback
+    const avgQualityScore = await this.calculateQualityScore(responseIds);
 
     return {
       avgQualityScore,
-      firstResponseDate: firstResponse?.createdAt ?? null,
+      firstResponseDate,
     };
+  }
+
+  /**
+   * Calculate quality score from votes and feedback for a set of responses.
+   *
+   * The quality score is calculated as a weighted combination of:
+   * - Vote ratio: upvotes / (upvotes + downvotes) - weight 0.6
+   * - Feedback helpfulness: helpful / (helpful + not_helpful) - weight 0.4
+   *
+   * If no data is available for a signal, it defaults to 0.5 (neutral).
+   *
+   * @param responseIds - IDs of responses to calculate quality for
+   * @returns Quality score between 0 and 1
+   */
+  private async calculateQualityScore(responseIds: string[]): Promise<number> {
+    if (responseIds.length === 0) {
+      return 0.5;
+    }
+
+    // Get vote counts
+    const voteCounts = await this.prisma.vote.groupBy({
+      by: ['voteType'],
+      where: {
+        responseId: { in: responseIds },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    let upvotes = 0;
+    let downvotes = 0;
+    for (const vc of voteCounts) {
+      if (vc.voteType === 'UPVOTE') {
+        upvotes = vc._count.id;
+      } else if (vc.voteType === 'DOWNVOTE') {
+        downvotes = vc._count.id;
+      }
+    }
+
+    // Get feedback helpfulness ratings
+    const feedbackCounts = await this.prisma.feedback.groupBy({
+      by: ['userHelpfulRating'],
+      where: {
+        responseId: { in: responseIds },
+        userHelpfulRating: { not: null },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    let helpful = 0;
+    let notHelpful = 0;
+    for (const fc of feedbackCounts) {
+      if (fc.userHelpfulRating === 'HELPFUL') {
+        helpful = fc._count.id;
+      } else if (fc.userHelpfulRating === 'NOT_HELPFUL') {
+        notHelpful = fc._count.id;
+      }
+    }
+
+    // Calculate vote ratio (0.5 default if no votes)
+    const totalVotes = upvotes + downvotes;
+    const voteRatio = totalVotes > 0 ? upvotes / totalVotes : 0.5;
+
+    // Calculate feedback ratio (0.5 default if no feedback)
+    const totalFeedback = helpful + notHelpful;
+    const feedbackRatio = totalFeedback > 0 ? helpful / totalFeedback : 0.5;
+
+    // Weighted combination: votes (60%), feedback (40%)
+    // This weights community votes more heavily than AI feedback helpfulness
+    const qualityScore = voteRatio * 0.6 + feedbackRatio * 0.4;
+
+    return qualityScore;
   }
 
   /**
