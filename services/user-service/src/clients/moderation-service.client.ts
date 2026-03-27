@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { getServiceUrl } from '@reason-bridge/common';
 
 /**
@@ -59,13 +60,31 @@ export class ModerationServiceClient {
   private readonly logger = new Logger(ModerationServiceClient.name);
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
+  private readonly internalApiKey: string | undefined;
 
-  constructor() {
+  constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['MODERATION_SERVICE_URL'] || getServiceUrl('MODERATION_SERVICE');
     this.timeoutMs = parseInt(
       process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
       10,
     );
+    this.internalApiKey =
+      this.configService?.get<string>('INTERNAL_API_KEY') ?? process.env['INTERNAL_API_KEY'];
+  }
+
+  /**
+   * Build headers for internal requests
+   */
+  private buildHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.internalApiKey) {
+      headers['Authorization'] = `ApiKey ${this.internalApiKey}`;
+    }
+
+    return headers;
   }
 
   /**
@@ -97,7 +116,7 @@ export class ModerationServiceClient {
     try {
       const response = await this.fetchWithTimeout(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.buildHeaders(),
         body: JSON.stringify({
           ...request,
           detectedAt: new Date().toISOString(),

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Logger, UseGuards } from '@nestjs/common';
+import { InternalApiKeyGuard } from '@reason-bridge/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 
@@ -46,10 +47,11 @@ export interface SlaBreachNotificationResponse {
  * 2. Broadcasts via WebSocket to the moderation:actions room
  *
  * @remarks
- * This is an internal endpoint without JWT protection, intended for
+ * This is an internal endpoint protected by API key, intended for
  * service-to-service communication only.
  */
 @Controller('internal/sla-breach')
+@UseGuards(InternalApiKeyGuard)
 export class InternalSlaBreachController {
   private readonly logger = new Logger(InternalSlaBreachController.name);
 
