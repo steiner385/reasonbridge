@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { getServiceUrl } from '@reason-bridge/common';
 
 /**
@@ -38,9 +39,27 @@ export interface SmsDeliveryResult {
 export class SmsClient {
   private readonly logger = new Logger(SmsClient.name);
   private readonly baseUrl: string;
+  private readonly internalApiKey: string | undefined;
 
-  constructor() {
+  constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
+    this.internalApiKey =
+      this.configService?.get<string>('INTERNAL_API_KEY') ?? process.env['INTERNAL_API_KEY'];
+  }
+
+  /**
+   * Build headers for internal requests
+   */
+  private buildHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.internalApiKey) {
+      headers['Authorization'] = `ApiKey ${this.internalApiKey}`;
+    }
+
+    return headers;
   }
 
   /**
@@ -59,7 +78,7 @@ export class SmsClient {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.buildHeaders(),
         body: JSON.stringify({ phoneNumber, code }),
       });
 
