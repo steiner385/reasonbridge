@@ -54,8 +54,11 @@ export class JwtVerificationService {
       !nodeEnv;
 
     if (this.useMockAuth) {
-      this.jwtSecret =
-        this.configService.get<string>('JWT_SECRET') ?? 'mock-jwt-secret-for-testing';
+      const secret = this.configService.get<string>('JWT_SECRET');
+      if (!secret && nodeEnv !== 'test') {
+        throw new Error('JWT_SECRET environment variable is required');
+      }
+      this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
       this.logger.debug('JwtVerificationService initialized in mock/development mode');
     } else {
       this.userPoolId = this.configService.get<string>('COGNITO_USER_POOL_ID');

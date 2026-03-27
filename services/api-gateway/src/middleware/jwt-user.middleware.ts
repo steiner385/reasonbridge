@@ -26,6 +26,16 @@ import jwt from 'jsonwebtoken';
 @Injectable()
 export class JwtUserMiddleware implements NestMiddleware {
   private readonly logger = new Logger(JwtUserMiddleware.name);
+  private readonly jwtSecret: string;
+
+  constructor() {
+    const secret = process.env['JWT_SECRET'];
+    const nodeEnv = process.env['NODE_ENV'];
+    if (!secret && nodeEnv !== 'test') {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
+  }
 
   use(req: FastifyRequest, res: FastifyReply, next: () => void) {
     const authHeader = req.headers.authorization;
@@ -37,10 +47,9 @@ export class JwtUserMiddleware implements NestMiddleware {
 
     try {
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-      const jwtSecret = process.env['JWT_SECRET'] || 'your-secret-key';
 
       // Decode and verify JWT
-      const decoded = jwt.verify(token, jwtSecret) as {
+      const decoded = jwt.verify(token, this.jwtSecret) as {
         sub?: string;
         userId?: string;
         id?: string;
