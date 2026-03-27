@@ -52,14 +52,22 @@ export interface BotFlagResult {
  * });
  * ```
  */
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 @Injectable()
 export class ModerationServiceClient {
   private readonly logger = new Logger(ModerationServiceClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
   private readonly internalApiKey: string | undefined;
 
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['MODERATION_SERVICE_URL'] || getServiceUrl('MODERATION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
     this.internalApiKey =
       this.configService?.get<string>('INTERNAL_API_KEY') ?? process.env['INTERNAL_API_KEY'];
   }
@@ -80,6 +88,20 @@ export class ModerationServiceClient {
   }
 
   /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
    * Flag a user as suspected bot for moderator review.
    *
    * Creates a report with category BOT_SUSPICION in the moderation queue.
@@ -92,7 +114,7 @@ export class ModerationServiceClient {
     const endpoint = `${this.baseUrl}/internal/bot-flagged`;
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await this.fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: this.buildHeaders(),
         body: JSON.stringify({
@@ -118,9 +140,13 @@ export class ModerationServiceClient {
 
       return result;
     } catch (error) {
-      this.logger.warn(
-        `Error flagging user ${request.userId} as bot: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn(`Request to flag user ${request.userId} as bot timed out`);
+      } else {
+        this.logger.warn(
+          `Error flagging user ${request.userId} as bot: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
       return null;
     }
   }

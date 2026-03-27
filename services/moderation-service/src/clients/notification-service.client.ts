@@ -56,14 +56,22 @@ export interface SlaBreachNotificationResponse {
  * ]);
  * ```
  */
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 @Injectable()
 export class NotificationServiceClient {
   private readonly logger = new Logger(NotificationServiceClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
   private readonly internalApiKey: string | undefined;
 
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
     this.internalApiKey =
       this.configService?.get<string>('INTERNAL_API_KEY') ?? process.env['INTERNAL_API_KEY'];
   }
@@ -81,6 +89,20 @@ export class NotificationServiceClient {
     }
 
     return headers;
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -102,7 +124,7 @@ export class NotificationServiceClient {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/internal/sla-breach`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/internal/sla-breach`, {
         method: 'POST',
         headers: this.buildHeaders(),
         body: JSON.stringify({
@@ -122,7 +144,11 @@ export class NotificationServiceClient {
       );
       return result;
     } catch (error) {
-      this.logger.warn(`Error sending SLA breach notification: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn('Request to send SLA breach notification timed out');
+      } else {
+        this.logger.warn(`Error sending SLA breach notification: ${(error as Error).message}`);
+      }
       return null;
     }
   }

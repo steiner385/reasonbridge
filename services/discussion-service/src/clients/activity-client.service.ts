@@ -19,6 +19,9 @@ interface CreateActivityEventDto {
   targetSlug?: string;
 }
 
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 /**
  * HTTP client for calling activity-service
  * Fire-and-forget pattern - failures are logged but don't block main operations
@@ -27,9 +30,28 @@ interface CreateActivityEventDto {
 export class ActivityClientService {
   private readonly logger = new Logger(ActivityClientService.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env['ACTIVITY_SERVICE_URL'] || getServiceUrl('ACTIVITY_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['ACTIVITY_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -38,7 +60,7 @@ export class ActivityClientService {
    */
   async createEvent(dto: CreateActivityEventDto): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/events`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dto),
@@ -55,9 +77,13 @@ export class ActivityClientService {
       }
     } catch (error) {
       // Fire-and-forget - log but don't throw
-      this.logger.warn(
-        `Error creating activity event: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn('Request to create activity event timed out');
+      } else {
+        this.logger.warn(
+          `Error creating activity event: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
     }
   }
 }

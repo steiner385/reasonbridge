@@ -91,13 +91,35 @@ export interface QueueChildContentData {
  * });
  * ```
  */
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 @Injectable()
 export class ModerationClientService {
   private readonly logger = new Logger(ModerationClientService.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env['MODERATION_SERVICE_URL'] || getServiceUrl('MODERATION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -117,11 +139,14 @@ export class ModerationClientService {
    */
   async queueChildContent(data: QueueChildContentData): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/moderation/child-content/queue`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      const response = await this.fetchWithTimeout(
+        `${this.baseUrl}/moderation/child-content/queue`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
 
       if (!response.ok) {
         this.logger.warn(
@@ -135,10 +160,17 @@ export class ModerationClientService {
       }
     } catch (error) {
       // Fire-and-forget - log but don't throw
-      this.logger.warn(
-        `Error queuing child content for moderation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { responseId: data.responseId, topicId: data.topicId },
-      );
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn('Request to queue child content timed out', {
+          responseId: data.responseId,
+          topicId: data.topicId,
+        });
+      } else {
+        this.logger.warn(
+          `Error queuing child content for moderation: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          { responseId: data.responseId, topicId: data.topicId },
+        );
+      }
     }
   }
 
@@ -159,11 +191,14 @@ export class ModerationClientService {
    */
   async screenContentForChildren(content: string): Promise<ChildScreeningResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/moderation/child-content/screen`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
-      });
+      const response = await this.fetchWithTimeout(
+        `${this.baseUrl}/moderation/child-content/screen`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content }),
+        },
+      );
 
       if (!response.ok) {
         this.logger.warn(
@@ -177,9 +212,13 @@ export class ModerationClientService {
       return result;
     } catch (error) {
       // Log and return safe default on failure
-      this.logger.warn(
-        `Error screening content for children: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn('Request to screen content for children timed out');
+      } else {
+        this.logger.warn(
+          `Error screening content for children: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
       return { childSafetyRisk: 'none' };
     }
   }

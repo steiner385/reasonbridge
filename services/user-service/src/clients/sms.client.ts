@@ -16,6 +16,9 @@ export interface SmsDeliveryResult {
   error?: string;
 }
 
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 /**
  * SMS Client for notification-service
  *
@@ -39,10 +42,15 @@ export interface SmsDeliveryResult {
 export class SmsClient {
   private readonly logger = new Logger(SmsClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
   private readonly internalApiKey: string | undefined;
 
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
     this.internalApiKey =
       this.configService?.get<string>('INTERNAL_API_KEY') ?? process.env['INTERNAL_API_KEY'];
   }
@@ -63,6 +71,20 @@ export class SmsClient {
   }
 
   /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
    * Send a verification code via SMS
    *
    * Calls notification-service to deliver the SMS via AWS SNS.
@@ -76,7 +98,7 @@ export class SmsClient {
     const endpoint = `${this.baseUrl}/internal/sms/verification-code`;
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await this.fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: this.buildHeaders(),
         body: JSON.stringify({ phoneNumber, code }),
@@ -105,6 +127,13 @@ export class SmsClient {
 
       return result;
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.error(`SMS delivery timed out for ${this.maskPhone(phoneNumber)}`);
+        return {
+          success: false,
+          error: 'Request timed out',
+        };
+      }
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error sending SMS to ${this.maskPhone(phoneNumber)}: ${errorMessage}`);
       return {

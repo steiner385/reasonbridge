@@ -239,11 +239,14 @@ export class RankingService {
    *
    * If no data is available for a signal, it defaults to 0.5 (neutral).
    *
+   * Uses parallel queries for votes and feedback to reduce latency by ~33%
+   * (2 sequential queries instead of 3).
+   *
    * @param userId - The user's unique identifier
    * @returns Quality score between 0 and 1
    */
   private async calculateQualityScore(userId: string): Promise<number> {
-    // Get all response IDs for this user
+    // Get all response IDs for this user (required for subsequent queries)
     const responses = await this.prisma.response.findMany({
       where: { authorId: userId },
       select: { id: true },
@@ -255,16 +258,28 @@ export class RankingService {
 
     const responseIds = responses.map((r) => r.id);
 
-    // Get vote counts
-    const voteCounts = await this.prisma.vote.groupBy({
-      by: ['voteType'],
-      where: {
-        responseId: { in: responseIds },
-      },
-      _count: {
-        id: true,
-      },
-    });
+    // Run vote and feedback queries in parallel (both depend on responseIds)
+    const [voteCounts, feedbackCounts] = await Promise.all([
+      this.prisma.vote.groupBy({
+        by: ['voteType'],
+        where: {
+          responseId: { in: responseIds },
+        },
+        _count: {
+          id: true,
+        },
+      }),
+      this.prisma.feedback.groupBy({
+        by: ['userHelpfulRating'],
+        where: {
+          responseId: { in: responseIds },
+          userHelpfulRating: { not: null },
+        },
+        _count: {
+          id: true,
+        },
+      }),
+    ]);
 
     let upvotes = 0;
     let downvotes = 0;
@@ -275,18 +290,6 @@ export class RankingService {
         downvotes = vc._count.id;
       }
     }
-
-    // Get feedback helpfulness ratings
-    const feedbackCounts = await this.prisma.feedback.groupBy({
-      by: ['userHelpfulRating'],
-      where: {
-        responseId: { in: responseIds },
-        userHelpfulRating: { not: null },
-      },
-      _count: {
-        id: true,
-      },
-    });
 
     let helpful = 0;
     let notHelpful = 0;

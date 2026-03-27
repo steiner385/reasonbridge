@@ -42,13 +42,35 @@ export interface TopicInfo {
  * }
  * ```
  */
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 @Injectable()
 export class DiscussionServiceClient {
   private readonly logger = new Logger(DiscussionServiceClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env['DISCUSSION_SERVICE_URL'] || getServiceUrl('DISCUSSION_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['DISCUSSION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -60,7 +82,7 @@ export class DiscussionServiceClient {
    */
   async getTopicById(topicId: string): Promise<TopicInfo | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/topics/${topicId}`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/topics/${topicId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -77,7 +99,11 @@ export class DiscussionServiceClient {
         status: data.status,
       };
     } catch (error) {
-      this.logger.warn(`Error fetching topic ${topicId}: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn(`Request to get topic ${topicId} timed out`);
+      } else {
+        this.logger.warn(`Error fetching topic ${topicId}: ${(error as Error).message}`);
+      }
       return null;
     }
   }
@@ -92,10 +118,13 @@ export class DiscussionServiceClient {
    */
   async canUserAccessTopic(topicId: string, userId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/topics/${topicId}/access/${userId}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await this.fetchWithTimeout(
+        `${this.baseUrl}/topics/${topicId}/access/${userId}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
 
       if (!response.ok) {
         this.logger.warn(
@@ -107,7 +136,11 @@ export class DiscussionServiceClient {
       const data = await response.json();
       return data.canAccess === true;
     } catch (error) {
-      this.logger.warn(`Error checking topic access for ${topicId}: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn(`Request to check topic access for ${topicId} timed out`);
+      } else {
+        this.logger.warn(`Error checking topic access for ${topicId}: ${(error as Error).message}`);
+      }
       return false;
     }
   }
@@ -124,14 +157,17 @@ export class DiscussionServiceClient {
    */
   async grantTopicAccess(topicId: string, userId: string, invitationId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/topics/${topicId}/access/${userId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source: 'INVITATION',
-          invitationId,
-        }),
-      });
+      const response = await this.fetchWithTimeout(
+        `${this.baseUrl}/topics/${topicId}/access/${userId}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'INVITATION',
+            invitationId,
+          }),
+        },
+      );
 
       if (!response.ok) {
         this.logger.warn(
@@ -143,7 +179,11 @@ export class DiscussionServiceClient {
       this.logger.log(`Granted access to topic ${topicId} for user ${userId}`);
       return true;
     } catch (error) {
-      this.logger.warn(`Error granting topic access for ${topicId}: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn(`Request to grant topic access for ${topicId} timed out`);
+      } else {
+        this.logger.warn(`Error granting topic access for ${topicId}: ${(error as Error).message}`);
+      }
       return false;
     }
   }

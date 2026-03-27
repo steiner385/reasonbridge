@@ -41,13 +41,35 @@ export interface UserProfile {
  * const user = await userServiceClient.getUserById('user-123');
  * ```
  */
+/** Default timeout for HTTP requests in milliseconds */
+const DEFAULT_TIMEOUT_MS = 30000;
+
 @Injectable()
 export class UserServiceClient {
   private readonly logger = new Logger(UserServiceClient.name);
   private readonly baseUrl: string;
+  private readonly timeoutMs: number;
 
   constructor() {
     this.baseUrl = process.env['USER_SERVICE_URL'] || getServiceUrl('USER_SERVICE');
+    this.timeoutMs = parseInt(
+      process.env['USER_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      10,
+    );
+  }
+
+  /**
+   * Fetch with timeout using AbortController
+   */
+  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -59,7 +81,7 @@ export class UserServiceClient {
    */
   async findDiscoverableUsersByEmailHashes(emailHashes: string[]): Promise<DiscoverableUser[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/users/discoverable`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/users/discoverable`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailHashes }),
@@ -73,7 +95,11 @@ export class UserServiceClient {
       const data = await response.json();
       return data.users || [];
     } catch (error) {
-      this.logger.warn(`Error calling user-service: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn('Request to user-service timed out');
+      } else {
+        this.logger.warn(`Error calling user-service: ${(error as Error).message}`);
+      }
       return [];
     }
   }
@@ -87,7 +113,7 @@ export class UserServiceClient {
    */
   async getUserById(userId: string): Promise<UserProfile | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/users/${userId}`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/users/${userId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -99,7 +125,11 @@ export class UserServiceClient {
 
       return await response.json();
     } catch (error) {
-      this.logger.warn(`Error fetching user ${userId}: ${(error as Error).message}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn(`Request to get user ${userId} timed out`);
+      } else {
+        this.logger.warn(`Error fetching user ${userId}: ${(error as Error).message}`);
+      }
       return null;
     }
   }
