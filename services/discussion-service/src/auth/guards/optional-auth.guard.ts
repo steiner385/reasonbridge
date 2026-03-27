@@ -32,7 +32,12 @@ export class OptionalAuthGuard implements CanActivate {
     @Optional() @Inject(ConfigService) private configService?: ConfigService,
   ) {
     const getConfig = (key: string) => this.configService?.get<string>(key) ?? process.env[key];
-    this.jwtSecret = getConfig('JWT_SECRET') ?? 'mock-jwt-secret-for-testing';
+    const secret = getConfig('JWT_SECRET');
+    const nodeEnv = getConfig('NODE_ENV');
+    if (!secret && nodeEnv !== 'test') {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

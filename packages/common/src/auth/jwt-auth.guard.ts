@@ -107,7 +107,11 @@ export class JwtAuthGuard implements CanActivate {
 
     if (this.useMockAuth) {
       // Mock mode - use simple JWT secret
-      this.jwtSecret = getConfig('JWT_SECRET') ?? 'mock-jwt-secret-for-testing';
+      const secret = getConfig('JWT_SECRET');
+      if (!secret && nodeEnv !== 'test') {
+        throw new Error('JWT_SECRET environment variable is required');
+      }
+      this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
     } else {
       // Production mode - use Cognito JWKS
       this.userPoolId = getConfig('COGNITO_USER_POOL_ID');
