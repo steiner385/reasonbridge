@@ -4,6 +4,7 @@ export default defineWorkspace([
   // Services with their own configs
   'services/*/vitest.config.ts',
   // Packages with their own configs (excluding db-models which needs special handling)
+  'packages/common/vitest.config.ts',
   'packages/shared/vitest.config.ts',
   'packages/testing-utils/vitest.config.ts',
   // NOTE: packages/db-models is excluded - its tests import @prisma/client

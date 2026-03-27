@@ -10,3 +10,4 @@
  */
 
 export { JwtAuthGuard, type JwtPayload } from './jwt-auth.guard.js';
+export { InternalApiKeyGuard } from './internal-api-key.guard.js';
