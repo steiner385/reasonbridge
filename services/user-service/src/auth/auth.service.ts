@@ -24,6 +24,7 @@ import { VisitorSessionRepository } from '../repositories/visitor-session.reposi
 import { CognitoService } from './cognito.service';
 import { GoogleOAuthService } from './oauth/google-oauth.service';
 import { AppleOAuthService } from './oauth/apple-oauth.service';
+import { OAuthStateService } from './oauth-state.service';
 import { VerificationService } from './verification.service';
 import { EmailService } from '../services/email.service';
 import { validatePassword, validateEmail } from '@reason-bridge/common';
@@ -72,6 +73,7 @@ export class AuthService {
     private readonly cognitoService: CognitoService,
     private readonly googleOAuthService: GoogleOAuthService,
     private readonly appleOAuthService: AppleOAuthService,
+    private readonly oauthStateService: OAuthStateService,
     private readonly verificationService: VerificationService,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
@@ -292,28 +294,27 @@ export class AuthService {
 
   /**
    * T068: Initiate OAuth flow with CSRF protection
-   * Generates OAuth URL with state token
+   * Generates OAuth URL with state token stored in Redis
    */
-  async initiateOAuth(dto: InitiateOAuthRequestDto): Promise<InitiateOAuthResponseDto> {
+  async initiateOAuth(
+    dto: InitiateOAuthRequestDto,
+    visitorSessionId?: string,
+  ): Promise<InitiateOAuthResponseDto> {
     this.logger.log(`Initiating OAuth for provider: ${dto.provider}`);
 
     let authUrl: string;
-    let state: string;
 
     try {
+      // Generate and store state token with Redis for CSRF protection
+      const state = await this.oauthStateService.generateState(dto.provider, visitorSessionId);
+
       if (dto.provider === OAuthProvider.GOOGLE) {
-        state = this.googleOAuthService.generateStateToken();
         authUrl = this.googleOAuthService.generateAuthUrl(state);
       } else if (dto.provider === OAuthProvider.APPLE) {
-        state = this.appleOAuthService.generateStateToken();
         authUrl = this.appleOAuthService.generateAuthUrl(state);
       } else {
         throw new BadRequestException(`Unsupported OAuth provider: ${dto.provider}`);
       }
-
-      // Store state and visitorSessionId in cache/session for callback verification
-      // (In production, use Redis or session storage)
-      // For now, we'll rely on state token validation in the OAuth service
 
       this.logger.log(`OAuth URL generated for ${dto.provider}`);
 
@@ -330,7 +331,7 @@ export class AuthService {
 
   /**
    * T070-T071: Handle OAuth callback
-   * Exchange code for tokens, fetch profile, create/login User
+   * Validates state token, exchanges code for tokens, fetches profile, creates/logins User
    */
   async handleOAuthCallback(
     provider: OAuthProvider,
@@ -341,6 +342,29 @@ export class AuthService {
 
     if (query.error) {
       throw new UnauthorizedException(`OAuth error: ${query.error_description || query.error}`);
+    }
+
+    // Validate state token for CSRF protection
+    if (!query.state) {
+      this.logger.warn(`OAuth callback missing state parameter for provider: ${provider}`);
+      throw new BadRequestException({
+        error: 'MISSING_STATE',
+        message: 'OAuth state parameter is required for security.',
+      });
+    }
+
+    const isValidState = await this.oauthStateService.validateState(
+      query.state,
+      provider,
+      visitorSessionId,
+    );
+
+    if (!isValidState) {
+      this.logger.warn(`OAuth state validation failed for provider: ${provider}`);
+      throw new UnauthorizedException({
+        error: 'INVALID_STATE',
+        message: 'OAuth state token is invalid or expired. Please try again.',
+      });
     }
 
     try {

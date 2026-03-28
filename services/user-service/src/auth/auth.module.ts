@@ -20,6 +20,7 @@ import { AUTH_SERVICE } from './auth.interface.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
 import { VerificationService } from './verification.service.js';
 import { EmailService } from '../services/email.service.js';
+import { OAuthStateService } from './oauth-state.service.js';
 
 /**
  * Provides authentication service based on environment configuration.
@@ -104,8 +105,18 @@ const authServiceProvider = {
     // Verification and email services for verify-email and resend-verification endpoints
     VerificationService,
     EmailService,
+    // OAuth state token management for CSRF protection
+    OAuthStateService,
     PrismaService,
   ],
-  exports: [AUTH_SERVICE, JwtAuthGuard, AdminGuard, ModeratorGuard, RolesGuard, JwtModule],
+  exports: [
+    AUTH_SERVICE,
+    JwtAuthGuard,
+    AdminGuard,
+    ModeratorGuard,
+    RolesGuard,
+    JwtModule,
+    OAuthStateService,
+  ],
 })
 export class AuthModule {}
