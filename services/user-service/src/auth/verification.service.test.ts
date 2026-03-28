@@ -8,6 +8,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { VerificationService } from './verification.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VerificationTokenType } from '@prisma/client';
+import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
 
 describe('VerificationService', () => {
   let service: VerificationService;
@@ -21,6 +22,7 @@ describe('VerificationService', () => {
       deleteMany: ReturnType<typeof vi.fn>;
     };
   };
+  let mockCodeGenerator: VerificationCodeGenerator;
 
   const mockUser = {
     id: 'user-123',
@@ -56,7 +58,12 @@ describe('VerificationService', () => {
       },
     };
 
-    service = new VerificationService(mockPrisma as unknown as PrismaService);
+    // Mock code generator that returns predictable codes
+    mockCodeGenerator = {
+      generate: vi.fn().mockReturnValue('123456'),
+    };
+
+    service = new VerificationService(mockPrisma as unknown as PrismaService, mockCodeGenerator);
   });
 
   describe('verifyToken', () => {

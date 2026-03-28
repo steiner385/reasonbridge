@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VerificationTokenType } from '@prisma/client';
-import { randomBytes, timingSafeEqual } from 'crypto';
+import { timingSafeEqual } from 'crypto';
+import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
+import { VERIFICATION_CODE_GENERATOR } from './verification-code-generator.interface.js';
 
 /**
  * Verification Token Service
@@ -23,12 +25,15 @@ import { randomBytes, timingSafeEqual } from 'crypto';
 @Injectable()
 export class VerificationService {
   private readonly logger = new Logger(VerificationService.name);
-  private readonly TOKEN_LENGTH = 6;
   private readonly TOKEN_EXPIRATION_HOURS = 24;
   private readonly PASSWORD_RESET_EXPIRATION_MINUTES = 15;
   private readonly MAX_ATTEMPTS = 5;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(VERIFICATION_CODE_GENERATOR)
+    private readonly codeGenerator: VerificationCodeGenerator,
+  ) {}
 
   /**
    * Generate a new verification token for a user
@@ -46,8 +51,8 @@ export class VerificationService {
     try {
       this.logger.debug(`Generating ${type} token for user: ${userId}`);
 
-      // Generate random 6-digit code
-      const code = this.generateVerificationCode();
+      // Generate 6-digit code using injected generator
+      const code = this.codeGenerator.generate();
 
       // Calculate expiration time based on token type
       const expiresAt = new Date();
@@ -68,18 +73,6 @@ export class VerificationService {
           used: true,
         },
       });
-
-      // In E2E mode, delete any existing tokens with the same code to avoid
-      // unique constraint violations (token column has global uniqueness).
-      // This is safe in E2E because tests run sequentially and verification
-      // flows complete quickly.
-      if (process.env['E2E_VERIFICATION_CODE']) {
-        await this.prisma.verificationToken.deleteMany({
-          where: {
-            token: code,
-          },
-        });
-      }
 
       // Create new verification token with attempts initialized to 0
       await this.prisma.verificationToken.create({
@@ -330,27 +323,5 @@ export class VerificationService {
       this.logger.error(`Failed to cleanup expired tokens: ${error.message}`, error.stack);
       return 0;
     }
-  }
-
-  /**
-   * Generate a random 6-digit verification code
-   *
-   * In E2E test mode (when E2E_VERIFICATION_CODE env var is set),
-   * returns the fixed test code to enable automated testing of
-   * the full signup verification flow.
-   */
-  private generateVerificationCode(): string {
-    // Check for E2E test mode - use fixed code for automated testing
-    const testCode = process.env['E2E_VERIFICATION_CODE'];
-    if (testCode && /^\d{6}$/.test(testCode)) {
-      this.logger.debug('Using fixed E2E test verification code');
-      return testCode;
-    }
-
-    // Generate random 6-digit number
-    const min = 100000;
-    const max = 999999;
-    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    return randomNum.toString();
   }
 }

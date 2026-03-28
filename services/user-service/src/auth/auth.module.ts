@@ -20,6 +20,10 @@ import { AUTH_SERVICE } from './auth.interface.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
 import { VerificationService } from './verification.service.js';
 import { EmailService } from '../services/email.service.js';
+import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
+import { VERIFICATION_CODE_GENERATOR } from './verification-code-generator.interface.js';
+import { RandomVerificationCodeGenerator } from './random-verification-code-generator.js';
+import { FixedVerificationCodeGenerator } from './fixed-verification-code-generator.js';
 
 /**
  * Provides authentication service based on environment configuration.
@@ -63,6 +67,30 @@ const authServiceProvider = {
   inject: [ConfigService, PrismaService],
 };
 
+/**
+ * Provides verification code generator based on environment configuration.
+ *
+ * E2E_VERIFICATION_CODE env var:
+ * - Set (valid 6-digit code): Use FixedVerificationCodeGenerator (for E2E tests)
+ * - Not set: Use RandomVerificationCodeGenerator (production)
+ *
+ * This keeps E2E-specific logic out of production code by using
+ * dependency injection to select the appropriate implementation.
+ */
+const verificationCodeGeneratorProvider = {
+  provide: VERIFICATION_CODE_GENERATOR,
+  useFactory: (configService: ConfigService): VerificationCodeGenerator => {
+    const e2eCode = configService.get<string>('E2E_VERIFICATION_CODE');
+
+    if (e2eCode && /^\d{6}$/.test(e2eCode)) {
+      return new FixedVerificationCodeGenerator(e2eCode);
+    }
+
+    return new RandomVerificationCodeGenerator();
+  },
+  inject: [ConfigService],
+};
+
 @Module({
   imports: [
     ConfigModule,
@@ -79,6 +107,7 @@ const authServiceProvider = {
   // because they are manually instantiated by authServiceProvider based on AUTH_MODE
   providers: [
     authServiceProvider,
+    verificationCodeGeneratorProvider,
     // Factory provider for JwtAuthGuard to bypass NestJS's reflection-based DI issues
     {
       provide: JwtAuthGuard,
