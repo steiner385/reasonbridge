@@ -5,7 +5,8 @@
 
 import { Module } from '@nestjs/common';
 import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HealthModule } from './health/health.module.js';
 import { ProxyModule } from './proxy/proxy.module.js';
@@ -56,7 +57,14 @@ import { JwtUserMiddleware } from './middleware/jwt-user.middleware.js';
     ProxyModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    // Apply ThrottlerGuard globally - all endpoints are rate limited
+    // Specific limits can be set per-endpoint using @Throttle decorator
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   /**
