@@ -223,6 +223,7 @@ export class VerificationService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: 100, // Limit to prevent unbounded results
     });
   }
 
@@ -309,6 +310,7 @@ export class VerificationService {
         },
       },
       orderBy: { createdAt: 'asc' },
+      take: 100, // Limit to prevent unbounded results
     });
 
     // Delete associated video uploads for cleanup
@@ -366,10 +368,11 @@ export class VerificationService {
    * @param userId - User ID
    * @returns Array of all verification records
    */
-  async getVerificationHistory(userId: string) {
+  async getVerificationHistory(userId: string, limit = 100) {
     return this.prisma.verificationRecord.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      take: limit,
     });
   }
 

@@ -101,6 +101,7 @@ describe('InternalSlaBreachController', () => {
           id: true,
           displayName: true,
         },
+        take: 500,
       });
 
       // Should create notification for each moderator

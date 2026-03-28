@@ -204,10 +204,11 @@ export class VideoUploadService {
    * @param userId - User ID
    * @returns Array of VideoUpload records
    */
-  async getUserVideoUploads(userId: string) {
+  async getUserVideoUploads(userId: string, limit = 100) {
     return this.prisma.videoUpload.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      take: limit,
     });
   }
 

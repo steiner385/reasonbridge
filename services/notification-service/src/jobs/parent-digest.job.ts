@@ -132,7 +132,7 @@ export class ParentDigestJob {
    * - User is active (status = 'ACTIVE')
    */
   async getEligibleChildren(): Promise<ChildActivityData[]> {
-    // Find all minor users with verified parental consent
+    // Find minor users with verified parental consent
     const minorUsers = await this.prisma.user.findMany({
       where: {
         isMinor: true,
@@ -150,6 +150,7 @@ export class ParentDigestJob {
           },
         },
       },
+      take: 10000, // Limit to prevent unbounded results
     });
 
     // Gather activity data for each child
@@ -190,7 +191,7 @@ export class ParentDigestJob {
   async gatherChildActivity(childId: string): Promise<Partial<ChildActivityData>> {
     const { weekStart, weekEnd } = this.getWeekDateRange();
 
-    // Get all responses from the child in the past week
+    // Get responses from the child in the past week
     const responses = await this.prisma.response.findMany({
       where: {
         authorId: childId,
@@ -205,6 +206,8 @@ export class ParentDigestJob {
         topicId: true,
         createdAt: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 1000, // Limit to prevent unbounded results
     });
 
     // Use responses.length instead of separate count query for efficiency
@@ -224,6 +227,7 @@ export class ParentDigestJob {
         ? await this.prisma.discussionTopic.findMany({
             where: { id: { in: topicIds } },
             select: { id: true, title: true },
+            take: 500, // Limit to prevent unbounded results
           })
         : [];
 

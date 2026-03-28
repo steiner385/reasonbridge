@@ -294,6 +294,7 @@ describe('VideoUploadService', () => {
       expect(mockPrismaService.videoUpload.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-123' },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       });
     });
 

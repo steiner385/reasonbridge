@@ -124,6 +124,7 @@ export class InternalSlaBreachController {
         id: true,
         displayName: true,
       },
+      take: 500, // Limit to prevent unbounded results
     });
   }
 

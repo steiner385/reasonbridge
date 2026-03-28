@@ -90,6 +90,7 @@ export class AgeReverificationJob {
         status: 'ACTIVE',
       },
       select: { id: true, lastAgeVerifiedAt: true },
+      take: 1000, // Process in batches; caller should paginate if more exist
     });
   }
 

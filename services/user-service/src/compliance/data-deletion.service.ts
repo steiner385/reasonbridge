@@ -156,6 +156,7 @@ export class DataDeletionService {
         scheduledFor: { lte: new Date() },
       },
       orderBy: { scheduledFor: 'asc' },
+      take: 100, // Process in batches; caller should paginate if more exist
     });
   }
 
@@ -225,6 +226,7 @@ export class DataDeletionService {
         const topics = await tx.discussionTopic.findMany({
           where: { creatorId: request.userId },
           select: { id: true, responseCount: true },
+          take: 10000, // Limit to prevent unbounded results
         });
 
         // Delete empty topics

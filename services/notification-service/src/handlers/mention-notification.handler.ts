@@ -124,6 +124,7 @@ export class MentionNotificationHandler {
           accountStatus: 'ACTIVE',
         },
         select: { id: true },
+        take: 100, // Limit to prevent unbounded results
       });
 
       const validUserIds = validUsers.map((u) => u.id);

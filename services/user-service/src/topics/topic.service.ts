@@ -32,7 +32,7 @@ export class TopicService {
       `Fetching topics - suggestedOnly: ${suggestedOnly}, minActivity: ${minActivity}`,
     );
 
-    // Fetch all discussion topics from database
+    // Fetch discussion topics from database
     const topics = await this.prisma.discussionTopic.findMany({
       where: suggestedOnly ? { suggestedForNewUsers: true } : undefined,
       select: {
@@ -48,6 +48,7 @@ export class TopicService {
         { suggestedForNewUsers: 'desc' }, // Suggested topics first
         { participantCount: 'desc' }, // Then by popularity
       ],
+      take: 500, // Limit to prevent unbounded results
     });
 
     // T091: Compute activity level for each topic

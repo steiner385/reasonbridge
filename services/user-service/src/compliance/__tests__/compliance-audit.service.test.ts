@@ -162,6 +162,7 @@ describe('ComplianceAuditService', () => {
       expect(mockPrisma.complianceAuditLog.findMany).toHaveBeenCalledWith({
         where: { action },
         orderBy: { timestamp: 'desc' },
+        take: 1000,
       });
     });
 
@@ -179,6 +180,7 @@ describe('ComplianceAuditService', () => {
           timestamp: { gte: startDate },
         },
         orderBy: { timestamp: 'desc' },
+        take: 1000,
       });
     });
 
@@ -196,6 +198,7 @@ describe('ComplianceAuditService', () => {
           timestamp: { lte: endDate },
         },
         orderBy: { timestamp: 'desc' },
+        take: 1000,
       });
     });
 
@@ -214,6 +217,7 @@ describe('ComplianceAuditService', () => {
           timestamp: { gte: startDate, lte: endDate },
         },
         orderBy: { timestamp: 'desc' },
+        take: 1000,
       });
     });
   });
