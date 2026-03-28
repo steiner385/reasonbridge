@@ -112,7 +112,7 @@ services:
     depends_on:
       db-migrate:
         condition: service_completed_successfully
-    mem_limit: 192m
+    mem_limit: 384m
     networks:
       - reasonbridge-e2e
     restart: 'no'
