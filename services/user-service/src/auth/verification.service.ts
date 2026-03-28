@@ -6,7 +6,7 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VerificationTokenType } from '@prisma/client';
-import { randomBytes } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 
 /**
  * Verification Token Service
@@ -185,8 +185,14 @@ export class VerificationService {
         });
       }
 
-      // Check if code matches
-      if (token.token !== code) {
+      // Check if code matches using timing-safe comparison to prevent timing attacks
+      const storedBuffer = Buffer.from(token.token, 'utf8');
+      const providedBuffer = Buffer.from(code, 'utf8');
+      const codeMatches =
+        storedBuffer.length === providedBuffer.length &&
+        timingSafeEqual(storedBuffer, providedBuffer);
+
+      if (!codeMatches) {
         // Increment attempts counter
         const newAttempts = token.attempts + 1;
         const isLocked = newAttempts >= this.MAX_ATTEMPTS;

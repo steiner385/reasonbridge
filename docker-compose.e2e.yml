@@ -3,9 +3,10 @@
 # Mimics production deployment for realistic end-to-end testing
 #
 # MEMORY CONSTRAINTS (Jenkins runner-3 has 6GB):
-# - Services total: ~2.4GB during startup (with db-migrate/seed running)
-# - Playwright container: 4GB (configured in jenkins-lib)
-# - Peak usage: ~6.4GB - keep limits tight to avoid OOM (exit code 137)
+# - Services total: ~2.0GB during startup (with db-migrate/seed running)
+# - Playwright container: 2GB (configured in jenkins-lib)
+# - Peak usage: ~4.0GB - keep limits tight to avoid OOM (exit code 137)
+# - Resource lock in jenkins-lib prevents concurrent E2E runs
 #
 # Note: Explicit image names are set for all built services to enable Docker
 # layer caching across builds with different COMPOSE_PROJECT_NAME values.
@@ -40,7 +41,7 @@ services:
       start_period: 30s
     tmpfs:
       - /var/lib/postgresql/data
-    mem_limit: 384m
+    mem_limit: 256m
     networks:
       - reasonbridge-e2e
 
@@ -76,7 +77,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
-    mem_limit: 384m
+    mem_limit: 256m
     networks:
       - reasonbridge-e2e
 
