@@ -19,9 +19,18 @@ export class PropositionsService {
   constructor(@Inject(PrismaService) private prisma: PrismaService) {}
 
   /**
-   * Find all propositions for a topic
+   * Find propositions for a topic with pagination
+   *
+   * @param topicId - The topic ID
+   * @param limit - Maximum number of propositions to return (default: 100, max: 500)
+   * @param offset - Number of propositions to skip (default: 0)
+   * @returns Paginated list of propositions
    */
-  async findByTopicId(topicId: string) {
+  async findByTopicId(topicId: string, limit = 100, offset = 0) {
+    // Enforce maximum limit to prevent excessive data fetching
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeOffset = Math.max(0, offset);
+
     return this.prisma.proposition.findMany({
       where: { topicId },
       include: {
@@ -30,6 +39,8 @@ export class PropositionsService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: safeLimit,
+      skip: safeOffset,
     });
   }
 
