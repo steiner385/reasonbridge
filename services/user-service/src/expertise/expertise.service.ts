@@ -62,6 +62,7 @@ export class ExpertiseService {
       where: { userId },
       include: { tag: true },
       orderBy: { expertiseScore: 'desc' },
+      take: 200, // Limit to prevent unbounded results
     });
 
     return expertises.map((expertise) => this.toTopicExpertiseDto(expertise));
@@ -239,6 +240,7 @@ export class ExpertiseService {
       },
       orderBy: { createdAt: 'asc' },
       select: { id: true, createdAt: true },
+      take: 10000, // Limit to prevent unbounded results while allowing accurate metrics
     });
 
     if (responses.length === 0) {
@@ -347,6 +349,7 @@ export class ExpertiseService {
         status: 'VERIFIED',
       },
       select: { boostValue: true },
+      take: 100, // Limit to prevent unbounded results
     });
 
     return credentials.reduce((total, cred) => {

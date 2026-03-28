@@ -602,6 +602,7 @@ export class UsersService {
         where: { topicId },
         select: { authorId: true },
         distinct: ['authorId'],
+        take: 1000, // Limit to prevent unbounded results
       });
       participantIds = participants.map((p) => p.authorId);
     }

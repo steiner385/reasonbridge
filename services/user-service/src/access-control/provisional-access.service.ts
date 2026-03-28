@@ -174,6 +174,7 @@ export class ProvisionalAccessService {
         },
       },
       orderBy: { createdAt: 'asc' },
+      take: 500, // Limit to prevent unbounded results
     });
 
     return requests.map((req) => this.toAccessRequestDto(req));
@@ -423,6 +424,7 @@ export class ProvisionalAccessService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: 500, // Limit to prevent unbounded results
     });
 
     return accessRecords.map((access) => this.toProvisionalAccessDto(access));

@@ -140,11 +140,12 @@ export class CredentialService {
    * @param userId - The user's unique identifier
    * @returns Array of CredentialDto for all user credentials
    */
-  async getUserCredentials(userId: string): Promise<CredentialDto[]> {
+  async getUserCredentials(userId: string, limit = 100): Promise<CredentialDto[]> {
     const credentials = await this.prisma.domainCredential.findMany({
       where: { userId },
       include: { tag: true },
       orderBy: { createdAt: 'desc' },
+      take: limit,
     });
 
     return credentials.map((cred) => this.toCredentialDto(cred));
@@ -175,11 +176,12 @@ export class CredentialService {
    *
    * @returns Array of CredentialDto with PENDING status, oldest first
    */
-  async getPendingCredentials(): Promise<CredentialDto[]> {
+  async getPendingCredentials(limit = 100): Promise<CredentialDto[]> {
     const credentials = await this.prisma.domainCredential.findMany({
       where: { status: CredentialStatus.PENDING },
       include: { tag: true },
       orderBy: { createdAt: 'asc' },
+      take: limit,
     });
 
     return credentials.map((cred) => this.toCredentialDto(cred));

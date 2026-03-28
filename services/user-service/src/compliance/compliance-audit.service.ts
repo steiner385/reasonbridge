@@ -111,7 +111,7 @@ export class ComplianceAuditService {
    * @param endDate - Optional end date for the date range filter
    * @returns Array of audit log entries matching the criteria
    */
-  async getLogsByAction(action: ComplianceAction, startDate?: Date, endDate?: Date) {
+  async getLogsByAction(action: ComplianceAction, startDate?: Date, endDate?: Date, limit = 1000) {
     return this.prisma.complianceAuditLog.findMany({
       where: {
         action,
@@ -125,6 +125,7 @@ export class ComplianceAuditService {
           : {}),
       },
       orderBy: { timestamp: 'desc' },
+      take: limit,
     });
   }
 }

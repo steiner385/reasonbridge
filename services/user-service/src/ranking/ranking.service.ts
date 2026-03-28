@@ -246,10 +246,11 @@ export class RankingService {
    * @returns Quality score between 0 and 1
    */
   private async calculateQualityScore(userId: string): Promise<number> {
-    // Get all response IDs for this user (required for subsequent queries)
+    // Get response IDs for this user (required for subsequent queries)
     const responses = await this.prisma.response.findMany({
       where: { authorId: userId },
       select: { id: true },
+      take: 10000, // Limit to prevent unbounded results while allowing accurate metrics
     });
 
     if (responses.length === 0) {

@@ -255,6 +255,7 @@ export class ReportService {
           select: { id: true, displayName: true },
         },
       },
+      take: 500, // Limit to prevent unbounded results
     });
 
     return reports.map((report) => this.mapReportToResponse(report));
@@ -413,6 +414,8 @@ export class ReportService {
         createdAt: true,
         resolvedAt: true,
       },
+      orderBy: { resolvedAt: 'desc' },
+      take: 10000, // Limit for metrics calculation
     });
 
     let avgResolutionTimeMinutes = 0;

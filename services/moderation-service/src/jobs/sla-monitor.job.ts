@@ -205,7 +205,7 @@ export class SlaMonitorJob {
   async getStaleItems(): Promise<StaleQueueItem[]> {
     const now = new Date();
 
-    // Get all pending items
+    // Get pending items
     const pendingItems = await this.prisma.childContentReviewQueue.findMany({
       where: {
         status: { in: ['PENDING', 'IN_REVIEW'] },
@@ -219,6 +219,8 @@ export class SlaMonitorJob {
         status: true,
         createdAt: true,
       },
+      orderBy: { createdAt: 'asc' },
+      take: 5000, // Limit to prevent unbounded results
     });
 
     // Calculate SLA metrics for each item

@@ -364,6 +364,8 @@ export class ModerationQueueService {
         createdAt: true,
         approvedAt: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for metrics calculation
     });
 
     let avgResolutionTimeMinutes = 0;
@@ -426,6 +428,8 @@ export class ModerationQueueService {
           lte: endDate,
         },
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for analytics query
     });
 
     const appeals = await this.prisma.appeal.findMany({
@@ -435,6 +439,8 @@ export class ModerationQueueService {
           lte: endDate,
         },
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for analytics query
     });
 
     const totalActions = actions.length;

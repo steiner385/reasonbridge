@@ -143,6 +143,8 @@ describe('SlaMonitorJob', () => {
           status: { in: ['PENDING', 'IN_REVIEW'] },
         },
         select: expect.any(Object),
+        orderBy: { createdAt: 'asc' },
+        take: 5000,
       });
     });
 

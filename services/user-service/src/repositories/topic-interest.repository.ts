@@ -103,7 +103,7 @@ export class TopicInterestRepository {
    * @param userId - User ID
    * @returns Array of topic interests with topic details
    */
-  async findByUserId(userId: string): Promise<Array<TopicInterest & { topic: any }>> {
+  async findByUserId(userId: string, limit = 100): Promise<Array<TopicInterest & { topic: any }>> {
     try {
       return await this.prisma.topicInterest.findMany({
         where: { userId },
@@ -113,6 +113,7 @@ export class TopicInterestRepository {
         orderBy: {
           priority: 'asc',
         },
+        take: limit,
       });
     } catch (error: any) {
       this.logger.error(`Failed to find topic interests: ${error.message}`, error.stack);

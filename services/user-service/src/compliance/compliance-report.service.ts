@@ -240,12 +240,14 @@ export class ComplianceReportService {
   private async getRegionBreakdown(dateFilter: {
     timestamp: { gte: Date; lte: Date };
   }): Promise<Record<string, number>> {
-    // Fetch all logs in the period to extract regions from metadata
+    // Fetch logs in the period to extract regions from metadata
     const logs = await this.prisma.complianceAuditLog.findMany({
       where: dateFilter,
       select: {
         metadata: true,
       },
+      orderBy: { timestamp: 'desc' },
+      take: 10000, // Limit to most recent for performance
     });
 
     const regionCounts: Record<string, number> = {};

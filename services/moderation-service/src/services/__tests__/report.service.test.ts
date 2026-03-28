@@ -305,6 +305,7 @@ describe('ReportService', () => {
           reporter: { select: { id: true, displayName: true } },
           moderator: { select: { id: true, displayName: true } },
         },
+        take: 500,
       });
       expect(result).toHaveLength(1);
     });

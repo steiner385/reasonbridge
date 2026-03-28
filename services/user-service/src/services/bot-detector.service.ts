@@ -102,6 +102,7 @@ export class BotDetectorService {
         author: { select: { id: true, createdAt: true } },
       },
       orderBy: { createdAt: 'asc' },
+      take: 5000, // Limit to recent responses for pattern detection
     });
 
     if (responses.length < 5) {

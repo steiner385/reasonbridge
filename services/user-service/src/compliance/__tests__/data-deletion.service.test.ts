@@ -195,6 +195,7 @@ describe('DataDeletionService', () => {
           scheduledFor: { lte: now },
         },
         orderBy: { scheduledFor: 'asc' },
+        take: 100,
       });
 
       vi.useRealTimers();

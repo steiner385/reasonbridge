@@ -131,6 +131,7 @@ describe('MentionNotificationHandler', () => {
           accountStatus: 'ACTIVE',
         },
         select: { id: true },
+        take: 100,
       });
 
       expect(mockGateway.emitToUser).toHaveBeenCalledWith(

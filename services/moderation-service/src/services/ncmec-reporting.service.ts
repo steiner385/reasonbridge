@@ -324,6 +324,7 @@ export class NCMECReportingService {
       orderBy: {
         ncmecDeadline: 'asc',
       },
+      take: 1000, // Limit to prevent unbounded results
     });
 
     return pending.map((report) => ({
