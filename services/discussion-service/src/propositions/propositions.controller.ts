@@ -9,6 +9,7 @@ import {
   Post,
   Param,
   Body,
+  Query,
   Headers,
   Request,
   HttpCode,
@@ -31,11 +32,21 @@ export class PropositionsController {
   ) {}
 
   /**
-   * Get all propositions for a topic
+   * Get propositions for a topic with pagination
+   *
+   * @param topicId - The topic ID
+   * @param limit - Maximum number of propositions to return (default: 100, max: 500)
+   * @param offset - Number of propositions to skip (default: 0)
    */
   @Get()
-  async getTopicPropositions(@Param('topicId') topicId: string) {
-    return this.propositionsService.findByTopicId(topicId);
+  async getTopicPropositions(
+    @Param('topicId') topicId: string,
+    @Query('limit') limitParam?: string,
+    @Query('offset') offsetParam?: string,
+  ) {
+    const limit = limitParam ? parseInt(limitParam, 10) : 100;
+    const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
+    return this.propositionsService.findByTopicId(topicId, limit, offset);
   }
 
   /**

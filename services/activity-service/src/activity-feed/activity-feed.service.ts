@@ -23,10 +23,13 @@ export class ActivityFeedService {
   async getFeed(userId: string, query: GetFeedQueryDto): Promise<ActivityFeedResponseDto> {
     const { limit = 20, cursor } = query;
 
-    // Step 1: Get IDs of users the current user follows
+    // Step 1: Get IDs of users the current user follows (limit to 1000 most recent)
+    // Note: Limiting follows prevents extremely large IN clauses for power users
     const follows = await this.prisma.userFollow.findMany({
       where: { followerId: userId },
       select: { followedId: true },
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
     });
 
     const followedUserIds = follows.map((f) => f.followedId);
