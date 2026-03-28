@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -21,8 +26,8 @@ export default defineConfig({
   grep: process.env.CI || process.env.E2E_DOCKER ? /^(?!.*@ai)/ : undefined,
   /* Retry disabled to prevent crash from accumulated timeout failures */
   retries: 0,
-  /* Serialize tests in CI to prevent OOM - single worker uses less peak memory */
-  workers: process.env.CI ? 1 : undefined,
+  /* Limit workers in CI to prevent OOM - 2 workers balances speed vs memory */
+  workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters
    * In CI, skip allure-playwright to avoid npm install overhead during E2E startup
    */
