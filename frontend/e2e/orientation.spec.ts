@@ -72,7 +72,9 @@ test.describe('Orientation Flow', () => {
 
     // Navigate to orientation page
     await page.goto('/onboarding/orientation');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    // Wait for orientation overlay to appear (replaces networkidle which hangs due to WebSocket)
+    await expect(page.locator('[role="dialog"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display orientation overlay on page load', async ({ page }) => {
