@@ -248,7 +248,9 @@ export async function loginWithDemoAccount(page: Page, userName: DemoUserName): 
   // The 'networkidle' wait hangs forever because the WebSocket connection
   // (established on auth) keeps the network active. Instead, we wait for
   // the Profile link which only renders when user is authenticated.
-  await expect(page.getByRole('link', { name: /profile/i })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('link', { name: 'Profile', exact: true })).toBeVisible({
+    timeout: 10000,
+  });
 
   // Brief wait for async localStorage writes and React state propagation
   await page.waitForTimeout(200);
@@ -269,7 +271,9 @@ export async function logout(page: Page): Promise<void> {
     // Click logout option
     await page.getByRole('menuitem', { name: /log out|logout|sign out/i }).click();
     // Wait for logout to complete - check that Profile link disappears (indicates logged out)
-    await expect(page.getByRole('link', { name: /profile/i })).not.toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('link', { name: 'Profile', exact: true })).not.toBeVisible({
+      timeout: 10000,
+    });
   }
 }
 
