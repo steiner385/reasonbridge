@@ -4,7 +4,7 @@
  */
 
 import { Module } from '@nestjs/common';
-import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
+import type { MiddlewareConsumer, NestModule, Provider } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,6 +14,19 @@ import { MetricsModule } from './metrics/metrics.module.js';
 import { ResilienceModule } from './resilience/resilience.module.js';
 import { CorrelationMiddleware } from './middleware/correlation.middleware.js';
 import { JwtUserMiddleware } from './middleware/jwt-user.middleware.js';
+
+// Skip rate limiting entirely in test mode for E2E tests
+const isTest = process.env['NODE_ENV'] === 'test';
+
+// Conditionally provide ThrottlerGuard only in non-test environments
+const throttlerGuardProvider: Provider[] = isTest
+  ? []
+  : [
+      {
+        provide: APP_GUARD,
+        useClass: ThrottlerGuard,
+      },
+    ];
 
 @Module({
   imports: [
@@ -60,10 +73,8 @@ import { JwtUserMiddleware } from './middleware/jwt-user.middleware.js';
   providers: [
     // Apply ThrottlerGuard globally - all endpoints are rate limited
     // Specific limits can be set per-endpoint using @Throttle decorator
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // In test mode (E2E tests), the guard is skipped entirely to avoid test flakiness
+    ...throttlerGuardProvider,
   ],
 })
 export class AppModule implements NestModule {

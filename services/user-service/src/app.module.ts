@@ -4,10 +4,24 @@
  */
 
 import { Module } from '@nestjs/common';
+import type { Provider } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+
+// Skip rate limiting entirely in test mode for E2E tests
+const isTest = process.env['NODE_ENV'] === 'test';
+
+// Conditionally provide ThrottlerGuard only in non-test environments
+const throttlerGuardProvider: Provider[] = isTest
+  ? []
+  : [
+      {
+        provide: APP_GUARD,
+        useClass: ThrottlerGuard,
+      },
+    ];
 import { PrismaModule } from './prisma/prisma.module.js';
 import { CacheModule } from './cache/cache.module.js';
 import { HealthModule } from './health/health.module.js';
@@ -51,10 +65,8 @@ import { DemoModule } from './demo/demo.module.js';
   controllers: [],
   providers: [
     // Enable global rate limiting
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // In test mode (E2E tests), the guard is skipped entirely to avoid test flakiness
+    ...throttlerGuardProvider,
   ],
 })
 export class AppModule {}

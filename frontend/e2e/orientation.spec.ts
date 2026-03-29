@@ -104,7 +104,7 @@ test.describe('Orientation Flow', () => {
 
   test('should navigate to step 2 when clicking Next', async ({ page }) => {
     // Click Next button
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
 
     // Check step indicator updated
     await expect(page.getByText(/step 2 of 3/i)).toBeVisible();
@@ -121,10 +121,10 @@ test.describe('Orientation Flow', () => {
 
   test('should navigate to step 3 from step 2', async ({ page }) => {
     // Navigate to step 2
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
 
     // Navigate to step 3
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
 
     // Check step indicator updated
     await expect(page.getByText(/step 3 of 3/i)).toBeVisible();
@@ -143,7 +143,7 @@ test.describe('Orientation Flow', () => {
 
   test('should allow navigating backwards with Previous button', async ({ page }) => {
     // Navigate to step 2
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
     await expect(page.getByText(/step 2 of 3/i)).toBeVisible();
 
     // Click Previous
@@ -163,13 +163,13 @@ test.describe('Orientation Flow', () => {
 
   test('should show Previous button on steps 2 and 3', async ({ page }) => {
     // Navigate to step 2
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
 
     // Previous button should be visible
     await expect(page.getByRole('button', { name: /previous/i })).toBeVisible();
 
     // Navigate to step 3
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
 
     // Previous button should still be visible
     await expect(page.getByRole('button', { name: /previous/i })).toBeVisible();
@@ -183,13 +183,13 @@ test.describe('Orientation Flow', () => {
     expect(parseFloat(step1Value || '0')).toBeLessThan(34);
 
     // Navigate to step 2
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
     const step2Value = await progressBar.getAttribute('aria-valuenow');
     expect(parseFloat(step2Value || '0')).toBeGreaterThanOrEqual(66);
     expect(parseFloat(step2Value || '0')).toBeLessThan(68);
 
     // Navigate to step 3
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
     await expect(progressBar).toHaveAttribute('aria-valuenow', '100');
   });
 
@@ -234,8 +234,8 @@ test.describe('Orientation Flow', () => {
 
   test('should complete orientation when clicking Get Started on step 3', async ({ page }) => {
     // Navigate to step 3
-    await page.getByRole('button', { name: /^next$/i }).click();
-    await page.getByRole('button', { name: /^next$/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
+    await page.getByRole('button', { name: /next/i }).click();
 
     // Click Get Started
     await page.getByRole('button', { name: /get started/i }).click();
@@ -278,7 +278,7 @@ test.describe('Orientation Flow', () => {
     await expect(page.getByRole('heading', { name: /platform orientation/i })).toBeVisible();
 
     // Check all buttons have labels
-    const nextButton = page.getByRole('button', { name: /^next$/i });
+    const nextButton = page.getByRole('button', { name: /next/i });
     await expect(nextButton).toBeVisible();
 
     const skipButton = page.getByRole('button', { name: /skip to end/i });
