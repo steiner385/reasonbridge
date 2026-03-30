@@ -113,6 +113,8 @@ export class RankingAnalyticsService {
         createdAt: true,
         resolvedAt: true,
       },
+      orderBy: { resolvedAt: 'desc' },
+      take: 1000, // Limit to most recent for average calculation
     });
 
     // Calculate average resolution time in hours
@@ -194,10 +196,11 @@ export class RankingAnalyticsService {
     // Calculate median
     let medianScore = 0;
     if (totalCount > 0) {
-      // Get all scores ordered for median calculation
+      // Get scores ordered for median calculation (limited for performance)
       const scores = await this.prisma.userRank.findMany({
         select: { compositeScore: true },
         orderBy: { compositeScore: 'asc' },
+        take: 10000, // Limit to prevent unbounded results; approximates median for large datasets
       });
 
       if (scores.length > 0) {

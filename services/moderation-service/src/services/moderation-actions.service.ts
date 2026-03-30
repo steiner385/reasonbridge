@@ -807,7 +807,7 @@ export class ModerationActionsService {
   async autoLiftExpiredBans(): Promise<{ lifted: number }> {
     const now = new Date();
 
-    // Find all active temporary bans that have expired
+    // Find active temporary bans that have expired
     const expiredBans = await this.prisma.moderationAction.findMany({
       where: {
         actionType: 'BAN',
@@ -818,6 +818,8 @@ export class ModerationActionsService {
         },
         liftedAt: null,
       },
+      orderBy: { expiresAt: 'asc' },
+      take: 1000, // Process in batches to prevent unbounded results
     });
 
     if (expiredBans.length === 0) {

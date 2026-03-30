@@ -279,6 +279,8 @@ describe('ContentModerationService', () => {
         orderBy: {
           createdAt: 'desc',
         },
+        take: 100,
+        skip: 0,
       });
       expect(result).toHaveLength(2);
     });

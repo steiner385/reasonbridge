@@ -2,34 +2,27 @@
 /**
  * reasonBridge CI/CD Pipeline Stub
  *
- * This minimal stub loads the actual pipeline definition from the jenkins-lib repository.
- * Keeping the real Jenkinsfile in jenkins-lib avoids chicken-and-egg problems with protected branches.
+ * This minimal stub loads the pipeline definition from the consolidated jenkins-config repository.
+ * All shared functions AND project-specific pipelines now live in jenkins-shared-lib.
  *
  * Architecture:
  *   - This stub: Lives in main reasonBridge repo (rarely changes)
- *   - Shared functions: Lives in jenkins-config repo (jenkins-shared-lib)
- *   - Project pipeline: Lives in reasonbridge-jenkins-lib repo (reasonbridgeMultibranchPipeline)
- *   - Jenkins scans: Main repo branches, finds this stub, loads libraries, executes pipeline
+ *   - All pipeline code: Lives in jenkins-config repo (jenkins-shared-lib)
+ *     - Shared functions: githubStatusReporter, dockerCleanup, runUnitTests, etc.
+ *     - Project pipeline: reasonbridgeMultibranchPipeline
+ *   - Jenkins scans: Main repo branches, finds this stub, loads library, executes pipeline
  *
- * Library Loading Order:
- *   1. jenkins-shared-lib (common functions: githubStatusReporter, dockerCleanup, etc.)
- *   2. reasonbridge-lib (project-specific: reasonbridgeMultibranchPipeline)
+ * Consolidation (2026-03):
+ *   - reasonbridge-jenkins-lib merged into jenkins-config
+ *   - Single library load simplifies dependency management
  */
 
-// First, load the shared library with common functions
-// This must be loaded first so functions are available to reasonbridge-lib
+// Load the consolidated shared library
+// Contains both shared functions AND reasonbridgeMultibranchPipeline
 library identifier: 'jenkins-shared-lib@main',
     retriever: modernSCM([
         $class: 'GitSCMSource',
         remote: 'https://github.com/steiner385/jenkins-config.git',
-        credentialsId: 'github-credentials'
-    ])
-
-// Then load the project-specific library
-library identifier: 'reasonbridge-lib@main',
-    retriever: modernSCM([
-        $class: 'GitSCMSource',
-        remote: 'https://github.com/steiner385/reasonbridge-jenkins-lib.git',
         credentialsId: 'github-credentials'
     ])
 

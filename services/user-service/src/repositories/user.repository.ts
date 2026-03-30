@@ -320,7 +320,7 @@ export class UserRepository {
    * @param endDate - End date
    * @returns Array of users
    */
-  async findByCreatedAtRange(startDate: Date, endDate: Date): Promise<User[]> {
+  async findByCreatedAtRange(startDate: Date, endDate: Date, limit = 1000): Promise<User[]> {
     try {
       return await this.prisma.user.findMany({
         where: {
@@ -332,6 +332,7 @@ export class UserRepository {
         orderBy: {
           createdAt: 'desc',
         },
+        take: limit,
       });
     } catch (error: any) {
       this.logger.error(`Failed to find users by date range: ${error.message}`, error.stack);

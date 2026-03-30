@@ -1,0 +1,84 @@
+<h2>Where should the "Find Context" button appear?</h2>
+<p class="subtitle">The button triggers fact-checking for claims in a response</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Action Bar (with vote buttons)</h3>
+      <p>Alongside upvote/downvote and other response actions</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px;">
+          <p style="margin: 0 0 12px; font-size: 14px; color: #374151;">The city's congestion pricing program reduced traffic by 15% in the first year...</p>
+          <div style="display: flex; gap: 16px; align-items: center; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+            <span style="color: #6b7280; font-size: 13px;">▲ 12</span>
+            <span style="color: #6b7280; font-size: 13px;">▼</span>
+            <span style="color: #6b7280; font-size: 13px;">💬 Reply</span>
+            <span style="color: #3b82f6; font-size: 13px; background: #eff6ff; padding: 2px 8px; border-radius: 4px;">🔍 Find Context</span>
+            <span style="color: #6b7280; font-size: 13px;">⋯</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Response Header (metadata area)</h3>
+      <p>Near author name and timestamp, visible without scrolling to actions</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 32px; height: 32px; background: #e5e7eb; border-radius: 50%;"></div>
+              <span style="font-weight: 500; font-size: 14px;">Alice Anderson</span>
+              <span style="color: #9ca3af; font-size: 12px;">2h ago</span>
+            </div>
+            <span style="color: #3b82f6; font-size: 12px; background: #eff6ff; padding: 2px 8px; border-radius: 4px; cursor: pointer;">🔍 Find Context</span>
+          </div>
+          <p style="margin: 0; font-size: 14px; color: #374151;">The city's congestion pricing program reduced traffic by 15% in the first year...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hover-Revealed (like bookmark)</h3>
+      <p>Hidden until user hovers over response, reduces visual clutter</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px; position: relative;">
+          <p style="margin: 0; font-size: 14px; color: #374151;">The city's congestion pricing program reduced traffic by 15% in the first year...</p>
+          <div style="position: absolute; top: 8px; right: 8px; opacity: 0.7;">
+            <span style="color: #3b82f6; font-size: 18px; cursor: pointer;" title="Find Context">🔍</span>
+          </div>
+          <p style="font-size: 11px; color: #9ca3af; margin: 8px 0 0; font-style: italic;">↑ Icon appears on hover</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Contextual (on claim detection)</h3>
+      <p>Button only appears when response contains checkable claims (auto-detected)</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px;">
+          <p style="margin: 0 0 8px; font-size: 14px; color: #374151;">The city's congestion pricing program reduced traffic by 15% in the first year...</p>
+          <div style="background: #fef3c7; padding: 6px 10px; border-radius: 4px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+            <span>💡</span>
+            <span style="color: #92400e;">This response contains checkable claims</span>
+            <span style="color: #3b82f6; cursor: pointer; margin-left: 4px;">Find Context →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <p class="subtitle">Note: Once results exist, a badge will show the status. This question is about the initial trigger button.</p>
+</div>

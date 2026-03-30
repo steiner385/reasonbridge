@@ -29,6 +29,10 @@
     "./auth": {
       "types": "./dist/auth/index.d.ts",
       "import": "./dist/auth/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
     }
   },
   "files": [
@@ -41,8 +45,8 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.1014.0",
-    "@aws-sdk/client-sqs": "^3.1014.0",
+    "@aws-sdk/client-sns": "^3.1019.0",
+    "@aws-sdk/client-sqs": "^3.1019.0",
     "@reason-bridge/event-schemas": "workspace:*"
   },
   "peerDependencies": {

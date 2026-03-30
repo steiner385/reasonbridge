@@ -185,7 +185,7 @@ export class AppealService {
    * @param userId - The user's unique identifier
    * @returns Array of AppealDto for all user appeals
    */
-  async getUserAppeals(userId: string): Promise<AppealDto[]> {
+  async getUserAppeals(userId: string, limit = 100): Promise<AppealDto[]> {
     const appeals = await this.prisma.tierAppeal.findMany({
       where: { userId },
       include: {
@@ -194,6 +194,7 @@ export class AppealService {
         reviewedBy: true,
       },
       orderBy: { createdAt: 'desc' },
+      take: limit,
     });
 
     return appeals.map((appeal) => this.toAppealDto(appeal));
@@ -228,7 +229,7 @@ export class AppealService {
    *
    * @returns Array of AppealDto with PENDING status, oldest first
    */
-  async getPendingAppeals(): Promise<AppealDto[]> {
+  async getPendingAppeals(limit = 100): Promise<AppealDto[]> {
     const appeals = await this.prisma.tierAppeal.findMany({
       where: { status: TierAppealStatus.PENDING },
       include: {
@@ -237,6 +238,7 @@ export class AppealService {
         reviewedBy: true,
       },
       orderBy: { createdAt: 'asc' },
+      take: limit,
     });
 
     return appeals.map((appeal) => this.toAppealDto(appeal));

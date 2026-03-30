@@ -241,11 +241,19 @@ export async function loginWithDemoAccount(page: Page, userName: DemoUserName): 
   // Use specific selector to avoid confusion with other modals
   await expect(page.locator('[data-testid="login-modal"]')).not.toBeVisible({ timeout: 10000 });
 
-  // Critical: Wait for auth state to fully stabilize
-  // This includes token storage and React state propagation
+  // Wait for URL to change (indicates navigation completed)
   await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(500); // Allow async localStorage writes and state propagation to complete
+
+  // Critical: Wait for authenticated UI to appear instead of 'networkidle'
+  // The 'networkidle' wait hangs forever because the WebSocket connection
+  // (established on auth) keeps the network active. Instead, we wait for
+  // the Profile link which only renders when user is authenticated.
+  await expect(page.getByRole('link', { name: 'Profile', exact: true })).toBeVisible({
+    timeout: 10000,
+  });
+
+  // Brief wait for async localStorage writes and React state propagation
+  await page.waitForTimeout(200);
 }
 
 /**
@@ -262,8 +270,10 @@ export async function logout(page: Page): Promise<void> {
     await userMenu.click();
     // Click logout option
     await page.getByRole('menuitem', { name: /log out|logout|sign out/i }).click();
-    // Wait for logout to complete
-    await page.waitForLoadState('networkidle');
+    // Wait for logout to complete - check that Profile link disappears (indicates logged out)
+    await expect(page.getByRole('link', { name: 'Profile', exact: true })).not.toBeVisible({
+      timeout: 10000,
+    });
   }
 }
 
@@ -289,15 +299,17 @@ export async function isAuthenticated(page: Page): Promise<boolean> {
  */
 export async function navigateToTopic(page: Page, topicTitle: string): Promise<void> {
   await page.goto('/topics');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
   // Click on the topic card with matching title
   const topicCard = page.locator(`[data-testid="topic-card"]:has-text("${topicTitle}")`);
   await expect(topicCard.first()).toBeVisible({ timeout: 10000 });
   await topicCard.first().click();
 
-  // Wait for topic page to load
-  await page.waitForLoadState('networkidle');
+  // Wait for topic page to load - wait for topic title to appear
+  await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
+    timeout: 10000,
+  });
 }
 
 /**
@@ -312,7 +324,7 @@ export async function navigateToTopic(page: Page, topicTitle: string): Promise<v
 export async function getFirstTopicTitle(page: Page): Promise<string> {
   // Navigate to topics to ensure the page is accessible
   await page.goto('/topics');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
   // Return known seeded topic - Congestion Pricing is always first alphabetically
   // and is guaranteed to exist in the seeded database
@@ -341,9 +353,9 @@ export async function navigateToSeededTopic(
 
   // Navigate to the topic's discussion page directly
   await page.goto(`/discussions?topic=${topic.id}`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
-  // Wait for topic content to load
+  // Wait for topic content to load (replaces networkidle which hangs due to WebSocket)
   await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
     timeout: 10000,
   });
@@ -382,7 +394,8 @@ export async function navigateToOwnedTopic(
   }
 
   await page.goto(`/discussions?topic=${topic.id}`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  // Wait for topic content (replaces networkidle which hangs due to WebSocket)
   await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
     timeout: 10000,
   });

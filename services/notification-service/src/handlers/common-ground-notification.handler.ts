@@ -377,6 +377,7 @@ export class CommonGroundNotificationHandler {
         createdAt,
       },
       select: { id: true, userId: true },
+      take: 1000, // Limit to prevent unbounded results
     });
 
     // Return IDs in the same order as recipientIds

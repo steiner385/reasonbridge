@@ -1,0 +1,75 @@
+<h2>How should fact-check results be displayed?</h2>
+<p class="subtitle">After clicking "Find Context", where do the sources and context appear?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Expandable Panel Below Response</h3>
+      <p>Inline expansion, keeps context close to the response</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px;">
+          <p style="margin: 0 0 8px; font-size: 14px; color: #374151;">The city's congestion pricing program <span style="border-bottom: 2px dotted #3b82f6;">reduced traffic by 15% in the first year</span>...</p>
+          <div style="display: flex; gap: 12px; font-size: 13px; color: #6b7280; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+            <span>▲ 12</span><span>💬 Reply</span>
+            <span style="color: #3b82f6;">✓ 1 claim</span>
+          </div>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 12px; margin-top: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">📎 Related Context</div>
+            <div style="background: white; border-radius: 4px; padding: 10px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 13px; font-style: italic; color: #475569; margin-bottom: 6px;">"reduced traffic by 15% in the first year"</div>
+              <div style="font-size: 12px; color: #3b82f6;">🔗 PolitiFact · 85% credibility</div>
+              <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Rating: Mostly True</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Slide-out Side Panel</h3>
+      <p>Panel slides in from right, response stays visible</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; display: flex;">
+          <div style="flex: 1; padding: 16px; border-right: 1px solid #e5e7eb;">
+            <p style="margin: 0; font-size: 14px; color: #374151;">The city's congestion pricing program <span style="border-bottom: 2px dotted #3b82f6;">reduced traffic by 15%</span>...</p>
+            <div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">← Main content area</div>
+          </div>
+          <div style="width: 200px; padding: 12px; background: #f8fafc;">
+            <div style="font-size: 12px; font-weight: 500; margin-bottom: 8px;">📎 Related Context</div>
+            <div style="background: white; border-radius: 4px; padding: 8px; font-size: 11px; border: 1px solid #e2e8f0;">
+              <div style="color: #3b82f6;">🔗 PolitiFact</div>
+              <div style="color: #6b7280; margin-top: 4px;">85% credibility</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Popover on Claim Click</h3>
+      <p>Click highlighted claim to see its specific context in a tooltip-style popover</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px; position: relative;">
+          <p style="margin: 0; font-size: 14px; color: #374151;">The city's congestion pricing program <span style="border-bottom: 2px dotted #3b82f6; background: #dbeafe; padding: 0 2px;">reduced traffic by 15% in the first year</span>...</p>
+          <div style="position: absolute; top: 45px; left: 140px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 220px; z-index: 10;">
+            <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">📎 Related Context</div>
+            <div style="font-size: 12px; color: #3b82f6;">🔗 PolitiFact · 85%</div>
+            <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Rating: Mostly True</div>
+            <div style="font-size: 10px; color: #94a3b8; margin-top: 6px; border-top: 1px solid #e5e7eb; padding-top: 6px;">Click outside to close</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <p class="subtitle">The existing FactCheckResultDisplay component supports the expandable panel pattern. Popover would require new component work.</p>
+</div>

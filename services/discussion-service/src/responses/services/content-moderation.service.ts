@@ -198,11 +198,22 @@ export class ContentModerationService {
   }
 
   /**
-   * Get all responses with a specific moderation status in a topic
+   * Get responses with a specific moderation status in a topic
    * @param topicId - The ID of the topic
    * @param status - The status filter (VISIBLE, HIDDEN, or REMOVED)
+   * @param limit - Maximum number of responses to return (default: 100, max: 500)
+   * @param offset - Number of responses to skip (default: 0)
    */
-  async getResponsesByStatus(topicId: string, status: 'VISIBLE' | 'HIDDEN' | 'REMOVED') {
+  async getResponsesByStatus(
+    topicId: string,
+    status: 'VISIBLE' | 'HIDDEN' | 'REMOVED',
+    limit = 100,
+    offset = 0,
+  ) {
+    // Enforce safe limits
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeOffset = Math.max(0, offset);
+
     // Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },
@@ -228,6 +239,8 @@ export class ContentModerationService {
       orderBy: {
         createdAt: 'desc',
       },
+      take: safeLimit,
+      skip: safeOffset,
     });
   }
 

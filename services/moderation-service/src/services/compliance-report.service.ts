@@ -240,6 +240,8 @@ export class ComplianceReportService {
         createdAt: true,
         handledAt: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for analytics query
     });
 
     const reportsByReason: Record<string, number> = {};
@@ -297,6 +299,8 @@ export class ComplianceReportService {
         decision: true,
         aiFlags: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for analytics query
     });
 
     let groomingDetections = 0;
@@ -348,6 +352,8 @@ export class ComplianceReportService {
         createdAt: true,
         status: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for analytics query
     });
 
     let submittedCount = 0;
@@ -400,6 +406,8 @@ export class ComplianceReportService {
         createdAt: true,
         reviewedAt: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 10000, // Limit for analytics query
     });
 
     const slaLimits: Record<string, number> = {
@@ -498,6 +506,7 @@ export class ComplianceReportService {
         reporterId: true,
       },
       distinct: ['reporterId'],
+      take: 10000, // Limit for analytics query
     });
 
     // Count minors whose content was moderated
@@ -509,6 +518,7 @@ export class ComplianceReportService {
         authorId: true,
       },
       distinct: ['authorId'],
+      take: 10000, // Limit for analytics query
     });
 
     return {

@@ -42,17 +42,22 @@ export class ResponsesService {
   ) {}
 
   /**
-   * Get all responses for a discussion topic
+   * Get responses for a discussion topic with pagination
    * @param topicId - The ID of the topic to get responses for
    * @param options - Query options
    * @param options.includePendingReview - Include PENDING_REVIEW responses (for moderators)
+   * @param options.limit - Maximum number of responses to return (default: 100, max: 500)
+   * @param options.offset - Number of responses to skip (default: 0)
    * @returns Array of responses for the topic
    */
   async getResponsesForTopic(
     topicId: string,
-    options: { includePendingReview?: boolean } = {},
+    options: { includePendingReview?: boolean; limit?: number; offset?: number } = {},
   ): Promise<ResponseDto[]> {
-    const { includePendingReview = false } = options;
+    const { includePendingReview = false, limit = 100, offset = 0 } = options;
+    // Enforce maximum limit to prevent excessive data fetching
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeOffset = Math.max(0, offset);
 
     // Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
@@ -69,7 +74,7 @@ export class ResponsesService {
       ? undefined // No filter - include all statuses
       : { not: 'PENDING_REVIEW' as const };
 
-    // Fetch all responses for the topic
+    // Fetch responses for the topic with pagination
     const responses = await this.prisma.response.findMany({
       where: {
         topicId,
@@ -99,6 +104,8 @@ export class ResponsesService {
       orderBy: {
         createdAt: 'asc', // Order by creation time, oldest first
       },
+      take: safeLimit,
+      skip: safeOffset,
     });
 
     // Map to ResponseDto array
@@ -894,25 +901,30 @@ export class ResponsesService {
   }
 
   /**
-   * T038 [US2] - Get all responses for a discussion with threading support
+   * T038 [US2] - Get responses for a discussion with threading support and pagination
    *
    * Requirements:
    * - Exclude soft-deleted responses (deletedAt is not null)
    * - Exclude PENDING_REVIEW responses by default (for regular users)
    * - Include author info and citations
-   * - Support pagination (Phase 9)
+   * - Pagination with configurable limit and offset
    * - Order by createdAt ascending (chronological)
    *
    * @param discussionId - The ID of the discussion
    * @param options - Query options
    * @param options.includePendingReview - Include PENDING_REVIEW responses (for moderators)
+   * @param options.limit - Maximum number of responses to return (default: 100, max: 500)
+   * @param options.offset - Number of responses to skip (default: 0)
    * @returns Array of responses for the discussion
    */
   async getDiscussionResponses(
     discussionId: string,
-    options: { includePendingReview?: boolean } = {},
+    options: { includePendingReview?: boolean; limit?: number; offset?: number } = {},
   ): Promise<ResponseDetailDto[]> {
-    const { includePendingReview = false } = options;
+    const { includePendingReview = false, limit = 100, offset = 0 } = options;
+    // Enforce maximum limit to prevent excessive data fetching
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeOffset = Math.max(0, offset);
 
     // Verify discussion exists
     const discussion = await this.prisma.discussion.findUnique({
@@ -929,7 +941,7 @@ export class ResponsesService {
       ? { not: 'REMOVED' as const } // Only exclude REMOVED, include PENDING_REVIEW
       : { notIn: ['REMOVED' as const, 'PENDING_REVIEW' as const] };
 
-    // Fetch all non-deleted responses
+    // Fetch non-deleted responses with pagination
     const responses = await this.prisma.response.findMany({
       where: {
         discussionId,
@@ -952,6 +964,8 @@ export class ResponsesService {
         },
       },
       orderBy: { createdAt: 'asc' },
+      take: safeLimit,
+      skip: safeOffset,
     });
 
     // Map to ResponseDetailDto array

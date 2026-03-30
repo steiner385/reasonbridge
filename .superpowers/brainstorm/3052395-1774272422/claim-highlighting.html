@@ -1,0 +1,66 @@
+<h2>How should claims be highlighted in responses?</h2>
+<p class="subtitle">When fact-check results return, the matching claims in the response text need visual treatment</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Inline Underline</h3>
+      <p>Subtle dotted underline on claim text, hover to see context badge</p>
+      <div class="mockup" style="margin-top: 12px; font-size: 14px; line-height: 1.6;">
+        <div class="mockup-body" style="padding: 16px;">
+          <p style="margin: 0;">The city's congestion pricing program <span style="border-bottom: 2px dotted #3b82f6; cursor: pointer;" title="Related Context available">reduced traffic by 15% in the first year</span>, which surprised many economists who predicted smaller impacts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Background Highlight</h3>
+      <p>Light background color on claim text, click to expand context panel</p>
+      <div class="mockup" style="margin-top: 12px; font-size: 14px; line-height: 1.6;">
+        <div class="mockup-body" style="padding: 16px;">
+          <p style="margin: 0;">The city's congestion pricing program <span style="background: linear-gradient(to bottom, transparent 60%, rgba(59, 130, 246, 0.2) 60%); cursor: pointer;">reduced traffic by 15% in the first year</span>, which surprised many economists who predicted smaller impacts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Margin Indicators</h3>
+      <p>Small icons in the margin next to lines containing claims, less intrusive to reading flow</p>
+      <div class="mockup" style="margin-top: 12px; font-size: 14px; line-height: 1.6;">
+        <div class="mockup-body" style="padding: 16px;">
+          <div style="display: flex; gap: 8px;">
+            <span style="color: #3b82f6; font-size: 12px; flex-shrink: 0;">📎</span>
+            <p style="margin: 0;">The city's congestion pricing program reduced traffic by 15% in the first year, which surprised many economists who predicted smaller impacts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>No Inline Highlighting</h3>
+      <p>Claims shown only in the expandable results panel below the response, keeps text clean</p>
+      <div class="mockup" style="margin-top: 12px; font-size: 14px; line-height: 1.6;">
+        <div class="mockup-body" style="padding: 16px;">
+          <p style="margin: 0 0 12px 0;">The city's congestion pricing program reduced traffic by 15% in the first year, which surprised many economists who predicted smaller impacts.</p>
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 12px; font-size: 13px; color: #6b7280;">
+            <span style="background: #dbeafe; padding: 2px 8px; border-radius: 4px; font-size: 12px;">📎 1 claim with context</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <p class="subtitle">Consider: highlighting draws attention to checkable claims but may feel "grading" the content. The platform philosophy is "Related Context" not "Truth Score".</p>
+</div>

@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { DEMO_CREDENTIALS } from '@reason-bridge/common';
+import { DEMO_CREDENTIALS } from '@reason-bridge/common/config';
 import { useAuth } from '../hooks/useAuth';
 
 /**

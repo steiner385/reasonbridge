@@ -228,6 +228,7 @@ describe('VerificationService', () => {
           },
         },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       });
     });
 
@@ -410,6 +411,7 @@ describe('VerificationService', () => {
       expect(mockPrismaService.verificationRecord.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-123' },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       });
     });
 
