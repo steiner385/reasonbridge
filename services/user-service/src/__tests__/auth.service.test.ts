@@ -13,6 +13,7 @@ import { VisitorSessionRepository } from '../repositories/visitor-session.reposi
 import { CognitoService } from '../auth/cognito.service.js';
 import { GoogleOAuthService } from '../auth/oauth/google-oauth.service.js';
 import { AppleOAuthService } from '../auth/oauth/apple-oauth.service.js';
+import { OAuthStateService } from '../auth/oauth-state.service.js';
 import { VerificationService } from '../auth/verification.service.js';
 import { EmailService } from '../services/email.service.js';
 import { ConfigService } from '@nestjs/config';
@@ -130,6 +131,11 @@ describe('AuthService - Unit Tests', () => {
     verifyAndGetProfile: vi.fn(),
   };
 
+  const mockOAuthStateService = {
+    generateState: vi.fn(),
+    validateState: vi.fn(),
+  };
+
   const mockVerificationService = {
     generateToken: vi.fn(),
     verifyToken: vi.fn(),
@@ -180,6 +186,7 @@ describe('AuthService - Unit Tests', () => {
       mockCognitoService as unknown as CognitoService,
       mockGoogleOAuthService as unknown as GoogleOAuthService,
       mockAppleOAuthService as unknown as AppleOAuthService,
+      mockOAuthStateService as unknown as OAuthStateService,
       mockVerificationService as unknown as VerificationService,
       mockConfigService as unknown as ConfigService,
       mockEmailService as unknown as EmailService,
@@ -553,51 +560,52 @@ describe('AuthService - Unit Tests', () => {
     it('should successfully initiate Google OAuth', async () => {
       // Arrange
       const dto = { provider: OAuthProvider.GOOGLE, visitorSessionId: 'visitor-123' };
-      mockGoogleOAuthService.generateStateToken.mockReturnValue('state-token-google');
+      mockOAuthStateService.generateState.mockResolvedValue('state-token-google');
       mockGoogleOAuthService.generateAuthUrl.mockReturnValue(
         'https://accounts.google.com/oauth/authorize?...',
       );
 
       // Act
-      const result = await authService.initiateOAuth(dto);
+      const result = await authService.initiateOAuth(dto, dto.visitorSessionId);
 
       // Assert
       expect(result).toBeDefined();
       expect(result.authUrl).toBe('https://accounts.google.com/oauth/authorize?...');
       expect(result.state).toBe('state-token-google');
       expect(result.provider).toBe(OAuthProvider.GOOGLE);
-      expect(mockGoogleOAuthService.generateStateToken).toHaveBeenCalled();
+      expect(mockOAuthStateService.generateState).toHaveBeenCalledWith('google', 'visitor-123');
       expect(mockGoogleOAuthService.generateAuthUrl).toHaveBeenCalledWith('state-token-google');
     });
 
     it('should successfully initiate Apple OAuth', async () => {
       // Arrange
       const dto = { provider: OAuthProvider.APPLE, visitorSessionId: 'visitor-123' };
-      mockAppleOAuthService.generateStateToken.mockReturnValue('state-token-apple');
+      mockOAuthStateService.generateState.mockResolvedValue('state-token-apple');
       mockAppleOAuthService.generateAuthUrl.mockReturnValue(
         'https://appleid.apple.com/auth/authorize?...',
       );
 
       // Act
-      const result = await authService.initiateOAuth(dto);
+      const result = await authService.initiateOAuth(dto, dto.visitorSessionId);
 
       // Assert
       expect(result).toBeDefined();
       expect(result.authUrl).toBe('https://appleid.apple.com/auth/authorize?...');
       expect(result.state).toBe('state-token-apple');
       expect(result.provider).toBe(OAuthProvider.APPLE);
-      expect(mockAppleOAuthService.generateStateToken).toHaveBeenCalled();
+      expect(mockOAuthStateService.generateState).toHaveBeenCalledWith('apple', 'visitor-123');
       expect(mockAppleOAuthService.generateAuthUrl).toHaveBeenCalledWith('state-token-apple');
     });
 
     it('should throw BadRequestException for unsupported provider', async () => {
       // Arrange
       const dto = { provider: 'FACEBOOK' as any, visitorSessionId: 'visitor-123' };
+      mockOAuthStateService.generateState.mockResolvedValue('state-token');
 
       // Act & Assert
-      await expect(authService.initiateOAuth(dto)).rejects.toThrow(BadRequestException);
-      expect(mockGoogleOAuthService.generateStateToken).not.toHaveBeenCalled();
-      expect(mockAppleOAuthService.generateStateToken).not.toHaveBeenCalled();
+      await expect(authService.initiateOAuth(dto, dto.visitorSessionId)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -608,6 +616,11 @@ describe('AuthService - Unit Tests', () => {
       code: 'oauth-code-123',
       state: 'state-token',
     };
+
+    beforeEach(() => {
+      // Default: OAuth state validation passes
+      mockOAuthStateService.validateState.mockResolvedValue(true);
+    });
 
     it('should successfully handle Google OAuth callback for new user', async () => {
       // Arrange
@@ -978,6 +991,7 @@ describe('AuthService - Unit Tests', () => {
         name: 'Google User',
         googleId: 'google-id-123',
       };
+      mockOAuthStateService.validateState.mockResolvedValue(true);
       mockGoogleOAuthService.verifyAndGetProfile.mockResolvedValue(googleProfile);
       mockUserRepository.findByEmail.mockResolvedValue(null);
       mockUserRepository.create.mockResolvedValue({

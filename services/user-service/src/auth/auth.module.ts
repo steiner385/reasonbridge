@@ -20,6 +20,7 @@ import { AUTH_SERVICE } from './auth.interface.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
 import { VerificationService } from './verification.service.js';
 import { EmailService } from '../services/email.service.js';
+import { OAuthStateService } from './oauth-state.service.js';
 import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
 import { VERIFICATION_CODE_GENERATOR } from './verification-code-generator.interface.js';
 import { RandomVerificationCodeGenerator } from './random-verification-code-generator.js';
@@ -133,8 +134,18 @@ const verificationCodeGeneratorProvider = {
     // Verification and email services for verify-email and resend-verification endpoints
     VerificationService,
     EmailService,
+    // OAuth state token management for CSRF protection
+    OAuthStateService,
     PrismaService,
   ],
-  exports: [AUTH_SERVICE, JwtAuthGuard, AdminGuard, ModeratorGuard, RolesGuard, JwtModule],
+  exports: [
+    AUTH_SERVICE,
+    JwtAuthGuard,
+    AdminGuard,
+    ModeratorGuard,
+    RolesGuard,
+    JwtModule,
+    OAuthStateService,
+  ],
 })
 export class AuthModule {}
