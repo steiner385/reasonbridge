@@ -120,16 +120,24 @@ export class TopicLinksService {
   }
 
   /**
-   * Get all links for a topic (both as source and target)
+   * Get links for a topic (both as source and target)
    *
    * @param topicId - ID of the topic
    * @param query - Filter options
+   * @param limit - Maximum number of links to return (default: 100, max: 500)
+   * @param offset - Number of links to skip (default: 0)
    * @returns Array of topic links
    */
   async getLinksForTopic(
     topicId: string,
     query: GetTopicLinksQueryDto = {},
+    limit = 100,
+    offset = 0,
   ): Promise<TopicLinkResponseDto[]> {
+    // Enforce safe limits
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeOffset = Math.max(0, offset);
+
     const where: Prisma.TopicLinkWhereInput = {
       OR: [{ sourceTopicId: topicId }, { targetTopicId: topicId }],
     };
@@ -157,6 +165,8 @@ export class TopicLinksService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: safeLimit,
+      skip: safeOffset,
     });
 
     return links.map((link) => this.mapToResponseDto(link));
@@ -167,9 +177,20 @@ export class TopicLinksService {
    *
    * @param topicId - ID of the topic
    * @param confirmedOnly - Only return confirmed links (default: true)
+   * @param limit - Maximum number of linked topics to return (default: 100, max: 500)
+   * @param offset - Number of links to skip (default: 0)
    * @returns Array of linked topics with relationship info
    */
-  async getLinkedTopics(topicId: string, confirmedOnly = true): Promise<LinkedTopicResponseDto[]> {
+  async getLinkedTopics(
+    topicId: string,
+    confirmedOnly = true,
+    limit = 100,
+    offset = 0,
+  ): Promise<LinkedTopicResponseDto[]> {
+    // Enforce safe limits
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeOffset = Math.max(0, offset);
+
     const where: Prisma.TopicLinkWhereInput = {
       OR: [{ sourceTopicId: topicId }, { targetTopicId: topicId }],
     };
@@ -189,6 +210,8 @@ export class TopicLinksService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: safeLimit,
+      skip: safeOffset,
     });
 
     return links.map((link) => {
