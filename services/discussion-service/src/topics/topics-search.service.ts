@@ -37,8 +37,12 @@ export class TopicsSearchService {
   ) {}
 
   /**
-   * Full-text search using PostgreSQL tsvector
-   * T010: Fast search across title and description
+   * Full-text search using ILIKE pattern matching
+   * T010: Search across title and description
+   *
+   * Note: The original tsvector-based search was removed when the search_vector
+   * column was dropped in migration 20260320232632_add_verification_token_type.
+   * This implementation uses ILIKE for basic text matching.
    *
    * @param query - Search query string
    * @param limit - Maximum results to return
@@ -49,15 +53,21 @@ export class TopicsSearchService {
     limit: number = 20,
   ): Promise<Array<{ id: string; rank: number }>> {
     try {
-      // Use PostgreSQL tsvector search with ranking
+      // Use ILIKE pattern matching with relevance ranking
+      // Higher rank for title matches, lower for description matches
+      const searchPattern = `%${query}%`;
       const results = await this.prisma.$queryRaw<Array<{ id: string; rank: number }>>`
         SELECT
           id::text,
-          ts_rank(search_vector, plainto_tsquery('english', ${query})) as rank
+          CASE
+            WHEN title ILIKE ${searchPattern} THEN 1.0
+            WHEN description ILIKE ${searchPattern} THEN 0.5
+            ELSE 0.0
+          END as rank
         FROM discussion_topics
-        WHERE search_vector @@ plainto_tsquery('english', ${query})
+        WHERE (title ILIKE ${searchPattern} OR description ILIKE ${searchPattern})
           AND status != 'ARCHIVED'
-        ORDER BY rank DESC
+        ORDER BY rank DESC, created_at DESC
         LIMIT ${limit}
       `;
 
