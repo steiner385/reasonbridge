@@ -37,6 +37,7 @@ import type {
   ReportContentType,
 } from '../dto/report.dto.js';
 import type { SafetyReportReason, SafetyReportStatus, ReviewPriority } from '@prisma/client';
+import { CONTENT_SCREENING } from '../constants/index.js';
 import type {
   CreateActionRequest,
   ApproveActionRequest,
@@ -89,8 +90,10 @@ export class ModerationController {
       throw new BadRequestException('content cannot be empty');
     }
 
-    if (request.content.length > 10000) {
-      throw new BadRequestException('content exceeds maximum length of 10000');
+    if (request.content.length > CONTENT_SCREENING.MAX_LENGTH) {
+      throw new BadRequestException(
+        `content exceeds maximum length of ${CONTENT_SCREENING.MAX_LENGTH}`,
+      );
     }
 
     const screening_result = await this.screeningService.screenContent(

@@ -21,6 +21,7 @@ import type { ResponseDto, CitedSourceDto, UserSummaryDto } from './dto/response
 import { getGravatarUrl } from '../dto/user-summary.dto.js';
 import { DiscussionLogger } from '../utils/logger.js';
 import { validateCitationUrl } from '../utils/ssrf-validator.js';
+import { RESPONSE_CONSTRAINTS } from '../constants/index.js';
 
 /**
  * T053 [US3] - Threaded response with nested replies
@@ -125,12 +126,19 @@ export class ResponsesService {
     createResponseDto: CreateResponseDto,
   ): Promise<ResponseDto> {
     // Validate input
-    if (!createResponseDto.content || createResponseDto.content.trim().length < 10) {
-      throw new BadRequestException('Response content must be at least 10 characters');
+    if (
+      !createResponseDto.content ||
+      createResponseDto.content.trim().length < RESPONSE_CONSTRAINTS.MIN_LENGTH
+    ) {
+      throw new BadRequestException(
+        `Response content must be at least ${RESPONSE_CONSTRAINTS.MIN_LENGTH} characters`,
+      );
     }
 
-    if (createResponseDto.content.length > 10000) {
-      throw new BadRequestException('Response content must not exceed 10000 characters');
+    if (createResponseDto.content.length > RESPONSE_CONSTRAINTS.MAX_LENGTH) {
+      throw new BadRequestException(
+        `Response content must not exceed ${RESPONSE_CONSTRAINTS.MAX_LENGTH} characters`,
+      );
     }
 
     // Verify topic exists and is active or seeding
@@ -341,12 +349,19 @@ export class ResponsesService {
 
     // Validate content if provided
     if (updateResponseDto.content !== undefined) {
-      if (!updateResponseDto.content || updateResponseDto.content.trim().length < 10) {
-        throw new BadRequestException('Response content must be at least 10 characters');
+      if (
+        !updateResponseDto.content ||
+        updateResponseDto.content.trim().length < RESPONSE_CONSTRAINTS.MIN_LENGTH
+      ) {
+        throw new BadRequestException(
+          `Response content must be at least ${RESPONSE_CONSTRAINTS.MIN_LENGTH} characters`,
+        );
       }
 
-      if (updateResponseDto.content.length > 10000) {
-        throw new BadRequestException('Response content must not exceed 10000 characters');
+      if (updateResponseDto.content.length > RESPONSE_CONSTRAINTS.MAX_LENGTH) {
+        throw new BadRequestException(
+          `Response content must not exceed ${RESPONSE_CONSTRAINTS.MAX_LENGTH} characters`,
+        );
       }
     }
 
@@ -572,8 +587,10 @@ export class ResponsesService {
     }> = [];
 
     if (dto.citations && dto.citations.length > 0) {
-      if (dto.citations.length > 10) {
-        throw new BadRequestException('Maximum 10 citations allowed per response');
+      if (dto.citations.length > RESPONSE_CONSTRAINTS.MAX_CITATIONS) {
+        throw new BadRequestException(
+          `Maximum ${RESPONSE_CONSTRAINTS.MAX_CITATIONS} citations allowed per response`,
+        );
       }
 
       for (const citation of dto.citations) {

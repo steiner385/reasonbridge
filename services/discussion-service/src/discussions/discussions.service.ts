@@ -29,6 +29,7 @@ import {
   PaginatedResponseDto,
 } from '../dto/pagination.dto.js';
 import { getGravatarUrl } from '../dto/user-summary.dto.js';
+import { RESPONSE_CONSTRAINTS } from '../constants/index.js';
 
 export interface ListDiscussionsQuery extends PaginationQueryDto {
   topicId?: string;
@@ -101,8 +102,10 @@ export class DiscussionsService {
     }> = [];
 
     if (dto.initialResponse.citations && dto.initialResponse.citations.length > 0) {
-      if (dto.initialResponse.citations.length > 10) {
-        throw new BadRequestException('Maximum 10 citations allowed per response');
+      if (dto.initialResponse.citations.length > RESPONSE_CONSTRAINTS.MAX_CITATIONS) {
+        throw new BadRequestException(
+          `Maximum ${RESPONSE_CONSTRAINTS.MAX_CITATIONS} citations allowed per response`,
+        );
       }
 
       for (const citation of dto.initialResponse.citations) {

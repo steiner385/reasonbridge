@@ -28,6 +28,7 @@ import type {
   PendingAppealResponse,
   ListAppealResponse,
 } from '../dto/appeal.dto.js';
+import { ACTION_CONSTRAINTS, APPEAL_CONSTRAINTS } from '../constants/index.js';
 
 // Re-export DTOs for backward compatibility
 export type {
@@ -124,8 +125,10 @@ export class ModerationActionsService {
     request: CreateActionRequest,
     moderatorId: string,
   ): Promise<ModerationActionResponse> {
-    if (request.reasoning.length < 20) {
-      throw new BadRequestException('Reasoning must be at least 20 characters long');
+    if (request.reasoning.length < ACTION_CONSTRAINTS.REASONING_MIN_LENGTH) {
+      throw new BadRequestException(
+        `Reasoning must be at least ${ACTION_CONSTRAINTS.REASONING_MIN_LENGTH} characters long`,
+      );
     }
 
     const severity = this.mapActionToSeverity(request.actionType);
@@ -378,12 +381,16 @@ export class ModerationActionsService {
       throw new BadRequestException('reason is required');
     }
 
-    if (request.reason.length < 20) {
-      throw new BadRequestException('Appeal reason must be at least 20 characters long');
+    if (request.reason.length < APPEAL_CONSTRAINTS.REASON_MIN_LENGTH) {
+      throw new BadRequestException(
+        `Appeal reason must be at least ${APPEAL_CONSTRAINTS.REASON_MIN_LENGTH} characters long`,
+      );
     }
 
-    if (request.reason.length > 5000) {
-      throw new BadRequestException('Appeal reason cannot exceed 5000 characters');
+    if (request.reason.length > APPEAL_CONSTRAINTS.REASON_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Appeal reason cannot exceed ${APPEAL_CONSTRAINTS.REASON_MAX_LENGTH} characters`,
+      );
     }
 
     const action = await this.prisma.moderationAction.findUnique({
@@ -550,14 +557,16 @@ export class ModerationActionsService {
       throw new BadRequestException('reasoning is required');
     }
 
-    if (request.reasoning.length < 20) {
+    if (request.reasoning.length < APPEAL_CONSTRAINTS.DECISION_REASONING_MIN_LENGTH) {
       throw new BadRequestException(
-        'Appeal decision reasoning must be at least 20 characters long',
+        `Appeal decision reasoning must be at least ${APPEAL_CONSTRAINTS.DECISION_REASONING_MIN_LENGTH} characters long`,
       );
     }
 
-    if (request.reasoning.length > 2000) {
-      throw new BadRequestException('Appeal decision reasoning cannot exceed 2000 characters');
+    if (request.reasoning.length > APPEAL_CONSTRAINTS.DECISION_REASONING_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Appeal decision reasoning cannot exceed ${APPEAL_CONSTRAINTS.DECISION_REASONING_MAX_LENGTH} characters`,
+      );
     }
 
     const appeal = await this.prisma.appeal.findUnique({
