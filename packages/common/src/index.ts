@@ -16,3 +16,4 @@ export * from './validation/index.js';
 export * from './config/index.js';
 export * from './observability/index.js';
 export * from './auth/index.js';
+export * from './clients/index.js';
