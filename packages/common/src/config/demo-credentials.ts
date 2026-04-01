@@ -25,7 +25,9 @@ export interface DemoCredential {
   /** Password (plaintext - will be hashed during seeding) */
   password: string;
   /** Role description shown in UI */
-  role: 'Admin' | 'Moderator' | 'Power User' | 'Regular User' | 'New User';
+  role: 'Admin' | 'Moderator' | 'Power User' | 'Regular User' | 'New User' | 'Unverified User';
+  /** Whether email is verified (defaults to true) */
+  emailVerified?: boolean;
 }
 
 /**
@@ -64,6 +66,13 @@ export const DEMO_CREDENTIALS: readonly DemoCredential[] = [
     email: 'demo-new@reasonbridge.demo',
     password: 'DemoNew2026!',
     role: 'New User',
+  },
+  {
+    name: 'Unverified Uma',
+    email: 'demo-unverified@reasonbridge.demo',
+    password: 'DemoUnverified2026!',
+    role: 'Unverified User',
+    emailVerified: false,
   },
 ] as const;
 

@@ -197,7 +197,8 @@ export type DemoUserName =
   | 'Mod Martinez'
   | 'Alice Anderson'
   | 'Bob Builder'
-  | 'New User';
+  | 'New User'
+  | 'Unverified Uma';
 
 /**
  * Login with a demo account using the login modal.
@@ -218,6 +219,60 @@ export type DemoUserName =
  * });
  * ```
  */
+/**
+ * Demo user credentials for E2E tests.
+ * Matches packages/common/src/config/demo-credentials.ts
+ */
+export const DEMO_CREDENTIALS: Record<DemoUserName, { email: string; password: string }> = {
+  'Admin Adams': { email: 'demo-admin@reasonbridge.demo', password: 'DemoAdmin2026!' },
+  'Mod Martinez': { email: 'demo-mod@reasonbridge.demo', password: 'DemoMod2026!' },
+  'Alice Anderson': { email: 'demo-alice@reasonbridge.demo', password: 'DemoAlice2026!' },
+  'Bob Builder': { email: 'demo-bob@reasonbridge.demo', password: 'DemoBob2026!' },
+  'New User': { email: 'demo-new@reasonbridge.demo', password: 'DemoNew2026!' },
+  'Unverified Uma': { email: 'demo-unverified@reasonbridge.demo', password: 'DemoUnverified2026!' },
+};
+
+/**
+ * Login with email and password using the login modal form.
+ *
+ * Use this for users that don't appear in quick-login buttons (e.g., unverified users).
+ *
+ * @param page - Playwright Page instance
+ * @param email - User's email address
+ * @param password - User's password
+ */
+export async function loginWithEmailPassword(
+  page: Page,
+  email: string,
+  password: string,
+): Promise<void> {
+  // Start at home page
+  await page.goto('/');
+
+  // Click Log In button
+  await page.getByRole('button', { name: /log in/i }).click();
+
+  // Wait for login modal to appear
+  await expect(page.getByRole('dialog')).toBeVisible();
+
+  // Fill email
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel(/email/i).fill(email);
+
+  // Fill password using ID selector (avoids ambiguity with "Show password" button)
+  await dialog.locator('#login-password').fill(password);
+
+  // Click the login button
+  await dialog.getByRole('button', { name: /^log in$/i }).click();
+
+  // Wait for login to complete
+  // Note: For unverified users, they may still be logged in but won't have access to certain features
+  await expect(page.locator('[data-testid="login-modal"]')).not.toBeVisible({ timeout: 10000 });
+
+  // Brief wait for async token storage
+  await page.waitForTimeout(200);
+}
+
 export async function loginWithDemoAccount(page: Page, userName: DemoUserName): Promise<void> {
   // Start at home page
   await page.goto('/');

@@ -16,7 +16,12 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount, SEEDED_TOPICS } from './helpers/demo-auth';
+import {
+  loginWithDemoAccount,
+  loginWithEmailPassword,
+  SEEDED_TOPICS,
+  DEMO_CREDENTIALS,
+} from './helpers/demo-auth';
 
 test.describe('Discussion Creation Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -229,17 +234,52 @@ test.describe('Discussion Creation Flow', () => {
     expect(page.url()).toMatch(/\/discussions\/[a-zA-Z0-9-]+$/);
   });
 
-  // =============================================================================
-  // INTENTIONALLY SKIPPED - Require error condition mocking
-  // =============================================================================
-
-  test.skip('should show error message on API failure', async () => {
-    // REQUIRES MOCK: Can't reliably cause API 403 errors in E2E
-    // Move to integration tests with controlled backend state
-  });
-
   test.skip('should show rate limit error when exceeded', async () => {
-    // REQUIRES MOCK: Can't reliably trigger rate limits in E2E
-    // Would require creating 5+ discussions in rapid succession
+    // Rate limiting is disabled in E2E test mode (NODE_ENV=test) to prevent flakiness.
+    // This test should be covered by integration tests with controlled rate limit settings.
+    // See: services/api-gateway/src/app.module.ts (ThrottlerGuard is conditionally disabled)
+  });
+});
+
+// =============================================================================
+// ERROR HANDLING TESTS - Separate describe to avoid Alice login in beforeEach
+// =============================================================================
+test.describe('Discussion Creation - Error Handling', () => {
+  test('should show error message when unverified user tries to create discussion', async ({
+    page,
+  }) => {
+    // Login as unverified user (no beforeEach login)
+    await loginWithEmailPassword(
+      page,
+      DEMO_CREDENTIALS['Unverified Uma'].email,
+      DEMO_CREDENTIALS['Unverified Uma'].password,
+    );
+
+    // Navigate to discussion list page
+    const topic = SEEDED_TOPICS.CONGESTION_PRICING;
+    await page.goto(`/topics/${topic.id}/discussions`);
+    await page.waitForLoadState('networkidle');
+
+    // Open form and try to create a discussion
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
+
+    // Fill in valid discussion details
+    await page.locator('#title').fill('Test Discussion from Unverified User');
+    await page
+      .locator('#content')
+      .fill(
+        'This is a test discussion that should fail because the user is not verified. The content needs to be at least 50 characters.',
+      );
+
+    // Try to submit
+    await page.getByRole('button', { name: /publish discussion/i }).click();
+
+    // Should show error message about being verified
+    await expect(page.getByText(/verified users|only verified/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 });
