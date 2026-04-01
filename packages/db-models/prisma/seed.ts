@@ -43,11 +43,12 @@ async function main() {
   for (const cred of DEMO_CREDENTIALS) {
     const passwordHash = await bcrypt.hash(cred.password, 10);
     const dbRole = mapRoleToDbRole(cred.role);
+    const isEmailVerified = cred.emailVerified ?? true;
     const user = await prisma.user.upsert({
       where: { email: cred.email },
       update: {
         passwordHash,
-        emailVerified: true,
+        emailVerified: isEmailVerified,
         role: dbRole,
       },
       create: {
@@ -56,7 +57,7 @@ async function main() {
         displayName: cred.name,
         authMethod: 'EMAIL_PASSWORD',
         passwordHash,
-        emailVerified: true,
+        emailVerified: isEmailVerified,
         verificationLevel: 'BASIC',
         role: dbRole,
       },

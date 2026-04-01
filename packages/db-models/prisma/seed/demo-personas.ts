@@ -6,12 +6,13 @@
 /**
  * Demo Persona Definitions
  *
- * Defines the 5 demo personas required by FR-001:
+ * Defines the 6 demo personas required by FR-001:
  * - Admin Adams: Admin with full permissions
  * - Mod Martinez: Moderator for moderation workflows
  * - Alice Anderson: Power user with high engagement
  * - Bob Builder: Regular user with moderate activity
  * - New User: Fresh user for onboarding experience
+ * - Unverified Uma: Unverified user for testing email verification gates
  */
 
 import { DEMO_USER_IDS } from './demo-ids';
@@ -49,7 +50,13 @@ export interface DemoPersona {
   activityLevel: ActivityLevel;
 }
 
-export type DemoRole = 'admin' | 'moderator' | 'power_user' | 'regular_user' | 'new_user';
+export type DemoRole =
+  | 'admin'
+  | 'moderator'
+  | 'power_user'
+  | 'regular_user'
+  | 'new_user'
+  | 'unverified_user';
 export type ActivityLevel = 'low' | 'medium' | 'high' | 'very_high';
 
 interface MoralFoundationProfile {
@@ -76,6 +83,8 @@ const DEMO_PASSWORD_HASHES = {
   BOB: '$2b$10$hiiwt49G4xz40WNJNrUJiu6lAw3V1KnjnqWY8YhzFuOcYnD8ZaPYu',
   // DemoNew2026!
   NEW: '$2b$10$dJPE1gjx.bzf1x4qtXlukOnOARg60n9eTYdpYTnXxwA/3v6EKP9wC',
+  // DemoUnverified2026!
+  UNVERIFIED: '$2b$10$5xGRrSsHTgFT.C.2rsl6WeMiQT4i4fl1ejqTnaV78C4hV1jabMjKK',
 };
 
 /**
@@ -249,6 +258,40 @@ export const NEW_USER: DemoPersona = {
 };
 
 /**
+ * Unverified Uma - Unverified account
+ * Purpose: Test email verification gates, restricted actions for unverified users
+ */
+export const UNVERIFIED_UMA: DemoPersona = {
+  id: DEMO_USER_IDS.UNVERIFIED_UMA,
+  email: 'demo-unverified@reasonbridge.demo',
+  displayName: 'Unverified Uma',
+  cognitoSub: 'demo-unverified',
+  authMethod: 'EMAIL_PASSWORD',
+  emailVerified: false,
+  passwordHash: DEMO_PASSWORD_HASHES.UNVERIFIED,
+  accountStatus: 'ACTIVE',
+  phoneNumber: null,
+  phoneVerified: false,
+  verificationLevel: 'BASIC',
+  trustScoreAbility: 0.3,
+  trustScoreBenevolence: 0.3,
+  trustScoreIntegrity: 0.3,
+  moralFoundationProfile: {
+    care: 0.5,
+    fairness: 0.5,
+    loyalty: 0.5,
+    authority: 0.5,
+    sanctity: 0.5,
+    liberty: 0.5,
+  },
+  status: 'ACTIVE',
+  userRole: 'USER',
+  role: 'unverified_user',
+  description: 'Test email verification gates, restricted actions for unverified users',
+  activityLevel: 'low',
+};
+
+/**
  * All demo personas in an array for iteration
  */
 export const DEMO_PERSONAS: DemoPersona[] = [
@@ -257,6 +300,7 @@ export const DEMO_PERSONAS: DemoPersona[] = [
   ALICE_ANDERSON,
   BOB_BUILDER,
   NEW_USER,
+  UNVERIFIED_UMA,
 ];
 
 /**
