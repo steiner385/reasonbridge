@@ -19,6 +19,7 @@ import {
   ResponseSearchResultDto,
   SearchResultItemType,
 } from './dto/unified-search-results.dto.js';
+import { SEARCH_DISPLAY } from '../constants/index.js';
 
 /**
  * Service for unified search across topics and responses
@@ -203,7 +204,8 @@ export class SearchService {
         createdAt: topic.createdAt,
         title: topic.title,
         description:
-          topic.description.substring(0, 200) + (topic.description.length > 200 ? '...' : ''),
+          topic.description.substring(0, SEARCH_DISPLAY.DESCRIPTION_TRUNCATE_LENGTH) +
+          (topic.description.length > SEARCH_DISPLAY.DESCRIPTION_TRUNCATE_LENGTH ? '...' : ''),
         slug: topic.slug,
         status: topic.status,
         responseCount: topic.responseCount,
@@ -259,7 +261,9 @@ export class SearchService {
         id: r.id,
         score: r.rank,
         createdAt: r.createdAt,
-        content: r.content.substring(0, 300) + (r.content.length > 300 ? '...' : ''),
+        content:
+          r.content.substring(0, SEARCH_DISPLAY.CONTENT_TRUNCATE_LENGTH) +
+          (r.content.length > SEARCH_DISPLAY.CONTENT_TRUNCATE_LENGTH ? '...' : ''),
         highlightedContent: r.highlightedContent,
         authorId: r.authorId,
         topicId: r.topicId,

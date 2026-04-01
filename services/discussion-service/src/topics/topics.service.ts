@@ -28,6 +28,7 @@ import { TopicsEditService } from './topics-edit.service.js';
 import { PropositionsService } from '../propositions/propositions.service.js';
 import { ActivityClientService } from '../clients/activity-client.service.js';
 import { Prisma } from '@prisma/client';
+import { CACHE_TTL } from '../constants/index.js';
 
 @Injectable()
 export class TopicsService implements OnModuleInit {
@@ -222,8 +223,8 @@ export class TopicsService implements OnModuleInit {
       },
     };
 
-    // Cache result with 5min TTL (300000ms)
-    await this.cacheManager?.set(cacheKey, result, 300000);
+    // Cache result with 5min TTL
+    await this.cacheManager?.set(cacheKey, result, CACHE_TTL.TOPICS_LIST_MS);
 
     return result;
   }
@@ -593,7 +594,7 @@ export class TopicsService implements OnModuleInit {
     };
 
     // Cache the result with a 1-hour TTL
-    await this.cacheManager?.set(cacheKey, result, 3600000);
+    await this.cacheManager?.set(cacheKey, result, CACHE_TTL.TOPIC_DETAIL_MS);
 
     return result;
   }

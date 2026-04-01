@@ -5,6 +5,7 @@
 
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { SLUG_CONSTRAINTS } from '../constants/index.js';
 
 /**
  * Service for generating unique URL-friendly slugs from topic titles
@@ -105,9 +106,9 @@ export class SlugGeneratorService {
     const hashSuffix = this.generateHashSuffix(title + Date.now());
     let slug = `${baseSlug}-${hashSuffix}`;
 
-    // Ensure slug is within length limit (250 chars from schema)
-    if (slug.length > 250) {
-      const maxBaseLength = 250 - hashSuffix.length - 1; // -1 for hyphen
+    // Ensure slug is within length limit
+    if (slug.length > SLUG_CONSTRAINTS.MAX_LENGTH) {
+      const maxBaseLength = SLUG_CONSTRAINTS.MAX_LENGTH - hashSuffix.length - 1; // -1 for hyphen
       slug = `${baseSlug.substring(0, maxBaseLength)}-${hashSuffix}`;
     }
 
@@ -189,10 +190,10 @@ export class SlugGeneratorService {
     }
 
     // Check length
-    if (slug.length < 3 || slug.length > 250) {
+    if (slug.length < SLUG_CONSTRAINTS.MIN_LENGTH || slug.length > SLUG_CONSTRAINTS.MAX_LENGTH) {
       return {
         valid: false,
-        error: 'Slug must be between 3 and 250 characters',
+        error: `Slug must be between ${SLUG_CONSTRAINTS.MIN_LENGTH} and ${SLUG_CONSTRAINTS.MAX_LENGTH} characters`,
       };
     }
 
