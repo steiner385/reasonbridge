@@ -6,6 +6,26 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { UserServiceClient } from '../user-service.client.js';
 
+/**
+ * Create a mock Response object with proper headers
+ */
+function createMockResponse(data: unknown, ok = true, status = 200): Partial<Response> {
+  return {
+    ok,
+    status,
+    statusText: ok ? 'OK' : 'Error',
+    headers: {
+      get: (name: string) => {
+        if (name.toLowerCase() === 'content-length') {
+          return data ? JSON.stringify(data).length.toString() : '0';
+        }
+        return null;
+      },
+    } as Headers,
+    json: () => Promise.resolve(data),
+  };
+}
+
 describe('UserServiceClient', () => {
   let client: UserServiceClient;
   let mockFetch: ReturnType<typeof vi.fn>;
@@ -22,13 +42,11 @@ describe('UserServiceClient', () => {
 
   describe('findDiscoverableUsersByEmailHashes', () => {
     it('should call user-service with email hashes', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            users: [{ id: 'user-1', displayName: 'John', emailHash: 'hash1' }],
-          }),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          users: [{ id: 'user-1', displayName: 'John', emailHash: 'hash1' }],
+        }),
+      );
 
       const result = await client.findDiscoverableUsersByEmailHashes(['hash1', 'hash2']);
 
@@ -51,10 +69,7 @@ describe('UserServiceClient', () => {
     });
 
     it('should return empty array on non-ok response', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 500,
-      });
+      mockFetch.mockResolvedValue(createMockResponse(null, false, 500));
 
       const result = await client.findDiscoverableUsersByEmailHashes(['hash1']);
 
@@ -64,15 +79,13 @@ describe('UserServiceClient', () => {
 
   describe('getUserById', () => {
     it('should fetch user by ID', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            id: 'user-1',
-            displayName: 'John Smith',
-            avatarUrl: 'https://example.com/avatar.jpg',
-          }),
-      });
+      mockFetch.mockResolvedValue(
+        createMockResponse({
+          id: 'user-1',
+          displayName: 'John Smith',
+          avatarUrl: 'https://example.com/avatar.jpg',
+        }),
+      );
 
       const result = await client.getUserById('user-1');
 

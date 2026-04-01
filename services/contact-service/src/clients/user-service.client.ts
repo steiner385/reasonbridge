@@ -4,7 +4,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { getServiceUrl } from '@reason-bridge/common';
+import { BaseHttpClient, getServiceUrl } from '@reason-bridge/common';
 
 export interface DiscoverableUser {
   id: string;
@@ -18,6 +18,10 @@ export interface UserProfile {
   displayName: string;
   avatarUrl?: string;
   email?: string;
+}
+
+interface DiscoverableUsersResponse {
+  users: DiscoverableUser[];
 }
 
 /**
@@ -41,35 +45,17 @@ export interface UserProfile {
  * const user = await userServiceClient.getUserById('user-123');
  * ```
  */
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
-
 @Injectable()
-export class UserServiceClient {
-  private readonly logger = new Logger(UserServiceClient.name);
-  private readonly baseUrl: string;
-  private readonly timeoutMs: number;
-
+export class UserServiceClient extends BaseHttpClient {
   constructor() {
-    this.baseUrl = process.env['USER_SERVICE_URL'] || getServiceUrl('USER_SERVICE');
-    this.timeoutMs = parseInt(
-      process.env['USER_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
-      10,
-    );
-  }
+    const baseUrl = process.env['USER_SERVICE_URL'] || getServiceUrl('USER_SERVICE');
+    const timeoutMs = parseInt(process.env['USER_SERVICE_TIMEOUT_MS'] || '30000', 10);
 
-  /**
-   * Fetch with timeout using AbortController
-   */
-  private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
-
-    try {
-      return await fetch(url, { ...options, signal: controller.signal });
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    super({
+      baseUrl,
+      timeoutMs,
+      logger: new Logger(UserServiceClient.name),
+    });
   }
 
   /**
@@ -80,28 +66,10 @@ export class UserServiceClient {
    * @returns Array of discoverable users matching the hashes, or empty array on error
    */
   async findDiscoverableUsersByEmailHashes(emailHashes: string[]): Promise<DiscoverableUser[]> {
-    try {
-      const response = await this.fetchWithTimeout(`${this.baseUrl}/users/discoverable`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emailHashes }),
-      });
-
-      if (!response.ok) {
-        this.logger.warn(`Failed to find discoverable users: ${response.status}`);
-        return [];
-      }
-
-      const data = await response.json();
-      return data.users || [];
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        this.logger.warn('Request to user-service timed out');
-      } else {
-        this.logger.warn(`Error calling user-service: ${(error as Error).message}`);
-      }
-      return [];
-    }
+    const result = await this.post<DiscoverableUsersResponse>('/users/discoverable', {
+      emailHashes,
+    });
+    return result?.users ?? [];
   }
 
   /**
@@ -112,25 +80,6 @@ export class UserServiceClient {
    * @returns User profile or null if not found/error
    */
   async getUserById(userId: string): Promise<UserProfile | null> {
-    try {
-      const response = await this.fetchWithTimeout(`${this.baseUrl}/users/${userId}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        this.logger.warn(`Failed to get user ${userId}: ${response.status}`);
-        return null;
-      }
-
-      return await response.json();
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        this.logger.warn(`Request to get user ${userId} timed out`);
-      } else {
-        this.logger.warn(`Error fetching user ${userId}: ${(error as Error).message}`);
-      }
-      return null;
-    }
+    return this.get<UserProfile>(`/users/${userId}`);
   }
 }
