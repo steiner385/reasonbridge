@@ -41,9 +41,10 @@ export class AppleOAuthService {
     try {
       this.privateKey = readFileSync(privateKeyPath, 'utf8');
       this.logger.log('Apple OAuth service initialized');
-    } catch (error: any) {
-      this.logger.error(`Failed to load Apple private key: ${error.message}`);
-      throw new Error(`Apple OAuth configuration error: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to load Apple private key: ${message}`);
+      throw new Error(`Apple OAuth configuration error: ${message}`);
     }
   }
 
@@ -135,8 +136,10 @@ export class AppleOAuthService {
         name: fullName,
         appleId: claims.sub,
       };
-    } catch (error: any) {
-      this.logger.error(`Apple OAuth verification failed: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Apple OAuth verification failed: ${message}`, stack);
 
       if (error instanceof UnauthorizedException) {
         throw error;
@@ -184,8 +187,10 @@ export class AppleOAuthService {
         emailVerified: claims.email_verified === 'true' || claims.email_verified === true,
         appleId: claims.sub,
       };
-    } catch (error: any) {
-      this.logger.error(`Apple ID token verification failed: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Apple ID token verification failed: ${message}`, stack);
 
       throw new UnauthorizedException({
         error: 'INVALID_TOKEN',

@@ -442,6 +442,7 @@ If the content is constructive and well-reasoned, return AFFIRMATION type.`,
   /**
    * Map Prisma Feedback to FeedbackResponseDto
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Feedback model
   private mapToResponseDto(feedback: any): FeedbackResponseDto {
     return {
       id: feedback.id,

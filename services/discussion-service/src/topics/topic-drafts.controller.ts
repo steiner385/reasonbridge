@@ -18,6 +18,7 @@ import {
 import { TopicDraftsService } from './topic-drafts.service.js';
 import { SaveTopicDraftDto } from './dto/topic-draft.dto.js';
 import type { TopicDraftResponseDto, TopicDraftsListResponseDto } from './dto/topic-draft.dto.js';
+import { type AuthenticatedRequest, getUserIdFromRequest } from '../auth/index.js';
 
 /**
  * Controller for topic draft endpoints
@@ -41,9 +42,9 @@ export class TopicDraftsController {
   async saveDraft(
     @Body() dto: SaveTopicDraftDto,
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicDraftResponseDto> {
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
       throw new Error('User ID not found in request. Authentication required.');
     }
@@ -56,9 +57,9 @@ export class TopicDraftsController {
   @Get()
   async getDrafts(
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicDraftsListResponseDto> {
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
       throw new Error('User ID not found in request. Authentication required.');
     }
@@ -72,9 +73,9 @@ export class TopicDraftsController {
   async getDraft(
     @Param('id') draftId: string,
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicDraftResponseDto> {
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
       throw new Error('User ID not found in request. Authentication required.');
     }
@@ -89,9 +90,9 @@ export class TopicDraftsController {
   async deleteDraft(
     @Param('id') draftId: string,
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<void> {
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
       throw new Error('User ID not found in request. Authentication required.');
     }

@@ -49,8 +49,10 @@ export class OnboardingProgressRepository {
 
       this.logger.log(`Onboarding progress created for user: ${userId}`);
       return progress;
-    } catch (error: any) {
-      this.logger.error(`Failed to create onboarding progress: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to create onboarding progress: ${message}`, stack);
       throw error;
     }
   }
@@ -66,8 +68,10 @@ export class OnboardingProgressRepository {
       return await this.prisma.onboardingProgress.findUnique({
         where: { userId },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find onboarding progress: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find onboarding progress: ${message}`, stack);
       throw error;
     }
   }
@@ -92,8 +96,10 @@ export class OnboardingProgressRepository {
 
       this.logger.log(`Email verification step completed for user: ${userId}`);
       return progress;
-    } catch (error: any) {
-      this.logger.error(`Failed to mark email verified: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to mark email verified: ${message}`, stack);
       throw error;
     }
   }
@@ -118,8 +124,10 @@ export class OnboardingProgressRepository {
 
       this.logger.log(`Topics selection step completed for user: ${userId}`);
       return progress;
-    } catch (error: any) {
-      this.logger.error(`Failed to mark topics selected: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to mark topics selected: ${message}`, stack);
       throw error;
     }
   }
@@ -143,8 +151,10 @@ export class OnboardingProgressRepository {
 
       this.logger.log(`Orientation step completed for user: ${userId}`);
       return progress;
-    } catch (error: any) {
-      this.logger.error(`Failed to mark orientation viewed: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to mark orientation viewed: ${message}`, stack);
       throw error;
     }
   }
@@ -170,8 +180,10 @@ export class OnboardingProgressRepository {
 
       this.logger.log(`Onboarding completed for user: ${userId}`);
       return progress;
-    } catch (error: any) {
-      this.logger.error(`Failed to mark first post made: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to mark first post made: ${message}`, stack);
       throw error;
     }
   }
@@ -196,8 +208,10 @@ export class OnboardingProgressRepository {
 
       this.logger.log(`Current step updated for user: ${userId}`);
       return progress;
-    } catch (error: any) {
-      this.logger.error(`Failed to update current step: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update current step: ${message}`, stack);
       throw error;
     }
   }
@@ -222,8 +236,10 @@ export class OnboardingProgressRepository {
         progress.orientationViewed &&
         progress.firstPostMade
       );
-    } catch (error: any) {
-      this.logger.error(`Failed to check onboarding completion: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to check onboarding completion: ${message}`, stack);
       throw error;
     }
   }
@@ -251,8 +267,10 @@ export class OnboardingProgressRepository {
 
       const completedSteps = steps.filter((step) => step).length;
       return Math.round((completedSteps / steps.length) * 100);
-    } catch (error: any) {
-      this.logger.error(`Failed to calculate completion percentage: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to calculate completion percentage: ${message}`, stack);
       throw error;
     }
   }
@@ -276,8 +294,10 @@ export class OnboardingProgressRepository {
         },
         take: limit,
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find incomplete onboarding: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find incomplete onboarding: ${message}`, stack);
       throw error;
     }
   }
@@ -318,8 +338,10 @@ export class OnboardingProgressRepository {
         inProgress: total - completed,
         byStep: stepCounts,
       };
-    } catch (error: any) {
-      this.logger.error(`Failed to get onboarding statistics: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get onboarding statistics: ${message}`, stack);
       throw error;
     }
   }

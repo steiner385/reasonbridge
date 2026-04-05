@@ -8,6 +8,14 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { BridgingSuggestionDto } from '../suggestions/dto/bridging-suggestions.dto.js';
 
 /**
+ * Proposition data for bridging analysis
+ */
+interface PropositionData {
+  id: string;
+  statement: string;
+}
+
+/**
  * Result from bridging suggestions analysis
  */
 export interface BridgingSuggestionResult {
@@ -135,7 +143,7 @@ export class BridgingSuggester {
    * Generate a bridging suggestion for a specific proposition
    */
   private generateBridgingSuggestion(
-    proposition: any,
+    proposition: PropositionData,
     alignmentCounts: { SUPPORT: number; OPPOSE: number; NUANCED: number },
   ): BridgingSuggestionDto {
     const totalAlignments =

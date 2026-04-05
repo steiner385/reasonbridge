@@ -105,8 +105,10 @@ export class GoogleOAuthService {
         picture: payload.picture,
         googleId: payload.sub,
       };
-    } catch (error: any) {
-      this.logger.error(`Google OAuth verification failed: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Google OAuth verification failed: ${message}`, stack);
 
       if (error instanceof UnauthorizedException) {
         throw error;
@@ -160,8 +162,10 @@ export class GoogleOAuthService {
         picture: payload.picture,
         googleId: payload.sub,
       };
-    } catch (error: any) {
-      this.logger.error(`Google ID token verification failed: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Google ID token verification failed: ${message}`, stack);
 
       throw new UnauthorizedException({
         error: 'INVALID_TOKEN',

@@ -16,6 +16,15 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { Request } from 'express';
+
+/**
+ * Request with optional email in body or query
+ */
+interface AuthRequest extends Request {
+  body: { email?: string };
+  query: { email?: string };
+}
 
 /**
  * Demo email domain that is blocked in production
@@ -56,7 +65,7 @@ export class DemoBlocklistGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthRequest>();
     const email = this.extractEmail(request);
 
     if (email && this.isDemoEmail(email)) {
@@ -72,7 +81,7 @@ export class DemoBlocklistGuard implements CanActivate {
   /**
    * Extract email from request body (for login endpoints)
    */
-  private extractEmail(request: any): string | undefined {
+  private extractEmail(request: AuthRequest): string | undefined {
     // Check body for login requests
     if (request.body?.email) {
       return request.body.email;

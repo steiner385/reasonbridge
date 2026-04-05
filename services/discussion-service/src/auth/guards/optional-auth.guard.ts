@@ -12,7 +12,17 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import type { FastifyRequest } from 'fastify';
 import type { JwtPayload } from '../jwt-auth.guard.js';
+
+/**
+ * Request with optional authorization header
+ */
+interface RequestWithAuth extends FastifyRequest {
+  headers: FastifyRequest['headers'] & {
+    authorization?: string;
+  };
+}
 
 /**
  * Optional auth guard that allows both authenticated and anonymous users
@@ -73,7 +83,7 @@ export class OptionalAuthGuard implements CanActivate {
     return true;
   }
 
-  private extractTokenFromHeader(request: any): string | undefined {
+  private extractTokenFromHeader(request: RequestWithAuth): string | undefined {
     const authHeader = request.headers.authorization;
     if (!authHeader) {
       return undefined;

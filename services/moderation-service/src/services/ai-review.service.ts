@@ -265,6 +265,7 @@ export class AIReviewService {
   /**
    * Map Prisma moderation action to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma ModerationAction model
   private mapModerationActionToResponse(action: any): AiRecommendationResponse {
     return {
       id: action.id,

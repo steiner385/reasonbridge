@@ -26,6 +26,7 @@ import {
   type TopicLinkResponseDto,
   type LinkedTopicResponseDto,
 } from './dto/topic-link.dto.js';
+import { type AuthenticatedRequest, getUserIdFromRequest } from '../auth/index.js';
 
 /**
  * Controller for topic links API
@@ -58,9 +59,9 @@ export class TopicLinksController {
     @Param('topicId') topicId: string,
     @Body() dto: CreateTopicLinkDto,
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicLinkResponseDto> {
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
 
     if (!userId) {
       throw new NotFoundException('User ID not found. Authentication required.');
@@ -126,9 +127,9 @@ export class TopicLinksController {
     @Param('linkId') linkId: string,
     @Body() dto: UpdateTopicLinkStatusDto,
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicLinkResponseDto> {
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
 
     if (!userId) {
       throw new NotFoundException('User ID not found. Authentication required.');

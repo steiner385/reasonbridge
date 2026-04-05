@@ -687,6 +687,7 @@ export class TopicsService implements OnModuleInit {
     }
 
     // Step 4: Prepare update data with appropriate timestamps
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma update data with dynamic properties
     const updateData: any = {
       status: newStatus,
       lastActivityAt: new Date(),
@@ -826,6 +827,7 @@ export class TopicsService implements OnModuleInit {
     }
 
     // Step 5: Prepare update data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma update data with dynamic properties
     const updateData: any = {
       lastActivityAt: new Date(),
     };
@@ -1238,6 +1240,7 @@ export class TopicsService implements OnModuleInit {
       });
 
       // Restore source topics from snapshots
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON field cast to array
       const snapshots = merge.sourceSnapshots as any[];
       for (const snapshot of snapshots) {
         await tx.discussionTopic.update({

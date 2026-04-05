@@ -13,6 +13,17 @@ import {
 import type { TopicQualityResponseDto, TopicQualityIssue } from './dto/topic-quality.dto.js';
 
 /**
+ * Raw AI-parsed issue from LLM response
+ */
+interface AIParsedIssue {
+  type: string;
+  severity?: 'high' | 'medium' | 'low';
+  message: string;
+  suggestion: string;
+  confidenceScore?: number;
+}
+
+/**
  * Service for analyzing topic quality
  * Feature 016: Topic Management (T214)
  *
@@ -280,14 +291,16 @@ Analyze this topic for quality issues.`;
     }
 
     try {
-      const parsed = JSON.parse(jsonMatch[0]);
-      return parsed.map((issue: any) => ({
-        type: this.mapAIIssueType(issue.type),
-        severity: issue.severity || 'medium',
-        message: issue.message,
-        suggestion: issue.suggestion,
-        confidenceScore: issue.confidenceScore || 0.7,
-      }));
+      const parsed = JSON.parse(jsonMatch[0]) as AIParsedIssue[];
+      return parsed.map(
+        (issue: AIParsedIssue): TopicQualityIssue => ({
+          type: this.mapAIIssueType(issue.type),
+          severity: issue.severity ?? 'medium',
+          message: issue.message,
+          suggestion: issue.suggestion,
+          confidenceScore: issue.confidenceScore || 0.7,
+        }),
+      );
     } catch (parseError) {
       this.logger.warn('Failed to parse AI analysis JSON response', parseError);
       return [];

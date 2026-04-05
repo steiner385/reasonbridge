@@ -20,6 +20,7 @@ import { Throttle } from '@nestjs/throttler';
 import { PropositionsService } from './propositions.service.js';
 import { CreatePropositionDto } from './dto/create-proposition.dto.js';
 import type { PropositionResponseDto } from './dto/create-proposition.dto.js';
+import { type AuthenticatedRequest, getUserIdFromRequest } from '../auth/index.js';
 
 /**
  * Controller for proposition management
@@ -63,10 +64,10 @@ export class PropositionsController {
     @Param('topicId') topicId: string,
     @Body() createPropositionDto: CreatePropositionDto,
     @Headers('x-user-id') userIdHeader: string | undefined,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<PropositionResponseDto> {
     // Extract userId from multiple sources
-    const userId = userIdHeader || req.user?.id || req.userId;
+    const userId = getUserIdFromRequest(userIdHeader, req);
 
     if (!userId) {
       throw new Error('User ID not found in request. Authentication required.');

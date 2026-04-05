@@ -691,6 +691,7 @@ export class ModerationActionsService {
   /**
    * Map Prisma moderation action to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma ModerationAction with dynamic includes
   private mapModerationActionToResponse(action: any): ModerationActionResponse {
     const approvedBy = action.approvedBy
       ? {
@@ -913,6 +914,7 @@ export class ModerationActionsService {
   /**
    * Map Prisma appeal to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Appeal model
   private mapAppealToResponse(appeal: any): AppealResponse {
     return {
       id: appeal.id,

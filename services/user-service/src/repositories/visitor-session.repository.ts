@@ -47,8 +47,10 @@ export class VisitorSessionRepository {
 
       this.logger.log(`Visitor session created: ${session.id}`);
       return session;
-    } catch (error: any) {
-      this.logger.error(`Failed to create visitor session: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to create visitor session: ${message}`, stack);
       throw error;
     }
   }
@@ -64,8 +66,10 @@ export class VisitorSessionRepository {
       return await this.prisma.visitorSession.findUnique({
         where: { sessionId },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find visitor session: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find visitor session: ${message}`, stack);
       throw error;
     }
   }
@@ -86,8 +90,10 @@ export class VisitorSessionRepository {
       }
 
       return await this.create(sessionId, referralSource);
-    } catch (error: any) {
-      this.logger.error(`Failed to find or create visitor session: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find or create visitor session: ${message}`, stack);
       throw error;
     }
   }
@@ -129,8 +135,10 @@ export class VisitorSessionRepository {
 
       this.logger.log(`Demo discussion view recorded for session: ${sessionId}`);
       return updatedSession;
-    } catch (error: any) {
-      this.logger.error(`Failed to add viewed discussion: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to add viewed discussion: ${message}`, stack);
       throw error;
     }
   }
@@ -155,8 +163,10 @@ export class VisitorSessionRepository {
       });
 
       return session;
-    } catch (error: any) {
-      this.logger.error(`Failed to record interaction: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to record interaction: ${message}`, stack);
       throw error;
     }
   }
@@ -182,8 +192,10 @@ export class VisitorSessionRepository {
 
       this.logger.log(`Visitor session converted to user: ${sessionId} -> ${userId}`);
       return session;
-    } catch (error: any) {
-      this.logger.error(`Failed to convert visitor session: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to convert visitor session: ${message}`, stack);
       throw error;
     }
   }
@@ -227,8 +239,10 @@ export class VisitorSessionRepository {
         sessionDurationMinutes,
         converted: !!session.convertedToUserId,
       };
-    } catch (error: any) {
-      this.logger.error(`Failed to get session statistics: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get session statistics: ${message}`, stack);
       throw error;
     }
   }
@@ -267,8 +281,10 @@ export class VisitorSessionRepository {
         converted,
         conversionRate: Math.round(conversionRate * 100) / 100,
       };
-    } catch (error: any) {
-      this.logger.error(`Failed to get conversion rate: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get conversion rate: ${message}`, stack);
       throw error;
     }
   }
@@ -297,8 +313,10 @@ export class VisitorSessionRepository {
 
       this.logger.log(`Cleaned up ${result.count} old visitor sessions`);
       return result.count;
-    } catch (error: any) {
-      this.logger.error(`Failed to cleanup old sessions: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to cleanup old sessions: ${message}`, stack);
       throw error;
     }
   }
@@ -331,8 +349,10 @@ export class VisitorSessionRepository {
         discussionId: row.discussion_id,
         viewCount: Number(row.view_count),
       }));
-    } catch (error: any) {
-      this.logger.error(`Failed to get most viewed discussions: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get most viewed discussions: ${message}`, stack);
       throw error;
     }
   }

@@ -147,6 +147,7 @@ export class PropositionsService {
   /**
    * Map a Prisma proposition to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Proposition with dynamic includes
   private mapToResponseDto(proposition: any): PropositionResponseDto {
     return {
       id: proposition.id,

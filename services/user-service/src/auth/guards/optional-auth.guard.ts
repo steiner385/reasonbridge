@@ -7,6 +7,15 @@ import { Injectable } from '@nestjs/common';
 import type { ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Observable } from 'rxjs';
+import type { Request } from 'express';
+
+/**
+ * JWT error information from Passport strategy
+ */
+interface JwtErrorInfo {
+  name?: string;
+  message?: string;
+}
 
 /**
  * Optional JWT Authentication Guard
@@ -56,30 +65,30 @@ export class OptionalAuthGuard extends AuthGuard('jwt') {
    * Handles authentication result without throwing errors
    * Returns user if authentication succeeded, undefined otherwise
    */
-  override handleRequest<TUser = any>(
-    err: any,
-    user: any,
-    info: any,
-    context: ExecutionContext,
-    status?: any,
-  ): TUser {
+  override handleRequest<TUser = unknown>(
+    _err: Error | null,
+    user: TUser | false | null,
+    _info: JwtErrorInfo | undefined,
+    _context: ExecutionContext,
+    _status?: number,
+  ): TUser | undefined {
     // If authentication succeeded, return the user
     if (user) {
-      return user;
+      return user as TUser;
     }
 
     // If authentication failed, just return undefined without throwing
     // This allows the request to proceed as an anonymous request
-    return undefined as any;
+    return undefined;
   }
 
   /**
    * Override to prevent errors from bubbling up
    * This ensures missing/invalid tokens don't stop request processing
    */
-  override getRequest(context: ExecutionContext): any {
+  override getRequest(context: ExecutionContext): Request {
     const ctx = context.switchToHttp();
-    const request = ctx.getRequest();
+    const request = ctx.getRequest<Request>();
 
     // Ensure we don't throw on missing Authorization header
     return request;

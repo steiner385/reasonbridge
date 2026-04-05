@@ -15,6 +15,7 @@ import type {
   PendingAppealResponse,
   ListAppealResponse,
 } from '../dto/appeal.dto.js';
+import type { ModerationActionResponse } from '../dto/moderation-action.dto.js';
 import { APPEAL_CONSTRAINTS } from '../constants/index.js';
 
 /**
@@ -114,6 +115,7 @@ export class AppealService {
     cursor?: string,
     assignedModeratorId?: string,
   ): Promise<ListAppealResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
     const where: any = {
       status: 'PENDING' as const,
     };
@@ -381,12 +383,14 @@ export class AppealService {
     denied: number;
     avgResolutionTime?: number;
   }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
     const where: any = {};
     if (startDate) {
       where.createdAt = { gte: startDate };
     }
     if (endDate) {
       if (where.createdAt) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Extending Prisma date filter
         (where.createdAt as any).lte = endDate;
       } else {
         where.createdAt = { lte: endDate };
@@ -430,6 +434,7 @@ export class AppealService {
   /**
    * Helper: Map appeal to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Appeal with dynamic includes
   mapAppealToResponse(appeal: any): AppealResponse {
     return {
       id: appeal.id,
@@ -447,7 +452,8 @@ export class AppealService {
   /**
    * Helper: Map moderation action to response (for appeal context)
    */
-  mapModerationActionToResponse(action: any): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma ModerationAction with dynamic includes
+  mapModerationActionToResponse(action: any): ModerationActionResponse {
     return {
       id: action.id,
       targetType: action.targetType,
