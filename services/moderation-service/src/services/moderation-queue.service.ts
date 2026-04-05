@@ -37,6 +37,33 @@ export interface QueueStats {
 }
 
 /**
+ * ModerationAnalytics contains time-period analytics for moderation actions
+ */
+export interface ModerationAnalytics {
+  period: { startDate: Date; endDate: Date };
+  summary: {
+    totalActions: number;
+    approvedActions: number;
+    reversedActions: number;
+    appealedActions: number;
+    totalAppeals: number;
+  };
+  rates: {
+    approvalRate: number;
+    reversalRate: number;
+    appealRate: number;
+  };
+  timing: {
+    avgResolutionMs: number;
+    avgResolutionMinutes: number;
+  };
+  breakdown: {
+    byActionType: Record<string, number>;
+    bySeverity: Record<string, number>;
+  };
+}
+
+/**
  * ModerationQueueService provides queue management and analytics for the moderation system.
  *
  * Responsibilities:
@@ -130,7 +157,8 @@ export class ModerationQueueService {
     limit: number = 20,
     cursor?: string,
   ): Promise<QueueItem[]> {
-    let where: any = { status: 'PENDING' };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
+    const where: any = { status: 'PENDING' };
 
     const actions = await this.prisma.moderationAction.findMany({
       where,
@@ -239,6 +267,7 @@ export class ModerationQueueService {
   /**
    * Calculate priority for a moderation action
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma ModerationAction model
   private calculateActionPriority(action: any): 'high' | 'normal' | 'low' {
     // High priority: consequential actions or high severity
     if (action.severity === 'CONSEQUENTIAL' || (action.aiConfidence && action.aiConfidence < 0.7)) {
@@ -257,6 +286,7 @@ export class ModerationQueueService {
   /**
    * Calculate priority for an appeal
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Appeal with ModerationAction include
   private calculateAppealPriority(appeal: any): 'high' | 'normal' | 'low' {
     // Appeals are generally high priority as they affect user trust
     if (appeal.moderationAction.severity === 'CONSEQUENTIAL') {
@@ -268,6 +298,7 @@ export class ModerationQueueService {
   /**
    * Calculate priority for a report
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma ContentReport model
   private calculateReportPriority(report: any): 'high' | 'normal' | 'low' {
     // High priority: severe violation categories
     const highPriorityCategories = ['VIOLENCE', 'HATE_SPEECH', 'HARASSMENT'];
@@ -420,7 +451,7 @@ export class ModerationQueueService {
    * @param endDate - End of analysis period
    * @returns Analytics data including action counts, approval rates, and resolution times
    */
-  async getAnalytics(startDate: Date, endDate: Date): Promise<any> {
+  async getAnalytics(startDate: Date, endDate: Date): Promise<ModerationAnalytics> {
     const actions = await this.prisma.moderationAction.findMany({
       where: {
         createdAt: {

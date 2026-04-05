@@ -37,7 +37,14 @@ import type { PaginatedTopicsResponseDto, TopicResponseDto } from './dto/topic-r
 import type { CommonGroundResponseDto } from './dto/common-ground-response.dto.js';
 import { CommonGroundExportService } from '../services/common-ground-export.service.js';
 import { TopicsAnalyticsService } from './topics-analytics.service.js';
-import { JwtAuthGuard, ModeratorGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
+import {
+  JwtAuthGuard,
+  ModeratorGuard,
+  CurrentUser,
+  type JwtPayload,
+  type AuthenticatedRequest,
+  type RequestUser,
+} from '../auth/index.js';
 
 @Controller('topics')
 export class TopicsController {
@@ -116,10 +123,11 @@ export class TopicsController {
     @Param('id') id: string,
     @Body() updateStatusDto: UpdateTopicStatusDto,
     @CurrentUser() user: JwtPayload,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicResponseDto> {
     // Check moderator role (still using request context for role until role is in JWT)
-    const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
+    const reqUser = req.user as RequestUser | undefined;
+    const isModerator = reqUser?.role === 'MODERATOR' || reqUser?.role === 'ADMIN' || false;
 
     return this.topicsService.updateTopicStatus(id, user.sub, updateStatusDto.status, isModerator);
   }
@@ -138,10 +146,11 @@ export class TopicsController {
     @Param('id') id: string,
     @Body() updateTopicDto: UpdateTopicDto,
     @CurrentUser() user: JwtPayload,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ): Promise<TopicResponseDto> {
     // Check moderator role (still using request context for role until role is in JWT)
-    const isModerator = req.user?.role === 'MODERATOR' || req.user?.role === 'ADMIN' || false;
+    const reqUser = req.user as RequestUser | undefined;
+    const isModerator = reqUser?.role === 'MODERATOR' || reqUser?.role === 'ADMIN' || false;
 
     return this.topicsService.updateTopic(id, user.sub, updateTopicDto, isModerator);
   }
@@ -164,7 +173,10 @@ export class TopicsController {
    * Returns chronological list of all edits with change details
    */
   @Get(':id/history')
-  async getTopicEditHistory(@Param('id') id: string, @Query('limit') limit?: string): Promise<any> {
+  async getTopicEditHistory(
+    @Param('id') id: string,
+    @Query('limit') limit?: string,
+  ): Promise<import('./topics-edit.service.js').TopicEditRecord[]> {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     return this.topicsService.getTopicEditHistory(id, limitNum);
   }
@@ -214,7 +226,10 @@ export class TopicsController {
   @Get(':id/analytics')
   // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
   // @CacheTTL(3600000) // 1 hour in ms
-  async getTopicAnalytics(@Param('id') id: string, @Query('days') days?: string): Promise<any> {
+  async getTopicAnalytics(
+    @Param('id') id: string,
+    @Query('days') days?: string,
+  ): Promise<import('./topics-analytics.service.js').TopicAnalyticsResponse> {
     const daysBack = days ? parseInt(days, 10) : 30;
     return this.analyticsService.getTopicAnalytics(id, daysBack);
   }

@@ -281,6 +281,7 @@ export class DiscussionsService {
     const sortOrder = query.sortOrder || 'desc';
 
     // Build where clause
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
     const where: any = {
       status: query.status || 'ACTIVE', // Default to active discussions
     };

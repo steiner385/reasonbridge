@@ -169,8 +169,9 @@ export class FallacyDetectorService {
   /**
    * Get educational resources for a specific fallacy
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic educational resources structure
   private getEducationalResources(fallacyType: string): any {
-    const resources: Record<string, any> = {
+    const resources: Record<string, { links: Array<{ title: string; url: string }> }> = {
       ad_hominem: {
         links: [
           {

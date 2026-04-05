@@ -14,7 +14,17 @@
  */
 
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import type { TopicAnalytics } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
+
+/**
+ * Subset of Response fields used for analytics computation
+ */
+interface ResponseMetrics {
+  content: string;
+  authorId: string;
+  createdAt: Date;
+}
 
 export interface DailyAnalytics {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -95,20 +105,22 @@ export class TopicsAnalyticsService {
     const todayMetrics = await this.computeRealTimeMetrics(topicId);
 
     // Combine historical and real-time metrics
-    const dailyMetrics: DailyAnalytics[] = [
-      ...historicalMetrics.map((m: any) => ({
-        date: m.date.toISOString().split('T')[0],
-        viewCount: m.viewCount,
-        uniqueViewers: m.uniqueViewers,
-        responseCount: m.responseCount,
-        participantCount: m.participantCount,
-        newParticipants: m.newParticipants,
-        avgResponseLength: m.avgResponseLength,
-        engagementScore: parseFloat(m.engagementScore.toString()),
-        peakActivityHour: m.peakActivityHour || undefined,
-      })),
-      todayMetrics,
-    ];
+    const mappedHistorical = historicalMetrics
+      .filter((m: TopicAnalytics) => m.date !== null)
+      .map(
+        (m: TopicAnalytics): DailyAnalytics => ({
+          date: m.date!.toISOString().split('T')[0] as string,
+          viewCount: m.viewCount,
+          uniqueViewers: m.uniqueViewers,
+          responseCount: m.responseCount,
+          participantCount: m.participantCount,
+          newParticipants: m.newParticipants,
+          avgResponseLength: m.avgResponseLength,
+          engagementScore: parseFloat(m.engagementScore.toString()),
+          peakActivityHour: m.peakActivityHour || undefined,
+        }),
+      );
+    const dailyMetrics: DailyAnalytics[] = [...mappedHistorical, todayMetrics];
 
     // Calculate summary metrics
     const summary = this.calculateSummary(topic, dailyMetrics);
@@ -153,19 +165,20 @@ export class TopicsAnalyticsService {
 
     // Calculate metrics
     const responseCount = responsesToday.length;
-    const uniqueAuthors = new Set(responsesToday.map((r: any) => r.authorId));
+    const uniqueAuthors = new Set(responsesToday.map((r: ResponseMetrics) => r.authorId));
     const participantCount = uniqueAuthors.size;
 
     const avgResponseLength =
       responseCount > 0
         ? Math.round(
-            responsesToday.reduce((sum: any, r: any) => sum + r.content.length, 0) / responseCount,
+            responsesToday.reduce((sum: number, r: ResponseMetrics) => sum + r.content.length, 0) /
+              responseCount,
           )
         : 0;
 
     // Calculate peak activity hour
     const hourCounts = new Map<number, number>();
-    responsesToday.forEach((r: any) => {
+    responsesToday.forEach((r: ResponseMetrics) => {
       const hour = r.createdAt.getHours();
       hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
     });
@@ -235,19 +248,20 @@ export class TopicsAnalyticsService {
 
     // Calculate metrics
     const responseCount = responses.length;
-    const uniqueAuthors = new Set(responses.map((r: any) => r.authorId));
+    const uniqueAuthors = new Set(responses.map((r: ResponseMetrics) => r.authorId));
     const participantCount = uniqueAuthors.size;
 
     const avgResponseLength =
       responseCount > 0
         ? Math.round(
-            responses.reduce((sum: any, r: any) => sum + r.content.length, 0) / responseCount,
+            responses.reduce((sum: number, r: ResponseMetrics) => sum + r.content.length, 0) /
+              responseCount,
           )
         : 0;
 
     // Calculate peak activity hour
     const hourCounts = new Map<number, number>();
-    responses.forEach((r: any) => {
+    responses.forEach((r: ResponseMetrics) => {
       const hour = r.createdAt.getHours();
       hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
     });

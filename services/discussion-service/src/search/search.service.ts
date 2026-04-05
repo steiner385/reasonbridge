@@ -165,6 +165,7 @@ export class SearchService {
       const topicIds = searchResults.map((r) => r.id);
 
       // Build where clause with optional filters
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
       const where: any = {
         id: { in: topicIds },
         status: { not: 'ARCHIVED' },

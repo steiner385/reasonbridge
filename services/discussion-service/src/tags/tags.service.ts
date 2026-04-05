@@ -484,6 +484,7 @@ export class TagsService {
     }
 
     // Calculate co-occurring tags
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Tag with dynamic includes
     const coOccurrenceMap = new Map<string, { tag: any; count: number }>();
 
     for (const topicTag of tag.topics) {
@@ -530,6 +531,7 @@ export class TagsService {
   /**
    * Map database tag to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Tag with dynamic includes
   private mapToResponseDto(tag: any): TagResponseDto {
     return {
       id: tag.id,

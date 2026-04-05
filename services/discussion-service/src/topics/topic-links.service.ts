@@ -339,6 +339,7 @@ export class TopicLinksService {
   /**
    * Map Prisma TopicLink to response DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma TopicLink with dynamic includes
   private mapToResponseDto(link: any): TopicLinkResponseDto {
     return {
       id: link.id,

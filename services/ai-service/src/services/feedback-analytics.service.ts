@@ -9,6 +9,20 @@ import { FeedbackAnalyticsDto, FeedbackAnalyticsQueryDto } from '../feedback/dto
 import { HelpfulRating, FeedbackType } from '@prisma/client';
 
 /**
+ * Feedback item for analytics aggregation
+ */
+interface FeedbackAnalyticsItem {
+  id: string;
+  type: FeedbackType;
+  confidenceScore: { toNumber: () => number } | number;
+  userAcknowledged: boolean;
+  userRevised: boolean;
+  userHelpfulRating: HelpfulRating | null;
+  dismissedAt: Date | null;
+  dismissalReason: string | null;
+}
+
+/**
  * Service for analyzing feedback effectiveness
  * Provides insights into how users interact with AI-generated feedback
  */
@@ -29,6 +43,7 @@ export class FeedbackAnalyticsService {
       : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
 
     // Build filter conditions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
     const where: any = {
       createdAt: {
         gte: startDate,
@@ -94,7 +109,7 @@ export class FeedbackAnalyticsService {
     const averageHelpfulScore = ratedItems.length > 0 ? totalScore / ratedItems.length : 0;
 
     // Group by feedback type
-    const typeGroups = new Map<string, any[]>();
+    const typeGroups = new Map<string, FeedbackAnalyticsItem[]>();
     feedbackItems.forEach((f) => {
       const existing = typeGroups.get(f.type) || [];
       existing.push(f);

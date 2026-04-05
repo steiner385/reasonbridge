@@ -183,8 +183,9 @@ export class BiasDetectorService {
   /**
    * Get educational resources for a specific bias
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic educational resources structure
   private getEducationalResources(biasType: string): any {
-    const resources: Record<string, any> = {
+    const resources: Record<string, { links: Array<{ title: string; url: string }> }> = {
       confirmation_bias: {
         links: [
           {

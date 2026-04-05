@@ -18,6 +18,7 @@ export interface AnalysisResult {
   suggestionText: string;
   reasoning: string;
   confidenceScore: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON field with dynamic structure
   educationalResources?: any;
 }
 

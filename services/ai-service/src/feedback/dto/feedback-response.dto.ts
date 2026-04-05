@@ -45,6 +45,7 @@ export class FeedbackResponseDto {
   /**
    * Optional educational resources (URLs, articles, etc.)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON field with dynamic structure
   educationalResources?: any;
 
   /**
