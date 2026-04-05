@@ -9,6 +9,14 @@ import { AuthGuard } from '@nestjs/passport';
 import type { Observable } from 'rxjs';
 
 /**
+ * JWT error information from Passport strategy
+ */
+interface JwtErrorInfo {
+  name?: string;
+  message?: string;
+}
+
+/**
  * JWT Authentication Guard
  *
  * Protects routes by requiring a valid JWT access token in the Authorization header.
@@ -43,11 +51,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Handles authentication errors and provides user-friendly messages
    */
-  override handleRequest<TUser = any>(
-    err: any,
-    user: any,
-    info: any,
-    context: ExecutionContext,
+  override handleRequest<TUser = unknown>(
+    err: Error | null,
+    user: TUser | false | null,
+    info: JwtErrorInfo | undefined,
+    _context: ExecutionContext,
   ): TUser {
     // If Passport strategy threw an error
     if (err) {
@@ -73,7 +81,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Extracts user-friendly error messages from Passport info
    */
-  private getErrorMessage(info: any): { message: string; reason: string } {
+  private getErrorMessage(info: JwtErrorInfo | undefined): { message: string; reason: string } {
     if (!info) {
       return {
         message: 'Authentication required',
