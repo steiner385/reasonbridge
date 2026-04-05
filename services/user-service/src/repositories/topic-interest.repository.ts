@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import type { TopicInterest } from '@prisma/client';
+import type { TopicInterest, DiscussionTopic } from '@prisma/client';
 
 /**
  * Topic Interest Repository
@@ -51,8 +51,10 @@ export class TopicInterestRepository {
 
       this.logger.log(`Topic interest created: ${interest.id}`);
       return interest;
-    } catch (error: any) {
-      this.logger.error(`Failed to create topic interest: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to create topic interest: ${message}`, stack);
       throw error;
     }
   }
@@ -91,8 +93,10 @@ export class TopicInterestRepository {
 
       this.logger.log(`Created ${interests.length} topic interests for user: ${userId}`);
       return interests;
-    } catch (error: any) {
-      this.logger.error(`Failed to create topic interests: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to create topic interests: ${message}`, stack);
       throw error;
     }
   }
@@ -103,7 +107,10 @@ export class TopicInterestRepository {
    * @param userId - User ID
    * @returns Array of topic interests with topic details
    */
-  async findByUserId(userId: string, limit = 100): Promise<Array<TopicInterest & { topic: any }>> {
+  async findByUserId(
+    userId: string,
+    limit = 100,
+  ): Promise<Array<TopicInterest & { topic: DiscussionTopic }>> {
     try {
       return await this.prisma.topicInterest.findMany({
         where: { userId },
@@ -115,8 +122,10 @@ export class TopicInterestRepository {
         },
         take: limit,
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find topic interests: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find topic interests: ${message}`, stack);
       throw error;
     }
   }
@@ -138,8 +147,10 @@ export class TopicInterestRepository {
           },
         },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find topic interest: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find topic interest: ${message}`, stack);
       throw error;
     }
   }
@@ -170,8 +181,10 @@ export class TopicInterestRepository {
 
       this.logger.log(`Topic interest priority updated: ${interest.id}`);
       return interest;
-    } catch (error: any) {
-      this.logger.error(`Failed to update priority: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update priority: ${message}`, stack);
       throw error;
     }
   }
@@ -196,8 +209,10 @@ export class TopicInterestRepository {
       });
 
       this.logger.log(`Topic interest deleted for user ${userId}, topic ${topicId}`);
-    } catch (error: any) {
-      this.logger.error(`Failed to delete topic interest: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to delete topic interest: ${message}`, stack);
       throw error;
     }
   }
@@ -218,8 +233,10 @@ export class TopicInterestRepository {
 
       this.logger.log(`Deleted ${result.count} topic interests for user: ${userId}`);
       return result.count;
-    } catch (error: any) {
-      this.logger.error(`Failed to delete topic interests: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to delete topic interests: ${message}`, stack);
       throw error;
     }
   }
@@ -236,8 +253,10 @@ export class TopicInterestRepository {
         where: { userId },
       });
       return count > 0;
-    } catch (error: any) {
-      this.logger.error(`Failed to check topic selection: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to check topic selection: ${message}`, stack);
       throw error;
     }
   }
@@ -253,8 +272,10 @@ export class TopicInterestRepository {
       return await this.prisma.topicInterest.count({
         where: { topicId },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to count users by topic: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to count users by topic: ${message}`, stack);
       throw error;
     }
   }
@@ -286,8 +307,10 @@ export class TopicInterestRepository {
         topicId: result.topicId,
         count: result._count.userId,
       }));
-    } catch (error: any) {
-      this.logger.error(`Failed to get popular topics: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to get popular topics: ${message}`, stack);
       throw error;
     }
   }
@@ -328,8 +351,10 @@ export class TopicInterestRepository {
 
         return interests;
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to replace topic interests: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to replace topic interests: ${message}`, stack);
       throw error;
     }
   }

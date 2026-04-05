@@ -57,8 +57,10 @@ export class UserRepository {
 
       this.logger.log(`User created successfully: ${user.id}`);
       return user;
-    } catch (error: any) {
-      this.logger.error(`Failed to create user: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to create user: ${message}`, stack);
       throw error;
     }
   }
@@ -74,8 +76,10 @@ export class UserRepository {
       return await this.prisma.user.findUnique({
         where: { id },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find user by ID: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find user by ID: ${message}`, stack);
       throw error;
     }
   }
@@ -91,8 +95,10 @@ export class UserRepository {
       return await this.prisma.user.findUnique({
         where: { email },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find user by email: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find user by email: ${message}`, stack);
       throw error;
     }
   }
@@ -108,8 +114,10 @@ export class UserRepository {
       return await this.prisma.user.findUnique({
         where: { cognitoSub },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find user by cognitoSub: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find user by cognitoSub: ${message}`, stack);
       throw error;
     }
   }
@@ -126,8 +134,10 @@ export class UserRepository {
         where: { email },
       });
       return count > 0;
-    } catch (error: any) {
-      this.logger.error(`Failed to check user existence: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to check user existence: ${message}`, stack);
       throw error;
     }
   }
@@ -152,8 +162,10 @@ export class UserRepository {
 
       this.logger.log(`Email verification updated for user: ${id}`);
       return user;
-    } catch (error: any) {
-      this.logger.error(`Failed to update email verification: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update email verification: ${message}`, stack);
       throw error;
     }
   }
@@ -172,8 +184,10 @@ export class UserRepository {
           lastLoginAt: new Date(),
         },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to update last login: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update last login: ${message}`, stack);
       throw error;
     }
   }
@@ -198,8 +212,10 @@ export class UserRepository {
 
       this.logger.log(`Account status updated for user: ${id}`);
       return user;
-    } catch (error: any) {
-      this.logger.error(`Failed to update account status: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update account status: ${message}`, stack);
       throw error;
     }
   }
@@ -219,8 +235,10 @@ export class UserRepository {
           displayName,
         },
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to update display name: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update display name: ${message}`, stack);
       throw error;
     }
   }
@@ -243,8 +261,10 @@ export class UserRepository {
 
       this.logger.log(`User updated successfully: ${id}`);
       return user;
-    } catch (error: any) {
-      this.logger.error(`Failed to update user: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to update user: ${message}`, stack);
       throw error;
     }
   }
@@ -269,8 +289,10 @@ export class UserRepository {
 
       this.logger.log(`User deleted (soft): ${id}`);
       return user;
-    } catch (error: any) {
-      this.logger.error(`Failed to delete user: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to delete user: ${message}`, stack);
       throw error;
     }
   }
@@ -290,8 +312,10 @@ export class UserRepository {
       });
 
       this.logger.log(`User permanently deleted: ${id}`);
-    } catch (error: any) {
-      this.logger.error(`Failed to hard delete user: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to hard delete user: ${message}`, stack);
       throw error;
     }
   }
@@ -307,8 +331,10 @@ export class UserRepository {
       return await this.prisma.user.count({
         where: status ? { accountStatus: status } : undefined,
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to count users: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to count users: ${message}`, stack);
       throw error;
     }
   }
@@ -334,8 +360,10 @@ export class UserRepository {
         },
         take: limit,
       });
-    } catch (error: any) {
-      this.logger.error(`Failed to find users by date range: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to find users by date range: ${message}`, stack);
       throw error;
     }
   }

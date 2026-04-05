@@ -89,8 +89,10 @@ export class VerificationService {
 
       this.logger.log(`${type} token generated for user: ${userId}`);
       return code;
-    } catch (error: any) {
-      this.logger.error(`Failed to generate ${type} token: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to generate ${type} token: ${message}`, stack);
       throw new BadRequestException('Failed to generate verification token');
     }
   }
@@ -237,12 +239,14 @@ export class VerificationService {
 
       this.logger.log(`${type} verification successful for email: ${email}`);
       return token.userId;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error(`${type} verification failed: ${error.message}`, error.stack);
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`${type} verification failed: ${message}`, stack);
       throw new BadRequestException('Verification failed');
     }
   }
@@ -319,8 +323,10 @@ export class VerificationService {
 
       this.logger.log(`Cleaned up ${result.count} expired verification tokens`);
       return result.count;
-    } catch (error: any) {
-      this.logger.error(`Failed to cleanup expired tokens: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to cleanup expired tokens: ${message}`, stack);
       return 0;
     }
   }
