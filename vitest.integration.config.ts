@@ -57,9 +57,8 @@ export default defineConfig({
         inline: [
           // Workspace packages
           /^@reason-bridge\//,
-          // Prisma client - needs inlining for proper ESM resolution
-          '@prisma/client',
-          '.prisma/client',
+          // Note: Don't inline Prisma for integration tests - adapter pattern
+          // requires native module resolution
         ],
       },
     },
