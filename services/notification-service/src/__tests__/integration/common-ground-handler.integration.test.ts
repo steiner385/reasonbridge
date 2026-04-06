@@ -37,10 +37,14 @@ describe('CommonGroundNotificationHandler Integration Tests', () => {
           .mockImplementation(() =>
             Promise.resolve({ id: `notif-${Math.random().toString(36).slice(2)}` }),
           ),
+        createMany: vi.fn().mockResolvedValue({ count: 1 }),
+        findMany: vi.fn().mockResolvedValue([{ id: 'notif-1', userId: testCreatorId }]),
       },
       response: {
         findMany: vi.fn().mockResolvedValue([]),
       },
+      // $queryRaw for getTopicParticipants method (raw SQL for DISTINCT author lookup)
+      $queryRaw: vi.fn().mockResolvedValue([]),
     };
 
     // Create mocked gateway
