@@ -50,15 +50,15 @@ function createMockResponse(
 const originalFetch = globalThis.fetch;
 const mockFetch = vi.fn();
 
-// Disable MSW for these tests since we're testing with direct fetch mocks
+// Disable MSW for these tests by overriding globalThis.fetch with a direct mock
+// Note: We don't close the global MSW server as it may be used by other test files
+// running in parallel (Vitest 4.x). Simply overriding fetch bypasses MSW anyway.
 beforeAll(() => {
-  server.close();
   globalThis.fetch = mockFetch;
 });
 
 afterAll(() => {
   globalThis.fetch = originalFetch;
-  server.listen({ onUnhandledRequest: 'warn' });
 });
 
 describe('Pact Publisher Configuration', () => {
