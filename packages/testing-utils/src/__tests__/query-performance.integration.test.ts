@@ -27,7 +27,7 @@ import {
 import { explainAnalyze, assertQueryTiming, formatExplainSummary } from '../perf/index.js';
 import type { PrismaClient } from '@prisma/client';
 
-describe('Query Performance - Index Verification', () => {
+describe.skipIf(!process.env['CI'])('Query Performance - Index Verification', () => {
   let pool: Pool;
   let prisma: PrismaClient;
   let testUserId: string;

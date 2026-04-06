@@ -358,6 +358,7 @@ describe('Verification Flow - Integration Tests', () => {
       expect(mockPrismaService.verificationRecord.findMany).toHaveBeenCalledWith({
         where: { userId },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       });
     });
 
@@ -440,6 +441,7 @@ describe('Verification Flow - Integration Tests', () => {
           },
         },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       });
     });
 
