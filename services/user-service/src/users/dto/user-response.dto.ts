@@ -9,6 +9,7 @@ import type {
   UserStatus,
   UserRole,
   UserPrivacySettings,
+  Prisma,
 } from '@prisma/client';
 import { PrivacySettingsDto, ProfileVisibility, TrustVisibility } from './privacy-settings.dto.js';
 
@@ -25,9 +26,9 @@ export class UserResponseDto {
   trustScoreAbility!: number;
   trustScoreBenevolence!: number;
   trustScoreIntegrity!: number;
-  moralFoundationProfile!: any | null;
-  positionFingerprint!: any | null;
-  topicAffinities!: any | null;
+  moralFoundationProfile!: Prisma.JsonValue | null;
+  positionFingerprint!: Prisma.JsonValue | null;
+  topicAffinities!: Prisma.JsonValue | null;
   status!: UserStatus;
   role!: UserRole;
   createdAt!: Date;

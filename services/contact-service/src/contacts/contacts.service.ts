@@ -117,6 +117,7 @@ export class ContactsService {
   async getContacts(userId: string, query: ContactListQueryDto): Promise<ContactListResponseDto> {
     const { matched, provider, limit = 50, offset = 0 } = query;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma where clause with dynamic properties
     const where: any = { ownerId: userId };
 
     if (matched !== undefined) {

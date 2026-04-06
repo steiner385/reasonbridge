@@ -9,7 +9,7 @@ import { VerificationRequestDto } from './dto/verification-request.dto.js';
 import { VerificationResponseDto } from './dto/verification-response.dto.js';
 import { VideoVerificationService } from './video-challenge.service.js';
 import { randomUUID } from 'crypto';
-import { VerificationType, VerificationStatus } from '@prisma/client';
+import { VerificationType, VerificationStatus, type VerificationRecord } from '@prisma/client';
 import { OtpService } from './services/otp.service.js';
 import { PhoneValidationService } from './services/phone-validation.service.js';
 import { SmsClient } from '../clients/sms.client.js';
@@ -147,13 +147,15 @@ export class VerificationService {
    * @returns VerificationResponseDto with type-specific information
    */
   private async generateVerificationResponse(
-    verification: any,
+    verification: VerificationRecord,
     request: VerificationRequestDto,
   ): Promise<VerificationResponseDto> {
     const baseResponse: VerificationResponseDto = {
       verificationId: verification.id,
       type: verification.type,
-      expiresAt: verification.expiresAt.toISOString(),
+      expiresAt:
+        verification.expiresAt?.toISOString() ??
+        new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     };
 
     // Add type-specific response details

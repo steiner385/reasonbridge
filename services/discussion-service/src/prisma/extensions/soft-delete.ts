@@ -17,6 +17,16 @@
 import { Prisma } from '@prisma/client';
 
 /**
+ * NOTE: Prisma Client Extensions use `any` types because:
+ * - The `this` context in extension methods refers to internal model delegates
+ *   that Prisma doesn't export proper types for
+ * - Args like `where` and `args` are dynamic based on model schema
+ * - Return types depend on runtime includes/selects
+ *
+ * See: https://github.com/prisma/prisma/issues/18628
+ */
+
+/**
  * Soft delete extension for Response model
  *
  * Adds `softDelete()` method to Prisma Response model
@@ -41,11 +51,13 @@ export const softDeleteExtension = Prisma.defineExtension({
        * }
        * ```
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma extension this context and where clause
       async softDelete(
         this: any,
         { where }: { where: any },
       ): Promise<{
         deletionType: 'SOFT' | 'HARD';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Response with dynamic includes
         response: any;
       }> {
         // Check if response has replies
@@ -108,6 +120,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        * });
        * ```
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma extension this context and dynamic args
       async findManyActive(this: any, args?: any): Promise<any[]> {
         return this.findMany({
           ...args,
@@ -124,6 +137,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        * @param args - Standard count arguments
        * @returns Count of non-deleted responses
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma extension this context and dynamic args
       async countActive(this: any, args?: any): Promise<number> {
         return this.count({
           ...args,
@@ -140,6 +154,7 @@ export const softDeleteExtension = Prisma.defineExtension({
        * @param where - Response identifier
        * @returns True if soft-deleted, false otherwise
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma extension this context and where clause
       async isSoftDeleted(this: any, { where }: { where: any }): Promise<boolean> {
         const response = await this.findUnique({
           where,
@@ -176,6 +191,7 @@ export type PrismaClientWithSoftDelete = ReturnType<typeof createExtendedPrismaC
  * await extendedPrisma.response.softDelete({ where: { id: 'uuid' } });
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accepts any PrismaClient instance
 export function createExtendedPrismaClient(prisma: any) {
   return prisma.$extends(softDeleteExtension);
 }

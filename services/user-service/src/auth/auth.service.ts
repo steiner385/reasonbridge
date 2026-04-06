@@ -44,7 +44,23 @@ import {
 import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponseDto, VerificationEmailSentResponseDto } from './dto/auth-response.dto';
 import { UserProfileDto, OnboardingProgressDto } from '../dto/common.dto';
-import { AuthMethod, OnboardingStep, VerificationTokenType } from '@prisma/client';
+import {
+  AuthMethod,
+  OnboardingStep,
+  VerificationTokenType,
+  type User,
+  type OnboardingProgress,
+} from '@prisma/client';
+
+/**
+ * Interface for onboarding next action
+ */
+interface OnboardingNextAction {
+  step: OnboardingStep;
+  label: string;
+  description: string;
+  url: string;
+}
 import jwt from 'jsonwebtoken';
 const { sign: jwtSign } = jwt;
 
@@ -599,7 +615,7 @@ export class AuthService {
    * Helper: Generate JWT tokens (for OAuth or post-verification)
    */
   private async generateJwtTokens(
-    user: any,
+    user: User,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
     const secret = this.configService?.get<string>('JWT_SECRET');
     const nodeEnv = process.env['NODE_ENV'];
@@ -668,7 +684,7 @@ export class AuthService {
   /**
    * Helper: Map User to UserProfileDto
    */
-  private mapUserToProfileDto(user: any): UserProfileDto {
+  private mapUserToProfileDto(user: User): UserProfileDto {
     return {
       id: user.id,
       email: user.email,
@@ -684,7 +700,16 @@ export class AuthService {
   /**
    * Helper: Map OnboardingProgress to OnboardingProgressDto
    */
-  private mapOnboardingProgressToDto(progress: any): OnboardingProgressDto {
+  private mapOnboardingProgressToDto(progress: OnboardingProgress): OnboardingProgressDto {
+    // Calculate completion percentage based on current step
+    const stepPercentages: Record<OnboardingStep, number> = {
+      [OnboardingStep.VERIFICATION]: 25,
+      [OnboardingStep.TOPICS]: 50,
+      [OnboardingStep.ORIENTATION]: 75,
+      [OnboardingStep.COMPLETE]: 100,
+    };
+    const completionPercentage = stepPercentages[progress.currentStep] || 0;
+
     return {
       userId: progress.userId,
       currentStep: progress.currentStep,
@@ -692,7 +717,7 @@ export class AuthService {
       topicsSelected: progress.topicsSelected ?? false,
       orientationViewed: progress.orientationViewed ?? false,
       firstPostMade: progress.firstPostMade ?? false,
-      completionPercentage: progress.completionPercentage || 0,
+      completionPercentage,
       nextAction: this.getNextActionForStep(progress.currentStep),
     };
   }
@@ -700,8 +725,8 @@ export class AuthService {
   /**
    * Helper: Get next action based on current onboarding step
    */
-  private getNextActionForStep(step: OnboardingStep): any {
-    const actions: Record<OnboardingStep, any> = {
+  private getNextActionForStep(step: OnboardingStep): OnboardingNextAction {
+    const actions: Record<OnboardingStep, OnboardingNextAction> = {
       VERIFICATION: {
         step: 'VERIFICATION',
         label: 'Verify your email',
