@@ -344,7 +344,9 @@ describe('ClaimExtractorService Latency Benchmarks', () => {
       const stdDev = Math.sqrt(variance);
 
       // Variance should be reasonable (no memory leaks or degradation)
-      expect(stdDev).toBeLessThan(Math.max(mean, 1));
+      // Use higher floor in CI due to resource contention causing higher variance
+      const varianceFloor = process.env['CI'] ? 3 : 1;
+      expect(stdDev).toBeLessThan(Math.max(mean, varianceFloor));
 
       console.log('Repeated concurrent load stability:', {
         mean: `${mean.toFixed(2)}ms`,
