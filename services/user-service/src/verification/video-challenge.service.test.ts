@@ -5,8 +5,11 @@ import { ConfigService } from '@nestjs/config';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock AWS SDK before importing the service
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: vi.fn().mockImplementation(() => ({})),
+  S3Client: vi.fn().mockImplementation(function () {
+    return {};
+  }),
   PutObjectCommand: vi.fn(),
 }));
 

@@ -14,10 +14,11 @@ import {
 import { ProcessedImage } from './image-processor.service.js';
 
 // Mock S3Client
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: vi.fn().mockImplementation(() => ({
-    send: vi.fn(),
-  })),
+  S3Client: vi.fn().mockImplementation(function () {
+    return { send: vi.fn() };
+  }),
   PutObjectCommand: vi.fn(),
   ListObjectsV2Command: vi.fn(),
   DeleteObjectCommand: vi.fn(),

@@ -14,10 +14,13 @@ import {
 } from '../pact/provider.js';
 
 // Mock @pact-foundation/pact
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@pact-foundation/pact', () => ({
-  Verifier: vi.fn().mockImplementation(() => ({
-    verifyProvider: vi.fn().mockResolvedValue('Verification successful'),
-  })),
+  Verifier: vi.fn().mockImplementation(function () {
+    return {
+      verifyProvider: vi.fn().mockResolvedValue('Verification successful'),
+    };
+  }),
 }));
 
 describe('Pact Provider Configuration', () => {
@@ -140,12 +143,11 @@ describe('Pact Provider Configuration', () => {
     it('should handle verification failure', async () => {
       // Override the mock to simulate failure
       const { Verifier } = await import('@pact-foundation/pact');
-      vi.mocked(Verifier).mockImplementationOnce(
-        () =>
-          ({
-            verifyProvider: vi.fn().mockRejectedValue(new Error('Verification failed')),
-          }) as unknown as InstanceType<typeof Verifier>,
-      );
+      vi.mocked(Verifier).mockImplementationOnce(function () {
+        return {
+          verifyProvider: vi.fn().mockRejectedValue(new Error('Verification failed')),
+        } as unknown as InstanceType<typeof Verifier>;
+      });
 
       const verifier = createProviderVerifier(baseOptions);
       const result = await verifier.verifyProvider();

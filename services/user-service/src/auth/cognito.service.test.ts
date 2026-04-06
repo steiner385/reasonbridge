@@ -7,10 +7,11 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 
 // Mock AWS SDK
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@aws-sdk/client-cognito-identity-provider', () => ({
-  CognitoIdentityProviderClient: vi.fn().mockImplementation(() => ({
-    send: vi.fn(),
-  })),
+  CognitoIdentityProviderClient: vi.fn().mockImplementation(function () {
+    return { send: vi.fn() };
+  }),
   InitiateAuthCommand: vi.fn(),
 }));
 
@@ -43,9 +44,9 @@ describe('CognitoService', () => {
     vi.clearAllMocks();
     mockConfigService = createMockConfigService();
     mockCognitoSend = vi.fn();
-    (CognitoIdentityProviderClient as any).mockImplementation(() => ({
-      send: mockCognitoSend,
-    }));
+    (CognitoIdentityProviderClient as any).mockImplementation(function () {
+      return { send: mockCognitoSend };
+    });
     service = new CognitoService(mockConfigService as any);
   });
 
