@@ -35,16 +35,13 @@ export default defineConfig({
         __dirname,
         'packages/testing-utils/dist/msw/index.js',
       ),
-      // Prisma client alias - resolve from db-models package where it's installed
-      '@prisma/client': resolve(__dirname, 'packages/db-models/node_modules/@prisma/client'),
+      // Note: Don't alias @prisma/client for integration tests - let it resolve naturally
+      // so the adapter pattern works correctly
     },
   },
-  optimizeDeps: {
-    include: ['@prisma/client'],
-  },
   ssr: {
-    // Don't externalize these packages - bundle them
-    noExternal: [/^@reason-bridge\//, '@prisma/client'],
+    // Don't externalize workspace packages - but let Prisma resolve naturally
+    noExternal: [/^@reason-bridge\//],
   },
   test: {
     globals: true,
