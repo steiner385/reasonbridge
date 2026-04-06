@@ -657,6 +657,173 @@ function DiscussionPage() {
 - Preview feedback (composer → metadata panel)
 - Topic selection (left panel → center panel)
 
+### Error Handling Patterns (Backend Services)
+
+The backend services use three primary error handling patterns. Understanding when to use each pattern ensures consistent, predictable behavior across the codebase.
+
+**1. Throw Immediately (Default for Public APIs)**
+
+Use when the caller MUST handle the error case. This is the default pattern for operations where failure is exceptional and requires immediate attention.
+
+```typescript
+// Method naming: get*() - throws if not found
+async getUserById(id: string): Promise<User> {
+  const user = await this.userRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new NotFoundException(`User with ID ${id} not found`);
+  }
+  return user;
+}
+```
+
+- **When to use**: Required resource lookups, validation failures, authorization checks
+- **Caller expectation**: Must handle the exception or let it propagate to error middleware
+
+**2. Return Null/Empty (Query Operations)**
+
+Use when not finding data is a valid outcome, not an error. Common for search, lookup, and optional relationship queries.
+
+```typescript
+// Method naming: find*() - returns null/undefined if not found
+async findUserByEmail(email: string): Promise<User | null> {
+  return this.userRepository.findOne({ where: { email } });
+}
+
+// Method naming: list*() or get*s() - returns empty array if none found
+async listUsersByRole(role: string): Promise<User[]> {
+  return this.userRepository.find({ where: { role } });
+}
+```
+
+- **When to use**: Optional resource lookups, search queries, relationship traversal
+- **Caller expectation**: Check for null/empty before using the result
+
+**3. Fire-and-Forget (Background/Optional Operations)**
+
+Use when operation failure should not affect the main flow. Common for analytics, notifications, and audit logging.
+
+```typescript
+// Method naming: try*() - logs errors, never throws
+async tryUpdateActivityFeed(userId: string, action: string): Promise<void> {
+  try {
+    await this.activityService.record(userId, action);
+  } catch (error) {
+    this.logger.warn(`Failed to update activity feed: ${error.message}`, {
+      userId,
+      action,
+    });
+    // Swallow error - don't affect main operation
+  }
+}
+```
+
+- **When to use**: Analytics, notifications, audit logging, cache updates
+- **Caller expectation**: Operation is best-effort; failure is logged but not propagated
+
+**Pattern Selection Guide**
+
+| Scenario                               | Pattern         | Method Prefix   | Returns                    |
+| -------------------------------------- | --------------- | --------------- | -------------------------- |
+| Required resource lookup               | Throw           | `get*`          | Entity or throws           |
+| Optional resource lookup               | Return null     | `find*`         | Entity \| null             |
+| Collection query                       | Return empty    | `list*`/`get*s` | Array (may be empty)       |
+| Side effect (analytics, notifications) | Fire-and-forget | `try*`          | void                       |
+| Batch operations with partial success  | Return partial  | varies          | Array with status per item |
+
+**Current Codebase Notes**
+
+The existing codebase has some inconsistencies with these patterns:
+
+- Some `find*` methods at service level throw instead of returning null
+- No `try*` methods exist yet (fire-and-forget uses inline try/catch)
+- UUID validation throws in some places, returns false in others
+
+New code should follow these conventions. Existing code can be migrated gradually as files are touched.
+
+### JSDoc Documentation Standards
+
+All public methods in backend services should include JSDoc documentation with the following tags.
+
+**Required Tags for Public Methods**
+
+```typescript
+/**
+ * Brief one-line description of what the method does.
+ *
+ * @param id - The user's unique identifier (UUID format)
+ * @param options - Optional query parameters
+ * @returns The user entity with profile data populated
+ * @throws {NotFoundException} When user with given ID doesn't exist
+ * @throws {ForbiddenException} When caller lacks permission to view user
+ */
+async getUserById(id: string, options?: QueryOptions): Promise<User> {
+  // implementation
+}
+```
+
+**Tag Reference**
+
+| Tag         | Required      | Description                                 |
+| ----------- | ------------- | ------------------------------------------- |
+| Description | Yes           | First line, no tag needed                   |
+| `@param`    | Yes           | Each parameter with type hint and meaning   |
+| `@returns`  | Yes           | Return type and what it represents          |
+| `@throws`   | If applicable | Each exception type with condition          |
+| `@remarks`  | Optional      | Additional context, caveats, or usage notes |
+| `@example`  | Optional      | Code example for complex methods            |
+
+**@throws Format**
+
+Always specify the exception class and the condition that triggers it:
+
+```typescript
+// Good - specific condition
+@throws {NotFoundException} When user with given ID doesn't exist
+
+// Good - multiple conditions for same exception type
+@throws {BadRequestException} When email format is invalid
+@throws {BadRequestException} When password doesn't meet requirements
+
+// Avoid - too vague
+@throws {Error} When something goes wrong
+```
+
+**When to Skip JSDoc**
+
+- Private methods (unless complex logic warrants documentation)
+- Simple getters/setters with obvious purpose
+- Methods where the signature is completely self-documenting
+- Test files
+
+**Example: Full Documentation**
+
+````typescript
+/**
+ * Creates a new user account with email verification.
+ *
+ * @remarks
+ * The user will receive a verification email after creation.
+ * Account remains inactive until email is verified.
+ *
+ * @param dto - User registration data
+ * @returns The created user (without password hash)
+ * @throws {ConflictException} When email is already registered
+ * @throws {BadRequestException} When password doesn't meet requirements
+ *
+ * @example
+ * ```typescript
+ * const user = await usersService.createUser({
+ *   email: 'user@example.com',
+ *   password: 'SecurePass123!',
+ *   displayName: 'John Doe',
+ * });
+ * ```
+ */
+async createUser(dto: CreateUserDto): Promise<User> {
+  // implementation
+}
+````
+
 ## Speckit Workflow
 
 The project uses a structured feature development process through Claude Code slash commands:
