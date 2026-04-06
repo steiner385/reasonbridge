@@ -11,6 +11,7 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import type { Request } from 'express';
 import type { JwtPayload } from '../auth/jwt-auth.guard.js';
 import { AccessControlService, TIER_LEVEL_VALUES } from './access-control.service.js';
 import { REQUIRE_TIER_KEY, REQUIRE_EXPERTISE_KEY } from './require-tier.decorator.js';
@@ -155,15 +156,17 @@ export class TierGuard implements CanActivate {
   /**
    * Extract topicId from request params or body
    */
-  private extractTopicId(request: any): string | undefined {
+  private extractTopicId(request: Request): string | undefined {
     // Try route params first
-    if (request.params?.topicId) {
-      return request.params.topicId;
+    const paramTopicId = request.params?.['topicId'];
+    if (paramTopicId && typeof paramTopicId === 'string') {
+      return paramTopicId;
     }
 
     // Try request body
-    if (request.body?.topicId) {
-      return request.body.topicId;
+    const bodyTopicId = request.body?.['topicId'];
+    if (bodyTopicId && typeof bodyTopicId === 'string') {
+      return bodyTopicId;
     }
 
     return undefined;

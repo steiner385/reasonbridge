@@ -15,6 +15,15 @@ import type {
 } from '@reason-bridge/event-schemas/moderation';
 
 /**
+ * Trust score values (ability, benevolence, integrity)
+ */
+interface TrustScores {
+  ability: number;
+  benevolence: number;
+  integrity: number;
+}
+
+/**
  * Handles moderation service events and creates notifications
  */
 @Injectable()
@@ -379,7 +388,11 @@ export class ModerationNotificationHandler {
   /**
    * Build notification body for trust update
    */
-  private buildTrustUpdateBody(previousScores: any, newScores: any, reason: string): string {
+  private buildTrustUpdateBody(
+    previousScores: TrustScores,
+    newScores: TrustScores,
+    reason: string,
+  ): string {
     const changes = {
       ability: newScores.ability - previousScores.ability,
       benevolence: newScores.benevolence - previousScores.benevolence,

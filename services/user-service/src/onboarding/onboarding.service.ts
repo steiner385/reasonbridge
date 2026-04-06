@@ -20,6 +20,16 @@ import { ActivityLevel } from '../topics/dto/topic.dto';
 import { OnboardingStep } from '@prisma/client';
 import type { OnboardingProgress } from '@prisma/client';
 
+/**
+ * Interface for onboarding next action
+ */
+interface OnboardingNextAction {
+  step: OnboardingStep | string;
+  label: string;
+  description: string;
+  url: string;
+}
+
 @Injectable()
 export class OnboardingService {
   private readonly logger = new Logger(OnboardingService.name);
@@ -291,8 +301,8 @@ export class OnboardingService {
   /**
    * Helper: Get next action based on current step
    */
-  private getNextActionForStep(step: OnboardingStep): any {
-    const actions: Record<OnboardingStep, any> = {
+  private getNextActionForStep(step: OnboardingStep): OnboardingNextAction {
+    const actions: Record<OnboardingStep, OnboardingNextAction> = {
       VERIFICATION: {
         step: 'VERIFICATION',
         label: 'Verify your email',
