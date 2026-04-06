@@ -39,6 +39,8 @@ reasonBridge is a **Rational Discussion Platform** built with modern web technol
 
 **Example**: If you're fixing TypeScript errors and discover E2E tests failing due to a missing module export, you fix BOTH the TypeScript errors AND the module export issue. The task isn't complete until the full pipeline passes.
 
+**No Excuses**: The phrase "this is a pre-existing issue" is not an acceptable response. If you encounter 131 failing test files due to module resolution issues that existed before you started, you fix all 131 files. The user hired you to make the codebase work, not to explain why it doesn't.
+
 ## Architecture
 
 ### Frontend Structure

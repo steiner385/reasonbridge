@@ -13,6 +13,11 @@ const createMockPrismaService = () => ({
   },
   notification: {
     createMany: vi.fn().mockResolvedValue({ count: 0 }),
+    create: vi
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve({ id: `notif-${Math.random().toString(36).slice(2)}` }),
+      ),
   },
 });
 
@@ -21,16 +26,26 @@ const createMockNotificationGateway = () => ({
   emitUserTrustUpdated: vi.fn(),
 });
 
+const createMockDeliveryService = () => ({
+  deliverNotification: vi.fn().mockResolvedValue(undefined),
+});
+
 describe('ModerationNotificationHandler', () => {
   let handler: ModerationNotificationHandler;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockGateway: ReturnType<typeof createMockNotificationGateway>;
+  let mockDeliveryService: ReturnType<typeof createMockDeliveryService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockGateway = createMockNotificationGateway();
-    handler = new ModerationNotificationHandler(mockPrisma as any, mockGateway as any);
+    mockDeliveryService = createMockDeliveryService();
+    handler = new ModerationNotificationHandler(
+      mockPrisma as any,
+      mockGateway as any,
+      mockDeliveryService as any,
+    );
   });
 
   describe('handleModerationActionRequested', () => {

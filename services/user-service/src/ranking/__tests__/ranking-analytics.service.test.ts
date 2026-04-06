@@ -55,6 +55,11 @@ vi.mock('@prisma/client', () => {
       INDUSTRY_CERTIFICATION: 'INDUSTRY_CERTIFICATION',
       PUBLICATION: 'PUBLICATION',
     },
+    // PrismaClient mock required for PrismaService which extends it
+    PrismaClient: vi.fn(function (this: any) {
+      this.$connect = vi.fn();
+      this.$disconnect = vi.fn();
+    }),
   };
 });
 

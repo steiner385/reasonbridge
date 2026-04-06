@@ -34,6 +34,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@reasonbridge/common': path.resolve(__dirname, '../../packages/common/src'),
+      '@reason-bridge/testing-utils/setup': path.resolve(
+        __dirname,
+        '../../packages/testing-utils/dist/setup/index.js',
+      ),
     },
   },
 });

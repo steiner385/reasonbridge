@@ -48,6 +48,11 @@ vi.mock('@prisma/client', () => {
       EXPIRED: 'EXPIRED',
       REVOKED: 'REVOKED',
     },
+    // PrismaClient mock required for PrismaService which extends it
+    PrismaClient: vi.fn(function (this: any) {
+      this.$connect = vi.fn();
+      this.$disconnect = vi.fn();
+    }),
   };
 });
 

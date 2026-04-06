@@ -2,16 +2,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { QueueService } from './queue.service.js';
 
 // Mock AWS SDK-based publishers/subscribers
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@reason-bridge/common', () => ({
-  SnsEventPublisher: vi.fn().mockImplementation(() => ({
-    publish: vi.fn().mockResolvedValue({ messageId: 'msg-123' }),
-  })),
-  SqsEventSubscriber: vi.fn().mockImplementation(() => ({
-    on: vi.fn(),
-    start: vi.fn().mockResolvedValue(undefined),
-    stop: vi.fn().mockResolvedValue(undefined),
-  })),
-  DeadLetterQueueHandler: vi.fn().mockImplementation(() => ({})),
+  SnsEventPublisher: vi.fn().mockImplementation(function () {
+    return {
+      publish: vi.fn().mockResolvedValue({ messageId: 'msg-123' }),
+    };
+  }),
+  SqsEventSubscriber: vi.fn().mockImplementation(function () {
+    return {
+      on: vi.fn(),
+      start: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn().mockResolvedValue(undefined),
+    };
+  }),
+  DeadLetterQueueHandler: vi.fn().mockImplementation(function () {
+    return {};
+  }),
 }));
 
 const createMockConfig = (overrides = {}) => ({
@@ -61,7 +68,7 @@ describe('QueueService', () => {
 
     it('should propagate initialization errors', async () => {
       const { SnsEventPublisher } = await import('@reason-bridge/common');
-      (SnsEventPublisher as any).mockImplementationOnce(() => {
+      (SnsEventPublisher as any).mockImplementationOnce(function () {
         throw new Error('SNS initialization failed');
       });
 
@@ -111,7 +118,9 @@ describe('QueueService', () => {
       // Get the internal publisher and make it throw
       const { SnsEventPublisher } = await import('@reason-bridge/common');
       const mockPublisher = { publish: vi.fn().mockRejectedValue(new Error('Publish failed')) };
-      (SnsEventPublisher as any).mockImplementation(() => mockPublisher);
+      (SnsEventPublisher as any).mockImplementation(function () {
+        return mockPublisher;
+      });
 
       const newService = new QueueService(mockConfig as any);
       await newService.initialize();
@@ -168,7 +177,9 @@ describe('QueueService', () => {
         start: vi.fn().mockRejectedValue(new Error('Start failed')),
         stop: vi.fn(),
       };
-      (SqsEventSubscriber as any).mockImplementation(() => mockSubscriber);
+      (SqsEventSubscriber as any).mockImplementation(function () {
+        return mockSubscriber;
+      });
 
       const newService = new QueueService(mockConfig as any);
       await newService.initialize();
@@ -197,7 +208,9 @@ describe('QueueService', () => {
         start: vi.fn(),
         stop: vi.fn().mockRejectedValue(new Error('Stop failed')),
       };
-      (SqsEventSubscriber as any).mockImplementation(() => mockSubscriber);
+      (SqsEventSubscriber as any).mockImplementation(function () {
+        return mockSubscriber;
+      });
 
       const newService = new QueueService(mockConfig as any);
       await newService.initialize();

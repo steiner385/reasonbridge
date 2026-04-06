@@ -22,8 +22,11 @@ const VerificationStatus = {
 } as const;
 
 // Mock AWS SDK
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: vi.fn().mockImplementation(() => ({})),
+  S3Client: vi.fn().mockImplementation(function () {
+    return {};
+  }),
   HeadObjectCommand: vi.fn(),
 }));
 

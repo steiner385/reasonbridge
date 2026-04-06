@@ -1,8 +1,11 @@
 /**
  * Tests for Pact publisher configuration utilities.
+ *
+ * Note: This file uses vi.stubGlobal for fetch mocking instead of MSW
+ * because it needs to verify specific fetch call arguments.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach, afterAll } from 'vitest';
 import {
   generatePublishCommand,
   createPactPublisherFromEnv,
@@ -10,10 +13,53 @@ import {
   generateDeploymentCommand,
   type PactPublisherOptions,
 } from '../pact/publisher.js';
+import { server } from '../setup/index.js';
 
-// Mock fetch for deployment recording
+/**
+ * Creates a mock Response object with all required methods
+ */
+function createMockResponse(
+  ok: boolean,
+  status = ok ? 200 : 500,
+  statusText = ok ? 'OK' : 'Internal Server Error',
+): Response {
+  const response = {
+    ok,
+    status,
+    statusText,
+    headers: new Headers({ 'Content-Type': 'application/json' }),
+    url: '',
+    redirected: false,
+    type: 'basic' as Response['type'],
+    body: null,
+    bodyUsed: false,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+    blob: () => Promise.resolve(new Blob()),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    formData: () => Promise.resolve(new FormData()),
+    clone: function (): Response {
+      return createMockResponse(ok, status, statusText);
+    },
+    bytes: () => Promise.resolve(new Uint8Array()),
+  } as Response;
+  return response;
+}
+
+// Store original fetch and mock
+const originalFetch = globalThis.fetch;
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+
+// Disable MSW for these tests by overriding globalThis.fetch with a direct mock
+// Note: We don't close the global MSW server as it may be used by other test files
+// running in parallel (Vitest 4.x). Simply overriding fetch bypasses MSW anyway.
+beforeAll(() => {
+  globalThis.fetch = mockFetch;
+});
+
+afterAll(() => {
+  globalThis.fetch = originalFetch;
+});
 
 describe('Pact Publisher Configuration', () => {
   describe('generatePublishCommand', () => {
@@ -192,7 +238,7 @@ describe('Pact Publisher Configuration', () => {
     });
 
     it('should call broker API to record deployment', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true });
+      mockFetch.mockResolvedValueOnce(createMockResponse(true));
 
       await recordDeployment({
         pactBrokerUrl: 'https://broker.example.com',
@@ -214,7 +260,7 @@ describe('Pact Publisher Configuration', () => {
     });
 
     it('should include application instance when provided', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true });
+      mockFetch.mockResolvedValueOnce(createMockResponse(true));
 
       await recordDeployment({
         pactBrokerUrl: 'https://broker.example.com',
@@ -231,11 +277,7 @@ describe('Pact Publisher Configuration', () => {
     });
 
     it('should throw error on API failure', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+      mockFetch.mockResolvedValueOnce(createMockResponse(false, 500, 'Internal Server Error'));
 
       await expect(
         recordDeployment({
@@ -248,7 +290,7 @@ describe('Pact Publisher Configuration', () => {
     });
 
     it('should handle trailing slash in broker URL', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true });
+      mockFetch.mockResolvedValueOnce(createMockResponse(true));
 
       await recordDeployment({
         pactBrokerUrl: 'https://broker.example.com/',
@@ -264,7 +306,7 @@ describe('Pact Publisher Configuration', () => {
     });
 
     it('should URL encode special characters', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true });
+      mockFetch.mockResolvedValueOnce(createMockResponse(true));
 
       await recordDeployment({
         pactBrokerUrl: 'https://broker.example.com',

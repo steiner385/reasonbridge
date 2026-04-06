@@ -17,8 +17,9 @@ let mockComplete: Mock;
 let mockDestroy: Mock;
 
 // Mock the ai-client module
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@reason-bridge/ai-client', () => ({
-  BedrockClient: vi.fn().mockImplementation(() => {
+  BedrockClient: vi.fn().mockImplementation(function () {
     mockComplete = vi.fn().mockResolvedValue({
       content: '{"test": "data"}',
       usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },

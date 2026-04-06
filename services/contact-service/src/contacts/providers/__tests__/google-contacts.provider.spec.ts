@@ -11,20 +11,23 @@ const mockList = vi.fn();
 const mockSetCredentials = vi.fn();
 
 // Mock the googleapis module
+// Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('googleapis', () => ({
   google: {
     auth: {
-      OAuth2: vi.fn(() => ({
-        setCredentials: mockSetCredentials,
-      })),
+      OAuth2: vi.fn(function () {
+        return { setCredentials: mockSetCredentials };
+      }),
     },
-    people: vi.fn(() => ({
-      people: {
-        connections: {
-          list: mockList,
+    people: vi.fn(function () {
+      return {
+        people: {
+          connections: {
+            list: mockList,
+          },
         },
-      },
-    })),
+      };
+    }),
   },
 }));
 

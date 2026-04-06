@@ -29,8 +29,8 @@ describe('ToneAnalyzerService', () => {
       });
 
       it('should detect "you\'re an idiot"', async () => {
-        // Pattern: you('re| are)\s+(stupid|dumb|idiot|moron|fool|ignorant)
-        const content = "You're idiot for saying that.";
+        // Pattern: you('re| are)\s+(so\s+)?(stupid|dumb|an?\s+idiot|...)
+        const content = "You're an idiot for saying that.";
 
         const result = await service.analyze(content);
 

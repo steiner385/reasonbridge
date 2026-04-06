@@ -12,10 +12,13 @@ const createMockPrismaService = () => ({
       .mockImplementation(() =>
         Promise.resolve({ id: `notif-${Math.random().toString(36).slice(2)}` }),
       ),
+    findMany: vi.fn().mockResolvedValue([]),
   },
   response: {
     findMany: vi.fn().mockResolvedValue([]),
   },
+  // $queryRaw for getTopicParticipants method
+  $queryRaw: vi.fn().mockResolvedValue([]),
 });
 
 const createMockNotificationGateway = () => ({
@@ -369,26 +372,31 @@ describe('CommonGroundNotificationHandler', () => {
         participantCount: 3,
       });
 
-      // Other participants (not the creator)
-      mockPrisma.response.findMany.mockResolvedValue([
-        { authorId: 'user-2' },
-        { authorId: 'user-3' },
+      // Mock $queryRaw for participant lookup (returns other participants via raw SQL)
+      mockPrisma.$queryRaw.mockResolvedValue([{ author_id: 'user-2' }, { author_id: 'user-3' }]);
+
+      // Mock findMany for notifications lookup
+      mockPrisma.notification.findMany.mockResolvedValue([
+        { id: 'notif-1', userId: 'user-1' },
+        { id: 'notif-2', userId: 'user-2' },
+        { id: 'notif-3', userId: 'user-3' },
       ]);
 
       await handler.handleCommonGroundGenerated(createEvent());
 
-      // Should query for participants excluding creator
-      expect(mockPrisma.response.findMany).toHaveBeenCalledWith({
-        where: {
-          topicId: 'topic-1',
-          authorId: { not: 'user-1' },
-        },
-        select: { authorId: true },
-        distinct: ['authorId'],
-      });
+      // Should query for participants using $queryRaw
+      expect(mockPrisma.$queryRaw).toHaveBeenCalled();
 
-      // Should create 3 notifications (1 creator + 2 other participants)
-      expect(mockPrisma.notification.create).toHaveBeenCalledTimes(3);
+      // Should create notifications for 3 recipients via createMany (1 creator + 2 other participants)
+      expect(mockPrisma.notification.createMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.arrayContaining([
+            expect.objectContaining({ userId: 'user-1' }),
+            expect.objectContaining({ userId: 'user-2' }),
+            expect.objectContaining({ userId: 'user-3' }),
+          ]),
+        }),
+      );
     });
 
     it('should notify only creator when no other participants', async () => {
@@ -399,13 +407,20 @@ describe('CommonGroundNotificationHandler', () => {
         participantCount: 1,
       });
 
-      // No other participants
-      mockPrisma.response.findMany.mockResolvedValue([]);
+      // No other participants via $queryRaw
+      mockPrisma.$queryRaw.mockResolvedValue([]);
+
+      // Mock findMany for notifications lookup
+      mockPrisma.notification.findMany.mockResolvedValue([{ id: 'notif-1', userId: 'user-1' }]);
 
       await handler.handleCommonGroundGenerated(createEvent());
 
-      // Should create 1 notification (just creator)
-      expect(mockPrisma.notification.create).toHaveBeenCalledTimes(1);
+      // Should create 1 notification via createMany (just creator)
+      expect(mockPrisma.notification.createMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.arrayContaining([expect.objectContaining({ userId: 'user-1' })]),
+        }),
+      );
     });
 
     it('should deliver notifications to all participants', async () => {
@@ -416,7 +431,14 @@ describe('CommonGroundNotificationHandler', () => {
         participantCount: 2,
       });
 
-      mockPrisma.response.findMany.mockResolvedValue([{ authorId: 'user-2' }]);
+      // Mock $queryRaw for participant lookup
+      mockPrisma.$queryRaw.mockResolvedValue([{ author_id: 'user-2' }]);
+
+      // Mock findMany for notifications lookup with IDs for delivery
+      mockPrisma.notification.findMany.mockResolvedValue([
+        { id: 'notif-1', userId: 'user-1', type: 'common_ground' },
+        { id: 'notif-2', userId: 'user-2', type: 'common_ground' },
+      ]);
 
       await handler.handleCommonGroundGenerated(createEvent());
 

@@ -35,14 +35,13 @@ export default defineConfig({
         __dirname,
         'packages/testing-utils/dist/msw/index.js',
       ),
+      // Note: Don't alias @prisma/client for integration tests - let it resolve naturally
+      // so the adapter pattern works correctly
     },
   },
-  optimizeDeps: {
-    include: ['@prisma/client'],
-  },
   ssr: {
-    // Don't externalize these packages - bundle them
-    noExternal: [/^@reason-bridge\//, '@prisma/client'],
+    // Don't externalize workspace packages - but let Prisma resolve naturally
+    noExternal: [/^@reason-bridge\//],
   },
   test: {
     globals: true,
@@ -55,9 +54,8 @@ export default defineConfig({
         inline: [
           // Workspace packages
           /^@reason-bridge\//,
-          // Prisma client - needs inlining for proper ESM resolution
-          '@prisma/client',
-          '.prisma/client',
+          // Note: Don't inline Prisma for integration tests - adapter pattern
+          // requires native module resolution
         ],
       },
     },
@@ -70,11 +68,9 @@ export default defineConfig({
     testTimeout: 30000,
     hookTimeout: 30000,
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    // Vitest 4.x: poolOptions replaced with maxWorkers/isolate
+    maxWorkers: 1,
+    isolate: false,
     reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/integration-junit.xml',

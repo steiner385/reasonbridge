@@ -224,8 +224,9 @@ describe('BotDetectorService', () => {
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
       const mockResponses = [];
-      // Create 5 responses from 3 very new accounts (created < 24h ago)
-      for (let i = 0; i < 5; i++) {
+      // Create 10 responses from 8 unique new accounts (created < 24h ago)
+      // Need 7+ new accounts for confidence > 0.6 threshold (7/10 = 0.7)
+      for (let i = 0; i < 10; i++) {
         mockResponses.push({
           id: `response-${i}`,
           topicId: 'topic-1',
@@ -233,9 +234,9 @@ describe('BotDetectorService', () => {
           author: {
             id: `user-${i}`,
             createdAt:
-              i < 3
-                ? new Date(now.getTime() - 60 * 60 * 1000) // Very new
-                : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // Older
+              i < 8
+                ? new Date(now.getTime() - 60 * 60 * 1000) // Very new (8 accounts)
+                : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // Older (2 accounts)
           },
           createdAt: new Date(oneHourAgo.getTime() + i * 10 * 60 * 1000),
         } as any);
@@ -250,7 +251,7 @@ describe('BotDetectorService', () => {
       expect(result.length).toBeGreaterThan(0);
       const newAccountPattern = result.find((p) => p.pattern === 'new_account_coordination');
       expect(newAccountPattern).toBeDefined();
-      expect(newAccountPattern?.confidence).toBeGreaterThan(0);
+      expect(newAccountPattern?.confidence).toBeGreaterThan(0.6);
     });
 
     it('should detect timing coordination pattern', async () => {

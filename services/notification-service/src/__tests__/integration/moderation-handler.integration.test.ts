@@ -38,6 +38,11 @@ describe('ModerationNotificationHandler Integration Tests', () => {
       discussionTopic: {
         findUnique: vi.fn(),
       },
+      notification: {
+        create: vi.fn().mockResolvedValue({ id: 'notif-1' }),
+        createMany: vi.fn().mockResolvedValue({ count: 1 }),
+        findMany: vi.fn().mockResolvedValue([{ id: 'notif-1', userId: testUserId1 }]),
+      },
     };
 
     // Create mocked gateway
@@ -57,8 +62,17 @@ describe('ModerationNotificationHandler Integration Tests', () => {
       handleUnsubscribeTrustUpdates: vi.fn(),
     } as any;
 
+    // Mock delivery service
+    const mockDeliveryService = {
+      deliverNotification: vi.fn().mockResolvedValue(undefined),
+    };
+
     // Create handler with injected dependencies
-    handler = new ModerationNotificationHandler(mockPrisma as PrismaService, gateway);
+    handler = new ModerationNotificationHandler(
+      mockPrisma as PrismaService,
+      gateway,
+      mockDeliveryService as any,
+    );
   });
 
   afterEach(() => {
