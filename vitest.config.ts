@@ -82,6 +82,8 @@ export default defineConfig({
       '**/appeal.service.spec.ts',
       '**/moderation-actions.service.spec.ts',
       '**/moderation-actions.service.unit.test.ts',
+      // MSW setup tests - manages own server lifecycle, conflicts with global setup
+      '**/msw-setup.spec.ts',
     ],
     coverage: {
       provider: 'v8',
