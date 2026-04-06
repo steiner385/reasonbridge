@@ -108,6 +108,7 @@ describe('Phone Verification - Integration Tests', () => {
         displayName: `Test User ${userId.substring(0, 8)}`,
         cognitoSub: `cognito-${userId}`,
         verificationLevel: 'BASIC',
+        authMethod: 'EMAIL_PASSWORD',
         trustScoreAbility: 0.5,
         trustScoreBenevolence: 0.5,
         trustScoreIntegrity: 0.5,
