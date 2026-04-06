@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.0",
-    "@nestjs/common": "^11.1.17",
+    "@nestjs/common": "^11.1.18",
     "@nestjs/config": "^4.0.3",
-    "@nestjs/core": "^11.1.17",
+    "@nestjs/core": "^11.1.18",
     "@nestjs/jwt": "11.0.2",
-    "@nestjs/platform-fastify": "^11.1.17",
+    "@nestjs/platform-fastify": "^11.1.18",
     "@nestjs/swagger": "^11.2.6",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/adapter-pg": "^7.6.0",
@@ -33,9 +33,9 @@
     "pg": "^8.20.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.8",
-    "@nestjs/testing": "^11.1.17",
-    "@types/node": "^25.5.0",
+    "@nestjs/cli": "^11.0.17",
+    "@nestjs/testing": "^11.1.18",
+    "@types/node": "^25.5.2",
     "@types/pg": "^8.20.0",
     "@vitest/coverage-v8": "^2.1.8",
     "tsx": "^4.21.0",
