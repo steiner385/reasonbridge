@@ -8,6 +8,7 @@ describe('FeedbackService', () => {
   let mockPrismaService: any;
   let mockAnalyzerService: any;
   let mockSemanticCacheService: any;
+  let mockBedrockService: any;
   let mockRedisCacheService: any;
 
   const mockAnalysisResults: AnalysisResult[] = [
@@ -46,16 +47,21 @@ describe('FeedbackService', () => {
           },
         ),
     };
+    mockBedrockService = {
+      isReady: vi.fn().mockResolvedValue(true),
+      complete: vi.fn().mockResolvedValue(''),
+    };
     mockRedisCacheService = {
       getFeedback: vi.fn().mockResolvedValue(null),
       setFeedback: vi.fn().mockResolvedValue(undefined),
     };
 
-    // Create service instance directly with mocks
+    // Create service instance directly with mocks (constructor order: prisma, analyzer, semanticCache, bedrockService, redisCache)
     service = new FeedbackService(
       mockPrismaService,
       mockAnalyzerService,
       mockSemanticCacheService,
+      mockBedrockService,
       mockRedisCacheService,
     );
   });

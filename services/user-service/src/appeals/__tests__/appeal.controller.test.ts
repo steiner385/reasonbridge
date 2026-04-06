@@ -58,6 +58,11 @@ vi.mock('@prisma/client', () => {
       KNOWLEDGEABLE: 'KNOWLEDGEABLE',
       EXPERT: 'EXPERT',
     },
+    // PrismaClient mock required for PrismaService which extends it
+    PrismaClient: vi.fn(function (this: any) {
+      this.$connect = vi.fn();
+      this.$disconnect = vi.fn();
+    }),
   };
 });
 

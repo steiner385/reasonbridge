@@ -26,8 +26,8 @@ export default defineConfig({
         __dirname,
         'packages/testing-utils/dist/msw/index.js',
       ),
-      // Prisma client alias - let Node resolve it from node_modules
-      '@prisma/client': path.resolve(__dirname, 'node_modules/@prisma/client'),
+      // Prisma client alias - resolve from db-models package where it's installed
+      '@prisma/client': path.resolve(__dirname, 'packages/db-models/node_modules/@prisma/client'),
     },
   },
   optimizeDeps: {
@@ -58,22 +58,20 @@ export default defineConfig({
       'packages/**/src/**/*.spec.ts',
       'services/**/src/**/*.test.ts',
       'services/**/src/**/*.spec.ts',
-      'frontend/src/**/*.test.ts',
-      'frontend/src/**/*.test.tsx',
-      'frontend/src/**/*.spec.ts',
-      'frontend/src/**/*.spec.tsx',
+      // Note: Frontend tests excluded here - run with frontend/vitest.config.ts using jsdom
     ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/*.integration.test.ts',
+      '**/*.integration.spec.ts',
       '**/*.contract.test.ts',
       '**/*.e2e.test.ts',
-      // Frontend component tests - run with separate frontend/vitest.config.ts using jsdom
-      'frontend/src/components/**/*.spec.tsx',
-      'frontend/src/components/**/*.test.tsx',
-      // Frontend component test - requires separate vitest config with React testing setup
-      '**/moderation/__tests__/ModerationActionButtons.spec.tsx',
+      // All frontend tests - run with separate frontend/vitest.config.ts using jsdom
+      'frontend/**/*.test.ts',
+      'frontend/**/*.test.tsx',
+      'frontend/**/*.spec.ts',
+      'frontend/**/*.spec.tsx',
       // Discussion service content-moderation tests - failing due to undefined mocks
       '**/content-moderation.service.spec.ts',
       // Moderation service tests - module resolution issues and failing tests

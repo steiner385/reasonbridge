@@ -35,6 +35,8 @@ export default defineConfig({
         __dirname,
         'packages/testing-utils/dist/msw/index.js',
       ),
+      // Prisma client alias - resolve from db-models package where it's installed
+      '@prisma/client': resolve(__dirname, 'packages/db-models/node_modules/@prisma/client'),
     },
   },
   optimizeDeps: {
@@ -70,11 +72,9 @@ export default defineConfig({
     testTimeout: 30000,
     hookTimeout: 30000,
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    // Vitest 4.x: poolOptions replaced with maxWorkers/isolate
+    maxWorkers: 1,
+    isolate: false,
     reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/integration-junit.xml',

@@ -30,6 +30,9 @@ export class ToneAnalyzerService {
     // Dismissive of entire discussion/topic (e.g., "this conversation is stupid")
     /\b(this|that|the)\s+(\w+\s+)?(conversation|discussion|argument|debate|topic|thread|post|comment)\s+(is|are)\s+(really|very|so|completely|totally|absolutely|just)?\s*(a\s+)?(stupid|dumb|pointless|waste\s+of\s+time|ridiculous|idiotic|moronic)/gi,
 
+    // Dismissive of discussion with inverted word order (e.g., "this is a stupid conversation")
+    /\b(this|that)\s+(is|was)\s+(really|very|so|completely|totally|absolutely|such)?\s*(a\s+)?(stupid|dumb|pointless|idiotic|moronic|ridiculous)\s+(conversation|discussion|argument|debate|topic|thread|post|comment)/gi,
+
     // Aggressive language
     /\b(hate|despise)\s+(you|your|them|this|these)/gi,
     /you\s+make\s+me\s+(sick|angry)/gi,

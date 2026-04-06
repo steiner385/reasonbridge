@@ -24,12 +24,10 @@ export default defineConfig({
     // Longer timeout for benchmark tests
     testTimeout: 60000,
     // Sequential execution for consistent latency measurements
+    // Vitest 4.x: poolOptions replaced with maxWorkers/isolate
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    maxWorkers: 1,
+    isolate: false,
     reporters: ['default'],
   },
 });

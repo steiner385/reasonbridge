@@ -3,12 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach, afterAll } from 'vitest';
 import { ModerationServiceClient, BotFlagRequest } from '../moderation-service.client.js';
+// Import server from testing-utils setup (using relative path due to Vitest 4.x alias resolution)
+import { server } from '../../../../../packages/testing-utils/dist/setup/index.js';
 
-// Mock fetch globally
+// Store original fetch and create mock
+const originalFetch = globalThis.fetch;
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+
+// Disable MSW for these tests since we're testing with direct fetch mocks
+beforeAll(() => {
+  server.close();
+  globalThis.fetch = mockFetch;
+});
+
+afterAll(() => {
+  globalThis.fetch = originalFetch;
+  server.listen({ onUnhandledRequest: 'warn' });
+});
 
 describe('ModerationServiceClient', () => {
   let client: ModerationServiceClient;

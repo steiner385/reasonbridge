@@ -4,8 +4,17 @@
  */
 
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@reason-bridge/testing-utils/setup': path.resolve(
+        __dirname,
+        '../../packages/testing-utils/dist/setup/index.js',
+      ),
+    },
+  },
   test: {
     globals: true,
     environment: 'node',

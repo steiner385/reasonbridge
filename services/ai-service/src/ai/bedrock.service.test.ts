@@ -2,15 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BedrockService } from './bedrock.service.js';
 
 // Mock the ai-client module at the top level
+// Vitest 4.x requires function syntax for mock constructors
 vi.mock('@reason-bridge/ai-client', () => {
   const mockComplete = vi.fn();
   const mockIsReady = vi.fn().mockResolvedValue(true);
 
   return {
-    BedrockClient: vi.fn().mockImplementation(() => ({
-      isReady: mockIsReady,
-      complete: mockComplete,
-    })),
+    BedrockClient: vi.fn(function (this: any) {
+      this.isReady = mockIsReady;
+      this.complete = mockComplete;
+    }),
     __mockComplete: mockComplete,
     __mockIsReady: mockIsReady,
   };

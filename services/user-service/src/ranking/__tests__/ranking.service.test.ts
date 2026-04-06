@@ -13,6 +13,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotFoundException } from '@nestjs/common';
 
 // Mock Prisma before importing services
+// Vitest 4.x requires function syntax for mock constructors
 vi.mock('@prisma/client', () => {
   class MockDecimal {
     private value: number;
@@ -36,6 +37,11 @@ vi.mock('@prisma/client', () => {
       LEADER: 'LEADER',
       EXPERT: 'EXPERT',
     },
+    // PrismaClient mock required for PrismaService which extends it
+    PrismaClient: vi.fn(function (this: any) {
+      this.$connect = vi.fn();
+      this.$disconnect = vi.fn();
+    }),
   };
 });
 

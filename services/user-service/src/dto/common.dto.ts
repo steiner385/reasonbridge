@@ -68,6 +68,26 @@ export class UserProfileDto {
 }
 
 /**
+ * Next Action DTO
+ *
+ * Recommended next action for onboarding.
+ * Note: Defined before OnboardingProgressDto because it's referenced via @Type decorator.
+ */
+export class NextActionDto {
+  @IsString()
+  step!: string;
+
+  @IsString()
+  label!: string;
+
+  @IsString()
+  description!: string;
+
+  @IsString()
+  url!: string;
+}
+
+/**
  * Onboarding Progress DTO
  *
  * Tracks user progress through onboarding steps.
@@ -194,25 +214,6 @@ export class SelectedTopicDto {
 
   @IsString()
   selectedAt!: string;
-}
-
-/**
- * Next Action DTO
- *
- * Recommended next action for onboarding.
- */
-export class NextActionDto {
-  @IsString()
-  step!: string;
-
-  @IsString()
-  label!: string;
-
-  @IsString()
-  description!: string;
-
-  @IsString()
-  url!: string;
 }
 
 /**
