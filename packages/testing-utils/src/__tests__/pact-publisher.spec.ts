@@ -30,7 +30,7 @@ function createMockResponse(
     headers: new Headers({ 'Content-Type': 'application/json' }),
     url: '',
     redirected: false,
-    type: 'basic' as ResponseType,
+    type: 'basic' as Response['type'],
     body: null,
     bodyUsed: false,
     json: () => Promise.resolve({}),
