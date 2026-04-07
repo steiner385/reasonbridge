@@ -50,9 +50,8 @@ test.describe('Response Voting', () => {
     // Click upvote
     await upvoteButton.click();
 
-    // Wait for API call to complete
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    // Wait for vote API call to complete
+    await page.waitForTimeout(500);
 
     // Button should show active state
     await expect(upvoteButton).toHaveAttribute('data-active', 'true');
@@ -68,9 +67,8 @@ test.describe('Response Voting', () => {
     // Click downvote
     await downvoteButton.click();
 
-    // Wait for API call to complete
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    // Wait for vote API call to complete
+    await page.waitForTimeout(500);
 
     // Button should show active state
     await expect(downvoteButton).toHaveAttribute('data-active', 'true');
@@ -85,14 +83,12 @@ test.describe('Response Voting', () => {
 
     // First click - upvote
     await upvoteButton.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500); // Wait for vote API call to complete
     await expect(upvoteButton).toHaveAttribute('data-active', 'true');
 
     // Second click - remove vote
     await upvoteButton.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500); // Wait for vote API call to complete
 
     // Button should no longer be active
     await expect(upvoteButton).not.toHaveAttribute('data-active', 'true');
@@ -109,14 +105,12 @@ test.describe('Response Voting', () => {
 
     // First upvote
     await upvoteButton.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500); // Wait for vote API call to complete
     await expect(upvoteButton).toHaveAttribute('data-active', 'true');
 
     // Click downvote while already upvoted
     await downvoteButton.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500); // Wait for vote API call to complete
 
     // Downvote should now be active, upvote should not
     await expect(downvoteButton).toHaveAttribute('data-active', 'true');
