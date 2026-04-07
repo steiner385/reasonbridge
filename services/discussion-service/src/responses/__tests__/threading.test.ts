@@ -13,11 +13,13 @@ import { ResponsesService } from '../responses.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import type { CommonGroundTriggerService } from '../../services/common-ground-trigger.service.js';
 import type { ResponseDetailDto } from '../dto/response-detail.dto.js';
+import type { ResponseThreadingService } from '../response-threading.service.js';
 
 describe('ResponsesService - Threading', () => {
   let service: ResponsesService;
   let prismaService: PrismaService;
   let commonGroundTrigger: CommonGroundTriggerService;
+  let threadingService: ResponseThreadingService;
 
   const mockDiscussion = {
     id: 'discussion-1',
@@ -102,7 +104,35 @@ describe('ResponsesService - Threading', () => {
       checkAndTrigger: vi.fn().mockResolvedValue(undefined),
     } as unknown as CommonGroundTriggerService;
 
-    service = new ResponsesService(prismaService, commonGroundTrigger);
+    threadingService = {
+      calculateThreadDepth: vi.fn().mockResolvedValue(0),
+      validateReplyDepth: vi.fn().mockResolvedValue(undefined),
+      buildThreadTree: vi.fn().mockImplementation((responses) => {
+        // Simple implementation that adds replies and depth fields
+        const responseMap = new Map();
+        const rootResponses: any[] = [];
+        responses.forEach((response: any) => {
+          responseMap.set(response.id, { ...response, replies: [], depth: 0 });
+        });
+        responses.forEach((response: any) => {
+          const threadedResponse = responseMap.get(response.id);
+          if (response.parentResponseId) {
+            const parent = responseMap.get(response.parentResponseId);
+            if (parent) {
+              parent.replies.push(threadedResponse);
+              threadedResponse.depth = parent.depth + 1;
+            } else {
+              rootResponses.push(threadedResponse);
+            }
+          } else {
+            rootResponses.push(threadedResponse);
+          }
+        });
+        return rootResponses;
+      }),
+    } as unknown as ResponseThreadingService;
+
+    service = new ResponsesService(prismaService, commonGroundTrigger, threadingService);
   });
 
   describe('replyToResponse', () => {
@@ -129,13 +159,11 @@ describe('ResponsesService - Threading', () => {
 
       // Mock sequence for replyToResponse:
       // 1. Parent lookup in replyToResponse (returns full parent with discussionId)
-      // 2. Depth calculation (queries response-1, returns parentId: null - top level)
-      // 3. Parent validation in createResponseForDiscussion (returns parent again)
+      // 2. Parent validation in createResponseForDiscussion (returns parent with matching discussionId)
       prismaService.response.findUnique
         .mockResolvedValueOnce(mockParentResponse as any) // 1. Parent lookup
-        .mockResolvedValueOnce({ parentId: null }) // 2. Depth calculation
         .mockResolvedValueOnce({
-          // 3. Parent validation in createResponseForDiscussion
+          // 2. Parent validation in createResponseForDiscussion
           id: 'response-1',
           discussionId: 'discussion-1',
           deletedAt: null,
@@ -231,25 +259,18 @@ describe('ResponsesService - Threading', () => {
     });
 
     it('should throw BadRequestException when thread depth limit exceeded', async () => {
-      // Create a chain of 10 responses (max depth)
-      const deepResponses = Array.from({ length: 11 }, (_, i) => ({
-        id: `response-${i}`,
-        parentId: i > 0 ? `response-${i - 1}` : null,
-      }));
-
-      // Mock parent lookup (first call)
-      prismaService.response.findUnique.mockResolvedValueOnce({
+      // Mock parent lookup (needs to return for both assertions)
+      prismaService.response.findUnique.mockResolvedValue({
         id: 'response-10',
         discussionId: 'discussion-1',
         deletedAt: null,
         parentId: 'response-9',
       } as any);
 
-      // Mock depth calculation calls (subsequent calls)
-      prismaService.response.findUnique.mockImplementation(async ({ where }: any) => {
-        const response = deepResponses.find((r) => r.id === where.id);
-        return response ? { parentId: response.parentId } : null;
-      });
+      // Mock threadingService.validateReplyDepth to always throw for max depth exceeded
+      vi.mocked(threadingService.validateReplyDepth).mockRejectedValue(
+        new BadRequestException('Thread depth limit exceeded'),
+      );
 
       await expect(
         service.replyToResponse('response-10', 'user-1', {
@@ -295,13 +316,11 @@ describe('ResponsesService - Threading', () => {
 
       // Mock sequence for replyToResponse:
       // 1. Parent lookup in replyToResponse
-      // 2. Depth calculation (queries response-1, returns parentId: null)
-      // 3. Parent validation in createResponseForDiscussion
+      // 2. Parent validation in createResponseForDiscussion (must have matching discussionId)
       prismaService.response.findUnique
         .mockResolvedValueOnce(mockParentResponse as any) // 1. Parent lookup
-        .mockResolvedValueOnce({ parentId: null }) // 2. Depth calculation
         .mockResolvedValueOnce({
-          // 3. Parent validation in createResponseForDiscussion
+          // 2. Parent validation in createResponseForDiscussion
           id: 'response-1',
           discussionId: 'discussion-1',
           deletedAt: null,
@@ -343,54 +362,52 @@ describe('ResponsesService - Threading', () => {
 
   describe('calculateThreadDepth', () => {
     it('should return 0 for top-level response (no parent)', async () => {
-      prismaService.response.findUnique.mockResolvedValue({ parentId: null });
+      // ResponsesService delegates to threadingService, so mock the expected return
+      vi.mocked(threadingService.calculateThreadDepth).mockResolvedValue(0);
 
       const depth = await service.calculateThreadDepth('response-1');
 
       expect(depth).toBe(0);
+      expect(threadingService.calculateThreadDepth).toHaveBeenCalledWith('response-1');
     });
 
     it('should return 1 for first-level reply', async () => {
-      prismaService.response.findUnique
-        .mockResolvedValueOnce({ parentId: 'response-parent' }) // Current response
-        .mockResolvedValueOnce({ parentId: null }); // Parent response
+      vi.mocked(threadingService.calculateThreadDepth).mockResolvedValue(1);
 
       const depth = await service.calculateThreadDepth('response-1');
 
       expect(depth).toBe(1);
+      expect(threadingService.calculateThreadDepth).toHaveBeenCalledWith('response-1');
     });
 
     it('should return 3 for deeply nested reply', async () => {
-      prismaService.response.findUnique
-        .mockResolvedValueOnce({ parentId: 'response-3' }) // Level 3
-        .mockResolvedValueOnce({ parentId: 'response-2' }) // Level 2
-        .mockResolvedValueOnce({ parentId: 'response-1' }) // Level 1
-        .mockResolvedValueOnce({ parentId: null }); // Level 0 (root)
+      vi.mocked(threadingService.calculateThreadDepth).mockResolvedValue(3);
 
       const depth = await service.calculateThreadDepth('response-4');
 
       expect(depth).toBe(3);
+      expect(threadingService.calculateThreadDepth).toHaveBeenCalledWith('response-4');
     });
 
     it('should handle non-existent response gracefully', async () => {
-      prismaService.response.findUnique.mockResolvedValue(null);
+      // ThreadingService returns 0 for non-existent responses
+      vi.mocked(threadingService.calculateThreadDepth).mockResolvedValue(0);
 
       const depth = await service.calculateThreadDepth('non-existent');
 
       expect(depth).toBe(0);
+      expect(threadingService.calculateThreadDepth).toHaveBeenCalledWith('non-existent');
     });
 
     it('should stop at max iterations to prevent infinite loops', async () => {
-      // Simulate a circular reference (shouldn't happen in practice, but defensive)
-      // response-1 -> response-2 -> response-1 -> response-2 -> ...
-      prismaService.response.findUnique.mockImplementation(async ({ where }: any) => {
-        return { parentId: where.id === 'response-1' ? 'response-2' : 'response-1' };
-      });
+      // ThreadingService caps at MAX_DEPTH (10) for circular references
+      vi.mocked(threadingService.calculateThreadDepth).mockResolvedValue(10);
 
       const depth = await service.calculateThreadDepth('response-1');
 
       // Should break out at MAX_DEPTH (10) to prevent infinite loop
       expect(depth).toBe(10);
+      expect(threadingService.calculateThreadDepth).toHaveBeenCalledWith('response-1');
     });
   });
 

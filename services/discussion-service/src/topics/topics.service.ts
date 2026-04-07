@@ -25,6 +25,9 @@ import { MergeTopicsDto } from './dto/merge-topics.dto.js';
 import { TopicsSearchService } from './topics-search.service.js';
 import { SlugGeneratorService } from './slug-generator.service.js';
 import { TopicsEditService } from './topics-edit.service.js';
+import { TopicMergeService } from './topic-merge.service.js';
+import { TopicStatusService } from './topic-status.service.js';
+import { TopicCommonGroundService } from './topic-common-ground.service.js';
 import { PropositionsService } from '../propositions/propositions.service.js';
 import { ActivityClientService } from '../clients/activity-client.service.js';
 import { Prisma } from '@prisma/client';
@@ -42,6 +45,9 @@ export class TopicsService implements OnModuleInit {
     @Inject(TopicsEditService) private editService: TopicsEditService,
     @Inject(PropositionsService) private propositionsService: PropositionsService,
     @Inject(ActivityClientService) private activityClient: ActivityClientService,
+    @Inject(TopicMergeService) private mergeService: TopicMergeService,
+    @Inject(TopicStatusService) private statusService: TopicStatusService,
+    @Inject(TopicCommonGroundService) private commonGroundService: TopicCommonGroundService,
   ) {}
 
   async onModuleInit() {
@@ -538,65 +544,18 @@ export class TopicsService implements OnModuleInit {
     };
   }
 
+  /**
+   * Get common ground analysis for a topic
+   *
+   * @param topicId - ID of the topic
+   * @param version - Optional specific version to retrieve
+   * @returns Common ground analysis
+   */
   async getCommonGroundAnalysis(
     topicId: string,
     version?: number,
   ): Promise<CommonGroundResponseDto> {
-    // Generate cache key based on whether a specific version is requested
-    const cacheKey = version
-      ? `common-ground:topic:${topicId}:v${version}`
-      : `common-ground:topic:${topicId}:latest`;
-
-    // Try to get from cache first
-    const cached = await this.cacheManager?.get<CommonGroundResponseDto>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    // First verify the topic exists
-    const topic = await this.prisma.discussionTopic.findUnique({
-      where: { id: topicId },
-      select: { id: true },
-    });
-
-    if (!topic) {
-      throw new NotFoundException(`Topic with ID ${topicId} not found`);
-    }
-
-    // Fetch the analysis - either specific version or latest
-    const where = version ? { topicId, version } : { topicId };
-    const orderBy = version ? {} : { version: 'desc' as const };
-
-    const analysis = await this.prisma.commonGroundAnalysis.findFirst({
-      where,
-      orderBy,
-    });
-
-    if (!analysis) {
-      throw new NotFoundException(
-        version
-          ? `Common ground analysis version ${version} not found for topic ${topicId}`
-          : `No common ground analysis found for topic ${topicId}`,
-      );
-    }
-
-    // Map database model to DTO
-    const result: CommonGroundResponseDto = {
-      id: analysis.id,
-      version: analysis.version,
-      agreementZones: analysis.agreementZones as any,
-      misunderstandings: analysis.misunderstandings as any,
-      genuineDisagreements: analysis.genuineDisagreements as any,
-      overallConsensusScore: analysis.overallConsensusScore?.toNumber() ?? 0,
-      participantCountAtGeneration: analysis.participantCountAtGeneration,
-      responseCountAtGeneration: analysis.responseCountAtGeneration,
-      generatedAt: analysis.createdAt,
-    };
-
-    // Cache the result with a 1-hour TTL
-    await this.cacheManager?.set(cacheKey, result, CACHE_TTL.TOPIC_DETAIL_MS);
-
-    return result;
+    return this.commonGroundService.getAnalysis(topicId, version);
   }
 
   /**
@@ -604,9 +563,7 @@ export class TopicsService implements OnModuleInit {
    * Called when new analysis is generated
    */
   async invalidateCommonGroundCache(topicId: string): Promise<void> {
-    const latestKey = `common-ground:topic:${topicId}:latest`;
-    await this.cacheManager?.del(latestKey);
-    // Note: Versioned caches remain valid as analysis versions are immutable
+    return this.commonGroundService.invalidateCache(topicId);
   }
 
   /**
@@ -629,7 +586,7 @@ export class TopicsService implements OnModuleInit {
    * @param topicId - ID of the topic to update
    * @param userId - ID of the user requesting the change
    * @param newStatus - New status to set
-   * @param isModerator - Whether the user is a moderator (has elevated permissions)
+   * @param isModerator - Whether the user is a moderator
    * @returns Updated topic
    */
   async updateTopicStatus(
@@ -638,135 +595,7 @@ export class TopicsService implements OnModuleInit {
     newStatus: 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED',
     isModerator: boolean = false,
   ): Promise<TopicResponseDto> {
-    // Step 1: Fetch the topic
-    const topic = await this.prisma.discussionTopic.findUnique({
-      where: { id: topicId },
-      include: {
-        tags: {
-          include: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!topic) {
-      throw new NotFoundException(`Topic with ID ${topicId} not found`);
-    }
-
-    // Step 2: Check permissions
-    const isCreator = topic.creatorId === userId;
-    if (!isCreator && !isModerator) {
-      throw new BadRequestException('Only the topic creator or moderators can change topic status');
-    }
-
-    // Step 3: Validate status transition
-    // Creators can: SEEDING -> ACTIVE, ACTIVE -> ARCHIVED, ARCHIVED -> ACTIVE
-    // Moderators can: any status change including LOCKED
-    if (!isModerator) {
-      // Creators cannot lock topics
-      if (newStatus === 'LOCKED') {
-        throw new BadRequestException('Only moderators can lock topics');
-      }
-
-      // Creators cannot unlock topics
-      if (topic.status === 'LOCKED') {
-        throw new BadRequestException('Only moderators can unlock locked topics');
-      }
-
-      // Creators cannot revert to SEEDING once activated
-      if (newStatus === 'SEEDING' && topic.status !== 'SEEDING') {
-        throw new BadRequestException('Cannot revert an activated topic to SEEDING status');
-      }
-    }
-
-    // Step 4: Prepare update data with appropriate timestamps
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma update data with dynamic properties
-    const updateData: any = {
-      status: newStatus,
-      lastActivityAt: new Date(),
-    };
-
-    // Set activatedAt when transitioning to ACTIVE for the first time
-    if (newStatus === 'ACTIVE' && !topic.activatedAt) {
-      updateData.activatedAt = new Date();
-    }
-
-    // Set archivedAt when archiving
-    if (newStatus === 'ARCHIVED' && topic.status !== 'ARCHIVED') {
-      updateData.archivedAt = new Date();
-    }
-
-    // Clear archivedAt when unarchiving
-    if (newStatus === 'ACTIVE' && topic.status === 'ARCHIVED') {
-      updateData.archivedAt = null;
-    }
-
-    // Set lockedAt when locking
-    if (newStatus === 'LOCKED' && topic.status !== 'LOCKED') {
-      updateData.lockedAt = new Date();
-    }
-
-    // Clear lockedAt when unlocking
-    if (newStatus !== 'LOCKED' && topic.status === 'LOCKED') {
-      updateData.lockedAt = null;
-    }
-
-    // Step 5: Update the topic
-    const updatedTopic = await this.prisma.discussionTopic.update({
-      where: { id: topicId },
-      data: updateData,
-      include: {
-        tags: {
-          include: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    // Step 6: Invalidate caches
-    if (this.cacheManager) {
-      await this.cacheManager.del('topics:list');
-      // Clear all query-based caches for this topic
-      const cacheKeys = await this.cacheManager.stores.keys();
-      const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
-      const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
-      await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager!.del(key)));
-    }
-
-    return {
-      id: updatedTopic.id,
-      title: updatedTopic.title,
-      description: updatedTopic.description,
-      creatorId: updatedTopic.creatorId,
-      status: updatedTopic.status,
-      visibility: updatedTopic.visibility,
-      slug: updatedTopic.slug,
-      evidenceStandards: updatedTopic.evidenceStandards,
-      minimumDiversityScore: updatedTopic.minimumDiversityScore.toNumber(),
-      currentDiversityScore: updatedTopic.currentDiversityScore?.toNumber() ?? null,
-      participantCount: updatedTopic.participantCount,
-      responseCount: updatedTopic.responseCount,
-      crossCuttingThemes: updatedTopic.crossCuttingThemes,
-      createdAt: updatedTopic.createdAt,
-      activatedAt: updatedTopic.activatedAt,
-      archivedAt: updatedTopic.archivedAt,
-      tags: updatedTopic.tags.map((tt) => tt.tag),
-      isMatureContent: updatedTopic.isMatureContent,
-    };
+    return this.statusService.updateStatus(topicId, userId, newStatus, isModerator);
   }
 
   /**
@@ -1024,172 +853,28 @@ export class TopicsService implements OnModuleInit {
    * Merge multiple topics into a single target topic
    * Feature 016: Topic Management (T043)
    *
-   * Moderator-only operation that:
-   * - Moves all responses from source topics to target
-   * - Merges participant activities
-   * - Creates merge record with snapshots for rollback (30-day window)
-   * - Archives source topics with redirect to target
-   * - Uses transaction to ensure atomicity
-   *
    * @param moderatorId - ID of the moderator performing the merge
    * @param mergeDto - Merge request with source topics, target, and reason
    * @returns Updated target topic
    */
   async mergeTopics(moderatorId: string, mergeDto: MergeTopicsDto): Promise<TopicResponseDto> {
-    const { sourceTopicIds, targetTopicId, mergeReason } = mergeDto;
+    const result = await this.mergeService.mergeTopics(moderatorId, mergeDto);
 
-    // Step 1: Validate that target is not in source list
-    if (sourceTopicIds.includes(targetTopicId)) {
-      throw new BadRequestException('Target topic cannot be one of the source topics');
-    }
-
-    // Step 2: Use transaction to ensure atomicity
-    return await this.prisma.$transaction(async (tx) => {
-      // Step 3: Fetch all topics (source + target) with full data for snapshots
-      const allTopicIds = [...sourceTopicIds, targetTopicId];
-      const topics = await tx.discussionTopic.findMany({
-        where: { id: { in: allTopicIds } },
-        include: {
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-          responses: {
-            select: {
-              id: true,
-              authorId: true,
-            },
-          },
-        },
-      });
-
-      // Verify all topics exist
-      if (topics.length !== allTopicIds.length) {
-        const foundIds = topics.map((t) => t.id);
-        const missingIds = allTopicIds.filter((id) => !foundIds.includes(id));
-        throw new NotFoundException(`Topics not found: ${missingIds.join(', ')}`);
+    // Invalidate caches (fire and forget)
+    setImmediate(async () => {
+      await this.invalidateTopicCaches(mergeDto.targetTopicId);
+      for (const sourceId of mergeDto.sourceTopicIds) {
+        await this.invalidateTopicCaches(sourceId);
       }
-
-      // Separate source and target
-      const sourceTopics = topics.filter((t) => sourceTopicIds.includes(t.id));
-      const targetTopic = topics.find((t) => t.id === targetTopicId);
-
-      if (!targetTopic) {
-        throw new NotFoundException(`Target topic ${targetTopicId} not found`);
-      }
-
-      // Step 4: Validate source topics are not locked
-      const lockedSources = sourceTopics.filter((t) => t.status === 'LOCKED');
-      if (lockedSources.length > 0) {
-        throw new BadRequestException(
-          `Cannot merge locked topics: ${lockedSources.map((t) => t.title).join(', ')}`,
-        );
-      }
-
-      // Step 5: Create snapshots for rollback
-      const sourceSnapshots = sourceTopics.map((topic) => ({
-        id: topic.id,
-        title: topic.title,
-        description: topic.description,
-        status: topic.status,
-        visibility: topic.visibility,
-        slug: topic.slug,
-        creatorId: topic.creatorId,
-        participantCount: topic.participantCount,
-        responseCount: topic.responseCount,
-        tags: topic.tags.map((tt) => ({
-          id: tt.tag.id,
-          name: tt.tag.name,
-        })),
-        createdAt: topic.createdAt.toISOString(),
-      }));
-
-      // Step 6: Move all responses from source topics to target
-      const responsesToMove = sourceTopics.reduce((sum, t) => sum + t.responseCount, 0);
-
-      await tx.response.updateMany({
-        where: {
-          topicId: { in: sourceTopicIds },
-        },
-        data: {
-          topicId: targetTopicId,
-        },
-      });
-
-      // Step 7: Merge participant activities
-      // Get unique participant IDs from source topics
-      const sourceParticipants = new Set<string>();
-      sourceTopics.forEach((topic) => {
-        topic.responses.forEach((response) => {
-          sourceParticipants.add(response.authorId);
-        });
-      });
-
-      const participantsMerged = sourceParticipants.size;
-
-      // Step 8: Update target topic counts
-      const newResponseCount = targetTopic.responseCount + responsesToMove;
-      const targetParticipants = new Set(targetTopic.responses.map((r) => r.authorId));
-      sourceParticipants.forEach((id) => targetParticipants.add(id));
-      const newParticipantCount = targetParticipants.size;
-
-      await tx.discussionTopic.update({
-        where: { id: targetTopicId },
-        data: {
-          responseCount: newResponseCount,
-          participantCount: newParticipantCount,
-          lastActivityAt: new Date(),
-        },
-      });
-
-      // Step 9: Create merge record
-      await tx.topicMerge.create({
-        data: {
-          sourceTopicIds,
-          targetTopicId,
-          moderatorId,
-          mergeReason,
-          sourceSnapshots,
-          responsesMoved: responsesToMove,
-          participantsMerged,
-        },
-      });
-
-      // Step 10: Archive source topics and add redirect note to description
-      for (const sourceTopic of sourceTopics) {
-        const redirectNote = `\n\n---\n**[MERGED]** This topic has been merged into: [${targetTopic.title}](/topics/${targetTopic.slug})\nReason: ${mergeReason}`;
-
-        await tx.discussionTopic.update({
-          where: { id: sourceTopic.id },
-          data: {
-            status: 'ARCHIVED',
-            archivedAt: new Date(),
-            description: sourceTopic.description + redirectNote,
-          },
-        });
-      }
-
-      // Step 11: Invalidate caches outside transaction (fire and forget)
-      // We'll do this after transaction commits
-      setImmediate(async () => {
-        await this.invalidateTopicCaches(targetTopicId);
-        for (const sourceId of sourceTopicIds) {
-          await this.invalidateTopicCaches(sourceId);
-        }
-      });
-
-      // Step 12: Fetch and return updated target topic
-      return this.getTopicById(targetTopicId);
     });
+
+    // Return updated target topic
+    return this.getTopicById(mergeDto.targetTopicId);
   }
 
   /**
    * Rollback a topic merge operation
    * Feature 016: Topic Management
-   *
-   * Moderator-only operation (30-day rollback window)
-   * Restores source topics and moves responses back
    *
    * @param moderatorId - ID of the moderator performing rollback
    * @param mergeId - ID of the merge to rollback
@@ -1200,77 +885,7 @@ export class TopicsService implements OnModuleInit {
     mergeId: string,
     rollbackReason: string,
   ): Promise<void> {
-    return await this.prisma.$transaction(async (tx) => {
-      // Fetch merge record
-      const merge = await tx.topicMerge.findUnique({
-        where: { id: mergeId },
-      });
-
-      if (!merge) {
-        throw new NotFoundException(`Merge record ${mergeId} not found`);
-      }
-
-      // Check if already rolled back
-      if (merge.rolledBackAt) {
-        throw new BadRequestException('This merge has already been rolled back');
-      }
-
-      // Check 30-day window
-      const daysSinceMerge = (Date.now() - merge.mergedAt.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSinceMerge > 30) {
-        throw new BadRequestException(
-          'Rollback window has expired (30 days). Manual intervention required.',
-        );
-      }
-
-      // Move responses back to original topics
-      // For simplicity, we'll move all responses from target back to first source
-      // In production, you might want to restore based on response.createdAt and original topic
-      const firstSourceId = merge.sourceTopicIds[0];
-
-      await tx.response.updateMany({
-        where: {
-          topicId: merge.targetTopicId,
-          // Only move responses that were created after merge (approximately)
-          createdAt: { gte: merge.mergedAt },
-        },
-        data: {
-          topicId: firstSourceId,
-        },
-      });
-
-      // Restore source topics from snapshots
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON field cast to array
-      const snapshots = merge.sourceSnapshots as any[];
-      for (const snapshot of snapshots) {
-        await tx.discussionTopic.update({
-          where: { id: snapshot.id },
-          data: {
-            status: 'ACTIVE',
-            archivedAt: null,
-            // Remove redirect note from description
-            description: snapshot.description,
-          },
-        });
-      }
-
-      // Mark merge as rolled back
-      await tx.topicMerge.update({
-        where: { id: mergeId },
-        data: {
-          rolledBackAt: new Date(),
-          rollbackReason,
-        },
-      });
-
-      // Invalidate caches
-      setImmediate(async () => {
-        await this.invalidateTopicCaches(merge.targetTopicId);
-        for (const sourceId of merge.sourceTopicIds) {
-          await this.invalidateTopicCaches(sourceId);
-        }
-      });
-    });
+    await this.mergeService.rollbackTopicMerge(moderatorId, mergeId, rollbackReason);
   }
 
   /**
