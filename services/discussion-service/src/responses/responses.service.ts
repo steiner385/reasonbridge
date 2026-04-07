@@ -22,10 +22,11 @@ import { getGravatarUrl } from '../dto/user-summary.dto.js';
 import { DiscussionLogger } from '../utils/logger.js';
 import { validateCitationUrl } from '../utils/ssrf-validator.js';
 import { RESPONSE_CONSTRAINTS } from '../constants/index.js';
-import { ResponseThreadingService, ThreadedResponse } from './response-threading.service.js';
+import { ResponseThreadingService } from './response-threading.service.js';
+import type { ThreadedResponse } from './response-threading.service.js';
 
 // Re-export ThreadedResponse for consumers
-export { ThreadedResponse } from './response-threading.service.js';
+export type { ThreadedResponse } from './response-threading.service.js';
 
 @Injectable()
 export class ResponsesService {

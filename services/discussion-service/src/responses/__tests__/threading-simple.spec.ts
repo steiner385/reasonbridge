@@ -4,10 +4,13 @@
  * Tests focused on pure threading algorithms:
  * - buildThreadTree() for nested structure creation
  * - Thread depth calculation and validation
+ *
+ * NOTE: These tests use ResponseThreadingService directly since buildThreadTree
+ * is a pure function that was extracted from ResponsesService.
  */
 
 import { describe, it, expect } from 'vitest';
-import { ResponsesService } from '../responses.service.js';
+import { ResponseThreadingService } from '../response-threading.service.js';
 import type { ResponseDetailDto } from '../dto/response-detail.dto.js';
 
 describe('ResponsesService - Threading (Pure Functions)', () => {
@@ -19,7 +22,8 @@ describe('ResponsesService - Threading (Pure Functions)', () => {
 
   describe('buildThreadTree', () => {
     // Create service instance for testing pure methods
-    const service = new ResponsesService({} as any, {} as any);
+    // buildThreadTree is a pure function that doesn't need Prisma
+    const service = new ResponseThreadingService({} as any);
 
     it('should build tree from flat response list', () => {
       const responses: ResponseDetailDto[] = [
