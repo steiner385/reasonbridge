@@ -7,6 +7,9 @@ import { Injectable, NotFoundException, BadRequestException, Inject } from '@nes
 import { PrismaService } from '../prisma/prisma.service.js';
 import { MergeTopicsDto } from './dto/merge-topics.dto.js';
 
+/** Maximum days after a merge that rollback is allowed */
+const ROLLBACK_WINDOW_DAYS = 30;
+
 /**
  * Handles topic merge and rollback operations.
  *
@@ -157,6 +160,11 @@ export class TopicMergeService {
   /**
    * Rollback a topic merge operation.
    *
+   * @remarks
+   * Note: Responses are moved to the first source topic only. If multiple topics
+   * were merged, the original response distribution cannot be perfectly restored
+   * without tracking the original topicId per response.
+   *
    * @param moderatorId - ID of the moderator performing rollback
    * @param mergeId - ID of the merge to rollback
    * @param rollbackReason - Reason for rollback
@@ -183,11 +191,11 @@ export class TopicMergeService {
         throw new BadRequestException('This merge has already been rolled back');
       }
 
-      // Check 30-day window
+      // Check rollback window
       const daysSinceMerge = (Date.now() - merge.mergedAt.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSinceMerge > 30) {
+      if (daysSinceMerge > ROLLBACK_WINDOW_DAYS) {
         throw new BadRequestException(
-          'Rollback window has expired (30 days). Manual intervention required.',
+          `Rollback window has expired (${ROLLBACK_WINDOW_DAYS} days). Manual intervention required.`,
         );
       }
 
@@ -225,6 +233,7 @@ export class TopicMergeService {
         data: {
           rolledBackAt: new Date(),
           rollbackReason,
+          rolledBackBy: moderatorId,
         },
       });
     });
