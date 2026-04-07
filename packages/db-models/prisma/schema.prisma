@@ -1466,7 +1466,8 @@ enum VerificationTokenType {
 model VerificationToken {
   id        String                @id @default(uuid()) @db.Uuid
   userId    String                @map("user_id") @db.Uuid
-  token     String                @unique @db.VarChar(6)
+  /// 6-digit verification code (not globally unique - allows same code for different users in E2E tests)
+  token     String                @db.VarChar(6)
   type      VerificationTokenType @default(EMAIL_VERIFICATION)
   createdAt DateTime              @default(now()) @map("created_at")
   expiresAt DateTime              @map("expires_at")
