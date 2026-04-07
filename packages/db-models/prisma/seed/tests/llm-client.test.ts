@@ -106,8 +106,9 @@ describe('SeedingLLMClient', () => {
       await client.generateJSON('prompt 2', {});
 
       const elapsed = Date.now() - startTime;
-      // Should take at least 500ms due to rate limiting
-      expect(elapsed).toBeGreaterThanOrEqual(500);
+      // Should take at least ~500ms due to rate limiting
+      // Use 490ms threshold to account for timer precision variance
+      expect(elapsed).toBeGreaterThanOrEqual(490);
     });
   });
 

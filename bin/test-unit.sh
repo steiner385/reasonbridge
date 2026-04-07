@@ -7,6 +7,16 @@ set -e
 # Collect all arguments
 ARGS="$@"
 
+# CI-specific optimizations to prevent OOM and improve stability
+# Detect CI environment: Jenkins sets BUILD_NUMBER, GitHub Actions sets CI=true
+CI_OPTS=""
+if [ -n "$BUILD_NUMBER" ] || [ "$CI" = "true" ]; then
+    echo "CI environment detected - applying memory optimizations..."
+    # Limit workers to reduce memory pressure
+    # Use sequential file execution to prevent resource contention
+    CI_OPTS="--maxWorkers=2 --no-file-parallelism"
+fi
+
 # Ensure Prisma client is generated before running tests
 # This is needed because db-models tests import @prisma/client
 # and vitest runs tests in parallel across all workspaces
@@ -21,9 +31,12 @@ fi
 
 echo "Running unit tests via Vitest workspaces..."
 echo "Using: vitest.workspace.ts"
+if [ -n "$CI_OPTS" ]; then
+    echo "CI optimizations: $CI_OPTS"
+fi
 
 # Run all workspace tests - Vitest will use each project's vitest.config.ts
-pnpm exec vitest run --passWithNoTests $ARGS
+pnpm exec vitest run --passWithNoTests $CI_OPTS $ARGS
 
 # Run db-models tests separately (excluded from workspace because it needs prisma generate)
 echo "Running db-models tests..."

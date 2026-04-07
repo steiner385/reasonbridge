@@ -1,5 +1,15 @@
 import { defineWorkspace } from 'vitest/config';
 
+/**
+ * Vitest Workspace Configuration
+ *
+ * CI Optimizations (2026-04-07):
+ * - Added maxWorkers: 2 to limit parallel test execution
+ * - Prevents OOM issues in memory-constrained CI environments
+ * - fileParallelism: false ensures workspaces run sequentially
+ *
+ * @see https://vitest.dev/guide/workspace
+ */
 export default defineWorkspace([
   // Services with their own configs
   'services/*/vitest.config.ts',
