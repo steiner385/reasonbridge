@@ -22,14 +22,10 @@ import { getGravatarUrl } from '../dto/user-summary.dto.js';
 import { DiscussionLogger } from '../utils/logger.js';
 import { validateCitationUrl } from '../utils/ssrf-validator.js';
 import { RESPONSE_CONSTRAINTS } from '../constants/index.js';
+import { ResponseThreadingService, ThreadedResponse } from './response-threading.service.js';
 
-/**
- * T053 [US3] - Threaded response with nested replies
- */
-export interface ThreadedResponse extends ResponseDetailDto {
-  replies: ThreadedResponse[];
-  depth: number;
-}
+// Re-export ThreadedResponse for consumers
+export { ThreadedResponse } from './response-threading.service.js';
 
 @Injectable()
 export class ResponsesService {
@@ -39,6 +35,8 @@ export class ResponsesService {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(CommonGroundTriggerService)
     private readonly commonGroundTrigger: CommonGroundTriggerService,
+    @Inject(ResponseThreadingService)
+    private readonly threadingService: ResponseThreadingService,
     @Optional() private readonly moderationClient?: ModerationClientService,
   ) {}
 
@@ -803,15 +801,7 @@ export class ResponsesService {
     }
 
     // Calculate thread depth to enforce limit (T054)
-    const depth = await this.calculateThreadDepth(parentResponseId);
-    const MAX_THREAD_DEPTH = 10; // Allow up to 10 levels, but UI will flatten after 5
-
-    if (depth >= MAX_THREAD_DEPTH) {
-      throw new BadRequestException(
-        `Thread depth limit exceeded (max ${MAX_THREAD_DEPTH} levels). ` +
-          'Please reply to a higher-level response.',
-      );
-    }
+    await this.threadingService.validateReplyDepth(parentResponseId);
 
     // Require discussionId for replies - legacy responses without discussions
     // cannot accept threaded replies through this endpoint
@@ -834,87 +824,21 @@ export class ResponsesService {
   /**
    * T054 [US3] - Calculate thread depth for a response
    *
-   * Recursively traverses up the parent chain to determine how deep
-   * in the thread tree a response is. Includes a safeguard against
-   * infinite loops from circular references.
-   *
    * @param responseId - The ID of the response to calculate depth for
-   * @returns The depth (0 for top-level, 1 for first reply, etc.), capped at MAX_DEPTH
+   * @returns The depth (0 for top-level, 1 for first reply, etc.)
    */
   async calculateThreadDepth(responseId: string): Promise<number> {
-    const MAX_DEPTH = 10; // Safeguard against circular references
-    let depth = 0;
-    let currentId: string | null = responseId;
-
-    while (currentId && depth < MAX_DEPTH) {
-      const response: { parentId: string | null } | null = await this.prisma.response.findUnique({
-        where: { id: currentId },
-        select: { parentId: true },
-      });
-
-      if (!response) break;
-
-      if (response.parentId) {
-        depth++;
-        currentId = response.parentId;
-      } else {
-        break; // Reached top-level response
-      }
-    }
-
-    return depth;
+    return this.threadingService.calculateThreadDepth(responseId);
   }
 
   /**
    * T053 [US3] - Build recursive thread tree from flat response list
    *
-   * Transforms a flat array of responses into a nested tree structure
-   * for display. Each response includes its direct replies as children.
-   *
-   * Requirements:
-   * - Maintain chronological order (oldest first) within each level
-   * - Calculate depth for each response
-   * - Handle orphaned responses gracefully (if parent is deleted)
-   *
    * @param responses - Flat array of responses from database
    * @returns Tree structure with responses and nested replies
    */
   buildThreadTree(responses: ResponseDetailDto[]): ThreadedResponse[] {
-    // Create a map for O(1) lookup
-    const responseMap = new Map<string, ThreadedResponse>();
-    const rootResponses: ThreadedResponse[] = [];
-
-    // Initialize all responses as threaded responses
-    responses.forEach((response) => {
-      responseMap.set(response.id, {
-        ...response,
-        replies: [],
-        depth: 0, // Will be calculated
-      });
-    });
-
-    // Build tree structure and calculate depths
-    responses.forEach((response) => {
-      const threadedResponse = responseMap.get(response.id)!;
-
-      if (response.parentResponseId) {
-        const parent = responseMap.get(response.parentResponseId);
-        if (parent) {
-          // Add as child to parent
-          parent.replies.push(threadedResponse);
-          // Calculate depth based on parent
-          threadedResponse.depth = parent.depth + 1;
-        } else {
-          // Orphaned response (parent deleted) - treat as root
-          rootResponses.push(threadedResponse);
-        }
-      } else {
-        // Top-level response
-        rootResponses.push(threadedResponse);
-      }
-    });
-
-    return rootResponses;
+    return this.threadingService.buildThreadTree(responses);
   }
 
   /**
