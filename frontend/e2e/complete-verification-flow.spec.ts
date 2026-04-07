@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { waitForAuthState } from './helpers/auth-waits';
 
 /**
  * E2E test suite for Complete Verification Flow (US4 - Human Authenticity)
@@ -57,7 +58,10 @@ test.describe('Complete Verification Flow', () => {
     await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
 
     // Wait for authentication state to stabilize
-    await page.waitForLoadState('networkidle');
+    // Note: Don't use networkidle as WebSocket keeps network active
+    await expect(page.getByRole('link', { name: 'Profile', exact: true })).toBeVisible({
+      timeout: 10000,
+    });
     await page.waitForTimeout(300); // Allow token storage and state propagation
   };
 
@@ -72,8 +76,8 @@ test.describe('Complete Verification Flow', () => {
     // Navigate directly to verification page
     await page.goto('/verification');
 
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    // Wait for authenticated page to stabilize (avoid networkidle which hangs due to WebSocket)
+    await waitForAuthState(page);
 
     // Verify we're on the verification page - should show verification options or error
     // When authenticated, the page shows "Verification Options" heading
@@ -249,8 +253,8 @@ test.describe('Complete Verification Flow', () => {
     const response = await page.goto('/verification');
     expect(response?.status()).toBeLessThan(400);
 
-    // Wait for page to fully load
-    await page.waitForLoadState('networkidle');
+    // Wait for authenticated page to stabilize (avoid networkidle which hangs due to WebSocket)
+    await waitForAuthState(page);
 
     // Get current URL
     const firstUrl = page.url();
