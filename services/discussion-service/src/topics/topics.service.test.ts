@@ -72,6 +72,25 @@ const createMockActivityClient = () => ({
   createEvent: vi.fn().mockResolvedValue(undefined),
 });
 
+// Mock Topic Merge Service
+const createMockMergeService = () => ({
+  mergeTopics: vi
+    .fn()
+    .mockResolvedValue({ mergeId: 'merge-1', responsesMoved: 10, participantsMerged: 5 }),
+  rollbackTopicMerge: vi.fn().mockResolvedValue(undefined),
+});
+
+// Mock Topic Status Service
+const createMockStatusService = () => ({
+  updateStatus: vi.fn(),
+});
+
+// Mock Topic Common Ground Service
+const createMockCommonGroundService = () => ({
+  getAnalysis: vi.fn(),
+  invalidateCache: vi.fn().mockResolvedValue(undefined),
+});
+
 const createMockTopic = (overrides = {}) => ({
   id: 'topic-1',
   title: 'Test Topic',
@@ -105,6 +124,9 @@ describe('TopicsService', () => {
   let mockEditService: ReturnType<typeof createMockEditService>;
   let mockPropositionsService: ReturnType<typeof createMockPropositionsService>;
   let mockActivityClient: ReturnType<typeof createMockActivityClient>;
+  let mockMergeService: ReturnType<typeof createMockMergeService>;
+  let mockStatusService: ReturnType<typeof createMockStatusService>;
+  let mockCommonGroundService: ReturnType<typeof createMockCommonGroundService>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -116,6 +138,9 @@ describe('TopicsService', () => {
     mockEditService = createMockEditService();
     mockPropositionsService = createMockPropositionsService();
     mockActivityClient = createMockActivityClient();
+    mockMergeService = createMockMergeService();
+    mockStatusService = createMockStatusService();
+    mockCommonGroundService = createMockCommonGroundService();
     service = new TopicsService(
       mockPrisma as any,
       mockModuleRef as any,
@@ -124,6 +149,9 @@ describe('TopicsService', () => {
       mockEditService as any,
       mockPropositionsService as any,
       mockActivityClient as any,
+      mockMergeService as any,
+      mockStatusService as any,
+      mockCommonGroundService as any,
     );
     // Initialize cache manager via onModuleInit
     await service.onModuleInit();
@@ -326,58 +354,40 @@ describe('TopicsService', () => {
   });
 
   describe('getCommonGroundAnalysis', () => {
-    const mockAnalysis = {
+    const mockAnalysisResponse = {
       id: 'analysis-1',
-      topicId: 'topic-1',
       version: 3,
       agreementZones: [{ id: '1', topic: 'test' }],
       misunderstandings: [],
       genuineDisagreements: [],
-      overallConsensusScore: { toNumber: () => 0.75 },
+      overallConsensusScore: 0.75,
       participantCountAtGeneration: 10,
       responseCountAtGeneration: 50,
-      createdAt: new Date('2026-01-15'),
+      generatedAt: new Date('2026-01-15'),
     };
 
-    it('should return cached analysis if available', async () => {
-      const cachedResult = { id: 'cached-analysis' };
-      mockCacheManager.get.mockResolvedValue(cachedResult);
+    it('should delegate to commonGroundService.getAnalysis', async () => {
+      mockCommonGroundService.getAnalysis.mockResolvedValue(mockAnalysisResponse);
 
       const result = await service.getCommonGroundAnalysis('topic-1');
 
-      expect(result).toBe(cachedResult);
-      expect(mockPrisma.discussionTopic.findUnique).not.toHaveBeenCalled();
+      expect(mockCommonGroundService.getAnalysis).toHaveBeenCalledWith('topic-1', undefined);
+      expect(result).toBe(mockAnalysisResponse);
     });
 
-    it('should fetch from database when not cached', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue(mockAnalysis);
+    it('should pass version parameter to commonGroundService', async () => {
+      mockCommonGroundService.getAnalysis.mockResolvedValue(mockAnalysisResponse);
 
-      const result = await service.getCommonGroundAnalysis('topic-1');
+      const result = await service.getCommonGroundAnalysis('topic-1', 2);
 
-      expect(result.id).toBe('analysis-1');
-      expect(result.version).toBe(3);
-      expect(result.overallConsensusScore).toBe(0.75);
-    });
-
-    it('should cache the result after fetching', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue(mockAnalysis);
-
-      await service.getCommonGroundAnalysis('topic-1');
-
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        'common-ground:topic:topic-1:latest',
-        expect.any(Object),
-        3600000,
-      );
+      expect(mockCommonGroundService.getAnalysis).toHaveBeenCalledWith('topic-1', 2);
+      expect(result).toBe(mockAnalysisResponse);
     });
 
     it('should throw NotFoundException if topic not found', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(null);
+      mockCommonGroundService.getAnalysis.mockRejectedValue(
+        new NotFoundException('Topic with ID nonexistent not found'),
+      );
 
       await expect(service.getCommonGroundAnalysis('nonexistent')).rejects.toThrow(
         NotFoundException,
@@ -385,72 +395,31 @@ describe('TopicsService', () => {
     });
 
     it('should throw NotFoundException if analysis not found', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue(null);
+      mockCommonGroundService.getAnalysis.mockRejectedValue(
+        new NotFoundException('No common ground analysis found for topic topic-1'),
+      );
 
       await expect(service.getCommonGroundAnalysis('topic-1')).rejects.toThrow(
         'No common ground analysis found for topic topic-1',
       );
     });
 
-    it('should fetch specific version when requested', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue(mockAnalysis);
-
-      await service.getCommonGroundAnalysis('topic-1', 2);
-
-      expect(mockPrisma.commonGroundAnalysis.findFirst).toHaveBeenCalledWith({
-        where: { topicId: 'topic-1', version: 2 },
-        orderBy: {},
-      });
-    });
-
-    it('should use versioned cache key for specific version', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue(mockAnalysis);
-
-      await service.getCommonGroundAnalysis('topic-1', 2);
-
-      expect(mockCacheManager.get).toHaveBeenCalledWith('common-ground:topic:topic-1:v2');
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
-        'common-ground:topic:topic-1:v2',
-        expect.any(Object),
-        3600000,
-      );
-    });
-
     it('should throw NotFoundException for missing specific version', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue(null);
+      mockCommonGroundService.getAnalysis.mockRejectedValue(
+        new NotFoundException('Common ground analysis version 99 not found for topic topic-1'),
+      );
 
       await expect(service.getCommonGroundAnalysis('topic-1', 99)).rejects.toThrow(
         'Common ground analysis version 99 not found for topic topic-1',
       );
     });
-
-    it('should handle null overallConsensusScore', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue({ id: 'topic-1' });
-      mockPrisma.commonGroundAnalysis.findFirst.mockResolvedValue({
-        ...mockAnalysis,
-        overallConsensusScore: null,
-      });
-
-      const result = await service.getCommonGroundAnalysis('topic-1');
-
-      expect(result.overallConsensusScore).toBe(0);
-    });
   });
 
   describe('invalidateCommonGroundCache', () => {
-    it('should delete latest cache key', async () => {
+    it('should delegate to commonGroundService.invalidateCache', async () => {
       await service.invalidateCommonGroundCache('topic-1');
 
-      expect(mockCacheManager.del).toHaveBeenCalledWith('common-ground:topic:topic-1:latest');
+      expect(mockCommonGroundService.invalidateCache).toHaveBeenCalledWith('topic-1');
     });
   });
 
@@ -816,132 +785,80 @@ describe('TopicsService', () => {
   });
 
   describe('updateTopicStatus', () => {
-    it('should update topic status from SEEDING to ACTIVE as creator', async () => {
-      const seedingTopic = createMockTopic({
-        status: 'SEEDING',
-        activatedAt: null,
-      });
-      const activeTopic = createMockTopic({
+    it('should delegate to statusService.updateStatus', async () => {
+      const activeTopic = {
+        id: 'topic-1',
+        title: 'Test Topic',
+        description: 'Test Description',
+        creatorId: 'user-1',
         status: 'ACTIVE',
+        visibility: 'PUBLIC',
+        slug: 'test-topic',
+        evidenceStandards: 'STANDARD',
+        minimumDiversityScore: 0.5,
+        currentDiversityScore: 0.7,
+        participantCount: 10,
+        responseCount: 25,
+        crossCuttingThemes: ['theme1'],
+        createdAt: new Date(),
         activatedAt: new Date(),
-      });
-
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(seedingTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(activeTopic);
-
-      const result = await service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false);
-
-      expect(result.status).toBe('ACTIVE');
-      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            status: 'ACTIVE',
-            activatedAt: expect.any(Date),
-          }),
-        }),
-      );
-    });
-
-    it('should update topic status from ACTIVE to ARCHIVED as creator', async () => {
-      const activeTopic = createMockTopic({ status: 'ACTIVE' });
-      const archivedTopic = createMockTopic({
-        status: 'ARCHIVED',
-        archivedAt: new Date(),
-      });
-
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(archivedTopic);
-
-      const result = await service.updateTopicStatus('topic-1', 'user-1', 'ARCHIVED', false);
-
-      expect(result.status).toBe('ARCHIVED');
-      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            status: 'ARCHIVED',
-            archivedAt: expect.any(Date),
-          }),
-        }),
-      );
-    });
-
-    it('should update topic status from ARCHIVED to ACTIVE as creator (unarchive)', async () => {
-      const archivedTopic = createMockTopic({
-        status: 'ARCHIVED',
-        archivedAt: new Date(),
-      });
-      const activeTopic = createMockTopic({
-        status: 'ACTIVE',
         archivedAt: null,
-      });
+        tags: [],
+        isMatureContent: false,
+      };
 
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(archivedTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(activeTopic);
+      mockStatusService.updateStatus.mockResolvedValue(activeTopic);
 
       const result = await service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false);
 
-      expect(result.status).toBe('ACTIVE');
-      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            status: 'ACTIVE',
-            archivedAt: null,
-          }),
-        }),
+      expect(mockStatusService.updateStatus).toHaveBeenCalledWith(
+        'topic-1',
+        'user-1',
+        'ACTIVE',
+        false,
       );
+      expect(result).toBe(activeTopic);
     });
 
-    it('should allow moderator to lock a topic', async () => {
-      const activeTopic = createMockTopic({ status: 'ACTIVE' });
-      const lockedTopic = createMockTopic({
+    it('should pass isModerator flag to statusService', async () => {
+      const lockedTopic = {
+        id: 'topic-1',
+        title: 'Test Topic',
+        description: 'Test Description',
+        creatorId: 'user-1',
         status: 'LOCKED',
-        lockedAt: new Date(),
-      });
+        visibility: 'PUBLIC',
+        slug: 'test-topic',
+        evidenceStandards: 'STANDARD',
+        minimumDiversityScore: 0.5,
+        currentDiversityScore: 0.7,
+        participantCount: 10,
+        responseCount: 25,
+        crossCuttingThemes: [],
+        createdAt: new Date(),
+        activatedAt: new Date(),
+        archivedAt: null,
+        tags: [],
+        isMatureContent: false,
+      };
 
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(lockedTopic);
+      mockStatusService.updateStatus.mockResolvedValue(lockedTopic);
 
       const result = await service.updateTopicStatus('topic-1', 'moderator-1', 'LOCKED', true);
 
+      expect(mockStatusService.updateStatus).toHaveBeenCalledWith(
+        'topic-1',
+        'moderator-1',
+        'LOCKED',
+        true,
+      );
       expect(result.status).toBe('LOCKED');
-      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            status: 'LOCKED',
-            lockedAt: expect.any(Date),
-          }),
-        }),
-      );
-    });
-
-    it('should allow moderator to unlock a topic', async () => {
-      const lockedTopic = createMockTopic({
-        status: 'LOCKED',
-        lockedAt: new Date(),
-      });
-      const activeTopic = createMockTopic({
-        status: 'ACTIVE',
-        lockedAt: null,
-      });
-
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(lockedTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(activeTopic);
-
-      const result = await service.updateTopicStatus('topic-1', 'moderator-1', 'ACTIVE', true);
-
-      expect(result.status).toBe('ACTIVE');
-      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            status: 'ACTIVE',
-            lockedAt: null,
-          }),
-        }),
-      );
     });
 
     it('should throw NotFoundException when topic does not exist', async () => {
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(null);
+      mockStatusService.updateStatus.mockRejectedValue(
+        new NotFoundException('Topic with ID nonexistent-topic not found'),
+      );
 
       await expect(
         service.updateTopicStatus('nonexistent-topic', 'user-1', 'ACTIVE', false),
@@ -949,8 +866,9 @@ describe('TopicsService', () => {
     });
 
     it('should throw BadRequestException when non-creator/non-moderator tries to change status', async () => {
-      const topic = createMockTopic({ creatorId: 'user-1' });
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(topic);
+      mockStatusService.updateStatus.mockRejectedValue(
+        new BadRequestException('Only the topic creator or moderators can change topic status'),
+      );
 
       await expect(
         service.updateTopicStatus('topic-1', 'other-user', 'ARCHIVED', false),
@@ -958,8 +876,9 @@ describe('TopicsService', () => {
     });
 
     it('should throw BadRequestException when creator tries to lock topic', async () => {
-      const topic = createMockTopic({ status: 'ACTIVE' });
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(topic);
+      mockStatusService.updateStatus.mockRejectedValue(
+        new BadRequestException('Only moderators can lock topics'),
+      );
 
       await expect(service.updateTopicStatus('topic-1', 'user-1', 'LOCKED', false)).rejects.toThrow(
         BadRequestException,
@@ -967,8 +886,9 @@ describe('TopicsService', () => {
     });
 
     it('should throw BadRequestException when creator tries to unlock locked topic', async () => {
-      const lockedTopic = createMockTopic({ status: 'LOCKED' });
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(lockedTopic);
+      mockStatusService.updateStatus.mockRejectedValue(
+        new BadRequestException('Only moderators can unlock locked topics'),
+      );
 
       await expect(service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false)).rejects.toThrow(
         BadRequestException,
@@ -976,64 +896,13 @@ describe('TopicsService', () => {
     });
 
     it('should throw BadRequestException when creator tries to revert to SEEDING', async () => {
-      const activeTopic = createMockTopic({ status: 'ACTIVE' });
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
+      mockStatusService.updateStatus.mockRejectedValue(
+        new BadRequestException('Cannot revert an activated topic to SEEDING status'),
+      );
 
       await expect(
         service.updateTopicStatus('topic-1', 'user-1', 'SEEDING', false),
       ).rejects.toThrow(BadRequestException);
-    });
-
-    it('should not set activatedAt if topic was already activated before', async () => {
-      const archivedTopic = createMockTopic({
-        status: 'ARCHIVED',
-        activatedAt: new Date('2026-01-01'),
-        archivedAt: new Date('2026-01-15'),
-      });
-      const reactivatedTopic = createMockTopic({
-        status: 'ACTIVE',
-        activatedAt: new Date('2026-01-01'),
-        archivedAt: null,
-      });
-
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(archivedTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(reactivatedTopic);
-
-      await service.updateTopicStatus('topic-1', 'user-1', 'ACTIVE', false);
-
-      // Should NOT include activatedAt since it was already set
-      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.not.objectContaining({
-            activatedAt: expect.any(Date),
-          }),
-        }),
-      );
-    });
-
-    it('should invalidate cache after status update', async () => {
-      const topic = createMockTopic({ status: 'ACTIVE' });
-      const archivedTopic = createMockTopic({ status: 'ARCHIVED' });
-
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(topic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(archivedTopic);
-
-      await service.updateTopicStatus('topic-1', 'user-1', 'ARCHIVED', false);
-
-      expect(mockCacheManager.del).toHaveBeenCalledWith('topics:list');
-    });
-
-    it('should allow moderator to make any status transition', async () => {
-      const activeTopic = createMockTopic({ status: 'ACTIVE' });
-      const seedingTopic = createMockTopic({ status: 'SEEDING' });
-
-      mockPrisma.discussionTopic.findUnique.mockResolvedValue(activeTopic);
-      mockPrisma.discussionTopic.update.mockResolvedValue(seedingTopic);
-
-      // Moderators can revert to SEEDING (unlike creators)
-      const result = await service.updateTopicStatus('topic-1', 'moderator-1', 'SEEDING', true);
-
-      expect(result.status).toBe('SEEDING');
     });
   });
 });
