@@ -228,12 +228,14 @@ export class TopicMergeService {
       }
 
       // Mark merge as rolled back
+      // Note: moderatorId who performed rollback is passed in but not stored
+      // as the schema doesn't have a rolledBackBy field. The original merge
+      // moderator is tracked via moderatorId.
       await tx.topicMerge.update({
         where: { id: mergeId },
         data: {
           rolledBackAt: new Date(),
           rollbackReason,
-          rolledBackBy: moderatorId,
         },
       });
     });
