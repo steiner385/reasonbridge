@@ -34,6 +34,12 @@ const createMockModerationClient = () => ({
   queueChildContent: vi.fn().mockResolvedValue(undefined),
 });
 
+const createMockThreadingService = () => ({
+  calculateThreadDepth: vi.fn().mockResolvedValue(0),
+  validateReplyDepth: vi.fn().mockResolvedValue(undefined),
+  buildThreadTree: vi.fn().mockReturnValue([]),
+});
+
 const createMockResponse = (overrides = {}) => ({
   id: 'response-1',
   topicId: 'topic-1',
@@ -57,16 +63,19 @@ describe('ResponsesService', () => {
   let service: ResponsesService;
   let mockPrisma: ReturnType<typeof createMockPrismaService>;
   let mockCommonGroundTrigger: ReturnType<typeof createMockCommonGroundTrigger>;
+  let mockThreadingService: ReturnType<typeof createMockThreadingService>;
   let mockModerationClient: ReturnType<typeof createMockModerationClient>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrismaService();
     mockCommonGroundTrigger = createMockCommonGroundTrigger();
+    mockThreadingService = createMockThreadingService();
     mockModerationClient = createMockModerationClient();
     service = new ResponsesService(
       mockPrisma as any,
       mockCommonGroundTrigger as any,
+      mockThreadingService as any,
       mockModerationClient as any,
     );
   });
@@ -423,6 +432,7 @@ describe('ResponsesService', () => {
       const serviceWithoutModeration = new ResponsesService(
         mockPrisma as any,
         mockCommonGroundTrigger as any,
+        mockThreadingService as any,
         undefined, // No moderation client
       );
 
