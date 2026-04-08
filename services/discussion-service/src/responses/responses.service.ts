@@ -1013,7 +1013,7 @@ export class ResponsesService {
       : undefined;
 
     // Queue content for moderation review
-    await this.moderationClient.queueChildContent({
+    await this.moderationClient.tryQueueChildContent({
       responseId,
       topicId,
       authorId,

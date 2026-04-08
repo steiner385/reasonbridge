@@ -82,8 +82,8 @@ export interface QueueChildContentData {
  *   // Handle critical risk
  * }
  *
- * // Queue for moderation review
- * await moderationClient.queueChildContent({
+ * // Queue for moderation review (fire-and-forget)
+ * await moderationClient.tryQueueChildContent({
  *   responseId: 'resp-123',
  *   topicId: 'topic-456',
  *   authorId: 'user-789',
@@ -137,7 +137,7 @@ export class ModerationClientService {
    * - HIGH: Other concerning content flagged
    * - NORMAL: No flags or low concern
    */
-  async queueChildContent(data: QueueChildContentData): Promise<void> {
+  async tryQueueChildContent(data: QueueChildContentData): Promise<void> {
     try {
       const response = await this.fetchWithTimeout(
         `${this.baseUrl}/moderation/child-content/queue`,

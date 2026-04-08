@@ -65,7 +65,7 @@ describe('ResponsesService - PENDING_REVIEW Status', () => {
     // Mock moderation client service
     mockModerationClient = {
       screenContentForChildren: vi.fn().mockResolvedValue({ childSafetyRisk: 'none' }),
-      queueChildContent: vi.fn().mockResolvedValue(undefined),
+      tryQueueChildContent: vi.fn().mockResolvedValue(undefined),
     };
 
     service = new ResponsesService(mockPrisma, mockCommonGroundTrigger, mockModerationClient);

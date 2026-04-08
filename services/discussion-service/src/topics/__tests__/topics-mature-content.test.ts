@@ -86,7 +86,7 @@ const createMockPropositionsService = () => ({
 });
 
 const createMockActivityClient = () => ({
-  createEvent: vi.fn().mockResolvedValue(undefined),
+  tryCreateEvent: vi.fn().mockResolvedValue(undefined),
 });
 
 describe('TopicsService - Mature Content Filtering', () => {

@@ -45,7 +45,7 @@ describe('ModerationServiceClient', () => {
     delete process.env['MODERATION_SERVICE_URL'];
   });
 
-  describe('flagUserAsBot', () => {
+  describe('tryFlagUserAsBot', () => {
     it('should successfully flag user as bot', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
@@ -57,7 +57,7 @@ describe('ModerationServiceClient', () => {
       });
 
       const request = createMockRequest();
-      const result = await client.flagUserAsBot(request);
+      const result = await client.tryFlagUserAsBot(request);
 
       expect(result).toEqual({
         success: true,
@@ -88,7 +88,7 @@ describe('ModerationServiceClient', () => {
       });
 
       const request = createMockRequest();
-      const result = await client.flagUserAsBot(request);
+      const result = await client.tryFlagUserAsBot(request);
 
       expect(result).toBeNull();
     });
@@ -97,7 +97,7 @@ describe('ModerationServiceClient', () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       const request = createMockRequest();
-      const result = await client.flagUserAsBot(request);
+      const result = await client.tryFlagUserAsBot(request);
 
       expect(result).toBeNull();
     });
@@ -113,7 +113,7 @@ describe('ModerationServiceClient', () => {
       });
 
       const request = createMockRequest();
-      const result = await client.flagUserAsBot(request);
+      const result = await client.tryFlagUserAsBot(request);
 
       expect(result).toEqual({
         success: false,
@@ -134,7 +134,7 @@ describe('ModerationServiceClient', () => {
         reasoning: 'Custom reasoning for high-risk user.',
       });
 
-      await client.flagUserAsBot(request);
+      await client.tryFlagUserAsBot(request);
 
       const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
       expect(callBody.userId).toBe('custom-user');

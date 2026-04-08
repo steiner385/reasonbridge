@@ -196,7 +196,7 @@ export class UsersService {
 
       // Flag user for moderation review (fire-and-forget)
       this.moderationClient
-        .flagUserAsBot({
+        .tryFlagUserAsBot({
           userId,
           riskScore: detectionResult.riskScore,
           patterns: detectionResult.patterns,

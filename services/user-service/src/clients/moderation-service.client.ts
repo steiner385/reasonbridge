@@ -38,13 +38,13 @@ export interface BotFlagResult {
  * responsive even when moderation-service is unavailable.
  *
  * @remarks
- * - flagUserAsBot: Creates a bot suspicion report in moderation queue
+ * - tryFlagUserAsBot: Creates a bot suspicion report in moderation queue (fire-and-forget)
  * - All errors are logged but not thrown
  *
  * @example
  * ```typescript
- * // Flag a user for bot review
- * const result = await moderationClient.flagUserAsBot({
+ * // Flag a user for bot review (fire-and-forget)
+ * const result = await moderationClient.tryFlagUserAsBot({
  *   userId: 'user-123',
  *   riskScore: 0.75,
  *   patterns: ['rapid_posting', 'topic_concentration'],
@@ -105,12 +105,15 @@ export class ModerationServiceClient {
    * Flag a user as suspected bot for moderator review.
    *
    * Creates a report with category BOT_SUSPICION in the moderation queue.
-   * Uses fire-and-forget pattern: logs errors but doesn't throw.
    *
    * @param request - Bot detection data
    * @returns Result with report ID, or null on error
+   *
+   * @remarks
+   * Fire-and-forget pattern: logs errors but doesn't throw. Named with "try"
+   * prefix to indicate this behavior.
    */
-  async flagUserAsBot(request: BotFlagRequest): Promise<BotFlagResult | null> {
+  async tryFlagUserAsBot(request: BotFlagRequest): Promise<BotFlagResult | null> {
     const endpoint = `${this.baseUrl}/internal/bot-flagged`;
 
     try {

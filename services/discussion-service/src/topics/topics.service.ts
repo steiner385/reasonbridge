@@ -416,7 +416,7 @@ export class TopicsService implements OnModuleInit {
 
     // Step 6: Create activity event (fire-and-forget)
     // Issue #245: Activity feed from followed users
-    this.activityClient.createEvent({
+    this.activityClient.tryCreateEvent({
       userId: userId,
       activityType: 'TOPIC_CREATED',
       targetId: topic.id,
@@ -972,7 +972,7 @@ export class TopicsService implements OnModuleInit {
 
     // Step 7: Track suggestion acceptance for AI feedback loop
     if (source === 'AI_SUGGESTED') {
-      this.activityClient.createEvent({
+      this.activityClient.tryCreateEvent({
         userId,
         activityType: 'AI_SUGGESTION_ACCEPTED',
         targetId: topicId,
@@ -1082,7 +1082,7 @@ export class TopicsService implements OnModuleInit {
 
     // Step 7: Track suggestion acceptance for AI feedback loop
     if (linkSource === 'AI_SUGGESTED') {
-      this.activityClient.createEvent({
+      this.activityClient.tryCreateEvent({
         userId,
         activityType: 'AI_SUGGESTION_ACCEPTED',
         targetId: sourceTopicId,

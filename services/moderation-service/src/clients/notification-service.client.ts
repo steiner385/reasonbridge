@@ -37,13 +37,13 @@ export interface SlaBreachNotificationResponse {
  * responsive even when notification-service is unavailable.
  *
  * @remarks
- * - sendSlaBreachNotification: Notifies moderators about SLA breaches
+ * - trySendSlaBreachNotification: Notifies moderators about SLA breaches (fire-and-forget)
  * - All errors are logged but not thrown
  *
  * @example
  * ```typescript
- * // Send SLA breach notification
- * const result = await notificationClient.sendSlaBreachNotification([
+ * // Send SLA breach notification (fire-and-forget)
+ * const result = await notificationClient.trySendSlaBreachNotification([
  *   {
  *     queueId: 'queue-123',
  *     priority: 'URGENT',
@@ -107,7 +107,6 @@ export class NotificationServiceClient {
 
   /**
    * Send SLA breach notification to notification-service.
-   * Fire-and-forget pattern: logs errors but doesn't throw.
    *
    * This triggers:
    * 1. Creation of notifications for all moderators
@@ -115,8 +114,12 @@ export class NotificationServiceClient {
    *
    * @param breaches - Array of SLA breach items
    * @returns Response with notification counts, or null on error
+   *
+   * @remarks
+   * Fire-and-forget pattern: logs errors but doesn't throw. Named with "try"
+   * prefix to indicate this behavior.
    */
-  async sendSlaBreachNotification(
+  async trySendSlaBreachNotification(
     breaches: SlaBreachItem[],
   ): Promise<SlaBreachNotificationResponse | null> {
     if (breaches.length === 0) {
