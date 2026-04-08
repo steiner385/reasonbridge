@@ -32,6 +32,10 @@ export default defineConfig({
         inline: [/^@reason-bridge\//, '@prisma/client'],
       },
     },
+    // Disable file parallelism to prevent Pact mock server race conditions
+    // Each Pact test creates its own mock server on a random port, but parallel
+    // execution can cause port conflicts or state leakage in the Pact library
+    fileParallelism: false,
     include: [
       'packages/**/tests/contract/**/*.test.ts',
       'services/**/tests/contract/**/*.test.ts',
