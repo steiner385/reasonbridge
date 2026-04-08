@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 /**
  * Dark Mode Accessibility E2E Tests
@@ -23,22 +24,12 @@ test.describe('Dark Mode Accessibility', () => {
   // Components fixed: TopicCard, Navigation, Sidebar, CompactSiteNav, Header.
   test('Topics page should have no accessibility violations in dark mode', async ({ page }) => {
     // Login first (topics is protected)
-    await page.goto('/');
-    await page.click('button:has-text("Log In")');
+    await loginWithDemoAccount(page, 'Admin Adams');
+    await page.goto('/topics');
 
-    // Select demo account (auto-fills credentials)
-    await page.click('button:has-text("Admin Adams")');
-
-    // Submit login form
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
-
-    // Wait for navigation to topics
-    await page.waitForURL('/topics?welcome=true');
-
-    // Wait for network requests to complete and theme to fully apply
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+    // Wait for page to load and theme to fully apply
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render + CSS transition
 
     // Run axe accessibility scan
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -50,19 +41,12 @@ test.describe('Dark Mode Accessibility', () => {
 
   // CSS fixes applied in PR #994: TopicCard link now uses dark:text-primary-400.
   test('Topic cards should have sufficient contrast in dark mode', async ({ page }) => {
-    await page.goto('/');
-    await page.click('button:has-text("Log In")');
-    await page.click('button:has-text("Admin Adams")');
+    await loginWithDemoAccount(page, 'Admin Adams');
+    await page.goto('/topics');
 
-    // Submit login form
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
-
-    await page.waitForURL('/topics?welcome=true');
-
-    // Wait for network requests to complete and theme to fully apply
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+    // Wait for page to load and theme to fully apply
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render + CSS transition
 
     // Run axe with specific color-contrast rules
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -73,16 +57,12 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   test('Simulator page should have no accessibility violations in dark mode', async ({ page }) => {
-    await page.goto('/');
-    await page.click('button:has-text("Log In")');
-    await page.click('button:has-text("Admin Adams")');
-
-    // Submit login form
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
+    await loginWithDemoAccount(page, 'Admin Adams');
 
     // Navigate to simulator
     await page.goto('/simulator');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     // Run axe accessibility scan
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -94,20 +74,12 @@ test.describe('Dark Mode Accessibility', () => {
 
   // CSS fixes applied in PR #994: ProfileBio buttons have focus rings, dark mode hover states.
   test('Profile page should have sufficient contrast in dark mode', async ({ page }) => {
-    await page.goto('/');
-    await page.click('button:has-text("Log In")');
-    await page.click('button:has-text("Admin Adams")');
-
-    // Submit login form
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
+    await loginWithDemoAccount(page, 'Admin Adams');
 
     // Navigate to profile
     await page.goto('/profile');
-
-    // Wait for network requests to complete and theme to fully apply
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render + CSS transition
 
     // Run axe with color-contrast rules
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -118,16 +90,12 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   test('Settings page should have no accessibility violations in dark mode', async ({ page }) => {
-    await page.goto('/');
-    await page.click('button:has-text("Log In")');
-    await page.click('button:has-text("Admin Adams")');
-
-    // Submit login form
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
+    await loginWithDemoAccount(page, 'Admin Adams');
 
     // Navigate to settings
     await page.goto('/settings');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     // Run axe accessibility scan
     const accessibilityScanResults = await new AxeBuilder({ page })
@@ -139,19 +107,12 @@ test.describe('Dark Mode Accessibility', () => {
 
   // CSS fixes applied in PR #994: focus-visible:ring-2 added to Navigation, Sidebar, CompactSiteNav, Header.
   test('Navigation sidebar should have sufficient focus indicators', async ({ page }) => {
-    await page.goto('/');
-    await page.click('button:has-text("Log In")');
-    await page.click('button:has-text("Admin Adams")');
+    await loginWithDemoAccount(page, 'Admin Adams');
+    await page.goto('/topics');
 
-    // Submit login form
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
-
-    await page.waitForURL('/topics?welcome=true');
-
-    // Wait for network requests to complete and theme to fully apply
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+    // Wait for page to load and theme to fully apply
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render + CSS transition
 
     // Tab through navigation items to activate focus states
     await page.keyboard.press('Tab');
@@ -198,8 +159,8 @@ test.describe('Dark Mode Accessibility', () => {
     await expect(rightPanel).toBeVisible();
 
     // Wait for page to load and theme to fully apply
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300); // Allow 200ms CSS transition + buffer
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render + CSS transition
 
     // Check that white backgrounds are not present in dark mode
     // This catches components that don't implement dark mode
@@ -236,25 +197,8 @@ test.describe('Dark Mode Accessibility', () => {
     // Switch to light mode
     await page.emulateMedia({ colorScheme: 'light' });
 
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
-
-    // Open login modal
-    await page.click('button:has-text("Log In")');
-
-    // Wait for dialog to be visible
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible({ timeout: 5000 });
-
-    // Select demo user
-    await page.click('button:has-text("Admin Adams")');
-    await page.waitForTimeout(300); // Allow form to update
-
-    // Submit login form
-    await dialog.getByRole('button', { name: /^log in$/i }).click();
-
-    // Wait for redirect to topics page
-    await page.waitForURL('/topics?welcome=true', { timeout: 10000 });
+    await loginWithDemoAccount(page, 'Admin Adams');
+    await page.goto('/topics');
 
     // Wait for page to fully render before scanning
     await page.waitForLoadState('domcontentloaded');
