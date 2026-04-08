@@ -17,9 +17,9 @@ Current integration test files:
 Integration tests can use these Docker services (defined in `docker-compose.test.yml`):
 
 - **PostgreSQL 15** (port 5433)
-  - User: `unite_test`
-  - Password: `unite_test`
-  - Database: `unite_test`
+  - User: `reasonbridge_test`
+  - Password: `reasonbridge_test`
+  - Database: `reasonbridge_test`
 
 - **Redis 7** (port 6380)
   - Used for caching and session storage

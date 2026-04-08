@@ -19,7 +19,7 @@ describe('Prisma Test Client Factory', () => {
   describe('TEST_DATABASE_URL', () => {
     it('should have default test database URL', () => {
       expect(TEST_DATABASE_URL).toContain('5433');
-      expect(TEST_DATABASE_URL).toContain('unite_test');
+      expect(TEST_DATABASE_URL).toContain('reasonbridge_test');
     });
 
     it('should use port 5433 for test database isolation', () => {

@@ -57,7 +57,7 @@ export type { Pool } from 'pg';
  */
 export const TEST_DATABASE_URL =
   process.env['TEST_DATABASE_URL'] ||
-  'postgresql://unite_test:unite_test@localhost:5433/unite_test?schema=public';
+  'postgresql://reasonbridge_test:reasonbridge_test@localhost:5433/reasonbridge_test?schema=public';
 
 /**
  * Options for creating a test Prisma client.
