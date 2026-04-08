@@ -129,8 +129,8 @@ test.describe('Emoji Reactions', () => {
       await emojiButton.click();
 
       // Wait for API call to complete
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(300);
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify reaction was added (reaction bar or count should update)
       // The specific assertion depends on the UI implementation

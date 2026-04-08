@@ -20,7 +20,8 @@ test.describe('Page Loading States', () => {
       await page.goto('/topics');
 
       // Wait for page to be fully loaded
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Page should not show error state
       await expect(page.getByText(/error loading/i)).not.toBeVisible();
@@ -38,7 +39,8 @@ test.describe('Page Loading States', () => {
 
     test('should have accessible page structure', async ({ page }) => {
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should have main heading
       const heading = page.getByRole('heading', { level: 1 });
@@ -54,7 +56,8 @@ test.describe('Page Loading States', () => {
       // Navigate directly to a known seeded topic
       const topic = SEEDED_TOPICS.CONGESTION_PRICING;
       await page.goto(`/discussions?topic=${topic.id}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should not show error state
       await expect(page.getByText(/error loading/i)).not.toBeVisible();
@@ -68,7 +71,8 @@ test.describe('Page Loading States', () => {
       // Navigate directly to a known seeded topic by ID
       const topic = SEEDED_TOPICS.AI_DISCLOSURE;
       await page.goto(`/discussions?topic=${topic.id}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should load without errors
       await expect(page.getByText(/error loading/i)).not.toBeVisible();
@@ -91,13 +95,14 @@ test.describe('Page Loading States', () => {
 
       // Wait for auth to complete
       await page.waitForURL(/(\/$$|\/topics)/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200);
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
     });
 
     test('should load profile page without errors', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should not show error state
       await expect(page.getByText(/error loading/i)).not.toBeVisible();
@@ -109,7 +114,8 @@ test.describe('Page Loading States', () => {
 
     test('should display user trust scores', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should show trust score section (may use different text)
       const hasTrustSection =

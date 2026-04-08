@@ -628,12 +628,13 @@ test.describe('View Bridging Suggestions', () => {
           timeout: 15000,
         }),
       ]).catch(() => {
-        // If neither appears, just wait for networkidle
-        return page.waitForLoadState('networkidle', { timeout: 10000 });
+        // If neither appears, just wait for domcontentloaded
+        return page.waitForLoadState('domcontentloaded', { timeout: 10000 });
       });
 
       // Wait for page to fully load
-      await page.waitForLoadState('networkidle', { timeout: 10000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+      await page.waitForTimeout(500);
 
       // Check if bridging suggestions section exists first
       const suggestionsSection = page.locator('[data-testid="bridging-suggestions"]');

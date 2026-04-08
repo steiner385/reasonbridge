@@ -44,8 +44,8 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Wait for navigation and authentication state to stabilize
     await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Navigate to topics page if not already there
     if (!page.url().includes('/topics')) {
@@ -339,7 +339,8 @@ test.describe('Topic Draft Saving and Recovery', () => {
 
     // Reload the page (simulates unexpected closure)
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Navigate back to topics page
     if (!page.url().includes('/topics')) {

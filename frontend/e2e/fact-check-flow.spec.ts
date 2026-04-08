@@ -19,7 +19,8 @@ test.describe('Fact-Check Feature', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to discussions page and select a topic
     await page.goto('/discussions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for topic list to load
     const topicList = page.locator('[data-testid="topic-list-item"]').first();

@@ -15,7 +15,8 @@ test.describe('Browse Topics and View Details', () => {
     await page.goto('/topics');
 
     // Wait for page to finish loading
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Check for page heading
     const heading = page.getByRole('heading', { name: /discussion topics/i });
@@ -60,7 +61,8 @@ test.describe('Browse Topics and View Details', () => {
    */
   test('should navigate to topic in discussion view when clicking on a topic', async ({ page }) => {
     await page.goto('/discussions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for Sidebar to load topic list items
     // The Sidebar fetches topics when in "topics" mode (/discussions route)
@@ -77,7 +79,8 @@ test.describe('Browse Topics and View Details', () => {
     await expect(page).toHaveURL(/\/discussions\?topic=/);
 
     // Wait for conversation panel to load the topic
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Verify conversation panel displays the topic title
     const conversationHeader = page.locator('.conversation-panel h1[data-testid="topic-title"]');
@@ -94,7 +97,8 @@ test.describe('Browse Topics and View Details', () => {
    */
   test('should display topic metadata in right panel', async ({ page }) => {
     await page.goto('/discussions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for Sidebar to load topic list items
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -102,7 +106,8 @@ test.describe('Browse Topics and View Details', () => {
 
     // Click the topic in the Sidebar
     await firstTopic.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Verify conversation panel shows topic content
     await expect(page.locator('.conversation-panel h1[data-testid="topic-title"]')).toBeVisible({
@@ -128,7 +133,8 @@ test.describe('Browse Topics and View Details', () => {
    */
   test('should allow switching between topics using sidebar', async ({ page }) => {
     await page.goto('/discussions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for Sidebar to load topic list items
     await expect(page.locator('[data-testid="topic-list-item"]').first()).toBeVisible({
@@ -150,7 +156,8 @@ test.describe('Browse Topics and View Details', () => {
     await firstTopic.click();
 
     // Wait for conversation panel to load with topic content
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
     const h1 = page.locator('.conversation-panel h1[data-testid="topic-title"]');
     await expect(h1).toBeVisible({ timeout: 10000 });
     await expect(h1).toContainText(firstTopicTitle!.trim(), { timeout: 5000 });
@@ -161,7 +168,8 @@ test.describe('Browse Topics and View Details', () => {
     await secondTopic.click();
 
     // Wait for content to update after topic switch
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
     await expect(h1).toContainText(secondTopicTitle!.trim(), { timeout: 5000 });
 
     // Sidebar should still be visible (it's separate from DiscussionLayout)
@@ -283,7 +291,8 @@ test.describe('Browse Topics and View Details', () => {
   test('should handle direct navigation to topic via URL parameter', async ({ page }) => {
     // First, navigate to discussions and select a topic to get its ID
     await page.goto('/discussions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
     await expect(firstTopic).toBeVisible({ timeout: 15000 });
@@ -303,11 +312,13 @@ test.describe('Browse Topics and View Details', () => {
 
     // Navigate away to home page
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Test direct navigation with topic parameter
     await page.goto(`/discussions?topic=${topicId}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Verify conversation panel shows the topic
     const h1 = page.locator('.conversation-panel h1[data-testid="topic-title"]');

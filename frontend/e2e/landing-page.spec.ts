@@ -92,7 +92,8 @@ test.describe('Landing Page - Unauthenticated User Flow', () => {
   });
 
   test('should display ReasonBridge branding in header', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
 
     // Wait for React app to hydrate
     await page.waitForLoadState('domcontentloaded');
@@ -125,8 +126,8 @@ test.describe('Landing Page - Authenticated User Redirect', () => {
 
     // Wait for navigation and authentication state to stabilize
     await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(200); // Allow token storage and state propagation
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow token storage and state propagation
   });
 
   test('should redirect authenticated user to topics page', async ({ page }) => {

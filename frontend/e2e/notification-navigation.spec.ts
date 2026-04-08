@@ -31,7 +31,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should display notifications page with demo notifications', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     const notificationsList = page.getByTestId('notifications-list');
@@ -44,7 +45,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should navigate to topic when clicking comment notification', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });
@@ -63,7 +65,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should navigate to topic when clicking mention notification', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });
@@ -82,7 +85,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should navigate to topic when clicking response notification', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });
@@ -101,7 +105,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should show correct unread count', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });
@@ -116,7 +121,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should mark all as read when clicking button', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });
@@ -133,7 +139,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should filter notifications by mentions', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });
@@ -152,7 +159,8 @@ test.describe.serial('Notification Navigation', () => {
 
   test('should handle system notification without URL', async ({ page }) => {
     await page.goto('/notifications');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for notifications to load
     await expect(page.getByTestId('notifications-list')).toBeVisible({ timeout: 10000 });

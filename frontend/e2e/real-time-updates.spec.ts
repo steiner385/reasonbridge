@@ -103,11 +103,13 @@ test.describe('Real-time Updates', () => {
       .getByRole('button', { name: /^log in$/i })
       .click();
     await expect(alicePage.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-    await alicePage.waitForLoadState('networkidle');
+    await alicePage.waitForLoadState('domcontentloaded');
+    await alicePage.waitForTimeout(500);
 
     // Navigate Alice to topic
     await alicePage.goto('/discussions?topic=11111111-0000-4000-8000-000000000101');
-    await alicePage.waitForLoadState('networkidle');
+    await alicePage.waitForLoadState('domcontentloaded');
+    await alicePage.waitForTimeout(500);
     await alicePage.waitForSelector('.conversation-panel h1', { timeout: 10000 });
 
     // Get initial response count for Alice
@@ -126,11 +128,13 @@ test.describe('Real-time Updates', () => {
       .getByRole('button', { name: /^log in$/i })
       .click();
     await expect(bobPage.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
-    await bobPage.waitForLoadState('networkidle');
+    await bobPage.waitForLoadState('domcontentloaded');
+    await bobPage.waitForTimeout(500);
 
     // Navigate Bob to same topic
     await bobPage.goto('/discussions?topic=11111111-0000-4000-8000-000000000101');
-    await bobPage.waitForLoadState('networkidle');
+    await bobPage.waitForLoadState('domcontentloaded');
+    await bobPage.waitForTimeout(500);
 
     // Bob posts a response
     const uniqueId = Date.now();
@@ -158,7 +162,8 @@ test.describe('Real-time Updates', () => {
     // If WebSocket delivered it, count increased. If not, refresh to verify posting worked.
     if (newAliceCount <= initialCount) {
       await alicePage.reload();
-      await alicePage.waitForLoadState('networkidle');
+      await alicePage.waitForLoadState('domcontentloaded');
+      await alicePage.waitForTimeout(500);
     }
 
     // Either way, the response should now be visible somewhere

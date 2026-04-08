@@ -20,7 +20,8 @@ test.describe('Create Topic Flow', () => {
     if (!page.url().includes('/topics')) {
       await page.goto('/topics');
     }
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
     await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
   });
 
@@ -298,7 +299,8 @@ test.describe('Create Topic Flow', () => {
 
     // Step 2: Navigate back to topics and try to create a similar topic
     await page.goto('/topics');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     await page.getByRole('button', { name: /create topic/i }).click();
     modal = page.locator('[data-testid="create-topic-modal"]');

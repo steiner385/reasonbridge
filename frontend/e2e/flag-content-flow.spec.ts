@@ -197,7 +197,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Find and click the flag button
       const flagButton = page.locator('[aria-label="Report content"]').first();
@@ -235,7 +236,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -269,7 +271,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -306,7 +309,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -348,7 +352,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -388,7 +393,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -431,7 +437,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -477,7 +484,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -524,7 +532,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -572,7 +581,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);
@@ -605,7 +615,8 @@ test.describe('Flag Content Flow', () => {
       });
 
       await page.goto('/topics/topic-1');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const flagButton = page.locator('[aria-label="Report content"]').first();
       await page.waitForTimeout(500);

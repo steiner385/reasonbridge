@@ -198,7 +198,8 @@ async function navigateToComposer(page: Page) {
   await page.goto(`/topics/${MOCK_TOPIC_ID}`);
 
   // Wait for the page to load and the composer to be visible
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(500);
   await page.waitForSelector('textarea[id="response-content"]', { timeout: 10000 });
 }
 
