@@ -19,22 +19,23 @@ test.describe('Login Modal', () => {
   });
 
   test('should render the login modal with all required elements', async ({ page }) => {
+    const dialog = page.getByRole('dialog');
+
     // Check for modal heading
-    const heading = page.getByRole('heading', { name: 'Log In' });
+    const heading = dialog.getByRole('heading', { name: 'Log In' });
     await expect(heading).toBeVisible();
 
-    // Check for email input
-    const emailInput = page.getByLabel(/email/i);
+    // Check for email input (scoped to dialog to avoid conflicts)
+    const emailInput = dialog.getByLabel(/email/i);
     await expect(emailInput).toBeVisible();
     await expect(emailInput).toHaveAttribute('type', 'email');
 
-    // Check for password input
-    const passwordInput = page.getByLabel(/password/i);
+    // Check for password input (use exact match to avoid matching "Confirm Password")
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
     await expect(passwordInput).toBeVisible();
     await expect(passwordInput).toHaveAttribute('type', 'password');
 
     // Check for submit button (inside the modal form)
-    const dialog = page.getByRole('dialog');
     const submitButton = dialog.getByRole('button', { name: /^log in$/i });
     await expect(submitButton).toBeVisible();
   });
@@ -54,11 +55,12 @@ test.describe('Login Modal', () => {
   });
 
   test('should auto-fill credentials when clicking demo account', async ({ page }) => {
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
+    const dialog = page.getByRole('dialog');
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     // Click on Admin Adams demo account
-    await page.getByText('Admin Adams').click();
+    await dialog.getByText('Admin Adams').click();
 
     // Verify credentials are auto-filled
     await expect(emailInput).toHaveValue('demo-admin@reasonbridge.demo');
@@ -66,11 +68,12 @@ test.describe('Login Modal', () => {
   });
 
   test('should auto-fill different credentials for different demo accounts', async ({ page }) => {
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
+    const dialog = page.getByRole('dialog');
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     // Click on Bob Builder demo account
-    await page.getByText('Bob Builder').click();
+    await dialog.getByText('Bob Builder').click();
 
     // Verify Bob's credentials are auto-filled
     await expect(emailInput).toHaveValue('demo-bob@reasonbridge.demo');
@@ -78,8 +81,9 @@ test.describe('Login Modal', () => {
   });
 
   test('should allow manual entry of credentials', async ({ page }) => {
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
+    const dialog = page.getByRole('dialog');
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     // Enter credentials manually
     await emailInput.fill('test@example.com');
@@ -126,8 +130,8 @@ test.describe('Login Modal', () => {
 
   test('should show error for invalid login credentials', async ({ page }) => {
     const dialog = page.getByRole('dialog');
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     // Enter invalid credentials
     await emailInput.fill('invalid@example.com');
@@ -142,8 +146,8 @@ test.describe('Login Modal', () => {
 
   test('should show loading state while logging in', async ({ page }) => {
     const dialog = page.getByRole('dialog');
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     // Enter credentials
     await emailInput.fill('demo-admin@reasonbridge.demo');
@@ -160,16 +164,17 @@ test.describe('Login Modal', () => {
   });
 
   test('should have accessible form structure', async ({ page }) => {
-    // All inputs should have labels
-    const emailInput = page.getByLabel(/email/i);
-    const passwordInput = page.getByLabel(/password/i);
+    const dialog = page.getByRole('dialog');
+
+    // All inputs should have labels (scoped to dialog)
+    const emailInput = dialog.getByLabel(/email/i);
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
 
     // Modal should have proper dialog role
-    const modal = page.getByRole('dialog');
-    await expect(modal).toHaveAttribute('aria-modal', 'true');
+    await expect(dialog).toHaveAttribute('aria-modal', 'true');
   });
 
   test('should display role badges for demo accounts', async ({ page }) => {

@@ -55,22 +55,9 @@ export function DiscussionListPage() {
     navigate(`/discussions/${discussionId}`);
   };
 
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card variant="elevated" padding="lg">
-          <div className="text-center text-fallacy-DEFAULT">
-            <h2 className="text-xl font-semibold mb-2">Error Loading Discussions</h2>
-            <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header */}
+      {/* Header - always shown, even on error */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -121,28 +108,42 @@ export function DiscussionListPage() {
         </Card>
       )}
 
-      {/* Filters and Sorting */}
-      <Card variant="outlined" padding="md" className="mb-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Sort by:</span>
-            <select
-              value={filters.sortBy}
-              onChange={(e) =>
-                handleSortChange(e.target.value as 'lastActivityAt' | 'createdAt' | 'responseCount')
-              }
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="lastActivityAt">Recent Activity</option>
-              <option value="createdAt">Newest First</option>
-              <option value="responseCount">Most Responses</option>
-            </select>
+      {/* Error State */}
+      {error && (
+        <Card variant="elevated" padding="lg" className="mb-6">
+          <div className="text-center text-fallacy-DEFAULT">
+            <h2 className="text-xl font-semibold mb-2">Error Loading Discussions</h2>
+            <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {data && `${data.meta.totalItems} discussion${data.meta.totalItems !== 1 ? 's' : ''}`}
+        </Card>
+      )}
+
+      {/* Filters and Sorting - only show when not in error state */}
+      {!error && (
+        <Card variant="outlined" padding="md" className="mb-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Sort by:</span>
+              <select
+                value={filters.sortBy}
+                onChange={(e) =>
+                  handleSortChange(
+                    e.target.value as 'lastActivityAt' | 'createdAt' | 'responseCount',
+                  )
+                }
+                className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="lastActivityAt">Recent Activity</option>
+                <option value="createdAt">Newest First</option>
+                <option value="responseCount">Most Responses</option>
+              </select>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {data && `${data.meta.totalItems} discussion${data.meta.totalItems !== 1 ? 's' : ''}`}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Loading Skeleton */}
       {showSkeleton && (

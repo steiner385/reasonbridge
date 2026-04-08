@@ -100,7 +100,8 @@ test.describe('User Registration and Login Flow', () => {
       // Fill login form inside the modal
       const dialog = page.getByRole('dialog');
       const loginEmailInput = dialog.getByLabel(/email/i);
-      const loginPasswordInput = dialog.getByLabel(/password/i);
+      // Use exact match to avoid matching "Confirm Password" if present
+      const loginPasswordInput = dialog.getByLabel('Password', { exact: true });
 
       await loginEmailInput.fill(testUser.email);
       await loginPasswordInput.fill(testUser.password);
@@ -277,7 +278,8 @@ test.describe('User Registration and Login Flow', () => {
 
     const dialog = page.getByRole('dialog');
     const emailInput = dialog.getByLabel(/email/i);
-    const passwordInput = dialog.getByLabel(/password/i);
+    // Use exact match to avoid matching "Confirm Password" if present
+    const passwordInput = dialog.getByLabel('Password', { exact: true });
 
     // Attempt login with non-existent credentials
     await emailInput.fill('nonexistent@example.com');

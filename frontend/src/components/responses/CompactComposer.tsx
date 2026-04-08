@@ -54,7 +54,7 @@ export function CompactComposer({
   topicId,
   onSubmit,
   parentId,
-  placeholder = 'Message...',
+  placeholder = 'Share your thoughts...',
   minLength = 1,
   maxLength = 10000,
   isLoading = false,
