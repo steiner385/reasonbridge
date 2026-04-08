@@ -7,9 +7,9 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import type { AnalysisResult } from '../services/response-analyzer.service.js';
+import { CACHE_TTL } from '../constants/index.js';
 
 const FEEDBACK_CACHE_PREFIX = 'feedback:exact:';
-const DEFAULT_TTL = 172800; // 48 hours in seconds
 
 /**
  * Redis cache service for exact-match feedback lookups.
@@ -23,7 +23,10 @@ export class RedisCacheService {
   private readonly ttl: number;
 
   constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {
-    this.ttl = parseInt(process.env['FEEDBACK_CACHE_TTL'] || String(DEFAULT_TTL), 10);
+    this.ttl = parseInt(
+      process.env['FEEDBACK_CACHE_TTL'] || String(CACHE_TTL.FEEDBACK_SECONDS),
+      10,
+    );
   }
 
   /**

@@ -6,6 +6,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 /**
  * Request data for flagging a user as suspected bot
@@ -52,9 +53,6 @@ export interface BotFlagResult {
  * });
  * ```
  */
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
-
 @Injectable()
 export class ModerationServiceClient {
   private readonly logger = new Logger(ModerationServiceClient.name);
@@ -65,7 +63,7 @@ export class ModerationServiceClient {
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['MODERATION_SERVICE_URL'] || getServiceUrl('MODERATION_SERVICE');
     this.timeoutMs = parseInt(
-      process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
       10,
     );
     this.internalApiKey =

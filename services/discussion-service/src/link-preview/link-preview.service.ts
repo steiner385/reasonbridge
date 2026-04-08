@@ -9,6 +9,7 @@ import type { Cache } from 'cache-manager';
 import ogs from 'open-graph-scraper';
 import { validateCitationUrl, isSafeUrl } from '../utils/ssrf-validator.js';
 import type { LinkPreviewResponseDto, LinkPreviewErrorDto } from './dto/link-preview.dto.js';
+import { LINK_PREVIEW } from '../constants/index.js';
 
 /**
  * Open Graph result object type (subset of what ogs returns)
@@ -25,17 +26,6 @@ interface OgResult {
   error?: string;
   success?: boolean;
 }
-
-/**
- * Cache TTL for link previews (24 hours)
- * Metadata changes infrequently, so longer TTL is appropriate
- */
-const LINK_PREVIEW_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-/**
- * Request timeout for fetching link metadata (10 seconds)
- */
-const FETCH_TIMEOUT_MS = 10000;
 
 /**
  * Link Preview Service
@@ -106,7 +96,7 @@ export class LinkPreviewService {
     try {
       const { result, error } = await ogs({
         url: validation.normalizedUrl,
-        timeout: FETCH_TIMEOUT_MS,
+        timeout: LINK_PREVIEW.FETCH_TIMEOUT_MS,
         fetchOptions: {
           headers: {
             'User-Agent': 'ReasonBridge-LinkPreview/1.0 (+https://reasonbridge.com)',
@@ -141,7 +131,7 @@ export class LinkPreviewService {
 
       // Step 5: Cache the result
       try {
-        await this.cacheManager.set(cacheKey, preview, LINK_PREVIEW_CACHE_TTL);
+        await this.cacheManager.set(cacheKey, preview, LINK_PREVIEW.CACHE_TTL_MS);
         this.logger.debug(`Cached preview for ${url}`);
       } catch (cacheError) {
         this.logger.warn(`Cache write error for ${url}: ${cacheError}`);

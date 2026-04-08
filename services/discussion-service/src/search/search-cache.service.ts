@@ -9,6 +9,7 @@ import type { Cache } from 'cache-manager';
 import { createHash } from 'crypto';
 import type { UnifiedSearchResultsDto } from './dto/unified-search-results.dto.js';
 import type { UnifiedSearchQueryDto } from './dto/unified-search-query.dto.js';
+import { SEARCH_CACHE } from '../constants/index.js';
 
 /**
  * Service for caching search results
@@ -26,7 +27,6 @@ import type { UnifiedSearchQueryDto } from './dto/unified-search-query.dto.js';
 export class SearchCacheService {
   private readonly logger = new Logger(SearchCacheService.name);
   private readonly CACHE_PREFIX = 'search:';
-  private readonly DEFAULT_TTL = 300000; // 5 minutes in milliseconds
 
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
@@ -90,7 +90,7 @@ export class SearchCacheService {
   async set(
     query: UnifiedSearchQueryDto,
     results: UnifiedSearchResultsDto,
-    ttl: number = this.DEFAULT_TTL,
+    ttl: number = SEARCH_CACHE.DEFAULT_TTL_MS,
   ): Promise<void> {
     try {
       const key = this.generateCacheKey(query);

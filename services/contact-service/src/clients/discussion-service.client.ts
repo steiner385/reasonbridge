@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 /**
  * Basic topic information returned from discussion-service.
@@ -42,9 +43,6 @@ export interface TopicInfo {
  * }
  * ```
  */
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
-
 @Injectable()
 export class DiscussionServiceClient {
   private readonly logger = new Logger(DiscussionServiceClient.name);
@@ -54,7 +52,7 @@ export class DiscussionServiceClient {
   constructor() {
     this.baseUrl = process.env['DISCUSSION_SERVICE_URL'] || getServiceUrl('DISCUSSION_SERVICE');
     this.timeoutMs = parseInt(
-      process.env['DISCUSSION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['DISCUSSION_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
       10,
     );
   }

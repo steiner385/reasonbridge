@@ -6,9 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { google } from 'googleapis';
 import type { ContactProvider, ContactProviderResult, RawContact } from './types.js';
-
-/** Maximum number of contacts to fetch to prevent abuse */
-const MAX_CONTACTS = 5000;
+import { CONTACT_LIMITS } from '../../constants/index.js';
 
 /**
  * Google Contacts Provider - fetches contacts from Google People API.
@@ -63,8 +61,8 @@ export class GoogleContactsProvider implements ContactProvider {
         const connections = response.data.connections || [];
 
         for (const connection of connections) {
-          if (contacts.length >= MAX_CONTACTS) {
-            this.logger.warn(`Reached max contacts limit (${MAX_CONTACTS})`);
+          if (contacts.length >= CONTACT_LIMITS.MAX_CONTACTS) {
+            this.logger.warn(`Reached max contacts limit (${CONTACT_LIMITS.MAX_CONTACTS})`);
             break;
           }
 
@@ -77,7 +75,7 @@ export class GoogleContactsProvider implements ContactProvider {
 
         totalFetched += connections.length;
         pageToken = response.data.nextPageToken || undefined;
-      } while (pageToken && contacts.length < MAX_CONTACTS);
+      } while (pageToken && contacts.length < CONTACT_LIMITS.MAX_CONTACTS);
 
       this.logger.log(`Fetched ${contacts.length} contacts with emails from Google`);
       return { contacts, totalFetched };

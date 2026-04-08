@@ -7,6 +7,7 @@ import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from '@ne
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { DATABASE } from '../constants/index.js';
 
 /**
  * Prisma service that provides database access throughout the service.
@@ -44,7 +45,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleInit() {
     const maxRetries = 5;
-    const retryDelay = 2000; // Start with 2 seconds
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -56,7 +56,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           this.logger.error('❌ Failed to connect to database after max retries');
           throw error;
         }
-        const delay = retryDelay * attempt; // Exponential backoff
+        const delay = DATABASE.RETRY_DELAY_MS * attempt; // Exponential backoff
         this.logger.warn(
           `⚠️  Database connection attempt ${attempt}/${maxRetries} failed. Retrying in ${delay}ms...`,
         );

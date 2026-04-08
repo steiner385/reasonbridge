@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseHttpClient, getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 export interface DiscoverableUser {
   id: string;
@@ -49,7 +50,10 @@ interface DiscoverableUsersResponse {
 export class UserServiceClient extends BaseHttpClient {
   constructor() {
     const baseUrl = process.env['USER_SERVICE_URL'] || getServiceUrl('USER_SERVICE');
-    const timeoutMs = parseInt(process.env['USER_SERVICE_TIMEOUT_MS'] || '30000', 10);
+    const timeoutMs = parseInt(
+      process.env['USER_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
+      10,
+    );
 
     super({
       baseUrl,

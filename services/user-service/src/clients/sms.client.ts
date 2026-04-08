@@ -6,6 +6,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 /**
  * Result of an SMS send operation
@@ -15,9 +16,6 @@ export interface SmsDeliveryResult {
   messageId?: string;
   error?: string;
 }
-
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
 
 /**
  * SMS Client for notification-service
@@ -48,7 +46,7 @@ export class SmsClient {
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
     this.timeoutMs = parseInt(
-      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
       10,
     );
     this.internalApiKey =

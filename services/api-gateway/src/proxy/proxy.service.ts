@@ -18,6 +18,7 @@ import {
 import { CircuitBreakerService } from '../resilience/circuit-breaker.service.js';
 import { withRetry, isRetryableHttpError } from '../resilience/retry.util.js';
 import { getCurrentRequestContext } from '../middleware/correlation.middleware.js';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 export interface ProxyRequest {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -38,11 +39,10 @@ interface ServiceConfig {
 
 /**
  * Default resilience configuration
- * - 5 second timeout per request
+ * - 5 second timeout per request (from constants)
  * - 3 retry attempts for transient failures
  * - Circuit breaker trips at 50% failure rate
  */
-const DEFAULT_TIMEOUT = 5000;
 const DEFAULT_RETRY_ATTEMPTS = 3;
 
 /**
@@ -91,13 +91,13 @@ export class ProxyService {
     // Environment variables can override for Docker/production deployments
     this.userService = {
       url: getConfig<string>('USER_SERVICE_URL', getServiceUrl('USER_SERVICE')),
-      timeout: getConfig<number>('USER_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      timeout: getConfig<number>('USER_SERVICE_TIMEOUT', CLIENT_TIMEOUTS.DEFAULT_MS),
       retryAttempts: getConfig<number>('USER_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
     this.discussionService = {
       url: getConfig<string>('DISCUSSION_SERVICE_URL', getServiceUrl('DISCUSSION_SERVICE')),
-      timeout: getConfig<number>('DISCUSSION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      timeout: getConfig<number>('DISCUSSION_SERVICE_TIMEOUT', CLIENT_TIMEOUTS.DEFAULT_MS),
       retryAttempts: getConfig<number>('DISCUSSION_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
@@ -110,25 +110,25 @@ export class ProxyService {
 
     this.moderationService = {
       url: getConfig<string>('MODERATION_SERVICE_URL', getServiceUrl('MODERATION_SERVICE')),
-      timeout: getConfig<number>('MODERATION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      timeout: getConfig<number>('MODERATION_SERVICE_TIMEOUT', CLIENT_TIMEOUTS.DEFAULT_MS),
       retryAttempts: getConfig<number>('MODERATION_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
     this.activityService = {
       url: getConfig<string>('ACTIVITY_SERVICE_URL', getServiceUrl('ACTIVITY_SERVICE')),
-      timeout: getConfig<number>('ACTIVITY_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      timeout: getConfig<number>('ACTIVITY_SERVICE_TIMEOUT', CLIENT_TIMEOUTS.DEFAULT_MS),
       retryAttempts: getConfig<number>('ACTIVITY_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
     this.contactService = {
       url: getConfig<string>('CONTACT_SERVICE_URL', getServiceUrl('CONTACT_SERVICE')),
-      timeout: getConfig<number>('CONTACT_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      timeout: getConfig<number>('CONTACT_SERVICE_TIMEOUT', CLIENT_TIMEOUTS.DEFAULT_MS),
       retryAttempts: getConfig<number>('CONTACT_SERVICE_RETRY_ATTEMPTS', DEFAULT_RETRY_ATTEMPTS),
     };
 
     this.notificationService = {
       url: getConfig<string>('NOTIFICATION_SERVICE_URL', getServiceUrl('NOTIFICATION_SERVICE')),
-      timeout: getConfig<number>('NOTIFICATION_SERVICE_TIMEOUT', DEFAULT_TIMEOUT),
+      timeout: getConfig<number>('NOTIFICATION_SERVICE_TIMEOUT', CLIENT_TIMEOUTS.DEFAULT_MS),
       retryAttempts: getConfig<number>(
         'NOTIFICATION_SERVICE_RETRY_ATTEMPTS',
         DEFAULT_RETRY_ATTEMPTS,

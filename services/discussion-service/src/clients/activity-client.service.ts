@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 interface CreateActivityEventDto {
   userId: string;
@@ -19,9 +20,6 @@ interface CreateActivityEventDto {
   targetSlug?: string;
 }
 
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
-
 /**
  * HTTP client for calling activity-service
  * Fire-and-forget pattern - failures are logged but don't block main operations
@@ -35,7 +33,7 @@ export class ActivityClientService {
   constructor() {
     this.baseUrl = process.env['ACTIVITY_SERVICE_URL'] || getServiceUrl('ACTIVITY_SERVICE');
     this.timeoutMs = parseInt(
-      process.env['ACTIVITY_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['ACTIVITY_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
       10,
     );
   }

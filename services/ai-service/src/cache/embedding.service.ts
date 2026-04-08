@@ -8,9 +8,9 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import type OpenAI from 'openai';
 import { computeContentHash } from './hash.util.js';
+import { CACHE_TTL } from '../constants/index.js';
 
 const EMBEDDING_CACHE_PREFIX = 'feedback:embedding:';
-const DEFAULT_TTL = 604800; // 7 days in seconds
 
 @Injectable()
 export class EmbeddingService {
@@ -24,7 +24,10 @@ export class EmbeddingService {
     @Inject('OPENAI_CLIENT') private readonly openai: OpenAI | null,
   ) {
     this.model = process.env['OPENAI_EMBEDDING_MODEL'] || 'text-embedding-3-small';
-    this.ttl = parseInt(process.env['EMBEDDING_CACHE_TTL'] || String(DEFAULT_TTL), 10);
+    this.ttl = parseInt(
+      process.env['EMBEDDING_CACHE_TTL'] || String(CACHE_TTL.EMBEDDING_SECONDS),
+      10,
+    );
     this.isAvailable = this.openai !== null;
 
     if (!this.isAvailable) {
