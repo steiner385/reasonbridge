@@ -30,7 +30,7 @@ const createMockPrismaService = () => ({
  * Create mock NotificationServiceClient
  */
 const createMockNotificationClient = () => ({
-  sendSlaBreachNotification: vi.fn().mockResolvedValue({
+  trySendSlaBreachNotification: vi.fn().mockResolvedValue({
     success: true,
     notificationsSent: 1,
     broadcastSent: true,
@@ -444,7 +444,7 @@ describe('SlaMonitorJob', () => {
 
       expect(result).toBe(0);
       expect(loggerSpy.error).not.toHaveBeenCalled();
-      expect(mockNotificationClient.sendSlaBreachNotification).not.toHaveBeenCalled();
+      expect(mockNotificationClient.trySendSlaBreachNotification).not.toHaveBeenCalled();
     });
 
     it('should log error for each breached item and send notification', async () => {
@@ -496,8 +496,8 @@ describe('SlaMonitorJob', () => {
       );
 
       // Should call notification service
-      expect(mockNotificationClient.sendSlaBreachNotification).toHaveBeenCalledTimes(1);
-      expect(mockNotificationClient.sendSlaBreachNotification).toHaveBeenCalledWith(
+      expect(mockNotificationClient.trySendSlaBreachNotification).toHaveBeenCalledTimes(1);
+      expect(mockNotificationClient.trySendSlaBreachNotification).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             queueId: 'breach-1',
@@ -535,7 +535,7 @@ describe('SlaMonitorJob', () => {
     });
 
     it('should handle notification service failure gracefully', async () => {
-      mockNotificationClient.sendSlaBreachNotification.mockResolvedValue(null);
+      mockNotificationClient.trySendSlaBreachNotification.mockResolvedValue(null);
 
       const breachedItems: StaleQueueItem[] = [
         {
@@ -558,7 +558,7 @@ describe('SlaMonitorJob', () => {
       const result = await job.notifyAdminsOfBreaches(breachedItems);
 
       expect(result).toBe(1);
-      expect(mockNotificationClient.sendSlaBreachNotification).toHaveBeenCalled();
+      expect(mockNotificationClient.trySendSlaBreachNotification).toHaveBeenCalled();
     });
   });
 

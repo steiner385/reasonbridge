@@ -31,7 +31,7 @@ const createMockCommonGroundTrigger = () => ({
 
 const createMockModerationClient = () => ({
   screenContentForChildren: vi.fn().mockResolvedValue({ childSafetyRisk: 'none' }),
-  queueChildContent: vi.fn().mockResolvedValue(undefined),
+  tryQueueChildContent: vi.fn().mockResolvedValue(undefined),
 });
 
 const createMockThreadingService = () => ({
@@ -358,7 +358,7 @@ describe('ResponsesService', () => {
       expect(mockModerationClient.screenContentForChildren).toHaveBeenCalledWith(
         validDto.content.trim(),
       );
-      expect(mockModerationClient.queueChildContent).toHaveBeenCalledWith(
+      expect(mockModerationClient.tryQueueChildContent).toHaveBeenCalledWith(
         expect.objectContaining({
           responseId: 'response-1',
           topicId: 'topic-1',
@@ -385,7 +385,7 @@ describe('ResponsesService', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(mockModerationClient.screenContentForChildren).not.toHaveBeenCalled();
-      expect(mockModerationClient.queueChildContent).not.toHaveBeenCalled();
+      expect(mockModerationClient.tryQueueChildContent).not.toHaveBeenCalled();
     });
 
     it('should include grooming flags when screening detects concerns', async () => {
@@ -415,7 +415,7 @@ describe('ResponsesService', () => {
       // Wait for the fire-and-forget call to complete
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(mockModerationClient.queueChildContent).toHaveBeenCalledWith(
+      expect(mockModerationClient.tryQueueChildContent).toHaveBeenCalledWith(
         expect.objectContaining({
           aiFlags: {
             grooming: true,

@@ -69,7 +69,7 @@ const createMockPropositionsService = () => ({
 
 // Mock Activity Client Service
 const createMockActivityClient = () => ({
-  createEvent: vi.fn().mockResolvedValue(undefined),
+  tryCreateEvent: vi.fn().mockResolvedValue(undefined),
 });
 
 // Mock Topic Merge Service

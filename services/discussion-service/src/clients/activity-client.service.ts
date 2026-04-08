@@ -55,10 +55,15 @@ export class ActivityClientService {
   }
 
   /**
-   * Create an activity event (fire-and-forget)
-   * Failures are logged but don't block the calling operation
+   * Create an activity event (fire-and-forget).
+   *
+   * @param dto - Activity event data to create
+   *
+   * @remarks
+   * Fire-and-forget pattern: failures are logged but don't block the calling
+   * operation. Named with "try" prefix to indicate this behavior.
    */
-  async createEvent(dto: CreateActivityEventDto): Promise<void> {
+  async tryCreateEvent(dto: CreateActivityEventDto): Promise<void> {
     try {
       const response = await this.fetchWithTimeout(`${this.baseUrl}/events`, {
         method: 'POST',

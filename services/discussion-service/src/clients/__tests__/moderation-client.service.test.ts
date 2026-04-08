@@ -35,7 +35,7 @@ describe('ModerationClientService', () => {
     vi.clearAllMocks();
   });
 
-  describe('queueChildContent', () => {
+  describe('tryQueueChildContent', () => {
     const mockData = {
       responseId: 'response-123',
       topicId: 'topic-456',
@@ -49,7 +49,7 @@ describe('ModerationClientService', () => {
         status: 200,
       });
 
-      await service.queueChildContent(mockData);
+      await service.tryQueueChildContent(mockData);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/moderation/child-content/queue'),
@@ -77,7 +77,7 @@ describe('ModerationClientService', () => {
         },
       };
 
-      await service.queueChildContent(dataWithFlags);
+      await service.tryQueueChildContent(dataWithFlags);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(String),
@@ -95,14 +95,14 @@ describe('ModerationClientService', () => {
       });
 
       // Should not throw
-      await expect(service.queueChildContent(mockData)).resolves.not.toThrow();
+      await expect(service.tryQueueChildContent(mockData)).resolves.not.toThrow();
     });
 
     it('should log warning but not throw on network error', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
       // Should not throw (fire-and-forget)
-      await expect(service.queueChildContent(mockData)).resolves.not.toThrow();
+      await expect(service.tryQueueChildContent(mockData)).resolves.not.toThrow();
     });
 
     it('should use default moderation service URL when env var not set', async () => {
@@ -111,7 +111,7 @@ describe('ModerationClientService', () => {
         status: 200,
       });
 
-      await service.queueChildContent(mockData);
+      await service.tryQueueChildContent(mockData);
 
       // Should use getServiceUrl default
       expect(mockFetch).toHaveBeenCalledWith(
@@ -241,7 +241,7 @@ describe('ModerationClientService', () => {
         status: 200,
       });
 
-      customService.queueChildContent({
+      customService.tryQueueChildContent({
         responseId: 'test',
         topicId: 'test',
         authorId: 'test',

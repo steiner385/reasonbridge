@@ -367,7 +367,7 @@ export class SlaMonitorJob {
 
     // Send to notification-service for real-time moderator alerts
     // Fire-and-forget pattern - failures are logged but don't block the SLA check
-    const result = await this.notificationClient.sendSlaBreachNotification(notifications);
+    const result = await this.notificationClient.trySendSlaBreachNotification(notifications);
 
     if (result) {
       this.logger.log(
