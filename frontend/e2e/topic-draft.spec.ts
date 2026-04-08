@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginWithDemoAccount } from './helpers/demo-auth';
 
 /**
  * E2E test suite for Topic Draft Auto-Save and Recovery (Feature 016: Topic Management)
@@ -26,30 +27,17 @@ const createDraftData = (overrides = {}) => ({
 
 test.describe('Topic Draft Saving and Recovery', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate and clear any existing draft
-    await page.goto('/');
+    // Login using shared helper (handles auth state properly)
+    await loginWithDemoAccount(page, 'Admin Adams');
+
+    // Clear any existing draft
     await page.evaluate((key) => localStorage.removeItem(key), DRAFT_STORAGE_KEY);
-
-    // Login first (required for topic creation)
-    await page.getByRole('button', { name: /log in/i }).click();
-    const loginModal = page.locator('[data-testid="login-modal"]');
-    await expect(loginModal).toBeVisible();
-
-    // Use demo admin account for testing
-    await page.getByText('Admin Adams').click();
-    await loginModal.getByRole('button', { name: /^log in$/i }).click();
-
-    // Wait for login to complete and modal to close
-    await expect(loginModal).not.toBeVisible({ timeout: 10000 });
-
-    // Wait for navigation and authentication state to stabilize
-    await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
 
     // Navigate to topics page if not already there
     if (!page.url().includes('/topics')) {
       await page.goto('/topics');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(300);
     }
     await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
   });
