@@ -31,7 +31,8 @@ test.describe('Discussion Creation Flow', () => {
     // Navigate to discussion list page for a seeded topic
     const topic = SEEDED_TOPICS.CONGESTION_PRICING;
     await page.goto(`/topics/${topic.id}/discussions`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
   });
 
   // =============================================================================
@@ -258,7 +259,8 @@ test.describe('Discussion Creation - Error Handling', () => {
     // Navigate to discussion list page
     const topic = SEEDED_TOPICS.CONGESTION_PRICING;
     await page.goto(`/topics/${topic.id}/discussions`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Open form and try to create a discussion
     await page
