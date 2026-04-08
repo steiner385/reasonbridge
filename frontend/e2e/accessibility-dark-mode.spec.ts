@@ -127,6 +127,8 @@ test.describe('Dark Mode Accessibility', () => {
   });
 
   test('Topic detail page should have sufficient contrast in dark mode', async ({ page }) => {
+    // Login first to access discussions
+    await loginWithDemoAccount(page, 'Admin Adams');
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -146,6 +148,8 @@ test.describe('Dark Mode Accessibility', () => {
 
   // CSS fixes applied in PR #994: CommonGroundSummaryPanel buttons have focus rings.
   test('Common ground cards should respect dark mode', async ({ page }) => {
+    // Login first to access discussions
+    await loginWithDemoAccount(page, 'Admin Adams');
     await page.goto('/discussions');
 
     const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
