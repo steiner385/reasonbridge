@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.18",
+    "@pact-foundation/pact": "^16.3.0",
     "@types/node": "25.5.2",
     "@types/pg": "^8.20.0",
     "@vitest/ui": "^4.1.2",

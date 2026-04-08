@@ -1,0 +1,585 @@
+{
+  "consumer": {
+    "name": "contact-service"
+  },
+  "interactions": [
+    {
+      "description": "a health check request (from contact-service)",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the notification service is healthy"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": "ok"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to send a topic invitation notification",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "notification service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "body": "You've been invited to join a discussion on \"Climate Change\".",
+            "metadata": {
+              "invitationId": "inv-456",
+              "inviterName": "John Doe",
+              "topicTitle": "Climate Change"
+            },
+            "title": "John Doe has invited you to discuss \"Climate Change\"",
+            "type": "TOPIC_INVITATION",
+            "userId": "user-123"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.body": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.invitationId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.inviterName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.topicTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/notifications"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "notif-789",
+            "status": "SENT"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to send a topic invitation with custom message",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "notification service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "body": "Please join us for an important discussion!",
+            "metadata": {
+              "invitationId": "inv-789",
+              "inviterName": "John Doe",
+              "message": "Please join us for an important discussion!",
+              "topicTitle": "Climate Change"
+            },
+            "title": "John Doe has invited you to discuss \"Climate Change\"",
+            "type": "TOPIC_INVITATION",
+            "userId": "user-123"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.body": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.invitationId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.inviterName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.topicTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/notifications"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "notif-custom",
+            "status": "SENT"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to send an invitation accepted notification",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "notification service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "body": "Jane Smith has joined the discussion on \"Climate Change\".",
+            "metadata": {
+              "accepterName": "Jane Smith",
+              "topicTitle": "Climate Change"
+            },
+            "title": "Jane Smith accepted your invitation to \"Climate Change\"",
+            "type": "INVITATION_ACCEPTED",
+            "userId": "user-789"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.body": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.accepterName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.topicTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/notifications"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "notif-abc",
+            "status": "SENT"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to send an invitation accepted notification",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "notification service is available for acceptance notifications"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "body": "Jane Smith has joined the discussion on \"Climate Change\".",
+            "metadata": {
+              "accepterName": "Jane Smith",
+              "topicTitle": "Climate Change"
+            },
+            "title": "Jane Smith accepted your invitation to \"Climate Change\"",
+            "type": "INVITATION_ACCEPTED",
+            "userId": "user-789"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.body": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.accepterName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.metadata.topicTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/notifications"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "id": "notif-abc",
+            "status": "SENT"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.3",
+      "models": "1.3.9"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "notification-service"
+  }
+}

@@ -1,0 +1,333 @@
+{
+  "consumer": {
+    "name": "contact-service"
+  },
+  "interactions": [
+    {
+      "description": "a health check request (from contact-service)",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the user service is healthy"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": "ok"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for non-existent user profile (from contact-service)",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID 660e8400-e29b-41d4-a716-446655440001 does not exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/660e8400-e29b-41d4-a716-446655440001"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "error": "Not Found",
+            "message": "User with ID 660e8400-e29b-41d4-a716-446655440001 not found",
+            "statusCode": 404
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to find discoverable users by email hashes",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "discoverable users exist with matching email hashes"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "emailHashes": ["abc123def456"]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.emailHashes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/users/discoverable"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "users": [
+              {
+                "avatarUrl": "https://example.com/avatar.jpg",
+                "displayName": "Alice Smith",
+                "emailHash": "abc123def456",
+                "id": "e2490de5-5bd3-43d5-b7c4-526e33f71304"
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.users[*].id": {
+              "type": "Uuid"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.users": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.users[*].avatarUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.users[*].displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.users[*].emailHash": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.users[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to find discoverable users with non-matching hashes",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no discoverable users match the email hashes"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "emailHashes": ["nonexistent-hash"]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.emailHashes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/users/discoverable"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "users": []
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to get user profile by ID (from contact-service)",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user with ID 550e8400-e29b-41d4-a716-446655440000 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/users/550e8400-e29b-41d4-a716-446655440000"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "avatarUrl": "https://example.com/avatar.jpg",
+            "displayName": "Alice Smith",
+            "email": "alice@example.com",
+            "id": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.avatarUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.email": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.3",
+      "models": "1.3.9"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "user-service"
+  }
+}

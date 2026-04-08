@@ -1,0 +1,502 @@
+{
+  "consumer": {
+    "name": "discussion-service"
+  },
+  "interactions": [
+    {
+      "description": "a health check request",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the moderation service is healthy"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": "ok"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to queue child content for moderation",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "moderation service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "authorId": "user-789",
+            "content": "Some content that needs moderation",
+            "responseId": "resp-123",
+            "topicId": "topic-456"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.authorId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/moderation/child-content/queue"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "priority": "NORMAL",
+            "queueId": "queue-item-1",
+            "status": "QUEUED"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.priority": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.queueId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to queue child content with grooming flags",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "moderation service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "aiFlags": {
+              "grooming": true,
+              "groomingConfidence": 0.85,
+              "groomingPatternType": "isolation_attempt",
+              "recommendedAction": "BLOCK"
+            },
+            "authorId": "user-789",
+            "content": "Flagged content",
+            "responseId": "resp-urgent-1",
+            "topicId": "topic-456"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.aiFlags": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.aiFlags.grooming": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.aiFlags.groomingConfidence": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.aiFlags.groomingPatternType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.aiFlags.recommendedAction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.authorId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.responseId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.topicId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/moderation/child-content/queue"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "priority": "URGENT",
+            "queueId": "queue-item-urgent",
+            "status": "QUEUED"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.priority": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.queueId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to screen content with grooming patterns",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "moderation service is available with AI detection"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "Concerning content that triggers detection"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/moderation/child-content/screen"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "childSafetyRisk": "high",
+            "groomingDetection": {
+              "confidence": 0.9,
+              "detected": true,
+              "explanation": "Content matches grooming pattern indicators",
+              "flaggedPhrases": ["concerning phrase"],
+              "patternType": "isolation_attempt",
+              "recommendedAction": "BLOCK"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.childSafetyRisk": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.groomingDetection": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.groomingDetection.confidence": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.groomingDetection.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.groomingDetection.explanation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.groomingDetection.flaggedPhrases": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.groomingDetection.patternType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.groomingDetection.recommendedAction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to screen safe content for children",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "moderation service is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "This is a normal discussion about homework"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/moderation/child-content/screen"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "childSafetyRisk": "none"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.childSafetyRisk": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.3",
+      "models": "1.3.9"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "moderation-service"
+  }
+}
