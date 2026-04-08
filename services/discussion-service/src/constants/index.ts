@@ -76,3 +76,65 @@ export const SLUG_CONSTRAINTS = {
   /** Maximum slug length (characters) */
   MAX_LENGTH: 250,
 } as const;
+
+/**
+ * HTTP client timeout constants in milliseconds.
+ *
+ * @remarks
+ * Different services have different timeout requirements:
+ * - AI service: 5 seconds (faster for simple operations)
+ * - Activity/Moderation: 30 seconds (may involve more processing)
+ */
+export const CLIENT_TIMEOUTS = {
+  /** Timeout for AI service calls (ms) */
+  AI_SERVICE_MS: 5000,
+  /** Default timeout for inter-service HTTP calls (ms) */
+  DEFAULT_MS: 30000,
+} as const;
+
+/**
+ * Link preview constants.
+ *
+ * @remarks
+ * Link previews are cached for 24 hours since metadata changes infrequently.
+ * 10 second fetch timeout prevents slow external sites from blocking responses.
+ */
+export const LINK_PREVIEW = {
+  /** Cache TTL for link previews (ms) - 24 hours */
+  CACHE_TTL_MS: 24 * 60 * 60 * 1000,
+  /** Timeout for fetching external URLs (ms) */
+  FETCH_TIMEOUT_MS: 10000,
+} as const;
+
+/**
+ * Search cache constants.
+ *
+ * @remarks
+ * Search results cached for 5 minutes to balance freshness with performance.
+ */
+export const SEARCH_CACHE = {
+  /** Default TTL for search results (ms) - 5 minutes */
+  DEFAULT_TTL_MS: 5 * 60 * 1000,
+} as const;
+
+/**
+ * URL validation constants.
+ *
+ * @remarks
+ * Maximum URL length prevents abuse while allowing for long query strings.
+ */
+export const URL_VALIDATION = {
+  /** Maximum URL length (characters) */
+  MAX_LENGTH: 2048,
+} as const;
+
+/**
+ * Database connection constants.
+ *
+ * @remarks
+ * Retry delay starts at 2 seconds and increases exponentially.
+ */
+export const DATABASE = {
+  /** Initial retry delay for database connections (ms) */
+  RETRY_DELAY_MS: 2000,
+} as const;

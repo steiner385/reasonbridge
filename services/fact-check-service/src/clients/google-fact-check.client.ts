@@ -12,21 +12,12 @@ import type {
   GoogleFactCheckApiResponse,
   FactCheckSourceResult,
 } from './types.js';
-
-/**
- * Default cache TTL: 24 hours for established facts
- */
-const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+import { CLIENT_TIMEOUTS, CACHE } from '../constants/index.js';
 
 /**
  * Reduced TTL for developing situations (claims less than 7 days old): 6 hours
  */
 const DEVELOPING_SITUATION_TTL_MS = 6 * 60 * 60 * 1000;
-
-/**
- * Default API timeout: 5 seconds
- */
-const DEFAULT_TIMEOUT_MS = 5000;
 
 /**
  * Known credibility ratings for fact-check publishers
@@ -77,7 +68,7 @@ export class GoogleFactCheckClient implements IFactCheckClient {
     this.apiUrl =
       process.env['GOOGLE_FACT_CHECK_API_URL'] || 'https://factchecktools.googleapis.com/v1alpha1';
     this.timeoutMs = parseInt(
-      process.env['FACT_CHECK_API_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['FACT_CHECK_API_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.EXTERNAL_API_MS),
       10,
     );
 
@@ -233,7 +224,7 @@ export class GoogleFactCheckClient implements IFactCheckClient {
       new Date(0),
     );
     const isRecentClaim = Date.now() - mostRecentReview.getTime() < 7 * 24 * 60 * 60 * 1000;
-    const ttl = isRecentClaim ? DEVELOPING_SITUATION_TTL_MS : DEFAULT_CACHE_TTL_MS;
+    const ttl = isRecentClaim ? DEVELOPING_SITUATION_TTL_MS : CACHE.DEFAULT_TTL_MS;
 
     return {
       claimText: originalClaim,

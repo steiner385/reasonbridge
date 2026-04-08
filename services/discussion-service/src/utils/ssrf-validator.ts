@@ -23,6 +23,7 @@
 import { URL } from 'url';
 import { isIP } from 'net';
 import * as dns from 'dns/promises';
+import { URL_VALIDATION } from '../constants/index.js';
 
 /**
  * SSRF validation result
@@ -70,11 +71,6 @@ const PRIVATE_IP_RANGES = [
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 
 /**
- * Maximum URL length (prevent DoS via extremely long URLs)
- */
-const MAX_URL_LENGTH = 2048;
-
-/**
  * Checks if an IP address is in a private range
  */
 function isPrivateIP(ip: string): boolean {
@@ -111,12 +107,12 @@ function normalizeUrl(url: URL): string {
  */
 export async function validateCitationUrl(urlString: string): Promise<SSRFValidationResult> {
   // Layer 1: URL length check
-  if (urlString.length > MAX_URL_LENGTH) {
+  if (urlString.length > URL_VALIDATION.MAX_LENGTH) {
     return {
       safe: false,
       originalUrl: urlString.substring(0, 100) + '...',
       normalizedUrl: '',
-      error: `URL exceeds maximum length of ${MAX_URL_LENGTH} characters`,
+      error: `URL exceeds maximum length of ${URL_VALIDATION.MAX_LENGTH} characters`,
       threat: 'MALFORMED_URL',
     };
   }

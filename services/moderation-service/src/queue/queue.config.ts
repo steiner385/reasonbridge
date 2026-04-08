@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { QUEUE_CONFIG } from '../constants/index.js';
+
 /**
  * Queue configuration for moderation service
  * Provides environment-based configuration for AWS SNS/SQS integration
@@ -46,9 +48,18 @@ export function loadQueueConfig(): QueueConfig {
     snsTopicArn: process.env['MODERATION_SNS_TOPIC_ARN'] || '',
     sqsQueueUrl: process.env['MODERATION_QUEUE_URL'] || '',
     dlqUrl: process.env['MODERATION_DLQ_URL'] || '',
-    maxMessages: parseInt(process.env['QUEUE_MAX_MESSAGES'] || '10', 10),
-    waitTimeSeconds: parseInt(process.env['QUEUE_WAIT_TIME_SECONDS'] || '20', 10),
-    visibilityTimeout: parseInt(process.env['QUEUE_VISIBILITY_TIMEOUT'] || '120', 10),
+    maxMessages: parseInt(
+      process.env['QUEUE_MAX_MESSAGES'] || String(QUEUE_CONFIG.MAX_MESSAGES),
+      10,
+    ),
+    waitTimeSeconds: parseInt(
+      process.env['QUEUE_WAIT_TIME_SECONDS'] || String(QUEUE_CONFIG.WAIT_TIME_SECONDS),
+      10,
+    ),
+    visibilityTimeout: parseInt(
+      process.env['QUEUE_VISIBILITY_TIMEOUT'] || String(QUEUE_CONFIG.VISIBILITY_TIMEOUT_SECONDS),
+      10,
+    ),
     enabled: process.env['QUEUE_ENABLED'] === 'true',
     serviceName: 'moderation-service',
   };

@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { IAuthService } from './auth.interface.js';
+import { AUTH_TOKENS } from '../constants/index.js';
 
 /**
  * Database-backed authentication service for local development.
@@ -114,7 +115,6 @@ export class DatabaseAuthService implements IAuthService {
     // IMPORTANT: Use user.id (UUID) as sub claim for downstream services
     // Downstream services expect UUID format, not cognitoSub string
     const now = Math.floor(Date.now() / 1000);
-    const expiresIn = 3600; // 1 hour
 
     const accessToken = jwt.sign(
       {
@@ -122,7 +122,7 @@ export class DatabaseAuthService implements IAuthService {
         email: user.email,
         token_use: 'access',
         iat: now,
-        exp: now + expiresIn,
+        exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
       },
       this.jwtSecret,
     );
@@ -134,7 +134,7 @@ export class DatabaseAuthService implements IAuthService {
         name: user.displayName,
         email_verified: user.emailVerified,
         iat: now,
-        exp: now + expiresIn,
+        exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
       },
       this.jwtSecret,
     );
@@ -153,7 +153,7 @@ export class DatabaseAuthService implements IAuthService {
       accessToken,
       idToken,
       refreshToken,
-      expiresIn,
+      expiresIn: AUTH_TOKENS.EXPIRES_IN_SECONDS,
       tokenType: 'Bearer',
     };
   }
@@ -187,7 +187,7 @@ export class DatabaseAuthService implements IAuthService {
           email: user.email,
           token_use: 'access',
           iat: now,
-          exp: now + expiresIn,
+          exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
         },
         this.jwtSecret,
       );
@@ -199,7 +199,7 @@ export class DatabaseAuthService implements IAuthService {
           name: user.displayName,
           email_verified: user.emailVerified,
           iat: now,
-          exp: now + expiresIn,
+          exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
         },
         this.jwtSecret,
       );

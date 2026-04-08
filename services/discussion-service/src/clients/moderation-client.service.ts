@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 /**
  * Child safety risk levels for content screening
@@ -91,9 +92,6 @@ export interface QueueChildContentData {
  * });
  * ```
  */
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
-
 @Injectable()
 export class ModerationClientService {
   private readonly logger = new Logger(ModerationClientService.name);
@@ -103,7 +101,7 @@ export class ModerationClientService {
   constructor() {
     this.baseUrl = process.env['MODERATION_SERVICE_URL'] || getServiceUrl('MODERATION_SERVICE');
     this.timeoutMs = parseInt(
-      process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['MODERATION_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
       10,
     );
   }

@@ -7,6 +7,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
+import { AUTH_TOKENS } from '../constants/index.js';
 
 /**
  * Mock authentication service for local development and E2E testing.
@@ -90,7 +91,6 @@ export class MockAuthService {
 
     // Generate mock JWT tokens
     const now = Math.floor(Date.now() / 1000);
-    const expiresIn = 3600; // 1 hour
 
     const accessToken = jwt.sign(
       {
@@ -98,7 +98,7 @@ export class MockAuthService {
         email: foundUser.email,
         token_use: 'access',
         iat: now,
-        exp: now + expiresIn,
+        exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
       },
       this.jwtSecret,
     );
@@ -110,7 +110,7 @@ export class MockAuthService {
         name: foundUser.displayName,
         email_verified: foundUser.emailVerified,
         iat: now,
-        exp: now + expiresIn,
+        exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
       },
       this.jwtSecret,
     );
@@ -129,7 +129,7 @@ export class MockAuthService {
       accessToken,
       idToken,
       refreshToken,
-      expiresIn,
+      expiresIn: AUTH_TOKENS.EXPIRES_IN_SECONDS,
       tokenType: 'Bearer',
     };
   }
@@ -151,7 +151,6 @@ export class MockAuthService {
       }
 
       const now = Math.floor(Date.now() / 1000);
-      const expiresIn = 3600;
 
       const accessToken = jwt.sign(
         {
@@ -159,7 +158,7 @@ export class MockAuthService {
           email: user.email,
           token_use: 'access',
           iat: now,
-          exp: now + expiresIn,
+          exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
         },
         this.jwtSecret,
       );
@@ -171,7 +170,7 @@ export class MockAuthService {
           name: user.displayName,
           email_verified: user.emailVerified,
           iat: now,
-          exp: now + expiresIn,
+          exp: now + AUTH_TOKENS.EXPIRES_IN_SECONDS,
         },
         this.jwtSecret,
       );
@@ -179,7 +178,7 @@ export class MockAuthService {
       return {
         accessToken,
         idToken,
-        expiresIn,
+        expiresIn: AUTH_TOKENS.EXPIRES_IN_SECONDS,
         tokenType: 'Bearer',
       };
     } catch (error) {

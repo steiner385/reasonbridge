@@ -10,8 +10,7 @@ import { FeedbackType } from '@prisma/client';
 import type { AnalysisResult } from '../services/response-analyzer.service.js';
 import type { CachedFeedback, FeedbackMetadata } from './types.js';
 import { randomUUID } from 'crypto';
-
-const VECTOR_SIZE = 1536; // text-embedding-3-small dimensions
+import { EMBEDDING } from '../constants/index.js';
 
 @Injectable()
 export class QdrantService implements OnModuleInit {
@@ -51,7 +50,7 @@ export class QdrantService implements OnModuleInit {
         this.logger.log(`Creating Qdrant collection: ${this.collectionName}`);
         await this.client.createCollection(this.collectionName, {
           vectors: {
-            size: VECTOR_SIZE,
+            size: EMBEDDING.VECTOR_SIZE,
             distance: 'Cosine',
           },
         });

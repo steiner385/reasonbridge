@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
+import { VERIFICATION_CODE } from '../constants/index.js';
 
 /**
  * Production implementation of verification code generator.
@@ -22,9 +23,9 @@ export class RandomVerificationCodeGenerator implements VerificationCodeGenerato
    * @returns A random 6-digit numeric string (100000-999999)
    */
   generate(): string {
-    const min = 100000;
-    const max = 999999;
-    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomNum =
+      Math.floor(Math.random() * (VERIFICATION_CODE.MAX_VALUE - VERIFICATION_CODE.MIN_VALUE + 1)) +
+      VERIFICATION_CODE.MIN_VALUE;
     const code = randomNum.toString();
 
     this.logger.debug('Generated random verification code');

@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 /**
  * Candidate topic for duplicate comparison
@@ -81,7 +82,10 @@ export class AiClientService {
 
   constructor() {
     this.baseUrl = process.env['AI_SERVICE_URL'] || getServiceUrl('AI_SERVICE');
-    this.timeoutMs = parseInt(process.env['AI_SERVICE_TIMEOUT_MS'] || '5000', 10);
+    this.timeoutMs = parseInt(
+      process.env['AI_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.AI_SERVICE_MS),
+      10,
+    );
   }
 
   /**

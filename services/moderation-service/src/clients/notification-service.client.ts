@@ -6,6 +6,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getServiceUrl } from '@reason-bridge/common';
+import { CLIENT_TIMEOUTS } from '../constants/index.js';
 
 /**
  * Single SLA breach item for notification
@@ -56,9 +57,6 @@ export interface SlaBreachNotificationResponse {
  * ]);
  * ```
  */
-/** Default timeout for HTTP requests in milliseconds */
-const DEFAULT_TIMEOUT_MS = 30000;
-
 @Injectable()
 export class NotificationServiceClient {
   private readonly logger = new Logger(NotificationServiceClient.name);
@@ -69,7 +67,7 @@ export class NotificationServiceClient {
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.baseUrl = process.env['NOTIFICATION_SERVICE_URL'] || getServiceUrl('NOTIFICATION_SERVICE');
     this.timeoutMs = parseInt(
-      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(DEFAULT_TIMEOUT_MS),
+      process.env['NOTIFICATION_SERVICE_TIMEOUT_MS'] || String(CLIENT_TIMEOUTS.DEFAULT_MS),
       10,
     );
     this.internalApiKey =
