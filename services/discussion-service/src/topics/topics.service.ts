@@ -32,6 +32,7 @@ import { PropositionsService } from '../propositions/propositions.service.js';
 import { ActivityClientService } from '../clients/activity-client.service.js';
 import { Prisma } from '@prisma/client';
 import { CACHE_TTL } from '../constants/index.js';
+import { generateCacheKey } from '../utils/cache-key.js';
 
 @Injectable()
 export class TopicsService implements OnModuleInit {
@@ -78,8 +79,8 @@ export class TopicsService implements OnModuleInit {
       excludeMatureContent,
     } = query;
 
-    // Generate cache key based on query parameters
-    const cacheKey = `topics:list:${JSON.stringify(query)}`;
+    // Generate deterministic cache key based on query parameters
+    const cacheKey = generateCacheKey('topics:list', query as Record<string, unknown>);
 
     // Try to get from cache first (5min TTL)
     const cached = await this.cacheManager?.get<PaginatedTopicsResponseDto>(cacheKey);
