@@ -1,0 +1,581 @@
+{
+  "consumer": {
+    "name": "moderation-service"
+  },
+  "interactions": [
+    {
+      "description": "a health check request (from moderation-service)",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the ai service is healthy"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "status": "ok"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for detailed analysis of low-risk content",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "ai service detailed grooming analysis is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "Low risk content for analysis"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/ai/grooming/detailed"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "allPatternsFound": [],
+            "moderatorNotes": "No significant patterns detected",
+            "originalContent": "Low risk content for analysis",
+            "riskLevel": "low",
+            "timestamp": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.moderatorNotes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.originalContent": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.riskLevel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for detailed grooming analysis",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "ai service detailed grooming analysis is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "Content requiring detailed analysis"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/ai/grooming/detailed"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "allPatternsFound": [
+              {
+                "match": "matched text",
+                "severity": 0.8,
+                "type": "isolation_attempt"
+              }
+            ],
+            "moderatorNotes": "Multiple grooming indicators detected",
+            "originalContent": "Content requiring detailed analysis",
+            "riskLevel": "high",
+            "timestamp": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.allPatternsFound": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.allPatternsFound[*].match": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.allPatternsFound[*].severity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.allPatternsFound[*].type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.moderatorNotes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.originalContent": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.riskLevel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "2026-01-15T10:30:00.000Z",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to analyze borderline content for grooming",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "ai service grooming detection is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "Borderline content that needs review"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/ai/grooming/analyze"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "confidence": 0.65,
+            "detected": true,
+            "explanation": "Content may contain concerning patterns - human review recommended",
+            "flaggedPhrases": ["borderline phrase"],
+            "patternType": "boundary_testing",
+            "recommendedAction": "REVIEW"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.confidence": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.explanation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.flaggedPhrases": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.patternType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.recommendedAction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to analyze concerning content for grooming",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "ai service grooming detection is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "Concerning content that triggers detection"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/ai/grooming/analyze"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "confidence": 0.92,
+            "detected": true,
+            "explanation": "Content matches grooming pattern indicators",
+            "flaggedPhrases": ["concerning phrase"],
+            "patternType": "isolation_attempt",
+            "recommendedAction": "BLOCK"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.confidence": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.explanation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.flaggedPhrases": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.patternType": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.recommendedAction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to analyze safe content for grooming",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "ai service grooming detection is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "content": "This is a normal discussion about homework"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.content": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/ai/grooming/analyze"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "confidence": 0.1,
+            "detected": false,
+            "explanation": "No grooming patterns detected",
+            "flaggedPhrases": [],
+            "patternType": null,
+            "recommendedAction": "ALLOW"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "matchingRules": {
+          "body": {
+            "$.confidence": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.explanation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.recommendedAction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.3",
+      "models": "1.3.9"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "ai-service"
+  }
+}
