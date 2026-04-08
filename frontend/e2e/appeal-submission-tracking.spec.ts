@@ -40,7 +40,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should display appeals page with user appeals', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page heading is visible
       await expect(page.getByRole('heading', { name: /appeal status/i })).toBeVisible();
@@ -53,7 +54,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should display all appeal filter buttons', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       await expect(page.getByRole('button', { name: /all appeals/i })).toBeVisible();
       await expect(page.getByRole('button', { name: /pending/i })).toBeVisible();
@@ -64,11 +66,13 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should filter appeals by pending status', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click pending filter
       await page.getByRole('button', { name: /pending/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify the pending button is active
       const pendingButton = page.getByRole('button', { name: /pending/i });
@@ -77,11 +81,13 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should filter appeals by under review status', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click under review filter
       await page.getByRole('button', { name: /under review/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify the filter is applied
       await expect(page.getByRole('button', { name: /under review/i })).toBeVisible();
@@ -89,11 +95,13 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should filter appeals by upheld status', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click upheld filter
       await page.getByRole('button', { name: /upheld/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify the filter is applied
       await expect(page.getByRole('button', { name: /upheld/i })).toBeVisible();
@@ -101,11 +109,13 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should filter appeals by denied status', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click denied filter
       await page.getByRole('button', { name: /denied/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify the filter is applied
       await expect(page.getByRole('button', { name: /denied/i })).toBeVisible();
@@ -113,15 +123,18 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should show all appeals when clicking All Appeals filter', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // First filter by pending
       await page.getByRole('button', { name: /pending/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Then click All Appeals to reset
       await page.getByRole('button', { name: /all appeals/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify the all appeals button is visible
       await expect(page.getByRole('button', { name: /all appeals/i })).toBeVisible();
@@ -129,7 +142,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should display help section with status explanations', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Scroll to help section
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -140,7 +154,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should show empty state when no appeals exist', async ({ page }) => {
       await page.goto('/appeals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // If there are no appeals, should show empty state
       // This depends on test data - look for either appeals or empty state
@@ -156,7 +171,8 @@ test.describe('Appeal Submission and Tracking', () => {
     test.skip('should navigate to moderation history page', async ({ page }) => {
       // Skip: /moderation-history route doesn't exist - only /admin/moderation and /appeals exist
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page is accessible (might show empty state or actions)
       await expect(page.getByText(/moderation|history|actions/i).first()).toBeVisible();
@@ -164,7 +180,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should show appeal button on moderation action if appealable', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for appeal buttons if any moderation actions exist
       const appealButtons = page.getByRole('button', { name: /appeal/i });
@@ -179,7 +196,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should open appeal modal when clicking appeal button', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -196,7 +214,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should show validation error for empty appeal reason', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -216,7 +235,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should show validation error for too-short appeal reason', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -240,7 +260,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should close appeal modal when clicking cancel', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -259,7 +280,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should display moderation action details in appeal form', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -275,7 +297,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should submit appeal successfully with valid reason', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -312,7 +335,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should show character count in appeal reason field', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {
@@ -332,7 +356,8 @@ test.describe('Appeal Submission and Tracking', () => {
 
     test('should display information about review timeline', async ({ page }) => {
       await page.goto('/moderation-history');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const appealButton = page.getByRole('button', { name: /appeal/i }).first();
       if ((await appealButton.count()) > 0) {

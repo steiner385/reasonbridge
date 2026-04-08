@@ -27,7 +27,8 @@ test.describe('Topic Status Management', () => {
     // Fixed: Added proper network waits for topic data to fully load
     test('should create a topic and see status action buttons', async ({ page }) => {
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -50,7 +51,8 @@ test.describe('Topic Status Management', () => {
 
       // Wait for redirect and all data to load
       await page.waitForURL(/\/discussions\?topic=/);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
       await page.waitForTimeout(500); // Allow React state to update
 
       await expect(page.locator('.conversation-panel h1')).toBeVisible();
@@ -75,7 +77,8 @@ test.describe('Topic Status Management', () => {
     test('should activate a topic from SEEDING state', async ({ page }) => {
       // Create a topic first
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       await page.getByRole('button', { name: /create topic/i }).click();
       const modal = page.locator('[data-testid="create-topic-modal"]');
@@ -96,7 +99,8 @@ test.describe('Topic Status Management', () => {
 
       // Wait for navigation and data to fully load
       await page.waitForURL(/\/discussions\?topic=/);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
       await page.waitForTimeout(500);
 
       // Click Activate Topic button
@@ -155,7 +159,8 @@ test.describe('Topic Status Management', () => {
     test('should reopen an archived topic', async ({ page }) => {
       // Create and archive a topic first to ensure we have one to reopen
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -178,7 +183,8 @@ test.describe('Topic Status Management', () => {
 
       // Wait for navigation
       await page.waitForURL(/\/discussions\?topic=/);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
       await page.waitForTimeout(500);
 
       // Activate the topic first if needed
@@ -291,7 +297,8 @@ test.describe('Topic Status Management', () => {
     test('should unlock a locked topic', async ({ page }) => {
       // Create and lock a topic first to ensure we have one to unlock
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Create topic
       await page.getByRole('button', { name: /create topic/i }).click();
@@ -314,7 +321,8 @@ test.describe('Topic Status Management', () => {
 
       // Wait for navigation
       await page.waitForURL(/\/discussions\?topic=/);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
       await page.waitForTimeout(500);
 
       // Activate the topic first if in SEEDING state
@@ -447,7 +455,8 @@ test.describe('Topic Status Management', () => {
       // Navigate directly to a known seeded topic without logging in
       const topic = SEEDED_TOPICS.CONGESTION_PRICING;
       await page.goto(`/discussions?topic=${topic.id}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Wait for page to load
       await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {

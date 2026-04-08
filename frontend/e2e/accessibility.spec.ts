@@ -31,7 +31,8 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
     await page.goto('/');
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     // Check for critical/serious violations (minor ones logged but don't fail)
     await checkCriticalAccessibility(page);
@@ -52,7 +53,8 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
     await page.goto('/register');
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     // Check for critical/serious violations
     await checkCriticalAccessibility(page);
@@ -60,7 +62,8 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
 
   test('can scan and retrieve accessibility statistics', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     const stats = await getAccessibilityStats(page);
 
@@ -76,7 +79,8 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
 
   test('can scan specific page regions', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     // Scan only the main content area if it exists
     const mainExists = await page.locator('main').count();
@@ -94,7 +98,8 @@ test.describe('Accessibility - WCAG 2.2 AA Compliance', () => {
 
   test('can exclude third-party components from scan', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500); // Allow content to render
 
     // Example: exclude a hypothetical third-party widget
     const results = await scanAccessibility(page, {
@@ -111,7 +116,8 @@ test.describe('Accessibility - Page-Specific Checks', () => {
     // CSS fixes applied in PR #994: dark mode colors, focus rings added to TopicCard.
     test('topics list page has no critical accessibility violations', async ({ page }) => {
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500); // Allow content to render
 
       await checkCriticalAccessibility(page);
     });
@@ -120,7 +126,8 @@ test.describe('Accessibility - Page-Specific Checks', () => {
   test.describe('Interactive Elements', () => {
     test('modal dialogs are accessible when opened', async ({ page }) => {
       await page.goto('/');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500); // Allow content to render
 
       // Open login modal
       await page.getByRole('button', { name: /log in/i }).click();

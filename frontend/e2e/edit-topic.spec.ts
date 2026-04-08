@@ -43,7 +43,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page and data to load
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500); // Allow React state to update
 
       // Should see Edit button on discussion page (creator can edit own topics)
@@ -73,7 +73,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Click Edit button
@@ -134,7 +134,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Click Edit button
@@ -185,7 +185,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Click Edit button
@@ -230,7 +230,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Click Edit button
@@ -273,7 +273,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Click Edit button
@@ -313,7 +313,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Click Edit button
@@ -355,7 +355,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Make an edit
@@ -403,7 +403,7 @@ test.describe('Topic Editing', () => {
 
       // Wait for redirect to discussion page
       await page.waitForURL(/\/discussions\?topic=/, { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500);
 
       // Edit the topic
@@ -436,7 +436,8 @@ test.describe('Topic Editing', () => {
       // Navigate directly to a known seeded topic without logging in
       const topic = SEEDED_TOPICS.CONGESTION_PRICING;
       await page.goto(`/discussions?topic=${topic.id}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Wait for page to load
       await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {
@@ -454,7 +455,8 @@ test.describe('Topic Editing', () => {
       // Navigate to a topic created by Alice Anderson (CONGESTION_PRICING)
       const topic = SEEDED_TOPICS.CONGESTION_PRICING;
       await page.goto(`/discussions?topic=${topic.id}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Wait for page to load
       await page.waitForSelector('.conversation-panel h1, [data-testid="topic-title"]', {

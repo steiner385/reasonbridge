@@ -34,7 +34,8 @@ test.describe('Social Media Integration', () => {
 
       // Navigate to settings page where social connections are shown
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify connected provider is displayed
       // Note: This assumes SocialConnections component is rendered on settings page
@@ -52,7 +53,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Page should load successfully
       await expect(page.locator('h1')).toBeVisible();
@@ -109,7 +111,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Page should load without errors
       const pageContent = await page.textContent('body');
@@ -125,7 +128,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify the page loads correctly
       await expect(page.locator('h1')).toBeVisible();
@@ -145,7 +149,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Page should load with discovered users data available
       await expect(page.locator('h1')).toBeVisible();
@@ -163,7 +168,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page loaded
       const pageContent = await page.textContent('body');
@@ -182,7 +188,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page loads - invitation flow would be tested with component integration
       await expect(page.locator('h1')).toBeVisible();
@@ -198,7 +205,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Form validation would be tested when modal is rendered
       const pageContent = await page.textContent('body');
@@ -216,7 +224,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Page should load with invitation data available
       await expect(page.locator('h1')).toBeVisible();
@@ -230,7 +239,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Accept flow would be tested with component integration
       const pageContent = await page.textContent('body');
@@ -245,7 +255,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Decline flow would be tested with component integration
       await expect(page.locator('h1')).toBeVisible();
@@ -260,7 +271,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Status badges would be visible when InvitationsList is rendered
       const pageContent = await page.textContent('body');
@@ -276,7 +288,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Sent invitations would be visible in InvitationsList
       await expect(page.locator('h1')).toBeVisible();
@@ -289,7 +302,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Status indicators would be visible for each invitation
       const pageContent = await page.textContent('body');
@@ -348,7 +362,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for accessible buttons on settings page
       const buttons = page.getByRole('button');
@@ -364,7 +379,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check page is accessible
       const headings = page.getByRole('heading');
@@ -379,7 +395,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Tab through interactive elements
       await page.keyboard.press('Tab');
@@ -403,7 +420,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page renders on mobile
       await expect(page.locator('h1')).toBeVisible();
@@ -421,7 +439,8 @@ test.describe('Social Media Integration', () => {
       });
 
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page renders on tablet
       await expect(page.locator('h1')).toBeVisible();
@@ -433,7 +452,8 @@ test.describe('Social Media Integration', () => {
     test('should complete full OAuth connection flow', async ({ page }) => {
       // This would test the actual OAuth flow with real backend
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Full flow requires backend connectivity
       const pageContent = await page.textContent('body');
@@ -443,7 +463,8 @@ test.describe('Social Media Integration', () => {
     test('should import real contacts from connected provider', async ({ page }) => {
       // This would test actual contact import with real backend
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const pageContent = await page.textContent('body');
       expect(pageContent).toBeTruthy();
@@ -452,7 +473,8 @@ test.describe('Social Media Integration', () => {
     test('should send invitation and verify delivery', async ({ page }) => {
       // This would test the full invitation flow with real backend
       await page.goto('/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const pageContent = await page.textContent('body');
       expect(pageContent).toBeTruthy();

@@ -31,7 +31,8 @@ test.describe('Follow User and Activity Feed', () => {
 
     test('should show empty state when not following anyone', async ({ page }) => {
       await page.goto('/feed');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for empty state or activity list
       const activityCount = await page.getByTestId('activity-card').count();
@@ -71,13 +72,15 @@ test.describe('Follow User and Activity Feed', () => {
       const topicCard = page.locator('[data-testid="topic-card"]').first();
       if (await topicCard.isVisible()) {
         await topicCard.click();
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
 
         // Find a user link (topic author or response author)
         const userLink = page.locator('a[href^="/profile/"]').first();
         if (await userLink.isVisible()) {
           await userLink.click();
-          await page.waitForLoadState('networkidle');
+          await page.waitForLoadState('domcontentloaded');
+          await page.waitForTimeout(500);
 
           // Check for follow button (only shows for other users, not self)
           const followButton = page.getByTestId('follow-button');
@@ -99,7 +102,8 @@ test.describe('Follow User and Activity Feed', () => {
     test('should toggle follow button state when clicked', async ({ page }) => {
       // Find another user to follow
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Wait for topics to load
       await page.waitForSelector('[data-testid="topic-card"]', { timeout: 10000 });
@@ -107,7 +111,8 @@ test.describe('Follow User and Activity Feed', () => {
       // Click on a topic
       const topicCard = page.locator('[data-testid="topic-card"]').first();
       await topicCard.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Find and navigate to a user profile
       const userLink = page.locator('a[href^="/profile/"]').first();
@@ -116,7 +121,8 @@ test.describe('Follow User and Activity Feed', () => {
         return;
       }
       await userLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for follow button (only shows for other users, not self)
       const followButton = page.getByTestId('follow-button');
@@ -143,7 +149,8 @@ test.describe('Follow User and Activity Feed', () => {
     test('should show followed user activity in feed or empty state', async ({ page }) => {
       // Step 1: Navigate to activity feed directly (seeded follows may exist)
       await page.goto('/feed');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
       await expect(page.getByRole('heading', { name: /activity feed/i })).toBeVisible();
 
       // Step 2: Check if activities are shown or empty state
@@ -178,7 +185,8 @@ test.describe('Follow User and Activity Feed', () => {
 
         if (await topicLink.isVisible()) {
           await topicLink.click();
-          await page.waitForLoadState('networkidle');
+          await page.waitForLoadState('domcontentloaded');
+          await page.waitForTimeout(500);
 
           // Should navigate to discussions page
           await expect(page).toHaveURL(/\/discussions/);
@@ -200,7 +208,8 @@ test.describe('Follow User and Activity Feed', () => {
 
         if (await userLink.isVisible()) {
           await userLink.click();
-          await page.waitForLoadState('networkidle');
+          await page.waitForLoadState('domcontentloaded');
+          await page.waitForTimeout(500);
 
           // Should navigate to profile page
           await expect(page).toHaveURL(/\/profile\//);
@@ -222,7 +231,8 @@ test.describe('Follow User and Activity Feed', () => {
         await loadMoreButton.click();
 
         // Wait for loading to complete
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
 
         // Check if more activities were loaded
         const newCount = await page.getByTestId('activity-card').count();
@@ -247,7 +257,8 @@ test.describe('Follow User and Activity Feed', () => {
       const userLink = page.locator('a[href^="/profile/"]').first();
       if (await userLink.isVisible()) {
         await userLink.click();
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
 
         const followButton = page.getByTestId('follow-button');
         if (await followButton.isVisible()) {

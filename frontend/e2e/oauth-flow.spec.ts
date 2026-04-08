@@ -93,8 +93,8 @@ test.describe.skip('OAuth Signup Flow', () => {
         await page.waitForURL(/\/onboarding|\/topics|\/login|\/verify/, { timeout: 15000 });
 
         // Wait for network requests to complete and token storage to finish
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(200); // Allow async token storage to complete
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500); // Allow async token storage to complete
       });
 
       // Step 4: Verify tokens stored in localStorage
@@ -229,8 +229,8 @@ test.describe.skip('OAuth Signup Flow', () => {
         await page.waitForURL(/\/onboarding|\/topics|\/login|\/verify/, { timeout: 15000 });
 
         // Wait for network requests to complete and token storage to finish
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(200); // Allow async token storage to complete
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500); // Allow async token storage to complete
       });
 
       await test.step('Verify authentication tokens stored', async () => {
@@ -296,8 +296,8 @@ test.describe.skip('OAuth Signup Flow', () => {
       await page.waitForURL(/\/onboarding|\/topics|\/home|\/verify/, { timeout: 15000 });
 
       // Wait for network requests to complete and token storage to finish
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200); // Allow async token storage to complete
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500); // Allow async token storage to complete
 
       // Verify auth token is stored
       const accessToken = await page.evaluate(() => localStorage.getItem('authToken'));

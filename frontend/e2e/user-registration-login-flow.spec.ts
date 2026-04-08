@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForAuthState, waitForAPIAction } from './helpers/auth-waits';
 
 /**
  * E2E test suite for User Registration and Login Flow
@@ -128,9 +129,8 @@ test.describe('User Registration and Login Flow', () => {
       // Wait for redirect to authenticated page
       await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
 
-      // Wait for network requests to complete and token storage to finish
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200); // Allow async token storage to complete
+      // Wait for authenticated state to stabilize (avoid networkidle which hangs due to WebSocket)
+      await waitForAuthState(page);
     });
 
     // Step 6: Verify successful authentication
@@ -167,8 +167,8 @@ test.describe('User Registration and Login Flow', () => {
     const registerButton = page.getByRole('button', { name: /sign up|register|create account/i });
     await registerButton.click();
 
-    // Wait for first registration to complete
-    await page.waitForLoadState('networkidle', { timeout: 20000 });
+    // Wait for first registration to complete (avoid networkidle which hangs due to WebSocket)
+    await waitForAPIAction(page, 1000);
 
     // Check if first registration failed
     if (page.url().includes('/register')) {
@@ -192,7 +192,7 @@ test.describe('User Registration and Login Flow', () => {
 
     // Attempt second registration with same email
     await page.goto('/register');
-    await page.waitForLoadState('networkidle');
+    await waitForAPIAction(page);
 
     // Re-query form elements on new page
     const emailInput2 = page.getByLabel(/email/i);
@@ -208,8 +208,8 @@ test.describe('User Registration and Login Flow', () => {
 
     await registerButton2.click();
 
-    // Wait for API response
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    // Wait for API response (avoid networkidle which hangs due to WebSocket)
+    await waitForAPIAction(page, 1000);
 
     // Should show error message about existing email - check the error container
     const errorMessage = page.locator('.bg-fallacy-light p, [role="alert"]').filter({
@@ -269,7 +269,7 @@ test.describe('User Registration and Login Flow', () => {
   test('should show error for invalid login credentials', async ({ page }) => {
     // Navigate to landing page and open login modal
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await waitForAPIAction(page);
 
     // Open login modal
     await page.getByRole('button', { name: /log in/i }).click();
@@ -286,8 +286,8 @@ test.describe('User Registration and Login Flow', () => {
     const loginButton = dialog.getByRole('button', { name: /^log in$/i });
     await loginButton.click();
 
-    // Wait for API response
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    // Wait for API response (avoid networkidle which hangs due to WebSocket)
+    await waitForAPIAction(page, 1000);
 
     // Should show authentication error within the modal
     // Backend may return different error messages, so cast a wide net
@@ -306,7 +306,7 @@ test.describe('User Registration and Login Flow', () => {
   test('should navigate between login modal and registration page', async ({ page }) => {
     // Start at landing page and open login modal
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await waitForAPIAction(page);
 
     // Open login modal
     await page.getByRole('button', { name: /log in/i }).click();

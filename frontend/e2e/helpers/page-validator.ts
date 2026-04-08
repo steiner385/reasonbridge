@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Page Validator for E2E Navigation Tests
  *
  * Validates page load success, checks for errors,
@@ -42,8 +47,8 @@ export interface ValidationOptions {
 
 const DEFAULT_OPTIONS: Required<ValidationOptions> = {
   timeout: 30000,
-  waitUntil: 'networkidle',
-  additionalWaitMs: 0,
+  waitUntil: 'domcontentloaded',
+  additionalWaitMs: 500,
 };
 
 export class PageValidator {

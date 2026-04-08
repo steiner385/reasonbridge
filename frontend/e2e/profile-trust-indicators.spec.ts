@@ -36,7 +36,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
     // Navigate to profile page
     await page.goto('/profile');
-    await page.waitForLoadState('networkidle', { timeout: 30000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+    await page.waitForTimeout(500);
 
     // Wait for the profile page to finish loading user data
     const profileHeading = page.getByRole('heading', { name: /my profile/i });
@@ -154,7 +155,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
       // Navigate to verification page
       await page.goto('/verification');
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
+      await page.waitForTimeout(500);
 
       // Look for phone verification button/option
       const phoneOption = page.locator('button:has-text("Phone Verification")');
@@ -172,7 +174,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
       // Navigate to verification page
       await page.goto('/verification');
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
+      await page.waitForTimeout(500);
 
       // Click phone verification option
       const phoneOption = page.locator('button:has-text("Phone Verification")');
@@ -194,7 +197,8 @@ test.describe('User Story 4: Trust Indicators and Human Authenticity', () => {
 
       // Navigate to verification page
       await page.goto('/verification');
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
+      await page.waitForTimeout(500);
 
       // Check for current verification level display
       const verificationLevel = page

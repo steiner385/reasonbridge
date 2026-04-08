@@ -24,7 +24,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should load moderation dashboard', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify page title
       const heading = page.getByRole('heading', { name: /moderation dashboard/i });
@@ -33,7 +34,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should display all four tabs', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify all tabs are present
       await expect(page.getByRole('tab', { name: /overview/i })).toBeVisible();
@@ -44,7 +46,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should switch between tabs', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click Queue tab
       await page.getByRole('tab', { name: /queue/i }).click();
@@ -77,7 +80,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should approve pending action', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Find and click approve button on first pending action
       const approveButton = page.getByRole('button', { name: /approve/i }).first();
@@ -91,7 +95,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should reject pending action', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Find and click reject button on first pending action
       const rejectButton = page.getByRole('button', { name: /reject/i }).first();
@@ -115,7 +120,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should display dashboard heading', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const heading = page.getByRole('heading', { name: /moderation dashboard/i });
       await expect(heading).toBeVisible();
@@ -123,7 +129,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should display statistics cards on Overview tab', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify statistics section exists (counts may vary with real data)
       await expect(page.getByText(/pending actions/i).first()).toBeVisible();
@@ -140,7 +147,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should display pending actions by type chart', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify action type distribution section exists
       const hasTypeDistribution = await page
@@ -153,7 +161,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should display recent pending actions when available', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for recent actions section (may be empty with real data)
       const hasRecentActions = await page
@@ -166,11 +175,13 @@ test.describe('Moderation Dashboard', () => {
 
     test('should switch to Queue tab and display filters', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click Queue tab
       await page.getByRole('tab', { name: /queue/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify Queue tab is selected
       await expect(page.getByRole('tab', { name: /queue/i })).toHaveAttribute(
@@ -181,11 +192,13 @@ test.describe('Moderation Dashboard', () => {
 
     test('should filter queue by status when filters available', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click Queue tab
       await page.getByRole('tab', { name: /queue/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Find and use status filter if available
       const statusFilter = page.locator('select').first();
@@ -197,11 +210,13 @@ test.describe('Moderation Dashboard', () => {
 
     test('should switch to Actions tab and display action list', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click Actions tab
       await page.getByRole('tab', { name: /actions/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify Actions tab is selected
       await expect(page.getByRole('tab', { name: /actions/i })).toHaveAttribute(
@@ -212,11 +227,13 @@ test.describe('Moderation Dashboard', () => {
 
     test('should switch to Appeals tab and display appeal list', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Click Appeals tab
       await page.getByRole('tab', { name: /appeals/i }).click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify Appeals tab is selected
       await expect(page.getByRole('tab', { name: /appeals/i })).toHaveAttribute(
@@ -227,7 +244,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should navigate between Overview tabs correctly', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify Overview is default selected
       const overviewTab = page.getByRole('tab', { name: /overview/i });
@@ -248,7 +266,8 @@ test.describe('Moderation Dashboard', () => {
 
     test('should have accessible tab structure', async ({ page }) => {
       await page.goto('/admin/moderation');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify tabs have proper ARIA attributes
       const tablist = page.getByRole('tablist');
@@ -262,7 +281,8 @@ test.describe('Moderation Dashboard', () => {
       await page.goto('/admin/moderation');
 
       // Check for loading indicator or content (page eventually loads)
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Dashboard should be visible after loading
       const heading = page.getByRole('heading', { name: /moderation dashboard/i });

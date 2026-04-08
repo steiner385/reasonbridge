@@ -45,11 +45,13 @@ test.describe('Read State Tracking', () => {
 
     // Navigate away
     await page.goto('/topics');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Navigate back to same topic
     await page.goto(currentUrl);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Wait for responses to load again
     await page.waitForSelector('[data-testid="response-item"]', { timeout: 15000 });
@@ -73,7 +75,8 @@ test.describe('Read State Tracking', () => {
     }
 
     // Wait for any API calls to complete
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // All responses should remain visible
     await expect(responses.first()).toBeVisible();

@@ -6,7 +6,8 @@ import { loginWithDemoAccount, SEEDED_TOPICS } from './helpers/demo-auth';
  */
 async function navigateToTopicsAndWaitForAuth(page: Page) {
   await page.goto('/topics');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(500);
   // Wait for page heading to confirm page is ready
   await expect(page.getByRole('heading', { name: /discussion topics/i })).toBeVisible();
   // Wait for auth state to propagate (moderator-only features depend on user role)
@@ -179,7 +180,8 @@ test.describe('Topic Merging', () => {
 
       // Navigate to topics
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should not see Merge Topics button
       const mergeButton = page.getByRole('button', { name: /merge topics/i });
@@ -189,7 +191,8 @@ test.describe('Topic Merging', () => {
     test('unauthenticated users should not see merge functionality', async ({ page }) => {
       // Navigate to topics without logging in
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should not see Merge Topics button
       const mergeButton = page.getByRole('button', { name: /merge topics/i });

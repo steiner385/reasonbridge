@@ -222,7 +222,8 @@ test.describe('Guest Read-Only Mode', () => {
       }
 
       await authorLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Wait for follow button to render (profile page may take time to hydrate)
       const followButton = page.locator('[data-testid="follow-button"]').first();
@@ -246,7 +247,8 @@ test.describe('Guest Read-Only Mode', () => {
     test('should prompt login when clicking Create Topic button', async ({ page }) => {
       // Navigate to topics page
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for create topic button
       const createButton = page.locator(
@@ -283,7 +285,8 @@ test.describe('Guest Read-Only Mode', () => {
         sessionStorage.clear();
       });
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Navigate to a topic with responses (30s timeout for CI cold-starts)
       const { hasResponses } = await navigateToTopicWithResponses(page, 'CONGESTION_PRICING');
@@ -354,7 +357,7 @@ test.describe('Guest Read-Only Mode', () => {
       // Wait for modal to close and authentication to complete
       await expect(dialog).not.toBeVisible({ timeout: 10000 });
 
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(500); // Allow token propagation
 
       // After login, the app may redirect to /topics?welcome=true
@@ -495,7 +498,8 @@ test.describe('Guest Read-Only Mode', () => {
   test.describe('Guest browsing is unaffected', () => {
     test('should allow guest to browse topics list', async ({ page }) => {
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Topics should be visible - skip if API isn't available
       const topicCards = page.locator('[data-testid="topic-card"]');
@@ -569,7 +573,8 @@ test.describe('Guest Read-Only Mode', () => {
       }
 
       await authorLink.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Profile content should be visible (look for common profile elements)
       const profileContent = page.locator('[data-testid="profile-page"], .profile-content, h1');

@@ -17,7 +17,8 @@ import { test, expect } from '@playwright/test';
 // Helper to select a topic via the Sidebar
 async function selectTopicViaSidebar(page: import('@playwright/test').Page) {
   await page.goto('/discussions');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(500);
 
   // Wait for Sidebar to load topic list
   const firstTopic = page.locator('[data-testid="topic-list-item"]').first();
@@ -28,7 +29,8 @@ async function selectTopicViaSidebar(page: import('@playwright/test').Page) {
   await expect(page).toHaveURL(/\?topic=/);
 
   // Wait for conversation panel to load
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(500);
   await expect(page.locator('.conversation-panel h1[data-testid="topic-title"]')).toBeVisible({
     timeout: 10000,
   });
@@ -201,7 +203,8 @@ test.describe('Discussion Page - Tablet Layout', () => {
 
   test('should display sidebar toggle on tablet', async ({ page }) => {
     await page.goto('/discussions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // On tablet, sidebar may be collapsed - look for toggle button
     const sidebarToggle = page.locator(

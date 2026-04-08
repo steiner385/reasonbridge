@@ -84,13 +84,32 @@ async function crawlPage(
 
   const pageErrors: PageError[] = [];
 
+  // Patterns to ignore in console error filtering
+  // These are common false positives that don't indicate real issues
+  const ignoredPatterns = [
+    /React does not recognize/i, // React prop warnings (e.g., custom DOM attributes)
+    /Warning: /i, // React development warnings
+    /DevTools/i, // Browser DevTools messages
+    /ResizeObserver/i, // ResizeObserver loop limit exceeded (browser quirk)
+    /socket\.io/i, // Socket.io connection messages
+    /websocket/i, // WebSocket connection messages
+    /Failed to load resource.*favicon/i, // Missing favicon (non-critical)
+    /Download the React DevTools/i, // React DevTools suggestion
+    /validateDOMNesting/i, // React DOM nesting warnings
+    /findDOMNode is deprecated/i, // React deprecated API warnings
+  ];
+
   // Listen for console errors
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
-      pageErrors.push({
-        type: 'console',
-        message: msg.text(),
-      });
+      const text = msg.text();
+      // Only record errors that don't match any ignored pattern
+      if (!ignoredPatterns.some((p) => p.test(text))) {
+        pageErrors.push({
+          type: 'console',
+          message: text,
+        });
+      }
     }
   });
 

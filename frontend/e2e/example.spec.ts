@@ -10,7 +10,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Application Layout', () => {
   test('should display the main header with application title', async ({ page }) => {
     // Navigate to the home page
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
 
     // Wait for React app to hydrate
     await page.waitForLoadState('domcontentloaded');
@@ -62,7 +63,8 @@ test.describe('Navigation', () => {
     expect(response?.status()).toBe(200);
 
     // Wait for the page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
   });
 });
 

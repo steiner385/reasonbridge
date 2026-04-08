@@ -32,7 +32,8 @@ test.describe('Ranking System', () => {
 
     test('should display profile page with ranking section', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Verify profile page loads with heading
       const profileHeading = page.getByRole('heading', { name: /profile/i });
@@ -41,7 +42,8 @@ test.describe('Ranking System', () => {
 
     test('should display user tier if ranking data available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for ranking section (may or may not be present depending on backend)
       const rankingHeading = page.getByRole('heading', { name: /ranking|tier|level/i });
@@ -59,7 +61,8 @@ test.describe('Ranking System', () => {
 
     test('should display score breakdown if available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for score breakdown section (may or may not exist)
       const scoreBreakdown = page.getByText(/score breakdown|engagement|quality/i);
@@ -74,7 +77,8 @@ test.describe('Ranking System', () => {
 
     test('should display leaderboard preview if available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for leaderboard section
       const leaderboard = page.getByText(/leaderboard|top contributors/i);
@@ -89,7 +93,8 @@ test.describe('Ranking System', () => {
 
     test('should display domain expertise section if available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for expertise section
       const expertise = page.getByText(/expertise|domain|specialization/i);
@@ -104,7 +109,8 @@ test.describe('Ranking System', () => {
 
     test('should display credentials section if available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for credentials section
       const credentials = page.getByText(/credentials/i);
@@ -125,7 +131,8 @@ test.describe('Ranking System', () => {
 
     test('should show Add Credential button if feature available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for Add Credential button
       const addButton = page.getByRole('button', { name: /add credential/i });
@@ -137,7 +144,8 @@ test.describe('Ranking System', () => {
 
     test('should open credential modal when Add button clicked', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       const addButton = page.getByRole('button', { name: /add credential/i });
       const hasAddButton = await addButton.isVisible().catch(() => false);
@@ -158,7 +166,8 @@ test.describe('Ranking System', () => {
 
     test('should display appeals section if available', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for appeals section
       const appeals = page.getByText(/appeals/i);
@@ -173,7 +182,8 @@ test.describe('Ranking System', () => {
 
     test('should show Submit Appeal button if allowed', async ({ page }) => {
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for Submit Appeal button
       const submitAppeal = page.getByTestId('submit-appeal-button');
@@ -192,7 +202,8 @@ test.describe('Ranking System', () => {
 
     test('should display ranking analytics dashboard for admin', async ({ page }) => {
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should show analytics page or unauthorized/redirect
       const analyticsHeading = page.getByRole('heading', { name: /ranking analytics/i });
@@ -211,7 +222,8 @@ test.describe('Ranking System', () => {
 
     test('should display tier distribution if analytics available', async ({ page }) => {
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for tier distribution section
       const tierDist = page.getByText(/tier distribution/i);
@@ -223,7 +235,8 @@ test.describe('Ranking System', () => {
 
     test('should display appeals overview if analytics available', async ({ page }) => {
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for appeals overview
       const appealsOverview = page.getByText(/appeals overview/i);
@@ -234,7 +247,8 @@ test.describe('Ranking System', () => {
 
     test('should display credentials overview if analytics available', async ({ page }) => {
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for credentials overview
       const credentialsOverview = page.getByText(/credentials overview/i);
@@ -245,7 +259,8 @@ test.describe('Ranking System', () => {
 
     test('should display system health metrics if available', async ({ page }) => {
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for system health section
       const systemHealth = page.getByText(/system health/i);
@@ -256,7 +271,8 @@ test.describe('Ranking System', () => {
 
     test('should display top contributors if available', async ({ page }) => {
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Check for top contributors section
       const topContributors = page.getByText(/top contributors/i);
@@ -293,7 +309,8 @@ test.describe('Ranking System', () => {
       await loginWithDemoAccount(page, 'Alice Anderson');
 
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should show profile page content
       const profileHeading = page.getByRole('heading', { name: /profile/i });
@@ -304,7 +321,8 @@ test.describe('Ranking System', () => {
       await loginWithDemoAccount(page, 'Admin Adams');
 
       await page.goto('/admin/ranking');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Should show ranking analytics or redirect/unauthorized
       const analyticsHeading = page.getByRole('heading', { name: /ranking analytics/i });
@@ -324,7 +342,8 @@ test.describe('Ranking System', () => {
     test('should show profile page with user information', async ({ page }) => {
       await loginWithDemoAccount(page, 'Alice Anderson');
       await page.goto('/profile');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Profile should show user's display name somewhere
       const hasUserName = await page

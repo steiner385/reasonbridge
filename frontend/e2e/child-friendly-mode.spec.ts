@@ -67,7 +67,8 @@ test.describe('Child-Friendly Mode', () => {
       await page.goto('/topics');
 
       // Wait for topics to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for any age-appropriate content markers
       const childFriendlyIndicators = page.locator(
@@ -191,7 +192,8 @@ test.describe('Child-Friendly Mode', () => {
       await page.goto('/discussions');
 
       // Wait for page load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for any pending review indicators in the UI
       const pendingNotice = page.locator(
@@ -229,10 +231,12 @@ test.describe('Child-Friendly Mode', () => {
 
       // Navigate around to trigger potential tracking
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       await page.goto('/about');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // For minor users, analytics should be disabled
       // This test captures analytics requests for verification
@@ -277,7 +281,8 @@ test.describe('Child-Friendly Mode', () => {
 
       // Navigate to topics
       await page.goto('/topics');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(500);
 
       // Look for any adult-only content markers
       const adultOnlyContent = page.locator(

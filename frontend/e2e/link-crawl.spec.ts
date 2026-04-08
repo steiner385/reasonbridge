@@ -26,7 +26,8 @@ async function crawlPage(
   result.visited.add(normalizedUrl);
 
   try {
-    const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 10000 });
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.waitForTimeout(500);
 
     if (!response || response.status() >= 400) {
       result.unreachablePages.push(normalizedUrl);

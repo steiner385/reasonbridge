@@ -73,7 +73,7 @@ export async function login(page: Page, user: TestUser): Promise<void> {
   await page.waitForSelector('[data-testid="login-modal"]', { state: 'hidden', timeout: 10000 });
 
   // Wait for auth state to stabilize
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(500);
 }
 
@@ -103,7 +103,7 @@ export async function loginWithDemoAccount(
 
   // Wait for navigation and auth state to stabilize
   await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(500);
 }
 
@@ -120,7 +120,8 @@ export async function logout(page: Page): Promise<void> {
     await page.getByRole('menuitem', { name: /log out|sign out/i }).click();
 
     // Wait for logout to complete
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
   }
 }
 

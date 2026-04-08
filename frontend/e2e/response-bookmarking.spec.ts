@@ -83,8 +83,8 @@ test.describe('Response Bookmarking', () => {
     await bookmarkButton.click();
 
     // Wait for API call to complete
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Button should show bookmarked state
     const isBookmarked = await bookmarkButton.getAttribute('data-bookmarked');
@@ -115,13 +115,13 @@ test.describe('Response Bookmarking', () => {
 
     // First click - add bookmark
     await bookmarkButton.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Second click - remove bookmark
     await bookmarkButton.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(300);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Button should show not-bookmarked state
     const isBookmarked = await bookmarkButton.getAttribute('data-bookmarked');
@@ -134,7 +134,8 @@ test.describe('Response Bookmarking', () => {
   test('should navigate to bookmarks page', async ({ page }) => {
     // Try navigating directly to bookmarks page
     await page.goto('/bookmarks');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
     // Page should load (may show empty state or bookmarks)
     await expect(page).toHaveURL(/bookmarks/);
