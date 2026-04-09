@@ -114,7 +114,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       });
 
       it('should use index for user lookup by cognitoSub', async () => {
-        const result = await explainAnalyze(pool, 'SELECT * FROM users WHERE "cognitoSub" = $1', [
+        const result = await explainAnalyze(pool, 'SELECT * FROM users WHERE cognito_sub = $1', [
           'perf-test-cognito-sub',
         ]);
 
@@ -125,7 +125,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       });
 
       it('should use index for displayName lookup', async () => {
-        const result = await explainAnalyze(pool, 'SELECT * FROM users WHERE "displayName" = $1', [
+        const result = await explainAnalyze(pool, 'SELECT * FROM users WHERE display_name = $1', [
           'Perf Test User',
         ]);
 
@@ -152,7 +152,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       it('should use index for topic filtering by status', async () => {
         const result = await explainAnalyze(
           pool,
-          'SELECT * FROM discussion_topics WHERE status = $1 ORDER BY "createdAt" DESC LIMIT 20',
+          'SELECT * FROM discussion_topics WHERE status = $1 ORDER BY created_at DESC LIMIT 20',
           ['ACTIVE'],
         );
 
@@ -178,7 +178,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       it('should use index for topics ordered by activity', async () => {
         const result = await explainAnalyze(
           pool,
-          'SELECT * FROM discussion_topics WHERE status = $1 ORDER BY "lastActivityAt" DESC LIMIT 10',
+          'SELECT * FROM discussion_topics WHERE status = $1 ORDER BY last_activity_at DESC LIMIT 10',
           ['ACTIVE'],
         );
 
@@ -192,7 +192,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       it('should use index for follower count query', async () => {
         const result = await explainAnalyze(
           pool,
-          'SELECT COUNT(*) FROM user_follows WHERE "followedId" = $1',
+          'SELECT COUNT(*) FROM user_follows WHERE followed_id = $1',
           [testUserId],
         );
 
@@ -204,7 +204,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       it('should use index for following count query', async () => {
         const result = await explainAnalyze(
           pool,
-          'SELECT COUNT(*) FROM user_follows WHERE "followerId" = $1',
+          'SELECT COUNT(*) FROM user_follows WHERE follower_id = $1',
           [testUserId],
         );
 
@@ -237,7 +237,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       it('paginated listing should be under 100ms', async () => {
         await assertQueryTiming(
           pool,
-          'SELECT * FROM discussion_topics WHERE status = $1 ORDER BY "createdAt" DESC LIMIT 20 OFFSET 0',
+          'SELECT * FROM discussion_topics WHERE status = $1 ORDER BY created_at DESC LIMIT 20 OFFSET 0',
           ['ACTIVE'],
           {
             maxExecutionTime: 100,
