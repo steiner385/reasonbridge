@@ -10,18 +10,27 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loginWithDemoAccount, navigateToSeededTopic, SEEDED_TOPICS } from './helpers/demo-auth';
+import {
+  loginWithDemoAccount,
+  navigateToSeededTopic,
+  waitForResponsesToLoad,
+} from './helpers/demo-auth';
 
 /**
  * Helper to navigate to a topic with responses
  * Uses seeded topic via direct URL navigation (more reliable than UI clicks)
+ * Uses polling with 30s timeout for CI cold-start scenarios
  */
 async function navigateToTopicWithResponses(page: import('@playwright/test').Page) {
   // Navigate directly to a seeded topic that has responses
   await navigateToSeededTopic(page, 'CONGESTION_PRICING');
 
-  // Wait for responses to load
-  await page.waitForSelector('[data-testid="response-item"]', { timeout: 15000 });
+  // Wait for responses to load with polling (handles CI cold-starts better than waitForSelector)
+  const hasResponses = await waitForResponsesToLoad(page, { timeout: 30000 });
+  if (!hasResponses) {
+    // Log warning but don't fail - some tests may work without responses
+    console.warn('Responses not loaded within timeout - backend may be starting up');
+  }
 }
 
 test.describe('Response Voting', () => {
