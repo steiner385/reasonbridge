@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { VerificationType, VerificationStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { VerificationService } from '../verification.service.js';
 import { OtpService } from '../services/otp.service.js';
 import { PhoneValidationService } from '../services/phone-validation.service.js';
 import { VideoVerificationService } from '../video-challenge.service.js';
+import type { SmsClient } from '../../clients/sms.client.js';
 import { randomUUID } from 'crypto';
 
 /**
@@ -23,6 +24,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
     let otpService: OtpService;
     let phoneValidationService: PhoneValidationService;
     let videoVerificationService: VideoVerificationService;
+    let mockSmsClient: SmsClient;
 
     // Test data cleanup tracker
     const createdUserIds: string[] = [];
@@ -55,11 +57,21 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
       };
 
       videoVerificationService = new VideoVerificationService(mockConfigService as any);
+
+      // Create mock SMS client for testing (always returns success)
+      mockSmsClient = {
+        sendVerificationCode: vi.fn().mockResolvedValue({
+          success: true,
+          messageId: 'test-msg-id',
+        }),
+      } as unknown as SmsClient;
+
       verificationService = new VerificationService(
         prisma as any,
         videoVerificationService,
         otpService,
         phoneValidationService,
+        mockSmsClient,
       );
     });
 
