@@ -125,7 +125,7 @@ log_info "=========================================="
 docker run -d \
     --name "$CONTAINER_NAME" \
     --network ${PROJECT_NAME}_reasonbridge-e2e \
-    --memory 4g \
+    --memory 6g \
     -w /app/frontend \
     -e CI=true \
     -e E2E_DOCKER=true \
@@ -158,15 +158,23 @@ docker exec "$CONTAINER_NAME" bash -c "
     # Remove broken local @playwright (pnpm symlinks break after tar copy)
     rm -rf node_modules/@playwright node_modules/playwright node_modules/playwright-core 2>/dev/null || true
 
-    echo 'DEBUG: Reinstalling @playwright/test...'
-    npm install @playwright/test --no-save --prefer-offline 2>/dev/null || npm install @playwright/test --no-save
+    # Move package.json aside - it contains workspace:* deps that npm doesn't understand
+    mv package.json package.json.bak
+
+    echo 'DEBUG: Reinstalling @playwright/test and @axe-core/playwright...'
+    npm install @playwright/test @axe-core/playwright --no-save --prefer-offline 2>/dev/null || npm install @playwright/test @axe-core/playwright --no-save
+
+    # Restore package.json
+    mv package.json.bak package.json
 
     echo 'DEBUG: Playwright version:' \$(npx playwright --version)
     echo 'DEBUG: Starting Playwright tests...'
     echo '=========================================='
 
-    # Run tests
-    npx playwright test --reporter=list,junit,json
+    # Run tests with limited workers to reduce memory pressure
+    # Local E2E runs many services (~3GB) alongside Playwright (~6GB)
+    # Use 2 workers as a balance between speed and memory
+    npx playwright test --reporter=list --workers=2
 " || {
     EXIT_CODE=$?
     log_error "Playwright tests exited with code $EXIT_CODE"
