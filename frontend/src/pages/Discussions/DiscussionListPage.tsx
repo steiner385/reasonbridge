@@ -139,7 +139,8 @@ export function DiscussionListPage() {
               </select>
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {data && `${data.meta.totalItems} discussion${data.meta.totalItems !== 1 ? 's' : ''}`}
+              {data?.meta?.totalItems !== undefined &&
+                `${data.meta.totalItems} discussion${data.meta.totalItems !== 1 ? 's' : ''}`}
             </div>
           </div>
         </Card>
@@ -199,7 +200,7 @@ export function DiscussionListPage() {
           </div>
 
           {/* Pagination */}
-          {data.meta.totalPages > 1 && (
+          {data.meta && data.meta.totalPages > 1 && (
             <Card padding="md">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600 dark:text-gray-400">

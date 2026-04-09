@@ -40,14 +40,18 @@ test.describe('Discussion Creation Flow', () => {
   // =============================================================================
 
   test('should display the "Start Discussion" button on discussion list page', async ({ page }) => {
-    const startButton = page.getByRole('button', { name: /start discussion/i });
+    // Use first() since there may be two buttons: header and empty state
+    const startButton = page.getByRole('button', { name: /start discussion/i }).first();
     await expect(startButton).toBeVisible();
   });
 
   test('should open discussion creation form when clicking "Start Discussion"', async ({
     page,
   }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Form should be visible with heading
     await expect(page.getByText(/start a new discussion/i)).toBeVisible();
@@ -56,7 +60,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should validate title length (minimum 10 characters)', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Enter short title
     const titleInput = page.locator('#title');
@@ -76,7 +83,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should validate title length (maximum 200 characters)', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     const titleInput = page.locator('#title');
     // Note: Input has maxLength=200, so we fill exactly 200 then try to exceed
@@ -94,7 +104,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should validate initial response length (minimum 50 characters)', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     const titleInput = page.locator('#title');
     await titleInput.fill('Valid Discussion Title for Testing');
@@ -108,7 +121,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should show character counter for title', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     const titleInput = page.locator('#title');
     await titleInput.fill('Test Title');
@@ -118,7 +134,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should show character counter for content', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     const contentInput = page.locator('#content');
     const testContent = 'This is test content for character counting in E2E test.';
@@ -129,7 +148,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should allow adding citations', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Find and fill citation URL input
     const citationUrlInput = page.getByPlaceholder('https://example.com/article');
@@ -148,7 +170,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should allow removing citations', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Add a citation
     const citationUrlInput = page.getByPlaceholder('https://example.com/article');
@@ -158,10 +183,9 @@ test.describe('Discussion Creation Flow', () => {
     // Verify it was added
     await expect(page.getByText('https://example.com/source1')).toBeVisible();
 
-    // Remove the citation
-    const removeButton = page
-      .locator('span:has-text("https://example.com/source1")')
-      .getByRole('button');
+    // Remove the citation - the remove button is inside the same container as the URL
+    // Use the aria-label to find it
+    const removeButton = page.getByRole('button', { name: 'Remove citation' });
     await removeButton.click();
 
     // Citation should be removed
@@ -169,7 +193,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should validate citation URL format', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Try to add invalid URL
     const citationUrlInput = page.getByPlaceholder('https://example.com/article');
@@ -181,7 +208,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should enforce maximum 10 citations', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Add 10 citations
     for (let i = 1; i <= 10; i++) {
@@ -198,7 +228,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should allow canceling discussion creation', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Fill in some data
     const titleInput = page.locator('#title');
@@ -212,7 +245,10 @@ test.describe('Discussion Creation Flow', () => {
   });
 
   test('should successfully create a discussion and redirect', async ({ page }) => {
-    await page.getByRole('button', { name: /start discussion/i }).click();
+    await page
+      .getByRole('button', { name: /start discussion/i })
+      .first()
+      .click();
 
     // Fill valid form with unique identifier
     const uniqueId = Date.now();

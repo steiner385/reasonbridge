@@ -10,6 +10,9 @@ PLAYWRIGHT_VERSION="v1.59.1-noble"
 CONTAINER_NAME="playwright-e2e-local-$$"
 PLAYWRIGHT_BASE_URL="http://frontend:80"
 
+# Optional: test pattern from command line (e.g., ./run-e2e-local.sh discussion-creation)
+TEST_PATTERN="${1:-}"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -125,7 +128,7 @@ log_info "=========================================="
 docker run -d \
     --name "$CONTAINER_NAME" \
     --network ${PROJECT_NAME}_reasonbridge-e2e \
-    --memory 6g \
+    --memory 8g \
     -w /app/frontend \
     -e CI=true \
     -e E2E_DOCKER=true \
@@ -174,7 +177,13 @@ docker exec "$CONTAINER_NAME" bash -c "
     # Run tests with limited workers to reduce memory pressure
     # Local E2E runs many services (~3GB) alongside Playwright (~6GB)
     # Use 2 workers as a balance between speed and memory
-    npx playwright test --reporter=list --workers=2
+    TEST_PATTERN='$TEST_PATTERN'
+    if [ -n \"\$TEST_PATTERN\" ]; then
+        echo \"DEBUG: Running tests matching pattern: \$TEST_PATTERN\"
+        npx playwright test --grep \"\$TEST_PATTERN\" --reporter=list --workers=2
+    else
+        npx playwright test --reporter=list --workers=2
+    fi
 " || {
     EXIT_CODE=$?
     log_error "Playwright tests exited with code $EXIT_CODE"
