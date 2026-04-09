@@ -204,7 +204,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
 
         // For small/empty tables, PostgreSQL may choose sequential scan
         // Verify the query executed successfully (no errors)
-        expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
+        expect(result.executionTime).toBeGreaterThanOrEqual(0);
       });
 
       it('should use index for following count query', async () => {
@@ -218,7 +218,7 @@ describe.skipIf(!process.env['DATABASE_URL'] || !process.env['INTEGRATION_TEST_D
 
         // For small/empty tables, PostgreSQL may choose sequential scan
         // Verify the query executed successfully (no errors)
-        expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
+        expect(result.executionTime).toBeGreaterThanOrEqual(0);
       });
     });
 
