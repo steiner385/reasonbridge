@@ -9,6 +9,7 @@ import { VerificationTokenType } from '@prisma/client';
 import { timingSafeEqual } from 'crypto';
 import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
 import { VERIFICATION_CODE_GENERATOR } from './verification-code-generator.interface.js';
+import { VERIFICATION } from '../constants/index.js';
 
 /**
  * Verification Token Service
@@ -25,9 +26,10 @@ import { VERIFICATION_CODE_GENERATOR } from './verification-code-generator.inter
 @Injectable()
 export class VerificationService {
   private readonly logger = new Logger(VerificationService.name);
-  private readonly TOKEN_EXPIRATION_HOURS = 24;
-  private readonly PASSWORD_RESET_EXPIRATION_MINUTES = 15;
-  private readonly MAX_ATTEMPTS = 5;
+  private readonly TOKEN_EXPIRATION_HOURS = VERIFICATION.TOKEN_EXPIRATION_HOURS;
+  private readonly PASSWORD_RESET_EXPIRATION_MINUTES =
+    VERIFICATION.PASSWORD_RESET_EXPIRATION_MINUTES;
+  private readonly MAX_ATTEMPTS = VERIFICATION.MAX_ATTEMPTS;
 
   constructor(
     private readonly prisma: PrismaService,

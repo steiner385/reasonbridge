@@ -10,6 +10,7 @@ import { ExpertiseCalculatorService } from './expertise-calculator.service.js';
 import { TopicExpertiseDto } from './dto/topic-expertise.dto.js';
 import { DEFAULT_EXPERTISE_LEADERBOARD_OPTIONS } from './dto/expertise-leaderboard-options.dto.js';
 import type { ExpertiseLeaderboardOptions } from './dto/expertise-leaderboard-options.dto.js';
+import { QUERY_LIMITS } from '../constants/index.js';
 
 /**
  * ExpertiseService - Orchestration layer for domain expertise management
@@ -62,7 +63,7 @@ export class ExpertiseService {
       where: { userId },
       include: { tag: true },
       orderBy: { expertiseScore: 'desc' },
-      take: 200, // Limit to prevent unbounded results
+      take: QUERY_LIMITS.EXPERTISE_USERS,
     });
 
     return expertises.map((expertise) => this.toTopicExpertiseDto(expertise));
@@ -240,7 +241,7 @@ export class ExpertiseService {
       },
       orderBy: { createdAt: 'asc' },
       select: { id: true, createdAt: true },
-      take: 10000, // Limit to prevent unbounded results while allowing accurate metrics
+      take: QUERY_LIMITS.EXPERTISE_METRICS,
     });
 
     if (responses.length === 0) {
@@ -349,7 +350,7 @@ export class ExpertiseService {
         status: 'VERIFIED',
       },
       select: { boostValue: true },
-      take: 100, // Limit to prevent unbounded results
+      take: QUERY_LIMITS.EXPERTISE_TOPICS,
     });
 
     return credentials.reduce((total, cred) => {

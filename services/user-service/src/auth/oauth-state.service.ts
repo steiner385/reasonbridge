@@ -7,6 +7,7 @@ import { Injectable, Inject, Optional, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { randomBytes } from 'crypto';
+import { OAUTH } from '../constants/index.js';
 
 /**
  * Stored OAuth state data
@@ -33,7 +34,7 @@ interface OAuthStateData {
 @Injectable()
 export class OAuthStateService {
   private readonly logger = new Logger(OAuthStateService.name);
-  private readonly STATE_TTL_SECONDS = 300; // 5 minutes
+  private readonly STATE_TTL_SECONDS = OAUTH.STATE_TTL_SECONDS;
   private readonly KEY_PREFIX = 'oauth:state:';
 
   constructor(@Optional() @Inject(CACHE_MANAGER) private readonly cacheManager: Cache | null) {

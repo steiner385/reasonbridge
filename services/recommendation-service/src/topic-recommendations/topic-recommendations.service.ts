@@ -5,6 +5,7 @@
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RECOMMENDATION_DEFAULTS } from '../constants/index.js';
 import type {
   GetTopicRecommendationsDto,
   GetSimilarTopicsDto,
@@ -36,7 +37,7 @@ export class TopicRecommendationsService {
   async getRecommendations(
     dto: GetTopicRecommendationsDto,
   ): Promise<TopicRecommendationsResponseDto> {
-    const { query, tags, limit = 10 } = dto;
+    const { query, tags, limit = RECOMMENDATION_DEFAULTS.LIMIT } = dto;
 
     // Build the where clause
     const where: Record<string, unknown> = {
@@ -128,7 +129,7 @@ export class TopicRecommendationsService {
    * Useful for detecting potential duplicates or related discussions.
    */
   async getSimilarTopics(dto: GetSimilarTopicsDto): Promise<SimilarTopicsResponseDto> {
-    const { topicId, limit = 5 } = dto;
+    const { topicId, limit = RECOMMENDATION_DEFAULTS.SIMILAR_LIMIT } = dto;
 
     // Get the source topic
     const sourceTopic = await this.prisma.discussionTopic.findUnique({
@@ -207,7 +208,11 @@ export class TopicRecommendationsService {
    * Useful for showing creators what's popular.
    */
   async getTrendingTopics(dto: GetTrendingTopicsDto): Promise<TrendingTopicsResponseDto> {
-    const { hours = 24, limit = 10, tags } = dto;
+    const {
+      hours = RECOMMENDATION_DEFAULTS.TRENDING_HOURS,
+      limit = RECOMMENDATION_DEFAULTS.LIMIT,
+      tags,
+    } = dto;
 
     const timeWindowStart = new Date(Date.now() - hours * 60 * 60 * 1000);
 
