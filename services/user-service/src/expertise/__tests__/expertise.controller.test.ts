@@ -92,7 +92,7 @@ describe('ExpertiseController', () => {
       ];
       mockExpertiseService.getAllUserExpertise.mockResolvedValue(mockExpertises);
 
-      const result = await controller.findUserExpertise('user-123');
+      const result = await controller.getUserExpertise('user-123');
 
       expect(result).toHaveLength(3);
       expect(result[0].tagName).toBe('Science');
@@ -104,7 +104,7 @@ describe('ExpertiseController', () => {
     it('should return empty array when user has no expertise', async () => {
       mockExpertiseService.getAllUserExpertise.mockResolvedValue([]);
 
-      const result = await controller.findUserExpertise('user-new');
+      const result = await controller.getUserExpertise('user-new');
 
       expect(result).toEqual([]);
       expect(mockExpertiseService.getAllUserExpertise).toHaveBeenCalledWith('user-new');
@@ -119,7 +119,7 @@ describe('ExpertiseController', () => {
       ];
       mockExpertiseService.getAllUserExpertise.mockResolvedValue(mockExpertises);
 
-      const result = await controller.findUserExpertise('user-123');
+      const result = await controller.getUserExpertise('user-123');
 
       expect(result[0].expertiseScore).toBe(0.85);
       expect(result[0].expertiseLevel).toBe(ExpertiseLevel.EXPERT);
@@ -130,7 +130,7 @@ describe('ExpertiseController', () => {
         new Error('Database connection failed'),
       );
 
-      await expect(controller.findUserExpertise('user-123')).rejects.toThrow(
+      await expect(controller.getUserExpertise('user-123')).rejects.toThrow(
         'Database connection failed',
       );
     });
@@ -146,7 +146,7 @@ describe('ExpertiseController', () => {
       });
       mockExpertiseService.findUserExpertise.mockResolvedValue(mockExpertise);
 
-      const result = await controller.findUserExpertiseByTag('user-456', 'tag-789');
+      const result = await controller.getUserExpertiseByTag('user-456', 'tag-789');
 
       expect(result).toBeDefined();
       expect(result.userId).toBe('user-456');
@@ -159,9 +159,9 @@ describe('ExpertiseController', () => {
     it('should return 404 when expertise not found', async () => {
       mockExpertiseService.findUserExpertise.mockResolvedValue(null);
 
-      await expect(
-        controller.findUserExpertiseByTag('user-123', 'nonexistent-tag'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.getUserExpertiseByTag('user-123', 'nonexistent-tag')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return full expertise details including response count and quality', async () => {
@@ -172,7 +172,7 @@ describe('ExpertiseController', () => {
       });
       mockExpertiseService.findUserExpertise.mockResolvedValue(mockExpertise);
 
-      const result = await controller.findUserExpertiseByTag('user-123', 'tag-456');
+      const result = await controller.getUserExpertiseByTag('user-123', 'tag-456');
 
       expect(result.responseCount).toBe(150);
       expect(result.avgQualityScore).toBe(0.85);
@@ -182,7 +182,7 @@ describe('ExpertiseController', () => {
     it('should propagate service errors', async () => {
       mockExpertiseService.findUserExpertise.mockRejectedValue(new Error('Service unavailable'));
 
-      await expect(controller.findUserExpertiseByTag('user-123', 'tag-456')).rejects.toThrow(
+      await expect(controller.getUserExpertiseByTag('user-123', 'tag-456')).rejects.toThrow(
         'Service unavailable',
       );
     });
@@ -312,7 +312,7 @@ describe('ExpertiseController', () => {
       mockExpertiseService.findUserExpertise.mockResolvedValue(null);
 
       try {
-        await controller.findUserExpertiseByTag('user-123', 'missing-tag');
+        await controller.getUserExpertiseByTag('user-123', 'missing-tag');
         expect.fail('Should have thrown NotFoundException');
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
@@ -326,9 +326,9 @@ describe('ExpertiseController', () => {
 
       // Simulate concurrent requests
       const promises = [
-        controller.findUserExpertiseByTag('user-1', 'tag-1'),
-        controller.findUserExpertiseByTag('user-2', 'tag-2'),
-        controller.findUserExpertiseByTag('user-3', 'tag-3'),
+        controller.getUserExpertiseByTag('user-1', 'tag-1'),
+        controller.getUserExpertiseByTag('user-2', 'tag-2'),
+        controller.getUserExpertiseByTag('user-3', 'tag-3'),
       ];
 
       const results = await Promise.all(promises);

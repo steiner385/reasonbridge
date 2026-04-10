@@ -29,7 +29,7 @@ describe('AlignmentsController', () => {
       };
       mockAlignmentsService.findUserAlignment.mockResolvedValue(alignment);
 
-      const result = await controller.findUserAlignment('proposition-1', 'user-1');
+      const result = await controller.getUserAlignment('proposition-1', 'user-1');
 
       expect(result).toEqual(alignment);
       expect(mockAlignmentsService.findUserAlignment).toHaveBeenCalledWith(
@@ -41,7 +41,7 @@ describe('AlignmentsController', () => {
     it('should return null when user has no alignment', async () => {
       mockAlignmentsService.findUserAlignment.mockResolvedValue(null);
 
-      const result = await controller.findUserAlignment('proposition-1', 'user-1');
+      const result = await controller.getUserAlignment('proposition-1', 'user-1');
 
       expect(result).toBeNull();
     });
@@ -49,7 +49,7 @@ describe('AlignmentsController', () => {
     it('should pass correct propositionId and userId', async () => {
       mockAlignmentsService.findUserAlignment.mockResolvedValue(null);
 
-      await controller.findUserAlignment('prop-123', 'user-456');
+      await controller.getUserAlignment('prop-123', 'user-456');
 
       expect(mockAlignmentsService.findUserAlignment).toHaveBeenCalledWith('prop-123', 'user-456');
     });
