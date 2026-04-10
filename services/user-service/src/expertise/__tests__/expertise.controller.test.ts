@@ -68,7 +68,7 @@ const createMockTopicExpertiseDto = (
  */
 const createMockExpertiseService = () => ({
   getAllUserExpertise: vi.fn(),
-  getUserExpertise: vi.fn(),
+  findUserExpertise: vi.fn(),
   getExpertiseLeaderboard: vi.fn(),
   recalculateExpertise: vi.fn(),
 });
@@ -144,7 +144,7 @@ describe('ExpertiseController', () => {
         tagName: 'Machine Learning',
         expertiseScore: 0.72,
       });
-      mockExpertiseService.getUserExpertise.mockResolvedValue(mockExpertise);
+      mockExpertiseService.findUserExpertise.mockResolvedValue(mockExpertise);
 
       const result = await controller.getUserExpertiseByTag('user-456', 'tag-789');
 
@@ -153,11 +153,11 @@ describe('ExpertiseController', () => {
       expect(result.tagId).toBe('tag-789');
       expect(result.tagName).toBe('Machine Learning');
       expect(result.expertiseScore).toBe(0.72);
-      expect(mockExpertiseService.getUserExpertise).toHaveBeenCalledWith('user-456', 'tag-789');
+      expect(mockExpertiseService.findUserExpertise).toHaveBeenCalledWith('user-456', 'tag-789');
     });
 
     it('should return 404 when expertise not found', async () => {
-      mockExpertiseService.getUserExpertise.mockResolvedValue(null);
+      mockExpertiseService.findUserExpertise.mockResolvedValue(null);
 
       await expect(controller.getUserExpertiseByTag('user-123', 'nonexistent-tag')).rejects.toThrow(
         NotFoundException,
@@ -170,7 +170,7 @@ describe('ExpertiseController', () => {
         avgQualityScore: 0.85,
         credentialBoost: 0.2,
       });
-      mockExpertiseService.getUserExpertise.mockResolvedValue(mockExpertise);
+      mockExpertiseService.findUserExpertise.mockResolvedValue(mockExpertise);
 
       const result = await controller.getUserExpertiseByTag('user-123', 'tag-456');
 
@@ -180,7 +180,7 @@ describe('ExpertiseController', () => {
     });
 
     it('should propagate service errors', async () => {
-      mockExpertiseService.getUserExpertise.mockRejectedValue(new Error('Service unavailable'));
+      mockExpertiseService.findUserExpertise.mockRejectedValue(new Error('Service unavailable'));
 
       await expect(controller.getUserExpertiseByTag('user-123', 'tag-456')).rejects.toThrow(
         'Service unavailable',
@@ -309,7 +309,7 @@ describe('ExpertiseController', () => {
 
   describe('Error handling', () => {
     it('should propagate NotFoundException with correct message for missing expertise', async () => {
-      mockExpertiseService.getUserExpertise.mockResolvedValue(null);
+      mockExpertiseService.findUserExpertise.mockResolvedValue(null);
 
       try {
         await controller.getUserExpertiseByTag('user-123', 'missing-tag');
@@ -322,7 +322,7 @@ describe('ExpertiseController', () => {
 
     it('should handle concurrent requests gracefully', async () => {
       const mockExpertise = createMockTopicExpertiseDto();
-      mockExpertiseService.getUserExpertise.mockResolvedValue(mockExpertise);
+      mockExpertiseService.findUserExpertise.mockResolvedValue(mockExpertise);
 
       // Simulate concurrent requests
       const promises = [
@@ -334,7 +334,7 @@ describe('ExpertiseController', () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(3);
-      expect(mockExpertiseService.getUserExpertise).toHaveBeenCalledTimes(3);
+      expect(mockExpertiseService.findUserExpertise).toHaveBeenCalledTimes(3);
     });
   });
 });

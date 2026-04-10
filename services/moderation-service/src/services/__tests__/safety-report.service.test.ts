@@ -160,11 +160,11 @@ describe('SafetyReportService', () => {
     });
   });
 
-  describe('getReport', () => {
+  describe('findReport', () => {
     it('should return a report by ID', async () => {
       prismaService.safetyReport.findUnique.mockResolvedValue(mockReport);
 
-      const result = await service.getReport('report-123');
+      const result = await service.findReport('report-123');
 
       expect(prismaService.safetyReport.findUnique).toHaveBeenCalledWith({
         where: { id: 'report-123' },
@@ -175,7 +175,7 @@ describe('SafetyReportService', () => {
     it('should return null if report not found', async () => {
       prismaService.safetyReport.findUnique.mockResolvedValue(null);
 
-      const result = await service.getReport('nonexistent');
+      const result = await service.findReport('nonexistent');
 
       expect(result).toBeNull();
     });

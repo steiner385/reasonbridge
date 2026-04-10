@@ -8,8 +8,8 @@ import { TopicDuplicateDetectorService } from './topic-duplicate-detector.servic
 import type { DuplicateCandidate } from './topic-duplicate-detector.service.js';
 
 const createMockEmbeddingService = () => ({
-  getEmbedding: vi.fn(),
-  getCachedEmbedding: vi.fn(),
+  findEmbedding: vi.fn(),
+  findCachedEmbedding: vi.fn(),
 });
 
 describe('TopicDuplicateDetectorService', () => {
@@ -26,7 +26,7 @@ describe('TopicDuplicateDetectorService', () => {
     it('should return similarity score when embeddings are available', async () => {
       // Mock embeddings - identical vectors should have similarity ~1.0
       const embedding = [0.1, 0.2, 0.3, 0.4, 0.5];
-      mockEmbeddingService.getEmbedding.mockResolvedValue(embedding);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(embedding);
 
       const result = await service.computeSemanticSimilarity(
         'Climate change',
@@ -36,11 +36,11 @@ describe('TopicDuplicateDetectorService', () => {
       );
 
       expect(result).toBe(1.0);
-      expect(mockEmbeddingService.getEmbedding).toHaveBeenCalledTimes(2);
+      expect(mockEmbeddingService.findEmbedding).toHaveBeenCalledTimes(2);
     });
 
     it('should return null when embeddings are unavailable', async () => {
-      mockEmbeddingService.getEmbedding.mockResolvedValue(null);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(null);
 
       const result = await service.computeSemanticSimilarity(
         'Climate change',
@@ -57,7 +57,7 @@ describe('TopicDuplicateDetectorService', () => {
       const embedding1 = [1.0, 0.0, 0.0];
       const embedding2 = [0.707, 0.707, 0.0]; // 45 degrees apart, cos(45) ≈ 0.707
 
-      mockEmbeddingService.getEmbedding
+      mockEmbeddingService.findEmbedding
         .mockResolvedValueOnce(embedding1)
         .mockResolvedValueOnce(embedding2);
 
@@ -75,7 +75,7 @@ describe('TopicDuplicateDetectorService', () => {
       const embedding1 = [1.0, 0.0, 0.0];
       const embedding2 = [0.0, 1.0, 0.0]; // Orthogonal
 
-      mockEmbeddingService.getEmbedding
+      mockEmbeddingService.findEmbedding
         .mockResolvedValueOnce(embedding1)
         .mockResolvedValueOnce(embedding2);
 
@@ -111,7 +111,7 @@ describe('TopicDuplicateDetectorService', () => {
 
       // Mock high semantic similarity
       const embedding = [0.1, 0.2, 0.3, 0.4, 0.5];
-      mockEmbeddingService.getEmbedding.mockResolvedValue(embedding);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(embedding);
 
       const result = await service.analyzeCandidates(
         'Climate Change Discussion',
@@ -135,7 +135,7 @@ describe('TopicDuplicateDetectorService', () => {
         },
       ];
 
-      mockEmbeddingService.getEmbedding.mockResolvedValue(null);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(null);
 
       const result = await service.analyzeCandidates(
         'Healthcare Reform',
@@ -163,7 +163,7 @@ describe('TopicDuplicateDetectorService', () => {
       const embedding1 = [1.0, 0.0];
       const embedding2 = [0.6, 0.8]; // cos similarity ≈ 0.6
 
-      mockEmbeddingService.getEmbedding
+      mockEmbeddingService.findEmbedding
         .mockResolvedValueOnce(embedding1)
         .mockResolvedValueOnce(embedding2);
 
@@ -184,7 +184,7 @@ describe('TopicDuplicateDetectorService', () => {
       ];
 
       const embedding = [0.5, 0.5, 0.5];
-      mockEmbeddingService.getEmbedding.mockResolvedValue(embedding);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(embedding);
 
       const result = await service.analyzeCandidates(
         'Identical Topic',
@@ -210,7 +210,7 @@ describe('TopicDuplicateDetectorService', () => {
       const embedding1 = [1.0, 0.0, 0.0];
       const embedding2 = [0.0, 0.0, 1.0];
 
-      mockEmbeddingService.getEmbedding
+      mockEmbeddingService.findEmbedding
         .mockResolvedValueOnce(embedding1)
         .mockResolvedValueOnce(embedding2);
 
@@ -227,7 +227,7 @@ describe('TopicDuplicateDetectorService', () => {
       ];
 
       const embedding = [0.5, 0.5];
-      mockEmbeddingService.getEmbedding.mockResolvedValue(embedding);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(embedding);
 
       const result = await service.analyzeCandidates('Test Topic', 'Test description', candidates);
 
@@ -248,7 +248,7 @@ describe('TopicDuplicateDetectorService', () => {
       ];
 
       const embedding = [0.5, 0.5];
-      mockEmbeddingService.getEmbedding.mockResolvedValue(embedding);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(embedding);
 
       const result = await service.analyzeCandidates('New Topic', 'New description', candidates);
 
@@ -258,7 +258,7 @@ describe('TopicDuplicateDetectorService', () => {
 
   describe('isSemanticAnalysisAvailable', () => {
     it('should return true when embedding service is available', async () => {
-      mockEmbeddingService.getEmbedding.mockResolvedValue([0.1, 0.2, 0.3]);
+      mockEmbeddingService.findEmbedding.mockResolvedValue([0.1, 0.2, 0.3]);
 
       const result = await service.isSemanticAnalysisAvailable();
 
@@ -266,7 +266,7 @@ describe('TopicDuplicateDetectorService', () => {
     });
 
     it('should return false when embedding service is unavailable', async () => {
-      mockEmbeddingService.getEmbedding.mockResolvedValue(null);
+      mockEmbeddingService.findEmbedding.mockResolvedValue(null);
 
       const result = await service.isSemanticAnalysisAvailable();
 

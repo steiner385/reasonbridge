@@ -8,14 +8,14 @@ import { FeedbackType } from '@prisma/client';
 describe('SemanticCacheService', () => {
   let service: SemanticCacheService;
   let mockEmbeddingService: {
-    getEmbedding: ReturnType<typeof vi.fn>;
+    findEmbedding: ReturnType<typeof vi.fn>;
   };
   let mockQdrantService: {
     searchSimilar: ReturnType<typeof vi.fn>;
     store: ReturnType<typeof vi.fn>;
   };
   let mockRedisCacheService: {
-    getFeedback: ReturnType<typeof vi.fn>;
+    findFeedback: ReturnType<typeof vi.fn>;
     setFeedback: ReturnType<typeof vi.fn>;
   };
 
@@ -29,7 +29,7 @@ describe('SemanticCacheService', () => {
 
   beforeEach(() => {
     mockEmbeddingService = {
-      getEmbedding: vi.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+      findEmbedding: vi.fn().mockResolvedValue([0.1, 0.2, 0.3]),
     };
 
     mockQdrantService = {
@@ -38,7 +38,7 @@ describe('SemanticCacheService', () => {
     };
 
     mockRedisCacheService = {
-      getFeedback: vi.fn().mockResolvedValue(null),
+      findFeedback: vi.fn().mockResolvedValue(null),
       setFeedback: vi.fn().mockResolvedValue(undefined),
     };
 
@@ -52,18 +52,18 @@ describe('SemanticCacheService', () => {
 
   describe('getOrAnalyze', () => {
     it('should return Redis cached result on exact match', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(mockAnalysisResult);
+      mockRedisCacheService.findFeedback.mockResolvedValue(mockAnalysisResult);
 
       const analyzeFunc = vi.fn();
       const result = await service.getOrAnalyze('test content', analyzeFunc);
 
       expect(result).toEqual(mockAnalysisResult);
       expect(analyzeFunc).not.toHaveBeenCalled();
-      expect(mockEmbeddingService.getEmbedding).not.toHaveBeenCalled();
+      expect(mockEmbeddingService.findEmbedding).not.toHaveBeenCalled();
     });
 
     it('should return Qdrant cached result on similarity match', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
       mockQdrantService.searchSimilar.mockResolvedValue({
         result: mockAnalysisResult,
         similarity: 0.97,
@@ -77,7 +77,7 @@ describe('SemanticCacheService', () => {
     });
 
     it('should call analyzer and cache result on cache miss', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
       mockQdrantService.searchSimilar.mockResolvedValue(null);
 
       const analyzeFunc = vi.fn().mockResolvedValue(mockAnalysisResult);
@@ -92,8 +92,8 @@ describe('SemanticCacheService', () => {
     });
 
     it('should handle embedding service failure gracefully', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
-      mockEmbeddingService.getEmbedding.mockRejectedValue(new Error('OpenAI error'));
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
+      mockEmbeddingService.findEmbedding.mockRejectedValue(new Error('OpenAI error'));
 
       const analyzeFunc = vi.fn().mockResolvedValue(mockAnalysisResult);
       const result = await service.getOrAnalyze('test content', analyzeFunc);
@@ -103,7 +103,7 @@ describe('SemanticCacheService', () => {
     });
 
     it('should handle Qdrant failure gracefully', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
       mockQdrantService.searchSimilar.mockRejectedValue(new Error('Qdrant error'));
 
       const analyzeFunc = vi.fn().mockResolvedValue(mockAnalysisResult);
@@ -114,7 +114,7 @@ describe('SemanticCacheService', () => {
     });
 
     it('should also cache Qdrant hit in Redis for faster future lookups', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
       mockQdrantService.searchSimilar.mockResolvedValue({
         result: mockAnalysisResult,
         similarity: 0.96,
@@ -130,7 +130,7 @@ describe('SemanticCacheService', () => {
 
   describe('lookup', () => {
     it('should return redis hit when content is in Redis', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(mockAnalysisResult);
+      mockRedisCacheService.findFeedback.mockResolvedValue(mockAnalysisResult);
 
       const result = await service.lookup('test content');
 
@@ -142,7 +142,7 @@ describe('SemanticCacheService', () => {
     });
 
     it('should return qdrant hit when content is similar in Qdrant', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
       mockQdrantService.searchSimilar.mockResolvedValue({
         result: mockAnalysisResult,
         similarity: 0.98,
@@ -159,7 +159,7 @@ describe('SemanticCacheService', () => {
     });
 
     it('should return cache miss when content not found', async () => {
-      mockRedisCacheService.getFeedback.mockResolvedValue(null);
+      mockRedisCacheService.findFeedback.mockResolvedValue(null);
       mockQdrantService.searchSimilar.mockResolvedValue(null);
 
       const result = await service.lookup('test content');

@@ -42,7 +42,7 @@ describe('Confidence Threshold Enforcement', () => {
       isReady: vi.fn().mockResolvedValue(false),
     };
     mockRedisCache = {
-      getFeedback: vi.fn().mockResolvedValue(null),
+      findFeedback: vi.fn().mockResolvedValue(null),
       setFeedback: vi.fn().mockResolvedValue(undefined),
     };
 

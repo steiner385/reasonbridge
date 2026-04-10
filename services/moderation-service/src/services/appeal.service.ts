@@ -337,9 +337,12 @@ export class AppealService {
   }
 
   /**
-   * Get appeal by ID
+   * Find an appeal by ID.
+   *
+   * @param appealId - The appeal's unique identifier
+   * @returns The appeal if found, null otherwise
    */
-  async getAppealById(appealId: string): Promise<PendingAppealResponse | null> {
+  async findAppealById(appealId: string): Promise<PendingAppealResponse | null> {
     const appeal = await this.prisma.appeal.findUnique({
       where: { id: appealId },
       include: {

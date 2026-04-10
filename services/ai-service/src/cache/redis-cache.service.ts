@@ -33,9 +33,9 @@ export class RedisCacheService {
    * Get cached feedback by content hash.
    *
    * @param contentHash - SHA-256 hash of the normalized content
-   * @returns Cached AnalysisResult or null if not found
+   * @returns Cached AnalysisResult if found, null otherwise
    */
-  async getFeedback(contentHash: string): Promise<AnalysisResult | null> {
+  async findFeedback(contentHash: string): Promise<AnalysisResult | null> {
     const cacheKey = `${FEEDBACK_CACHE_PREFIX}${contentHash}`;
     try {
       const cached = await this.cache.get<AnalysisResult>(cacheKey);

@@ -17,13 +17,13 @@ describe('FactCheckController', () => {
   let controller: FactCheckController;
   let mockFactCheckService: {
     checkClaims: ReturnType<typeof vi.fn>;
-    getResultById: ReturnType<typeof vi.fn>;
+    findResultById: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     mockFactCheckService = {
       checkClaims: vi.fn(),
-      getResultById: vi.fn(),
+      findResultById: vi.fn(),
     };
     controller = new FactCheckController(mockFactCheckService as unknown as FactCheckService);
   });
@@ -223,12 +223,12 @@ describe('FactCheckController', () => {
     };
 
     it('should return fact-check result successfully', async () => {
-      mockFactCheckService.getResultById.mockResolvedValue(mockResult);
+      mockFactCheckService.findResultById.mockResolvedValue(mockResult);
 
       const result = await controller.getResult(validUuid);
 
       expect(result).toEqual(mockResult);
-      expect(mockFactCheckService.getResultById).toHaveBeenCalledWith(validUuid);
+      expect(mockFactCheckService.findResultById).toHaveBeenCalledWith(validUuid);
     });
 
     it('should throw BadRequestException for invalid UUID format', async () => {
@@ -243,14 +243,14 @@ describe('FactCheckController', () => {
     it('should accept valid UUID v1 format', async () => {
       // UUID v1 format is also accepted
       const uuidV1 = '123e4567-e89b-12d3-8456-426614174000';
-      mockFactCheckService.getResultById.mockResolvedValue(mockResult);
+      mockFactCheckService.findResultById.mockResolvedValue(mockResult);
 
       const result = await controller.getResult(uuidV1);
       expect(result).toEqual(mockResult);
     });
 
     it('should throw NotFoundException when result not found', async () => {
-      mockFactCheckService.getResultById.mockResolvedValue(null);
+      mockFactCheckService.findResultById.mockResolvedValue(null);
 
       await expect(controller.getResult(validUuid)).rejects.toThrow(NotFoundException);
       await expect(controller.getResult(validUuid)).rejects.toThrow(
@@ -259,7 +259,7 @@ describe('FactCheckController', () => {
     });
 
     it('should accept various valid UUID v4 formats', async () => {
-      mockFactCheckService.getResultById.mockResolvedValue(mockResult);
+      mockFactCheckService.findResultById.mockResolvedValue(mockResult);
 
       // Lowercase
       await expect(

@@ -83,10 +83,10 @@ export class ReadStateService {
    * Get the current read state for a user in a topic
    * @param userId - The ID of the user
    * @param topicId - The ID of the topic
-   * @returns The read state or null if not found
-   * @throws NotFoundException if the topic doesn't exist
+   * @returns The read state if found, null if user has not read this topic
+   * @throws {NotFoundException} When the topic doesn't exist
    */
-  async getReadState(userId: string, topicId: string): Promise<ReadStateDto | null> {
+  async findReadState(userId: string, topicId: string): Promise<ReadStateDto | null> {
     // Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },

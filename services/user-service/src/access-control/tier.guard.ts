@@ -103,7 +103,7 @@ export class TierGuard implements CanActivate {
 
     // If decorator expertise requirement exists, check it
     if (requiredExpertise) {
-      const expertise = await this.accessControlService.getUserExpertise(
+      const expertise = await this.accessControlService.findUserExpertise(
         userId,
         requiredExpertise.tagId,
       );

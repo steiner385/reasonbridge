@@ -38,12 +38,12 @@ describe('EmbeddingService', () => {
     service = module.get<EmbeddingService>(EmbeddingService);
   });
 
-  describe('getEmbedding', () => {
+  describe('findEmbedding', () => {
     it('should return cached embedding if available', async () => {
       const cachedEmbedding = [0.1, 0.2, 0.3];
       mockCacheManager.get.mockResolvedValue(cachedEmbedding);
 
-      const result = await service.getEmbedding('test content');
+      const result = await service.findEmbedding('test content');
 
       expect(result).toEqual(cachedEmbedding);
       expect(mockOpenAI.embeddings.create).not.toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe('EmbeddingService', () => {
         data: [{ embedding }],
       });
 
-      const result = await service.getEmbedding('test content');
+      const result = await service.findEmbedding('test content');
 
       expect(result).toEqual(embedding);
       expect(mockOpenAI.embeddings.create).toHaveBeenCalledWith({
@@ -72,7 +72,7 @@ describe('EmbeddingService', () => {
         data: [{ embedding: [0.1] }],
       });
 
-      await service.getEmbedding('test content');
+      await service.findEmbedding('test content');
 
       expect(mockCacheManager.get).toHaveBeenCalledWith(
         expect.stringMatching(/^feedback:embedding:[a-f0-9]{64}$/),
@@ -85,7 +85,7 @@ describe('EmbeddingService', () => {
         data: [{ embedding: [0.1, 0.2] }],
       });
 
-      await service.getEmbedding('test content');
+      await service.findEmbedding('test content');
 
       // 7 days in milliseconds = 604800 * 1000
       expect(mockCacheManager.set).toHaveBeenCalledWith(
@@ -101,18 +101,18 @@ describe('EmbeddingService', () => {
         data: [],
       });
 
-      await expect(service.getEmbedding('test content')).rejects.toThrow(
+      await expect(service.findEmbedding('test content')).rejects.toThrow(
         'No embedding returned from OpenAI',
       );
     });
   });
 
-  describe('getCachedEmbedding', () => {
+  describe('findCachedEmbedding', () => {
     it('should return cached embedding without generating new one', async () => {
       const cachedEmbedding = [0.1, 0.2, 0.3];
       mockCacheManager.get.mockResolvedValue(cachedEmbedding);
 
-      const result = await service.getCachedEmbedding('test content');
+      const result = await service.findCachedEmbedding('test content');
 
       expect(result).toEqual(cachedEmbedding);
       expect(mockOpenAI.embeddings.create).not.toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('EmbeddingService', () => {
     it('should return null when no cached embedding exists', async () => {
       mockCacheManager.get.mockResolvedValue(null);
 
-      const result = await service.getCachedEmbedding('test content');
+      const result = await service.findCachedEmbedding('test content');
 
       expect(result).toBeNull();
       expect(mockOpenAI.embeddings.create).not.toHaveBeenCalled();

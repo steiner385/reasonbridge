@@ -296,7 +296,7 @@ describe('FactCheckService', () => {
     });
   });
 
-  describe('getResultById', () => {
+  describe('findResultById', () => {
     const mockResult: FactCheckResultDto = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       claimText: 'Test claim',
@@ -322,7 +322,7 @@ describe('FactCheckService', () => {
       // Service without cache
       const serviceWithoutCache = new FactCheckService([mockClient as unknown as IFactCheckClient]);
 
-      const result = await serviceWithoutCache.getResultById(
+      const result = await serviceWithoutCache.findResultById(
         '123e4567-e89b-12d3-a456-426614174000',
       );
 
@@ -331,7 +331,7 @@ describe('FactCheckService', () => {
 
     it('should return cached result when found', async () => {
       const mockCacheService = {
-        getById: vi.fn().mockResolvedValue(mockResult),
+        findById: vi.fn().mockResolvedValue(mockResult),
         setById: vi.fn(),
         get: vi.fn(),
         set: vi.fn(),
@@ -343,15 +343,17 @@ describe('FactCheckService', () => {
         mockCacheService as unknown as FactCheckCacheService,
       );
 
-      const result = await serviceWithCache.getResultById('123e4567-e89b-12d3-a456-426614174000');
+      const result = await serviceWithCache.findResultById('123e4567-e89b-12d3-a456-426614174000');
 
       expect(result).toEqual(mockResult);
-      expect(mockCacheService.getById).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000');
+      expect(mockCacheService.findById).toHaveBeenCalledWith(
+        '123e4567-e89b-12d3-a456-426614174000',
+      );
     });
 
     it('should return null when result not found in cache', async () => {
       const mockCacheService = {
-        getById: vi.fn().mockResolvedValue(null),
+        findById: vi.fn().mockResolvedValue(null),
         setById: vi.fn(),
         get: vi.fn(),
         set: vi.fn(),
@@ -363,7 +365,7 @@ describe('FactCheckService', () => {
         mockCacheService as unknown as FactCheckCacheService,
       );
 
-      const result = await serviceWithCache.getResultById('123e4567-e89b-12d3-a456-426614174000');
+      const result = await serviceWithCache.findResultById('123e4567-e89b-12d3-a456-426614174000');
 
       expect(result).toBeNull();
     });

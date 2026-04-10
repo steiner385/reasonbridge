@@ -108,9 +108,13 @@ export class AlignmentsService {
   }
 
   /**
-   * Get user's alignment on a proposition (if exists)
+   * Find a user's alignment on a proposition.
+   *
+   * @param propositionId - The proposition's unique identifier
+   * @param userId - The user's unique identifier
+   * @returns AlignmentDto if found, null if user has no alignment on this proposition
    */
-  async getUserAlignment(propositionId: string, userId: string): Promise<AlignmentDto | null> {
+  async findUserAlignment(propositionId: string, userId: string): Promise<AlignmentDto | null> {
     const alignment = await this.prisma.alignment.findUnique({
       where: {
         userId_propositionId: {

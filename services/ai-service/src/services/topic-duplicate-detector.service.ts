@@ -117,8 +117,8 @@ export class TopicDuplicateDetectorService {
     const textB = this.combineTopicText(titleB, descriptionB);
 
     const [embeddingA, embeddingB] = await Promise.all([
-      this.embeddingService.getEmbedding(textA),
-      this.embeddingService.getEmbedding(textB),
+      this.embeddingService.findEmbedding(textA),
+      this.embeddingService.findEmbedding(textB),
     ]);
 
     if (!embeddingA || !embeddingB) {
@@ -229,7 +229,7 @@ export class TopicDuplicateDetectorService {
    */
   async isSemanticAnalysisAvailable(): Promise<boolean> {
     // Try to get an embedding for a test string
-    const testEmbedding = await this.embeddingService.getEmbedding('test');
+    const testEmbedding = await this.embeddingService.findEmbedding('test');
     return testEmbedding !== null;
   }
 }

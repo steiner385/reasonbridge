@@ -160,12 +160,13 @@ export class TopicsEditService {
 
   /**
    * Get the most recent edit for a topic
-   * T012: Helper method for displaying latest change
+   * Find the most recent edit for a topic.
+   * T012: Helper method for displaying latest change.
    *
-   * @param topicId - Topic ID
-   * @returns Most recent edit record or null if no edits
+   * @param topicId - The topic's unique identifier
+   * @returns The most recent edit record if found, null if no edits exist
    */
-  async getLatestEdit(topicId: string): Promise<TopicEditRecord | null> {
+  async findLatestEdit(topicId: string): Promise<TopicEditRecord | null> {
     try {
       const latestEdit = await this.prisma.topicEdit.findFirst({
         where: { topicId },

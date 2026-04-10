@@ -56,7 +56,7 @@ export class SemanticCacheService {
     const contentHash = computeContentHash(content);
 
     // 1. Check Redis for exact match (fastest path)
-    const redisResult = await this.redisCacheService.getFeedback(contentHash);
+    const redisResult = await this.redisCacheService.findFeedback(contentHash);
     if (redisResult) {
       this.logger.debug('Cache hit: Redis exact match');
       return redisResult;
@@ -65,7 +65,7 @@ export class SemanticCacheService {
     // 2. Try Qdrant similarity search (only if embeddings are available)
     let embedding: number[] | null = null;
     try {
-      embedding = await this.embeddingService.getEmbedding(content);
+      embedding = await this.embeddingService.findEmbedding(content);
       if (embedding) {
         const qdrantResult = await this.qdrantService.searchSimilar(
           embedding,
@@ -103,14 +103,14 @@ export class SemanticCacheService {
     const contentHash = computeContentHash(content);
 
     // Check Redis
-    const redisResult = await this.redisCacheService.getFeedback(contentHash);
+    const redisResult = await this.redisCacheService.findFeedback(contentHash);
     if (redisResult) {
       return { hit: true, source: 'redis', result: redisResult };
     }
 
     // Check Qdrant (only if embeddings are available)
     try {
-      const embedding = await this.embeddingService.getEmbedding(content);
+      const embedding = await this.embeddingService.findEmbedding(content);
       if (embedding) {
         const qdrantResult = await this.qdrantService.searchSimilar(
           embedding,
@@ -166,7 +166,7 @@ export class SemanticCacheService {
   ): Promise<void> {
     try {
       // Get or generate embedding
-      const vectorEmbedding = embedding ?? (await this.embeddingService.getEmbedding(content));
+      const vectorEmbedding = embedding ?? (await this.embeddingService.findEmbedding(content));
 
       // Skip Qdrant storage if embeddings are not available
       if (!vectorEmbedding) {

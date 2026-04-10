@@ -110,12 +110,12 @@ export class FactCheckCacheService {
   }
 
   /**
-   * Get cached fact-check result by its ID
+   * Find a cached fact-check result by its ID.
    *
    * @param id - Result ID (UUID)
-   * @returns Cached result or null if not found/error
+   * @returns Cached result if found, null if not found or on error
    */
-  async getById(id: string): Promise<FactCheckResultDto | null> {
+  async findById(id: string): Promise<FactCheckResultDto | null> {
     try {
       const cacheKey = this.buildIdCacheKey(id);
       const cached = await this.cacheManager.get<FactCheckResultDto>(cacheKey);

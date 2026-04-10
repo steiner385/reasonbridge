@@ -440,7 +440,7 @@ export class ModerationController {
 
   @Get('safety-reports/:reportId')
   async getSafetyReport(@Param('reportId') reportId: string): Promise<SafetyReportResponse> {
-    const report = await this.safetyReportService.getReport(reportId);
+    const report = await this.safetyReportService.findReport(reportId);
     if (!report) {
       throw new BadRequestException('Safety report not found');
     }

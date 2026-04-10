@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AlignmentsController } from './alignments.controller.js';
 
 const createMockAlignmentsService = () => ({
-  getUserAlignment: vi.fn(),
+  findUserAlignment: vi.fn(),
   setAlignment: vi.fn(),
   removeAlignment: vi.fn(),
 });
@@ -18,7 +18,7 @@ describe('AlignmentsController', () => {
     controller = new AlignmentsController(mockAlignmentsService as any);
   });
 
-  describe('getUserAlignment', () => {
+  describe('findUserAlignment', () => {
     it('should return user alignment when it exists', async () => {
       const alignment = {
         id: 'alignment-1',
@@ -27,19 +27,19 @@ describe('AlignmentsController', () => {
         position: 'AGREE',
         createdAt: new Date(),
       };
-      mockAlignmentsService.getUserAlignment.mockResolvedValue(alignment);
+      mockAlignmentsService.findUserAlignment.mockResolvedValue(alignment);
 
       const result = await controller.getUserAlignment('proposition-1', 'user-1');
 
       expect(result).toEqual(alignment);
-      expect(mockAlignmentsService.getUserAlignment).toHaveBeenCalledWith(
+      expect(mockAlignmentsService.findUserAlignment).toHaveBeenCalledWith(
         'proposition-1',
         'user-1',
       );
     });
 
     it('should return null when user has no alignment', async () => {
-      mockAlignmentsService.getUserAlignment.mockResolvedValue(null);
+      mockAlignmentsService.findUserAlignment.mockResolvedValue(null);
 
       const result = await controller.getUserAlignment('proposition-1', 'user-1');
 
@@ -47,11 +47,11 @@ describe('AlignmentsController', () => {
     });
 
     it('should pass correct propositionId and userId', async () => {
-      mockAlignmentsService.getUserAlignment.mockResolvedValue(null);
+      mockAlignmentsService.findUserAlignment.mockResolvedValue(null);
 
       await controller.getUserAlignment('prop-123', 'user-456');
 
-      expect(mockAlignmentsService.getUserAlignment).toHaveBeenCalledWith('prop-123', 'user-456');
+      expect(mockAlignmentsService.findUserAlignment).toHaveBeenCalledWith('prop-123', 'user-456');
     });
   });
 

@@ -205,7 +205,7 @@ describe('TierGuard', () => {
     canAccessTopic: ReturnType<typeof vi.fn>;
     hasProvisionalAccess: ReturnType<typeof vi.fn>;
     getUserRank: ReturnType<typeof vi.fn>;
-    getUserExpertise: ReturnType<typeof vi.fn>;
+    findUserExpertise: ReturnType<typeof vi.fn>;
     getTopic: ReturnType<typeof vi.fn>;
   };
   let mockReflector: Reflector;
@@ -218,7 +218,7 @@ describe('TierGuard', () => {
       canAccessTopic: vi.fn(),
       hasProvisionalAccess: vi.fn(),
       getUserRank: vi.fn(),
-      getUserExpertise: vi.fn(),
+      findUserExpertise: vi.fn(),
       getTopic: vi.fn(),
     };
 

@@ -231,12 +231,12 @@ export class TopicLinksService {
   }
 
   /**
-   * Get a specific link by ID
+   * Find a specific link by ID.
    *
-   * @param linkId - ID of the link
-   * @returns Topic link or null
+   * @param linkId - The link's unique identifier
+   * @returns TopicLinkResponseDto if found, null if link doesn't exist
    */
-  async getLinkById(linkId: string): Promise<TopicLinkResponseDto | null> {
+  async findLinkById(linkId: string): Promise<TopicLinkResponseDto | null> {
     const link = await this.prisma.topicLink.findUnique({
       where: { id: linkId },
       include: {

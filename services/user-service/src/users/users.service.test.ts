@@ -123,7 +123,7 @@ describe('UsersService', () => {
     });
   });
 
-  describe('getAvatarHash', () => {
+  describe('findAvatarHash', () => {
     it('should return avatarHash for user', async () => {
       const userId = '550e8400-e29b-41d4-a716-446655440000';
       (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -131,7 +131,7 @@ describe('UsersService', () => {
         avatarHash: 'abc12345',
       });
 
-      const result = await service.getAvatarHash(userId);
+      const result = await service.findAvatarHash(userId);
 
       expect(result).toBe('abc12345');
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
@@ -147,7 +147,7 @@ describe('UsersService', () => {
         avatarHash: null,
       });
 
-      const result = await service.getAvatarHash(userId);
+      const result = await service.findAvatarHash(userId);
 
       expect(result).toBeNull();
     });
@@ -156,13 +156,13 @@ describe('UsersService', () => {
       const userId = '550e8400-e29b-41d4-a716-446655440000';
       (mockPrismaService.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
-      const result = await service.getAvatarHash(userId);
+      const result = await service.findAvatarHash(userId);
 
       expect(result).toBeNull();
     });
 
     it('should throw BadRequestException for invalid userId', async () => {
-      await expect(service.getAvatarHash('invalid-uuid')).rejects.toThrow(BadRequestException);
+      await expect(service.findAvatarHash('invalid-uuid')).rejects.toThrow(BadRequestException);
     });
   });
 });

@@ -195,14 +195,14 @@ describe('ExpertiseService', () => {
     service = new ExpertiseService(mockPrisma as unknown as PrismaService, mockExpertiseCalculator);
   });
 
-  describe('getUserExpertise', () => {
+  describe('findUserExpertise', () => {
     it('should return expertise for a specific tag when it exists', async () => {
       const mockTag = createMockTag();
       const mockExpertise = createMockTopicExpertise({ tag: mockTag });
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result).not.toBeNull();
       expect(result?.userId).toBe('user-123');
@@ -215,7 +215,7 @@ describe('ExpertiseService', () => {
     it('should return null when expertise does not exist', async () => {
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(null);
 
-      const result = await service.getUserExpertise('user-123', 'tag-456');
+      const result = await service.findUserExpertise('user-123', 'tag-456');
 
       expect(result).toBeNull();
     });
@@ -232,7 +232,7 @@ describe('ExpertiseService', () => {
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result?.progressToNextLevel).toBe(20);
     });
@@ -247,7 +247,7 @@ describe('ExpertiseService', () => {
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result?.progressToNextLevel).toBe(100);
     });
@@ -654,7 +654,7 @@ describe('ExpertiseService', () => {
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result?.progressToNextLevel).toBe(40);
     });
@@ -668,7 +668,7 @@ describe('ExpertiseService', () => {
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result?.responseCount).toBe(42);
     });
@@ -682,7 +682,7 @@ describe('ExpertiseService', () => {
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result?.avgQualityScore).toBeCloseTo(0.85, 2);
     });
@@ -696,7 +696,7 @@ describe('ExpertiseService', () => {
 
       mockPrisma.topicExpertise.findFirst.mockResolvedValue(mockExpertise);
 
-      const result = await service.getUserExpertise('user-123', 'tag-123');
+      const result = await service.findUserExpertise('user-123', 'tag-123');
 
       expect(result?.credentialBoost).toBeCloseTo(0.3, 2);
     });

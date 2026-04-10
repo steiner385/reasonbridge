@@ -278,12 +278,12 @@ describe('TopicLinksService', () => {
     });
   });
 
-  describe('getLinkById', () => {
+  describe('findLinkById', () => {
     it('should return a link by ID', async () => {
       const link = createMockLink();
       mockPrisma.topicLink.findUnique.mockResolvedValue(link);
 
-      const result = await service.getLinkById('link-1');
+      const result = await service.findLinkById('link-1');
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe('link-1');
@@ -292,7 +292,7 @@ describe('TopicLinksService', () => {
     it('should return null when link does not exist', async () => {
       mockPrisma.topicLink.findUnique.mockResolvedValue(null);
 
-      const result = await service.getLinkById('nonexistent-link');
+      const result = await service.findLinkById('nonexistent-link');
 
       expect(result).toBeNull();
     });

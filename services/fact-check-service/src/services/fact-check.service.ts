@@ -181,18 +181,19 @@ export class FactCheckService {
   /**
    * Get a fact-check result by its ID
    *
-   * T256: GET /fact-check/:id endpoint implementation
+   * Find a fact-check result by ID.
+   * T256: GET /fact-check/:id endpoint implementation.
    *
    * @param id - Result ID (UUID)
-   * @returns The fact-check result or null if not found
+   * @returns The fact-check result if found, null otherwise
    */
-  async getResultById(id: string): Promise<FactCheckResultDto | null> {
+  async findResultById(id: string): Promise<FactCheckResultDto | null> {
     if (!this.cacheService) {
       this.logger.warn('Cache service not available for ID lookup');
       return null;
     }
 
-    return this.cacheService.getById(id);
+    return this.cacheService.findById(id);
   }
 
   /**

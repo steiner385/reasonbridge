@@ -102,7 +102,7 @@ export class ExpertiseController {
   ): Promise<TopicExpertiseDto> {
     this.logger.debug(`Fetching expertise for user: ${userId}, tag: ${tagId}`);
 
-    const expertise = await this.expertiseService.getUserExpertise(userId, tagId);
+    const expertise = await this.expertiseService.findUserExpertise(userId, tagId);
 
     if (!expertise) {
       throw new NotFoundException(`Expertise not found for user ${userId} in tag ${tagId}`);
