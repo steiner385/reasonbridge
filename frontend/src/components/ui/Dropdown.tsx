@@ -20,6 +20,8 @@ interface DropdownProps {
   className?: string;
   /** Whether to close on click outside */
   closeOnClickOutside?: boolean;
+  /** Accessible label for the trigger button (required when trigger is icon-only) */
+  ariaLabel?: string;
 }
 
 /**
@@ -36,6 +38,7 @@ export function Dropdown({
   onOpenChange,
   className = '',
   closeOnClickOutside = true,
+  ariaLabel,
 }: DropdownProps) {
   const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -93,6 +96,7 @@ export function Dropdown({
         className="flex items-center justify-center min-h-[44px] min-w-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
         aria-expanded={isOpen}
         aria-haspopup="true"
+        aria-label={ariaLabel}
       >
         {trigger}
       </button>
