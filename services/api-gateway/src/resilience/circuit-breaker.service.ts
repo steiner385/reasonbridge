@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { OnModuleDestroy } from '@nestjs/common';
 import CircuitBreaker from 'opossum';
 import type { Options } from 'opossum';
+import { CIRCUIT_BREAKER } from '../constants';
 
 /**
  * Circuit breaker configuration per service
@@ -38,9 +39,9 @@ export interface CircuitBreakerStats {
 }
 
 const DEFAULT_CONFIG: Partial<Options> = {
-  timeout: 5000, // 5 seconds
+  timeout: CIRCUIT_BREAKER.TIMEOUT_MS,
   errorThresholdPercentage: 50, // Trip after 50% failures
-  resetTimeout: 30000, // Try again after 30 seconds
+  resetTimeout: CIRCUIT_BREAKER.RESET_TIMEOUT_MS,
   volumeThreshold: 5, // Minimum 5 requests before tripping
 };
 

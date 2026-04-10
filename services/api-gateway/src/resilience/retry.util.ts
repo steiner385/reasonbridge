@@ -4,6 +4,7 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { RETRY_CONFIG } from '../constants';
 
 /**
  * Retry configuration options
@@ -24,10 +25,10 @@ export interface RetryConfig {
 }
 
 const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
-  maxAttempts: 3,
-  initialDelay: 100,
-  maxDelay: 5000,
-  backoffFactor: 2,
+  maxAttempts: RETRY_CONFIG.MAX_ATTEMPTS,
+  initialDelay: RETRY_CONFIG.INITIAL_DELAY_MS,
+  maxDelay: RETRY_CONFIG.MAX_DELAY_MS,
+  backoffFactor: RETRY_CONFIG.BACKOFF_FACTOR,
   jitter: true,
   isRetryable: () => true,
 };
@@ -95,7 +96,7 @@ function calculateDelay(attempt: number, config: Required<RetryConfig>): number 
 
   if (config.jitter) {
     // Add random jitter ±25%
-    const jitterRange = delay * 0.25;
+    const jitterRange = delay * RETRY_CONFIG.JITTER_RANGE;
     return delay + (Math.random() * jitterRange * 2 - jitterRange);
   }
 

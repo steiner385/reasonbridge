@@ -58,9 +58,23 @@ export const SEARCH_DISPLAY = {
  */
 export const PROPOSITION_CONSTRAINTS = {
   /** Minimum proposition statement length (characters) */
-  MIN_LENGTH: 10,
+  STATEMENT_MIN_LENGTH: 10,
   /** Maximum proposition statement length (characters) */
-  MAX_LENGTH: 1000,
+  STATEMENT_MAX_LENGTH: 1000,
+  /** Default number of propositions to return */
+  DEFAULT_LIMIT: 100,
+  /** Maximum number of propositions to return */
+  MAX_LIMIT: 500,
+} as const;
+
+/**
+ * Rate limiting configuration.
+ */
+export const RATE_LIMITS = {
+  /** TTL window for proposition creation rate limit (ms) - 1 hour */
+  PROPOSITION_CREATE_TTL_MS: 60 * 60 * 1000,
+  /** Maximum propositions per hour per user */
+  PROPOSITION_CREATE_LIMIT: 20,
 } as const;
 
 /**
