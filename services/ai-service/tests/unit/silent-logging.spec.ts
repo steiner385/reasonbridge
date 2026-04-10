@@ -40,7 +40,7 @@ describe('Low-Confidence Silent Logging', () => {
       isReady: vi.fn().mockResolvedValue(false),
     };
     mockRedisCache = {
-      getFeedback: vi.fn().mockResolvedValue(null),
+      findFeedback: vi.fn().mockResolvedValue(null),
       setFeedback: vi.fn().mockResolvedValue(undefined),
     };
 

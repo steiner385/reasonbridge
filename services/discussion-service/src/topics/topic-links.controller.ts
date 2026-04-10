@@ -97,7 +97,7 @@ export class TopicLinksController {
     @Param('topicId') topicId: string,
     @Param('linkId') linkId: string,
   ): Promise<TopicLinkResponseDto> {
-    const link = await this.topicLinksService.getLinkById(linkId);
+    const link = await this.topicLinksService.findLinkById(linkId);
 
     if (!link) {
       throw new NotFoundException(`Topic link ${linkId} not found`);
@@ -136,7 +136,7 @@ export class TopicLinksController {
     }
 
     // Verify link exists and belongs to topic
-    const existingLink = await this.topicLinksService.getLinkById(linkId);
+    const existingLink = await this.topicLinksService.findLinkById(linkId);
     if (!existingLink) {
       throw new NotFoundException(`Topic link ${linkId} not found`);
     }
@@ -160,7 +160,7 @@ export class TopicLinksController {
     @Param('linkId') linkId: string,
   ): Promise<TopicLinkResponseDto> {
     // Verify link exists and belongs to topic
-    const existingLink = await this.topicLinksService.getLinkById(linkId);
+    const existingLink = await this.topicLinksService.findLinkById(linkId);
     if (!existingLink) {
       throw new NotFoundException(`Topic link ${linkId} not found`);
     }

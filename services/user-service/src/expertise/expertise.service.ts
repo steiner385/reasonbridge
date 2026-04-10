@@ -32,13 +32,13 @@ export class ExpertiseService {
   ) {}
 
   /**
-   * Get a user's expertise for a specific topic tag
+   * Find a user's expertise for a specific topic tag.
    *
    * @param userId - The user's unique identifier
    * @param tagId - The topic tag's unique identifier
-   * @returns TopicExpertiseDto or null if no expertise record exists
+   * @returns TopicExpertiseDto if found, null if no expertise record exists
    */
-  async getUserExpertise(userId: string, tagId: string): Promise<TopicExpertiseDto | null> {
+  async findUserExpertise(userId: string, tagId: string): Promise<TopicExpertiseDto | null> {
     const expertise = await this.prisma.topicExpertise.findFirst({
       where: { userId, tagId },
       include: { tag: true },

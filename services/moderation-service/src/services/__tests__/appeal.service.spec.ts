@@ -613,11 +613,11 @@ describe('AppealService', () => {
     });
   });
 
-  describe('getAppealById', () => {
+  describe('findAppealById', () => {
     it('should return null if appeal does not exist', async () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(null);
 
-      const result = await service.getAppealById('nonexistent');
+      const result = await service.findAppealById('nonexistent');
 
       expect(result).toBeNull();
     });
@@ -651,7 +651,7 @@ describe('AppealService', () => {
         },
       });
 
-      const result = await service.getAppealById('appeal-1');
+      const result = await service.findAppealById('appeal-1');
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe('appeal-1');

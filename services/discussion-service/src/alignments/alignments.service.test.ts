@@ -203,11 +203,11 @@ describe('AlignmentsService', () => {
     });
   });
 
-  describe('getUserAlignment', () => {
+  describe('findUserAlignment', () => {
     it('should return null if alignment does not exist', async () => {
       mockPrisma.alignment.findUnique.mockResolvedValue(null);
 
-      const result = await service.getUserAlignment('proposition-1', 'user-1');
+      const result = await service.findUserAlignment('proposition-1', 'user-1');
 
       expect(result).toBeNull();
     });
@@ -215,7 +215,7 @@ describe('AlignmentsService', () => {
     it('should return alignment DTO if alignment exists', async () => {
       mockPrisma.alignment.findUnique.mockResolvedValue(createMockAlignment());
 
-      const result = await service.getUserAlignment('proposition-1', 'user-1');
+      const result = await service.findUserAlignment('proposition-1', 'user-1');
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe('alignment-1');
@@ -230,7 +230,7 @@ describe('AlignmentsService', () => {
         }),
       );
 
-      const result = await service.getUserAlignment('proposition-1', 'user-1');
+      const result = await service.findUserAlignment('proposition-1', 'user-1');
 
       expect(result?.nuanceExplanation).toBe('My nuanced view...');
     });
@@ -238,7 +238,7 @@ describe('AlignmentsService', () => {
     it('should not include nuanceExplanation when not present', async () => {
       mockPrisma.alignment.findUnique.mockResolvedValue(createMockAlignment());
 
-      const result = await service.getUserAlignment('proposition-1', 'user-1');
+      const result = await service.findUserAlignment('proposition-1', 'user-1');
 
       expect(result?.nuanceExplanation).toBeUndefined();
     });
@@ -246,7 +246,7 @@ describe('AlignmentsService', () => {
     it('should query with correct composite key', async () => {
       mockPrisma.alignment.findUnique.mockResolvedValue(null);
 
-      await service.getUserAlignment('proposition-1', 'user-1');
+      await service.findUserAlignment('proposition-1', 'user-1');
 
       expect(mockPrisma.alignment.findUnique).toHaveBeenCalledWith({
         where: {

@@ -22,7 +22,7 @@ describe('RedisCacheService', () => {
     service = module.get<RedisCacheService>(RedisCacheService);
   });
 
-  describe('getFeedback', () => {
+  describe('findFeedback', () => {
     it('should return cached feedback for content hash', async () => {
       const cached = {
         type: FeedbackType.FALLACY,
@@ -32,7 +32,7 @@ describe('RedisCacheService', () => {
       };
       mockCacheManager.get.mockResolvedValue(cached);
 
-      const result = await service.getFeedback('abc123');
+      const result = await service.findFeedback('abc123');
 
       expect(result).toEqual(cached);
       expect(mockCacheManager.get).toHaveBeenCalledWith('feedback:exact:abc123');
@@ -41,7 +41,7 @@ describe('RedisCacheService', () => {
     it('should return null on cache miss', async () => {
       mockCacheManager.get.mockResolvedValue(null);
 
-      const result = await service.getFeedback('abc123');
+      const result = await service.findFeedback('abc123');
 
       expect(result).toBeNull();
     });
@@ -49,7 +49,7 @@ describe('RedisCacheService', () => {
     it('should return null on cache error and not throw', async () => {
       mockCacheManager.get.mockRejectedValue(new Error('Redis connection failed'));
 
-      const result = await service.getFeedback('abc123');
+      const result = await service.findFeedback('abc123');
 
       expect(result).toBeNull();
     });

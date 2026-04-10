@@ -312,13 +312,13 @@ export class AccessControlService {
   }
 
   /**
-   * Get a user's expertise for a specific tag
+   * Find a user's expertise for a specific tag.
    *
    * @param userId - The user's unique identifier (cognitoSub)
    * @param tagId - The tag's unique identifier
-   * @returns The user's expertise or null if not found
+   * @returns The user's expertise if found, null otherwise
    */
-  async getUserExpertise(
+  async findUserExpertise(
     userId: string,
     tagId: string,
   ): Promise<{ expertiseLevel: ExpertiseLevel } | null> {

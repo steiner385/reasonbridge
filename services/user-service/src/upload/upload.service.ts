@@ -43,7 +43,7 @@ export class UploadService {
       this.validateMimeType(mimeType);
 
       // 2. Get old hash for cleanup (before processing)
-      const oldHash = await this.usersService.getAvatarHash(userId);
+      const oldHash = await this.usersService.findAvatarHash(userId);
 
       // 3. Generate new hash from file content
       const newHash = this.generateHash(file);
@@ -81,7 +81,7 @@ export class UploadService {
 
     try {
       // Get the current avatar S3 key
-      const s3Key = await this.usersService.getAvatarS3Key(userId);
+      const s3Key = await this.usersService.findAvatarS3Key(userId);
 
       if (s3Key) {
         // Delete from S3

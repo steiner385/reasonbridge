@@ -34,7 +34,7 @@ export class AlignmentsController {
     @Param('propositionId') propositionId: string,
     @Headers('x-user-id') userId: string,
   ): Promise<AlignmentDto | null> {
-    return this.alignmentsService.getUserAlignment(propositionId, userId);
+    return this.alignmentsService.findUserAlignment(propositionId, userId);
   }
 
   /**

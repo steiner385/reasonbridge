@@ -38,10 +38,12 @@ export class EmbeddingService {
   }
 
   /**
-   * Get embedding for content, using cache when available.
-   * Returns null if OpenAI is not configured.
+   * Find embedding for content, using cache when available.
+   *
+   * @param content - The text content to get embeddings for
+   * @returns The embedding vector if available, null if OpenAI is not configured
    */
-  async getEmbedding(content: string): Promise<number[] | null> {
+  async findEmbedding(content: string): Promise<number[] | null> {
     // Return null if OpenAI is not available
     if (!this.isAvailable || !this.openai) {
       this.logger.debug('OpenAI not available, skipping embedding generation');
@@ -77,9 +79,12 @@ export class EmbeddingService {
   }
 
   /**
-   * Get cached embedding without generating new one
+   * Find a cached embedding without generating a new one.
+   *
+   * @param content - The text content to look up
+   * @returns The cached embedding if found, null otherwise
    */
-  async getCachedEmbedding(content: string): Promise<number[] | null> {
+  async findCachedEmbedding(content: string): Promise<number[] | null> {
     const contentHash = computeContentHash(content);
     const cacheKey = `${EMBEDDING_CACHE_PREFIX}${contentHash}`;
     const cached = await this.cache.get<number[]>(cacheKey);

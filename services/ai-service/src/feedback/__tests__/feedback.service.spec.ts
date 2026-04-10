@@ -52,7 +52,7 @@ describe('FeedbackService', () => {
       complete: vi.fn().mockResolvedValue(''),
     };
     mockRedisCacheService = {
-      getFeedback: vi.fn().mockResolvedValue(null),
+      findFeedback: vi.fn().mockResolvedValue(null),
       setFeedback: vi.fn().mockResolvedValue(undefined),
     };
 
@@ -158,13 +158,13 @@ describe('FeedbackService', () => {
         reasoning: 'From cache',
         confidenceScore: 0.9,
       };
-      mockRedisCacheService.getFeedback = vi.fn().mockResolvedValue(cachedResult);
+      mockRedisCacheService.findFeedback = vi.fn().mockResolvedValue(cachedResult);
 
       const result = await service.previewFeedback({
         content: 'Cached content',
       });
 
-      expect(mockRedisCacheService.getFeedback).toHaveBeenCalled();
+      expect(mockRedisCacheService.findFeedback).toHaveBeenCalled();
       expect(mockAnalyzerService.analyzeContentFull).not.toHaveBeenCalled();
       expect(result.feedback.length).toBe(1);
       expect(result.feedback[0]?.suggestionText).toBe('Cached result');
@@ -182,7 +182,7 @@ describe('FeedbackService', () => {
     });
 
     it('should gracefully handle Redis cache errors', async () => {
-      mockRedisCacheService.getFeedback = vi.fn().mockRejectedValue(new Error('Redis error'));
+      mockRedisCacheService.findFeedback = vi.fn().mockRejectedValue(new Error('Redis error'));
 
       const result = await service.previewFeedback({
         content: 'Test content',

@@ -141,12 +141,12 @@ describe('FactCheckCacheService', () => {
     });
   });
 
-  describe('getById', () => {
+  describe('findById', () => {
     it('should return cached result on hit', async () => {
       const cachedResult = createSampleResult();
       mockCacheManager.get.mockResolvedValue(cachedResult);
 
-      const result = await service.getById('123e4567-e89b-12d3-a456-426614174000');
+      const result = await service.findById('123e4567-e89b-12d3-a456-426614174000');
 
       expect(mockCacheManager.get).toHaveBeenCalledWith(
         'fact-check:id:123e4567-e89b-12d3-a456-426614174000',
@@ -157,7 +157,7 @@ describe('FactCheckCacheService', () => {
     it('should return null on cache miss', async () => {
       mockCacheManager.get.mockResolvedValue(null);
 
-      const result = await service.getById('123e4567-e89b-12d3-a456-426614174000');
+      const result = await service.findById('123e4567-e89b-12d3-a456-426614174000');
 
       expect(result).toBeNull();
     });
@@ -165,7 +165,7 @@ describe('FactCheckCacheService', () => {
     it('should return null on cache error (graceful degradation)', async () => {
       mockCacheManager.get.mockRejectedValue(new Error('Redis connection failed'));
 
-      const result = await service.getById('123e4567-e89b-12d3-a456-426614174000');
+      const result = await service.findById('123e4567-e89b-12d3-a456-426614174000');
 
       expect(result).toBeNull();
     });

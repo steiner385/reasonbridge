@@ -27,7 +27,7 @@ describe('UploadService', () => {
     } as unknown as S3Service;
 
     mockUsersService = {
-      getAvatarHash: vi.fn(),
+      findAvatarHash: vi.fn(),
       updateAvatarUrls: vi.fn(),
     } as unknown as UsersService;
 
@@ -69,7 +69,7 @@ describe('UploadService', () => {
         },
       };
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue(mockVariants);
       mockS3Service.uploadAvatarVariants.mockResolvedValue(mockAvatarUrls);
       mockUsersService.updateAvatarUrls.mockResolvedValue(undefined);
@@ -99,7 +99,7 @@ describe('UploadService', () => {
         { size: 'small', format: 'webp', buffer: Buffer.from('s'), width: 32, height: 32 },
       ];
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue(mockVariants);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -128,7 +128,7 @@ describe('UploadService', () => {
         { size: 'small', format: 'webp', buffer: Buffer.from('s'), width: 32, height: 32 },
       ];
 
-      mockUsersService.getAvatarHash.mockResolvedValue(oldHash);
+      mockUsersService.findAvatarHash.mockResolvedValue(oldHash);
       mockImageProcessor.processAvatar.mockResolvedValue(mockVariants);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -156,7 +156,7 @@ describe('UploadService', () => {
         { size: 'small', format: 'webp', buffer: Buffer.from('s'), width: 32, height: 32 },
       ];
 
-      mockUsersService.getAvatarHash.mockResolvedValue(hash);
+      mockUsersService.findAvatarHash.mockResolvedValue(hash);
       mockImageProcessor.processAvatar.mockResolvedValue(mockVariants);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -185,7 +185,7 @@ describe('UploadService', () => {
         { size: 'small', format: 'webp', buffer: Buffer.from('s'), width: 32, height: 32 },
       ];
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue(mockVariants);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -218,7 +218,7 @@ describe('UploadService', () => {
         large: { webp: 'url', jpg: 'url' },
       };
 
-      mockUsersService.getAvatarHash.mockResolvedValue(oldHash);
+      mockUsersService.findAvatarHash.mockResolvedValue(oldHash);
       mockImageProcessor.processAvatar.mockResolvedValue(mockVariants);
       mockS3Service.uploadAvatarVariants.mockResolvedValue(mockAvatarUrls);
       mockUsersService.updateAvatarUrls.mockResolvedValue(undefined);
@@ -264,7 +264,7 @@ describe('UploadService', () => {
       const file = Buffer.from('test');
       const mimeType = 'image/jpeg';
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue([]);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -281,7 +281,7 @@ describe('UploadService', () => {
       const file = Buffer.from('test');
       const mimeType = 'image/png';
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue([]);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -298,7 +298,7 @@ describe('UploadService', () => {
       const file = Buffer.from('test');
       const mimeType = 'image/webp';
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue([]);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },
@@ -315,7 +315,7 @@ describe('UploadService', () => {
       const file = Buffer.from('test');
       const mimeType = 'image/gif';
 
-      mockUsersService.getAvatarHash.mockResolvedValue(null);
+      mockUsersService.findAvatarHash.mockResolvedValue(null);
       mockImageProcessor.processAvatar.mockResolvedValue([]);
       mockS3Service.uploadAvatarVariants.mockResolvedValue({
         small: { webp: 'url', jpg: 'url' },

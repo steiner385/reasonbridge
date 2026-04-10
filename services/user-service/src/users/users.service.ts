@@ -402,11 +402,13 @@ export class UsersService {
   }
 
   /**
-   * Get a user's current avatar S3 key (for deletion before replacing)
+   * Find a user's current avatar S3 key (for deletion before replacing).
+   *
    * @param userId - The user's UUID
-   * @returns The S3 key or null if no avatar exists
+   * @returns The S3 key if found, null if no avatar exists
+   * @throws {BadRequestException} When userId is not a valid UUID
    */
-  async getAvatarS3Key(userId: string): Promise<string | null> {
+  async findAvatarS3Key(userId: string): Promise<string | null> {
     if (!isValidUUID(userId)) {
       throw new BadRequestException(`Invalid user ID format: expected UUID`);
     }
@@ -827,12 +829,13 @@ export class UsersService {
   }
 
   /**
-   * Get user's avatar hash for S3 folder management
-   * @param userId - User ID
-   * @returns Avatar hash or null if not set
-   * @throws BadRequestException if userId is not a valid UUID
+   * Find a user's avatar hash for S3 folder management.
+   *
+   * @param userId - The user's UUID
+   * @returns Avatar hash if found, null if not set
+   * @throws {BadRequestException} When userId is not a valid UUID
    */
-  async getAvatarHash(userId: string): Promise<string | null> {
+  async findAvatarHash(userId: string): Promise<string | null> {
     if (!isValidUUID(userId)) {
       throw new BadRequestException(`Invalid user ID format: expected UUID`);
     }

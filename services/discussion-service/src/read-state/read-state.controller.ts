@@ -52,6 +52,6 @@ export class ReadStateController {
     if (!userId) {
       return null;
     }
-    return this.readStateService.getReadState(userId, topicId);
+    return this.readStateService.findReadState(userId, topicId);
   }
 }

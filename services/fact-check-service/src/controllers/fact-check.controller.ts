@@ -129,7 +129,7 @@ export class FactCheckController {
 
     this.logger.log(`Retrieving fact-check result: ${id}`);
 
-    const result = await this.factCheckService.getResultById(id);
+    const result = await this.factCheckService.findResultById(id);
 
     if (!result) {
       throw new NotFoundException(`Fact-check result not found: ${id}`);

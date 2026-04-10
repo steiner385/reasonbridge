@@ -164,9 +164,12 @@ export class SafetyReportService {
   }
 
   /**
-   * Gets a safety report by ID
+   * Find a safety report by ID.
+   *
+   * @param reportId - The report's unique identifier
+   * @returns The safety report if found, null otherwise
    */
-  async getReport(reportId: string): Promise<SafetyReportResponse | null> {
+  async findReport(reportId: string): Promise<SafetyReportResponse | null> {
     const report = await this.prisma.safetyReport.findUnique({
       where: { id: reportId },
     });

@@ -157,7 +157,7 @@ export class FeedbackService {
     // Try Redis cache first for fast response
     const contentHash = computeContentHash(dto.content);
     try {
-      const cached = await this.redisCache?.getFeedback(contentHash);
+      const cached = await this.redisCache?.findFeedback(contentHash);
       if (cached) {
         // Cache hit - use cached result (wrapped in array for consistency)
         analysisResults = [cached];
@@ -242,7 +242,7 @@ export class FeedbackService {
     try {
       // Try Redis cache first
       const contentHash = computeContentHash(`ai:${dto.content}`);
-      const cached = await this.redisCache?.getFeedback(contentHash);
+      const cached = await this.redisCache?.findFeedback(contentHash);
 
       let analysisResults: AnalysisResult[];
 

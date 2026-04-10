@@ -145,7 +145,7 @@ export class ParentNotificationService {
 
     try {
       // Get parent contact information
-      const parentContact = await this.getParentContact(request.childId);
+      const parentContact = await this.findParentContact(request.childId);
 
       if (!parentContact) {
         this.logger.warn(
@@ -283,9 +283,12 @@ export class ParentNotificationService {
   }
 
   /**
-   * Get parent contact information for a child
+   * Find parent contact information for a child.
+   *
+   * @param childId - The child user's unique identifier
+   * @returns Parent contact info if found, null otherwise
    */
-  private async getParentContact(childId: string): Promise<ParentContact | null> {
+  private async findParentContact(childId: string): Promise<ParentContact | null> {
     const child = await this.prisma.user.findUnique({
       where: { id: childId },
       select: {

@@ -758,7 +758,7 @@ describe('Appeal Process Integration Tests', () => {
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
 
-      const result = await appealService.getAppealById(testAppealId);
+      const result = await appealService.findAppealById(testAppealId);
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe(testAppealId);
@@ -784,7 +784,7 @@ describe('Appeal Process Integration Tests', () => {
     it('should return null for non-existent appeal', async () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(null);
 
-      const result = await appealService.getAppealById('nonexistent-appeal');
+      const result = await appealService.findAppealById('nonexistent-appeal');
 
       expect(result).toBeNull();
     });
