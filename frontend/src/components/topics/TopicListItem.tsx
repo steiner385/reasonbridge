@@ -147,7 +147,7 @@ export function TopicListItem({
         </div>
 
         {/* Diversity score (if available) */}
-        {topic.currentDiversityScore !== null && (
+        {typeof topic.currentDiversityScore === 'number' && (
           <div
             className="flex items-center gap-1"
             title={`Diversity score: ${topic.currentDiversityScore.toFixed(1)}`}

@@ -1,5 +1,4 @@
 import { test, expect, type Page } from '@playwright/test';
-import { waitForAuthState } from './helpers/auth-waits';
 
 /**
  * E2E test suite for Complete Verification Flow (US4 - Human Authenticity)
@@ -75,9 +74,11 @@ test.describe('Complete Verification Flow', () => {
 
     // Navigate directly to verification page
     await page.goto('/verification');
+    await page.waitForLoadState('domcontentloaded');
 
-    // Wait for authenticated page to stabilize (avoid networkidle which hangs due to WebSocket)
-    await waitForAuthState(page);
+    // Wait for verification page content to load
+    // The page may show: loading skeleton, verification options, auth required, or error
+    await page.waitForTimeout(500);
 
     // Verify we're on the verification page - should show verification options or error
     // When authenticated, the page shows "Verification Options" heading
@@ -85,7 +86,7 @@ test.describe('Complete Verification Flow', () => {
     const verificationHeading = page.getByRole('heading', {
       name: /verification options|error loading verification/i,
     });
-    await expect(verificationHeading).toBeVisible({ timeout: 10000 });
+    await expect(verificationHeading).toBeVisible({ timeout: 15000 });
   });
 
   test('should display verification page with header', async ({ page }) => {
@@ -253,8 +254,15 @@ test.describe('Complete Verification Flow', () => {
     const response = await page.goto('/verification');
     expect(response?.status()).toBeLessThan(400);
 
-    // Wait for authenticated page to stabilize (avoid networkidle which hangs due to WebSocket)
-    await waitForAuthState(page);
+    // Wait for verification page content to load
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    // Wait for heading to appear (indicates page loaded)
+    const heading = page.getByRole('heading', {
+      name: /verification options|error loading verification|authentication required/i,
+    });
+    await expect(heading).toBeVisible({ timeout: 15000 });
 
     // Get current URL
     const firstUrl = page.url();

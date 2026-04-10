@@ -384,7 +384,7 @@ export function ConversationPanel({
             <span>{topic.responseCount} responses</span>
           </div>
 
-          {topic.currentDiversityScore !== null && (
+          {typeof topic.currentDiversityScore === 'number' && (
             <div className="flex items-center gap-1.5">
               <svg
                 className="w-4 h-4"

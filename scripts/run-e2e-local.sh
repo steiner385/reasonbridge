@@ -6,9 +6,12 @@ set -e  # Exit on error
 
 # Configuration
 PROJECT_NAME="e2e-local-$$"
-PLAYWRIGHT_VERSION="v1.58.0-noble"
+PLAYWRIGHT_VERSION="v1.59.1-noble"
 CONTAINER_NAME="playwright-e2e-local-$$"
 PLAYWRIGHT_BASE_URL="http://frontend:80"
+
+# Optional: test pattern from command line (e.g., ./run-e2e-local.sh discussion-creation)
+TEST_PATTERN="${1:-}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -125,7 +128,7 @@ log_info "=========================================="
 docker run -d \
     --name "$CONTAINER_NAME" \
     --network ${PROJECT_NAME}_reasonbridge-e2e \
-    --memory 4g \
+    --memory 8g \
     -w /app/frontend \
     -e CI=true \
     -e E2E_DOCKER=true \
@@ -158,15 +161,29 @@ docker exec "$CONTAINER_NAME" bash -c "
     # Remove broken local @playwright (pnpm symlinks break after tar copy)
     rm -rf node_modules/@playwright node_modules/playwright node_modules/playwright-core 2>/dev/null || true
 
-    echo 'DEBUG: Reinstalling @playwright/test...'
-    npm install @playwright/test --no-save --prefer-offline 2>/dev/null || npm install @playwright/test --no-save
+    # Move package.json aside - it contains workspace:* deps that npm doesn't understand
+    mv package.json package.json.bak
+
+    echo 'DEBUG: Reinstalling @playwright/test and @axe-core/playwright...'
+    npm install @playwright/test @axe-core/playwright --no-save --prefer-offline 2>/dev/null || npm install @playwright/test @axe-core/playwright --no-save
+
+    # Restore package.json
+    mv package.json.bak package.json
 
     echo 'DEBUG: Playwright version:' \$(npx playwright --version)
     echo 'DEBUG: Starting Playwright tests...'
     echo '=========================================='
 
-    # Run tests
-    npx playwright test --reporter=list,junit,json
+    # Run tests with limited workers to reduce memory pressure
+    # Local E2E runs many services (~3GB) alongside Playwright (~6GB)
+    # Use 2 workers as a balance between speed and memory
+    TEST_PATTERN='$TEST_PATTERN'
+    if [ -n \"\$TEST_PATTERN\" ]; then
+        echo \"DEBUG: Running tests matching pattern: \$TEST_PATTERN\"
+        npx playwright test --grep \"\$TEST_PATTERN\" --reporter=list --workers=2
+    else
+        npx playwright test --reporter=list --workers=2
+    fi
 " || {
     EXIT_CODE=$?
     log_error "Playwright tests exited with code $EXIT_CODE"

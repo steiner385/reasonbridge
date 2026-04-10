@@ -214,6 +214,15 @@ export const routes: RouteObject[] = [
     ),
   },
   {
+    // More specific route must come before catch-all /topics/:id
+    path: '/topics/:topicId/discussions',
+    element: (
+      <LazyRoute>
+        <DiscussionListPage />
+      </LazyRoute>
+    ),
+  },
+  {
     path: '/topics/:id',
     element: <TopicRedirect />,
   },
@@ -238,14 +247,6 @@ export const routes: RouteObject[] = [
     element: (
       <LazyRoute>
         <DiscussionDetailPage />
-      </LazyRoute>
-    ),
-  },
-  {
-    path: '/topics/:topicId/discussions',
-    element: (
-      <LazyRoute>
-        <DiscussionListPage />
       </LazyRoute>
     ),
   },
