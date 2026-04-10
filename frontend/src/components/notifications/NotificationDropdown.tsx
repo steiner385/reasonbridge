@@ -47,6 +47,7 @@ export function NotificationDropdown() {
           )}
         </div>
       }
+      ariaLabel="Notifications"
       isOpen={isOpen}
       onOpenChange={setIsOpen}
       align="right"

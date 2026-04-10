@@ -331,10 +331,10 @@ test.describe('User Registration and Login Flow', () => {
     });
     await expect(registrationHeading).toBeVisible({ timeout: 10000 });
 
-    // Find and click "Sign in" button on signup page (it's a button, not a link)
-    const loginButton = page.getByRole('button', { name: /sign in/i });
-    await expect(loginButton).toBeVisible();
-    await loginButton.click();
+    // Find and click "Sign in" link on signup page
+    const loginLink = page.getByRole('link', { name: /sign in/i });
+    await expect(loginLink).toBeVisible();
+    await loginLink.click();
 
     // Should navigate back to landing page where login is a modal
     await expect(page).toHaveURL(/\/$|\/login/);
