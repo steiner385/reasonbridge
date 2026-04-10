@@ -10,7 +10,7 @@ import { FeedbackType } from '@prisma/client';
 import type { AnalysisResult } from '../services/response-analyzer.service.js';
 import type { CachedFeedback, FeedbackMetadata } from './types.js';
 import { randomUUID } from 'crypto';
-import { EMBEDDING } from '../constants/index.js';
+import { EMBEDDING, CACHE_CONFIG } from '../constants/index.js';
 
 @Injectable()
 export class QdrantService implements OnModuleInit {
@@ -76,7 +76,7 @@ export class QdrantService implements OnModuleInit {
     try {
       const results = await this.client.search(this.collectionName, {
         vector: embedding,
-        limit: 1,
+        limit: CACHE_CONFIG.SIMILARITY_SEARCH_LIMIT,
         score_threshold: threshold,
       });
 

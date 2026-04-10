@@ -7,6 +7,7 @@ import { Controller, Post, Body, Logger, UseGuards } from '@nestjs/common';
 import { InternalApiKeyGuard } from '@reason-bridge/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
+import { QUERY_LIMITS } from '../constants/index.js';
 
 /**
  * Single SLA breach notification item
@@ -124,7 +125,7 @@ export class InternalSlaBreachController {
         id: true,
         displayName: true,
       },
-      take: 500, // Limit to prevent unbounded results
+      take: QUERY_LIMITS.SLA_BREACH,
     });
   }
 

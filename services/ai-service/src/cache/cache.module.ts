@@ -13,6 +13,7 @@ import { SemanticCacheService } from './semantic-cache.service.js';
 import { EmbeddingService } from './embedding.service.js';
 import { QdrantService } from './qdrant.service.js';
 import { RedisCacheService } from './redis-cache.service.js';
+import { CACHE_CONFIG } from '../constants/index.js';
 
 const logger = new Logger('CacheModule');
 
@@ -45,7 +46,7 @@ const logger = new Logger('CacheModule');
       host: process.env['REDIS_HOST'] || 'localhost',
       port: parseInt(process.env['REDIS_PORT'] || '6379', 10),
       ttl: parseInt(process.env['CACHE_TTL'] || '3600', 10),
-      max: parseInt(process.env['CACHE_MAX_ITEMS'] || '1000', 10),
+      max: parseInt(process.env['CACHE_MAX_ITEMS'] || String(CACHE_CONFIG.MAX_ITEMS), 10),
       ...(process.env['REDIS_TLS'] === 'true' && {
         tls: { rejectUnauthorized: false },
       }),

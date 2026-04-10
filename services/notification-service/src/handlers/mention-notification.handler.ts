@@ -9,6 +9,7 @@ import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { NotificationDeliveryService } from '../services/notification-delivery.service.js';
+import { QUERY_LIMITS } from '../constants/index.js';
 import type { ResponseCreatedEvent } from '@reason-bridge/event-schemas/discussion';
 
 /**
@@ -124,7 +125,7 @@ export class MentionNotificationHandler {
           accountStatus: 'ACTIVE',
         },
         select: { id: true },
-        take: 100, // Limit to prevent unbounded results
+        take: QUERY_LIMITS.DEFAULT,
       });
 
       const validUserIds = validUsers.map((u) => u.id);

@@ -6,6 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 import { SNSClient, PublishCommand, SetSMSAttributesCommand } from '@aws-sdk/client-sns';
+import { SMS_RATE_LIMITS } from '../constants/index.js';
 
 /**
  * SMS delivery result
@@ -44,10 +45,10 @@ export class SmsService implements OnModuleInit {
   private globalSmsCount = 0;
   private globalResetAt = 0;
 
-  // Configuration
-  private readonly MAX_SMS_PER_PHONE_PER_HOUR = 5;
-  private readonly MAX_SMS_GLOBAL_PER_HOUR = 100;
-  private readonly RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+  // Configuration (from constants)
+  private readonly MAX_SMS_PER_PHONE_PER_HOUR = SMS_RATE_LIMITS.MAX_PER_PHONE_PER_HOUR;
+  private readonly MAX_SMS_GLOBAL_PER_HOUR = SMS_RATE_LIMITS.MAX_GLOBAL_PER_HOUR;
+  private readonly RATE_LIMIT_WINDOW_MS = SMS_RATE_LIMITS.WINDOW_MS;
 
   constructor() {
     const region = process.env['AWS_REGION'] || 'us-east-1';
