@@ -8,6 +8,7 @@ import { type Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { NotificationDeliveryService } from '../services/notification-delivery.service.js';
+import { QUERY_LIMITS } from '../constants/index.js';
 import type {
   CommonGroundGeneratedEvent,
   CommonGroundUpdatedEvent,
@@ -377,7 +378,7 @@ export class CommonGroundNotificationHandler {
         createdAt,
       },
       select: { id: true, userId: true },
-      take: 1000, // Limit to prevent unbounded results
+      take: QUERY_LIMITS.COMMON_GROUND,
     });
 
     // Return IDs in the same order as recipientIds

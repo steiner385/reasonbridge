@@ -19,6 +19,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { PropositionsService } from './propositions.service.js';
 import { CreatePropositionDto } from './dto/create-proposition.dto.js';
+import { PROPOSITION_CONSTRAINTS, RATE_LIMITS } from '../constants/index.js';
 import type { PropositionResponseDto } from './dto/create-proposition.dto.js';
 import { type AuthenticatedRequest, getUserIdFromRequest } from '../auth/index.js';
 
@@ -45,7 +46,7 @@ export class PropositionsController {
     @Query('limit') limitParam?: string,
     @Query('offset') offsetParam?: string,
   ) {
-    const limit = limitParam ? parseInt(limitParam, 10) : 100;
+    const limit = limitParam ? parseInt(limitParam, 10) : PROPOSITION_CONSTRAINTS.DEFAULT_LIMIT;
     const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
     return this.propositionsService.findByTopicId(topicId, limit, offset);
   }
@@ -59,7 +60,12 @@ export class PropositionsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @Throttle({ default: { limit: 20, ttl: 3600000 } }) // 20 per hour
+  @Throttle({
+    default: {
+      limit: RATE_LIMITS.PROPOSITION_CREATE_LIMIT,
+      ttl: RATE_LIMITS.PROPOSITION_CREATE_TTL_MS,
+    },
+  })
   async createProposition(
     @Param('topicId') topicId: string,
     @Body() createPropositionDto: CreatePropositionDto,

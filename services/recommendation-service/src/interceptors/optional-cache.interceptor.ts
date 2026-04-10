@@ -10,6 +10,7 @@ import type { Cache } from 'cache-manager';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
+import { CACHE_TTL_MS } from '../constants/index.js';
 
 /**
  * Optional Cache Interceptor
@@ -48,7 +49,8 @@ export class OptionalCacheInterceptor implements NestInterceptor {
     const key = this.generateCacheKey(request);
 
     // Get TTL from @CacheTTL decorator or use default
-    const ttl = this.reflector.get<number>('cache_ttl', context.getHandler()) || 300000; // 5 min default
+    const ttl =
+      this.reflector.get<number>('cache_ttl', context.getHandler()) || CACHE_TTL_MS.DEFAULT;
 
     try {
       // Check cache first

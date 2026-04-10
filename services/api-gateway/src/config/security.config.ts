@@ -4,6 +4,7 @@
  */
 
 import type { FastifyHelmetOptions } from '@fastify/helmet';
+import { DEV_PORTS, RATE_LIMITS, SECURITY_HEADERS } from '../constants';
 
 /**
  * Security configuration for the API Gateway
@@ -39,18 +40,12 @@ export function getAllowedOrigins(): string[] | boolean {
   }
 
   // Development - allow localhost on common ports
-  return [
+  const devOrigins = [
     'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:5176',
     'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-    'http://127.0.0.1:5175',
-    'http://127.0.0.1:5176',
+    ...DEV_PORTS.flatMap((port) => [`http://localhost:${port}`, `http://127.0.0.1:${port}`]),
   ];
+  return devOrigins;
 }
 
 /**
@@ -84,7 +79,7 @@ export function getCorsConfig(): CorsConfig {
       'X-RateLimit-Limit',
       'X-RateLimit-Remaining',
     ],
-    maxAge: 86400, // 24 hours
+    maxAge: SECURITY_HEADERS.CORS_MAX_AGE_SECONDS,
   };
 }
 
@@ -133,7 +128,7 @@ export function getHelmetConfig(): FastifyHelmetOptions {
     // Only in production with HTTPS
     hsts: isProduction
       ? {
-          maxAge: 31536000, // 1 year
+          maxAge: SECURITY_HEADERS.HSTS_MAX_AGE_SECONDS,
           includeSubDomains: true,
           preload: true,
         }
@@ -180,14 +175,14 @@ export interface RateLimitTier {
 
 export const rateLimitTiers: Record<string, RateLimitTier> = {
   // Default: 100 requests per minute
-  default: { ttl: 60000, limit: 100 },
+  default: { ttl: RATE_LIMITS.TTL_MS, limit: RATE_LIMITS.DEFAULT_LIMIT },
 
   // Strict: 10 requests per minute (expensive operations)
-  strict: { ttl: 60000, limit: 10 },
+  strict: { ttl: RATE_LIMITS.TTL_MS, limit: RATE_LIMITS.STRICT_LIMIT },
 
   // Auth: 5 login attempts per minute (brute force protection)
-  auth: { ttl: 60000, limit: 5 },
+  auth: { ttl: RATE_LIMITS.TTL_MS, limit: RATE_LIMITS.AUTH_LIMIT },
 
   // API: 1000 requests per minute (authenticated API users)
-  api: { ttl: 60000, limit: 1000 },
+  api: { ttl: RATE_LIMITS.TTL_MS, limit: RATE_LIMITS.API_LIMIT },
 };

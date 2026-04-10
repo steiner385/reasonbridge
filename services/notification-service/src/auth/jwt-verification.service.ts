@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
+import { JWT_CACHE } from '../constants/index.js';
 
 /**
  * JWT payload structure for authenticated users
@@ -68,7 +69,7 @@ export class JwtVerificationService {
       this.jwksClient = jwksClient.default({
         jwksUri: `https://cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}/.well-known/jwks.json`,
         cache: true,
-        cacheMaxAge: 86400000, // 24 hours
+        cacheMaxAge: JWT_CACHE.MAX_AGE_MS,
       });
       this.logger.debug('JwtVerificationService initialized in production mode with Cognito JWKS');
     }

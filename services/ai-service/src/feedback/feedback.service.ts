@@ -19,6 +19,7 @@ import {
   PreviewFeedbackResponseDto,
 } from './dto/index.js';
 import { Prisma, FeedbackType } from '@prisma/client';
+import { LLM_PRESETS } from '../constants/index.js';
 
 /** Critical feedback types that should block posting */
 const CRITICAL_TYPES = ['INFLAMMATORY', 'FALLACY'] as const;
@@ -282,8 +283,7 @@ If the content is constructive and well-reasoned, return AFFIRMATION type.`,
               content: `Analyze this draft response:\n\n${dto.content}`,
             },
           ],
-          maxTokens: 2048,
-          temperature: 0.2,
+          ...LLM_PRESETS.FEEDBACK,
         });
 
         // Parse JSON response

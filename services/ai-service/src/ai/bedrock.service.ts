@@ -5,6 +5,7 @@
 
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import { BedrockClient, type AIClientConfig } from '@reason-bridge/ai-client';
+import { LLM_DEFAULTS, LLM_PRESETS } from '../constants/index.js';
 
 /**
  * Bedrock AI Service
@@ -27,8 +28,8 @@ export class BedrockService implements OnModuleDestroy {
       const config: AIClientConfig = {
         region,
         modelId,
-        maxTokens: 4096,
-        temperature: 0.3, // Lower temperature for more focused analysis
+        maxTokens: LLM_DEFAULTS.MAX_TOKENS,
+        temperature: LLM_DEFAULTS.TEMPERATURE,
       };
 
       this.client = new BedrockClient(config);
@@ -91,7 +92,7 @@ export class BedrockService implements OnModuleDestroy {
       const response = await this.client.complete({
         systemPrompt: 'Respond with OK only.',
         messages: [{ role: 'user', content: 'Health check' }],
-        maxTokens: 5,
+        maxTokens: LLM_PRESETS.HEALTH_CHECK.maxTokens,
       });
 
       return {
@@ -172,7 +173,7 @@ export class BedrockService implements OnModuleDestroy {
             content: `Moderate this content:\n\n${content}`,
           },
         ],
-        maxTokens: 256,
+        maxTokens: LLM_PRESETS.MODERATION.maxTokens,
       });
 
       const result = response.content.trim();
@@ -224,8 +225,7 @@ where members are the numeric IDs of the texts.`,
             content: `Cluster these ${texts.length} texts into at most ${maxClusters} semantic groups:\n\n${textList}`,
           },
         ],
-        maxTokens: 1024,
-        temperature: 0.2,
+        ...LLM_PRESETS.ANALYSIS,
       });
 
       // Parse JSON response
@@ -275,8 +275,7 @@ Return ONLY a JSON array of values: ["value1", "value2", "value3"]`,
             content: `Identify the underlying values in these positions:\n\n${textList}`,
           },
         ],
-        maxTokens: 512,
-        temperature: 0.2,
+        ...LLM_PRESETS.VALUE_ANALYSIS,
       });
 
       // Parse JSON response
@@ -325,8 +324,7 @@ Return ONLY a JSON array of values: ["value1", "value2", "value3"]`,
             content: `Topic: "${topic}"\n\nDifferent interpretations:\n${interpList}\n\nProvide a brief clarification (2-3 sentences max) to help participants understand the different perspectives.`,
           },
         ],
-        maxTokens: 256,
-        temperature: 0.3,
+        ...LLM_PRESETS.CLARIFICATION,
       });
 
       return response.content.trim();

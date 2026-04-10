@@ -6,6 +6,7 @@
 import { Module, Global, Logger } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { CACHE } from '../constants/index.js';
 
 const logger = new Logger('CacheModule');
 
@@ -36,8 +37,8 @@ const logger = new Logger('CacheModule');
         if (isTestMode && !redisHost) {
           logger.warn('REDIS_HOST not configured in test mode - using in-memory cache');
           return {
-            ttl: parseInt(process.env['CACHE_TTL'] || '3600', 10) * 1000,
-            max: parseInt(process.env['CACHE_MAX_ITEMS'] || '1000', 10),
+            ttl: parseInt(process.env['CACHE_TTL'] || String(CACHE.TTL_SECONDS), 10) * 1000,
+            max: parseInt(process.env['CACHE_MAX_ITEMS'] || String(CACHE.MAX_ITEMS), 10),
           };
         }
 
@@ -46,8 +47,8 @@ const logger = new Logger('CacheModule');
           store: redisStore,
           host: redisHost || 'localhost',
           port: parseInt(process.env['REDIS_PORT'] || '6379', 10),
-          ttl: parseInt(process.env['CACHE_TTL'] || '3600', 10),
-          max: parseInt(process.env['CACHE_MAX_ITEMS'] || '1000', 10),
+          ttl: parseInt(process.env['CACHE_TTL'] || String(CACHE.TTL_SECONDS), 10),
+          max: parseInt(process.env['CACHE_MAX_ITEMS'] || String(CACHE.MAX_ITEMS), 10),
           ...(process.env['REDIS_TLS'] === 'true' && {
             tls: { rejectUnauthorized: false },
           }),

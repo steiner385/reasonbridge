@@ -8,6 +8,7 @@ import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
 import { generateParentDigestEmail } from '../templates/index.js';
+import { QUERY_LIMITS } from '../constants/index.js';
 
 /**
  * Data required for a child's activity summary in the parent digest.
@@ -150,7 +151,7 @@ export class ParentDigestJob {
           },
         },
       },
-      take: 10000, // Limit to prevent unbounded results
+      take: QUERY_LIMITS.PARENT_DIGEST,
     });
 
     // Gather activity data for each child
@@ -207,7 +208,7 @@ export class ParentDigestJob {
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
-      take: 1000, // Limit to prevent unbounded results
+      take: QUERY_LIMITS.DIGEST_TOPICS,
     });
 
     // Use responses.length instead of separate count query for efficiency
@@ -227,7 +228,7 @@ export class ParentDigestJob {
         ? await this.prisma.discussionTopic.findMany({
             where: { id: { in: topicIds } },
             select: { id: true, title: true },
-            take: 500, // Limit to prevent unbounded results
+            take: QUERY_LIMITS.DIGEST_RESPONSES,
           })
         : [];
 

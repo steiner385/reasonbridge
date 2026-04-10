@@ -15,18 +15,7 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { UsersService } from '../users/users.service.js';
-
-// In test mode, use very high limits to allow E2E tests to run without throttling
-const isTest = process.env['NODE_ENV'] === 'test';
-const THROTTLE_LIMITS = {
-  register: isTest ? 10000 : 3, // 3/min in prod
-  login: isTest ? 10000 : 5, // 5/min in prod
-  refresh: isTest ? 10000 : 10, // 10/min in prod
-  verifyEmail: isTest ? 10000 : 5, // 5/min in prod
-  resendVerification: isTest ? 10000 : 3, // 3/min in prod (per spec)
-  forgotPassword: isTest ? 10000 : 3, // 3/min in prod
-  resetPassword: isTest ? 10000 : 5, // 5/min in prod
-};
+import { THROTTLE_LIMITS } from '../constants/index.js';
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';
 import { RefreshDto, RefreshResponseDto } from './dto/refresh.dto.js';
 import { RegisterDto, RegisterResponseDto } from './dto/register.dto.js';
@@ -68,7 +57,7 @@ export class AuthController {
    * Rate limited: 3 attempts per minute to prevent automated account creation
    */
   @Post('register')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.register, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.REGISTER, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto): Promise<RegisterResponseDto> {
     // 1. Register with auth service (Cognito or Database)
@@ -165,7 +154,7 @@ export class AuthController {
    * Rate limited: 5 attempts per minute to prevent brute force attacks
    */
   @Post('login')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.login, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.authenticateUser(loginDto.email, loginDto.password);
@@ -176,7 +165,7 @@ export class AuthController {
    * Rate limited: 10 attempts per minute
    */
   @Post('refresh')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.refresh, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.REFRESH, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() refreshDto: RefreshDto): Promise<RefreshResponseDto> {
     return this.authService.refreshAccessToken(refreshDto.refreshToken);
@@ -188,7 +177,7 @@ export class AuthController {
    * Rate limited: 3 attempts per minute
    */
   @Post('signup')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.register, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.REGISTER, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.CREATED)
   async signup(@Body() registerDto: RegisterDto): Promise<RegisterResponseDto> {
     return this.register(registerDto);
@@ -199,7 +188,7 @@ export class AuthController {
    * Rate limited: 5 attempts per minute to prevent brute force
    */
   @Post('verify-email')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.verifyEmail, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.VERIFY_EMAIL, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body() dto: VerifyEmailRequestDto): Promise<VerifyEmailResponseDto> {
     this.logger.debug(`Verifying email for: ${dto.email}`);
@@ -227,7 +216,9 @@ export class AuthController {
    * Rate limited: 3 attempts per minute per spec
    */
   @Post('resend-verification')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.resendVerification, ttl: 60000 } })
+  @Throttle({
+    default: { limit: THROTTLE_LIMITS.RESEND_VERIFICATION, ttl: THROTTLE_LIMITS.TTL_MS },
+  })
   @HttpCode(HttpStatus.OK)
   async resendVerification(
     @Body() dto: ResendVerificationRequestDto,
@@ -289,7 +280,7 @@ export class AuthController {
    * Always returns success to prevent email enumeration
    */
   @Post('forgot-password')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.forgotPassword, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.FORGOT_PASSWORD, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordRequestDto): Promise<ForgotPasswordResponseDto> {
     await this.authService.requestPasswordReset(dto.email);
@@ -304,7 +295,7 @@ export class AuthController {
    * Rate limited: 5 attempts per minute to prevent brute force
    */
   @Post('reset-password')
-  @Throttle({ default: { limit: THROTTLE_LIMITS.resetPassword, ttl: 60000 } })
+  @Throttle({ default: { limit: THROTTLE_LIMITS.RESET_PASSWORD, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordRequestDto): Promise<ResetPasswordResponseDto> {
     await this.authService.resetPassword(dto.email, dto.code, dto.newPassword);

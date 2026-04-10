@@ -11,6 +11,7 @@ import {
   TopicQualityRating,
 } from './dto/topic-quality.dto.js';
 import type { TopicQualityResponseDto, TopicQualityIssue } from './dto/topic-quality.dto.js';
+import { LLM_PRESETS } from '../constants/index.js';
 
 /**
  * Raw AI-parsed issue from LLM response
@@ -280,8 +281,7 @@ Analyze this topic for quality issues.`;
     const response = await this.bedrockService.complete({
       systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
-      maxTokens: 1024,
-      temperature: 0.2,
+      ...LLM_PRESETS.TOPIC_QUALITY,
     });
 
     // Extract JSON from response

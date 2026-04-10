@@ -7,6 +7,7 @@ import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreatePropositionDto } from './dto/create-proposition.dto.js';
 import type { PropositionResponseDto } from './dto/create-proposition.dto.js';
+import { PROPOSITION_CONSTRAINTS } from '../constants/index.js';
 
 /**
  * Service for managing propositions
@@ -26,9 +27,13 @@ export class PropositionsService {
    * @param offset - Number of propositions to skip (default: 0)
    * @returns Paginated list of propositions
    */
-  async findByTopicId(topicId: string, limit = 100, offset = 0) {
+  async findByTopicId(
+    topicId: string,
+    limit: number = PROPOSITION_CONSTRAINTS.DEFAULT_LIMIT,
+    offset: number = 0,
+  ) {
     // Enforce maximum limit to prevent excessive data fetching
-    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safeLimit = Math.min(Math.max(1, limit), PROPOSITION_CONSTRAINTS.MAX_LIMIT);
     const safeOffset = Math.max(0, offset);
 
     return this.prisma.proposition.findMany({

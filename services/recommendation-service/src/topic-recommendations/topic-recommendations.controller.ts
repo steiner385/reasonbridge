@@ -12,6 +12,7 @@ import {
   GetSimilarTopicsDto,
   GetTrendingTopicsDto,
 } from './dto/topic-recommendation.dto.js';
+import { CACHE_TTL_MS } from '../constants/index.js';
 import type {
   TopicRecommendationsResponseDto,
   SimilarTopicsResponseDto,
@@ -53,7 +54,7 @@ export class TopicRecommendationsController {
    */
   @Get('similar/:topicId')
   @UseInterceptors(OptionalCacheInterceptor)
-  @CacheTTL(86400000) // 24 hours in ms
+  @CacheTTL(CACHE_TTL_MS.SIMILAR_TOPICS)
   async getSimilarTopics(
     @Param('topicId') topicId: string,
     @Query('limit') limit?: number,
@@ -74,7 +75,7 @@ export class TopicRecommendationsController {
    */
   @Get('trending')
   @UseInterceptors(OptionalCacheInterceptor)
-  @CacheTTL(300000) // 5 minutes in ms
+  @CacheTTL(CACHE_TTL_MS.TRENDING_TOPICS)
   async getTrendingTopics(
     @Query() query: GetTrendingTopicsDto,
   ): Promise<TrendingTopicsResponseDto> {
