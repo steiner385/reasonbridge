@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -11,7 +12,6 @@ import { AppModule } from './app.module.js';
 import { TracingInterceptor } from './observability/index.js';
 
 async function bootstrap() {
-  // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     // Only log errors in test mode to prevent memory leaks from verbose logging
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
@@ -25,9 +25,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
   const document = SwaggerModule.createDocument(app, config);
-  // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
   SwaggerModule.setup('api-docs', app, document);
 
   // Distributed tracing interceptor
@@ -39,10 +37,12 @@ async function bootstrap() {
   const port = process.env['PORT'] || SERVICE_PORTS.AI_SERVICE;
   await app.listen(port, '0.0.0.0');
 
-  console.log(`🤖 AI Service is running on: http://localhost:${port}`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`AI Service is running on: http://localhost:${port}`);
 }
 
 bootstrap().catch((error) => {
-  console.error('Fatal error during bootstrap:', error);
+  const logger = new Logger('Bootstrap');
+  logger.error('Fatal error during bootstrap:', error);
   process.exit(1);
 });
