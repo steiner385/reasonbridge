@@ -36,7 +36,7 @@ test.describe('Complete Verification Flow', () => {
 
   // Helper function to register, login, and navigate
   const registerAndLogin = async (page: Page) => {
-    // Navigate to registration page
+    // Step 1: Navigate to registration page and register
     await page.goto('/register');
     await page.waitForLoadState('domcontentloaded');
 
@@ -55,6 +55,26 @@ test.describe('Complete Verification Flow', () => {
 
     // Wait for navigation away from /register (registration success)
     await page.waitForURL(/^(?!.*\/register).*$/, { timeout: 10000 });
+
+    // Step 2: Login with newly created credentials
+    // Registration doesn't auto-login - we need to explicitly log in
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Open login modal
+    await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+
+    // Fill login form
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel(/email/i).fill(testUser.email);
+    await dialog.getByLabel('Password', { exact: true }).fill(testUser.password);
+
+    // Submit login
+    await dialog.getByRole('button', { name: /^log in$/i }).click();
+
+    // Wait for login modal to close
+    await expect(dialog).not.toBeVisible({ timeout: 15000 });
 
     // Wait for authentication state to stabilize
     // Note: Don't use networkidle as WebSocket keeps network active
