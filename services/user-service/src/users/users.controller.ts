@@ -20,6 +20,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { CacheTTL } from '@nestjs/cache-manager';
+import { isValidUUID } from '@reason-bridge/common';
 import { OptionalCacheInterceptor } from '../interceptors/optional-cache.interceptor.js';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
@@ -52,14 +53,6 @@ import type {
   ContributionsResponseDto,
   ContributionStatsDto,
 } from '../contributions/dto/contribution.dto.js';
-
-/**
- * Validates that a string is a valid UUID v4 format
- */
-function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
-}
 
 @Controller('users')
 export class UsersController {
