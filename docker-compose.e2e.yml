@@ -151,9 +151,9 @@ services:
       db-seed:
         condition: service_completed_successfully
       user-service:
-        condition: service_started
+        condition: service_healthy
       discussion-service:
-        condition: service_started
+        condition: service_healthy
     mem_limit: 128m
     networks:
       - reasonbridge-e2e
@@ -184,6 +184,12 @@ services:
       COGNITO_REGION: us-east-1
     ports:
       - '3001:3001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
@@ -218,6 +224,12 @@ services:
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3002:3002'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3002/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     volumes:
       # Mount AWS credentials from host for Bedrock access
       - ${HOME}/.aws:/root/.aws:ro
@@ -247,6 +259,12 @@ services:
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3007:3007'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3007/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
@@ -281,7 +299,7 @@ services:
       db-seed:
         condition: service_completed_successfully
       ai-service:
-        condition: service_started
+        condition: service_healthy
     mem_limit: 128m
     networks:
       - reasonbridge-e2e
@@ -357,7 +375,7 @@ services:
       db-seed:
         condition: service_completed_successfully
       ai-service:
-        condition: service_started
+        condition: service_healthy
     mem_limit: 128m
     networks:
       - reasonbridge-e2e
