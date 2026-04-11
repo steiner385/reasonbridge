@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
-import type { IAuthService } from './auth.interface.js';
+import type { IAuthService, AuthResult, RefreshResult } from './auth.interface.js';
 import { AUTH_TOKENS } from '../constants/index.js';
 
 /**
@@ -85,7 +85,7 @@ export class DatabaseAuthService implements IAuthService {
   /**
    * Authenticate user against database
    */
-  async authenticateUser(email: string, password: string) {
+  async authenticateUser(email: string, password: string): Promise<AuthResult> {
     // Find user by email
     const user = await this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
@@ -161,7 +161,7 @@ export class DatabaseAuthService implements IAuthService {
   /**
    * Refresh access token
    */
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string): Promise<RefreshResult> {
     try {
       const decoded = jwt.verify(refreshToken, this.jwtSecret) as jwt.JwtPayload;
 

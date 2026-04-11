@@ -7,8 +7,17 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VideoUploadCompleteDto } from './dto/video-upload.dto.js';
-import { VerificationStatus } from '@prisma/client';
+import { VerificationStatus, type VideoUpload } from '@prisma/client';
 import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
+
+/**
+ * S3 object metadata returned by getS3ObjectMetadata
+ */
+export interface S3ObjectMetadata {
+  size: number | undefined;
+  mimeType: string | undefined;
+  lastModified: Date | undefined;
+}
 
 /**
  * Video Upload Service
@@ -192,7 +201,7 @@ export class VideoUploadService {
    * @param verificationId - Verification record ID
    * @returns VideoUpload record or null if not found
    */
-  async getVideoUpload(verificationId: string) {
+  async getVideoUpload(verificationId: string): Promise<VideoUpload | null> {
     return this.prisma.videoUpload.findUnique({
       where: { verificationId },
     });
@@ -204,7 +213,7 @@ export class VideoUploadService {
    * @param userId - User ID
    * @returns Array of VideoUpload records
    */
-  async getUserVideoUploads(userId: string, limit = 100) {
+  async getUserVideoUploads(userId: string, limit = 100): Promise<VideoUpload[]> {
     return this.prisma.videoUpload.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -256,7 +265,7 @@ export class VideoUploadService {
    * @param s3Key - S3 object key
    * @returns Object metadata or null if not found
    */
-  async getS3ObjectMetadata(s3Key: string) {
+  async getS3ObjectMetadata(s3Key: string): Promise<S3ObjectMetadata | null> {
     try {
       const command = new HeadObjectCommand({
         Bucket: this.videoBucket,

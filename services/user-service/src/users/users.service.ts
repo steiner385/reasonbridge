@@ -11,8 +11,10 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { isValidUUID } from '@reason-bridge/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { BotDetectorService } from '../services/bot-detector.service.js';
+import { BotDetectorService, type BotDetectionResult } from '../services/bot-detector.service.js';
+import type { User, UserFollow } from '@prisma/client';
 import { ModerationServiceClient } from '../clients/moderation-service.client.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
 import {
@@ -33,14 +35,6 @@ export interface CreateUserData {
   cognitoSub: string;
 }
 
-/**
- * Validates that a string is a valid UUID v4 format
- */
-function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
-}
-
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -56,7 +50,7 @@ export class UsersService {
    * @param data - User creation data including Cognito sub
    * @returns Created user object
    */
-  async createUser(data: CreateUserData) {
+  async createUser(data: CreateUserData): Promise<User> {
     // Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
       where: {
@@ -91,7 +85,7 @@ export class UsersService {
    * @param cognitoSub - The Cognito user ID from JWT token
    * @returns User object or null if not found
    */
-  async findByCognitoSub(cognitoSub: string) {
+  async findByCognitoSub(cognitoSub: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { cognitoSub },
     });
@@ -110,7 +104,7 @@ export class UsersService {
    * @throws BadRequestException if id is not a valid UUID
    * @throws NotFoundException if user is not found
    */
-  async findById(id: string) {
+  async findById(id: string): Promise<User> {
     // Validate UUID format before querying to prevent Prisma errors
     if (!isValidUUID(id)) {
       this.logger.error(
@@ -146,7 +140,7 @@ export class UsersService {
    * @param updateProfileDto - The fields to update
    * @returns Updated user object
    */
-  async updateProfile(cognitoSub: string, updateProfileDto: UpdateProfileDto) {
+  async updateProfile(cognitoSub: string, updateProfileDto: UpdateProfileDto): Promise<User> {
     // First verify the user exists
     await this.findByCognitoSub(cognitoSub);
 
@@ -165,7 +159,7 @@ export class UsersService {
    * @param updateProfileDto - The fields to update
    * @returns Updated user object
    */
-  async updateProfileById(id: string, updateProfileDto: UpdateProfileDto) {
+  async updateProfileById(id: string, updateProfileDto: UpdateProfileDto): Promise<User> {
     // First verify the user exists
     await this.findById(id);
 
@@ -184,7 +178,7 @@ export class UsersService {
    * @param userId - The user ID to check
    * @returns Bot detection result with risk assessment
    */
-  async checkAndHandleBotPatterns(userId: string) {
+  async checkAndHandleBotPatterns(userId: string): Promise<BotDetectionResult> {
     const detectionResult = await this.botDetector.detectNewAccountBotPatterns(userId);
 
     // If suspicious patterns detected, flag for moderator review
@@ -222,7 +216,7 @@ export class UsersService {
    * @throws NotFoundException if followed user doesn't exist
    * @throws ConflictException if already following
    */
-  async followUser(followerId: string, followedId: string) {
+  async followUser(followerId: string, followedId: string): Promise<UserFollow> {
     // Validate UUID formats
     if (!isValidUUID(followerId)) {
       throw new BadRequestException(`Invalid follower ID format: expected UUID`);
@@ -278,7 +272,7 @@ export class UsersService {
    * @throws BadRequestException if user tries to unfollow themselves
    * @throws NotFoundException if not following the user
    */
-  async unfollowUser(followerId: string, followedId: string) {
+  async unfollowUser(followerId: string, followedId: string): Promise<void> {
     // Validate UUID formats
     if (!isValidUUID(followerId)) {
       throw new BadRequestException(`Invalid follower ID format: expected UUID`);
@@ -380,7 +374,7 @@ export class UsersService {
    * @param avatarS3Key - The S3 object key for deletion
    * @returns Updated user object
    */
-  async updateAvatar(userId: string, avatarUrl: string, avatarS3Key: string) {
+  async updateAvatar(userId: string, avatarUrl: string, avatarS3Key: string): Promise<User> {
     if (!isValidUUID(userId)) {
       throw new BadRequestException(`Invalid user ID format: expected UUID`);
     }
@@ -426,7 +420,7 @@ export class UsersService {
    * @param userId - The user's UUID
    * @returns Updated user object
    */
-  async removeAvatar(userId: string) {
+  async removeAvatar(userId: string): Promise<User> {
     if (!isValidUUID(userId)) {
       throw new BadRequestException(`Invalid user ID format: expected UUID`);
     }

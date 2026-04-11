@@ -4,7 +4,7 @@
  */
 
 import type { FastifyHelmetOptions } from '@fastify/helmet';
-import { DEV_PORTS, RATE_LIMITS, SECURITY_HEADERS } from '../constants';
+import { DEV_PORTS, RATE_LIMITS, SECURITY_HEADERS } from '../constants/index.js';
 
 /**
  * Security configuration for the API Gateway

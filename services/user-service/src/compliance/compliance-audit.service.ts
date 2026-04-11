@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { ComplianceAction, Prisma } from '@prisma/client';
+import { ComplianceAction, Prisma, type ComplianceAuditLog } from '@prisma/client';
 
 /**
  * Metadata structure for compliance audit logs
@@ -75,7 +75,11 @@ export class ComplianceAuditService {
    * @param metadata - Additional context about the action
    * @returns The created audit log entry
    */
-  async logAction(userId: string, action: ComplianceAction, metadata: AuditMetadata = {}) {
+  async logAction(
+    userId: string,
+    action: ComplianceAction,
+    metadata: AuditMetadata = {},
+  ): Promise<ComplianceAuditLog> {
     const log = await this.prisma.complianceAuditLog.create({
       data: {
         userId,
@@ -95,7 +99,7 @@ export class ComplianceAuditService {
    * @param limit - Maximum number of logs to return (default: 100)
    * @returns Array of audit log entries ordered by timestamp descending
    */
-  async getAuditHistory(userId: string, limit = 100) {
+  async getAuditHistory(userId: string, limit = 100): Promise<ComplianceAuditLog[]> {
     return this.prisma.complianceAuditLog.findMany({
       where: { userId },
       orderBy: { timestamp: 'desc' },
@@ -111,7 +115,12 @@ export class ComplianceAuditService {
    * @param endDate - Optional end date for the date range filter
    * @returns Array of audit log entries matching the criteria
    */
-  async getLogsByAction(action: ComplianceAction, startDate?: Date, endDate?: Date, limit = 1000) {
+  async getLogsByAction(
+    action: ComplianceAction,
+    startDate?: Date,
+    endDate?: Date,
+    limit = 1000,
+  ): Promise<ComplianceAuditLog[]> {
     return this.prisma.complianceAuditLog.findMany({
       where: {
         action,

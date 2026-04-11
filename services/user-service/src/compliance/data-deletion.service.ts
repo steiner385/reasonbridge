@@ -6,7 +6,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ComplianceAuditService } from './compliance-audit.service.js';
-import { DeletionStatus, ComplianceAction, AccountStatus } from '@prisma/client';
+import {
+  DeletionStatus,
+  ComplianceAction,
+  AccountStatus,
+  type DataDeletionRequest,
+} from '@prisma/client';
 
 /**
  * Result of a deletion request creation
@@ -149,7 +154,7 @@ export class DataDeletionService {
    *
    * @returns Array of pending deletion requests
    */
-  async getPendingDeletionRequests() {
+  async getPendingDeletionRequests(): Promise<DataDeletionRequest[]> {
     return this.prisma.dataDeletionRequest.findMany({
       where: {
         status: DeletionStatus.PENDING,

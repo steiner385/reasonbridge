@@ -24,7 +24,7 @@ import { UpdateTopicDto } from './dto/update-topic.dto.js';
 import { MergeTopicsDto } from './dto/merge-topics.dto.js';
 import { TopicsSearchService } from './topics-search.service.js';
 import { SlugGeneratorService } from './slug-generator.service.js';
-import { TopicsEditService } from './topics-edit.service.js';
+import { TopicsEditService, type TopicEditRecord } from './topics-edit.service.js';
 import { TopicMergeService } from './topic-merge.service.js';
 import { TopicStatusService } from './topic-status.service.js';
 import { TopicCommonGroundService } from './topic-common-ground.service.js';
@@ -51,7 +51,7 @@ export class TopicsService implements OnModuleInit {
     @Inject(TopicCommonGroundService) private commonGroundService: TopicCommonGroundService,
   ) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     try {
       this.cacheManager = this.moduleRef.get(CACHE_MANAGER, { strict: false });
     } catch {
@@ -836,7 +836,7 @@ export class TopicsService implements OnModuleInit {
    * @param limit - Maximum number of records to return
    * @returns Edit history records
    */
-  async getTopicEditHistory(topicId: string, limit: number = 50) {
+  async getTopicEditHistory(topicId: string, limit: number = 50): Promise<TopicEditRecord[]> {
     // Verify topic exists
     const topic = await this.prisma.discussionTopic.findUnique({
       where: { id: topicId },

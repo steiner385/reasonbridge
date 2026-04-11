@@ -13,17 +13,13 @@ import {
   NotFoundException,
   Logger,
 } from '@nestjs/common';
+import { isValidUUID } from '@reason-bridge/common';
 import { FactCheckService } from '../services/fact-check.service.js';
 import type {
   CheckClaimsRequestDto,
   CheckClaimsResponseDto,
   FactCheckResultDto,
 } from '../dto/check-claims.dto.js';
-
-/**
- * UUID regex pattern for validation (accepts any valid UUID format)
- */
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Controller for fact-check operations
@@ -123,7 +119,7 @@ export class FactCheckController {
   @Get(':id')
   async getResult(@Param('id') id: string): Promise<FactCheckResultDto> {
     // Validate UUID format
-    if (!UUID_REGEX.test(id)) {
+    if (!isValidUUID(id)) {
       throw new BadRequestException('Invalid fact-check result ID format');
     }
 

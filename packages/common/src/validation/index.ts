@@ -9,3 +9,4 @@
 
 export * from './email-validator.js';
 export * from './password-validator.js';
+export * from './uuid-validator.js';

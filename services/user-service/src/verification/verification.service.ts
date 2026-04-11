@@ -18,6 +18,20 @@ import {
   PhoneVerificationVerifyDto,
 } from './dto/phone-verification.dto.js';
 
+export interface PhoneVerificationRequestResult {
+  verificationId: string;
+  phoneNumber: string;
+  expiresAt: string;
+  message: string;
+}
+
+export interface PhoneVerificationResult {
+  success: boolean;
+  message: string;
+  verificationLevel: string;
+  trustScoreIntegrity: number;
+}
+
 /**
  * Verification Service
  * Handles verification requests and management for users
@@ -203,7 +217,7 @@ export class VerificationService {
    * @param verificationId - ID of verification record
    * @returns Verification record or null if not found
    */
-  async getVerification(verificationId: string) {
+  async getVerification(verificationId: string): Promise<VerificationRecord | null> {
     return this.prisma.verificationRecord.findUnique({
       where: { id: verificationId },
     });
@@ -215,7 +229,7 @@ export class VerificationService {
    * @param userId - User ID
    * @returns Array of pending verification records
    */
-  async getPendingVerifications(userId: string) {
+  async getPendingVerifications(userId: string): Promise<VerificationRecord[]> {
     return this.prisma.verificationRecord.findMany({
       where: {
         userId,
@@ -238,7 +252,7 @@ export class VerificationService {
    * @returns Updated verification record
    * @throws Error if verification not found or doesn't belong to user
    */
-  async cancelVerification(verificationId: string, userId: string) {
+  async cancelVerification(verificationId: string, userId: string): Promise<VerificationRecord> {
     const verification = await this.getVerification(verificationId);
 
     if (!verification) {
@@ -370,7 +384,7 @@ export class VerificationService {
    * @param userId - User ID
    * @returns Array of all verification records
    */
-  async getVerificationHistory(userId: string, limit = 100) {
+  async getVerificationHistory(userId: string, limit = 100): Promise<VerificationRecord[]> {
     return this.prisma.verificationRecord.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -386,7 +400,7 @@ export class VerificationService {
    * @param userId - User ID (for authorization)
    * @returns Updated verification record
    */
-  async completeVerification(verificationId: string, userId: string) {
+  async completeVerification(verificationId: string, userId: string): Promise<VerificationRecord> {
     const verification = await this.getVerification(verificationId);
 
     if (!verification) {
@@ -415,7 +429,10 @@ export class VerificationService {
    * @returns Verification record with masked phone number and expiry
    * @throws BadRequestException if phone is invalid or already verified by another user
    */
-  async requestPhoneVerification(userId: string, request: PhoneVerificationRequestDto) {
+  async requestPhoneVerification(
+    userId: string,
+    request: PhoneVerificationRequestDto,
+  ): Promise<PhoneVerificationRequestResult> {
     // Validate phone number format and normalize to E.164
     const validation = this.phoneValidationService.validatePhoneNumber(request.phoneNumber);
     if (!validation.isValid) {
@@ -530,7 +547,10 @@ export class VerificationService {
    * @returns Success confirmation with updated trust level
    * @throws BadRequestException if verification fails (invalid code, expired, max attempts)
    */
-  async verifyPhoneOTP(userId: string, request: PhoneVerificationVerifyDto) {
+  async verifyPhoneOTP(
+    userId: string,
+    request: PhoneVerificationVerifyDto,
+  ): Promise<PhoneVerificationResult> {
     // Find verification record
     const verification = await this.prisma.verificationRecord.findUnique({
       where: { id: request.verificationId },

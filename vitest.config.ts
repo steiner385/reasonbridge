@@ -72,16 +72,6 @@ export default defineConfig({
       'frontend/**/*.test.tsx',
       'frontend/**/*.spec.ts',
       'frontend/**/*.spec.tsx',
-      // Discussion service content-moderation tests - failing due to undefined mocks
-      '**/content-moderation.service.spec.ts',
-      // Moderation service tests - module resolution issues and failing tests
-      '**/moderation.controller.test.ts',
-      '**/moderation-queue.service.spec.ts',
-      '**/moderation-action.repository.spec.ts',
-      '**/ai-review.service.spec.ts',
-      '**/appeal.service.spec.ts',
-      '**/moderation-actions.service.spec.ts',
-      '**/moderation-actions.service.unit.test.ts',
       // MSW setup tests - manages own server lifecycle, conflicts with global setup
       '**/msw-setup.spec.ts',
     ],

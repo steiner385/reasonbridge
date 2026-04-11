@@ -14,6 +14,16 @@ import {
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ModerateResponseDto, ModerationActionResponseDto } from '../dto/moderate-response.dto.js';
 
+export interface ResponseModerationStatus {
+  responseId: string;
+  status: string;
+  isHidden: boolean;
+  isRemoved: boolean;
+  isVisible: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 /**
  * Service for handling content moderation operations
  * Supports hiding and removing responses with proper audit trail
@@ -169,7 +179,7 @@ export class ContentModerationService {
    * Get the current moderation status of a response
    * @param responseId - The ID of the response
    */
-  async getResponseModerationStatus(responseId: string) {
+  async getResponseModerationStatus(responseId: string): Promise<ResponseModerationStatus> {
     const response = await this.prisma.response.findUnique({
       where: { id: responseId },
       select: {

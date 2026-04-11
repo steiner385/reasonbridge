@@ -42,6 +42,7 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error('Fatal error:', error);
+  const logger = new Logger('Bootstrap');
+  logger.error('Fatal error:', error);
   process.exit(1);
 });

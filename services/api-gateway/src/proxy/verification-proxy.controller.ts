@@ -16,15 +16,8 @@ import {
   Inject,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
+import { isValidUUID } from '@reason-bridge/common';
 import { ProxyService } from './proxy.service.js';
-
-/**
- * Validates that a string is a valid UUID v4 format
- */
-function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
-}
 
 /**
  * VerificationProxyController routes verification requests to user-service

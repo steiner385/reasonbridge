@@ -31,7 +31,7 @@ export class CommonGroundTriggerService implements OnModuleInit {
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
   ) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     try {
       this.cacheManager = this.moduleRef.get(CACHE_MANAGER, { strict: false });
     } catch {

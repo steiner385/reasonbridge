@@ -20,6 +20,7 @@ import {
   type InitiateAuthCommandInput,
   type AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';
+import type { AuthResult, RefreshResult } from './auth.interface.js';
 
 @Injectable()
 export class CognitoService implements OnModuleDestroy {
@@ -47,7 +48,7 @@ export class CognitoService implements OnModuleDestroy {
     this.logger.log('CognitoService client destroyed');
   }
 
-  async authenticateUser(email: string, password: string) {
+  async authenticateUser(email: string, password: string): Promise<AuthResult> {
     try {
       const params: InitiateAuthCommandInput = {
         AuthFlow: 'USER_PASSWORD_AUTH' as AuthFlowType,
@@ -99,7 +100,7 @@ export class CognitoService implements OnModuleDestroy {
     }
   }
 
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string): Promise<RefreshResult> {
     try {
       const params: InitiateAuthCommandInput = {
         AuthFlow: 'REFRESH_TOKEN_AUTH' as AuthFlowType,
@@ -223,7 +224,7 @@ export class CognitoService implements OnModuleDestroy {
   /**
    * Alias for authenticateUser (backward compatibility)
    */
-  async initiateAuth(email: string, password: string) {
+  async initiateAuth(email: string, password: string): Promise<AuthResult> {
     return this.authenticateUser(email, password);
   }
 

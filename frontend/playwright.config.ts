@@ -26,8 +26,8 @@ export default defineConfig({
   grep: process.env.CI || process.env.E2E_DOCKER ? /^(?!.*@ai)/ : undefined,
   /* Retry disabled to prevent crash from accumulated timeout failures */
   retries: 0,
-  /* Limit workers in CI to prevent OOM - 2 workers balances speed vs memory */
-  workers: process.env.CI ? 2 : undefined,
+  /* Limit workers to prevent OOM - 2 in CI, 4 locally (default would use all CPUs) */
+  workers: process.env.CI ? 2 : 4,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters
    * In CI, skip allure-playwright to avoid npm install overhead during E2E startup
    */

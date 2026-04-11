@@ -4,6 +4,7 @@
  */
 
 import 'reflect-metadata';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -16,14 +17,12 @@ import { TracingInterceptor } from './observability/tracing.interceptor.js';
 async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter();
 
-  // @ts-ignore - Fastify adapter type compatibility with updated @nestjs/platform-fastify
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
     // Only log errors in test mode to prevent memory leaks from verbose logging
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
 
   // Register Fastify security headers plugin (OWASP compliant)
-  // @ts-ignore - Type compatibility with fastify-helmet
   await app.register(helmet, getHelmetConfig());
 
   // Enable CORS with environment-aware configuration
@@ -60,9 +59,7 @@ async function bootstrap() {
       .addTag('moderation', 'Content moderation')
       .build();
 
-    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
     const document = SwaggerModule.createDocument(app, config);
-    // @ts-ignore - Type compatibility between Fastify and Express adapters for Swagger
     SwaggerModule.setup('api-docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
@@ -82,15 +79,17 @@ async function bootstrap() {
   const port = process.env['PORT'] || SERVICE_PORTS.API_GATEWAY;
   await app.listen(port, '0.0.0.0');
 
-  console.log(`🚀 API Gateway is running on: http://localhost:${port}`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`API Gateway is running on: http://localhost:${port}`);
   if (!process.env['SKIP_SWAGGER']) {
-    console.log(`📚 API Documentation available at: http://localhost:${port}/api-docs`);
+    logger.log(`API Documentation available at: http://localhost:${port}/api-docs`);
   } else {
-    console.log(`⚠️  Swagger disabled (SKIP_SWAGGER=1)`);
+    logger.warn('Swagger disabled (SKIP_SWAGGER=1)');
   }
 }
 
 bootstrap().catch((error) => {
-  console.error('Fatal error during bootstrap:', error);
+  const logger = new Logger('Bootstrap');
+  logger.error('Fatal error during bootstrap:', error);
   process.exit(1);
 });

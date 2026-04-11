@@ -3,6 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/** Result of successful user authentication */
+export interface AuthResult {
+  accessToken: string;
+  idToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  tokenType: string;
+}
+
+/** Result of token refresh */
+export interface RefreshResult {
+  accessToken: string;
+  idToken: string;
+  expiresIn: number;
+  tokenType: string;
+}
+
 /**
  * Interface for authentication services.
  * Both CognitoService and MockAuthService implement this interface.
@@ -10,23 +27,9 @@
 export interface IAuthService {
   signUp(email: string, password: string, displayName: string): Promise<{ userSub: string }>;
 
-  authenticateUser(
-    email: string,
-    password: string,
-  ): Promise<{
-    accessToken: string;
-    idToken: string;
-    refreshToken: string;
-    expiresIn: number;
-    tokenType: string;
-  }>;
+  authenticateUser(email: string, password: string): Promise<AuthResult>;
 
-  refreshAccessToken(refreshToken: string): Promise<{
-    accessToken: string;
-    idToken: string;
-    expiresIn: number;
-    tokenType: string;
-  }>;
+  refreshAccessToken(refreshToken: string): Promise<RefreshResult>;
 
   /**
    * Request a password reset for the given email.

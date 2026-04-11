@@ -483,15 +483,18 @@ describe('InvitationsProxyController', () => {
       });
     });
 
-    it('should return 400 for UUID with wrong version', async () => {
-      // UUID v7 format (which has different first character in version field)
-      const invalidId = 'a1b2c3d4-e5f6-77a8-b9c0-d1e2f3a4b5c6';
+    it('should accept UUID v7 format (permissive UUID validation)', async () => {
+      // UUID v7 format (newer version) should be accepted by the permissive validator
+      const validV7Id = 'a1b2c3d4-e5f6-77a8-b9c0-d1e2f3a4b5c6';
       const authHeader = 'Bearer token123';
+      (mockProxyService.proxyToContactService as ReturnType<typeof vi.fn>).mockResolvedValue({
+        status: 200,
+        data: { success: true },
+      });
 
-      await controller.declineInvitation(invalidId, authHeader, mockRes);
+      await controller.declineInvitation(validV7Id, authHeader, mockRes);
 
-      expect(mockProxyService.proxyToContactService).not.toHaveBeenCalled();
-      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockProxyService.proxyToContactService).toHaveBeenCalled();
     });
   });
 
