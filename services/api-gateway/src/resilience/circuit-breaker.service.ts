@@ -7,7 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { OnModuleDestroy } from '@nestjs/common';
 import CircuitBreaker from 'opossum';
 import type { Options } from 'opossum';
-import { CIRCUIT_BREAKER } from '../constants';
+import { CIRCUIT_BREAKER } from '../constants/index.js';
 
 /**
  * Circuit breaker configuration per service

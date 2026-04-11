@@ -4,7 +4,7 @@
  */
 
 import { Logger } from '@nestjs/common';
-import { RETRY_CONFIG } from '../constants';
+import { RETRY_CONFIG } from '../constants/index.js';
 
 /**
  * Retry configuration options
