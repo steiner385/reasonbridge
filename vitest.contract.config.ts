@@ -36,6 +36,18 @@ export default defineConfig({
     // Each Pact test creates its own mock server on a random port, but parallel
     // execution can cause port conflicts or state leakage in the Pact library
     fileParallelism: false,
+    // Retry failed tests up to 2 times to handle intermittent CI failures
+    // Pact mock server can occasionally fail to bind ports or handle connections
+    // in resource-constrained CI environments
+    retry: process.env.CI ? 2 : 0,
+    // Use process isolation (forks) to ensure clean state between test files
+    // This helps prevent Pact mock server port conflicts in CI
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true, // Run all tests in a single forked process
+      },
+    },
     include: [
       'packages/**/tests/contract/**/*.test.ts',
       'services/**/tests/contract/**/*.test.ts',
