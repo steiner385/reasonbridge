@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { AccessSource } from '@prisma/client';
+import { AccessSource, type TopicAccess } from '@prisma/client';
 
 export interface GrantAccessResult {
   success: boolean;
@@ -176,7 +176,7 @@ export class TopicAccessService {
    * @param topicId - The topic to list access for
    * @returns Array of access records
    */
-  async listTopicAccess(topicId: string) {
+  async listTopicAccess(topicId: string): Promise<TopicAccess[]> {
     return this.prisma.topicAccess.findMany({
       where: { topicId },
       orderBy: { grantedAt: 'desc' },

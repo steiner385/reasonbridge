@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import { AUTH_TOKENS } from '../constants/index.js';
+import type { AuthResult, RefreshResult } from './auth.interface.js';
 
 /**
  * Mock authentication service for local development and E2E testing.
@@ -71,7 +72,7 @@ export class MockAuthService {
   /**
    * Authenticate user (mock implementation)
    */
-  async authenticateUser(email: string, password: string) {
+  async authenticateUser(email: string, password: string): Promise<AuthResult> {
     // Find user by email
     let foundUser: MockUser | undefined;
     for (const user of this.users.values()) {
@@ -137,7 +138,7 @@ export class MockAuthService {
   /**
    * Refresh access token (mock implementation)
    */
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string): Promise<RefreshResult> {
     try {
       const decoded = jwt.verify(refreshToken, this.jwtSecret) as jwt.JwtPayload;
 

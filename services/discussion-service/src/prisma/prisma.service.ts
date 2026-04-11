@@ -43,7 +43,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     this.pool = pool;
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     const maxRetries = 5;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -65,7 +65,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
   }
 
-  async onModuleDestroy() {
+  async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
     await this.pool.end();
   }

@@ -22,7 +22,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     this.pool = pool;
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     let retries = 5;
     while (retries > 0) {
       try {
@@ -38,7 +38,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
   }
 
-  async onModuleDestroy() {
+  async onModuleDestroy(): Promise<void> {
     await this.$disconnect();
     await this.pool.end();
   }
