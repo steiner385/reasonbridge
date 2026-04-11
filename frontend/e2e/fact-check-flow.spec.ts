@@ -33,7 +33,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should display fact-check button on response', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find the fact-check button
@@ -54,7 +54,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should show loading state when requesting fact-check', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find and click the fact-check button
@@ -79,7 +79,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should display fact-check results after request', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find and click the fact-check button
@@ -106,7 +106,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should display fact-check badge when results exist', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Look for fact-check badge (may already exist if previously checked)
@@ -124,7 +124,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should display source information in results', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find and click the fact-check button
@@ -161,7 +161,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should show credibility score indicator', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find and click the fact-check button
@@ -188,7 +188,7 @@ test.describe('Fact-Check Feature', () => {
     // Navigate to a response that may have conflicting fact-check results
 
     // Wait for responses to load
-    const responses = page.locator('[data-testid="response-card"]');
+    const responses = page.locator('[data-testid="response-item"]');
     await expect(responses.first()).toBeVisible({ timeout: 10000 });
 
     // Look for any existing conflict indicator
@@ -211,7 +211,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should display "Related Context" label per FR-012b', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find and click the fact-check button
@@ -241,7 +241,7 @@ test.describe('Fact-Check Feature', () => {
 
   test('should be accessible with keyboard navigation', async ({ page }) => {
     // Wait for responses to load
-    const response = page.locator('[data-testid="response-card"]').first();
+    const response = page.locator('[data-testid="response-item"]').first();
     await expect(response).toBeVisible({ timeout: 10000 });
 
     // Find the fact-check button
