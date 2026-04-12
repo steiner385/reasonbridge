@@ -134,6 +134,9 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
       USER_SERVICE_URL: http://user-service:3001
+      # Increase timeouts for E2E tests - services may be slower during cold start
+      USER_SERVICE_TIMEOUT: 15000
+      DISCUSSION_SERVICE_TIMEOUT: 15000
       DISCUSSION_SERVICE_URL: http://discussion-service:3007
       AI_SERVICE_URL: http://ai-service:3002
       MODERATION_SERVICE_URL: http://moderation-service:3003
@@ -195,7 +198,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 15s
+      # Increased start_period to allow full service initialization before health checks
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
