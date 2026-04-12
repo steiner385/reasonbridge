@@ -48,8 +48,9 @@ RUN pnpm -r --filter="./services/*" --filter="!./services/contact-service" run b
 # Stage 2: Runtime image for a specific service
 FROM node:20-alpine AS runtime
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Install curl for health checks and pnpm
+RUN apk add --no-cache curl && \
+    corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
