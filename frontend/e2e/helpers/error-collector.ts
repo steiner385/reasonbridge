@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Tony Stein
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Error Collector for E2E Navigation Tests
  *
  * Tracks console errors, failed network requests, and uncaught exceptions
@@ -30,6 +35,17 @@ const IGNORED_URL_PATTERNS = [
   '/@vite/', // Vite module resolution
   '/node_modules/.vite/', // Vite cache
   '.hot-update.', // Hot module replacement
+];
+
+/**
+ * URL + status combinations to ignore during error collection.
+ * These are expected errors for specific endpoints (e.g., unauthenticated requests).
+ */
+const IGNORED_URL_STATUS_PATTERNS: Array<{ pattern: string; statuses: number[] }> = [
+  // Unauthenticated users get 401 when fetching notifications - expected behavior
+  { pattern: '/notifications', statuses: [401, 404] },
+  // Profile API may return 401/404 for unauthenticated requests
+  { pattern: '/api/users/me', statuses: [401] },
 ];
 
 /**
@@ -109,6 +125,9 @@ export class ErrorCollector {
     // Skip expected 404s for static assets
     if (this.shouldIgnoreUrl(url)) return;
 
+    // Skip expected errors for specific URL + status combinations
+    if (this.shouldIgnoreUrlStatusCombo(url, status)) return;
+
     this.errors.push({
       type: 'network',
       message: `HTTP ${status}`,
@@ -128,6 +147,12 @@ export class ErrorCollector {
 
   private shouldIgnoreUrl(url: string): boolean {
     return IGNORED_URL_PATTERNS.some((pattern) => url.includes(pattern));
+  }
+
+  private shouldIgnoreUrlStatusCombo(url: string, status: number): boolean {
+    return IGNORED_URL_STATUS_PATTERNS.some(
+      ({ pattern, statuses }) => url.includes(pattern) && statuses.includes(status),
+    );
   }
 
   private shouldIgnoreConsoleMessage(message: string): boolean {

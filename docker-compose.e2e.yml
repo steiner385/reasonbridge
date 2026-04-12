@@ -157,6 +157,8 @@ services:
         condition: service_healthy
       discussion-service:
         condition: service_healthy
+      notification-service:
+        condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 5s
@@ -352,6 +354,12 @@ services:
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3005:3005'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3005/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy

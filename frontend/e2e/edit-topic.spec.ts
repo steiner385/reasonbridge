@@ -98,8 +98,9 @@ test.describe('Topic Editing', () => {
 
       // Should show change preview
       await expect(page.getByText(/review changes/i)).toBeVisible();
-      await expect(page.getByText(originalTitle)).toBeVisible();
-      await expect(page.getByText(editedTitle)).toBeVisible();
+      // Use .first() to avoid strict mode violations - titles may appear in both original/updated sections
+      await expect(page.getByText(originalTitle).first()).toBeVisible();
+      await expect(page.getByText(editedTitle).first()).toBeVisible();
 
       // Confirm and save
       await modal.getByRole('button', { name: /confirm & save/i }).click();
