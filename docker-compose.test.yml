@@ -1,7 +1,13 @@
+# Integration Testing Infrastructure
+# Used by Jenkins CI for integration tests with process isolation
+#
+# Note: container_name removed to allow parallel builds with different COMPOSE_PROJECT_NAME values.
+# Docker Compose V2 names containers as: {project}-{service}-1
+
 services:
   postgres-test:
     image: postgres:15-alpine
-    container_name: reasonbridge-postgres-test
+    # Note: container_name removed for CI parallel build compatibility
     environment:
       POSTGRES_USER: reasonbridge_test
       POSTGRES_PASSWORD: reasonbridge_test
@@ -18,7 +24,7 @@ services:
 
   redis-test:
     image: redis:7-alpine
-    container_name: reasonbridge-redis-test
+    # Note: container_name removed for CI parallel build compatibility
     ports:
       - '6380:6379'
     healthcheck:
@@ -29,7 +35,7 @@ services:
 
   localstack-test:
     image: localstack/localstack:3.0
-    container_name: reasonbridge-localstack-test
+    # Note: container_name removed for CI parallel build compatibility
     environment:
       SERVICES: s3,sqs,sns
       DEBUG: 0
