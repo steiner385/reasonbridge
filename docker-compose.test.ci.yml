@@ -1,0 +1,33 @@
+# CI Overlay for Integration Tests
+# Connects test containers to the Jenkins network for container-to-container communication
+#
+# This file is used automatically by runIntegrationTests when:
+# 1. A projectName is set (build-specific isolation)
+# 2. The Jenkins network exists (Jenkins runs in Docker)
+#
+# Usage:
+#   docker compose -f docker-compose.test.yml -f docker-compose.test.ci.yml up -d
+#
+# The Jenkins agent runs inside the jenkins-network, so test containers must join
+# that network to be reachable by hostname from the agent.
+
+services:
+  postgres-test:
+    networks:
+      - default
+      - jenkins-network
+
+  redis-test:
+    networks:
+      - default
+      - jenkins-network
+
+  localstack-test:
+    networks:
+      - default
+      - jenkins-network
+
+networks:
+  jenkins-network:
+    name: docker-compose_jenkins-network
+    external: true
