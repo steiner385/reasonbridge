@@ -64,7 +64,9 @@ test.describe('Response Posting Flow', () => {
     await composerTextarea.fill('Too short');
 
     // The submit button should be disabled when text is too short
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await expect(submitButton).toBeDisabled();
   });
 
@@ -112,7 +114,9 @@ test.describe('Response Posting Flow', () => {
     await composerTextarea.fill(validContent);
 
     // Submit button should now be enabled
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
 
     // Wait a moment for validation to complete
     await page.waitForTimeout(500);
@@ -137,7 +141,9 @@ test.describe('Response Posting Flow', () => {
     await composerTextarea.fill(responseContent);
 
     // Submit the response
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
 
     // Wait for submission to complete
@@ -169,7 +175,9 @@ test.describe('Response Posting Flow', () => {
         'textarea[placeholder*="perspective"], textarea[placeholder*="response"], textarea[placeholder*="thoughts"]',
       )
       .first();
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
 
     // Initially, submit button should be disabled (no content)
     await expect(submitButton).toBeDisabled();
@@ -209,7 +217,9 @@ test.describe('Response Posting Flow', () => {
     );
 
     // Submit the response
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
 
     // Wait for success

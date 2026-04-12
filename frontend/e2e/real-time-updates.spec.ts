@@ -55,7 +55,9 @@ test.describe('Real-time Updates', () => {
     await expect(composerTextarea.first()).toBeVisible({ timeout: 5000 });
 
     // Verify submit button exists
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await expect(submitButton).toBeVisible();
 
     // Page maintains functionality - real-time updates would be received via WebSocket
@@ -145,7 +147,9 @@ test.describe('Real-time Updates', () => {
     );
     await bobComposer.first().fill(responseContent);
 
-    const bobSubmit = bobPage.getByRole('button', { name: /post response|submit|post/i });
+    const bobSubmit = bobPage.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await bobSubmit.click();
 
     // Wait for submission to complete
