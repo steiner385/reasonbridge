@@ -223,7 +223,7 @@ test.describe('Thread Navigation and Reply', () => {
 
           // Find and click submit button
           const submitButton = page
-            .getByRole('button', { name: /post reply|submit|post response/i })
+            .getByRole('button', { name: /post reply|send message|submit|post response/i })
             .last();
           const hasSubmitButton = (await submitButton.count()) > 0;
 
@@ -405,7 +405,7 @@ test.describe('Thread Navigation and Reply', () => {
           await replyTextarea.fill(replyContent);
 
           const submitButton = page
-            .getByRole('button', { name: /post reply|submit|post response/i })
+            .getByRole('button', { name: /post reply|send message|submit|post response/i })
             .last();
           if ((await submitButton.count()) > 0 && (await submitButton.isEnabled())) {
             await submitButton.click();

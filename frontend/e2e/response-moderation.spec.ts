@@ -83,7 +83,9 @@ test.describe('Response Moderation', () => {
     await expect(responseComposer.first()).toBeVisible({ timeout: 5000 });
 
     // Verify the Post Response button exists
-    const postButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const postButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await expect(postButton).toBeVisible();
   });
 
@@ -103,7 +105,9 @@ test.describe('Response Moderation', () => {
     await composerTextarea.fill(responseContent);
 
     // Submit the response
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
 
     // Wait for submission
@@ -181,7 +185,9 @@ test.describe('Response Moderation', () => {
     const responseContent = `E2E Own Response Test ${uniqueId}: Testing edit/delete menu options.`;
     await composerTextarea.fill(responseContent);
 
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
     await page.waitForTimeout(2000);
 
@@ -323,7 +329,9 @@ test.describe('Response Moderation', () => {
     const responseContent = `E2E Delete Test ${uniqueId}: This response will be deleted.`;
     await composerTextarea.fill(responseContent);
 
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
     await page.waitForTimeout(2000);
 
@@ -480,7 +488,9 @@ test.describe('Response Moderation', () => {
     const responseContent = `E2E No Report Test ${uniqueId}: Should not show report option.`;
     await composerTextarea.fill(responseContent);
 
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
     await page.waitForTimeout(2000);
 

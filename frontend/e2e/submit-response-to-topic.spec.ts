@@ -43,7 +43,9 @@ test.describe('Submit Response to Topic', () => {
       await expect(responseTextarea).toBeVisible();
 
       // Check for submit button
-      const submitButton = page.getByRole('button', { name: /post response|submit|post reply/i });
+      const submitButton = page.getByRole('button', {
+        name: /post response|send message|submit|post reply/i,
+      });
       await expect(submitButton).toBeVisible();
     }
   });
@@ -74,7 +76,9 @@ test.describe('Submit Response to Topic', () => {
 
       // The submit button should be disabled when text is too short
       // This is the correct validation behavior - button stays disabled
-      const submitButton = page.getByRole('button', { name: /post response|submit|post reply/i });
+      const submitButton = page.getByRole('button', {
+        name: /post response|send message|submit|post reply/i,
+      });
       await expect(submitButton).toBeDisabled();
 
       // Check for inline validation indicator (character count showing insufficient)
@@ -119,7 +123,9 @@ test.describe('Submit Response to Topic', () => {
       await responseTextarea.fill(responseContent);
 
       // Submit the response
-      const submitButton = page.getByRole('button', { name: /post response|submit|post reply/i });
+      const submitButton = page.getByRole('button', {
+        name: /post response|send message|submit|post reply/i,
+      });
       await submitButton.click();
 
       // Wait for submission to complete
@@ -384,7 +390,9 @@ test.describe('Submit Response to Topic', () => {
       }
 
       // Submit the response
-      const submitButton = page.getByRole('button', { name: /post response|submit|post reply/i });
+      const submitButton = page.getByRole('button', {
+        name: /post response|send message|submit|post reply/i,
+      });
       await submitButton.click();
 
       // Wait for submission to complete
@@ -431,7 +439,9 @@ test.describe('Submit Response to Topic', () => {
           '#response-content, textarea[placeholder*="perspective"], textarea[placeholder*="response"]',
         )
         .first();
-      const submitButton = page.getByRole('button', { name: /post response|submit|post reply/i });
+      const submitButton = page.getByRole('button', {
+        name: /post response|send message|submit|post reply/i,
+      });
 
       // Initially, submit button should be disabled
       await expect(submitButton).toBeDisabled();

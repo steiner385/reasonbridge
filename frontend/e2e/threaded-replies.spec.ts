@@ -78,7 +78,9 @@ test.describe('Threaded Replies', () => {
     await expect(responseComposer.first()).toBeVisible({ timeout: 5000 });
 
     // Verify the Post Response button exists
-    const postButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const postButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await expect(postButton).toBeVisible();
 
     // Verify the button is disabled when textarea is empty
@@ -101,7 +103,9 @@ test.describe('Threaded Replies', () => {
     await composerTextarea.fill(responseContent);
 
     // Submit the response
-    const submitButton = page.getByRole('button', { name: /post response|submit|post/i });
+    const submitButton = page.getByRole('button', {
+      name: /post response|send message|submit|post/i,
+    });
     await submitButton.click();
 
     // Wait for submission
