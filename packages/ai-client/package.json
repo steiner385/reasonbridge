@@ -36,7 +36,7 @@
     "@aws-sdk/client-bedrock-runtime": "^3.1024.0"
   },
   "devDependencies": {
-    "typescript": "5.9.3"
+    "typescript": "6.0.2"
   },
   "peerDependencies": {
     "@reason-bridge/common": "workspace:*"
