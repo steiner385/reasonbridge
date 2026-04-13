@@ -16,16 +16,16 @@
     "test": "echo \"No tests yet\" && exit 0"
   },
   "dependencies": {
-    "@nestjs/config": "^4.0.3",
+    "@nestjs/config": "^4.0.4",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.1.18",
     "@nestjs/core": "^11.1.18",
     "@nestjs/platform-fastify": "^11.1.18",
-    "@nestjs/swagger": "^11.2.6",
-    "@prisma/adapter-pg": "^7.6.0",
-    "@prisma/client": "7.6.0",
+    "@nestjs/swagger": "^11.2.7",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "7.7.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "@willsoto/nestjs-prometheus": "^6.1.0",
@@ -41,7 +41,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/pg": "^8.20.0",
     "tsx": "^4.7.0",
     "typescript": "5.9.3"
