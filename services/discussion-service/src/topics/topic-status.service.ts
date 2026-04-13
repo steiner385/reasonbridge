@@ -163,10 +163,13 @@ export class TopicStatusService {
    * @param topicId - ID of the topic whose caches should be invalidated
    */
   private async invalidateCaches(topicId: string): Promise<void> {
-    await this.cacheManager.del('topics:list');
-    const cacheKeys = await this.cacheManager.stores.keys();
-    const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
-    const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
-    await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager.del(key)));
+    // Delete known cache keys for this topic
+    await Promise.all([
+      this.cacheManager.del('topics:list'),
+      this.cacheManager.del(`topics:${topicId}`),
+      this.cacheManager.del(`topic:${topicId}`),
+      this.cacheManager.del(`topics:${topicId}:responses`),
+      this.cacheManager.del(`topics:${topicId}:propositions`),
+    ]);
   }
 }
