@@ -159,6 +159,14 @@ services:
         condition: service_healthy
       notification-service:
         condition: service_healthy
+      moderation-service:
+        condition: service_healthy
+      recommendation-service:
+        condition: service_healthy
+      fact-check-service:
+        condition: service_healthy
+      activity-service:
+        condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 5s
@@ -303,6 +311,12 @@ services:
       JWT_SECRET: mock-jwt-secret-for-e2e-testing
     ports:
       - '3003:3003'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3003/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
@@ -329,6 +343,12 @@ services:
       REDIS_URL: redis://redis:6379
     ports:
       - '3004:3004'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3004/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
@@ -385,6 +405,12 @@ services:
       AI_SERVICE_URL: http://ai-service:3002
     ports:
       - '3006:3006'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3006/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
@@ -411,6 +437,12 @@ services:
       REDIS_URL: redis://redis:6379
     ports:
       - '3008:3008'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3008/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
