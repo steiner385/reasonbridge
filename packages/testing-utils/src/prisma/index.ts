@@ -54,9 +54,11 @@ export type { Pool } from 'pg';
 /**
  * Test database connection URL.
  * Uses the test database from docker-compose.test.yml (port 5433).
+ * Falls back to DATABASE_URL if TEST_DATABASE_URL is not set (for CI environments).
  */
 export const TEST_DATABASE_URL =
   process.env['TEST_DATABASE_URL'] ||
+  process.env['DATABASE_URL'] ||
   'postgresql://reasonbridge_test:reasonbridge_test@localhost:5433/reasonbridge_test?schema=public';
 
 /**
