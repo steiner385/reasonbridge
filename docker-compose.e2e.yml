@@ -159,14 +159,6 @@ services:
         condition: service_healthy
       notification-service:
         condition: service_healthy
-      moderation-service:
-        condition: service_healthy
-      recommendation-service:
-        condition: service_healthy
-      fact-check-service:
-        condition: service_healthy
-      activity-service:
-        condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 5s
