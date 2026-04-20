@@ -60,21 +60,21 @@
   },
   "dependencies": {
     "@pact-foundation/pact": "^16.3.0",
-    "@prisma/client": "7.6.0",
-    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "7.7.0",
+    "@prisma/adapter-pg": "^7.7.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "msw": "^2.12.14",
+    "msw": "^2.13.4",
     "pg": "^8.20.0",
     "yaml": "^2.8.3"
   },
   "devDependencies": {
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/pg": "^8.20.0",
     "typescript": "5.9.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
     "@types/jest": ">=29.0.0",
