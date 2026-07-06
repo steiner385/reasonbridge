@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "11.1.18",
-    "@pact-foundation/pact": "^16.3.0",
+    "@pact-foundation/pact": "^17.0.1",
     "@reason-bridge/testing-utils": "workspace:*",
     "@types/node": "25.5.2",
     "@types/pdfkit": "0.17.5",

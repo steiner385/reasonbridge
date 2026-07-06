@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.18",
-    "@pact-foundation/pact": "^16.3.0",
+    "@pact-foundation/pact": "^17.0.1",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "25.5.2",
     "@vitest/coverage-v8": "^4.0.18",
