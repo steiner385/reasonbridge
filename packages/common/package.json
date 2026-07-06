@@ -45,8 +45,8 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.1024.0",
-    "@aws-sdk/client-sqs": "^3.1024.0",
+    "@aws-sdk/client-sns": "^3.1079.0",
+    "@aws-sdk/client-sqs": "^3.1079.0",
     "@reason-bridge/event-schemas": "workspace:*"
   },
   "peerDependencies": {
@@ -70,10 +70,10 @@
     }
   },
   "devDependencies": {
-    "@nestjs/common": "^11.1.18",
-    "@nestjs/config": "^4.0.2",
+    "@nestjs/common": "^11.1.27",
+    "@nestjs/config": "^4.0.4",
     "@nestjs/jwt": "^11.0.2",
-    "jwks-rsa": "^4.0.1",
+    "jwks-rsa": "^4.1.0",
     "typescript": "5.9.3"
   },
   "engines": {
