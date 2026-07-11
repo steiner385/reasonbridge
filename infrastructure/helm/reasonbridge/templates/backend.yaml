@@ -1,0 +1,78 @@
+{{- range .Values.services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-{{ .name }}
+  labels:
+    {{- include "reasonbridge.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: {{ .name }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .replicas | default 2 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .name }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "reasonbridge.labels" $ | nindent 8 }}
+        app.kubernetes.io/name: {{ .name }}
+        app.kubernetes.io/component: backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: {{ .name }}
+          image: "{{ $.Values.image.registry }}/{{ $.Values.image.repository }}/{{ .name }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .port }}
+          env:
+            - name: PORT
+              value: {{ .port | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ $.Release.Name }}-env
+            - secretRef:
+                name: {{ $.Values.existingSecret }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            {{- toYaml $.Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ .name }}
+  labels:
+    {{- include "reasonbridge.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: {{ .name }}
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ .name }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+  ports:
+    - name: http
+      port: {{ .port }}
+      targetPort: {{ .port }}
+{{- end }}

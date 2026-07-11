@@ -1,0 +1,57 @@
+# E2E local-debugging override (opt-in)
+#
+# The base docker-compose.e2e.yml intentionally publishes NO host ports so that
+# multiple E2E stacks can run concurrently on one CI agent (via COMPOSE_PROJECT_NAME)
+# without "port is already allocated" collisions — see issue #1338 and CLAUDE.md
+# E2E fix #3.
+#
+# In CI, everything talks over the reasonbridge-e2e Docker network (http://service:port)
+# and Playwright runs inside that network, so host ports are unnecessary.
+#
+# For LOCAL debugging where you want to hit services from the host, layer this file
+# on top of the base compose file:
+#
+#   docker compose -f docker-compose.e2e.yml -f docker-compose.e2e.local.yml up
+#
+# Do NOT use this override in CI.
+
+services:
+  api-gateway:
+    ports:
+      - '3000:3000'
+
+  user-service:
+    ports:
+      - '3001:3001'
+
+  ai-service:
+    ports:
+      - '3002:3002'
+
+  moderation-service:
+    ports:
+      - '3003:3003'
+
+  recommendation-service:
+    ports:
+      - '3004:3004'
+
+  notification-service:
+    ports:
+      - '3005:3005'
+
+  fact-check-service:
+    ports:
+      - '3006:3006'
+
+  discussion-service:
+    ports:
+      - '3007:3007'
+
+  activity-service:
+    ports:
+      - '3008:3008'
+
+  frontend:
+    ports:
+      - '9080:80'
