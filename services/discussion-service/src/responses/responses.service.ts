@@ -14,7 +14,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CommonGroundTriggerService } from '../services/common-ground-trigger.service.js';
 import { ModerationClientService } from '../clients/moderation-client.service.js';
-import { CreateResponseDto } from './dto/create-response.dto.js';
+import { CreateResponseDto, CreateTopicResponseDto } from './dto/create-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
 import type { ResponseDto, CitedSourceDto, UserSummaryDto } from './dto/response.dto.js';
@@ -124,7 +124,7 @@ export class ResponsesService {
   async createResponse(
     topicId: string,
     authorId: string,
-    createResponseDto: CreateResponseDto,
+    createResponseDto: CreateTopicResponseDto,
   ): Promise<ResponseDto> {
     // Validate input
     if (
@@ -591,7 +591,11 @@ export class ResponsesService {
     });
 
     if (!discussion) {
-      throw new NotFoundException(`Discussion with ID ${dto.discussionId} not found`);
+      // The discussion UI sends the active DiscussionTopic id as discussionId.
+      // Topic-centric environments (including the demo/E2E seed) have no
+      // Discussion rows, so fall back to the topic-based creation flow.
+      // This mirrors the legacy-topic handling in replyToResponse.
+      return this.createResponseForLegacyTopic(userId, dto);
     }
 
     if (discussion.status !== 'ACTIVE') {
@@ -800,6 +804,74 @@ export class ResponsesService {
       deletedAt: result.deletedAt?.toISOString() || null,
       createdAt: result.createdAt.toISOString(),
       updatedAt: result.updatedAt.toISOString(),
+    };
+  }
+
+  /**
+   * Legacy/topic-centric fallback for createResponseForDiscussion.
+   *
+   * The frontend discussion UI passes the active DiscussionTopic id as
+   * `discussionId`. Environments seeded before the Discussion entity existed
+   * (including the demo/E2E seed) only have DiscussionTopic rows, so when no
+   * Discussion matches we treat the id as a topic id and reuse the
+   * topic-based creation flow.
+   *
+   * @param userId - The ID of the user creating the response
+   * @param dto - Response creation data (discussionId holds a topic id)
+   * @returns The created response mapped to ResponseDetailDto
+   * @throws {NotFoundException} When the id matches neither a discussion nor a topic
+   */
+  private async createResponseForLegacyTopic(
+    userId: string,
+    dto: CreateResponseDto,
+  ): Promise<ResponseDetailDto> {
+    const topic = await this.prisma.discussionTopic.findUnique({
+      where: { id: dto.discussionId },
+      select: { id: true },
+    });
+
+    if (!topic) {
+      throw new NotFoundException(`Discussion with ID ${dto.discussionId} not found`);
+    }
+
+    const created = await this.createResponse(topic.id, userId, {
+      content: dto.content,
+      parentId: dto.parentResponseId ?? dto.parentId,
+      citedSources: dto.citedSources ?? dto.citations?.map((citation) => citation.url),
+      containsOpinion: dto.containsOpinion,
+      containsFactualClaims: dto.containsFactualClaims,
+      propositionIds: dto.propositionIds,
+    });
+
+    // Map the topic-based ResponseDto onto the discussion-based detail shape.
+    // Topic-based responses store cited sources as JSON (not Citation rows),
+    // so structured citations are not returned here.
+    return {
+      id: created.id,
+      discussionId: dto.discussionId,
+      content: created.content,
+      author: created.author
+        ? {
+            id: created.author.id,
+            displayName: created.author.displayName,
+            avatarUrl: created.author.avatarUrl ?? null,
+            verificationLevel: created.author.verificationLevel ?? 'BASIC',
+          }
+        : {
+            id: created.authorId,
+            displayName: null,
+            avatarUrl: null,
+            verificationLevel: 'BASIC',
+          },
+      parentResponseId: created.parentId ?? null,
+      citations: [],
+      version: 1,
+      editCount: created.revisionCount ?? 0,
+      editedAt: null,
+      deletedAt: null,
+      createdAt: created.createdAt.toISOString(),
+      updatedAt: created.updatedAt.toISOString(),
+      replyCount: 0,
     };
   }
 

@@ -26,8 +26,9 @@ test.describe('/parental-consent/pending', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    // Page redirects unauthenticated visitors to home
-    await expect(page).toHaveURL(/^\/$|\/login/, { timeout: 8000 });
+    // Page redirects unauthenticated visitors to home (or login).
+    // Note: toHaveURL matches the FULL url, so anchor on the origin.
+    await expect(page).toHaveURL(/^https?:\/\/[^/]+\/(login\/?)?$/, { timeout: 8000 });
   });
 
   test('authenticated user sees the consent-pending screen', async ({ page }) => {
@@ -52,7 +53,7 @@ test.describe('/parental-consent/pending', () => {
     } else {
       // Redirect happened (consent already satisfied or not required) — that is
       // also a valid outcome; the page behaves correctly either way.
-      await expect(page).toHaveURL(/^\/$|\/topics/, { timeout: 8000 });
+      await expect(page).toHaveURL(/^https?:\/\/[^/]+\/(topics\/?)?$/, { timeout: 8000 });
     }
   });
 });
@@ -84,9 +85,9 @@ test.describe('/parental-consent/verify/:token', () => {
 
     // The page fetches consent details for the token on mount; an invalid token
     // should transition to the error state.
-    await expect(
-      page.getByRole('heading', { name: /verification failed/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /verification failed/i })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText(/invalid or expired|could not verify/i)).toBeVisible();
     await expect(page.getByText(/consent link may have expired/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /go to homepage/i })).toBeVisible();
@@ -99,7 +100,8 @@ test.describe('/parental-consent/verify/:token', () => {
     });
 
     await page.getByRole('button', { name: /go to homepage/i }).click();
-    await expect(page).toHaveURL(/^\/$/, { timeout: 5000 });
+    // String URLs are resolved against baseURL, giving an exact match on "/"
+    await expect(page).toHaveURL('/', { timeout: 5000 });
   });
 });
 
@@ -114,9 +116,7 @@ test.describe('/parental-dashboard/:token', () => {
 
     // Page fetches child summary; an invalid token yields a 404 → error state.
     await expect(page.getByRole('heading', { name: /error/i })).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByText(/invalid or expired dashboard link/i),
-    ).toBeVisible();
+    await expect(page.getByText(/invalid or expired dashboard link/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /go to home/i })).toBeVisible();
   });
 
@@ -125,7 +125,8 @@ test.describe('/parental-dashboard/:token', () => {
     await expect(page.getByRole('heading', { name: /error/i })).toBeVisible({ timeout: 10000 });
 
     await page.getByRole('button', { name: /go to home/i }).click();
-    await expect(page).toHaveURL(/^\/$/, { timeout: 5000 });
+    // String URLs are resolved against baseURL, giving an exact match on "/"
+    await expect(page).toHaveURL('/', { timeout: 5000 });
   });
 });
 
@@ -153,9 +154,9 @@ test.describe('Happy-path parental consent verification (requires test hooks)', 
     await page.waitForLoadState('domcontentloaded');
 
     // Step 3: Review state — should show privacy policy summary and consent checkbox
-    await expect(
-      page.getByRole('heading', { name: /parental consent request/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /parental consent request/i })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByRole('checkbox')).toBeVisible();
 
     // Step 4: Check the consent checkbox and grant consent
@@ -164,9 +165,9 @@ test.describe('Happy-path parental consent verification (requires test hooks)', 
     await page.getByRole('button', { name: /grant consent/i }).click();
 
     // Step 5: Verify success screen
-    await expect(
-      page.getByRole('heading', { name: /consent verified/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /consent verified/i })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByRole('button', { name: /visit reasonbridge/i })).toBeVisible();
   });
 
@@ -181,9 +182,9 @@ test.describe('Happy-path parental consent verification (requires test hooks)', 
     await page.goto(`/parental-dashboard/${token}`);
     await page.waitForLoadState('domcontentloaded');
 
-    await expect(
-      page.getByRole('heading', { name: /parental dashboard/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /parental dashboard/i })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText(/topics participated/i)).toBeVisible();
     await expect(page.getByText(/responses posted/i)).toBeVisible();
   });

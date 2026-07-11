@@ -79,19 +79,26 @@ test.describe('Response Bookmarking', () => {
       return;
     }
 
+    // Wait for the bookmark status query to settle so data-bookmarked
+    // reflects the persisted server state before interacting with it.
+    await page.waitForLoadState('networkidle');
+
+    // Bookmarks persist per user across runs against a long-lived backend.
+    // If a previous run left this response bookmarked, un-bookmark it first so
+    // this test always exercises the "add bookmark" transition it covers.
+    if ((await bookmarkButton.getAttribute('data-bookmarked')) === 'true') {
+      await bookmarkButton.click();
+      await expect(bookmarkButton).toHaveAttribute('data-bookmarked', 'false', {
+        timeout: 5000,
+      });
+    }
+
     // Click to add bookmark
     await bookmarkButton.click();
 
-    // Wait for API call to complete
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
-
-    // Button should show bookmarked state
-    const isBookmarked = await bookmarkButton.getAttribute('data-bookmarked');
-    const ariaPressed = await bookmarkButton.getAttribute('aria-pressed');
-
-    // Check either data attribute or aria attribute for bookmarked state
-    expect(isBookmarked === 'true' || ariaPressed === 'true').toBeTruthy();
+    // Button should show bookmarked state (optimistic update confirmed by API)
+    await expect(bookmarkButton).toHaveAttribute('data-bookmarked', 'true', { timeout: 5000 });
+    await expect(bookmarkButton).toHaveAttribute('aria-pressed', 'true');
   });
 
   /**

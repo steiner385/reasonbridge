@@ -25,6 +25,30 @@ interface VerifyResult {
 type PageState = 'loading' | 'review' | 'verifying' | 'success' | 'error';
 
 /**
+ * Extracts a human-readable error message from a consent API payload.
+ *
+ * @remarks
+ * The consent endpoints return `{ valid/success, error }` payloads, but generic
+ * HTTP failures (e.g. an unknown route) come back as the NestJS error envelope
+ * `{ statusCode, message, error: 'Not Found' }`, where `error` is just the HTTP
+ * status text. Only trust `error` when the payload matches the consent
+ * contract; otherwise fall back to a user-friendly message.
+ */
+function extractConsentError(
+  data: unknown,
+  contractFlag: 'valid' | 'success',
+  fallback: string,
+): string {
+  if (data && typeof data === 'object') {
+    const payload = data as Record<string, unknown>;
+    if (typeof payload[contractFlag] === 'boolean' && typeof payload['error'] === 'string') {
+      return payload['error'];
+    }
+  }
+  return fallback;
+}
+
+/**
  * Page for parents to verify their consent
  *
  * @remarks
@@ -63,7 +87,7 @@ function ConsentVerifyPage() {
         const data = await response.json();
 
         if (!response.ok || !data.valid) {
-          setErrorMessage(data.error || 'Invalid or expired consent link');
+          setErrorMessage(extractConsentError(data, 'valid', 'Invalid or expired consent link'));
           setPageState('error');
           return;
         }
@@ -96,7 +120,7 @@ function ConsentVerifyPage() {
         setResult(data);
         setPageState('success');
       } else {
-        setErrorMessage(data.error || 'Failed to verify consent');
+        setErrorMessage(extractConsentError(data, 'success', 'Invalid or expired consent link'));
         setPageState('error');
       }
     } catch {

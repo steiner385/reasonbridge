@@ -1,0 +1,213 @@
+name: CI
+
+# Migrated from Jenkins (reasonbridgeMultibranchPipeline in steiner385/jenkins-config).
+# Jenkins ran full CI for PRs and protected branches only; pull_request + push-to-main
+# reproduces that. Job *names* are the required status check contexts on main —
+# renaming a job requires updating branch protection to match.
+# See docs/superpowers/specs/2026-07-11-github-actions-migration-design.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Parity with Jenkins disableConcurrentBuilds(abortPrevious: true), except
+# pushes to main always run to completion.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: ESLint
+        run: pnpm run lint
+      - name: Typecheck
+        run: pnpm typecheck
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # No AWS credentials on purpose: Bedrock is mocked in tests (.env.test
+      # sets BEDROCK_ENABLED=false) and fork PRs never receive secrets anyway.
+      - name: Run unit tests with coverage
+        run: pnpm run test:unit -- --coverage
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@localhost:5433/reasonbridge_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Start test services (postgres, redis, localstack)
+        run: docker compose -f docker-compose.test.yml up -d --wait
+      - name: Apply Prisma schema to test database
+        working-directory: packages/db-models
+        run: npx prisma db push --accept-data-loss
+      - name: Run integration tests
+        env:
+          INTEGRATION_TEST_DB_READY: 'true'
+        run: npx vitest run --config vitest.integration.config.ts
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-results
+          path: coverage/integration-junit.xml
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Stop test services
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
+
+  contract-tests:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Run contract tests
+        run: pnpm run test:contract
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # Parity with Jenkins: staging/* dependency branches skip E2E. A skipped
+    # required check counts as satisfied for branch protection.
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'staging/')
+    env:
+      # The db-setup script and compose commands key off this project name.
+      COMPOSE_PROJECT_NAME: e2e
+      E2E_PROJECT_NAME: e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      # The local overlay publishes frontend on :9080 (and service ports).
+      # Safe here: each workflow run owns the whole VM, so the parallel-CI
+      # port-conflict rationale for the headless base file does not apply.
+      - name: Build E2E images
+        run: docker compose -f docker-compose.e2e.yml -f docker-compose.e2e.local.yml build
+
+      - name: Start E2E stack
+        run: docker compose -f docker-compose.e2e.yml -f docker-compose.e2e.local.yml up -d
+
+      - name: Wait for database migration and seed
+        run: ./scripts/jenkins-e2e-db-setup.sh
+
+      - name: Wait for frontend
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:9080 > /dev/null 2>&1; then
+              echo "Frontend is ready (attempt $i)"
+              exit 0
+            fi
+            echo "Waiting for frontend... (attempt $i/60)"
+            sleep 2
+          done
+          echo "ERROR: frontend not reachable on :9080"
+          docker compose -f docker-compose.e2e.yml -f docker-compose.e2e.local.yml ps
+          exit 1
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: frontend
+        env:
+          E2E_DOCKER: 'true'
+          PLAYWRIGHT_BASE_URL: http://localhost:9080
+          SKIP_GLOBAL_SETUP_WAIT: 'true'
+        run: npx playwright test
+
+      # Advisory, like the old jenkins/accessibility status: report, don't block.
+      - name: Accessibility tests (non-blocking)
+        continue-on-error: true
+        working-directory: frontend
+        env:
+          E2E_DOCKER: 'true'
+          PLAYWRIGHT_BASE_URL: http://localhost:9080
+          SKIP_GLOBAL_SETUP_WAIT: 'true'
+        run: npx playwright test --config playwright.a11y.config.ts
+
+      - name: Dump service logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.e2e.yml -f docker-compose.e2e.local.yml logs --tail=100
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Stop E2E stack
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml -f docker-compose.e2e.local.yml down -v --remove-orphans
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # Shared packages are built by the setup action; this validates the
+      # frontend production bundle (the old Jenkins Build stage ran the root
+      # `build` script, which is a no-op echo).
+      - name: Build frontend
+        run: pnpm --filter @reason-bridge/frontend run build
+
+  # Aggregate gate, successor to the jenkins/ci context: fails if anything it
+  # needs failed or was cancelled. Skipped jobs (staging/* E2E) count as OK.
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs: [lint, unit-tests, integration-tests, contract-tests, e2e-tests, build]
+    steps:
+      - name: Check required job results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq .
+          if echo "$RESULTS" | jq -e '[.[] | select(.result == "failure" or .result == "cancelled")] | length > 0' > /dev/null; then
+            echo "One or more required jobs failed or were cancelled"
+            exit 1
+          fi
+          echo "All required jobs succeeded (or were intentionally skipped)"

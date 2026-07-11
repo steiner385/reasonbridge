@@ -12,6 +12,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ModerationActionsService } from '../../services/moderation-actions.service.js';
+import { AppealService } from '../../services/appeal.service.js';
 import { AIReviewService } from '../../services/ai-review.service.js';
 import { ContentScreeningService } from '../../services/content-screening.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -34,6 +35,7 @@ import {
 
 describe('Flag-to-Action Integration Tests', () => {
   let moderationActionsService: ModerationActionsService;
+  let appealService: AppealService;
   let aiReviewService: AIReviewService;
   let mockPrisma: any;
   let mockQueueService: any;
@@ -64,10 +66,12 @@ describe('Flag-to-Action Integration Tests', () => {
       moderationAction: {
         create: vi.fn(),
         findUnique: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
         findFirst: vi.fn(),
         findMany: vi.fn(),
         update: vi.fn(),
-        updateMany: vi.fn(),
+        // Conditional writes (race-safe transitions) report the matched row count
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         count: vi.fn().mockResolvedValue(0),
         groupBy: vi.fn().mockResolvedValue([]),
         aggregate: vi.fn().mockResolvedValue({ _avg: { aiConfidence: null } }),
@@ -75,14 +79,24 @@ describe('Flag-to-Action Integration Tests', () => {
       appeal: {
         create: vi.fn(),
         findUnique: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
         findMany: vi.fn(),
         update: vi.fn(),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         count: vi.fn().mockResolvedValue(0),
       },
     };
+    // Interactive transactions execute the callback against the same mock client
+    mockPrisma.$transaction = vi.fn(async (callback: any) => callback(mockPrisma));
 
     // Create service instances with mocked dependencies
     moderationActionsService = new ModerationActionsService(
+      mockPrisma as unknown as PrismaService,
+      mockQueueService as unknown as QueueService,
+    );
+
+    // Appeal workflow now lives on AppealService
+    appealService = new AppealService(
       mockPrisma as unknown as PrismaService,
       mockQueueService as unknown as QueueService,
     );
@@ -156,21 +170,21 @@ describe('Flag-to-Action Integration Tests', () => {
       };
 
       mockPrisma.moderationAction.findUnique.mockResolvedValue(pendingAction);
-      mockPrisma.moderationAction.update.mockResolvedValue(approvedAction);
+      mockPrisma.moderationAction.findUniqueOrThrow.mockResolvedValue(approvedAction);
 
       const result = await moderationActionsService.approveAction(
         testModerationActionId,
         testModeratorId,
       );
 
-      // Verify status updated to ACTIVE
-      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
-        where: { id: testModerationActionId },
+      // Verify status updated to ACTIVE via a conditional write guarded on
+      // PENDING (race-safe: two moderators cannot both resolve the action)
+      expect(mockPrisma.moderationAction.updateMany).toHaveBeenCalledWith({
+        where: { id: testModerationActionId, status: 'PENDING' },
         data: expect.objectContaining({
           status: 'ACTIVE',
           approvedById: testModeratorId,
         }),
-        include: expect.any(Object),
       });
 
       expect(result.status).toBe('active');
@@ -212,19 +226,19 @@ describe('Flag-to-Action Integration Tests', () => {
       });
 
       mockPrisma.moderationAction.findUnique.mockResolvedValue(pendingAction);
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...pendingAction,
-        status: 'REVERSED',
-      });
 
-      await moderationActionsService.rejectAction(testModerationActionId, {
+      await moderationActionsService.rejectAction(testModerationActionId, testModeratorId, {
         reason: 'False positive - content does not violate guidelines',
       });
 
-      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
-        where: { id: testModerationActionId },
+      // Rejection is a conditional write guarded on PENDING and records the
+      // rejecting moderator as an auditable field (Issues #1316/#1320)
+      expect(mockPrisma.moderationAction.updateMany).toHaveBeenCalledWith({
+        where: { id: testModerationActionId, status: 'PENDING' },
         data: expect.objectContaining({
           status: 'REVERSED',
+          rejectedById: testModeratorId,
+          rejectedAt: expect.any(Date),
           reasoning: expect.stringContaining('[REJECTED BY MODERATOR:'),
         }),
       });
@@ -332,7 +346,7 @@ describe('Flag-to-Action Integration Tests', () => {
         status: 'APPEALED',
       });
 
-      const result = await moderationActionsService.createAppeal(
+      const result = await appealService.createAppeal(
         testModerationActionId,
         testUserId,
         mockCreateAppealRequest,
@@ -371,21 +385,18 @@ describe('Flag-to-Action Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(pendingAppeal);
-      mockPrisma.appeal.update.mockResolvedValue(upheldAppeal);
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...pendingAppeal.moderationAction,
-        status: 'REVERSED',
-      });
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(upheldAppeal);
 
-      const result = await moderationActionsService.reviewAppeal(
+      const result = await appealService.reviewAppeal(
         testAppealId,
         testModeratorId,
         mockReviewAppealUpheldRequest,
       );
 
-      // Verify appeal updated to UPHELD
-      expect(mockPrisma.appeal.update).toHaveBeenCalledWith({
-        where: { id: testAppealId },
+      // Verify appeal updated to UPHELD via a conditional write guarded on a
+      // reviewable status (race-safe: no double-processing by two moderators)
+      expect(mockPrisma.appeal.updateMany).toHaveBeenCalledWith({
+        where: { id: testAppealId, status: { in: ['PENDING', 'UNDER_REVIEW'] } },
         data: expect.objectContaining({
           status: 'UPHELD',
           reviewerId: testModeratorId,
@@ -393,9 +404,9 @@ describe('Flag-to-Action Integration Tests', () => {
         }),
       });
 
-      // Verify action reversed
-      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
-        where: { id: testModerationActionId },
+      // Verify action reversed (conditional write guarded on APPEALED)
+      expect(mockPrisma.moderationAction.updateMany).toHaveBeenCalledWith({
+        where: { id: testModerationActionId, status: 'APPEALED' },
         data: expect.objectContaining({
           status: 'REVERSED',
           reasoning: expect.stringContaining('[APPEAL UPHELD:'),
@@ -416,7 +427,7 @@ describe('Flag-to-Action Integration Tests', () => {
       expect(result.status).toBe('upheld');
     });
 
-    it('should deny appeal and keep action status unchanged', async () => {
+    it('should deny appeal and restore action to ACTIVE', async () => {
       const pendingAppeal = createMockAppeal({
         status: 'PENDING',
         moderationAction: createMockModerationAction({ status: 'APPEALED' }),
@@ -430,25 +441,30 @@ describe('Flag-to-Action Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(pendingAppeal);
-      mockPrisma.appeal.update.mockResolvedValue(deniedAppeal);
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(deniedAppeal);
 
-      const result = await moderationActionsService.reviewAppeal(
+      const result = await appealService.reviewAppeal(
         testAppealId,
         testModeratorId,
         mockReviewAppealDeniedRequest,
       );
 
-      // Verify appeal updated to DENIED
-      expect(mockPrisma.appeal.update).toHaveBeenCalledWith({
-        where: { id: testAppealId },
+      // Verify appeal updated to DENIED via a conditional (race-safe) write
+      expect(mockPrisma.appeal.updateMany).toHaveBeenCalledWith({
+        where: { id: testAppealId, status: { in: ['PENDING', 'UNDER_REVIEW'] } },
         data: expect.objectContaining({
           status: 'DENIED',
           reviewerId: testModeratorId,
         }),
       });
 
-      // Verify action NOT updated (appeal denied)
-      expect(mockPrisma.moderationAction.update).not.toHaveBeenCalled();
+      // Verify action NOT reversed — a denied appeal returns the APPEALED
+      // action to ACTIVE so enforcement resumes
+      expect(mockPrisma.moderationAction.updateMany).not.toHaveBeenCalled();
+      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: testModerationActionId },
+        data: { status: 'ACTIVE' },
+      });
 
       // Verify no trust update event published
       expect(mockQueueService.publishEvent).not.toHaveBeenCalled();
@@ -464,11 +480,7 @@ describe('Flag-to-Action Integration Tests', () => {
       mockPrisma.moderationAction.findUnique.mockResolvedValue(reversedAction);
 
       await expect(
-        moderationActionsService.createAppeal(
-          testModerationActionId,
-          testUserId,
-          mockCreateAppealRequest,
-        ),
+        appealService.createAppeal(testModerationActionId, testUserId, mockCreateAppealRequest),
       ).rejects.toThrow('Cannot appeal a moderation action that has already been reversed');
     });
 
@@ -484,11 +496,7 @@ describe('Flag-to-Action Integration Tests', () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(existingAppeal);
 
       await expect(
-        moderationActionsService.createAppeal(
-          testModerationActionId,
-          testUserId,
-          mockCreateAppealRequest,
-        ),
+        appealService.createAppeal(testModerationActionId, testUserId, mockCreateAppealRequest),
       ).rejects.toThrow('An appeal for this moderation action is already pending review');
     });
 
@@ -500,7 +508,7 @@ describe('Flag-to-Action Integration Tests', () => {
       mockPrisma.moderationAction.findUnique.mockResolvedValue(activeAction);
 
       await expect(
-        moderationActionsService.createAppeal(testModerationActionId, testUserId, {
+        appealService.createAppeal(testModerationActionId, testUserId, {
           reason: 'Too short',
         }),
       ).rejects.toThrow('Appeal reason must be at least 20 characters long');
@@ -592,7 +600,7 @@ describe('Flag-to-Action Integration Tests', () => {
         ...pendingAction,
         severity: 'CONSEQUENTIAL',
       });
-      mockPrisma.moderationAction.update.mockResolvedValue(approvedAction);
+      mockPrisma.moderationAction.findUniqueOrThrow.mockResolvedValue(approvedAction);
 
       const approveResult = await moderationActionsService.approveAction(
         'flow-action-id',
@@ -614,7 +622,7 @@ describe('Flag-to-Action Integration Tests', () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(null);
       mockPrisma.appeal.create.mockResolvedValue(appeal);
 
-      const appealResult = await moderationActionsService.createAppeal(
+      const appealResult = await appealService.createAppeal(
         'flow-action-id',
         testUserId,
         mockCreateAppealRequest,
@@ -635,21 +643,25 @@ describe('Flag-to-Action Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
-      mockPrisma.appeal.update.mockResolvedValue(upheldAppeal);
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...approvedAction,
-        status: 'REVERSED',
-      });
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(upheldAppeal);
 
       mockQueueService.publishEvent.mockClear();
 
-      const reviewResult = await moderationActionsService.reviewAppeal(
+      const reviewResult = await appealService.reviewAppeal(
         'flow-appeal-id',
         testModeratorId,
         mockReviewAppealUpheldRequest,
       );
 
       expect(reviewResult.status).toBe('upheld');
+      // Verify the upheld appeal reversed the action (conditional write)
+      expect(mockPrisma.moderationAction.updateMany).toHaveBeenCalledWith({
+        where: { id: 'flow-action-id', status: 'APPEALED' },
+        data: expect.objectContaining({
+          status: 'REVERSED',
+          reasoning: expect.stringContaining('[APPEAL UPHELD:'),
+        }),
+      });
 
       // Verify trust update event was published
       expect(mockQueueService.publishEvent).toHaveBeenCalledWith(

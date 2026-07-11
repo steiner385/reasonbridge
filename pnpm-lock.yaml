@@ -283,6 +283,9 @@ importers:
         specifier: workspace:*
         version: link:../common
     devDependencies:
+      '@types/node':
+        specifier: 25.5.2
+        version: 25.5.2
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -2836,7 +2839,6 @@ packages:
   '@pact-foundation/pact-core@19.2.0':
     resolution: {integrity: sha512-7EB2e850hmBzGnwOYTRj4TCFCJQa9zaOy53bK+ybzEDx801olf0gVlYqMYHt1EsHUZzmtS5uDybpr9UMcZQxgg==}
     engines: {node: '>=20'}
-    cpu: [x64, ia32, arm64]
     os: [darwin, linux, win32]
 
   '@pact-foundation/pact@17.0.1':

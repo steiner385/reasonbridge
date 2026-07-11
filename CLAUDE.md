@@ -167,11 +167,11 @@ packages/
 - Husky 9.x (Git hooks)
 - lint-staged (staged file linting)
 
-**CI/CD**: Jenkins (multibranch pipeline)
+**CI/CD**: GitHub Actions (`.github/workflows/ci.yml`)
 
-- Comprehensive test stages (lint, unit, integration, contract, E2E)
+- Parallel jobs: lint, unit, integration, contract, E2E, build + aggregate `CI` gate
 - Branch protection via required status checks
-- Allure reporting for test results
+- GitHub-hosted `ubuntu-latest` runners (free for this public repo)
 
 ### UI/UX Implementation Patterns
 
@@ -944,118 +944,90 @@ Bypassing hooks defeats the purpose of code quality enforcement and can introduc
 - Console debugging statements in production code
 - Formatting inconsistencies
 
-## Jenkins CI/CD
+## GitHub Actions CI/CD
 
-**Jenkins Server:** `http://jenkins.local`
-**Credentials:** Stored in `~/.jenkins-cli.yaml`
+CI runs on GitHub Actions with GitHub-hosted runners (`ubuntu-latest`). The repo is
+public, so runner minutes are free. Migrated from Jenkins in 2026-07 (the Jenkins
+server no longer exists); design record:
+`docs/superpowers/specs/2026-07-11-github-actions-migration-design.md`.
 
-**Infrastructure:**
+**Workflow:** `.github/workflows/ci.yml`
 
-- Master + 3 agents running via Docker Compose: `/home/tony/jenkins/docker-compose/`
-- Agent allocation: runner-1 and runner-2 (4GB each, general tasks), runner-3 (6GB, E2E dedicated)
-- Start/stop: `cd /home/tony/jenkins/docker-compose && docker compose up -d` / `docker compose down`
-- Agent secrets configured in Docker Compose `.env`
+- **Triggers**: `pull_request`, `push` to `main`, and manual `workflow_dispatch`
+- **Concurrency**: newer pushes cancel in-flight runs for the same ref (except `main`)
+- **Shared setup**: `.github/actions/setup` composite action — pnpm (version from
+  the `packageManager` field) + Node 20 + pnpm store cache + frozen-lockfile
+  install + shared package build (includes Prisma client generation)
 
-**Jenkins Shared Library:**
+**Jobs (run in parallel; job name = status check context):**
 
-- Repository: `github.com/steiner385/reasonbridge-jenkins-lib`
-- Local clone: `/tmp/reasonbridge-jenkins-lib`
-- **IMPORTANT:** Push changes directly to `main` branch - no PRs needed
-- Jenkins loads the library directly from `main`, so branches/PRs just add unnecessary overhead
-- The library contains reusable pipeline steps in `vars/` directory
-
-**Key Job:** `ReasonBridge-ci` - Multibranch pipeline automatically triggered on all branch pushes via GitHub webhook
-
-- Trigger: `githubPush()` in `.jenkins/Jenkinsfile`
-- No manual triggering needed - commits trigger builds automatically
-- Feature branches only run full CI when a PR exists (otherwise skipped)
-
-**Pipeline Stages:**
-
-1. Initialize - Checkout code
-2. Install Dependencies - pnpm install with frozen lockfile
-3. Build Packages - Compile shared packages
-4. Lint - ESLint and formatting checks
-5. Unit Tests - vitest with coverage thresholds
-6. Integration Tests - vitest + Docker services (postgres, redis, localstack)
-7. Contract Tests - API contract validation
-8. E2E Tests - Playwright browser automation (main/develop only)
-9. Build - Production artifact generation
+| Job               | What it runs                                                                                             |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Lint              | `pnpm run lint` + `pnpm typecheck`                                                                       |
+| Unit Tests        | `pnpm run test:unit -- --coverage` (Bedrock mocked; no AWS credentials in CI)                            |
+| Integration Tests | `docker-compose.test.yml` services + `prisma db push` + `vitest --config vitest.integration.config.ts`   |
+| Contract Tests    | `pnpm run test:contract` (Pact mock servers, no Docker services)                                         |
+| E2E Tests         | full compose stack + Playwright on the runner (see Playwright section); skipped for `staging/*` branches |
+| Build             | frontend production build (shared packages built in setup)                                               |
+| CI                | aggregate gate — fails if any needed job failed or was cancelled; skipped jobs count as OK               |
 
 **Debugging:**
 
-- Check console output: `echo $UNIT_TEST_EXIT_CODE` for test exit codes
-- View build logs: Jenkins UI → ReasonBridge-ci → [branch-name] → Build Console
-- Local reproduction: Run stages from `.jenkins/Jenkinsfile` locally (documented in `.github/CI_SETUP.md`)
-- Systematic fix plan: See `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md` for ordered debugging approach
+- View runs: `gh run list --workflow=ci.yml` / `gh run view <id> --log-failed`
+- Artifacts: unit coverage, integration JUnit XML, Playwright report + test-results
+- E2E failures dump the last 100 lines of every compose service's logs
+- Local reproduction: run the same commands from `.github/workflows/ci.yml` locally
+  (they are the standard `pnpm run ...` scripts)
 
 ## GitHub Branch Protection
 
-**CRITICAL: Branch protection configuration must match actual Jenkins status checks.**
+**CRITICAL: Branch protection contexts must match the job names in `.github/workflows/ci.yml`.**
+Renaming a job in the workflow without updating branch protection will block all merges.
 
 **Required Status Checks for `main` branch (Defense-in-Depth):**
 
 ```json
 {
-  "contexts": [
-    "jenkins/lint", // Code quality
-    "jenkins/unit-tests", // Unit tests
-    "jenkins/integration", // Integration tests
-    "jenkins/ci" // Overall pipeline status
-  ],
+  "contexts": ["Lint", "Unit Tests", "Integration Tests", "E2E Tests", "CI"],
   "strict": true
 }
 ```
 
 **Why this configuration:**
 
-- **Comprehensive validation**: Requires lint, unit tests, integration tests, AND overall pipeline success before merge
-- **Full pipeline completion**: jenkins/ci ensures entire pipeline completes successfully (including E2E when applicable)
-- **Strict mode**: Ensures PRs are up-to-date with base branch
-- **Defense-in-depth**: Multiple layers prevent broken code from merging
-- **Prevents premature merges**: PR #709 (2026-01-28) merged at 20:27:43Z while jenkins/ci was pending, later failing at 20:33:31Z
-
-**Status Check Sources:**
-
-- `jenkins/lint` - Posted by `runLintChecks()` helper
-- `jenkins/unit-tests` - Posted by `runUnitTests()` helper
-- `jenkins/integration` - Posted by `runIntegrationTests()` helper
-- `jenkins/ci` - Overall pipeline status (all stages must complete successfully)
-
-**Important Note on jenkins/ci:**
-
-The `jenkins/ci` check represents the overall Jenkins pipeline result and may show UNSTABLE/FAILURE when:
-
-- E2E tests are skipped on feature branches
-- Allure/JUnit plugins mark builds as unstable despite passing tests
-- Any post-success/failure stage fails
-
-This is a stricter requirement than individual stage checks, ensuring the complete pipeline succeeds before merge.
+- Individual pre-merge checks (Lint, Unit Tests, Integration Tests, E2E Tests) plus
+  the aggregate `CI` gate that requires every job to finish without failure
+- **Strict mode**: PRs must be up-to-date with the base branch
+- A **skipped** required check (e.g. E2E Tests on `staging/*` branches) counts as
+  satisfied — this is native GitHub Actions behavior, no manual status posting needed
+- `Contract Tests` and `Build` run but are not required (parity with the old Jenkins
+  setup, where contract tests were soft-failing)
 
 **Verification:**
 
 ```bash
 gh api repos/steiner385/reasonbridge/branches/main/protection/required_status_checks --jq '.contexts'
-# Expected output: ["jenkins/integration","jenkins/lint","jenkins/unit-tests","jenkins/ci"]
+# Expected output: ["Lint","Unit Tests","Integration Tests","E2E Tests","CI"]
 ```
 
 **NEVER modify branch protection without:**
 
-1. Verifying the new status check context actually exists in Jenkins builds
-2. Ensuring the check posts BEFORE merge (not in post-success/failure blocks)
-3. Testing with a dummy PR that auto-merge correctly waits for all checks
-4. Documenting the change and reason in this file
+1. Verifying the new status check context matches a job name that actually reports on PRs
+2. Testing with a dummy PR that auto-merge correctly waits for all checks
+3. Documenting the change and reason in this file
 
-**Incident References:**
+**Incident References (from the Jenkins era; the failure modes still generalize):**
 
-1. **2026-01-24 - PR #668**: Merged with failing test because protection required only `jenkins/ci` (which posts after merge) but not the individual pre-merge checks (lint, unit-tests, integration). Led to initial defense-in-depth configuration with three required checks.
-
-2. **2026-01-28 - PR #709**: Hotfix PR merged at 20:27:43Z with only three checks (lint, unit-tests, integration) passing. The `jenkins/ci` check was still pending and later failed at 20:33:31Z. This incident revealed that while individual stages passed, the overall pipeline could still fail in later stages. Added `jenkins/ci` as fourth required check to ensure complete pipeline success before merge.
+1. **2026-01-24 - PR #668**: Merged with a failing test because protection required only an
+   after-merge status. Lesson: require the individual pre-merge checks.
+2. **2026-01-28 - PR #709**: Merged while the overall pipeline status was still pending, which
+   later failed. Lesson: also require the aggregate gate (`CI`) so the whole pipeline must finish.
 
 **Configuration Evolution:**
 
-- 2026-01-24: Added jenkins/lint, jenkins/unit-tests, jenkins/integration (removed jenkins/ci)
-- 2026-01-28: Re-added jenkins/ci as fourth required check for full pipeline validation
+- 2026-01-24: Required jenkins/lint, jenkins/unit-tests, jenkins/integration
+- 2026-01-28: Re-added jenkins/ci as fourth required check
+- 2026-07-11: Migrated to GitHub Actions contexts: Lint, Unit Tests, Integration Tests, E2E Tests, CI
 
 ## Playwright E2E Testing
 
@@ -1110,15 +1082,24 @@ await page.waitForTimeout(200); // Critical: Allow token storage and state propa
 
 **Reference**: user-registration-login-flow.spec.ts:135-139
 
-**CI/CD E2E Configuration:**
+**CI/CD E2E Configuration (GitHub Actions):**
 
-The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E tests:
+The `E2E Tests` job in `.github/workflows/ci.yml` runs Playwright directly on the
+`ubuntu-latest` runner — no Playwright Docker container:
 
-- **Image**: `mcr.microsoft.com/playwright:v1.58.0-noble`
-- **Pre-installed**: @playwright/test, Chromium browser binaries (~400MB), system dependencies
-- **Benefits**: Eliminates browser downloads, prevents OOM kills (exit code 137), faster startup
+- The E2E stack starts via `docker-compose.e2e.yml` + `docker-compose.e2e.local.yml`
+  (the local overlay publishes the frontend on `:9080`; safe because each workflow
+  run owns the whole VM)
+- `npx playwright install --with-deps chromium` installs the browser matching the
+  workspace-pinned `@playwright/test` version — the old image/package version-match
+  requirement is gone
+- Tests run from `frontend/` with `PLAYWRIGHT_BASE_URL=http://localhost:9080`,
+  `E2E_DOCKER=true`, `SKIP_GLOBAL_SETUP_WAIT=true` (the workflow waits for readiness)
+- Accessibility tests run afterwards as a non-blocking step
+  (`npx playwright test --config playwright.a11y.config.ts`)
 
-**Historical Issues:**
+**Historical Issues (Jenkins era — the containerized-Playwright architecture they
+describe no longer applies, but the failure modes are educational):**
 
 1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
    - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
@@ -1250,25 +1231,24 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 **Issue**: E2E tests fail with exit code 137 (OOM)
 **Solution**:
 
-- Check Playwright container memory limit (should be 4GB)
 - Verify only chromium runs in CI (not all 3 browsers)
 - Ensure allure-playwright is skipped in CI (check reporter config)
-- Clear pnpm store cache on Jenkins agents: `rm -rf ~/.local/share/pnpm/store`
+- Check `mem_limit` values in `docker-compose.e2e.yml` if a service is being killed
 - If recurring, consider reducing parallel test workers
 
-**Issue**: Jenkins build fails but passes locally
+**Issue**: CI fails but passes locally
 **Solution**:
 
-- Check Jenkins console logs for specific errors
-- Verify environment variables are set correctly
-- Ensure Docker services (postgres, redis) are running in Jenkins
+- Check the failing job's logs: `gh run view <run-id> --log-failed`
+- Verify environment variables are set correctly in `.github/workflows/ci.yml`
+- Ensure Docker services started (`docker compose ... up -d --wait` step output)
 - Test with frozen lockfile: `pnpm install --frozen-lockfile`
 
 **Issue**: PR cannot merge - status checks pending
 **Solution**:
 
-- Wait for all Jenkins pipeline stages to complete
-- Required checks: `jenkins/lint`, `jenkins/unit-tests`, `jenkins/integration`
+- Wait for all GitHub Actions jobs to complete
+- Required checks: `Lint`, `Unit Tests`, `Integration Tests`, `E2E Tests`, `CI`
 - If checks fail, fix issues and push new commits
 - PR must be up-to-date with base branch (strict mode)
 
@@ -1296,10 +1276,9 @@ The Jenkins pipeline uses the official Microsoft Playwright Docker image for E2E
 
 ### Getting Help
 
-- **Jenkins Logs**: Jenkins UI → ReasonBridge-ci → [branch] → Build Console
+- **CI Logs**: `gh run list --workflow=ci.yml` / `gh run view <id> --log-failed` (or the Actions tab)
 - **CI Setup Guide**: `.github/CI_SETUP.md`
-- **Systematic Debugging Plan**: `/home/tony/.claude/plans/snuggly-nibbling-pretzel.md`
-- **Local Reproduction**: Run pipeline stages from `.jenkins/Jenkinsfile` locally
+- **Local Reproduction**: run the same `pnpm run ...` commands from `.github/workflows/ci.yml` locally
 
 ## Recent Changes
 

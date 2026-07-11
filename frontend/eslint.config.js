@@ -60,6 +60,15 @@ export default [
       // React Refresh
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
+      // New rules introduced by eslint-plugin-react-hooks 7.x. The codebase
+      // predates them; existing violations are tracked for burn-down rather
+      // than blocking CI. Do not add NEW violations — fix warnings as files
+      // are touched.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/incompatible-library': 'warn',
+      'react-hooks/refs': 'warn',
+
       // TypeScript
       '@typescript-eslint/no-unused-vars': [
         'error',

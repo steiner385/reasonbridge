@@ -10,7 +10,7 @@ permissions:
 jobs:
   delete-branch:
     if: github.event.pull_request.merged == true
-    runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
     steps:
       - name: Delete head branch
         uses: octokit/request-action@v2.x

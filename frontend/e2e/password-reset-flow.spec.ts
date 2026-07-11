@@ -56,7 +56,10 @@ test.describe('Forgot Password Page (/forgot-password)', () => {
     await expect(page.getByRole('heading', { name: /check your email/i })).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByText(/if an account exists/i)).toBeVisible();
+    // "for" scopes this to the success-screen paragraph ("If an account exists
+    // for <email>...") and avoids a strict-mode clash with the transient toast
+    // ("If an account exists, a reset code has been sent...").
+    await expect(page.getByText(/if an account exists for/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /enter reset code/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /try different email/i })).toBeVisible();
   });

@@ -245,11 +245,11 @@ test.describe('Email Signup Flow', () => {
 
       const displayNameInput = page.getByLabel(/display name|username/i);
 
-      // Test too short
-      await displayNameInput.fill('ab');
+      // Test too short (minimum is 2 characters, aligned with backend RegisterDto)
+      await displayNameInput.fill('a');
       await displayNameInput.blur();
 
-      const shortError = page.getByText(/at least 3 characters|too short/i);
+      const shortError = page.getByText(/at least 2 characters|too short/i);
       await expect(shortError).toBeVisible({ timeout: 3000 });
 
       // Test valid length
