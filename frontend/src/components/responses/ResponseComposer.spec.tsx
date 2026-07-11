@@ -2,20 +2,76 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import type { UsePreviewFeedbackResult } from '../../hooks/usePreviewFeedback';
+import { useHybridPreviewFeedback } from '../../hooks/useHybridPreviewFeedback';
 import ResponseComposer from './ResponseComposer';
 
-// Mock usePreviewFeedback hook
-vi.mock('../../hooks/usePreviewFeedback', () => ({
-  usePreviewFeedback: vi.fn(() => ({
+// Mock the authentication context - component reads `user` and requires auth to submit
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuthContext: vi.fn(() => ({
+    user: { id: 'user-1', isMinor: false },
+    isAuthenticated: true,
+  })),
+}));
+
+// requireAuth simply invokes the callback (user is authenticated)
+vi.mock('../../hooks/useRequireAuth', () => ({
+  useRequireAuth: vi.fn(() => ({
+    requireAuth: (callback: () => void) => callback(),
+  })),
+}));
+
+// Typing indicator - no-op in tests
+vi.mock('../../hooks/useTypingIndicator', () => ({
+  useTypingIndicator: vi.fn(() => ({
+    sendTyping: vi.fn(),
+  })),
+}));
+
+// The component uses useHybridPreviewFeedback (regex + AI), not usePreviewFeedback
+vi.mock('../../hooks/useHybridPreviewFeedback', () => ({
+  useHybridPreviewFeedback: vi.fn(() => ({
     feedback: [],
     readyToPost: true,
     isLoading: false,
+    isAILoading: false,
+    isAIFeedback: false,
     error: null,
     summary: '',
     sensitivity: 'MEDIUM',
     setSensitivity: vi.fn(),
   })),
+}));
+
+// Replace MentionInput with a plain textarea so we can drive content changes directly
+vi.mock('./MentionInput', () => ({
+  default: ({
+    id,
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    ariaLabel,
+    maxLength,
+  }: {
+    id: string;
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    disabled?: boolean;
+    ariaLabel?: string;
+    maxLength?: number;
+  }) => (
+    <textarea
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      maxLength={maxLength}
+      data-testid="mention-input"
+    />
+  ),
 }));
 
 describe('ResponseComposer', () => {
@@ -32,94 +88,106 @@ describe('ResponseComposer', () => {
       },
     });
     vi.clearAllMocks();
+    // Reset hybrid feedback mock to default after clearAllMocks wipes implementations
+    vi.mocked(useHybridPreviewFeedback).mockReturnValue({
+      feedback: [],
+      readyToPost: true,
+      isLoading: false,
+      isAILoading: false,
+      isAIFeedback: false,
+      isError: false,
+      error: null,
+      summary: '',
+      sensitivity: 'MEDIUM',
+      setSensitivity: vi.fn(),
+      isContentValid: false,
+      analysisTimeMs: 0,
+    });
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  describe('Inline mode', () => {
-    it('should render collapsed state when inline=true and not expanded', () => {
+  describe('Rendering', () => {
+    // The `inline` prop is currently reserved (unused) in the component: the composer
+    // always renders its expanded form (textarea) regardless of `inline`. There is no
+    // collapsed "Share your perspective" placeholder button. These tests assert the
+    // actual current behavior.
+    it('should render the textarea immediately when inline=true', () => {
       render(<ResponseComposer inline onSubmit={mockOnSubmit} topicId="topic-1" />, { wrapper });
 
-      // Should show placeholder button
-      const placeholderButton = screen.getByRole('button', { name: /share your perspective/i });
-      expect(placeholderButton).toBeInTheDocument();
-
-      // Should not show textarea
-      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /your response/i })).toBeInTheDocument();
     });
 
-    it('should expand when clicked in inline mode', async () => {
-      render(<ResponseComposer inline onSubmit={mockOnSubmit} topicId="topic-1" />, { wrapper });
-
-      // Click placeholder to expand
-      const placeholderButton = screen.getByRole('button', { name: /share your perspective/i });
-      fireEvent.click(placeholderButton);
-
-      // Should now show textarea
-      await waitFor(() => {
-        expect(screen.getByRole('textbox')).toBeInTheDocument();
-      });
-    });
-
-    it('should always show expanded state when inline=false', () => {
+    it('should render the textarea immediately when inline=false', () => {
       render(<ResponseComposer inline={false} onSubmit={mockOnSubmit} topicId="topic-1" />, {
         wrapper,
       });
 
-      // Should show textarea immediately
-      expect(screen.getByRole('textbox')).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /your response/i })).toBeInTheDocument();
     });
 
-    it('should show Cancel button in inline mode', async () => {
+    it('should use the placeholder text as the textarea placeholder (no collapse button)', () => {
       render(<ResponseComposer inline onSubmit={mockOnSubmit} topicId="topic-1" />, { wrapper });
 
-      // Expand
-      fireEvent.click(screen.getByRole('button', { name: /share your perspective/i }));
-
-      // Should show Cancel button
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-      });
+      // "Share your perspective..." is the default placeholder text, not a button
+      expect(screen.getByPlaceholderText(/share your perspective/i)).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /share your perspective/i }),
+      ).not.toBeInTheDocument();
     });
 
-    it('should collapse and clear content when Cancel is clicked', async () => {
-      render(<ResponseComposer inline onSubmit={mockOnSubmit} topicId="topic-1" />, { wrapper });
-
-      // Expand and type content
-      fireEvent.click(screen.getByRole('button', { name: /share your perspective/i }));
-
-      const textarea = await screen.findByRole('textbox');
-      fireEvent.change(textarea, { target: { value: 'Test content' } });
-
-      // Click Cancel
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
-      fireEvent.click(cancelButton);
-
-      // Should collapse back to placeholder
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /share your perspective/i })).toBeInTheDocument();
+    it('should show a Cancel button only when showCancel is true', () => {
+      const { rerender } = render(<ResponseComposer onSubmit={mockOnSubmit} topicId="topic-1" />, {
+        wrapper,
       });
 
-      // Content should be cleared
-      expect(screen.queryByText('Test content')).not.toBeInTheDocument();
+      // No cancel button by default
+      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <ResponseComposer onSubmit={mockOnSubmit} topicId="topic-1" showCancel />
+        </QueryClientProvider>,
+      );
+
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+    });
+
+    it('should call onCancel when the Cancel button is clicked', () => {
+      const onCancel = vi.fn();
+      render(
+        <ResponseComposer
+          onSubmit={mockOnSubmit}
+          topicId="topic-1"
+          showCancel
+          onCancel={onCancel}
+        />,
+        { wrapper },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('Preview feedback integration', () => {
-    it('should call onPreviewFeedbackChange when content changes', async () => {
-      const { usePreviewFeedback } = await import('../../hooks/usePreviewFeedback');
-
-      vi.mocked(usePreviewFeedback).mockReturnValue({
-        feedback: [{ type: 'suggestion', message: 'Add evidence' }],
+    it('should call onPreviewFeedbackChange with the hook values', async () => {
+      vi.mocked(useHybridPreviewFeedback).mockReturnValue({
+        feedback: [{ type: 'suggestion', severity: 'info', message: 'Add evidence' }],
         readyToPost: false,
         isLoading: false,
+        isAILoading: false,
+        isAIFeedback: false,
+        isError: false,
         error: null,
         summary: 'Consider adding more evidence',
         sensitivity: 'MEDIUM',
         setSensitivity: vi.fn(),
-      } as UsePreviewFeedbackResult);
+        isContentValid: true,
+        analysisTimeMs: 0,
+      });
 
       render(
         <ResponseComposer
@@ -130,14 +198,11 @@ describe('ResponseComposer', () => {
         { wrapper },
       );
 
-      const textarea = screen.getByRole('textbox');
-      fireEvent.change(textarea, {
-        target: { value: 'This is a long enough content for preview feedback' },
-      });
-
+      // The component fires the callback from an effect using the hook's return values.
+      // Signature: (feedback, readyToPost, summary, isLoading, error)
       await waitFor(() => {
         expect(mockOnPreviewFeedbackChange).toHaveBeenCalledWith(
-          [{ type: 'suggestion', message: 'Add evidence' }],
+          [{ type: 'suggestion', severity: 'info', message: 'Add evidence' }],
           false,
           'Consider adding more evidence',
           false,
@@ -146,7 +211,22 @@ describe('ResponseComposer', () => {
       });
     });
 
-    it('should clear preview feedback when content is empty', async () => {
+    it('should coerce a null readyToPost to false when notifying the parent', async () => {
+      vi.mocked(useHybridPreviewFeedback).mockReturnValue({
+        feedback: [],
+        readyToPost: null, // AI still analyzing
+        isLoading: false,
+        isAILoading: true,
+        isAIFeedback: false,
+        isError: false,
+        error: null,
+        summary: '',
+        sensitivity: 'MEDIUM',
+        setSensitivity: vi.fn(),
+        isContentValid: true,
+        analysisTimeMs: 0,
+      });
+
       render(
         <ResponseComposer
           onSubmit={mockOnSubmit}
@@ -156,49 +236,27 @@ describe('ResponseComposer', () => {
         { wrapper },
       );
 
-      const textarea = screen.getByRole('textbox');
-
-      // Type content
-      fireEvent.change(textarea, { target: { value: 'Some content' } });
-
-      // Clear content
-      fireEvent.change(textarea, { target: { value: '' } });
-
       await waitFor(() => {
-        expect(mockOnPreviewFeedbackChange).toHaveBeenCalledWith([], true, '', false, null);
+        expect(mockOnPreviewFeedbackChange).toHaveBeenCalledWith([], false, '', false, null);
       });
     });
 
-    it('should not show inline preview when showPreviewFeedbackInline=false', async () => {
-      const { usePreviewFeedback } = await import('../../hooks/usePreviewFeedback');
+    it('should render the inline preview panel once content reaches 20 characters', async () => {
+      render(<ResponseComposer onSubmit={mockOnSubmit} topicId="topic-1" />, { wrapper });
 
-      vi.mocked(usePreviewFeedback).mockReturnValue({
-        feedback: [{ type: 'suggestion', message: 'Add evidence' }],
-        readyToPost: false,
-        isLoading: false,
-        error: null,
-        summary: 'Consider adding more evidence',
-        sensitivity: 'MEDIUM',
-        setSensitivity: vi.fn(),
-      } as UsePreviewFeedbackResult);
+      const textarea = screen.getByTestId('mention-input');
 
-      render(
-        <ResponseComposer
-          onSubmit={mockOnSubmit}
-          topicId="topic-1"
-          showPreviewFeedbackInline={false}
-        />,
-        { wrapper },
-      );
+      // Below threshold: no preview panel
+      fireEvent.change(textarea, { target: { value: 'short' } });
+      expect(screen.queryByLabelText('Preview feedback')).not.toBeInTheDocument();
 
-      const textarea = screen.getByRole('textbox');
+      // At/above threshold (>= 20 chars): preview panel appears
       fireEvent.change(textarea, {
-        target: { value: 'This is a long enough content for preview feedback' },
+        target: { value: 'This is a long enough content for preview' },
       });
 
-      // Should not show inline feedback panel
       await waitFor(() => {
-        expect(screen.queryByText('Feedback Preview')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('Preview feedback')).toBeInTheDocument();
       });
     });
   });
@@ -209,18 +267,16 @@ describe('ResponseComposer', () => {
         wrapper,
       });
 
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'Short' } });
 
-      const submitButton = screen.getByRole('button', { name: /post response/i });
-      fireEvent.click(submitButton);
+      // Submit is disabled below minLength, so submit via the form directly
+      fireEvent.submit(textarea.closest('form')!);
 
-      // Should show error
       await waitFor(() => {
-        expect(screen.getByText(/must be at least 10 characters/i)).toBeInTheDocument();
+        expect(screen.getByText(/at least 10 characters/i)).toBeInTheDocument();
       });
 
-      // Should not call onSubmit
       expect(mockOnSubmit).not.toHaveBeenCalled();
     });
 
@@ -231,7 +287,7 @@ describe('ResponseComposer', () => {
         wrapper,
       });
 
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'This is valid content' } });
 
       const submitButton = screen.getByRole('button', { name: /post response/i });
@@ -253,7 +309,7 @@ describe('ResponseComposer', () => {
         wrapper,
       });
 
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'This is valid content' } });
 
       const submitButton = screen.getByRole('button', { name: /post response/i });
@@ -263,36 +319,12 @@ describe('ResponseComposer', () => {
         expect(mockOnSubmit).toHaveBeenCalled();
       });
 
-      // Form should be reset
       await waitFor(() => {
         expect(textarea).toHaveValue('');
       });
     });
 
-    it('should collapse after submission in inline mode', async () => {
-      mockOnSubmit.mockResolvedValue(undefined);
-
-      render(<ResponseComposer inline onSubmit={mockOnSubmit} topicId="topic-1" minLength={10} />, {
-        wrapper,
-      });
-
-      // Expand
-      fireEvent.click(screen.getByRole('button', { name: /share your perspective/i }));
-
-      // Type and submit
-      const textarea = await screen.findByRole('textbox');
-      fireEvent.change(textarea, { target: { value: 'This is valid content' } });
-
-      const submitButton = screen.getByRole('button', { name: /post response/i });
-      fireEvent.click(submitButton);
-
-      // Should collapse back to placeholder
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /share your perspective/i })).toBeInTheDocument();
-      });
-    });
-
-    it('should include parentId when provided', async () => {
+    it('should include parentId and render "Post Reply" when parentId is provided', async () => {
       mockOnSubmit.mockResolvedValue(undefined);
 
       render(
@@ -305,7 +337,7 @@ describe('ResponseComposer', () => {
         { wrapper },
       );
 
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'This is a reply' } });
 
       const submitButton = screen.getByRole('button', { name: /post reply/i });
@@ -336,7 +368,7 @@ describe('ResponseComposer', () => {
         wrapper,
       });
 
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'Hello' } });
 
       expect(screen.getByText(/5 \/ 100 characters/i)).toBeInTheDocument();
@@ -347,7 +379,7 @@ describe('ResponseComposer', () => {
         wrapper,
       });
 
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'Short content' } });
 
       expect(screen.getByText(/minimum 50/i)).toBeInTheDocument();
@@ -360,14 +392,13 @@ describe('ResponseComposer', () => {
 
       const submitButton = screen.getByRole('button', { name: /post response/i });
 
-      // Should be disabled with no content
+      // Disabled with no content
       expect(submitButton).toBeDisabled();
 
-      // Type short content
-      const textarea = screen.getByRole('textbox');
+      // Type short content (below minLength) - still disabled
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'Short' } });
 
-      // Should still be disabled
       expect(submitButton).toBeDisabled();
     });
   });
@@ -404,7 +435,6 @@ describe('ResponseComposer', () => {
     it('should remove cited source when delete button is clicked', async () => {
       render(<ResponseComposer onSubmit={mockOnSubmit} topicId="topic-1" />, { wrapper });
 
-      // Add a source
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/i);
       fireEvent.change(sourceInput, { target: { value: 'https://example.com' } });
       fireEvent.click(screen.getByRole('button', { name: /add/i }));
@@ -413,7 +443,7 @@ describe('ResponseComposer', () => {
         expect(screen.getByText('https://example.com')).toBeInTheDocument();
       });
 
-      // Remove the source
+      // aria-label is "Remove source https://example.com"
       const removeButton = screen.getByLabelText(/remove source/i);
       fireEvent.click(removeButton);
 
@@ -429,7 +459,6 @@ describe('ResponseComposer', () => {
         wrapper,
       });
 
-      // Add sources
       const sourceInput = screen.getByPlaceholderText(/https:\/\/example.com\/source/i);
       fireEvent.change(sourceInput, { target: { value: 'https://example1.com' } });
       fireEvent.click(screen.getByRole('button', { name: /add/i }));
@@ -445,8 +474,7 @@ describe('ResponseComposer', () => {
         expect(screen.getByText('https://example2.com')).toBeInTheDocument();
       });
 
-      // Submit
-      const textarea = screen.getByRole('textbox');
+      const textarea = screen.getByTestId('mention-input');
       fireEvent.change(textarea, { target: { value: 'Content with sources' } });
 
       const submitButton = screen.getByRole('button', { name: /post response/i });

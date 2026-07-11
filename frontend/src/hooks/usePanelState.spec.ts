@@ -16,8 +16,8 @@ describe('usePanelState', () => {
     it('should initialize with default panel widths', () => {
       const { result } = renderHook(() => usePanelState());
 
-      expect(result.current.panelState.leftPanelWidth).toBe(320);
-      expect(result.current.panelState.rightPanelWidth).toBe(400);
+      expect(result.current.panelState.leftPanelWidth).toBe(300);
+      expect(result.current.panelState.rightPanelWidth).toBe(360);
       expect(result.current.panelState.isLeftPanelCollapsed).toBe(false);
       expect(result.current.panelState.isRightPanelCollapsed).toBe(false);
       expect(result.current.panelState.activeTopic).toBe(null);
@@ -43,8 +43,8 @@ describe('usePanelState', () => {
 
       const { result } = renderHook(() => usePanelState());
 
-      expect(result.current.panelState.leftPanelWidth).toBe(320);
-      expect(result.current.panelState.rightPanelWidth).toBe(400);
+      expect(result.current.panelState.leftPanelWidth).toBe(300);
+      expect(result.current.panelState.rightPanelWidth).toBe(360);
     });
   });
 

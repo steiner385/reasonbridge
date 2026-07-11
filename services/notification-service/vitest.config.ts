@@ -10,15 +10,21 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
-    include: ['src/**/*.test.ts'],
+    // Include both .test.ts and .spec.ts unit suites (E2E/Playwright specs live
+    // under frontend/e2e). The notification event-handler suites are no longer
+    // excluded: @prisma/client is aliased + inlined below (see resolve/ssr) so
+    // they resolve correctly instead of failing on "Prisma module resolution".
+    include: ['src/**/*.{test,spec}.ts'],
+    server: {
+      deps: {
+        inline: ['@prisma/client'],
+      },
+    },
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/*.integration.test.ts', // Run in integration test phase
-      // CI: Prisma client module resolution issues
-      '**/common-ground-notification.handler.test.ts',
-      '**/moderation-notification.handler.test.ts',
+      '**/*.integration.spec.ts', // Run in integration test phase
     ],
     coverage: {
       provider: 'v8',
@@ -44,9 +50,18 @@ export default defineConfig({
       junit: './coverage/junit.xml',
     },
   },
+  ssr: {
+    noExternal: ['@prisma/client'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Resolve @prisma/client from db-models (where it is generated) so the
+      // event-handler suites resolve it under vitest's ESM loader.
+      '@prisma/client': path.resolve(
+        __dirname,
+        '../../packages/db-models/node_modules/@prisma/client',
+      ),
     },
   },
 });

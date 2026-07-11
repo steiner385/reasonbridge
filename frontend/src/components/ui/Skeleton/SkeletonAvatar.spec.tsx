@@ -60,10 +60,11 @@ describe('SkeletonAvatar', () => {
       expect(avatar).not.toHaveClass('animate-pulse');
     });
 
-    it('should apply pulse animation when shimmer is requested', () => {
+    it('should apply shimmer animation classes when shimmer is requested', () => {
       render(<SkeletonAvatar animation="shimmer" data-testid="skeleton-avatar" />);
       const avatar = screen.getByTestId('skeleton-avatar');
-      expect(avatar).toHaveClass('animate-pulse');
+      expect(avatar).toHaveClass('before:animate-shimmer', 'overflow-hidden');
+      expect(avatar).not.toHaveClass('animate-pulse');
     });
   });
 
