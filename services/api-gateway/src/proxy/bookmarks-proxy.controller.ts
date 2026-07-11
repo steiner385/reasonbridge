@@ -15,6 +15,7 @@ import {
   Body,
   Inject,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -27,6 +28,7 @@ import { ProxyService } from './proxy.service.js';
  * - POST /bookmarks - Add a bookmark
  * - DELETE /bookmarks/:responseId - Remove a bookmark
  */
+@ApiTags('bookmarks')
 @Controller('bookmarks')
 export class BookmarksProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

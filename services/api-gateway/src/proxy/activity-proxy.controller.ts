@@ -4,6 +4,7 @@
  */
 
 import { Controller, Get, Post, Query, Body, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -13,6 +14,7 @@ import { ProxyService } from './proxy.service.js';
  * Proxies activity feed and event endpoints to the activity-service.
  * Part of Issue #245 - Activity feed from followed users
  */
+@ApiTags('activity')
 @Controller()
 export class ActivityProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

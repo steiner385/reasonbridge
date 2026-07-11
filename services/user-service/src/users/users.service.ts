@@ -81,9 +81,17 @@ export class UsersService {
   }
 
   /**
-   * Find a user by their Cognito sub (subject identifier)
+   * Find a user by their Cognito sub (subject identifier).
+   *
+   * @remarks
+   * Despite the `find*` prefix, this method throws when the user is absent
+   * (see CLAUDE.md "Current Codebase Notes" on legacy `find*` inconsistencies).
+   * Callers must handle the thrown {@link NotFoundException} rather than
+   * null-checking the result.
+   *
    * @param cognitoSub - The Cognito user ID from JWT token
-   * @returns User object or null if not found
+   * @returns The matching User object
+   * @throws {NotFoundException} When no user has the given Cognito sub
    */
   async findByCognitoSub(cognitoSub: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -98,11 +106,17 @@ export class UsersService {
   }
 
   /**
-   * Find a user by their ID
+   * Find a user by their ID.
+   *
+   * @remarks
+   * Despite the `find*` prefix, this method throws when the user is absent
+   * (see CLAUDE.md "Current Codebase Notes" on legacy `find*` inconsistencies).
+   * Callers must handle the thrown exceptions rather than null-checking.
+   *
    * @param id - The user's UUID
-   * @returns User object or null if not found
-   * @throws BadRequestException if id is not a valid UUID
-   * @throws NotFoundException if user is not found
+   * @returns The matching User object
+   * @throws {BadRequestException} When id is not a valid UUID
+   * @throws {NotFoundException} When no user has the given id
    */
   async findById(id: string): Promise<User> {
     // Validate UUID format before querying to prevent Prisma errors

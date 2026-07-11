@@ -860,6 +860,18 @@ the `{ data, meta }` envelope; existing endpoints can migrate incrementally. Alw
 numeric query params (limit/offset/page/days) with `parsePositiveInt` (or a DTO) instead of
 raw `parseInt`, which can produce `NaN`/negative values that corrupt queries and date math.
 
+## API Versioning
+
+The API gateway uses **URI-based versioning** (`app.enableVersioning({ type: VersioningType.URI, ... })` in `services/api-gateway/src/main.ts`).
+
+- **Policy**: The default version list is `[VERSION_NEUTRAL, '1']`, so every gateway route is served BOTH at its original unversioned path (e.g. `/auth/login`) and at a versioned path (`/v1/auth/login`). This gives existing consumers — including the frontend `/api` base — a deprecation window with no breaking change.
+- **Adding a breaking change**: introduce it under a new version (`@Version('2')` on the specific handler, or `defaultVersion` bump) while keeping the prior version's route as a deprecated alias for the transition window.
+- **Proxying**: gateway proxy controllers hardcode each downstream `path` (e.g. `/auth/login`), so the `/vN` segment is consumed by the gateway router and never forwarded to downstream services (which remain unversioned internally).
+
+## Observability & Logging
+
+All services log structured JSON via the shared `PinoLoggerService` from `@reason-bridge/common` (`packages/common/src/logging/`), passed into `NestFactory.create({ logger })` and `setupGracefulShutdown`. Output is single-line JSON in production (machine-parseable for CloudWatch/Loki), pretty in development, and error-level-only under tests. The gateway binds `correlationId`/`traceparent` from the AsyncLocalStorage request context onto every log line via the logger's `contextProvider`.
+
 ## Speckit Workflow
 
 The project uses a structured feature development process through Claude Code slash commands:

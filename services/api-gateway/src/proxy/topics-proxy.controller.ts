@@ -16,9 +16,11 @@ import {
   Body,
   Inject,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
+@ApiTags('topics')
 @Controller('topics')
 export class TopicsProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

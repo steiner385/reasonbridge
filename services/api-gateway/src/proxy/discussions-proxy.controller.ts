@@ -4,6 +4,7 @@
  */
 
 import { Controller, Get, Post, Param, Query, Body, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -13,6 +14,7 @@ import { ProxyService } from './proxy.service.js';
  * Proxies discussion-related endpoints to the discussion-service.
  * Part of Feature 009 - Discussion Participation
  */
+@ApiTags('discussions')
 @Controller('discussions')
 export class DiscussionsProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

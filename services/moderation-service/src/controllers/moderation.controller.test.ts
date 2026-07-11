@@ -99,6 +99,8 @@ describe('ModerationController', () => {
         content: 'valid content',
       });
 
+      // camelCase key (current convention) plus deprecated snake_case alias.
+      expect(result.screeningResult).toEqual(screeningResult);
       expect(result.screening_result).toEqual(screeningResult);
       expect(result.recommendations).toEqual(['No action needed']);
     });
