@@ -57,10 +57,8 @@ function ToastContainer({ toasts, onDismiss, position = 'top-right' }: ToastCont
     'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
   };
 
-  if (toasts.length === 0) {
-    return null;
-  }
-
+  // Always render the live region so it pre-exists before toasts arrive — several
+  // screen readers only announce content added to a pre-existing aria-live region.
   return (
     <div
       className={`

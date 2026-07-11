@@ -84,7 +84,7 @@ export function NotificationItem({ notification, onMarkAsRead, onClose }: Notifi
     }
   };
 
-  const content = (
+  const notificationBody = (
     <div
       className={`
         flex items-start gap-3 p-3
@@ -124,33 +124,47 @@ export function NotificationItem({ notification, onMarkAsRead, onClose }: Notifi
         </p>
       </div>
 
-      {/* Mark as read button (for unread notifications) */}
-      {!read && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onMarkAsRead(id);
-          }}
-          className="shrink-0 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          title="Mark as read"
-        >
-          <CheckCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-        </button>
-      )}
+      {/* Spacer to reserve space for the absolutely-positioned mark-as-read button */}
+      {!read && <div className="shrink-0 w-6" aria-hidden="true" />}
     </div>
   );
 
-  // If notification has a URL, wrap in Link
+  // Mark-as-read rendered as a sibling, not nested inside Link, to avoid
+  // interactive-inside-interactive markup that AT exposes unpredictably.
+  const markAsReadButton = !read ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onMarkAsRead(id);
+      }}
+      className="absolute top-2 right-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+      aria-label="Mark notification as read"
+    >
+      <CheckCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+    </button>
+  ) : null;
+
+  // If notification has a URL, wrap in Link with mark-as-read as a sibling
   if (url) {
     return (
-      <Link to={url} onClick={handleClick} className="block">
-        {content}
-      </Link>
+      <div className="relative">
+        <Link to={url} onClick={handleClick} className="block">
+          {notificationBody}
+        </Link>
+        {markAsReadButton}
+      </div>
     );
   }
 
-  // Otherwise, just render the content
-  return <div onClick={handleClick}>{content}</div>;
+  // No URL — render as a button so keyboard users can activate it
+  return (
+    <div className="relative">
+      <button type="button" onClick={handleClick} className="block w-full text-left">
+        {notificationBody}
+      </button>
+      {markAsReadButton}
+    </div>
+  );
 }

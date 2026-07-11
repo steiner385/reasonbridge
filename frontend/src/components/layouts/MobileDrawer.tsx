@@ -197,6 +197,7 @@ export function MobileDrawer() {
         `}
         aria-label="Mobile navigation drawer"
         aria-hidden={!isMobileOpen}
+        inert={!isMobileOpen}
       >
         {/* Drawer Header */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-800">

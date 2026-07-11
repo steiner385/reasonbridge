@@ -381,9 +381,9 @@ export function ResponseItem({
                   </div>
                 </div>
 
-                {/* Response menu - visible on hover, only when auth state is known */}
+                {/* Response menu - always visible on touch devices, hover-revealed on desktop */}
                 {!isAuthLoading && (
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
                     <ResponseMenu
                       isOwnResponse={isOwnResponse}
                       onEdit={() => setShowEditModal(true)}

@@ -88,7 +88,7 @@ export function ProfileBio({
             disabled={isUpdating}
             aria-label="Edit bio"
           />
-          <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+          <div className="absolute bottom-2 right-2 text-xs text-gray-500">
             {editedBio.length}/{maxLength}
           </div>
         </div>

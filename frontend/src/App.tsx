@@ -72,6 +72,10 @@ function App() {
         <LoginModalProvider>
           <OfflineIndicator />
           <PanicButton onReport={handleSafetyReport} />
+          {/* Skip to main content link (WCAG 2.4.1 Level A) */}
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
           {routing}
         </LoginModalProvider>
       </TourProvider>
