@@ -194,26 +194,42 @@ describe('ModerationActionButtons', () => {
   });
 
   describe('Reject Action', () => {
-    it('should call rejectModerationAction on reject click', async () => {
-      const mockReject = vi.fn().mockResolvedValue({
-        ...mockModerationAction,
-        status: 'reversed',
-      });
+    // Rejecting always requires a reason: click Reject → type reason → Confirm.
+    const rejectWithReason = async (reason: string) => {
+      await userEvent.click(screen.getByText('Reject'));
+      const input = await screen.findByPlaceholderText(/Provide a reason/i);
+      await userEvent.type(input, reason);
+      await userEvent.click(screen.getByText('Confirm Reject'));
+    };
+
+    it('should call rejectModerationAction with the entered reason', async () => {
+      const mockReject = vi.fn().mockResolvedValue(undefined);
       moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
       renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
-      const rejectButton = screen.getByText('Reject');
-      await userEvent.click(rejectButton);
+      await rejectWithReason('Not a real violation');
 
       await waitFor(() => {
-        expect(mockReject).toHaveBeenCalledWith('action-123');
+        expect(mockReject).toHaveBeenCalledWith('action-123', 'Not a real violation');
       });
     });
 
-    it('should call onReject callback with updated action', async () => {
-      const updatedAction = { ...mockModerationAction, status: 'reversed' as const };
-      const mockReject = vi.fn().mockResolvedValue(updatedAction);
+    it('should not call the API and should show an error when no reason is given', async () => {
+      const mockReject = vi.fn().mockResolvedValue(undefined);
+      moderationApi.rejectModerationAction.mockImplementation(mockReject);
+
+      renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
+
+      await userEvent.click(screen.getByText('Reject'));
+      await userEvent.click(screen.getByText('Confirm Reject'));
+
+      expect(mockReject).not.toHaveBeenCalled();
+      expect(await screen.findByText(/Please provide a reason/i)).toBeInTheDocument();
+    });
+
+    it('should call onReject callback with the action', async () => {
+      const mockReject = vi.fn().mockResolvedValue(undefined);
       moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
       const onReject = vi.fn();
@@ -221,11 +237,10 @@ describe('ModerationActionButtons', () => {
         <ModerationActionButtons action={mockModerationAction} onReject={onReject} />,
       );
 
-      const rejectButton = screen.getByText('Reject');
-      await userEvent.click(rejectButton);
+      await rejectWithReason('Duplicate report');
 
       await waitFor(() => {
-        expect(onReject).toHaveBeenCalledWith(updatedAction);
+        expect(onReject).toHaveBeenCalledWith(mockModerationAction);
       });
     });
 
@@ -233,24 +248,16 @@ describe('ModerationActionButtons', () => {
       const mockReject = vi
         .fn()
         .mockImplementation(
-          () =>
-            new Promise((resolve) =>
-              setTimeout(() => resolve({ ...mockModerationAction, status: 'reversed' }), 300),
-            ),
+          () => new Promise((resolve) => setTimeout(() => resolve(undefined), 300)),
         );
       moderationApi.rejectModerationAction.mockImplementation(mockReject);
 
       renderWithNotifications(<ModerationActionButtons action={mockModerationAction} />);
 
-      const rejectButton = screen.getByText('Reject');
-      await userEvent.click(rejectButton);
+      await rejectWithReason('Insufficient evidence');
 
       // Wait for React to re-render with loading state
       expect(await screen.findByText('Rejecting...')).toBeInTheDocument();
-
-      await waitFor(() => {
-        expect(screen.getByText('Reject')).toBeInTheDocument();
-      });
     });
 
     it('should handle reject errors gracefully', async () => {
@@ -263,13 +270,11 @@ describe('ModerationActionButtons', () => {
         <ModerationActionButtons action={mockModerationAction} onError={onError} />,
       );
 
-      const rejectButton = screen.getByText('Reject');
-      await userEvent.click(rejectButton);
+      await rejectWithReason('Some reason');
 
       await waitFor(
         () => {
           expect(onError).toHaveBeenCalledWith('Server error');
-          expect(screen.getAllByText('Server error')).toHaveLength(2);
         },
         { timeout: 2000 },
       );

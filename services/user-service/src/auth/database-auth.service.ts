@@ -3,12 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { VerificationTokenType } from '@prisma/client';
+import { validatePassword } from '@reason-bridge/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { VerificationService } from './verification.service.js';
+import { EmailService } from '../services/email.service.js';
 import type { IAuthService, AuthResult, RefreshResult } from './auth.interface.js';
 import { AUTH_TOKENS } from '../constants/index.js';
 
@@ -25,11 +34,17 @@ export class DatabaseAuthService implements IAuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly verificationService: VerificationService,
+    private readonly emailService: EmailService,
   ) {
-    this.jwtSecret = this.configService?.get<string>(
-      'JWT_SECRET',
-      'local-jwt-secret-for-development',
-    );
+    // Fail fast if JWT_SECRET is missing outside of test environments. Only the
+    // test suite may fall back to a shared, well-known secret (which must match
+    // the value used by JwtAuthGuard so tokens verify end-to-end).
+    const secret = this.configService?.get<string>('JWT_SECRET');
+    if (!secret && process.env['NODE_ENV'] !== 'test') {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
   }
 
   /**
@@ -144,7 +159,7 @@ export class DatabaseAuthService implements IAuthService {
         sub: user.id, // Use actual user ID (UUID) instead of cognitoSub
         token_use: 'refresh',
         iat: now,
-        exp: now + 30 * 24 * 3600, // 30 days
+        exp: now + AUTH_TOKENS.REFRESH_EXPIRES_IN_SECONDS, // 7 days (issue #1384)
       },
       this.jwtSecret,
     );
@@ -163,7 +178,10 @@ export class DatabaseAuthService implements IAuthService {
    */
   async refreshAccessToken(refreshToken: string): Promise<RefreshResult> {
     try {
-      const decoded = jwt.verify(refreshToken, this.jwtSecret) as jwt.JwtPayload;
+      // Pin the algorithm to the symmetric HS256 we sign with (issue #1300).
+      const decoded = jwt.verify(refreshToken, this.jwtSecret, {
+        algorithms: ['HS256'],
+      }) as jwt.JwtPayload;
 
       if (decoded['token_use'] !== 'refresh') {
         throw new UnauthorizedException('Invalid refresh token');
@@ -217,23 +235,71 @@ export class DatabaseAuthService implements IAuthService {
 
   /**
    * Request a password reset for the given email.
-   * Not supported in database auth mode - use the main AuthService instead.
+   *
+   * Always resolves successfully (even for unknown or OAuth-only accounts) to
+   * prevent email enumeration. When a matching password-based account exists, a
+   * password reset code is generated and emailed.
+   *
+   * @param email - The email address requesting a password reset
    */
-  async requestPasswordReset(_email: string): Promise<void> {
-    // In database auth mode, password reset is handled by the main AuthService
-    // which has access to VerificationService and EmailService.
-    // This stub exists only to satisfy the interface.
-    throw new Error('Password reset not supported in database auth mode');
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      select: { id: true, email: true, passwordHash: true },
+    });
+
+    // Silently succeed for unknown accounts to avoid leaking which emails exist.
+    if (!user || !user.passwordHash) {
+      return;
+    }
+
+    try {
+      const code = await this.verificationService.generateToken(
+        user.id,
+        user.email,
+        VerificationTokenType.PASSWORD_RESET,
+      );
+
+      await this.emailService.sendPasswordResetEmail({
+        email: user.email,
+        code,
+      });
+    } catch {
+      // Swallow errors so the response never reveals account existence or
+      // delivery status. Failures are logged inside the underlying services.
+    }
   }
 
   /**
    * Reset the password using a verification code.
-   * Not supported in database auth mode - use the main AuthService instead.
+   *
+   * @param email - The account email address
+   * @param code - The password reset verification code
+   * @param newPassword - The new password to set
+   * @throws {BadRequestException} When the new password fails strength validation
+   * @throws {UnauthorizedException} When the code is invalid or expired
    */
-  async resetPassword(_email: string, _code: string, _newPassword: string): Promise<void> {
-    // In database auth mode, password reset is handled by the main AuthService
-    // which has access to VerificationService and EmailService.
-    // This stub exists only to satisfy the interface.
-    throw new Error('Password reset not supported in database auth mode');
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new BadRequestException({
+        message: 'Password does not meet requirements',
+        errors: passwordValidation.errors,
+      });
+    }
+
+    // Verifies the code and returns the owning user id (throws if invalid/expired).
+    const userId = await this.verificationService.verifyToken(
+      email,
+      code,
+      VerificationTokenType.PASSWORD_RESET,
+    );
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
   }
 }

@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface ModalProps {
   /**
@@ -85,18 +86,9 @@ const Modal: React.FC<ModalProps> = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closeOnEscape, onClose]);
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
+  // Prevent body scroll when modal is open (reference-counted so overlapping
+  // overlays don't clobber each other's lock — see #1378).
+  useScrollLock(isOpen);
 
   // Focus trap
   useEffect(() => {

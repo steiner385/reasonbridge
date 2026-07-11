@@ -6,6 +6,12 @@
 import React, { useState } from 'react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import {
+  PASSWORD_SPECIAL_CHAR_REGEX,
+  PASSWORD_SPECIAL_CHAR_MESSAGE,
+  DISPLAY_NAME_MIN_LENGTH,
+  DISPLAY_NAME_MAX_LENGTH,
+} from '../../schemas/common';
 
 export interface EmailSignupFormData {
   email: string;
@@ -101,16 +107,16 @@ function EmailSignupForm({
     return undefined;
   };
 
-  // Display name validation (3-50 characters)
+  // Display name validation (aligned with backend RegisterDto: 2-50 characters)
   const validateDisplayName = (displayName: string): string | undefined => {
     if (!displayName) {
       return 'Display name is required';
     }
-    if (displayName.length < 3) {
-      return 'Display name must be at least 3 characters';
+    if (displayName.trim().length < DISPLAY_NAME_MIN_LENGTH) {
+      return `Display name must be at least ${DISPLAY_NAME_MIN_LENGTH} characters`;
     }
-    if (displayName.length > 50) {
-      return 'Display name must be at most 50 characters';
+    if (displayName.trim().length > DISPLAY_NAME_MAX_LENGTH) {
+      return `Display name must be at most ${DISPLAY_NAME_MAX_LENGTH} characters`;
     }
     return undefined;
   };
@@ -132,8 +138,8 @@ function EmailSignupForm({
     if (!/[0-9]/.test(password)) {
       return 'Password must contain at least one number';
     }
-    if (!/[^A-Za-z0-9]/.test(password)) {
-      return 'Password must contain at least one special character';
+    if (!PASSWORD_SPECIAL_CHAR_REGEX.test(password)) {
+      return PASSWORD_SPECIAL_CHAR_MESSAGE;
     }
     return undefined;
   };

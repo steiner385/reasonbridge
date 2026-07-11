@@ -15,6 +15,10 @@ interface RegisterResponse {
   displayName: string;
   message: string;
   requiresEmailVerification: boolean;
+  /** Whether parental consent is required (true for minors) */
+  requiresParentalConsent?: boolean;
+  /** Whether the parental-consent email was sent */
+  consentEmailSent?: boolean;
 }
 
 /**
@@ -31,19 +35,29 @@ function RegisterPage() {
     setError(undefined);
 
     try {
+      // Forward ALL collected fields. Previously only email/password/displayName
+      // were sent, silently dropping birthDate/declaredCountry/parentEmail — so a
+      // minor's parental-consent flow (which the backend drives from these
+      // fields) never triggered despite the UI promising a consent email
+      // (issue #1331). Optional fields are omitted when empty so class-validator
+      // @IsOptional rules pass.
       await apiClient.post<RegisterResponse>('/auth/register', {
         email: data.email,
         password: data.password,
         displayName: data.displayName,
+        ...(data.birthDate ? { birthDate: data.birthDate } : {}),
+        ...(data.declaredCountry ? { declaredCountry: data.declaredCountry } : {}),
+        ...(data.parentEmail ? { parentEmail: data.parentEmail } : {}),
       });
 
-      // Registration successful - redirect to landing page
-      // User will need to verify email before logging in
-      navigate('/', {
-        state: {
-          message: 'Registration successful! Please check your email to verify your account.',
-        },
-      });
+      // Store the email so /verify-email (and resend) have a pending target —
+      // without this the verification page dead-ends with "No pending
+      // verification email found" (issue #1331). Mirrors the /signup flow.
+      localStorage.setItem('pendingVerificationEmail', data.email);
+
+      // Send the user straight to the verification step instead of the landing
+      // page (which never rendered the success message anyway).
+      navigate('/verify-email', { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         // Handle specific API errors

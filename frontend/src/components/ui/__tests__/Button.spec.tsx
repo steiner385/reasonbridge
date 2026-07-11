@@ -43,7 +43,7 @@ describe('Button', () => {
     it('should apply primary variant styles by default', () => {
       render(<Button>Primary</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('bg-primary-600');
+      expect(button).toHaveClass('bg-primary-700');
     });
 
     it('should apply secondary variant styles', () => {
@@ -76,19 +76,19 @@ describe('Button', () => {
     it('should apply medium size styles by default', () => {
       render(<Button>Medium</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('px-4', 'py-2', 'text-base');
+      expect(button).toHaveClass('px-4', 'py-3', 'text-base');
     });
 
     it('should apply small size styles', () => {
       render(<Button size="sm">Small</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('px-3', 'py-1.5', 'text-sm');
+      expect(button).toHaveClass('px-3', 'py-2.5', 'text-sm');
     });
 
     it('should apply large size styles', () => {
       render(<Button size="lg">Large</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('px-6', 'py-3', 'text-lg');
+      expect(button).toHaveClass('px-6', 'py-3.5', 'text-lg');
     });
   });
 
@@ -220,7 +220,7 @@ describe('Button', () => {
       render(<Button className="custom-class">Custom</Button>);
       const button = screen.getByRole('button');
       expect(button).toHaveClass('custom-class');
-      expect(button).toHaveClass('bg-primary-600'); // Still has default variant class
+      expect(button).toHaveClass('bg-primary-700'); // Still has default variant class
     });
   });
 

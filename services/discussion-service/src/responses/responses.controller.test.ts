@@ -52,7 +52,22 @@ describe('ResponsesController', () => {
       const result = await controller.getResponsesForTopic('topic-1');
 
       expect(result).toEqual(responses);
-      expect(mockResponsesService.getResponsesForTopic).toHaveBeenCalledWith('topic-1');
+      // Issue #1298: controller now forwards pagination options to the service.
+      expect(mockResponsesService.getResponsesForTopic).toHaveBeenCalledWith('topic-1', {
+        limit: undefined,
+        offset: undefined,
+      });
+    });
+
+    it('should forward parsed limit and offset to the service', async () => {
+      mockResponsesService.getResponsesForTopic.mockResolvedValue([]);
+
+      await controller.getResponsesForTopic('topic-1', '250', '50');
+
+      expect(mockResponsesService.getResponsesForTopic).toHaveBeenCalledWith('topic-1', {
+        limit: 250,
+        offset: 50,
+      });
     });
 
     it('should return empty array when no responses exist', async () => {

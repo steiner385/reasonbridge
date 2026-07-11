@@ -109,11 +109,30 @@ describe('Security Configuration', () => {
       expect(config.referrerPolicy).toEqual({ policy: 'strict-origin-when-cross-origin' });
     });
 
-    it('should disable CSP in non-production', async () => {
+    it('should enable CSP in non-production without upgradeInsecureRequests', async () => {
+      // Issue #1384: CSP must stay enabled in every environment to constrain
+      // the XSS blast radius. Only upgradeInsecureRequests is production-only
+      // (dev is served over plain HTTP).
       process.env['NODE_ENV'] = 'development';
       const { getHelmetConfig: getConfig } = await import('../security.config.js');
       const config = getConfig();
-      expect(config.contentSecurityPolicy).toBe(false);
+      expect(config.contentSecurityPolicy).not.toBe(false);
+      if (config.contentSecurityPolicy && typeof config.contentSecurityPolicy === 'object') {
+        const { directives } = config.contentSecurityPolicy;
+        expect(directives?.['defaultSrc']).toEqual(["'self'"]);
+        expect(directives?.['upgradeInsecureRequests']).toBeUndefined();
+      }
+    });
+
+    it('should enable CSP with upgradeInsecureRequests in production', async () => {
+      process.env['NODE_ENV'] = 'production';
+      const { getHelmetConfig: getConfig } = await import('../security.config.js');
+      const config = getConfig();
+      expect(config.contentSecurityPolicy).not.toBe(false);
+      if (config.contentSecurityPolicy && typeof config.contentSecurityPolicy === 'object') {
+        const { directives } = config.contentSecurityPolicy;
+        expect(directives?.['upgradeInsecureRequests']).toEqual([]);
+      }
     });
 
     it('should enable HSTS in production', async () => {

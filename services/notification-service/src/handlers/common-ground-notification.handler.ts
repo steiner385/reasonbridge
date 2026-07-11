@@ -20,12 +20,64 @@ import type {
 @Injectable()
 export class CommonGroundNotificationHandler {
   private readonly logger = new Logger(CommonGroundNotificationHandler.name);
+  /**
+   * Maximum number of notification deliveries processed concurrently. A single
+   * common-ground event fans out to every topic participant, so unbounded
+   * concurrency would launch thousands of simultaneous DB queries and SES/FCM
+   * calls, exhausting the Prisma connection pool and risking provider throttling.
+   */
+  private static readonly DELIVERY_CONCURRENCY = 10;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationGateway: NotificationGateway,
     private readonly deliveryService: NotificationDeliveryService,
   ) {}
+
+  /**
+   * Deliver notifications to recipients via email/push with bounded concurrency.
+   *
+   * @param recipientIds - Recipient user IDs, aligned by index with notificationIds
+   * @param notificationIds - Created notification IDs (empty string = skip)
+   * @param content - Shared notification content
+   */
+  private async deliverToRecipients(
+    recipientIds: string[],
+    notificationIds: string[],
+    content: { type: string; title: string; body: string; actionUrl: string },
+  ): Promise<void> {
+    const jobs: Array<() => Promise<void>> = [];
+    for (let i = 0; i < recipientIds.length; i++) {
+      const userId = recipientIds[i]!;
+      const notificationId = notificationIds[i];
+      if (!notificationId) {
+        continue;
+      }
+      jobs.push(async () => {
+        try {
+          await this.deliveryService.deliverNotification(userId, {
+            id: notificationId,
+            ...content,
+          });
+        } catch (err) {
+          this.logger.error(`Failed to deliver notification ${notificationId}: ${err}`);
+        }
+      });
+    }
+
+    // Run a fixed pool of workers that pull jobs off a shared cursor, capping
+    // in-flight deliveries at DELIVERY_CONCURRENCY regardless of topic size.
+    let cursor = 0;
+    const workerCount = Math.min(CommonGroundNotificationHandler.DELIVERY_CONCURRENCY, jobs.length);
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (cursor < jobs.length) {
+        const jobIndex = cursor;
+        cursor += 1;
+        await jobs[jobIndex]!();
+      }
+    });
+    await Promise.all(workers);
+  }
 
   /**
    * Handle common-ground.generated event
@@ -96,28 +148,17 @@ export class CommonGroundNotificationHandler {
         `Created ${recipientIds.length} notifications for common-ground.generated event`,
       );
 
-      // Deliver notifications via email/push based on user preferences
-      for (let i = 0; i < recipientIds.length; i++) {
-        const userId = recipientIds[i]!;
-        const notificationId = notificationIds[i];
-        if (notificationId) {
-          // Fire and forget - don't block on delivery
-          this.deliveryService
-            .deliverNotification(userId, {
-              id: notificationId,
-              type: 'common_ground',
-              title,
-              body,
-              actionUrl,
-            })
-            .catch((err) => {
-              this.logger.error(`Failed to deliver notification ${notificationId}: ${err}`);
-            });
-        }
-      }
-
-      // Emit WebSocket event for real-time delivery
+      // Emit WebSocket event for real-time delivery first so the in-app channel
+      // stays prompt regardless of email/push fanout duration.
       this.notificationGateway.emitCommonGroundGenerated(event);
+
+      // Deliver via email/push with bounded concurrency.
+      await this.deliverToRecipients(recipientIds, notificationIds, {
+        type: 'common_ground',
+        title,
+        body,
+        actionUrl,
+      });
     } catch (error) {
       this.logger.error(
         `Failed to handle common-ground.generated event: ${error instanceof Error ? error.message : String(error)}`,
@@ -190,28 +231,17 @@ export class CommonGroundNotificationHandler {
         `Created ${recipientIds.length} notifications for common-ground.updated event`,
       );
 
-      // Deliver notifications via email/push based on user preferences
-      for (let i = 0; i < recipientIds.length; i++) {
-        const userId = recipientIds[i]!;
-        const notificationId = notificationIds[i];
-        if (notificationId) {
-          // Fire and forget - don't block on delivery
-          this.deliveryService
-            .deliverNotification(userId, {
-              id: notificationId,
-              type: 'common_ground',
-              title,
-              body,
-              actionUrl,
-            })
-            .catch((err) => {
-              this.logger.error(`Failed to deliver notification ${notificationId}: ${err}`);
-            });
-        }
-      }
-
-      // Emit WebSocket event for real-time delivery
+      // Emit WebSocket event for real-time delivery first so the in-app channel
+      // stays prompt regardless of email/push fanout duration.
       this.notificationGateway.emitCommonGroundUpdated(event);
+
+      // Deliver via email/push with bounded concurrency.
+      await this.deliverToRecipients(recipientIds, notificationIds, {
+        type: 'common_ground',
+        title,
+        body,
+        actionUrl,
+      });
     } catch (error) {
       this.logger.error(
         `Failed to handle common-ground.updated event: ${error instanceof Error ? error.message : String(error)}`,

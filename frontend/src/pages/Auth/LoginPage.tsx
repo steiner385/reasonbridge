@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
 import type { LoginFormData } from '../../components/auth/LoginForm';
-import { authService } from '../../services/authService';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 /**
  * Login page that renders the LoginForm component
@@ -15,6 +15,7 @@ import { authService } from '../../services/authService';
  */
 function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuthContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -23,12 +24,14 @@ function LoginPage() {
     setError(undefined);
 
     try {
-      await authService.login({
-        email: data.email,
-        password: data.password,
-      });
+      // Route through AuthContext so the profile is fetched, isAuthenticated
+      // flips to true, rememberMe/minor storage rules apply, and the "Welcome
+      // back" toast fires — all before we navigate. Calling authService.login
+      // directly here left AuthContext.user null, bouncing the user off any
+      // ProtectedRoute until a hard refresh (issue #1355).
+      await login(data.email, data.password, data.rememberMe);
 
-      // Login successful - redirect to topics page
+      // Login (and profile fetch + state propagation) complete — safe to redirect
       navigate('/topics', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.');

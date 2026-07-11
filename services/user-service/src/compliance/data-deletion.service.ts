@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Optional, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ComplianceAuditService } from './compliance-audit.service.js';
+import { S3Service } from '../services/s3.service.js';
 import {
   DeletionStatus,
   ComplianceAction,
   AccountStatus,
+  Prisma,
   type DataDeletionRequest,
 } from '@prisma/client';
 
@@ -42,6 +44,11 @@ export interface DeletionLog {
   topicsDeleted: number;
   topicsTransferred: number;
   parentalConsentDeleted: boolean;
+  verificationRecordsDeleted: number;
+  videoUploadsDeleted: number;
+  videoObjectsDeleted: number;
+  verificationTokensDeleted: number;
+  activityEventsDeleted: number;
   userAnonymized: boolean;
   retainedRecords: string[];
   completedAt: string;
@@ -97,6 +104,10 @@ export class DataDeletionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: ComplianceAuditService,
+    // Optional so unit tests and environments without object storage configured
+    // still construct the service; S3 object cleanup is skipped (and logged)
+    // when it is not provided.
+    @Optional() @Inject(S3Service) private readonly s3Service?: S3Service,
   ) {}
 
   /**
@@ -166,6 +177,41 @@ export class DataDeletionService {
   }
 
   /**
+   * Best-effort deletion of S3 objects (e.g. identity-verification videos).
+   *
+   * @param keys - S3 object keys to delete
+   * @param userId - The owning user (for logging)
+   * @returns The number of objects successfully deleted
+   *
+   * @remarks
+   * Never throws: object storage is not transactional, so a failure here must
+   * not roll back an already-committed database deletion. Failures are logged
+   * for follow-up.
+   */
+  private async deleteS3Objects(keys: string[], userId: string): Promise<number> {
+    if (!this.s3Service) {
+      this.logger.warn(
+        `S3Service unavailable; ${keys.length} verification video object(s) for user ${userId} were not removed from storage`,
+      );
+      return 0;
+    }
+
+    let deleted = 0;
+    for (const key of keys) {
+      try {
+        await this.s3Service.deleteObject(key);
+        deleted += 1;
+      } catch (error) {
+        this.logger.error(
+          `Failed to delete S3 object ${key} for user ${userId}`,
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
+    }
+    return deleted;
+  }
+
+  /**
    * Execute data deletion for a specific request
    *
    * @param requestId - The ID of the deletion request to execute
@@ -196,10 +242,19 @@ export class DataDeletionService {
       topicsDeleted: 0,
       topicsTransferred: 0,
       parentalConsentDeleted: false,
+      verificationRecordsDeleted: 0,
+      videoUploadsDeleted: 0,
+      videoObjectsDeleted: 0,
+      verificationTokensDeleted: 0,
+      activityEventsDeleted: 0,
       userAnonymized: false,
       retainedRecords: ['ComplianceAuditLog', 'SafetyReports'],
       completedAt: '',
     };
+
+    // S3 keys of verification videos, captured inside the transaction so the
+    // objects can be deleted from object storage after the DB commit.
+    let videoS3Keys: string[] = [];
 
     try {
       // Mark as in progress
@@ -266,11 +321,47 @@ export class DataDeletionService {
           this.logger.debug(`No parental consent record found for user ${request.userId}`);
         }
 
-        // 4. Anonymize user record (keep ID for referential integrity)
+        // 4. Delete identity-verification data. The user row is anonymized in
+        //    place (not hard-deleted), so onDelete: Cascade never fires — these
+        //    rows must be removed explicitly or they retain PII (phone numbers,
+        //    S3 video keys, potentially of minors).
+        const videoUploads = await tx.videoUpload.findMany({
+          where: { userId: request.userId },
+          select: { s3Key: true },
+          take: 10000,
+        });
+        videoS3Keys = videoUploads.map((v) => v.s3Key);
+
+        const videoUploadsDeleted = await tx.videoUpload.deleteMany({
+          where: { userId: request.userId },
+        });
+        deletionLog.videoUploadsDeleted = videoUploadsDeleted.count;
+
+        const verificationRecordsDeleted = await tx.verificationRecord.deleteMany({
+          where: { userId: request.userId },
+        });
+        deletionLog.verificationRecordsDeleted = verificationRecordsDeleted.count;
+
+        const verificationTokensDeleted = await tx.verificationToken.deleteMany({
+          where: { userId: request.userId },
+        });
+        deletionLog.verificationTokensDeleted = verificationTokensDeleted.count;
+
+        // 5. Delete the user's activity feed events (contain denormalized PII).
+        const activityEventsDeleted = await tx.activityEvent.deleteMany({
+          where: { userId: request.userId },
+        });
+        deletionLog.activityEventsDeleted = activityEventsDeleted.count;
+
+        // 6. Anonymize user record (keep ID for referential integrity). Null out
+        //    every remaining PII column — including emailHash (used for contact
+        //    discovery, so a "deleted" user would otherwise stay findable),
+        //    parentPhone, bio, and avatar references.
         await tx.user.update({
           where: { id: request.userId },
           data: {
             email: `deleted-${request.userId}@deleted.reasonbridge.org`,
+            emailHash: null,
             displayName: '[Deleted User]',
             passwordHash: null,
             phoneNumber: null,
@@ -278,11 +369,23 @@ export class DataDeletionService {
             emailVerified: false,
             birthDate: null,
             parentEmail: null,
+            parentPhone: null,
+            bio: null,
+            avatarUrl: null,
+            avatarS3Key: null,
+            avatarUrls: Prisma.DbNull,
             accountStatus: AccountStatus.DELETED,
           },
         });
         deletionLog.userAnonymized = true;
       });
+
+      // Best-effort deletion of verification-video objects from S3. Done after
+      // the DB commit (S3 is not transactional); failures are logged but must
+      // not roll back the completed database deletion.
+      if (videoS3Keys.length > 0) {
+        deletionLog.videoObjectsDeleted = await this.deleteS3Objects(videoS3Keys, request.userId);
+      }
 
       // Mark as completed
       deletionLog.completedAt = new Date().toISOString();

@@ -162,8 +162,41 @@ export function useNotifications(): UseNotificationsReturn {
     }
   }, []);
 
+  // Initial fetch on mount
   useEffect(() => {
     fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Keep notifications and the unread badge fresh without a page reload (#1364).
+  // The notification list previously fetched exactly once on mount, so new
+  // reply/mention notifications and the unread count stayed stale for the whole
+  // session. Poll on an interval and refetch whenever the tab regains focus /
+  // becomes visible again, mirroring React Query's refetchInterval +
+  // refetchOnWindowFocus behaviour used elsewhere in the app.
+  useEffect(() => {
+    const POLL_INTERVAL_MS = 30 * 1000; // 30 seconds
+
+    const interval = window.setInterval(() => {
+      // Only poll while the tab is visible to avoid needless background traffic
+      if (document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    }, POLL_INTERVAL_MS);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    };
+
+    window.addEventListener('focus', fetchNotifications);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', fetchNotifications);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [fetchNotifications]);
 
   const markAsRead = useCallback(

@@ -36,6 +36,10 @@ import type {
     credentials: true,
   },
   namespace: '/discussions',
+  // Distinct Engine.IO path so nginx can proxy this Socket.io server separately
+  // from notification-service (which owns the default /socket.io path). Without
+  // this, two Socket.io servers would collide on one nginx location. See #1359.
+  path: '/discussions-ws',
 })
 export class DiscussionGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -161,6 +165,58 @@ export class DiscussionGateway implements OnGatewayConnection, OnGatewayDisconne
 
     this.logger.log(
       `Broadcasted reaction.removed event for response ${payload.responseId} to room ${room}`,
+    );
+  }
+
+  /**
+   * Broadcast a new-response event to all clients in the topic room.
+   * Called by ResponsesService after a response is created so the client-side
+   * "N new responses" banner and sidebar counters can update in realtime (#1359).
+   *
+   * @param payload - The new response payload
+   */
+  emitNewResponse(payload: {
+    topicId: string;
+    responseId: string;
+    authorId: string;
+    authorName: string;
+    parentId?: string;
+  }): void {
+    const room = `topic:${payload.topicId}`;
+
+    this.server.to(room).emit('response:new', {
+      type: 'NEW_RESPONSE',
+      payload: {
+        ...payload,
+        timestamp: new Date().toISOString(),
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(`Broadcasted response.new event for response ${payload.responseId} to ${room}`);
+  }
+
+  /**
+   * Broadcast a topic status change to all clients in the topic room.
+   * Called by TopicStatusService so clients viewing a topic learn it was
+   * archived/locked/activated without reloading the page (#1359, #1362).
+   *
+   * @param payload - The topic status change payload
+   */
+  emitTopicStatusChange(payload: { topicId: string; oldStatus: string; newStatus: string }): void {
+    const room = `topic:${payload.topicId}`;
+
+    this.server.to(room).emit('topic:status', {
+      type: 'TOPIC_STATUS_CHANGE',
+      payload: {
+        ...payload,
+        timestamp: new Date().toISOString(),
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(
+      `Broadcasted topic.status event for topic ${payload.topicId} (${payload.oldStatus} -> ${payload.newStatus})`,
     );
   }
 

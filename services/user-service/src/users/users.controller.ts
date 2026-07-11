@@ -12,11 +12,13 @@ import {
   Delete,
   Param,
   Query,
+  Headers,
   UseGuards,
   UseInterceptors,
   Body,
   Logger,
   BadRequestException,
+  ForbiddenException,
   Inject,
 } from '@nestjs/common';
 import { CacheTTL } from '@nestjs/cache-manager';
@@ -250,13 +252,17 @@ export class UsersController {
 
   /**
    * GET /users/:id/contributions - Get a user's contributions with pagination
-   * Public endpoint - no authentication required
+   *
+   * Respects the target user's `activityHistory` privacy setting (issue #1303):
+   * PRIVATE hides it from everyone but the owner, FOLLOWERS_ONLY requires a
+   * follow relationship. The viewer id comes from the gateway-verified
+   * x-user-id header. Response caching is intentionally disabled because the
+   * result is now viewer-dependent and the cache is keyed only by URL.
    */
   @Get(':id/contributions')
-  @UseInterceptors(OptionalCacheInterceptor)
-  @CacheTTL(300000) // 5 minutes
   async getUserContributions(
     @Param('id') id: string,
+    @Headers('x-user-id') viewerId: string | undefined,
     @Query('page') pageStr?: string,
     @Query('limit') limitStr?: string,
     @Query('type') type?: ContributionType,
@@ -268,6 +274,8 @@ export class UsersController {
       );
     }
 
+    await this.assertSectionVisible(id, viewerId, 'activityHistory');
+
     const page = Math.max(parseInt(pageStr || '1', 10) || 1, 1);
     const limit = Math.min(Math.max(parseInt(limitStr || '20', 10) || 20, 1), 100);
 
@@ -276,17 +284,21 @@ export class UsersController {
 
   /**
    * GET /users/:id/contributions/stats - Get a user's contribution statistics
-   * Public endpoint - no authentication required
+   *
+   * Respects the target user's `activityHistory` privacy setting (issue #1303).
    */
   @Get(':id/contributions/stats')
-  @UseInterceptors(OptionalCacheInterceptor)
-  @CacheTTL(300000) // 5 minutes
-  async getUserContributionStats(@Param('id') id: string): Promise<ContributionStatsDto> {
+  async getUserContributionStats(
+    @Param('id') id: string,
+    @Headers('x-user-id') viewerId: string | undefined,
+  ): Promise<ContributionStatsDto> {
     if (!isValidUUID(id)) {
       throw new BadRequestException(
         `Invalid user ID format: expected UUID, received "${id.substring(0, 50)}${id.length > 50 ? '...' : ''}"`,
       );
     }
+
+    await this.assertSectionVisible(id, viewerId, 'activityHistory');
 
     return this.contributionsService.getContributionStats(id);
   }
@@ -379,15 +391,17 @@ export class UsersController {
 
   /**
    * GET /users/:id/followers - Get a user's followers
-   * Public endpoint - no authentication required
-   * Supports pagination via limit and offset query params
-   * Cached for 1 hour (3600 seconds)
+   *
+   * Respects the target user's `followerList` privacy setting (issue #1303).
+   * The viewer id comes from the gateway-verified x-user-id header. Response
+   * caching is intentionally disabled because the result is now
+   * viewer-dependent and the cache is keyed only by URL.
+   * Supports pagination via limit and offset query params.
    */
   @Get(':id/followers')
-  @UseInterceptors(OptionalCacheInterceptor)
-  @CacheTTL(3600000) // 1 hour in ms
   async getFollowers(
     @Param('id') userId: string,
+    @Headers('x-user-id') viewerId: string | undefined,
     @Query('limit') limitStr?: string,
     @Query('offset') offsetStr?: string,
   ): Promise<FollowersResponseDto> {
@@ -397,6 +411,8 @@ export class UsersController {
         `Invalid user ID format: expected UUID, received "${userId.substring(0, 50)}${userId.length > 50 ? '...' : ''}"`,
       );
     }
+
+    await this.assertSectionVisible(userId, viewerId, 'followerList');
 
     // Parse pagination params with defaults
     const limit = Math.min(Math.max(parseInt(limitStr || '20', 10) || 20, 1), 100);
@@ -409,15 +425,14 @@ export class UsersController {
 
   /**
    * GET /users/:id/following - Get users a user is following
-   * Public endpoint - no authentication required
-   * Supports pagination via limit and offset query params
-   * Cached for 1 hour (3600 seconds)
+   *
+   * Respects the target user's `followingList` privacy setting (issue #1303).
+   * Supports pagination via limit and offset query params.
    */
   @Get(':id/following')
-  @UseInterceptors(OptionalCacheInterceptor)
-  @CacheTTL(3600000) // 1 hour in ms
   async getFollowing(
     @Param('id') userId: string,
+    @Headers('x-user-id') viewerId: string | undefined,
     @Query('limit') limitStr?: string,
     @Query('offset') offsetStr?: string,
   ): Promise<FollowingResponseDto> {
@@ -428,6 +443,8 @@ export class UsersController {
       );
     }
 
+    await this.assertSectionVisible(userId, viewerId, 'followingList');
+
     // Parse pagination params with defaults
     const limit = Math.min(Math.max(parseInt(limitStr || '20', 10) || 20, 1), 100);
     const offset = Math.max(parseInt(offsetStr || '0', 10) || 0, 0);
@@ -435,5 +452,28 @@ export class UsersController {
     const result = await this.usersService.getFollowing(userId, { limit, offset });
 
     return new FollowingResponseDto(result);
+  }
+
+  /**
+   * Enforce a target user's per-section profile privacy setting (issue #1303).
+   *
+   * Delegates to {@link UsersService.canViewSection}, which resolves PUBLIC /
+   * FOLLOWERS_ONLY / PRIVATE against the actual follow relationship. Throws a
+   * 403 when the viewer is not permitted to see the requested section.
+   *
+   * @param targetUserId - The profile being viewed
+   * @param viewerId - The gateway-verified viewer id, or undefined for anonymous
+   * @param section - Which profile section is being accessed
+   * @throws {ForbiddenException} When the section is not visible to the viewer
+   */
+  private async assertSectionVisible(
+    targetUserId: string,
+    viewerId: string | undefined,
+    section: 'activityHistory' | 'followerList' | 'followingList',
+  ): Promise<void> {
+    const allowed = await this.usersService.canViewSection(targetUserId, viewerId ?? null, section);
+    if (!allowed) {
+      throw new ForbiddenException('This information is private');
+    }
   }
 }

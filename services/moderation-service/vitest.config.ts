@@ -10,12 +10,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Only include .test.ts files - .spec.ts is reserved for E2E/Playwright tests
-    include: ['src/**/*.test.ts'],
+    // Include both .test.ts and .spec.ts unit suites. (Playwright E2E specs live
+    // under frontend/e2e, not services/*/src, so there is no collision here.)
+    include: ['src/**/*.{test,spec}.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/*.integration.test.ts', // Run in integration test phase
+      '**/*.integration.spec.ts', // Run in integration test phase
     ],
     coverage: {
       provider: 'v8',

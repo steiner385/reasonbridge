@@ -103,7 +103,7 @@ export class PageValidator {
         success: httpStatus === 200 || httpStatus === 304,
         loadTime,
         errors: this.errorCollector.getErrors(),
-        redirectedTo: redirected ? this.page.url() : undefined,
+        redirectedTo: redirected ? currentUrl.pathname : undefined,
         httpStatus,
       };
     } catch (error) {

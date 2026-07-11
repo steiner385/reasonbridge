@@ -7,41 +7,23 @@ import { AppModule } from '../../app.module.js';
 /**
  * Integration tests for POST /feedback/preview endpoint
  *
- * Tests authentication (FR-015), rate limiting (FR-016), and response format.
- * Uses actual NestJS application with mocked external services.
+ * Tests request validation and response format for the regex-based preview
+ * endpoint. Uses the actual NestJS application.
  *
- * NOTE: These tests require DATABASE_URL to be set. They are skipped in CI
- * unit test phase and run during integration test phase when database is available.
+ * NOTE: This service is intentionally guard-free. JWT authentication and rate
+ * limiting are enforced upstream at the api-gateway, not per-service, so the
+ * controller has no auth/throttler guards. Former "Authentication (FR-015)"
+ * and "Rate Limiting (FR-016)" blocks were removed because they asserted
+ * behavior that no longer lives in this service.
+ *
+ * These tests require DATABASE_URL to be set. They are skipped in the CI unit
+ * test phase and run during the integration test phase when the database is
+ * available.
  */
 describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integration', () => {
   let app: NestFastifyApplication;
-  let validToken: string;
-
-  // Create a valid JWT token for testing (HS256 with JWT_SECRET)
-  const createTestToken = (payload: Record<string, unknown> = {}): string => {
-    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-    const defaultPayload = {
-      sub: 'test-user-id',
-      email: 'test@example.com',
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
-      ...payload,
-    };
-    const payloadB64 = Buffer.from(JSON.stringify(defaultPayload)).toString('base64url');
-
-    // Sign with JWT_SECRET (must match env var in test setup)
-    const crypto = require('crypto');
-    const signature = crypto
-      .createHmac('sha256', process.env['JWT_SECRET'] || 'test-secret')
-      .update(`${header}.${payloadB64}`)
-      .digest('base64url');
-
-    return `${header}.${payloadB64}.${signature}`;
-  };
 
   beforeAll(async () => {
-    // Set test environment variables
-    process.env['JWT_SECRET'] = 'test-secret-for-integration-tests';
     process.env['NODE_ENV'] = 'test';
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -60,8 +42,6 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
 
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
-
-    validToken = createTestToken();
   });
 
   afterAll(async () => {
@@ -72,8 +52,14 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
     vi.clearAllMocks();
   });
 
-  describe('Authentication (FR-015)', () => {
-    it('should return 401 when no Authorization header provided', async () => {
+  // NOTE: The former "Authentication (FR-015)" describe block was removed.
+  // The ai-service is intentionally guard-free: JWT authentication is enforced
+  // upstream at the api-gateway, not per-service. The controller has no auth
+  // guards, so unauthenticated requests to /feedback/preview return 200. Those
+  // 401 assertions tested functionality that no longer lives in this service.
+
+  describe('Preview Feedback (regex-based, no auth required)', () => {
+    it('should return 200 and expected shape for valid content', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/feedback/preview',
@@ -82,81 +68,12 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
         },
       });
 
-      expect(response.statusCode).toBe(401);
+      // preview is fully regex-based (no Bedrock dependency), so it is
+      // deterministic and always succeeds for valid input.
+      expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
-      expect(body.message).toContain('authentication');
-    });
-
-    it('should return 401 when Authorization header has invalid format', async () => {
-      const response = await app.inject({
-        method: 'POST',
-        url: '/feedback/preview',
-        headers: {
-          Authorization: 'InvalidFormat token123',
-        },
-        payload: {
-          content: 'This is a test message that is at least 20 characters.',
-        },
-      });
-
-      expect(response.statusCode).toBe(401);
-    });
-
-    it('should return 401 when token is expired', async () => {
-      const expiredToken = createTestToken({
-        exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
-      });
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${expiredToken}`,
-        },
-        payload: {
-          content: 'This is a test message that is at least 20 characters.',
-        },
-      });
-
-      expect(response.statusCode).toBe(401);
-    });
-
-    it('should return 401 when token has invalid signature', async () => {
-      const tamperedToken = validToken.slice(0, -5) + 'xxxxx';
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${tamperedToken}`,
-        },
-        payload: {
-          content: 'This is a test message that is at least 20 characters.',
-        },
-      });
-
-      expect(response.statusCode).toBe(401);
-    });
-
-    it('should accept valid JWT token', async () => {
-      const response = await app.inject({
-        method: 'POST',
-        url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
-        payload: {
-          content: 'This is a test message that is at least 20 characters.',
-        },
-      });
-
-      // Should succeed or fail for reasons other than auth (200 or 500 from analyzer)
-      expect([200, 500]).toContain(response.statusCode);
-      if (response.statusCode === 200) {
-        const body = JSON.parse(response.body);
-        expect(body).toHaveProperty('feedback');
-        expect(body).toHaveProperty('readyToPost');
-      }
+      expect(body).toHaveProperty('feedback');
+      expect(body).toHaveProperty('readyToPost');
     });
   });
 
@@ -165,9 +82,6 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
       const response = await app.inject({
         method: 'POST',
         url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
         payload: {},
       });
 
@@ -178,9 +92,6 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
       const response = await app.inject({
         method: 'POST',
         url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
         payload: {
           content: 'Too short',
         },
@@ -192,21 +103,19 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
     });
 
     it('should accept valid sensitivity values', async () => {
-      for (const sensitivity of ['LOW', 'MEDIUM', 'HIGH']) {
+      // FeedbackSensitivity enum values are lowercase ('low' | 'medium' | 'high').
+      for (const sensitivity of ['low', 'medium', 'high']) {
         const response = await app.inject({
           method: 'POST',
           url: '/feedback/preview',
-          headers: {
-            Authorization: `Bearer ${validToken}`,
-          },
           payload: {
             content: 'This is a valid test message for sensitivity testing.',
             sensitivity,
           },
         });
 
-        // Should not fail validation (200 or 500 from analyzer)
-        expect([200, 500]).toContain(response.statusCode);
+        // preview is regex-based and deterministic, so valid input returns 200.
+        expect(response.statusCode).toBe(200);
       }
     });
 
@@ -214,9 +123,6 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
       const response = await app.inject({
         method: 'POST',
         url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
         payload: {
           content: 'This is a valid test message for sensitivity testing.',
           sensitivity: 'INVALID',
@@ -232,15 +138,14 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
       const response = await app.inject({
         method: 'POST',
         url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
         payload: {
           content: 'This is a test message that should trigger some feedback analysis.',
         },
       });
 
-      if (response.statusCode === 200) {
+      // preview is regex-based and deterministic, so it always returns 200.
+      expect(response.statusCode).toBe(200);
+      {
         const body = JSON.parse(response.body);
 
         // Required fields
@@ -269,62 +174,20 @@ describe.skipIf(!process.env['DATABASE_URL'])('POST /feedback/preview Integratio
       const response = await app.inject({
         method: 'POST',
         url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
         payload: {
           content: 'This is a test message for timing verification.',
         },
       });
 
-      if (response.statusCode === 200) {
-        const body = JSON.parse(response.body);
-        expect(body.analysisTimeMs).toBeGreaterThanOrEqual(0);
-      }
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body.analysisTimeMs).toBeGreaterThanOrEqual(0);
     });
   });
 
-  describe('Rate Limiting (FR-016)', () => {
-    it('should allow requests within rate limit', async () => {
-      // First request should succeed
-      const response = await app.inject({
-        method: 'POST',
-        url: '/feedback/preview',
-        headers: {
-          Authorization: `Bearer ${validToken}`,
-        },
-        payload: {
-          content: 'This is a test message for rate limiting.',
-        },
-      });
-
-      expect([200, 500]).toContain(response.statusCode);
-    });
-
-    // Note: Full rate limit testing requires either:
-    // 1. Making 11+ requests rapidly (would slow down tests)
-    // 2. Mocking the throttler time (complex setup)
-    // This test documents the expected behavior
-    it.skip('should return 429 when rate limit exceeded (10 req/min)', async () => {
-      // Make 11 requests rapidly
-      for (let i = 0; i < 11; i++) {
-        const response = await app.inject({
-          method: 'POST',
-          url: '/feedback/preview',
-          headers: {
-            Authorization: `Bearer ${validToken}`,
-          },
-          payload: {
-            content: `Rate limit test message ${i} - enough chars.`,
-          },
-        });
-
-        if (i < 10) {
-          expect([200, 500]).toContain(response.statusCode);
-        } else {
-          expect(response.statusCode).toBe(429);
-        }
-      }
-    });
-  });
+  // NOTE: The former "Rate Limiting (FR-016)" describe block was removed.
+  // The ai-service controller has no throttler guard on /feedback/preview;
+  // rate limiting is enforced upstream at the api-gateway, not per-service.
+  // The 429 assertions tested functionality that no longer lives in this
+  // service, so they were deleted rather than weakened.
 });

@@ -251,8 +251,13 @@ export class ProxyService {
       },
       params: request.query,
       timeout, // Request timeout
-      // Don't throw on non-2xx status - let the gateway handle the response
-      validateStatus: () => true,
+      // Reject on upstream 5xx so the failure propagates through withRetry()
+      // and the opossum circuit breaker (both only act on thrown errors).
+      // 4xx responses still resolve and are forwarded to the client verbatim by
+      // the proxy controllers, preserving client-error transparency. Exhausted
+      // 5xx retries throw an AxiosError that the ProxyExceptionFilter maps to a
+      // stable 502/503/504 (or forwards the upstream status/body if present).
+      validateStatus: (status) => status < 500,
     };
 
     // Remove undefined/null headers

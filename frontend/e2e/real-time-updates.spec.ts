@@ -40,8 +40,8 @@ test.describe('Real-time Updates', () => {
       await expect(connectionIndicator).toBeVisible();
     }
 
-    // Test passes if page loads - WebSocket connection happens in background
-    expect(true).toBe(true);
+    // The meaningful assertion is the conversation panel heading above; the
+    // WebSocket connection happens in the background and is covered elsewhere.
   });
 
   test('should maintain page functionality during session', async ({ page }) => {
@@ -60,8 +60,8 @@ test.describe('Real-time Updates', () => {
     });
     await expect(submitButton).toBeVisible();
 
-    // Page maintains functionality - real-time updates would be received via WebSocket
-    expect(true).toBe(true);
+    // Composer + submit button visibility above prove the page stays interactive;
+    // real-time updates arrive via WebSocket and are covered by the multi-client tests.
   });
 
   test('should persist state across page interactions', async ({ page }) => {
@@ -158,7 +158,14 @@ test.describe('Real-time Updates', () => {
     // Verify in Alice's view - either via WebSocket notification or page refresh
     // Real-time: response appears automatically
     // Fallback: refresh to verify it was posted
-    await alicePage.waitForTimeout(3000); // Allow WebSocket time to deliver
+    // Poll for the WebSocket-delivered response instead of a fixed 3s sleep; if
+    // it never arrives within the window we fall through to the reload fallback.
+    await expect
+      .poll(() => aliceResponses.count(), { timeout: 5000 })
+      .toBeGreaterThan(initialCount)
+      .catch(() => {
+        /* best-effort: reload fallback below verifies the post landed */
+      });
 
     // Check if the new response appeared (via WebSocket or manual check)
     const newAliceCount = await aliceResponses.count();
@@ -179,44 +186,46 @@ test.describe('Real-time Updates', () => {
     await bobContext.close();
   });
 
-  // INTENTIONALLY SKIPPED - These tests have complex timing/infrastructure requirements
+  // NOT YET IMPLEMENTED - real-time correctness surface tracked in #1349.
+  // Marked test.fixme (not skip) so they surface as known-unimplemented work
+  // rather than silently-green skips.
 
-  test.skip('should show typing indicator when other user is typing', async () => {
+  test.fixme('should show typing indicator when other user is typing', async () => {
     // COMPLEX TIMING: Typing indicators require precise timing and may not
     // be implemented in all WebSocket configurations
   });
 
-  test.skip('should update response content when edit notification received', async () => {
+  test.fixme('should update response content when edit notification received', async () => {
     // REQUIRES: Response edit feature with real-time broadcast
     // Currently editing may not broadcast to other users
   });
 
-  test.skip('should remove response from list when deletion notification received', async () => {
+  test.fixme('should remove response from list when deletion notification received', async () => {
     // REQUIRES: Moderator deletion with real-time broadcast
     // Moderator actions may not broadcast to regular users
   });
 
-  test.skip('should update topic status when status change notification received', async () => {
+  test.fixme('should update topic status when status change notification received', async () => {
     // REQUIRES: Topic status change broadcast
     // Status changes may not broadcast to all viewers
   });
 
-  test.skip('should handle reconnection gracefully', async () => {
+  test.fixme('should handle reconnection gracefully', async () => {
     // REQUIRES NETWORK CONTROL: Need to simulate network disconnection
     // and verify reconnection behavior - difficult in E2E context
   });
 
-  test.skip('should show new message count when scrolled away', async () => {
+  test.fixme('should show new message count when scrolled away', async () => {
     // COMPLEX UI: Unread indicator may not be implemented
     // or may have specific scroll threshold requirements
   });
 
-  test.skip('should maintain scroll position when new messages arrive', async () => {
+  test.fixme('should maintain scroll position when new messages arrive', async () => {
     // COMPLEX TIMING: Scroll position preservation depends on
     // implementation details and may be timing-sensitive
   });
 
-  test.skip('should clear typing indicator after timeout', async () => {
+  test.fixme('should clear typing indicator after timeout', async () => {
     // COMPLEX TIMING: Typing indicator timeout is implementation-specific
     // and may have variable timing across environments
   });

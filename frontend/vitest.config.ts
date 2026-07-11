@@ -31,11 +31,16 @@ export default defineConfig({
     // - Sets up MSW server for API mocking
     setupFiles: ['./src/setupTests.ts'],
 
-    // Include both .test.ts (existing convention) and .spec.tsx (new test directory structure)
-    // .spec.ts in e2e/ directory is reserved for Playwright E2E tests
+    // Include both .test.{ts,tsx} and .spec.{ts,tsx} unit suites under src.
+    // The src .spec files (component suites, hooks, common-ground/moderation
+    // panels) previously matched no include glob and never executed.
+    // Note: Playwright E2E specs live in frontend/e2e (a separate root) and are
+    // not covered by this config, so there is no collision.
     include: [
       'src/**/*.test.{ts,tsx}',
+      'src/**/*.spec.{ts,tsx}',
       'src/**/__tests__/*.test.{ts,tsx}',
+      'src/**/__tests__/*.spec.{ts,tsx}',
       'tests/unit/**/*.spec.{ts,tsx}',
       'tests/integration/**/*.spec.{ts,tsx}',
     ],

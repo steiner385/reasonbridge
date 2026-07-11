@@ -7,16 +7,13 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  ForbiddenException,
+  ConflictException,
   Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
 import { NotificationServiceClient } from '../clients/notification-service.client.js';
-import type {
-  UserTrustUpdatedEvent,
-  ModerationActionRequestedEvent,
-} from '@reason-bridge/event-schemas';
+import type { ModerationActionRequestedEvent } from '@reason-bridge/event-schemas';
 import { MODERATION_EVENT_TYPES } from '@reason-bridge/event-schemas';
 import type {
   CreateActionRequest,
@@ -28,14 +25,7 @@ import type {
   CoolingOffPromptRequest,
   CoolingOffPromptResponse,
 } from '../dto/moderation-action.dto.js';
-import type {
-  CreateAppealRequest,
-  AppealResponse,
-  ReviewAppealRequest,
-  PendingAppealResponse,
-  ListAppealResponse,
-} from '../dto/appeal.dto.js';
-import { ACTION_CONSTRAINTS, APPEAL_CONSTRAINTS } from '../constants/index.js';
+import { ACTION_CONSTRAINTS } from '../constants/index.js';
 
 // Re-export DTOs for backward compatibility
 export type {
@@ -316,8 +306,11 @@ export class ModerationActionsService {
       throw new BadRequestException('Non-punitive actions cannot be explicitly approved');
     }
 
-    const updatedAction = await this.prisma.moderationAction.update({
-      where: { id: actionId },
+    // Conditional write: only transition rows still in PENDING. This closes the
+    // check-then-update race where two moderators both pass the status check
+    // above and one silently overwrites the other's decision (Issue #1316).
+    const { count } = await this.prisma.moderationAction.updateMany({
+      where: { id: actionId, status: 'PENDING' },
       data: {
         status: 'ACTIVE',
         approvedById: moderatorId,
@@ -325,6 +318,14 @@ export class ModerationActionsService {
         executedAt: new Date(),
         reasoning: request?.modifiedReasoning || action.reasoning,
       },
+    });
+
+    if (count === 0) {
+      throw new ConflictException(`Action ${actionId} was already resolved by another moderator`);
+    }
+
+    const updatedAction = await this.prisma.moderationAction.findUniqueOrThrow({
+      where: { id: actionId },
       include: {
         approvedBy: {
           select: {
@@ -339,9 +340,18 @@ export class ModerationActionsService {
   }
 
   /**
-   * Reject a pending moderation action
+   * Reject a pending moderation action.
+   *
+   * Records the rejecting moderator (rejectedById/rejectedAt) so the rejection
+   * is a queryable audit record rather than only free text in the reasoning
+   * field (Issue #1320), and uses a conditional write so two moderators cannot
+   * both resolve the same pending action (Issue #1316).
    */
-  async rejectAction(actionId: string, request: RejectActionRequest): Promise<void> {
+  async rejectAction(
+    actionId: string,
+    moderatorId: string,
+    request: RejectActionRequest,
+  ): Promise<void> {
     const action = await this.prisma.moderationAction.findUnique({
       where: { id: actionId },
     });
@@ -356,13 +366,19 @@ export class ModerationActionsService {
       );
     }
 
-    await this.prisma.moderationAction.update({
-      where: { id: actionId },
+    const { count } = await this.prisma.moderationAction.updateMany({
+      where: { id: actionId, status: 'PENDING' },
       data: {
         status: 'REVERSED',
+        rejectedById: moderatorId,
+        rejectedAt: new Date(),
         reasoning: `${action.reasoning}\n\n[REJECTED BY MODERATOR: ${request.reason}]`,
       },
     });
+
+    if (count === 0) {
+      throw new ConflictException(`Action ${actionId} was already resolved by another moderator`);
+    }
   }
 
   /**
@@ -432,320 +448,6 @@ export class ModerationActionsService {
     return {
       sent: userIds.length,
     };
-  }
-
-  /**
-   * Create an appeal against a moderation action
-   */
-  async createAppeal(
-    actionId: string,
-    appellantId: string,
-    request: CreateAppealRequest,
-  ): Promise<AppealResponse> {
-    if (!request.reason || request.reason.trim().length === 0) {
-      throw new BadRequestException('reason is required');
-    }
-
-    if (request.reason.length < APPEAL_CONSTRAINTS.REASON_MIN_LENGTH) {
-      throw new BadRequestException(
-        `Appeal reason must be at least ${APPEAL_CONSTRAINTS.REASON_MIN_LENGTH} characters long`,
-      );
-    }
-
-    if (request.reason.length > APPEAL_CONSTRAINTS.REASON_MAX_LENGTH) {
-      throw new BadRequestException(
-        `Appeal reason cannot exceed ${APPEAL_CONSTRAINTS.REASON_MAX_LENGTH} characters`,
-      );
-    }
-
-    const action = await this.prisma.moderationAction.findUnique({
-      where: { id: actionId },
-    });
-
-    if (!action) {
-      throw new NotFoundException(`Moderation action ${actionId} not found`);
-    }
-
-    if (action.status === 'REVERSED') {
-      throw new BadRequestException(
-        'Cannot appeal a moderation action that has already been reversed',
-      );
-    }
-
-    // Ownership check: only the user targeted by the action may appeal it.
-    // For USER targets, targetId IS the affected user, so this is an exact check.
-    // Without it, any authenticated user (including an accomplice) could file an
-    // appeal, flip the action to APPEALED, and — combined with status-based
-    // enforcement — neutralize an active ban. See getUserBanStatus, which now
-    // also treats APPEALED bans as still-enforced.
-    if (action.targetType === 'USER' && action.targetId !== appellantId) {
-      throw new ForbiddenException('You can only appeal moderation actions that target you');
-    }
-
-    // Check if an appeal already exists for this action by this user
-    const existingAppeal = await this.prisma.appeal.findUnique({
-      where: {
-        moderationActionId_appellantId: {
-          moderationActionId: actionId,
-          appellantId: appellantId,
-        },
-      },
-    });
-
-    if (existingAppeal) {
-      if (existingAppeal.status === 'PENDING' || existingAppeal.status === 'UNDER_REVIEW') {
-        throw new BadRequestException(
-          'An appeal for this moderation action is already pending review',
-        );
-      }
-    }
-
-    // Create the appeal and update the action status to APPEALED
-    const appeal = await this.prisma.appeal.create({
-      data: {
-        moderationActionId: actionId,
-        appellantId: appellantId,
-        reason: request.reason,
-        status: 'PENDING',
-      },
-    });
-
-    // Update the moderation action status to APPEALED
-    await this.prisma.moderationAction.update({
-      where: { id: actionId },
-      data: { status: 'APPEALED' },
-    });
-
-    return this.mapAppealToResponse(appeal);
-  }
-
-  /**
-   * Get pending appeals for review
-   */
-  async getPendingAppeals(limit: number = 20, cursor?: string): Promise<ListAppealResponse> {
-    const where = {
-      status: 'PENDING' as const,
-    };
-
-    const totalCount = await this.prisma.appeal.count({ where });
-
-    const findManyArgs = {
-      where,
-      include: {
-        moderationAction: {
-          include: {
-            approvedBy: {
-              select: {
-                id: true,
-                displayName: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: 'asc' as const },
-      take: limit,
-      skip: cursor ? 1 : 0,
-      ...(cursor && { cursor: { id: cursor } }),
-    };
-
-    const appeals = await this.prisma.appeal.findMany(findManyArgs);
-
-    const nextCursor = appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
-
-    return {
-      appeals: appeals.map((appeal) => ({
-        ...this.mapAppealToResponse(appeal),
-        moderationAction: appeal.moderationAction
-          ? this.mapModerationActionToResponse(appeal.moderationAction)
-          : undefined,
-      })),
-      nextCursor,
-      totalCount,
-    };
-  }
-
-  /**
-   * List all appeals with optional status filter
-   */
-  async listAppeals(
-    status?: 'PENDING' | 'UNDER_REVIEW' | 'UPHELD' | 'DENIED',
-    limit: number = 20,
-    cursor?: string,
-  ): Promise<ListAppealResponse> {
-    type WhereInput = {
-      status?: 'PENDING' | 'UNDER_REVIEW' | 'UPHELD' | 'DENIED';
-    };
-    const where: WhereInput = {};
-
-    if (status) {
-      where.status = status;
-    }
-
-    const totalCount = await this.prisma.appeal.count({ where });
-
-    const findManyArgs = {
-      where,
-      include: {
-        moderationAction: {
-          include: {
-            approvedBy: {
-              select: {
-                id: true,
-                displayName: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' as const },
-      take: limit,
-      skip: cursor ? 1 : 0,
-      ...(cursor && { cursor: { id: cursor } }),
-    };
-
-    const appeals = await this.prisma.appeal.findMany(findManyArgs);
-
-    const nextCursor = appeals.length === limit ? appeals[appeals.length - 1]!.id : null;
-
-    return {
-      appeals: appeals.map((appeal) => ({
-        ...this.mapAppealToResponse(appeal),
-        moderationAction: appeal.moderationAction
-          ? this.mapModerationActionToResponse(appeal.moderationAction)
-          : undefined,
-      })),
-      nextCursor,
-      totalCount,
-    };
-  }
-
-  /**
-   * Review and decide on an appeal
-   */
-  async reviewAppeal(
-    appealId: string,
-    reviewerId: string,
-    request: ReviewAppealRequest,
-  ): Promise<AppealResponse> {
-    if (!request.reasoning || request.reasoning.trim().length === 0) {
-      throw new BadRequestException('reasoning is required');
-    }
-
-    if (request.reasoning.length < APPEAL_CONSTRAINTS.DECISION_REASONING_MIN_LENGTH) {
-      throw new BadRequestException(
-        `Appeal decision reasoning must be at least ${APPEAL_CONSTRAINTS.DECISION_REASONING_MIN_LENGTH} characters long`,
-      );
-    }
-
-    if (request.reasoning.length > APPEAL_CONSTRAINTS.DECISION_REASONING_MAX_LENGTH) {
-      throw new BadRequestException(
-        `Appeal decision reasoning cannot exceed ${APPEAL_CONSTRAINTS.DECISION_REASONING_MAX_LENGTH} characters`,
-      );
-    }
-
-    const appeal = await this.prisma.appeal.findUnique({
-      where: { id: appealId },
-      include: {
-        moderationAction: true,
-      },
-    });
-
-    if (!appeal) {
-      throw new NotFoundException(`Appeal ${appealId} not found`);
-    }
-
-    if (appeal.status !== 'PENDING') {
-      throw new BadRequestException(
-        `Appeal must be in PENDING status to review, current status: ${appeal.status}`,
-      );
-    }
-
-    const newStatus = request.decision === 'upheld' ? 'UPHELD' : 'DENIED';
-
-    // Update the appeal with the decision
-    const updatedAppeal = await this.prisma.appeal.update({
-      where: { id: appealId },
-      data: {
-        status: newStatus,
-        reviewerId: reviewerId,
-        decisionReasoning: request.reasoning,
-        resolvedAt: new Date(),
-      },
-    });
-
-    // If appeal is upheld, reverse the moderation action
-    if (request.decision === 'upheld' && appeal.moderationAction) {
-      await this.prisma.moderationAction.update({
-        where: { id: appeal.moderationAction.id },
-        data: {
-          status: 'REVERSED',
-          reasoning: `${appeal.moderationAction.reasoning}\n\n[APPEAL UPHELD: ${request.reasoning}]`,
-        },
-      });
-
-      // Publish appeal upheld event
-      try {
-        const event: UserTrustUpdatedEvent = {
-          id: appealId,
-          type: MODERATION_EVENT_TYPES.USER_TRUST_UPDATED,
-          timestamp: new Date().toISOString(),
-          version: 1,
-          payload: {
-            userId: appeal.appellantId,
-            previousScores: {
-              ability: 0,
-              benevolence: 0,
-              integrity: 0,
-            },
-            newScores: {
-              ability: 0,
-              benevolence: 0,
-              integrity: 0,
-            },
-            reason: 'appeal_upheld',
-            moderationActionId: appeal.moderationAction.id,
-            updatedAt: new Date().toISOString(),
-          },
-          metadata: {
-            source: 'moderation-service',
-            userId: reviewerId,
-          },
-        };
-
-        await this.queueService.publishEvent(event);
-      } catch (error) {
-        // Log error but don't fail the request - appeal is still decided
-        console.error('Failed to publish appeal upheld event', error);
-      }
-    } else if (request.decision === 'denied' && appeal.moderationAction) {
-      // A denied appeal must return the action to ACTIVE so the sanction resumes
-      // being enforced. Without this, filing then losing an appeal would leave the
-      // action stuck in APPEALED indefinitely.
-      if (appeal.moderationAction.status === 'APPEALED') {
-        await this.prisma.moderationAction.update({
-          where: { id: appeal.moderationAction.id },
-          data: { status: 'ACTIVE' },
-        });
-      }
-    }
-
-    // Notify the appellant of the outcome (best-effort). The Appeal Status page
-    // promises "You will receive a notification when your appeal has been
-    // reviewed" — this fulfils that promise for both upheld and denied decisions.
-    const upheld = request.decision === 'upheld';
-    await this.notificationClient?.trySendModerationNotification({
-      userId: appeal.appellantId,
-      type: 'appeal_decision',
-      title: upheld ? 'Your appeal was upheld' : 'Your appeal was denied',
-      body: upheld
-        ? `Your appeal has been reviewed and upheld. The moderation action has been reversed.\n\nReviewer note: ${request.reasoning}`
-        : `Your appeal has been reviewed and denied. The moderation action remains in effect.\n\nReviewer note: ${request.reasoning}`,
-      actionUrl: `/appeal/${appealId}`,
-      metadata: { appealId, decision: newStatus },
-    });
-
-    return this.mapAppealToResponse(updatedAppeal);
   }
 
   /**
@@ -939,21 +641,26 @@ export class ModerationActionsService {
       return { lifted: 0 };
     }
 
-    // Update all expired bans to REVERSED status
-    if (expiredBans.length > 0) {
-      await this.prisma.moderationAction.updateMany({
-        where: {
-          id: {
-            in: expiredBans.map((b) => b.id),
+    // Update each expired ban to REVERSED status individually.
+    //
+    // NOTE: Do NOT use updateMany here. updateMany applies one literal `data`
+    // payload to every matched row, so appending `expiredBans[0].reasoning`
+    // would overwrite EVERY ban's original moderation reasoning with the first
+    // ban's text — permanently corrupting the audit trail across unrelated
+    // users and offenses. Per-row updates inside a single transaction let each
+    // ban keep its own reasoning while remaining atomic.
+    await this.prisma.$transaction(
+      expiredBans.map((ban) =>
+        this.prisma.moderationAction.update({
+          where: { id: ban.id },
+          data: {
+            status: 'REVERSED',
+            liftedAt: now,
+            reasoning: `${ban.reasoning}\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]`,
           },
-        },
-        data: {
-          status: 'REVERSED',
-          liftedAt: now,
-          reasoning: `${expiredBans[0]!.reasoning}\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]`,
-        },
-      });
-    }
+        }),
+      ),
+    );
 
     return { lifted: expiredBans.length };
   }
@@ -1015,24 +722,6 @@ export class ModerationActionsService {
       isTemporaryBan: activeBan.isTemporary || false,
       expiresAt: activeBan.expiresAt?.toISOString() || null,
       action: this.mapModerationActionToResponse(activeBan),
-    };
-  }
-
-  /**
-   * Map Prisma appeal to response DTO
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma Appeal model
-  private mapAppealToResponse(appeal: any): AppealResponse {
-    return {
-      id: appeal.id,
-      moderationActionId: appeal.moderationActionId,
-      appellantId: appeal.appellantId,
-      reason: appeal.reason,
-      status: appeal.status.toLowerCase(),
-      reviewerId: appeal.reviewerId,
-      decisionReasoning: appeal.decisionReasoning,
-      createdAt: appeal.createdAt.toISOString(),
-      resolvedAt: appeal.resolvedAt?.toISOString() || null,
     };
   }
 }
