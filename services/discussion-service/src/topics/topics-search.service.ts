@@ -95,7 +95,18 @@ export class TopicsSearchService {
     threshold: number = 0.7,
   ): Promise<DuplicateSuggestion[]> {
     try {
-      // Use pg_trgm similarity for fast duplicate detection
+      // Use pg_trgm similarity for fast duplicate detection.
+      //
+      // The `title % $x` / `description % $x` predicates use the pg_trgm `%`
+      // operator, which — unlike `similarity(a, b) > t` — can be answered by the
+      // GIN trigram indexes (discussion_topics_title_trgm_idx /
+      // discussion_topics_description_trgm_idx). It pre-filters candidates using
+      // the index at the default similarity_threshold (0.3), then the explicit
+      // `similarity(...) > threshold` predicates refine to the requested
+      // precision (0.7 / 0.42). Since 0.3 is below both refine thresholds, the
+      // index pre-filter never drops a row the refine step would keep — result
+      // semantics are unchanged, but the scan is now index-backed instead of a
+      // full sequential scan.
       const results = await this.prisma.$queryRaw<
         Array<{
           id: string;
@@ -113,7 +124,8 @@ export class TopicsSearchService {
           similarity(description, ${description}) as desc_similarity
         FROM discussion_topics
         WHERE
-          (similarity(title, ${title}) > ${threshold}
+          (title % ${title} OR description % ${description})
+          AND (similarity(title, ${title}) > ${threshold}
            OR similarity(description, ${description}) > ${threshold * 0.6})
           AND status != 'ARCHIVED'
         ORDER BY

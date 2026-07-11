@@ -303,7 +303,8 @@ describe('CommonGroundDetailModal', () => {
         />,
       );
 
-      expect(screen.getByText('"sustainability"')).toBeInTheDocument();
+      // The term is rendered inside a sentence with curly quotes (&ldquo;/&rdquo;)
+      expect(screen.getByText('“sustainability”')).toBeInTheDocument();
     });
 
     it('should display all definitions', () => {
@@ -326,7 +327,8 @@ describe('CommonGroundDetailModal', () => {
         />,
       );
 
-      expect(screen.getByText('"Environmental protection and conservation"')).toBeInTheDocument();
+      // Definitions are rendered as blockquotes with curly quotes (&ldquo;/&rdquo;)
+      expect(screen.getByText('“Environmental protection and conservation”')).toBeInTheDocument();
       expect(screen.getByText('2')).toBeInTheDocument();
     });
 

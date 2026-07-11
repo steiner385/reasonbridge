@@ -70,10 +70,10 @@ describe('Card', () => {
   });
 
   describe('Padding', () => {
-    it('should apply medium padding by default', () => {
+    it('should apply medium responsive padding by default', () => {
       render(<Card data-testid="card">Medium</Card>);
       const card = screen.getByTestId('card');
-      expect(card).toHaveClass('p-6');
+      expect(card).toHaveClass('p-3', 'sm:p-4', 'lg:p-6');
     });
 
     it('should apply no padding when padding="none"', () => {
@@ -83,27 +83,27 @@ describe('Card', () => {
         </Card>,
       );
       const card = screen.getByTestId('card');
-      expect(card).not.toHaveClass('p-3', 'p-6', 'p-8');
+      expect(card).not.toHaveClass('p-2', 'p-3', 'p-4', 'lg:p-6', 'lg:p-8');
     });
 
-    it('should apply small padding', () => {
+    it('should apply small responsive padding', () => {
       render(
         <Card padding="sm" data-testid="card">
           Small
         </Card>,
       );
       const card = screen.getByTestId('card');
-      expect(card).toHaveClass('p-3');
+      expect(card).toHaveClass('p-2', 'sm:p-3');
     });
 
-    it('should apply large padding', () => {
+    it('should apply large responsive padding', () => {
       render(
         <Card padding="lg" data-testid="card">
           Large
         </Card>,
       );
       const card = screen.getByTestId('card');
-      expect(card).toHaveClass('p-8');
+      expect(card).toHaveClass('p-4', 'sm:p-6', 'lg:p-8');
     });
   });
 
@@ -218,13 +218,13 @@ describe('CardHeader', () => {
     it('should apply title styles', () => {
       render(<CardHeader title="Styled Title" />);
       const title = screen.getByText('Styled Title');
-      expect(title).toHaveClass('text-lg', 'font-semibold');
+      expect(title).toHaveClass('text-base', 'sm:text-lg', 'font-semibold');
     });
 
     it('should apply subtitle styles', () => {
       render(<CardHeader title="Title" subtitle="Styled Subtitle" />);
       const subtitle = screen.getByText('Styled Subtitle');
-      expect(subtitle).toHaveClass('text-sm', 'text-gray-500');
+      expect(subtitle).toHaveClass('text-xs', 'sm:text-sm', 'text-gray-500');
     });
   });
 
@@ -292,7 +292,7 @@ describe('CardFooter', () => {
     it('should have border when bordered is true', () => {
       render(<CardFooter bordered>With border</CardFooter>);
       const footer = screen.getByText('With border');
-      expect(footer).toHaveClass('border-t', 'border-gray-200', 'pt-4');
+      expect(footer).toHaveClass('border-t', 'border-gray-200', 'pt-2', 'sm:pt-4');
     });
   });
 

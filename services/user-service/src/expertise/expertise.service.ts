@@ -229,38 +229,41 @@ export class ExpertiseService {
     userId: string,
     tagId: string,
   ): Promise<{ avgQualityScore: number; firstResponseDate: Date | null }> {
-    // Get all response IDs for this user in topics with the specified tag
-    const responses = await this.prisma.response.findMany({
-      where: {
-        authorId: userId,
-        topic: {
-          tags: {
-            some: { tagId },
-          },
+    // Match this user's responses in topics carrying the given tag. This filter
+    // is applied through the `response` relation in the aggregations below so
+    // the database performs the join, instead of pulling up to
+    // QUERY_LIMITS.EXPERTISE_METRICS (10k) response IDs into the app and
+    // shipping them back as a SQL IN-list.
+    const responseWhere: Prisma.ResponseWhereInput = {
+      authorId: userId,
+      topic: {
+        tags: {
+          some: { tagId },
         },
       },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true, createdAt: true },
-      take: QUERY_LIMITS.EXPERTISE_METRICS,
-    });
+    };
 
-    if (responses.length === 0) {
+    // The earliest response date only needs one indexed row, and the quality
+    // score aggregates set-based over the same filter — both run in parallel.
+    const [firstResponse, avgQualityScore] = await Promise.all([
+      this.prisma.response.findFirst({
+        where: responseWhere,
+        orderBy: { createdAt: 'asc' },
+        select: { createdAt: true },
+      }),
+      this.calculateQualityScore(responseWhere),
+    ]);
+
+    if (!firstResponse) {
       return {
         avgQualityScore: 0.5, // Neutral default for users with no responses
         firstResponseDate: null,
       };
     }
 
-    const responseIds = responses.map((r) => r.id);
-    // Safe to use ! since we already checked responses.length > 0 above
-    const firstResponseDate = responses[0]!.createdAt;
-
-    // Calculate quality score from votes and feedback
-    const avgQualityScore = await this.calculateQualityScore(responseIds);
-
     return {
       avgQualityScore,
-      firstResponseDate,
+      firstResponseDate: firstResponse.createdAt,
     };
   }
 
@@ -273,24 +276,35 @@ export class ExpertiseService {
    *
    * If no data is available for a signal, it defaults to 0.5 (neutral).
    *
-   * @param responseIds - IDs of responses to calculate quality for
+   * @param responseWhere - Filter selecting the responses to score, applied
+   *   through the `response` relation so the aggregation joins in the database
    * @returns Quality score between 0 and 1
    */
-  private async calculateQualityScore(responseIds: string[]): Promise<number> {
-    if (responseIds.length === 0) {
-      return 0.5;
-    }
-
-    // Get vote counts
-    const voteCounts = await this.prisma.vote.groupBy({
-      by: ['voteType'],
-      where: {
-        responseId: { in: responseIds },
-      },
-      _count: {
-        id: true,
-      },
-    });
+  private async calculateQualityScore(responseWhere: Prisma.ResponseWhereInput): Promise<number> {
+    // Run vote and feedback aggregations in parallel, joining to the matching
+    // responses via the relation filter. Empty groups fall through to the
+    // neutral 0.5 defaults below.
+    const [voteCounts, feedbackCounts] = await Promise.all([
+      this.prisma.vote.groupBy({
+        by: ['voteType'],
+        where: {
+          response: responseWhere,
+        },
+        _count: {
+          id: true,
+        },
+      }),
+      this.prisma.feedback.groupBy({
+        by: ['userHelpfulRating'],
+        where: {
+          response: responseWhere,
+          userHelpfulRating: { not: null },
+        },
+        _count: {
+          id: true,
+        },
+      }),
+    ]);
 
     let upvotes = 0;
     let downvotes = 0;
@@ -301,18 +315,6 @@ export class ExpertiseService {
         downvotes = vc._count.id;
       }
     }
-
-    // Get feedback helpfulness ratings
-    const feedbackCounts = await this.prisma.feedback.groupBy({
-      by: ['userHelpfulRating'],
-      where: {
-        responseId: { in: responseIds },
-        userHelpfulRating: { not: null },
-      },
-      _count: {
-        id: true,
-      },
-    });
 
     let helpful = 0;
     let notHelpful = 0;

@@ -12,6 +12,7 @@
  * - Real-time refetching options
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { responseService } from '../services/responseService';
 import type { ResponseDetail } from '../services/discussionService';
@@ -65,18 +66,26 @@ export function useResponses(discussionId: string, options: UseResponsesOptions 
     limit = RESPONSES_PAGE_LIMIT,
   } = options;
 
-  return useQuery<ResponseDetail[], Error>({
+  // Always cache the FLAT server response under a single canonical key
+  // (['responses', discussionId, limit]) and derive the threaded shape with
+  // `select`. Previously the queryFn returned either a flat array or a thread
+  // tree depending on the option, while the queryKey ignored the option — so a
+  // threaded consumer and a flat consumer collided on one cache entry and
+  // poisoned each other. Deriving via `select` gives every consumer one shared
+  // network fetch and keeps optimistic flat appends nesting correctly. See #1361.
+  const select = useMemo(
+    () =>
+      buildThreadTree
+        ? (responses: ResponseDetail[]): ResponseDetail[] =>
+            responseService.buildThreadTree(responses)
+        : undefined,
+    [buildThreadTree],
+  );
+
+  return useQuery<ResponseDetail[], Error, ResponseDetail[]>({
     queryKey: ['responses', discussionId, limit],
-    queryFn: async () => {
-      const responses = await responseService.getDiscussionResponses(discussionId, { limit });
-
-      // Optionally build thread tree for nested display
-      if (buildThreadTree) {
-        return responseService.buildThreadTree(responses);
-      }
-
-      return responses;
-    },
+    queryFn: () => responseService.getDiscussionResponses(discussionId, { limit }),
+    select,
     enabled: enabled && !!discussionId,
     staleTime: 1 * 60 * 1000, // 1 minute - responses update frequently
     gcTime: 5 * 60 * 1000, // 5 minutes cache

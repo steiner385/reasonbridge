@@ -4,7 +4,13 @@
  */
 
 import { z } from 'zod';
-import { emailSchema, passwordSchema, birthDateSchema, countryCodeSchema } from './common';
+import {
+  emailSchema,
+  passwordSchema,
+  displayNameSchema,
+  birthDateSchema,
+  countryCodeSchema,
+} from './common';
 
 /**
  * Authentication Form Validation Schemas
@@ -12,11 +18,19 @@ import { emailSchema, passwordSchema, birthDateSchema, countryCodeSchema } from 
  */
 
 /**
- * Login schema - Email + Password
+ * Login schema - Email + Password + Remember Me
+ *
+ * `rememberMe` controls token persistence: when true tokens stay in
+ * localStorage (survive browser restarts), when false they are moved to
+ * sessionStorage. Defaults to false so unchecked = session-only.
  */
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, 'Password is required'), // Relaxed for login (no format requirements)
+  // Optional (not .default) so the resolver's input and output types match,
+  // keeping useForm<LoginFormData> happy. An unchecked box yields `undefined`,
+  // which AuthContext.login treats as "session-only" (rememberMe = false).
+  rememberMe: z.boolean().optional(),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -37,12 +51,9 @@ export const parentEmailSchema = z
 export const registrationSchema = z
   .object({
     email: emailSchema,
-    displayName: z
-      .string()
-      .min(3, 'Display name must be at least 3 characters')
-      .max(50, 'Display name must be at most 50 characters')
-      .regex(/^[a-zA-Z0-9\s]+$/, 'Display name can only contain letters, numbers, and spaces')
-      .trim(),
+    // Shared displayName rules (aligned with backend RegisterDto) so names like
+    // "O'Brien" or "José" are not blocked client-side.
+    displayName: displayNameSchema,
     password: passwordSchema,
     confirmPassword: z.string().min(1, 'Please confirm your password'),
     // Child safety fields (optional for Phase 1)

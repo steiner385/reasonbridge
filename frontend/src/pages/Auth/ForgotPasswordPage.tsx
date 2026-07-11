@@ -29,6 +29,7 @@ function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
+  const [submitError, setSubmitError] = useState<string>('');
 
   const {
     register,
@@ -40,16 +41,24 @@ function ForgotPasswordPage() {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true);
+    setSubmitError('');
     try {
+      // Only reach the success screen on a 2xx response. Anti-enumeration is
+      // handled entirely server-side (the endpoint always returns 200 with a
+      // neutral message), so any thrown error here means a genuine failure —
+      // rate limit (429), 5xx, or a network/offline error. Masking those as
+      // success (the previous behaviour) left users waiting for a code that was
+      // never generated (issue #1333).
       await authService.forgotPassword(data.email);
       setSubmittedEmail(data.email);
       setIsSubmitted(true);
       toast.success('If an account exists, a reset code has been sent to your email.');
     } catch {
-      // Still show success to prevent email enumeration
-      setSubmittedEmail(data.email);
-      setIsSubmitted(true);
-      toast.success('If an account exists, a reset code has been sent to your email.');
+      // Neutral, retryable message that does not reveal whether the account
+      // exists — surfaces the real failure without aiding enumeration.
+      const message = "We couldn't process your request. Please try again in a moment.";
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -135,6 +144,16 @@ function ForgotPasswordPage() {
 
           <CardBody>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {submitError && (
+                <div
+                  className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-4"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  <p className="text-sm text-red-800 dark:text-red-300">{submitError}</p>
+                </div>
+              )}
+
               <Input
                 label="Email"
                 type="email"

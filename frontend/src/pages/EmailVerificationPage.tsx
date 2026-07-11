@@ -115,11 +115,20 @@ export const EmailVerificationPage: React.FC = () => {
 
       const response = await authService.verifyEmail(codeToVerify);
 
-      // Check onboarding progress and redirect accordingly
-      if (response.onboardingProgress.topicsSelected) {
-        navigate('/home', { replace: true });
+      // The endpoint returns { success, message, emailVerified } — NOT an
+      // AuthResponse. Reading response.onboardingProgress here used to throw a
+      // TypeError that was surfaced as a fake "verification failed" error even
+      // though the account was verified server-side (issue #1330).
+      if (response.success) {
+        // Send verified users to an existing onboarding route. '/home' and
+        // '/onboarding/topics' are not defined in the router (they resolved to
+        // the 404 page), so use '/onboarding/orientation'.
+        navigate('/onboarding/orientation', { replace: true });
       } else {
-        navigate('/onboarding/topics', { replace: true });
+        setIsLoading(false);
+        setError(response.message || 'Verification failed. Please try again.');
+        setCode(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
     } catch (err) {
       setIsLoading(false);

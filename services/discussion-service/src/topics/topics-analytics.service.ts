@@ -330,49 +330,26 @@ export class TopicsAnalyticsService {
     const nextDay = new Date(targetDate);
     nextDay.setDate(nextDay.getDate() + 1);
 
-    // Get all participants who responded on target date
-    const participantsOnDate = await this.prisma.response.findMany({
+    // Compute every author's first-ever response timestamp in the topic with a
+    // single set-based aggregation, then count those whose first response falls
+    // within the target day. This replaces the previous N+1 pattern (one
+    // findFirst per participant). An author whose global-min response is in
+    // [targetDate, nextDay) necessarily made their first response that day.
+    const firstResponses = await this.prisma.response.groupBy({
+      by: ['authorId'],
       where: {
         topicId,
-        createdAt: {
-          gte: targetDate,
-          lt: nextDay,
-        },
         status: 'VISIBLE',
       },
-      select: {
-        authorId: true,
+      _min: {
+        createdAt: true,
       },
-      distinct: ['authorId'],
     });
 
-    // For each participant, check if this was their first response
-    let newCount = 0;
-    for (const p of participantsOnDate) {
-      const firstResponse = await this.prisma.response.findFirst({
-        where: {
-          topicId,
-          authorId: p.authorId,
-          status: 'VISIBLE',
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-        select: {
-          createdAt: true,
-        },
-      });
-
-      if (
-        firstResponse &&
-        firstResponse.createdAt >= targetDate &&
-        firstResponse.createdAt < nextDay
-      ) {
-        newCount++;
-      }
-    }
-
-    return newCount;
+    return firstResponses.filter((group) => {
+      const firstAt = group._min.createdAt;
+      return firstAt !== null && firstAt >= targetDate && firstAt < nextDay;
+    }).length;
   }
 
   /**

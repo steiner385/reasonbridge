@@ -1,26 +1,28 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { Topic } from '../../types/topic';
 import type { PropositionItem } from '../common-ground/PropositionList';
 import { MetadataPanel } from './MetadataPanel';
 
-// Mock child components
+// CommonGroundSummaryPanel is imported as a DEFAULT export by the component
 vi.mock('../common-ground/CommonGroundSummaryPanel', () => ({
-  CommonGroundSummaryPanel: ({ analysis }: Record<string, unknown>) => (
+  default: ({ analysis }: Record<string, unknown>) => (
     <div data-testid="common-ground-summary">
       Common Ground: {(analysis as { consensusLevel?: string })?.consensusLevel || 'N/A'}
     </div>
   ),
 }));
 
+// BridgingSuggestionsSection is imported as a DEFAULT export by the component
 vi.mock('../common-ground/BridgingSuggestionsSection', () => ({
-  BridgingSuggestionsSection: ({ suggestions }: Record<string, unknown>) => (
+  default: ({ suggestions }: Record<string, unknown>) => (
     <div data-testid="bridging-suggestions">
       Bridging: {(suggestions as { suggestions?: unknown[] })?.suggestions?.length || 0} suggestions
     </div>
   ),
 }));
 
+// PropositionList is imported as a NAMED export
 vi.mock('../common-ground/PropositionList', () => ({
   PropositionList: ({
     propositions,
@@ -28,11 +30,51 @@ vi.mock('../common-ground/PropositionList', () => ({
     onPropositionClick,
   }: Record<string, unknown>) => (
     <div data-testid="proposition-list">
-      Propositions: {propositions.length}
-      <button onClick={() => onPropositionHover?.('prop-1')}>Hover Prop 1</button>
-      <button onClick={() => onPropositionClick?.('prop-1', ['resp-1'])}>Click Prop 1</button>
+      Propositions: {(propositions as unknown[]).length}
+      <button onClick={() => (onPropositionHover as (id: string) => void)?.('prop-1')}>
+        Hover Prop 1
+      </button>
+      <button
+        onClick={() =>
+          (onPropositionClick as (id: string, ids: string[]) => void)?.('prop-1', ['resp-1'])
+        }
+      >
+        Click Prop 1
+      </button>
     </div>
   ),
+}));
+
+// TopicStatusActions renders on the Propositions tab; stub it out
+vi.mock('../topics/TopicStatusActions', () => ({
+  TopicStatusActions: () => <div data-testid="topic-status-actions" />,
+}));
+
+// Auth context - provide an authenticated user so useAuthContext doesn't throw
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    user: { id: 'user-1', role: 'USER' },
+    isAuthenticated: true,
+  }),
+}));
+
+// Force desktop/tablet tab layout (not mobile accordion)
+vi.mock('../../hooks/useBreakpoint', () => ({
+  useBreakpoint: () => 'desktop',
+}));
+
+// WebSocket subscribe is a no-op that returns an unsubscribe function
+vi.mock('../../hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    subscribe: () => () => {},
+    send: vi.fn(),
+    isConnected: false,
+  }),
+}));
+
+// No layout context in tests (safe variant returns null)
+vi.mock('../../contexts/DiscussionLayoutContext', () => ({
+  useDiscussionLayoutSafe: () => null,
 }));
 
 describe('MetadataPanel', () => {

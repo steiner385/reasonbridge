@@ -1,32 +1,43 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import type { Location } from 'react-router-dom';
 import * as ReactRouter from 'react-router-dom';
 import { useTopicNavigation } from './useTopicNavigation';
 
-// Mock react-router-dom
+// Mock react-router-dom. The current hook derives activeTopicId from
+// useLocation() and performs navigation via useNavigate() (it no longer uses
+// useSearchParams/setSearchParams).
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof ReactRouter>('react-router-dom');
   return {
     ...actual,
-    useSearchParams: vi.fn(),
+    useLocation: vi.fn(),
     useNavigate: vi.fn(),
   };
 });
 
+/**
+ * Helper to build a minimal Location object for useLocation mocking.
+ */
+function makeLocation(pathname: string, search = ''): Location {
+  return {
+    pathname,
+    search,
+    hash: '',
+    state: null,
+    key: 'default',
+  };
+}
+
 describe('useTopicNavigation', () => {
-  let mockSetSearchParams: ReturnType<typeof vi.fn>;
   let mockNavigate: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    mockSetSearchParams = vi.fn();
     mockNavigate = vi.fn();
 
-    vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-      new URLSearchParams(),
-      mockSetSearchParams,
-    ] as [URLSearchParams, (params: URLSearchParams) => void]);
-
     vi.mocked(ReactRouter.useNavigate).mockReturnValue(mockNavigate);
+    // Default: no topic selected
+    vi.mocked(ReactRouter.useLocation).mockReturnValue(makeLocation('/discussions'));
   });
 
   describe('Initial state', () => {
@@ -36,60 +47,40 @@ describe('useTopicNavigation', () => {
       expect(result.current.activeTopicId).toBe(null);
     });
 
-    it('should return activeTopicId from URL query param', () => {
-      const searchParams = new URLSearchParams('topic=topic-123');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
+    it('should return activeTopicId from query param', () => {
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(
+        makeLocation('/discussions', '?topic=topic-123'),
+      );
 
       const { result } = renderHook(() => useTopicNavigation());
 
       expect(result.current.activeTopicId).toBe('topic-123');
     });
+
+    it('should return activeTopicId from /topics/:id path', () => {
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(makeLocation('/topics/topic-999'));
+
+      const { result } = renderHook(() => useTopicNavigation());
+
+      expect(result.current.activeTopicId).toBe('topic-999');
+    });
   });
 
   describe('navigateToTopic', () => {
-    it('should update URL with topic query parameter', () => {
+    it('should navigate to /discussions with topic query parameter', () => {
       const { result } = renderHook(() => useTopicNavigation());
 
       act(() => {
         result.current.navigateToTopic('topic-456');
       });
 
-      expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(URLSearchParams), {
-        replace: false,
-      });
-
-      const callArgs = mockSetSearchParams.mock.calls[0][0];
-      expect(callArgs.get('topic')).toBe('topic-456');
+      expect(mockNavigate).toHaveBeenCalledWith('/discussions?topic=topic-456');
     });
 
-    it('should preserve other query parameters when navigating', () => {
-      const searchParams = new URLSearchParams('foo=bar&baz=qux');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
-
-      const { result } = renderHook(() => useTopicNavigation());
-
-      act(() => {
-        result.current.navigateToTopic('topic-789');
-      });
-
-      const callArgs = mockSetSearchParams.mock.calls[0][0];
-      expect(callArgs.get('topic')).toBe('topic-789');
-      expect(callArgs.get('foo')).toBe('bar');
-      expect(callArgs.get('baz')).toBe('qux');
-    });
-
-    it('should update topic parameter if it already exists', () => {
-      const searchParams = new URLSearchParams('topic=topic-old');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
+    it('should navigate to the newly requested topic when one is already active', () => {
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(
+        makeLocation('/discussions', '?topic=topic-old'),
+      );
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -97,18 +88,15 @@ describe('useTopicNavigation', () => {
         result.current.navigateToTopic('topic-new');
       });
 
-      const callArgs = mockSetSearchParams.mock.calls[0][0];
-      expect(callArgs.get('topic')).toBe('topic-new');
+      expect(mockNavigate).toHaveBeenCalledWith('/discussions?topic=topic-new');
     });
   });
 
   describe('clearTopic', () => {
-    it('should remove topic query parameter from URL', () => {
-      const searchParams = new URLSearchParams('topic=topic-123');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
+    it('should navigate to /discussions without a topic parameter', () => {
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(
+        makeLocation('/discussions', '?topic=topic-123'),
+      );
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -116,36 +104,15 @@ describe('useTopicNavigation', () => {
         result.current.clearTopic();
       });
 
-      const callArgs = mockSetSearchParams.mock.calls[0][0];
-      expect(callArgs.has('topic')).toBe(false);
-    });
-
-    it('should preserve other query parameters when clearing topic', () => {
-      const searchParams = new URLSearchParams('topic=topic-123&foo=bar');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
-
-      const { result } = renderHook(() => useTopicNavigation());
-
-      act(() => {
-        result.current.clearTopic();
-      });
-
-      const callArgs = mockSetSearchParams.mock.calls[0][0];
-      expect(callArgs.has('topic')).toBe(false);
-      expect(callArgs.get('foo')).toBe('bar');
+      expect(mockNavigate).toHaveBeenCalledWith('/discussions', { replace: false });
     });
   });
 
   describe('isTopicActive', () => {
     it('should return true for active topic', () => {
-      const searchParams = new URLSearchParams('topic=topic-123');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(
+        makeLocation('/discussions', '?topic=topic-123'),
+      );
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -153,11 +120,9 @@ describe('useTopicNavigation', () => {
     });
 
     it('should return false for inactive topic', () => {
-      const searchParams = new URLSearchParams('topic=topic-123');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([
-        searchParams,
-        mockSetSearchParams,
-      ] as [URLSearchParams, (params: URLSearchParams) => void]);
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(
+        makeLocation('/discussions', '?topic=topic-123'),
+      );
 
       const { result } = renderHook(() => useTopicNavigation());
 
@@ -172,19 +137,18 @@ describe('useTopicNavigation', () => {
   });
 
   describe('URL change detection', () => {
-    it('should update activeTopicId when URL changes', () => {
-      const { rerender } = renderHook(() => useTopicNavigation());
+    it('should update activeTopicId when the location changes', () => {
+      const { result, rerender } = renderHook(() => useTopicNavigation());
 
-      // Simulate URL change
-      const newParams = new URLSearchParams('topic=topic-updated');
-      vi.mocked(ReactRouter.useSearchParams).mockReturnValue([newParams, mockSetSearchParams] as [
-        URLSearchParams,
-        (params: URLSearchParams) => void,
-      ]);
+      expect(result.current.activeTopicId).toBe(null);
+
+      // Simulate the location updating to a new topic
+      vi.mocked(ReactRouter.useLocation).mockReturnValue(
+        makeLocation('/discussions', '?topic=topic-updated'),
+      );
 
       rerender();
 
-      const { result } = renderHook(() => useTopicNavigation());
       expect(result.current.activeTopicId).toBe('topic-updated');
     });
   });

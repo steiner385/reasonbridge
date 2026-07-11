@@ -104,9 +104,11 @@ function LoginForm({ onSubmit, isLoading = false, error, className = '' }: Login
           />
 
           <div className="flex items-center justify-between">
-            <label className="flex items-center">
+            <label htmlFor="rememberMe" className="flex items-center">
               <input
                 type="checkbox"
+                id="rememberMe"
+                {...register('rememberMe')}
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded"
               />
               <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Remember me</span>

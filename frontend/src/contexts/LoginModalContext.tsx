@@ -76,7 +76,10 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
     setLoginLoading(true);
 
     try {
-      await login(loginEmail, loginPassword);
+      // Pass the modal's rememberMe state through to AuthContext.login so the
+      // checkbox actually controls token persistence (issue #1332). Without
+      // this, every modal login was forced session-only regardless of the box.
+      await login(loginEmail, loginPassword, rememberMe);
       closeModal();
 
       // Redirect to original page or default to /topics with welcome banner

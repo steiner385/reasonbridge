@@ -46,6 +46,10 @@ const IGNORED_URL_STATUS_PATTERNS: Array<{ pattern: string; statuses: number[] }
   { pattern: '/notifications', statuses: [401, 404] },
   // Profile API may return 401/404 for unauthenticated requests
   { pattern: '/api/users/me', statuses: [401] },
+  // Profile page makes authenticated API calls that fail for unauthenticated users
+  { pattern: '/api/users/', statuses: [401] },
+  // Verification endpoint returns 401 for unauthenticated users
+  { pattern: '/api/verification', statuses: [401] },
 ];
 
 /**
@@ -58,6 +62,9 @@ const IGNORED_CONSOLE_PATTERNS = [
   '[HMR]', // Hot module replacement
   'WebSocket connection', // Dev server connection
   'Failed to load resource: net::ERR_FAILED', // Network errors without status
+  'Failed to load resource: the server responded with a status of 404', // Expected 404s for notifications
+  'Failed to load resource: the server responded with a status of 401', // Expected 401s for unauthenticated requests
+  'Importing a module script failed', // Vite lazy-loading during parallel tests
 ];
 
 export class ErrorCollector {

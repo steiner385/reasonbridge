@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { redactEmail } from '@reason-bridge/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -337,6 +337,37 @@ export class ParentalConsentService {
   }
 
   /**
+   * Validate that a consent token is still usable for the unauthenticated
+   * dashboard/withdrawal endpoints.
+   *
+   * @param consent - The consent record loaded by token
+   * @throws {ForbiddenException} When the token has already been withdrawn
+   * @throws {ForbiddenException} When the token has expired
+   *
+   * @remarks
+   * The consent token is a bearer credential embedded in an emailed URL. Without
+   * these checks a leaked link (forwarded email, browser history, proxy logs)
+   * could be replayed indefinitely — including re-triggering an irreversible
+   * data-deletion request. This mirrors the expiry/single-use validation already
+   * enforced by {@link verifyConsent}.
+   */
+  private assertConsentTokenUsable(consent: {
+    userId: string;
+    tokenExpiresAt: Date;
+    withdrawnAt: Date | null;
+  }): void {
+    if (consent.withdrawnAt) {
+      this.logger.warn(`Consent token already withdrawn for user ${consent.userId}`);
+      throw new ForbiddenException('Parental consent has already been withdrawn');
+    }
+
+    if (consent.tokenExpiresAt < new Date()) {
+      this.logger.warn(`Consent token expired for user ${consent.userId}`);
+      throw new ForbiddenException('Consent token has expired. Please request a new one.');
+    }
+  }
+
+  /**
    * Get child's activity summary by consent token
    *
    * @param token - The consent token from the parental consent email
@@ -366,6 +397,10 @@ export class ParentalConsentService {
     if (!consent) {
       throw new NotFoundException('Invalid consent token');
     }
+
+    // A leaked dashboard link must not work forever: reject expired or
+    // already-withdrawn tokens, mirroring verifyConsent's validation.
+    this.assertConsentTokenUsable(consent);
 
     // Get activity statistics for the child
     const [topicsParticipated, responsesPosted] = await Promise.all([
@@ -423,6 +458,10 @@ export class ParentalConsentService {
     if (!consent) {
       throw new NotFoundException('Invalid consent token');
     }
+
+    // Reject expired tokens and make withdrawal idempotent: an already-withdrawn
+    // token must not re-trigger a data-deletion request (issue #1288).
+    this.assertConsentTokenUsable(consent);
 
     this.logger.log(`Withdrawing parental consent via token for user ${consent.userId}`);
 

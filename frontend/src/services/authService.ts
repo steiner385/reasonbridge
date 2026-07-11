@@ -48,6 +48,20 @@ export interface ErrorResponse {
   statusCode: number;
 }
 
+/**
+ * Response returned by POST /auth/verify-email.
+ *
+ * Mirrors the backend VerifyEmailResponseDto
+ * (services/user-service/src/auth/dto/verify-email.dto.ts) — the endpoint does
+ * NOT return an AuthResponse, so consumers must not read tokens or
+ * onboardingProgress off this shape (issue #1330).
+ */
+export interface VerifyEmailResponse {
+  success: boolean;
+  message: string;
+  emailVerified: boolean;
+}
+
 class AuthService {
   /**
    * Sign up a new user with email and password
@@ -153,8 +167,10 @@ class AuthService {
 
   /**
    * Verify email with 6-digit code
+   *
+   * @returns The backend VerifyEmailResponse ({ success, message, emailVerified }).
    */
-  async verifyEmail(code: string): Promise<AuthResponse> {
+  async verifyEmail(code: string): Promise<VerifyEmailResponse> {
     const email = this.getPendingVerificationEmail();
     if (!email) {
       throw new Error('No pending verification email found. Please sign up again.');
@@ -174,7 +190,8 @@ class AuthService {
       throw new Error(error.message || 'Email verification failed');
     }
 
-    // Clear pending email on success
+    // Only clear the pending email once we have a confirmed success response,
+    // so a failed attempt can still be retried without a "sign up again" dead end.
     this.clearPendingVerificationEmail();
 
     return response.json();
