@@ -4,7 +4,12 @@
  */
 
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
-import { BedrockClient, type AIClientConfig } from '@reason-bridge/ai-client';
+import {
+  BedrockClient,
+  MockAIClient,
+  type AIClientConfig,
+  type IAIClient,
+} from '@reason-bridge/ai-client';
 import { LLM_DEFAULTS, LLM_PRESETS } from '../constants/index.js';
 
 /**
@@ -16,13 +21,23 @@ import { LLM_DEFAULTS, LLM_PRESETS } from '../constants/index.js';
 @Injectable()
 export class BedrockService implements OnModuleDestroy {
   private readonly logger = new Logger(BedrockService.name);
-  private readonly client: BedrockClient | null;
+  private readonly client: IAIClient | null;
   private readonly isConfigured: boolean;
 
   constructor() {
     // Initialize Bedrock client if credentials are available
     const region = process.env['AWS_REGION'] || 'us-east-1';
     const modelId = process.env['BEDROCK_MODEL_ID'] || 'anthropic.claude-3-sonnet-20240229-v1:0';
+
+    // In test/E2E environments, route through a deterministic in-process mock so
+    // runs never touch real AWS Bedrock (no spend, no host credentials, no network
+    // flakiness). Enabled via AI_MOCK=true — see docker-compose.e2e.yml.
+    if (process.env['AI_MOCK'] === 'true') {
+      this.client = new MockAIClient();
+      this.isConfigured = true;
+      this.logger.log('🧪 Bedrock service initialized in MOCK mode (AI_MOCK=true)');
+      return;
+    }
 
     try {
       const config: AIClientConfig = {
@@ -48,8 +63,10 @@ export class BedrockService implements OnModuleDestroy {
    * Clean up AWS SDK resources on module shutdown
    */
   onModuleDestroy(): void {
-    if (this.client) {
-      this.client.destroy();
+    // Only the real BedrockClient owns AWS SDK resources; the mock has no destroy().
+    const client = this.client as unknown as { destroy?: () => void } | null;
+    if (client && typeof client.destroy === 'function') {
+      client.destroy();
       this.logger.log('BedrockService client destroyed');
     }
   }

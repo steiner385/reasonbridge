@@ -16,6 +16,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   constructor() {
     const pool = new Pool({
       connectionString: process.env['DATABASE_URL'],
+      // Explicit, environment-driven pool sizing keeps the whole service fleet within
+      // PostgreSQL max_connections under load. node-postgres otherwise defaults to
+      // max=10 with an unbounded acquisition queue and no acquire timeout.
+      max: Number(process.env['DB_POOL_MAX'] ?? 10),
+      idleTimeoutMillis: Number(process.env['DB_POOL_IDLE_TIMEOUT_MS'] ?? 30000),
+      connectionTimeoutMillis: Number(process.env['DB_POOL_CONNECTION_TIMEOUT_MS'] ?? 5000),
     });
     const adapter = new PrismaPg(pool);
     super({ adapter });
