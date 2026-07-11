@@ -910,6 +910,9 @@ model Response {
   @@index([authorId])
   @@index([parentId])
   @@index([topicId, createdAt(sort: Desc)])
+  // Composite index supports the per-author EXISTS check used to maintain
+  // participantCount without aggregating every response in the topic.
+  @@index([topicId, authorId])
   @@index([status])
   @@map("responses")
 }

@@ -15,6 +15,7 @@ const createMockPrismaService = () => ({
   responseReaction: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
+    groupBy: vi.fn(),
     create: vi.fn(),
     delete: vi.fn(),
   },
@@ -189,48 +190,54 @@ describe('ReactionsService', () => {
     });
   });
 
+  // Route the two distinct findMany shapes the service issues: the preview
+  // fetch uses `include: { user }`, the caller's-own-reactions fetch uses
+  // `select`.
+  const mockReactionQueries = (opts: {
+    grouped?: unknown[];
+    preview?: unknown[];
+    userReactions?: unknown[];
+  }) => {
+    mockPrisma.responseReaction.groupBy.mockResolvedValue(opts.grouped ?? []);
+    mockPrisma.responseReaction.findMany.mockImplementation((args: any) => {
+      if (args?.select) {
+        return Promise.resolve(opts.userReactions ?? []);
+      }
+      return Promise.resolve(opts.preview ?? []);
+    });
+  };
+
+  const previewRow = (emoji: string, userId: string, displayName: string | null) => ({
+    id: `reaction-${userId}`,
+    responseId: 'response-1',
+    userId,
+    emoji,
+    createdAt: new Date(),
+    user: { id: userId, displayName },
+  });
+
   describe('getReactions', () => {
     const responseId = 'response-1';
 
     it('should return grouped reactions with counts', async () => {
-      const createdAt = new Date();
-      mockPrisma.responseReaction.findMany.mockResolvedValue([
-        {
-          id: 'reaction-1',
-          responseId,
-          userId: 'user-1',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-1', displayName: 'Alice' },
-        },
-        {
-          id: 'reaction-2',
-          responseId,
-          userId: 'user-2',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-2', displayName: 'Bob' },
-        },
-        {
-          id: 'reaction-3',
-          responseId,
-          userId: 'user-3',
-          emoji: '❤️',
-          createdAt,
-          user: { id: 'user-3', displayName: 'Charlie' },
-        },
-      ]);
+      mockReactionQueries({
+        grouped: [
+          { emoji: '👍', _count: { _all: 2 } },
+          { emoji: '❤️', _count: { _all: 1 } },
+        ],
+        preview: [
+          previewRow('👍', 'user-1', 'Alice'),
+          previewRow('👍', 'user-2', 'Bob'),
+          previewRow('❤️', 'user-3', 'Charlie'),
+        ],
+      });
 
       const result = await service.getReactions(responseId);
 
-      expect(mockPrisma.responseReaction.findMany).toHaveBeenCalledWith({
+      expect(mockPrisma.responseReaction.groupBy).toHaveBeenCalledWith({
+        by: ['emoji'],
         where: { responseId },
-        include: {
-          user: {
-            select: { id: true, displayName: true },
-          },
-        },
-        orderBy: { createdAt: 'asc' },
+        _count: { _all: true },
       });
       expect(result.totalCount).toBe(3);
       expect(result.reactions).toHaveLength(2);
@@ -245,25 +252,14 @@ describe('ReactionsService', () => {
     });
 
     it('should indicate userReacted correctly when user has reacted', async () => {
-      const createdAt = new Date();
-      mockPrisma.responseReaction.findMany.mockResolvedValue([
-        {
-          id: 'reaction-1',
-          responseId,
-          userId: 'user-1',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-1', displayName: 'Alice' },
-        },
-        {
-          id: 'reaction-2',
-          responseId,
-          userId: 'user-2',
-          emoji: '❤️',
-          createdAt,
-          user: { id: 'user-2', displayName: 'Bob' },
-        },
-      ]);
+      mockReactionQueries({
+        grouped: [
+          { emoji: '👍', _count: { _all: 1 } },
+          { emoji: '❤️', _count: { _all: 1 } },
+        ],
+        preview: [previewRow('👍', 'user-1', 'Alice'), previewRow('❤️', 'user-2', 'Bob')],
+        userReactions: [{ emoji: '👍' }],
+      });
 
       const result = await service.getReactions(responseId, 'user-1');
 
@@ -275,17 +271,10 @@ describe('ReactionsService', () => {
     });
 
     it('should indicate userReacted as false when no userId provided', async () => {
-      const createdAt = new Date();
-      mockPrisma.responseReaction.findMany.mockResolvedValue([
-        {
-          id: 'reaction-1',
-          responseId,
-          userId: 'user-1',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-1', displayName: 'Alice' },
-        },
-      ]);
+      mockReactionQueries({
+        grouped: [{ emoji: '👍', _count: { _all: 1 } }],
+        preview: [previewRow('👍', 'user-1', 'Alice')],
+      });
 
       const result = await service.getReactions(responseId);
 
@@ -293,7 +282,7 @@ describe('ReactionsService', () => {
     });
 
     it('should return empty reactions for response with no reactions', async () => {
-      mockPrisma.responseReaction.findMany.mockResolvedValue([]);
+      mockReactionQueries({ grouped: [], preview: [] });
 
       const result = await service.getReactions(responseId);
 
@@ -302,16 +291,13 @@ describe('ReactionsService', () => {
     });
 
     it('should limit users list to first 10 users per emoji', async () => {
-      const createdAt = new Date();
-      const manyReactions = Array.from({ length: 15 }, (_, i) => ({
-        id: `reaction-${i}`,
-        responseId,
-        userId: `user-${i}`,
-        emoji: '👍',
-        createdAt,
-        user: { id: `user-${i}`, displayName: `User ${i}` },
-      }));
-      mockPrisma.responseReaction.findMany.mockResolvedValue(manyReactions);
+      const manyReactions = Array.from({ length: 15 }, (_, i) =>
+        previewRow('👍', `user-${i}`, `User ${i}`),
+      );
+      mockReactionQueries({
+        grouped: [{ emoji: '👍', _count: { _all: 15 } }],
+        preview: manyReactions,
+      });
 
       const result = await service.getReactions(responseId);
 
@@ -322,17 +308,10 @@ describe('ReactionsService', () => {
     });
 
     it('should handle users with null displayName', async () => {
-      const createdAt = new Date();
-      mockPrisma.responseReaction.findMany.mockResolvedValue([
-        {
-          id: 'reaction-1',
-          responseId,
-          userId: 'user-1',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-1', displayName: null },
-        },
-      ]);
+      mockReactionQueries({
+        grouped: [{ emoji: '👍', _count: { _all: 1 } }],
+        preview: [previewRow('👍', 'user-1', null)],
+      });
 
       const result = await service.getReactions(responseId);
 
@@ -344,7 +323,7 @@ describe('ReactionsService', () => {
     const responseIds = ['response-1', 'response-2', 'response-3'];
 
     it('should return empty summaries for all requested responses when no reactions exist', async () => {
-      mockPrisma.responseReaction.findMany.mockResolvedValue([]);
+      mockReactionQueries({ grouped: [], preview: [] });
 
       const result = await service.getReactionSummaries(responseIds);
 
@@ -356,49 +335,58 @@ describe('ReactionsService', () => {
       }
     });
 
+    it('should return an empty map without querying for an empty id list', async () => {
+      const result = await service.getReactionSummaries([]);
+
+      expect(result.size).toBe(0);
+      expect(mockPrisma.responseReaction.groupBy).not.toHaveBeenCalled();
+    });
+
     it('should return grouped reactions for multiple responses', async () => {
       const createdAt = new Date();
-      mockPrisma.responseReaction.findMany.mockResolvedValue([
-        {
-          id: 'r1',
-          responseId: 'response-1',
-          userId: 'user-1',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-1', displayName: 'Alice' },
-        },
-        {
-          id: 'r2',
-          responseId: 'response-1',
-          userId: 'user-2',
-          emoji: '👍',
-          createdAt,
-          user: { id: 'user-2', displayName: 'Bob' },
-        },
-        {
-          id: 'r3',
-          responseId: 'response-2',
-          userId: 'user-1',
-          emoji: '❤️',
-          createdAt,
-          user: { id: 'user-1', displayName: 'Alice' },
-        },
-      ]);
+      mockReactionQueries({
+        grouped: [
+          { responseId: 'response-1', emoji: '👍', _count: { _all: 2 } },
+          { responseId: 'response-2', emoji: '❤️', _count: { _all: 1 } },
+        ],
+        preview: [
+          {
+            id: 'r1',
+            responseId: 'response-1',
+            userId: 'user-1',
+            emoji: '👍',
+            createdAt,
+            user: { id: 'user-1', displayName: 'Alice' },
+          },
+          {
+            id: 'r2',
+            responseId: 'response-1',
+            userId: 'user-2',
+            emoji: '👍',
+            createdAt,
+            user: { id: 'user-2', displayName: 'Bob' },
+          },
+          {
+            id: 'r3',
+            responseId: 'response-2',
+            userId: 'user-1',
+            emoji: '❤️',
+            createdAt,
+            user: { id: 'user-1', displayName: 'Alice' },
+          },
+        ],
+        userReactions: [
+          { responseId: 'response-1', emoji: '👍' },
+          { responseId: 'response-2', emoji: '❤️' },
+        ],
+      });
 
       const result = await service.getReactionSummaries(responseIds, 'user-1');
 
-      expect(mockPrisma.responseReaction.findMany).toHaveBeenCalledWith({
-        where: {
-          responseId: {
-            in: responseIds,
-          },
-        },
-        include: {
-          user: {
-            select: { id: true, displayName: true },
-          },
-        },
-        orderBy: { createdAt: 'asc' },
+      expect(mockPrisma.responseReaction.groupBy).toHaveBeenCalledWith({
+        by: ['responseId', 'emoji'],
+        where: { responseId: { in: responseIds } },
+        _count: { _all: true },
       });
 
       const response1Summary = result.get('response-1');
