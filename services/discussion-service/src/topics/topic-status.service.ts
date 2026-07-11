@@ -3,10 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  Optional,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { DiscussionGateway } from '../gateways/discussion.gateway.js';
 import type { TopicResponseDto } from './dto/topic-response.dto.js';
 
 type TopicStatus = 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
@@ -32,6 +39,7 @@ export class TopicStatusService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @Optional() @Inject(DiscussionGateway) private readonly discussionGateway?: DiscussionGateway,
   ) {}
 
   /**
@@ -134,6 +142,16 @@ export class TopicStatusService {
 
     // Invalidate caches
     await this.invalidateCaches(topicId);
+
+    // Broadcast the status change to clients viewing this topic so archived/
+    // locked state is reflected live without a page reload (#1359, #1362).
+    if (this.discussionGateway && topic.status !== newStatus) {
+      this.discussionGateway.emitTopicStatusChange({
+        topicId,
+        oldStatus: topic.status,
+        newStatus,
+      });
+    }
 
     return {
       id: updatedTopic.id,

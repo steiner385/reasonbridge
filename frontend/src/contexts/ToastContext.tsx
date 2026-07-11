@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import ToastContainer from '../components/ui/ToastContainer';
 import type { ToastVariant } from '../components/ui/Toast';
 
@@ -139,15 +139,21 @@ export function ToastProvider({
     setToasts([]);
   }, []);
 
-  const value: ToastContextType = {
-    success,
-    error,
-    warning,
-    info,
-    show,
-    dismiss,
-    dismissAll,
-  };
+  // Memoize the context value so toast state changes only re-render the
+  // ToastContainer, not every consumer of the toast API (all callbacks are
+  // stable useCallbacks). See issue #1387.
+  const value: ToastContextType = useMemo(
+    () => ({
+      success,
+      error,
+      warning,
+      info,
+      show,
+      dismiss,
+      dismissAll,
+    }),
+    [success, error, warning, info, show, dismiss, dismissAll],
+  );
 
   return (
     <ToastContext.Provider value={value}>
