@@ -6,6 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface DeleteConfirmDialogProps {
   isOpen: boolean;
@@ -65,16 +66,8 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, isDeleting, onCancel]);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  // Reference-counted lock so a still-open drawer/modal keeps scroll locked (#1378).
+  useScrollLock(isOpen);
 
   if (!isOpen) return null;
 
