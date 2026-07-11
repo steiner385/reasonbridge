@@ -18,7 +18,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BookmarksService } from './bookmarks.service.js';
-import type { CreateBookmarkDto } from './dto/create-bookmark.dto.js';
+// NOTE: Must be a value import (not `import type`). This class is used as an
+// @Body() parameter type, so `emitDecoratorMetadata` needs the runtime class
+// reference. With verbatimModuleSyntax, `import type` would elide it and tsc
+// would emit `Function` as the paramtype, silently breaking ValidationPipe.
+import { CreateBookmarkDto } from './dto/create-bookmark.dto.js';
 import type { BookmarkDto, BookmarkListDto, BookmarkStatusDto } from './dto/bookmark.dto.js';
 import { JwtAuthGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
 

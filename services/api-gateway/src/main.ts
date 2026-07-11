@@ -13,6 +13,7 @@ import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { getCorsConfig, getHelmetConfig } from './config/security.config.js';
 import { TracingInterceptor } from './observability/tracing.interceptor.js';
+import { ProxyExceptionFilter } from './filters/proxy-exception.filter.js';
 
 async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter();
@@ -72,6 +73,10 @@ async function bootstrap() {
 
   // Distributed tracing interceptor
   app.useGlobalInterceptors(new TracingInterceptor('api-gateway'));
+
+  // Map upstream outages, circuit-breaker-open, and timeouts to stable
+  // 502/503/504 responses instead of opaque 500s (see ProxyExceptionFilter).
+  app.useGlobalFilters(new ProxyExceptionFilter());
 
   // Setup graceful shutdown handlers
   setupGracefulShutdown(app, { serviceName: 'api-gateway' });

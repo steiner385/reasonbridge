@@ -56,7 +56,10 @@ class ActivityFeedService {
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.cursor) searchParams.append('cursor', params.cursor);
 
-    const url = `${API_BASE_URL}/activity-feed${searchParams.toString() ? `?${searchParams}` : ''}`;
+    // The API gateway exposes the activity feed at GET /feed
+    // (services/api-gateway/src/proxy/activity-proxy.controller.ts). The old
+    // /activity-feed path does not exist on the gateway and 404s.
+    const url = `${API_BASE_URL}/feed${searchParams.toString() ? `?${searchParams}` : ''}`;
 
     const response = await fetch(url, {
       method: 'GET',

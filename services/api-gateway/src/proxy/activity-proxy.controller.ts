@@ -25,13 +25,23 @@ export class ActivityProxyController {
   async getFeed(
     @Query() query: Record<string, string>,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
+    // activity-service authenticates solely via the X-User-Id header (set by the
+    // gateway's JwtUserMiddleware from the Bearer token). ProxyService does not
+    // relay inbound headers automatically, so we must forward it explicitly —
+    // otherwise every /feed request reaches the activity-service without an
+    // identity and is rejected with 401. See topics-proxy.controller for the
+    // canonical pattern.
     const response = await this.proxyService.proxyToActivityService({
       method: 'GET',
       path: '/feed',
       query,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);

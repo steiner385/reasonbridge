@@ -44,4 +44,35 @@ export class HealthController {
       service: 'api-gateway',
     };
   }
+
+  /** Explicit liveness alias (for probes configured against /health/live). */
+  @Get('live')
+  @ApiOperation({ summary: 'Liveness probe (process is up)' })
+  @ApiResponse({ status: 200, description: 'Process is alive', type: HealthCheckResponse })
+  live(): HealthCheckResponse {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'api-gateway',
+    };
+  }
+
+  /**
+   * Readiness probe. The gateway holds no direct datastore connection — it
+   * proxies to downstream services, each of which exposes its own
+   * /health/ready backed by a real Postgres check. So the gateway is ready as
+   * soon as its process can accept connections; downstream availability is
+   * surfaced per-request via the circuit breaker and ProxyExceptionFilter
+   * (502/503), not by failing the gateway's own readiness.
+   */
+  @Get('ready')
+  @ApiOperation({ summary: 'Readiness probe (gateway can accept connections)' })
+  @ApiResponse({ status: 200, description: 'Gateway is ready', type: HealthCheckResponse })
+  ready(): HealthCheckResponse {
+    return {
+      status: 'ready',
+      timestamp: new Date().toISOString(),
+      service: 'api-gateway',
+    };
+  }
 }
