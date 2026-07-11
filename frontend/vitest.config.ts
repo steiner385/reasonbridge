@@ -65,12 +65,10 @@ export default defineConfig({
       },
     },
 
-    // JUnit XML output for CI/CD
-    // Note: path is relative to the frontend/ directory; uses frontend-junit.xml
-    // to avoid colliding with the repo-root coverage/junit.xml that the unused
-    // root vitest.config.ts would write.
+    // JUnit XML output for CI/CD; named junit-* so CI glob patterns pick it up.
+    reporters: ['default', 'junit'],
     outputFile: {
-      junit: '../coverage/frontend-junit.xml',
+      junit: '../coverage/junit-frontend.xml',
     },
   },
 });
