@@ -1,0 +1,49 @@
+{{- if .Values.migrate.enabled }}
+# Gated schema migration (issue #1336).
+#
+# As a Helm pre-install/pre-upgrade hook, Helm creates this Job and WAITS for it
+# to complete successfully before applying/upgrading any Deployment below. If
+# `prisma migrate deploy` fails, the Job fails, the hook fails, and the release is
+# aborted — services are never rolled out against an un-migrated schema.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-db-migrate
+  labels:
+    {{- include "reasonbridge.labels" . | nindent 4 }}
+    app.kubernetes.io/component: db-migrate
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migrate.backoffLimit }}
+  # Give a failed migration room to surface logs before the Job is reaped.
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        {{- include "reasonbridge.labels" . | nindent 8 }}
+        app.kubernetes.io/component: db-migrate
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: db-migrate
+          image: "{{ .Values.image.registry }}/{{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag | default .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["npx", "prisma", "migrate", "deploy"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret }}
+                  key: DATABASE_URL
+          resources:
+            {{- toYaml .Values.migrate.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+{{- end }}

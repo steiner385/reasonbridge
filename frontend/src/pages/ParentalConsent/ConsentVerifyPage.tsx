@@ -44,7 +44,9 @@ function ConsentVerifyPage() {
   const [isConsentChecked, setIsConsentChecked] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const apiBaseUrl = import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:3001';
+  // Default to '/api' to match apiClient (lib/api.ts), routed via the nginx/vite
+  // proxy, instead of a hardcoded host:port (see issue #1334).
+  const apiBaseUrl = import.meta.env['VITE_API_BASE_URL'] || '/api';
 
   // Fetch consent details without auto-verifying
   useEffect(() => {
