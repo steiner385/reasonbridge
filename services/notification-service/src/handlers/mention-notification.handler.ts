@@ -219,26 +219,42 @@ export class MentionNotificationHandler {
   }): Promise<string[]> {
     const { recipientIds, type, title, body, actionUrl, metadata } = params;
 
+    if (recipientIds.length === 0) {
+      return [];
+    }
+
     this.logger.log(`Creating ${recipientIds.length} notification(s) of type "${type}"`);
 
-    // Create notifications individually to get IDs back
-    const notifications = await Promise.all(
-      recipientIds.map((userId) =>
-        this.prisma.notification.create({
-          data: {
-            userId,
-            type,
-            title,
-            body,
-            actionUrl,
-            metadata: metadata as Prisma.InputJsonValue,
-            isRead: false,
-          },
-          select: { id: true },
-        }),
-      ),
-    );
+    // Batch insert (single INSERT) instead of N individual creates, then read
+    // the rows back to recover their generated IDs — the same pattern used by
+    // the common-ground handler.
+    const createdAt = new Date();
+    await this.prisma.notification.createMany({
+      data: recipientIds.map((userId) => ({
+        userId,
+        type,
+        title,
+        body,
+        actionUrl,
+        metadata: metadata as Prisma.InputJsonValue,
+        isRead: false,
+        createdAt,
+      })),
+    });
 
-    return notifications.map((n) => n.id);
+    // Query back the batch we just inserted (matched by userId set + type +
+    // exact createdAt) to map IDs back to recipients in order.
+    const notifications = await this.prisma.notification.findMany({
+      where: {
+        userId: { in: recipientIds },
+        type,
+        createdAt,
+      },
+      select: { id: true, userId: true },
+      take: QUERY_LIMITS.MENTIONS,
+    });
+
+    const idByUserId = new Map(notifications.map((n) => [n.userId, n.id]));
+    return recipientIds.map((userId) => idByUserId.get(userId) ?? '');
   }
 }
