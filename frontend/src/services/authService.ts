@@ -5,9 +5,16 @@
 
 /**
  * Authentication service for user signup, login, and OAuth flows
+ *
+ * All auth requests are routed through the shared {@link apiClient}, so they use
+ * the same single base-URL env var (VITE_API_BASE_URL, default '/api') and typed
+ * ApiError semantics as the rest of the app. Previously this service used a
+ * second client driven by VITE_API_URL with a hardcoded http://localhost:3000
+ * default, which silently broke login/signup/verify/reset in any deployment
+ * configured only from .env.example (see issue #1334).
  */
 
-const API_BASE_URL = import.meta.env['VITE_API_URL'] || 'http://localhost:3000';
+import { apiClient, ApiError } from '../lib/api';
 
 export interface SignupRequest {
   email: string;
@@ -48,69 +55,70 @@ export interface ErrorResponse {
   statusCode: number;
 }
 
+/** Build an Error that carries an HTTP status and preserves the original cause. */
+function makeAuthError(message: string, cause: unknown, status?: number): Error {
+  const error = new Error(message) as Error & { status?: number; cause?: unknown };
+  if (status !== undefined) {
+    error.status = status;
+  }
+  error.cause = cause;
+  return error;
+}
+
+/**
+ * Normalize an apiClient failure into a plain Error that preserves the backend's
+ * message and (where available) HTTP status, keeping the previous throwing
+ * behaviour for existing callers while using the shared client under the hood.
+ */
+function toAuthError(err: unknown, fallback: string): Error {
+  if (err instanceof ApiError) {
+    const data = err.data as Partial<ErrorResponse> | null | undefined;
+    const message = data && typeof data === 'object' ? data.message : undefined;
+    return makeAuthError(message || err.message || fallback, err, err.status);
+  }
+  return err instanceof Error ? err : new Error(fallback);
+}
+
 class AuthService {
   /**
    * Sign up a new user with email and password
    */
   async signup(data: SignupRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      throw new Error(error.message || 'Signup failed');
+    try {
+      const result = await apiClient.post<AuthResponse>('/auth/signup', data, { skipAuth: true });
+      this.storeTokens(result.accessToken, result.refreshToken);
+      return result;
+    } catch (err) {
+      throw toAuthError(err, 'Signup failed');
     }
-
-    const result: AuthResponse = await response.json();
-    this.storeTokens(result.accessToken, result.refreshToken);
-    return result;
   }
 
   /**
    * Log in an existing user
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      throw new Error(error.message || 'Login failed');
+    try {
+      const result = await apiClient.post<AuthResponse>('/auth/login', data, { skipAuth: true });
+      this.storeTokens(result.accessToken, result.refreshToken);
+      return result;
+    } catch (err) {
+      throw toAuthError(err, 'Login failed');
     }
-
-    const result: AuthResponse = await response.json();
-    this.storeTokens(result.accessToken, result.refreshToken);
-    return result;
   }
 
   /**
    * Request a password reset code
    */
   async forgotPassword(email: string): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      throw new Error(error.message || 'Failed to request password reset');
+    try {
+      return await apiClient.post<{ message: string }>(
+        '/auth/forgot-password',
+        { email },
+        { skipAuth: true },
+      );
+    } catch (err) {
+      throw toAuthError(err, 'Failed to request password reset');
     }
-
-    return response.json();
   }
 
   /**
@@ -121,20 +129,15 @@ class AuthService {
     code: string,
     newPassword: string,
   ): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, code, newPassword }),
-    });
-
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      throw new Error(error.message || 'Failed to reset password');
+    try {
+      return await apiClient.post<{ message: string }>(
+        '/auth/reset-password',
+        { email, code, newPassword },
+        { skipAuth: true },
+      );
+    } catch (err) {
+      throw toAuthError(err, 'Failed to reset password');
     }
-
-    return response.json();
   }
 
   /**
@@ -160,24 +163,16 @@ class AuthService {
       throw new Error('No pending verification email found. Please sign up again.');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/verify-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.getAuthToken()}`,
-      },
-      body: JSON.stringify({ email, code }),
-    });
+    try {
+      const result = await apiClient.post<AuthResponse>('/auth/verify-email', { email, code });
 
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      throw new Error(error.message || 'Email verification failed');
+      // Clear pending email on success
+      this.clearPendingVerificationEmail();
+
+      return result;
+    } catch (err) {
+      throw toAuthError(err, 'Email verification failed');
     }
-
-    // Clear pending email on success
-    this.clearPendingVerificationEmail();
-
-    return response.json();
   }
 
   /**
@@ -189,45 +184,31 @@ class AuthService {
       throw new Error('No pending verification email found. Please sign up again.');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.getAuthToken()}`,
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      // Handle rate limiting specifically
-      if (response.status === 429) {
-        throw new Error('Too many requests. Please try again later.');
+    try {
+      return await apiClient.post<{ message: string }>('/auth/resend-verification', { email });
+    } catch (err) {
+      // Handle rate limiting specifically (force a friendly message regardless
+      // of the backend body, while still preserving the original error as cause)
+      if (err instanceof ApiError && err.status === 429) {
+        throw makeAuthError('Too many requests. Please try again later.', err, err.status);
       }
-      throw new Error(error.message || 'Failed to resend verification email');
+      throw toAuthError(err, 'Failed to resend verification email');
     }
-
-    return response.json();
   }
 
   /**
    * Initiate OAuth flow
    */
   async initiateOAuth(provider: 'google' | 'apple'): Promise<{ authUrl: string; state: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/oauth/initiate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ provider }),
-    });
-
-    if (!response.ok) {
-      const error: ErrorResponse = await response.json();
-      throw new Error(error.message || 'Failed to initiate OAuth');
+    try {
+      return await apiClient.post<{ authUrl: string; state: string }>(
+        '/auth/oauth/initiate',
+        { provider },
+        { skipAuth: true },
+      );
+    } catch (err) {
+      throw toAuthError(err, 'Failed to initiate OAuth');
     }
-
-    return response.json();
   }
 
   /**
@@ -389,19 +370,11 @@ class AuthService {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        return false;
-      }
-
-      const result: AuthResponse = await response.json();
+      const result = await apiClient.post<AuthResponse>(
+        '/auth/refresh',
+        { refreshToken },
+        { skipAuth: true },
+      );
       this.storeTokens(result.accessToken, result.refreshToken);
       return true;
     } catch {

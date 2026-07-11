@@ -41,7 +41,9 @@ export function useFeedbackActions() {
 
     try {
       // Call backend API to dismiss feedback
-      const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:3000';
+      // Default to '/api' to match apiClient (lib/api.ts) — routed via the
+      // nginx/vite proxy — instead of a hardcoded host:port (see issue #1334).
+      const API_BASE_URL = import.meta.env['VITE_API_BASE_URL'] || '/api';
       const response = await fetch(`${API_BASE_URL}/feedback/${options.feedbackId}/dismiss`, {
         method: 'PATCH',
         headers: {

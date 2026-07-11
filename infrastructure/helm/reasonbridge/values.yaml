@@ -1,0 +1,98 @@
+# Default values for the reasonbridge chart.
+
+image:
+  # Container registry holding the per-service production images built from
+  # Dockerfile.service.prod (e.g. <account>.dkr.ecr.us-east-1.amazonaws.com).
+  registry: REGISTRY_PLACEHOLDER
+  # Images are expected at <registry>/<repository>/<service-name>:<tag>
+  repository: reasonbridge
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Existing Kubernetes Secret providing the sensitive environment for every service.
+# It is synced from AWS Secrets Manager (secret "reason-bridge/rds/credentials",
+# created in infrastructure/cdk/lib/rds-stack.ts) by the External Secrets Operator.
+# Required keys: DATABASE_URL, REDIS_URL, JWT_SECRET
+existingSecret: reasonbridge-app-secrets
+
+# Non-secret, environment-driven configuration shared by all services.
+env:
+  NODE_ENV: production
+  AWS_REGION: us-east-1
+
+# Postgres connection-pool tuning (see issue #1341). Injected into every service.
+db:
+  poolMax: 10
+  poolIdleTimeoutMs: 30000
+  poolConnectionTimeoutMs: 5000
+
+# Gated database migration Job (see issue #1336). Runs as a Helm pre-install /
+# pre-upgrade hook that MUST succeed before any Deployment is rolled out.
+migrate:
+  enabled: true
+  image:
+    repository: reasonbridge/db-migrate
+    tag: latest
+  backoffLimit: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Default resource requests/limits applied to each backend service.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Backend microservices. Names MUST match the in-repo service directory names so
+# their in-cluster DNS (<release>-<name>) and *_SERVICE_URL env vars line up.
+services:
+  - name: api-gateway
+    port: 3000
+    replicas: 2
+  - name: user-service
+    port: 3001
+    replicas: 2
+  - name: ai-service
+    port: 3002
+    replicas: 1
+  - name: moderation-service
+    port: 3003
+    replicas: 1
+  - name: recommendation-service
+    port: 3004
+    replicas: 1
+  - name: notification-service
+    port: 3005
+    replicas: 1
+  - name: fact-check-service
+    port: 3006
+    replicas: 1
+  - name: discussion-service
+    port: 3007
+    replicas: 2
+  - name: activity-service
+    port: 3008
+    replicas: 1
+
+frontend:
+  enabled: true
+  image:
+    repository: reasonbridge/frontend
+    tag: latest
+  port: 8080
+  replicas: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi

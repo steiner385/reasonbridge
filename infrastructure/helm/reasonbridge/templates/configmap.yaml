@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-env
+  labels:
+    {{- include "reasonbridge.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.env.NODE_ENV | quote }}
+  AWS_REGION: {{ .Values.env.AWS_REGION | quote }}
+  # Postgres pool tuning (#1341)
+  DB_POOL_MAX: {{ .Values.db.poolMax | quote }}
+  DB_POOL_IDLE_TIMEOUT_MS: {{ .Values.db.poolIdleTimeoutMs | quote }}
+  DB_POOL_CONNECTION_TIMEOUT_MS: {{ .Values.db.poolConnectionTimeoutMs | quote }}
+  # In-cluster service discovery URLs, e.g. USER_SERVICE_URL=http://<release>-user-service:3001
+  {{- range .Values.services }}
+  {{ .name | upper | replace "-" "_" }}_URL: {{ printf "http://%s-%s:%v" $.Release.Name .name .port | quote }}
+  {{- end }}
