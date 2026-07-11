@@ -43,7 +43,7 @@
     "@reason-bridge/ai-client": "workspace:^",
     "bcrypt": "^6.0.0",
     "pg": "^8.20.0",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
