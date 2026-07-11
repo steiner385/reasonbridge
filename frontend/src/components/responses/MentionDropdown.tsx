@@ -234,6 +234,8 @@ const MentionDropdown: React.FC<MentionDropdownProps> = ({
                   alt=""
                   className="w-8 h-8 rounded-full object-cover"
                   aria-hidden="true"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <div

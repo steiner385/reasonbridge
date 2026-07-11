@@ -178,13 +178,19 @@ export function useTypingIndicator(options: UseTypingIndicatorOptions): UseTypin
   }, [subscribe, handleTypingEvent]);
 
   /**
-   * Set up cleanup interval to remove stale typing users
+   * Set up cleanup interval to remove stale typing users.
+   * Returns the previous reference when nothing changed so React can bail out
+   * of re-rendering ResponseList (which owns this hook) every second.
    */
   useEffect(() => {
     cleanupIntervalRef.current = window.setInterval(() => {
       const now = Date.now();
-      setTypingUsers((prev) => prev.filter((user) => now - user.lastTypingAt < clearAfterMs));
-    }, 1000); // Check every second
+      setTypingUsers((prev) => {
+        if (prev.length === 0) return prev;
+        const next = prev.filter((user) => now - user.lastTypingAt < clearAfterMs);
+        return next.length === prev.length ? prev : next;
+      });
+    }, 1000);
 
     return () => {
       if (cleanupIntervalRef.current) {
