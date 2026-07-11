@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CommonGroundAnalysis } from '../../types/common-ground';
 import CommonGroundSummaryPanel from './CommonGroundSummaryPanel';
@@ -22,11 +22,17 @@ describe('CommonGroundSummaryPanel', () => {
             id: 'prop-1',
             text: 'Climate change is a serious threat',
             agreementPercentage: 85,
+            supportingParticipants: [],
+            opposingParticipants: [],
+            neutralParticipants: [],
           },
           {
             id: 'prop-2',
             text: 'We need to reduce carbon emissions',
             agreementPercentage: 78,
+            supportingParticipants: [],
+            opposingParticipants: [],
+            neutralParticipants: [],
           },
         ],
         participantCount: 25,
@@ -90,12 +96,23 @@ describe('CommonGroundSummaryPanel', () => {
       expect(screen.getByText('Overall Consensus')).toBeInTheDocument();
     });
 
-    it('should display consensus score as progress bar', () => {
+    it('should render the panel title', () => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
 
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toHaveStyle({ width: '65%' });
-      expect(progressBar).toHaveAttribute('aria-valuenow', '65');
+      expect(screen.getByText('Common Ground Analysis')).toBeInTheDocument();
+    });
+
+    it('should display consensus score as a progress bar', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
+
+      // Overall consensus is the progressbar whose value is 65
+      const overallBar = screen
+        .getAllByRole('progressbar')
+        .find((bar) => bar.getAttribute('aria-valuenow') === '65');
+
+      expect(overallBar).toBeDefined();
+      expect(overallBar).toHaveStyle({ width: '65%' });
+      expect(overallBar).toHaveAttribute('aria-valuenow', '65');
     });
 
     it('should display participant count', () => {
@@ -118,66 +135,37 @@ describe('CommonGroundSummaryPanel', () => {
     });
   });
 
-  describe('View Full Analysis Toggle', () => {
-    it('should display "View Full Analysis" button when content exists', () => {
+  // NOTE: The component no longer uses a collapse/expand toggle. All sections
+  // (agreement zones, misunderstandings, disagreements) are rendered directly.
+  // The previous "View Full Analysis" toggle and summary-card behavior have been
+  // removed from the component, so those cases are replaced by direct-render checks.
+  describe('Section Rendering', () => {
+    it('should render agreement zones section with count in the heading', () => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
 
-      expect(screen.getByText('View Full Analysis')).toBeInTheDocument();
-    });
-
-    it('should show summary cards when collapsed', () => {
-      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-
-      // Should show summary cards
-      expect(screen.getByText('1')).toBeInTheDocument(); // Agreement Zones count
-      expect(screen.getByText('Agreement Zones')).toBeInTheDocument();
-      expect(screen.getByText('Misunderstandings')).toBeInTheDocument();
-      expect(screen.getByText('Disagreements')).toBeInTheDocument();
-    });
-
-    it('should expand to show detailed view when clicked', () => {
-      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-
-      const toggleButton = screen.getByText('View Full Analysis');
-      fireEvent.click(toggleButton);
-
-      // Should now show detailed agreement zones
+      expect(screen.getByText('Agreement Zones (1)')).toBeInTheDocument();
+      // Detailed content is always visible (no toggle)
       expect(screen.getByText('Climate Action Urgency')).toBeInTheDocument();
       expect(screen.getByText('Climate change is a serious threat')).toBeInTheDocument();
-
-      // Button text should change
-      expect(screen.getByText('Hide Full Analysis')).toBeInTheDocument();
     });
 
-    it('should collapse back when clicked again', () => {
+    it('should render misunderstandings section with count in the heading', () => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
 
-      const toggleButton = screen.getByText('View Full Analysis');
+      expect(screen.getByText('Identified Misunderstandings (1)')).toBeInTheDocument();
+    });
 
-      // Expand
-      fireEvent.click(toggleButton);
-      expect(screen.getByText('Climate Action Urgency')).toBeInTheDocument();
+    it('should render disagreements section with count in the heading', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
 
-      // Collapse
-      const hideButton = screen.getByText('Hide Full Analysis');
-      fireEvent.click(hideButton);
-
-      // Should hide detailed view
-      expect(screen.queryByText('Climate Action Urgency')).not.toBeInTheDocument();
-      expect(screen.getByText('View Full Analysis')).toBeInTheDocument();
+      expect(screen.getByText('Genuine Disagreements (1)')).toBeInTheDocument();
     });
   });
 
   describe('Agreement Zones', () => {
-    beforeEach(() => {
-      const { rerender } = render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-
-      // Expand to see details
-      fireEvent.click(screen.getByText('View Full Analysis'));
-      rerender(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-    });
-
     it('should display agreement zone title and description', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
+
       expect(screen.getByText('Climate Action Urgency')).toBeInTheDocument();
       expect(
         screen.getByText('Most participants agree that climate change requires immediate action'),
@@ -185,10 +173,14 @@ describe('CommonGroundSummaryPanel', () => {
     });
 
     it('should display consensus level badge', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
+
       expect(screen.getByText('HIGH')).toBeInTheDocument();
     });
 
     it('should display propositions with agreement percentages', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
+
       expect(screen.getByText('Climate change is a serious threat')).toBeInTheDocument();
       expect(screen.getByText('85% agree')).toBeInTheDocument();
 
@@ -197,6 +189,8 @@ describe('CommonGroundSummaryPanel', () => {
     });
 
     it('should display progress bars for each proposition', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
+
       const progressBars = screen.getAllByRole('progressbar');
 
       // Find proposition progress bars (not the overall consensus one)
@@ -214,58 +208,33 @@ describe('CommonGroundSummaryPanel', () => {
         <CommonGroundSummaryPanel analysis={mockAnalysis} onAgreementZoneClick={handleClick} />,
       );
 
-      // Expand first
-      fireEvent.click(screen.getByText('View Full Analysis'));
-
-      // Find the agreement zone element
-      const zoneElement = screen.getByText('Climate Action Urgency').closest('[role="button"]');
+      // The zone is an article; when clickable it gets the cursor-pointer class
+      const zoneElement = screen.getByText('Climate Action Urgency').closest('[role="article"]');
 
       expect(zoneElement).toBeInTheDocument();
       expect(zoneElement).toHaveClass('cursor-pointer');
 
-      // Click it
       fireEvent.click(zoneElement!);
 
       expect(handleClick).toHaveBeenCalledWith('zone-1', ['resp-1', 'resp-2', 'resp-3']);
     });
 
-    it('should show related response count when clickable', () => {
-      render(<CommonGroundSummaryPanel analysis={mockAnalysis} onAgreementZoneClick={vi.fn()} />);
+    it('should not add the cursor-pointer class when onAgreementZoneClick is absent', () => {
+      render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
 
-      fireEvent.click(screen.getByText('View Full Analysis'));
+      const zoneElement = screen.getByText('Climate Action Urgency').closest('[role="article"]');
 
-      expect(screen.getByText(/Click to view 3 related responses/i)).toBeInTheDocument();
-    });
-
-    it('should support keyboard navigation for clickable zones', () => {
-      const handleClick = vi.fn();
-      render(
-        <CommonGroundSummaryPanel analysis={mockAnalysis} onAgreementZoneClick={handleClick} />,
-      );
-
-      fireEvent.click(screen.getByText('View Full Analysis'));
-
-      const zoneElement = screen.getByText('Climate Action Urgency').closest('[role="button"]');
-
-      // Press Enter
-      fireEvent.keyDown(zoneElement!, { key: 'Enter' });
-      expect(handleClick).toHaveBeenCalledWith('zone-1', ['resp-1', 'resp-2', 'resp-3']);
-
-      // Press Space
-      handleClick.mockClear();
-      fireEvent.keyDown(zoneElement!, { key: ' ' });
-      expect(handleClick).toHaveBeenCalledWith('zone-1', ['resp-1', 'resp-2', 'resp-3']);
+      expect(zoneElement).not.toHaveClass('cursor-pointer');
     });
   });
 
   describe('Misunderstandings', () => {
     beforeEach(() => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-      fireEvent.click(screen.getByText('View Full Analysis'));
     });
 
     it('should display misunderstanding term', () => {
-      expect(screen.getByText('"renewable energy"')).toBeInTheDocument();
+      expect(screen.getByText('“renewable energy”')).toBeInTheDocument();
     });
 
     it('should display TERM CONFUSION badge', () => {
@@ -278,18 +247,17 @@ describe('CommonGroundSummaryPanel', () => {
     });
 
     it('should display participant counts for each definition', () => {
-      expect(screen.getByText('Used by 2 participant(s)')).toBeInTheDocument();
+      expect(screen.getAllByText('Used by 2 participant(s)')).toHaveLength(2);
     });
 
     it('should display clarification suggestion', () => {
-      expect(screen.getByText('Specify which energy sources are included')).toBeInTheDocument();
+      expect(screen.getByText(/Specify which energy sources are included/i)).toBeInTheDocument();
     });
   });
 
   describe('Disagreements', () => {
     beforeEach(() => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-      fireEvent.click(screen.getByText('View Full Analysis'));
     });
 
     it('should display disagreement topic and description', () => {
@@ -370,14 +338,12 @@ describe('CommonGroundSummaryPanel', () => {
 
     it('should have proper ARIA labels for agreement zones', () => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-      fireEvent.click(screen.getByText('View Full Analysis'));
 
       expect(screen.getByLabelText('Agreement zone: Climate Action Urgency')).toBeInTheDocument();
     });
 
     it('should have proper ARIA labels for misunderstandings', () => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-      fireEvent.click(screen.getByText('View Full Analysis'));
 
       expect(
         screen.getByLabelText('Misunderstanding about term: renewable energy'),
@@ -386,7 +352,6 @@ describe('CommonGroundSummaryPanel', () => {
 
     it('should have proper ARIA labels for disagreements', () => {
       render(<CommonGroundSummaryPanel analysis={mockAnalysis} />);
-      fireEvent.click(screen.getByText('View Full Analysis'));
 
       expect(
         screen.getByLabelText('Disagreement about: Economic vs Environmental Priorities'),

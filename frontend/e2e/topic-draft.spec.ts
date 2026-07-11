@@ -81,6 +81,12 @@ test.describe('Topic Draft Saving and Recovery', () => {
       { key: DRAFT_STORAGE_KEY, data: createDraftData() },
     );
 
+    // Reload page so useTopicDraft hook initializes with saved draft
+    // (The hook checks localStorage on page load, not modal open)
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
+
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
     const modal = page.locator('[data-testid="create-topic-modal"]');
@@ -111,6 +117,11 @@ test.describe('Topic Draft Saving and Recovery', () => {
       },
     );
 
+    // Reload page so useTopicDraft hook initializes with saved draft
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
+
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
     const modal = page.locator('[data-testid="create-topic-modal"]');
@@ -138,6 +149,11 @@ test.describe('Topic Draft Saving and Recovery', () => {
         data: createDraftData({ title: 'Draft To Be Cleared Title' }),
       },
     );
+
+    // Reload page so useTopicDraft hook initializes with saved draft
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
 
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();
@@ -240,6 +256,11 @@ test.describe('Topic Draft Saving and Recovery', () => {
         }),
       },
     );
+
+    // Reload page so useTopicDraft hook initializes with saved draft
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByRole('heading', { name: 'Discussion Topics' })).toBeVisible();
 
     // Open the modal
     await page.getByRole('button', { name: /create topic/i }).click();

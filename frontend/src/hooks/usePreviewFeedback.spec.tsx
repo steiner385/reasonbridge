@@ -242,11 +242,17 @@ describe('usePreviewFeedback', () => {
 
       const { result } = renderHook(() => usePreviewFeedback(longContent), { wrapper });
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      // The hook configures retry: 1 with a 1000ms retryDelay, so the query
+      // retries once before settling into an error state. Allow enough time
+      // for the retry to complete.
+      await waitFor(
+        () => {
+          expect(result.current.isError).toBe(true);
+        },
+        { timeout: 5000 },
+      );
 
-      expect(result.current.isError).toBe(true);
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBe(errorMessage);
       expect(result.current.feedback).toEqual([]);
       expect(result.current.readyToPost).toBe(true); // Default to allowing post on error

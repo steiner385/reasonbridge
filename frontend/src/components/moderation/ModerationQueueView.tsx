@@ -17,6 +17,7 @@
 import { useEffect, useState } from 'react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 import { Tooltip } from '../ui/Tooltip';
 import {
   getModerationActions,
@@ -67,13 +68,22 @@ export default function ModerationQueueView({
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  // Pagination
-  const [page, setPage] = useState(1);
-  const pageSize = 20;
+  // Cursor-based pagination. The backend is cursor-based, not page-based, so we
+  // track the current cursor, the next-page cursor it returns, and a stack of
+  // prior cursors to support "Previous" (Issue #1397).
+  const limit = 20;
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [prevCursors, setPrevCursors] = useState<string[]>([]);
 
   // Action states
   const [processingActionId, setProcessingActionId] = useState<string | null>(null);
   const [processingAction, setProcessingAction] = useState<'approve' | 'reject' | null>(null);
+
+  // Reject-reason capture. The backend requires a non-empty reason (Issue #1393).
+  const [rejectTarget, setRejectTarget] = useState<ModerationAction | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState<string | null>(null);
 
   // Load actions
   useEffect(() => {
@@ -85,11 +95,11 @@ export default function ModerationQueueView({
         const options: {
           status?: ModerationActionStatus;
           severity?: ModerationSeverity;
-          page?: number;
-          pageSize?: number;
+          limit?: number;
+          cursor?: string;
         } = {
-          page,
-          pageSize,
+          limit,
+          ...(cursor ? { cursor } : {}),
         };
 
         if (statusFilter !== 'all') {
@@ -100,6 +110,7 @@ export default function ModerationQueueView({
         }
 
         const response = await getModerationActions(options);
+        setNextCursor(response.nextCursor);
 
         let filteredActions = response.actions;
 
@@ -142,7 +153,14 @@ export default function ModerationQueueView({
     };
 
     loadActions();
-  }, [statusFilter, severityFilter, actionTypeFilter, page, sortField, sortOrder]);
+  }, [statusFilter, severityFilter, actionTypeFilter, cursor, sortField, sortOrder]);
+
+  // Reset pagination to the first page whenever a filter changes, so the cursor
+  // stack never points into a differently-filtered result set.
+  useEffect(() => {
+    setCursor(undefined);
+    setPrevCursors([]);
+  }, [statusFilter, severityFilter, actionTypeFilter]);
 
   // Handle action approval
   const handleApprove = async (actionId: string) => {
@@ -160,16 +178,33 @@ export default function ModerationQueueView({
     }
   };
 
-  // Handle action rejection
-  const handleReject = async (actionId: string) => {
+  // Open the reject-reason modal for an action (the backend requires a reason,
+  // Issue #1393).
+  const openRejectModal = (action: ModerationAction) => {
+    setRejectTarget(action);
+    setRejectReason('');
+    setRejectError(null);
+  };
+
+  // Confirm rejection with the entered reason.
+  const handleConfirmReject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (!reason) {
+      setRejectError('Please provide a reason for rejecting this action');
+      return;
+    }
+    const actionId = rejectTarget.id;
     try {
       setProcessingActionId(actionId);
       setProcessingAction('reject');
-      const updatedAction = await rejectModerationAction(actionId);
+      await rejectModerationAction(actionId, reason);
       setActions(actions.filter((a) => a.id !== actionId));
-      onActionUpdated?.(updatedAction);
+      onActionUpdated?.({ ...rejectTarget, status: 'reversed' });
+      setRejectTarget(null);
+      setRejectReason('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reject action');
+      setRejectError(err instanceof Error ? err.message : 'Failed to reject action');
     } finally {
       setProcessingActionId(null);
       setProcessingAction(null);
@@ -261,7 +296,6 @@ export default function ModerationQueueView({
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value as ModerationActionStatus | 'all');
-                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
               >
@@ -286,7 +320,6 @@ export default function ModerationQueueView({
                 value={severityFilter}
                 onChange={(e) => {
                   setSeverityFilter(e.target.value as ModerationSeverity | 'all');
-                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
               >
@@ -309,7 +342,6 @@ export default function ModerationQueueView({
                 value={actionTypeFilter}
                 onChange={(e) => {
                   setActionTypeFilter(e.target.value as ModerationActionType | 'all');
-                  setPage(1);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800"
               >
@@ -430,7 +462,7 @@ export default function ModerationQueueView({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleReject(action.id)}
+                          onClick={() => openRejectModal(action)}
                           disabled={processingActionId === action.id}
                         >
                           {processingActionId === action.id && processingAction === 'reject'
@@ -447,28 +479,92 @@ export default function ModerationQueueView({
         </CardBody>
       </Card>
 
-      {/* Pagination */}
-      {actions.length > 0 && (
+      {/* Pagination (cursor-based) */}
+      {(prevCursors.length > 0 || nextCursor) && (
         <div className="flex justify-center gap-2">
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setPage(Math.max(1, page - 1))}
-            disabled={page === 1}
+            onClick={() => {
+              setPrevCursors((stack) => {
+                const next = [...stack];
+                const previous = next.pop();
+                setCursor(previous);
+                return next;
+              });
+            }}
+            disabled={prevCursors.length === 0 || loading}
           >
             Previous
           </Button>
-          <span className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">Page {page}</span>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setPage(page + 1)}
-            disabled={actions.length < pageSize}
+            onClick={() => {
+              if (!nextCursor) return;
+              setPrevCursors((stack) => [...stack, cursor ?? '']);
+              setCursor(nextCursor);
+            }}
+            disabled={!nextCursor || loading}
           >
             Next
           </Button>
         </div>
       )}
+
+      {/* Reject-reason modal (Issue #1393) */}
+      <Modal
+        isOpen={rejectTarget !== null}
+        onClose={() => setRejectTarget(null)}
+        title="Reject moderation action"
+        size="md"
+        showCloseButton={processingAction !== 'reject'}
+        closeOnBackdropClick={processingAction !== 'reject'}
+        closeOnEscape={processingAction !== 'reject'}
+        footer={
+          <div className="flex gap-3 w-full">
+            <Button
+              variant="outline"
+              onClick={() => setRejectTarget(null)}
+              disabled={processingAction === 'reject'}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmReject}
+              isLoading={processingAction === 'reject'}
+              disabled={processingAction === 'reject'}
+            >
+              Confirm Reject
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Rejecting dismisses this recommended action. Please explain why so there is a record of
+            the decision.
+          </p>
+          {rejectError && (
+            <div className="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {rejectError}
+            </div>
+          )}
+          <label htmlFor="queue-reject-reason" className="sr-only">
+            Reason for rejection
+          </label>
+          <textarea
+            id="queue-reject-reason"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Reason for rejecting this action"
+            rows={4}
+            disabled={processingAction === 'reject'}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

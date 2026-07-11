@@ -22,13 +22,26 @@ export const emailSchema = z
   .trim();
 
 /**
+ * Canonical password special-character set.
+ *
+ * Single source of truth shared by every client-side password check so the
+ * frontend never accepts a character the backend RegisterDto
+ * (services/user-service/src/auth/dto/register.dto.ts) would reject with a 400.
+ * Keep this in sync with the class-validator `@Matches` rule on the backend.
+ */
+export const PASSWORD_SPECIAL_CHAR_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
+
+/** Human-readable message used whenever the special-character rule fails. */
+export const PASSWORD_SPECIAL_CHAR_MESSAGE = 'Password must contain at least one special character';
+
+/**
  * Password validation schema
  * Requirements:
  * - Minimum 12 characters
  * - At least one lowercase letter
  * - At least one uppercase letter
  * - At least one number
- * - At least one special character
+ * - At least one special character (see PASSWORD_SPECIAL_CHAR_REGEX)
  */
 export const passwordSchema = z
   .string()
@@ -36,18 +49,29 @@ export const passwordSchema = z
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[0-9]/, 'Password must contain at least one number')
-  .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character');
+  .regex(PASSWORD_SPECIAL_CHAR_REGEX, PASSWORD_SPECIAL_CHAR_MESSAGE);
 
 /**
  * Display name validation schema
- * Requirements: 3-50 characters, alphanumeric with spaces allowed
+ *
+ * Aligned with the backend RegisterDto (MinLength 2, MaxLength 50, no
+ * character allow-list) so legitimate names such as "O'Brien" or "José" are
+ * not blocked client-side while still passing server validation.
  */
+export const DISPLAY_NAME_MIN_LENGTH = 2;
+export const DISPLAY_NAME_MAX_LENGTH = 50;
+
 export const displayNameSchema = z
   .string()
-  .min(3, 'Display name must be at least 3 characters')
-  .max(50, 'Display name must be at most 50 characters')
-  .regex(/^[a-zA-Z0-9\s]+$/, 'Display name can only contain letters, numbers, and spaces')
-  .trim();
+  .trim()
+  .min(
+    DISPLAY_NAME_MIN_LENGTH,
+    `Display name must be at least ${DISPLAY_NAME_MIN_LENGTH} characters`,
+  )
+  .max(
+    DISPLAY_NAME_MAX_LENGTH,
+    `Display name must be at most ${DISPLAY_NAME_MAX_LENGTH} characters`,
+  );
 
 /**
  * URL validation schema

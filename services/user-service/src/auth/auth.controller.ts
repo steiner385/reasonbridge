@@ -14,6 +14,7 @@ import {
   Logger,
   UseGuards,
 } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { Throttle } from '@nestjs/throttler';
 import { DemoBlocklistGuard } from './demo-blocklist.guard.js';
 import { UsersService } from '../users/users.service.js';
@@ -198,7 +199,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.VERIFY_EMAIL, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body() dto: VerifyEmailRequestDto): Promise<VerifyEmailResponseDto> {
-    this.logger.debug(`Verifying email for: ${dto.email}`);
+    this.logger.debug(`Verifying email for: ${redactEmail(dto.email)}`);
 
     // Verify the token (throws if invalid/expired)
     const userId = await this.verificationService.verifyToken(dto.email, dto.code);
@@ -230,7 +231,7 @@ export class AuthController {
   async resendVerification(
     @Body() dto: ResendVerificationRequestDto,
   ): Promise<ResendVerificationResponseDto> {
-    this.logger.debug(`Resending verification email for: ${dto.email}`);
+    this.logger.debug(`Resending verification email for: ${redactEmail(dto.email)}`);
 
     // Find user by email
     const user = await this.prisma.user.findUnique({

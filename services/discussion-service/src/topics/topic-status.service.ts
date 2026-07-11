@@ -3,10 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  Optional,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { DiscussionGateway } from '../gateways/discussion.gateway.js';
 import type { TopicResponseDto } from './dto/topic-response.dto.js';
 
 type TopicStatus = 'SEEDING' | 'ACTIVE' | 'ARCHIVED' | 'LOCKED';
@@ -32,6 +39,7 @@ export class TopicStatusService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @Optional() @Inject(DiscussionGateway) private readonly discussionGateway?: DiscussionGateway,
   ) {}
 
   /**
@@ -135,6 +143,16 @@ export class TopicStatusService {
     // Invalidate caches
     await this.invalidateCaches(topicId);
 
+    // Broadcast the status change to clients viewing this topic so archived/
+    // locked state is reflected live without a page reload (#1359, #1362).
+    if (this.discussionGateway && topic.status !== newStatus) {
+      this.discussionGateway.emitTopicStatusChange({
+        topicId,
+        oldStatus: topic.status,
+        newStatus,
+      });
+    }
+
     return {
       id: updatedTopic.id,
       title: updatedTopic.title,
@@ -163,10 +181,13 @@ export class TopicStatusService {
    * @param topicId - ID of the topic whose caches should be invalidated
    */
   private async invalidateCaches(topicId: string): Promise<void> {
-    await this.cacheManager.del('topics:list');
-    const cacheKeys = await this.cacheManager.stores.keys();
-    const cacheKeysArray = Array.from(cacheKeys) as unknown as string[];
-    const topicCacheKeys = cacheKeysArray.filter((key: string) => key.includes(topicId));
-    await Promise.all(topicCacheKeys.map((key: string) => this.cacheManager.del(key)));
+    // Delete known cache keys for this topic
+    await Promise.all([
+      this.cacheManager.del('topics:list'),
+      this.cacheManager.del(`topics:${topicId}`),
+      this.cacheManager.del(`topic:${topicId}`),
+      this.cacheManager.del(`topics:${topicId}:responses`),
+      this.cacheManager.del(`topics:${topicId}:propositions`),
+    ]);
   }
 }

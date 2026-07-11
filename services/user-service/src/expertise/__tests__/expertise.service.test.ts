@@ -453,10 +453,9 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(25); // Category response count
-      mockPrisma.response.findMany.mockResolvedValue([
-        { id: 'resp-1', createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
-        { id: 'resp-2', createdAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000) },
-      ]);
+      mockPrisma.response.findFirst.mockResolvedValue({
+        createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      });
       mockPrisma.vote.groupBy.mockResolvedValue([
         { voteType: 'UPVOTE', _count: { id: 15 } },
         { voteType: 'DOWNVOTE', _count: { id: 5 } },
@@ -521,9 +520,9 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(10);
-      mockPrisma.response.findMany.mockResolvedValue([
-        { id: 'resp-1', createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-      ]);
+      mockPrisma.response.findFirst.mockResolvedValue({
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      });
       mockPrisma.vote.groupBy.mockResolvedValue([]);
       mockPrisma.feedback.groupBy.mockResolvedValue([]);
       mockPrisma.domainCredential.findMany.mockResolvedValue(mockCredentials);
@@ -548,7 +547,7 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(10);
-      mockPrisma.response.findMany.mockResolvedValue([{ id: 'resp-1', createdAt: new Date() }]);
+      mockPrisma.response.findFirst.mockResolvedValue({ createdAt: new Date() });
       mockPrisma.vote.groupBy.mockResolvedValue([]);
       mockPrisma.feedback.groupBy.mockResolvedValue([]);
       mockPrisma.domainCredential.findMany.mockResolvedValue([]);
@@ -586,8 +585,8 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(0);
-      mockPrisma.response.findMany.mockResolvedValue([]);
-      // Note: vote and feedback groupBy won't be called when no responses exist
+      mockPrisma.response.findFirst.mockResolvedValue(null);
+      // Aggregations run against the relation filter and return empty groups.
       mockPrisma.vote.groupBy.mockResolvedValue([]);
       mockPrisma.feedback.groupBy.mockResolvedValue([]);
       mockPrisma.domainCredential.findMany.mockResolvedValue([]);
@@ -612,9 +611,9 @@ describe('ExpertiseService', () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockPrisma.tag.findUnique.mockResolvedValue(mockTag);
       mockPrisma.response.count.mockResolvedValue(50); // Max engagement
-      mockPrisma.response.findMany.mockResolvedValue([
-        { id: 'resp-1', createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) }, // Max tenure
-      ]);
+      mockPrisma.response.findFirst.mockResolvedValue({
+        createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000), // Max tenure
+      });
       mockPrisma.vote.groupBy.mockResolvedValue([
         { voteType: 'UPVOTE', _count: { id: 100 } },
         { voteType: 'DOWNVOTE', _count: { id: 10 } },

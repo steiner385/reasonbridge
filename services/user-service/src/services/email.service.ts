@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { ConfigService } from '@nestjs/config';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
@@ -127,9 +128,12 @@ export class EmailService implements OnModuleDestroy {
 
     try {
       await this.sesClient.send(command);
-      this.logger.log(`Parental consent email sent to ${params.parentEmail}`);
+      this.logger.log(`Parental consent email sent to ${redactEmail(params.parentEmail)}`);
     } catch (error) {
-      this.logger.error(`Failed to send parental consent email to ${params.parentEmail}:`, error);
+      this.logger.error(
+        `Failed to send parental consent email to ${redactEmail(params.parentEmail)}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -168,9 +172,12 @@ export class EmailService implements OnModuleDestroy {
 
     try {
       await this.sesClient.send(command);
-      this.logger.log(`Verification email sent to ${params.email}`);
+      this.logger.log(`Verification email sent to ${redactEmail(params.email)}`);
     } catch (error) {
-      this.logger.error(`Failed to send verification email to ${params.email}:`, error);
+      this.logger.error(
+        `Failed to send verification email to ${redactEmail(params.email)}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -210,9 +217,12 @@ export class EmailService implements OnModuleDestroy {
 
     try {
       await this.sesClient.send(command);
-      this.logger.log(`Password reset email sent to ${params.email}`);
+      this.logger.log(`Password reset email sent to ${redactEmail(params.email)}`);
     } catch (error) {
-      this.logger.error(`Failed to send password reset email to ${params.email}:`, error);
+      this.logger.error(
+        `Failed to send password reset email to ${redactEmail(params.email)}:`,
+        error,
+      );
       throw error;
     }
   }

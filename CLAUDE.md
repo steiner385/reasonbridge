@@ -826,6 +826,40 @@ async createUser(dto: CreateUserDto): Promise<User> {
 }
 ````
 
+### Request Validation Policy (Backend Services)
+
+All backend services standardize on a single global `ValidationPipe` policy via the
+shared helper `createValidationPipe()` in `@reason-bridge/common` (`packages/common/src/http`):
+
+- `whitelist: true` — strip properties without validation decorators.
+- `forbidNonWhitelisted: true` — reject requests containing unknown fields with a 400.
+- `transform: true` — transform plain payloads into DTO instances.
+
+Rationale: a typo'd or extra field returns a clear `400` rather than being silently
+stripped, which is safer for API consumers. Bootstrap each service with:
+
+```typescript
+import { createValidationPipe } from '@reason-bridge/common';
+
+app.useGlobalPipes(createValidationPipe());
+// discussion-service preserves implicit numeric conversion for query params:
+app.useGlobalPipes(createValidationPipe({ transformOptions: { enableImplicitConversion: true } }));
+```
+
+**Exception — the API gateway does NOT register this pipe.** Its proxy controllers bind
+raw `@Body() body: Record<string, any>` payloads with no DTO, so `whitelist: true` would
+strip every field. The gateway forwards bodies verbatim and relies on downstream services
+to validate.
+
+### Pagination Contract (List Endpoints)
+
+A shared pagination contract lives in `@reason-bridge/common` (`packages/common/src/pagination`):
+`PaginatedResponse<T>` / `PaginationMeta` types plus `parsePositiveInt`,
+`normalizeOffsetPagination`, and `buildOffsetMeta` helpers. New list endpoints should adopt
+the `{ data, meta }` envelope; existing endpoints can migrate incrementally. Always validate
+numeric query params (limit/offset/page/days) with `parsePositiveInt` (or a DTO) instead of
+raw `parseInt`, which can produce `NaN`/negative values that corrupt queries and date math.
+
 ## API Versioning
 
 The API gateway uses **URI-based versioning** (`app.enableVersioning({ type: VersioningType.URI, ... })` in `services/api-gateway/src/main.ts`).

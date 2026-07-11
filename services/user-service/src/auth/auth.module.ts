@@ -19,6 +19,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AUTH_SERVICE } from './auth.interface.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
 import { VerificationService } from './verification.service.js';
+import { VerificationTokenCleanupJob } from './verification-token-cleanup.job.js';
 import { EmailService } from '../services/email.service.js';
 import { OAuthStateService } from './oauth-state.service.js';
 import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
@@ -42,7 +43,12 @@ import { FixedVerificationCodeGenerator } from './fixed-verification-code-genera
  */
 const authServiceProvider = {
   provide: AUTH_SERVICE,
-  useFactory: (configService: ConfigService, prisma: PrismaService) => {
+  useFactory: (
+    configService: ConfigService,
+    prisma: PrismaService,
+    verificationService: VerificationService,
+    emailService: EmailService,
+  ) => {
     const authMode = configService.get<string>('AUTH_MODE');
     const nodeEnv = configService.get<string>('NODE_ENV');
     const useMock = configService.get<string>('AUTH_MOCK') === 'true' || nodeEnv === 'test';
@@ -51,7 +57,7 @@ const authServiceProvider = {
 
     // Explicit AUTH_MODE takes precedence
     if (authMode === 'database') {
-      return new DatabaseAuthService(configService, prisma);
+      return new DatabaseAuthService(configService, prisma, verificationService, emailService);
     }
 
     if (authMode === 'mock' || useMock) {
@@ -60,12 +66,12 @@ const authServiceProvider = {
 
     // Use database auth in development mode (avoids requiring Cognito config)
     if (useDatabase) {
-      return new DatabaseAuthService(configService, prisma);
+      return new DatabaseAuthService(configService, prisma, verificationService, emailService);
     }
 
     return new CognitoService(configService);
   },
-  inject: [ConfigService, PrismaService],
+  inject: [ConfigService, PrismaService, VerificationService, EmailService],
 };
 
 /**
@@ -133,6 +139,7 @@ const verificationCodeGeneratorProvider = {
     RolesGuard,
     // Verification and email services for verify-email and resend-verification endpoints
     VerificationService,
+    VerificationTokenCleanupJob,
     EmailService,
     // OAuth state token management for CSRF protection
     OAuthStateService,

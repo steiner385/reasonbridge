@@ -9,8 +9,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/*.integration.test.ts'],
+    include: ['src/**/*.{test,spec}.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/*.integration.test.ts',
+      '**/*.integration.spec.ts',
+    ],
     reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',

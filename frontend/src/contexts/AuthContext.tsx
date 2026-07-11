@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authService } from '../services/authService';
 import { apiClient } from '../lib/api';
 import { getJWTTimeUntilExpiry } from '../lib/jwt';
@@ -273,14 +273,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => clearInterval(interval);
   }, [user, logout]);
 
-  const value: AuthContextType = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    logout,
-    refreshUserProfile,
-  };
+  // Memoize the context value so it only changes when auth state actually
+  // changes. AuthProvider itself consumes useToast, so without this every toast
+  // would hand AuthProvider a new context identity and cascade a re-render to
+  // every useAuthContext consumer (Header, Sidebar, etc.). See issue #1387.
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      login,
+      logout,
+      refreshUserProfile,
+    }),
+    [user, isLoading, login, logout, refreshUserProfile],
+  );
 
   return (
     <AuthContext.Provider value={value}>

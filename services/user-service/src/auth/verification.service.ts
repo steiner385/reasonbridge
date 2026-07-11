@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VerificationTokenType } from '@prisma/client';
 import { timingSafeEqual } from 'crypto';
@@ -114,7 +115,7 @@ export class VerificationService {
     type: VerificationTokenType = VerificationTokenType.EMAIL_VERIFICATION,
   ): Promise<string> {
     try {
-      this.logger.debug(`Verifying ${type} token for email: ${email}`);
+      this.logger.debug(`Verifying ${type} token for email: ${redactEmail(email)}`);
 
       // Look up user by email first
       const user = await this.prisma.user.findUnique({
@@ -123,7 +124,7 @@ export class VerificationService {
       });
 
       if (!user) {
-        this.logger.warn(`No user found for email: ${email}`);
+        this.logger.warn(`No user found for email: ${redactEmail(email)}`);
         throw new NotFoundException({
           error: 'USER_NOT_FOUND',
           message: 'No user found with this email',
@@ -143,7 +144,7 @@ export class VerificationService {
       });
 
       if (!token) {
-        this.logger.warn(`No ${type} token found for email: ${email}`);
+        this.logger.warn(`No ${type} token found for email: ${redactEmail(email)}`);
         throw new NotFoundException({
           error: 'TOKEN_NOT_FOUND',
           message: 'No verification code found for this email',
@@ -155,7 +156,9 @@ export class VerificationService {
 
       // Check if token is locked due to too many failed attempts
       if (token.lockedAt) {
-        this.logger.warn(`${type} token locked for email: ${email} (too many failed attempts)`);
+        this.logger.warn(
+          `${type} token locked for email: ${redactEmail(email)} (too many failed attempts)`,
+        );
         throw new BadRequestException({
           error: 'TOKEN_LOCKED',
           message: 'Verification code has been locked due to too many failed attempts',
@@ -172,7 +175,7 @@ export class VerificationService {
           type === VerificationTokenType.PASSWORD_RESET
             ? 'valid for 15 minutes'
             : 'valid for 24 hours';
-        this.logger.warn(`${type} token expired for email: ${email}`);
+        this.logger.warn(`${type} token expired for email: ${redactEmail(email)}`);
         throw new BadRequestException({
           error: 'EXPIRED_CODE',
           message: `Verification code has expired (${expiryMessage})`,
@@ -239,7 +242,7 @@ export class VerificationService {
         },
       });
 
-      this.logger.log(`${type} verification successful for email: ${email}`);
+      this.logger.log(`${type} verification successful for email: ${redactEmail(email)}`);
       return token.userId;
     } catch (error: unknown) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { ThemeMode, ThemeContextType } from '../types/theme';
 import { useMediaQuery } from '../hooks/useMediaQuery';
@@ -82,12 +82,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     });
   }, []);
 
-  const value: ThemeContextType = {
-    mode,
-    isDark,
-    setTheme,
-    toggleTheme,
-  };
+  // Memoize the context value so it only changes when theme state actually
+  // changes, preventing cascading re-renders of every consumer. See issue #1387.
+  const value: ThemeContextType = useMemo(
+    () => ({
+      mode,
+      isDark,
+      setTheme,
+      toggleTheme,
+    }),
+    [mode, isDark, setTheme, toggleTheme],
+  );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

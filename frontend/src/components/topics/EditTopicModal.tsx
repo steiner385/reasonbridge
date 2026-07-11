@@ -59,21 +59,22 @@ export function EditTopicModal({
   const [showPreview, setShowPreview] = useState(false);
 
   // Reset form when topic changes or modal opens
+  // This is an intentional pattern for form initialization - the setState calls
+  // reset form state to match the topic prop when the modal opens or topic changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
-      // Schedule state updates asynchronously to avoid cascading renders
-      setTimeout(() => {
-        setTitle(topic.title);
-        setDescription(topic.description);
-        setTags((topic.tags || []).map((t) => t.name));
-        setTagInput('');
-        setEditReason('');
-        setFlagForReview(false);
-        setErrors({});
-        setShowPreview(false);
-      }, 0);
+      setTitle(topic.title);
+      setDescription(topic.description);
+      setTags((topic.tags || []).map((t) => t.name));
+      setTagInput('');
+      setEditReason('');
+      setFlagForReview(false);
+      setErrors({});
+      setShowPreview(false);
     }
   }, [isOpen, topic]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Calculate if edit reason is required (topic older than 24 hours)
   // Use useState initializer to calculate once on mount (avoids Date.now() during render)

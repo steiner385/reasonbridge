@@ -10,6 +10,7 @@ const createMockPrismaService = () => ({
   vote: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
+    groupBy: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -130,7 +131,7 @@ describe('VotesService', () => {
 
   describe('getVoteSummary', () => {
     it('should return empty summary for response with no votes', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([]);
+      mockPrisma.vote.groupBy.mockResolvedValue([]);
 
       const result = await service.getVoteSummary('response-1');
 
@@ -143,11 +144,9 @@ describe('VotesService', () => {
     });
 
     it('should calculate vote counts correctly', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([
-        { voteType: 'UPVOTE', userId: 'user-1' },
-        { voteType: 'UPVOTE', userId: 'user-2' },
-        { voteType: 'UPVOTE', userId: 'user-3' },
-        { voteType: 'DOWNVOTE', userId: 'user-4' },
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'UPVOTE', _count: { _all: 3 } },
+        { voteType: 'DOWNVOTE', _count: { _all: 1 } },
       ]);
 
       const result = await service.getVoteSummary('response-1');
@@ -158,18 +157,24 @@ describe('VotesService', () => {
     });
 
     it('should return userVote when userId is provided and user voted', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([
-        { voteType: 'UPVOTE', userId: 'user-1' },
-        { voteType: 'DOWNVOTE', userId: 'user-2' },
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'UPVOTE', _count: { _all: 1 } },
+        { voteType: 'DOWNVOTE', _count: { _all: 1 } },
       ]);
+      mockPrisma.vote.findUnique.mockResolvedValue({ voteType: 'DOWNVOTE' });
 
       const result = await service.getVoteSummary('response-1', 'user-2');
 
       expect(result.userVote).toBe('DOWNVOTE');
+      expect(mockPrisma.vote.findUnique).toHaveBeenCalledWith({
+        where: { userId_responseId: { userId: 'user-2', responseId: 'response-1' } },
+        select: { voteType: true },
+      });
     });
 
     it('should return null userVote when user has not voted', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([{ voteType: 'UPVOTE', userId: 'user-1' }]);
+      mockPrisma.vote.groupBy.mockResolvedValue([{ voteType: 'UPVOTE', _count: { _all: 1 } }]);
+      mockPrisma.vote.findUnique.mockResolvedValue(null);
 
       const result = await service.getVoteSummary('response-1', 'user-2');
 
@@ -177,11 +182,9 @@ describe('VotesService', () => {
     });
 
     it('should handle negative score correctly', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([
-        { voteType: 'DOWNVOTE', userId: 'user-1' },
-        { voteType: 'DOWNVOTE', userId: 'user-2' },
-        { voteType: 'DOWNVOTE', userId: 'user-3' },
-        { voteType: 'UPVOTE', userId: 'user-4' },
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { voteType: 'DOWNVOTE', _count: { _all: 3 } },
+        { voteType: 'UPVOTE', _count: { _all: 1 } },
       ]);
 
       const result = await service.getVoteSummary('response-1');
@@ -192,10 +195,9 @@ describe('VotesService', () => {
 
   describe('getVoteSummaries', () => {
     it('should return summaries for multiple responses', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([
-        { responseId: 'response-1', voteType: 'UPVOTE', userId: 'user-1' },
-        { responseId: 'response-1', voteType: 'UPVOTE', userId: 'user-2' },
-        { responseId: 'response-2', voteType: 'DOWNVOTE', userId: 'user-1' },
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { responseId: 'response-1', voteType: 'UPVOTE', _count: { _all: 2 } },
+        { responseId: 'response-2', voteType: 'DOWNVOTE', _count: { _all: 1 } },
       ]);
 
       const result = await service.getVoteSummaries(['response-1', 'response-2']);
@@ -215,19 +217,27 @@ describe('VotesService', () => {
     });
 
     it('should include userVote for each response when userId provided', async () => {
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { responseId: 'response-1', voteType: 'UPVOTE', _count: { _all: 1 } },
+        { responseId: 'response-2', voteType: 'DOWNVOTE', _count: { _all: 1 } },
+      ]);
       mockPrisma.vote.findMany.mockResolvedValue([
-        { responseId: 'response-1', voteType: 'UPVOTE', userId: 'user-1' },
-        { responseId: 'response-2', voteType: 'DOWNVOTE', userId: 'user-1' },
+        { responseId: 'response-1', voteType: 'UPVOTE' },
+        { responseId: 'response-2', voteType: 'DOWNVOTE' },
       ]);
 
       const result = await service.getVoteSummaries(['response-1', 'response-2'], 'user-1');
 
       expect(result.get('response-1')?.userVote).toBe('UPVOTE');
       expect(result.get('response-2')?.userVote).toBe('DOWNVOTE');
+      expect(mockPrisma.vote.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', responseId: { in: ['response-1', 'response-2'] } },
+        select: { responseId: true, voteType: true },
+      });
     });
 
     it('should initialize summary for responses with no votes', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([]);
+      mockPrisma.vote.groupBy.mockResolvedValue([]);
 
       const result = await service.getVoteSummaries(['response-1', 'response-2']);
 
@@ -245,9 +255,16 @@ describe('VotesService', () => {
       });
     });
 
+    it('should return an empty map without querying for an empty id list', async () => {
+      const result = await service.getVoteSummaries([]);
+
+      expect(result.size).toBe(0);
+      expect(mockPrisma.vote.groupBy).not.toHaveBeenCalled();
+    });
+
     it('should handle mixed responses with and without votes', async () => {
-      mockPrisma.vote.findMany.mockResolvedValue([
-        { responseId: 'response-1', voteType: 'UPVOTE', userId: 'user-1' },
+      mockPrisma.vote.groupBy.mockResolvedValue([
+        { responseId: 'response-1', voteType: 'UPVOTE', _count: { _all: 1 } },
       ]);
 
       const result = await service.getVoteSummaries(['response-1', 'response-2', 'response-3']);

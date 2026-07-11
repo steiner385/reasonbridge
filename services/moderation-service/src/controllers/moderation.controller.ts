@@ -21,6 +21,7 @@ import type {
 } from '../services/ai-review.service.js';
 import { AIReviewService } from '../services/ai-review.service.js';
 import { ModerationActionsService } from '../services/moderation-actions.service.js';
+import { AppealService } from '../services/appeal.service.js';
 import { ModerationQueueService } from '../services/moderation-queue.service.js';
 import type { QueueStats } from '../services/moderation-queue.service.js';
 import { SafetyReportService } from '../services/safety-report.service.js';
@@ -57,7 +58,14 @@ import type {
   PendingAppealResponse,
   ListAppealResponse,
 } from '../dto/appeal.dto.js';
-import { JwtAuthGuard, AdminGuard, CurrentUser, type JwtPayload } from '../auth/index.js';
+import { InternalApiKeyGuard } from '@reason-bridge/common';
+import {
+  JwtAuthGuard,
+  AdminGuard,
+  ModeratorGuard,
+  CurrentUser,
+  type JwtPayload,
+} from '../auth/index.js';
 
 export interface ScreenContentRequest {
   contentId: string;
@@ -84,9 +92,11 @@ export class ModerationController {
     private readonly queueService: ModerationQueueService,
     private readonly safetyReportService: SafetyReportService,
     private readonly reportService: ReportService,
+    private readonly appealService: AppealService,
   ) {}
 
   @Post('screen')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async screenContent(@Body() request: ScreenContentRequest): Promise<ScreenContentResponse> {
     if (!request.contentId || !request.content) {
       throw new BadRequestException('contentId and content are required fields');
@@ -118,6 +128,7 @@ export class ModerationController {
   }
 
   @Post('actions/ai-recommend')
+  @UseGuards(InternalApiKeyGuard)
   async submitAiRecommendation(
     @Body() request: AiRecommendationRequest,
   ): Promise<AiRecommendationResponse> {
@@ -154,6 +165,7 @@ export class ModerationController {
   }
 
   @Get('actions/ai-pending')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getPendingRecommendations(): Promise<{
     recommendations: AiRecommendationResponse[];
   }> {
@@ -162,6 +174,7 @@ export class ModerationController {
   }
 
   @Get('ai-stats')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getAiStats(): Promise<{
     totalPending: number;
     byActionType: Record<string, number>;
@@ -172,11 +185,13 @@ export class ModerationController {
   }
 
   @Get('queue/stats')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getQueueStats(): Promise<QueueStats> {
     return this.queueService.getQueueStats();
   }
 
   @Get('actions')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async listActions(
     @Query('targetType') targetType?: string,
     @Query('status') status?: string,
@@ -197,7 +212,7 @@ export class ModerationController {
   }
 
   @Post('actions')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async createAction(
     @CurrentUser() user: JwtPayload,
     @Body() request: CreateActionRequest,
@@ -214,12 +229,13 @@ export class ModerationController {
   }
 
   @Get('actions/:actionId')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getAction(@Param('actionId') actionId: string): Promise<ModerationActionDetailResponse> {
     return this.actionsService.getAction(actionId);
   }
 
   @Post('actions/:actionId/approve')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async approveAction(
     @Param('actionId') actionId: string,
     @CurrentUser() user: JwtPayload,
@@ -229,19 +245,21 @@ export class ModerationController {
   }
 
   @Post('actions/:actionId/reject')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async rejectAction(
     @Param('actionId') actionId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request: RejectActionRequest,
   ): Promise<void> {
     if (!request.reason || request.reason.trim().length === 0) {
       throw new BadRequestException('reason is required');
     }
 
-    return this.actionsService.rejectAction(actionId, request);
+    return this.actionsService.rejectAction(actionId, user.sub, request);
   }
 
   @Get('users/:userId/actions')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getUserActions(
     @Param('userId') userId: string,
     @Query('limit') limit: number = 20,
@@ -251,7 +269,7 @@ export class ModerationController {
   }
 
   @Post('interventions/cooling-off')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async sendCoolingOffPrompt(
     @Body()
     request: {
@@ -290,18 +308,45 @@ export class ModerationController {
       throw new BadRequestException('reason is required');
     }
 
-    return this.actionsService.createAppeal(actionId, user.sub, request);
+    return this.appealService.createAppeal(actionId, user.sub, request);
   }
 
   @Get('appeals/pending')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getPendingAppeals(
     @Query('limit') limit: number = 20,
     @Query('cursor') cursor?: string,
   ): Promise<ListAppealResponse> {
-    return this.actionsService.getPendingAppeals(limit, cursor);
+    return this.appealService.getPendingAppeals(limit, cursor);
+  }
+
+  /**
+   * List the authenticated user's own appeals.
+   *
+   * Scoped to the JWT subject so the "your appeals" surface can no longer leak
+   * every user's appeal reason and moderator decision reasoning (Issue #1396).
+   * Declared before the unscoped `GET appeals` handler; both paths are static
+   * so ordering is unambiguous.
+   */
+  @Get('appeals/me')
+  @UseGuards(JwtAuthGuard)
+  async listMyAppeals(
+    @CurrentUser() user: JwtPayload,
+    @Query('status') status?: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<ListAppealResponse> {
+    const statusEnum = status?.toUpperCase() as
+      | 'PENDING'
+      | 'UNDER_REVIEW'
+      | 'UPHELD'
+      | 'DENIED'
+      | undefined;
+    return this.appealService.listAppealsByAppellant(user.sub, statusEnum, limit, cursor);
   }
 
   @Get('appeals')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async listAppeals(
     @Query('status') status?: string,
     @Query('limit') limit: number = 20,
@@ -313,11 +358,11 @@ export class ModerationController {
       | 'UPHELD'
       | 'DENIED'
       | undefined;
-    return this.actionsService.listAppeals(statusEnum, limit, cursor);
+    return this.appealService.listAppeals(statusEnum, limit, cursor);
   }
 
   @Post('appeals/:appealId/review')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async reviewAppeal(
     @Param('appealId') appealId: string,
     @CurrentUser() user: JwtPayload,
@@ -331,11 +376,35 @@ export class ModerationController {
       throw new BadRequestException('reasoning is required');
     }
 
-    return this.actionsService.reviewAppeal(appealId, user.sub, request);
+    return this.appealService.reviewAppeal(appealId, user.sub, request);
+  }
+
+  /**
+   * Claim an appeal for review (PENDING → UNDER_REVIEW).
+   *
+   * Makes the previously-unreachable UNDER_REVIEW state usable so two
+   * moderators don't unknowingly review the same appeal (Issue #1320).
+   */
+  @Post('appeals/:appealId/assign')
+  @UseGuards(JwtAuthGuard)
+  async assignAppeal(
+    @Param('appealId') appealId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AppealResponse> {
+    return this.appealService.assignAppealToModerator(appealId, user.sub);
+  }
+
+  /**
+   * Release a claimed appeal back to the queue (UNDER_REVIEW → PENDING).
+   */
+  @Post('appeals/:appealId/unassign')
+  @UseGuards(JwtAuthGuard)
+  async unassignAppeal(@Param('appealId') appealId: string): Promise<AppealResponse> {
+    return this.appealService.unassignAppeal(appealId);
   }
 
   @Post('bans/temporary')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async createTemporaryBan(
     @CurrentUser() user: JwtPayload,
     @Body() request: CreateTemporaryBanRequest,
@@ -365,6 +434,7 @@ export class ModerationController {
   }
 
   @Get('bans/user/:userId/status')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getUserBanStatus(@Param('userId') userId: string): Promise<UserBanStatusResponse> {
     if (!userId || !userId.trim()) {
       throw new BadRequestException('userId is required');
@@ -422,6 +492,7 @@ export class ModerationController {
   }
 
   @Get('safety-reports')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async listSafetyReports(
     @Query('status') status?: string,
     @Query('priority') priority?: string,
@@ -435,6 +506,7 @@ export class ModerationController {
   }
 
   @Get('safety-reports/pending')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getPendingSafetyReports(
     @Query('limit') limit: number = 20,
   ): Promise<SafetyReportResponse[]> {
@@ -442,11 +514,13 @@ export class ModerationController {
   }
 
   @Get('safety-reports/stats')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getSafetyReportStats(): Promise<SafetyReportStats> {
     return this.safetyReportService.getStats();
   }
 
   @Get('safety-reports/:reportId')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getSafetyReport(@Param('reportId') reportId: string): Promise<SafetyReportResponse> {
     const report = await this.safetyReportService.findReport(reportId);
     if (!report) {
@@ -456,7 +530,7 @@ export class ModerationController {
   }
 
   @Post('safety-reports/:reportId/resolve')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async resolveSafetyReport(
     @Param('reportId') reportId: string,
     @CurrentUser() user: JwtPayload,
@@ -466,7 +540,7 @@ export class ModerationController {
   }
 
   @Post('safety-reports/:reportId/escalate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async escalateSafetyReport(
     @Param('reportId') reportId: string,
     @CurrentUser() user: JwtPayload,
@@ -476,6 +550,7 @@ export class ModerationController {
   }
 
   @Get('users/:userId/safety-reports')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getUserSafetyReports(
     @Param('userId') userId: string,
     @Query('limit') limit: number = 20,
@@ -527,6 +602,7 @@ export class ModerationController {
   }
 
   @Get('reports')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async listReports(
     @Query('status') status?: string,
     @Query('category') category?: string,
@@ -548,22 +624,25 @@ export class ModerationController {
   }
 
   @Get('reports/stats')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getReportStats(): Promise<ReportStatsResponse> {
     return this.reportService.getReportStats();
   }
 
   @Get('reports/pending')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getPendingReports(@Query('limit') limit: number = 20): Promise<ReportResponse[]> {
     return this.reportService.getPendingReports(limit);
   }
 
   @Get('reports/:reportId')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getReport(@Param('reportId') reportId: string): Promise<ReportResponse> {
     return this.reportService.getReportById(reportId);
   }
 
   @Post('reports/:reportId/status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async updateReportStatus(
     @Param('reportId') reportId: string,
     @CurrentUser() user: JwtPayload,
@@ -587,6 +666,7 @@ export class ModerationController {
   }
 
   @Get('content/:contentType/:contentId/reports')
+  @UseGuards(JwtAuthGuard, ModeratorGuard)
   async getContentReports(
     @Param('contentType') contentType: string,
     @Param('contentId') contentId: string,

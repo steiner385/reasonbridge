@@ -13,6 +13,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { authService } from '../../services/authService';
 import { useToast } from '../../contexts/ToastContext';
+import { PASSWORD_SPECIAL_CHAR_REGEX } from '../../schemas/common';
 
 const resetPasswordSchema = z
   .object({
@@ -27,7 +28,9 @@ const resetPasswordSchema = z
       .regex(/[A-Z]/, 'Password must contain an uppercase letter')
       .regex(/[a-z]/, 'Password must contain a lowercase letter')
       .regex(/[0-9]/, 'Password must contain a number')
-      .regex(/[^A-Za-z0-9]/, 'Password must contain a special character'),
+      // Match the backend special-character set so a valid client password is
+      // never rejected server-side with a 400.
+      .regex(PASSWORD_SPECIAL_CHAR_REGEX, 'Password must contain a special character'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

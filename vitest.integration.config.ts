@@ -63,6 +63,11 @@ export default defineConfig({
       'packages/**/tests/integration/**/*.test.ts',
       'services/**/tests/integration/**/*.test.ts',
       '**/*.integration.test.ts',
+      // Integration suites named with the .spec.ts convention (e.g.
+      // discussion-service's discussions/responses integration suites and
+      // ai-service's semantic-cache integration suite) previously matched no
+      // runner glob. Route them to the integration phase here.
+      '**/*.integration.spec.ts',
     ],
     exclude: ['**/node_modules/**', '**/dist/**'],
     testTimeout: 30000,

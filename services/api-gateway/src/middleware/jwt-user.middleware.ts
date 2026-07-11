@@ -38,6 +38,14 @@ export class JwtUserMiddleware implements NestMiddleware {
   }
 
   use(req: FastifyRequest, res: FastifyReply, next: () => void) {
+    // SECURITY: Always strip any client-supplied identity headers first. These
+    // headers are trusted by downstream services as the acting identity, so an
+    // inbound value must never survive. We only ever re-set them below from a
+    // fully verified JWT. (Previously, a missing/invalid token path returned
+    // without stripping, allowing `X-User-Id: <victim>` spoofing.)
+    delete req.headers['x-user-id'];
+    delete req.headers['x-is-minor'];
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -48,8 +56,10 @@ export class JwtUserMiddleware implements NestMiddleware {
     try {
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-      // Decode and verify JWT
-      const decoded = jwt.verify(token, this.jwtSecret) as {
+      // Decode and verify JWT.
+      // Pin the algorithm to the symmetric HS256 we sign with, so a future move to
+      // asymmetric keys cannot open an algorithm-confusion path (see issue #1300).
+      const decoded = jwt.verify(token, this.jwtSecret, { algorithms: ['HS256'] }) as {
         sub?: string;
         userId?: string;
         id?: string;
