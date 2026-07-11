@@ -14,6 +14,7 @@ import { ComplianceReportService } from './compliance-report.service.js';
 import { DataDeletionService } from './data-deletion.service.js';
 import { DataDeletionJob } from './data-deletion.job.js';
 import { AgeReverificationJob } from './age-reverification.job.js';
+import { PiiRetentionJob } from './pii-retention.job.js';
 import { ParentalConsentController } from './parental-consent.controller.js';
 import { ParentalDashboardController } from './parental-dashboard.controller.js';
 import { ComplianceController } from './compliance.controller.js';
@@ -59,6 +60,7 @@ import { GeoModule } from '../geo/index.js';
     DataDeletionService,
     DataDeletionJob,
     AgeReverificationJob,
+    PiiRetentionJob,
     EmailService,
     AdminGuard,
     // Factory provider that explicitly injects dependencies

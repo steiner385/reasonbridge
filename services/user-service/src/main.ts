@@ -7,14 +7,14 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { setupGracefulShutdown } from '@reason-bridge/common';
+import { PinoLoggerService, setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { TracingInterceptor } from './observability/index.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     // Only log errors in test mode to prevent memory leaks from verbose logging
-    logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
+    logger: new PinoLoggerService({ name: 'user-service' }),
   });
 
   // Enable validation globally

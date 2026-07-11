@@ -4,6 +4,7 @@
  */
 
 import { Controller, Get, Query, Res, Logger, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -14,6 +15,7 @@ import { ProxyService } from './proxy.service.js';
  * These endpoints are used by the landing page to showcase
  * the platform's capabilities without requiring authentication.
  */
+@ApiTags('demo')
 @Controller('demo')
 export class DemoProxyController {
   private readonly logger = new Logger(DemoProxyController.name);

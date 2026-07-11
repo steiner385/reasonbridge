@@ -17,10 +17,12 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { isValidUUID } from '@reason-bridge/common';
 import { ProxyService } from './proxy.service.js';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersProxyController {
   private readonly logger = new Logger(UsersProxyController.name);

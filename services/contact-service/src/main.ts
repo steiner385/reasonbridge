@@ -7,14 +7,14 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SERVICE_PORTS } from '@reason-bridge/common';
+import { PinoLoggerService, SERVICE_PORTS } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   const logger = new Logger('ContactService');
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
-    logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
+    logger: new PinoLoggerService({ name: 'contact-service' }),
   });
 
   app.useGlobalPipes(

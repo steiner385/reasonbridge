@@ -15,6 +15,7 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { isValidUUID } from '@reason-bridge/common';
 import { ProxyService } from './proxy.service.js';
@@ -35,6 +36,7 @@ import { ProxyService } from './proxy.service.js';
  *
  * Authentication is enforced by user-service, not at the gateway level.
  */
+@ApiTags('verification')
 @Controller('verification')
 export class VerificationProxyController {
   private readonly logger = new Logger(VerificationProxyController.name);

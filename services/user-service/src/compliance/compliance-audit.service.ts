@@ -30,6 +30,19 @@ export interface AuditMetadata {
 }
 
 /**
+ * Number of days IP address / user-agent are retained inside audit-log
+ * `metadata` before being stripped.
+ *
+ * @remarks
+ * The compliance audit *row* is retained indefinitely for COPPA/GDPR legal
+ * requirements, but the contact-identifying PII (ipAddress, userAgent) embedded
+ * in its metadata is subject to GDPR data-minimisation and must not linger tied
+ * to a userId indefinitely. 90 days aligns with common security-log retention
+ * and is well within the regulatory windows in {@link compliance.service.ts}.
+ */
+export const CONTACT_METADATA_RETENTION_DAYS = 90;
+
+/**
  * Service for logging compliance-related actions for regulatory audit trails
  *
  * @remarks
@@ -136,5 +149,53 @@ export class ComplianceAuditService {
       orderBy: { timestamp: 'desc' },
       take: limit,
     });
+  }
+
+  /**
+   * Strip expired contact PII (ipAddress, userAgent) from audit-log metadata.
+   *
+   * @remarks
+   * The audit row itself is preserved (legal retention requirement); only the
+   * IP/user-agent fields inside `metadata` — which are subject to GDPR data
+   * minimisation — are removed once older than the retention window. Designed to
+   * be invoked on a schedule (see PiiRetentionJob). Idempotent: rows with no
+   * contact PII are skipped.
+   *
+   * @param retentionDays - Age (in days) beyond which contact PII is stripped
+   * @param now - Reference "current" time (injectable for testing)
+   * @returns The number of audit-log rows whose metadata was updated
+   */
+  async stripExpiredContactMetadata(
+    retentionDays: number = CONTACT_METADATA_RETENTION_DAYS,
+    now: Date = new Date(),
+  ): Promise<number> {
+    const cutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000);
+
+    const expired = await this.prisma.complianceAuditLog.findMany({
+      where: { timestamp: { lt: cutoff } },
+      select: { id: true, metadata: true },
+    });
+
+    let stripped = 0;
+    for (const row of expired) {
+      const metadata = row.metadata as AuditMetadata | null;
+      if (!metadata || (metadata.ipAddress === undefined && metadata.userAgent === undefined)) {
+        continue;
+      }
+
+      const { ipAddress: _ip, userAgent: _ua, ...retained } = metadata;
+      await this.prisma.complianceAuditLog.update({
+        where: { id: row.id },
+        data: { metadata: retained as Prisma.InputJsonValue },
+      });
+      stripped += 1;
+    }
+
+    if (stripped > 0) {
+      this.logger.log(
+        `Stripped contact PII (ipAddress/userAgent) from ${stripped} compliance audit log(s) older than ${retentionDays} days`,
+      );
+    }
+    return stripped;
   }
 }

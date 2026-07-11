@@ -12,8 +12,10 @@ import {
   Inject,
   forwardRef,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { DemoBlocklistGuard } from './demo-blocklist.guard.js';
 import { UsersService } from '../users/users.service.js';
 import { THROTTLE_LIMITS } from '../constants/index.js';
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';
@@ -152,9 +154,14 @@ export class AuthController {
   /**
    * Authenticate user and return tokens
    * Rate limited: 5 attempts per minute to prevent brute force attacks
+   *
+   * DemoBlocklistGuard rejects @reasonbridge.demo credentials in production
+   * (unless DEMO_MODE=true), so seeded demo accounts can never be used to obtain
+   * a session against a real/shared database.
    */
   @Post('login')
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_LIMITS.TTL_MS } })
+  @UseGuards(DemoBlocklistGuard)
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.authenticateUser(loginDto.email, loginDto.password);

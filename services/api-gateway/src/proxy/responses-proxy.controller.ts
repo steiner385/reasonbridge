@@ -4,6 +4,7 @@
  */
 
 import { Controller, Get, Post, Delete, Param, Res, Headers, Body, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -19,6 +20,7 @@ import { ProxyService } from './proxy.service.js';
  * - POST /responses/:id/vote - Vote on a response
  * - DELETE /responses/:id/vote - Remove vote from a response
  */
+@ApiTags('responses')
 @Controller('responses')
 export class ResponsesProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
