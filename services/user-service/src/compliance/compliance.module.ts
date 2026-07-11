@@ -43,9 +43,16 @@ import { GeoModule } from '../geo/index.js';
     ConfigModule,
     GeoModule,
     JwtModule.register({
-      // JWT secret is required for JwtService to work properly
-      // JwtAuthGuard will use this for mock/database auth modes
-      secret: process.env['JWT_SECRET'] || 'default-dev-secret',
+      // JWT secret is required for JwtService to work properly.
+      // Fail fast outside of tests instead of silently using a committed secret;
+      // the test fallback matches JwtAuthGuard so tokens verify end-to-end.
+      secret: (() => {
+        const secret = process.env['JWT_SECRET'];
+        if (!secret && process.env['NODE_ENV'] !== 'test') {
+          throw new Error('JWT_SECRET environment variable is required');
+        }
+        return secret ?? 'mock-jwt-secret-for-testing';
+      })(),
       signOptions: { algorithm: 'HS256' },
     }),
   ],

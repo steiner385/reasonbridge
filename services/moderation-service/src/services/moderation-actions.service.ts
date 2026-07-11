@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
 import type {
@@ -584,6 +589,19 @@ export class ModerationActionsService {
       throw new BadRequestException(
         `Appeal must be in PENDING status to review, current status: ${appeal.status}`,
       );
+    }
+
+    // Separation of duties: prevent self-service ban evasion. The appellant may
+    // not decide their own appeal, and the moderator who issued the underlying
+    // action may not review the appeal against it.
+    if (reviewerId === appeal.appellantId) {
+      throw new ForbiddenException('You cannot review your own appeal');
+    }
+    if (
+      appeal.moderationAction?.approvedById &&
+      reviewerId === appeal.moderationAction.approvedById
+    ) {
+      throw new ForbiddenException('You cannot review an appeal against an action you issued');
     }
 
     const newStatus = request.decision === 'upheld' ? 'UPHELD' : 'DENIED';

@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import { AUTH_TOKENS } from '../constants/index.js';
-import type { AuthResult, RefreshResult } from './auth.interface.js';
+import type { IAuthService, AuthResult, RefreshResult } from './auth.interface.js';
 
 /**
  * Mock authentication service for local development and E2E testing.
@@ -28,13 +28,20 @@ interface MockUser {
 }
 
 @Injectable()
-export class MockAuthService {
+export class MockAuthService implements IAuthService {
   private users: Map<string, MockUser> = new Map();
+  // Password reset codes keyed by lowercased email (mock delivery channel).
+  private resetCodes: Map<string, string> = new Map();
   private readonly jwtSecret: string;
 
   constructor(private readonly configService: ConfigService) {
-    // Use a simple secret for testing - DO NOT use in production
-    this.jwtSecret = this.configService?.get<string>('JWT_SECRET', 'mock-jwt-secret-for-testing');
+    // Mock auth only runs in test/E2E contexts. Fail fast if a real deployment
+    // ever selects it without providing JWT_SECRET.
+    const secret = this.configService?.get<string>('JWT_SECRET');
+    if (!secret && process.env['NODE_ENV'] !== 'test') {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
   }
 
   /**
@@ -188,10 +195,53 @@ export class MockAuthService {
   }
 
   /**
+   * Request a password reset (mock implementation).
+   *
+   * Generates a deterministic in-memory code for a known account. Always
+   * resolves successfully to mirror the enumeration-safe production behaviour.
+   *
+   * @param email - The email address requesting a password reset
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    const normalizedEmail = email.toLowerCase();
+    const exists = [...this.users.values()].some((u) => u.email === normalizedEmail);
+    if (!exists) {
+      return; // Silent success to prevent enumeration.
+    }
+    // Fixed code keeps mock/E2E flows deterministic without an email channel.
+    this.resetCodes.set(normalizedEmail, '123456');
+  }
+
+  /**
+   * Reset a user's password with a verification code (mock implementation).
+   *
+   * @param email - The account email address
+   * @param code - The reset code previously issued by requestPasswordReset
+   * @param newPassword - The new password to set
+   * @throws {UnauthorizedException} When the code is missing or does not match
+   */
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    const normalizedEmail = email.toLowerCase();
+    const expected = this.resetCodes.get(normalizedEmail);
+    if (!expected || expected !== code) {
+      throw new UnauthorizedException('Invalid or expired reset code');
+    }
+
+    const user = [...this.users.values()].find((u) => u.email === normalizedEmail);
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired reset code');
+    }
+
+    user.password = newPassword;
+    this.resetCodes.delete(normalizedEmail);
+  }
+
+  /**
    * Clear all mock users (useful for test cleanup)
    */
   clearUsers(): void {
     this.users.clear();
+    this.resetCodes.clear();
   }
 
   /**

@@ -6,4 +6,5 @@
 export { AuthModule } from './auth.module.js';
 export { JwtAuthGuard, type JwtPayload } from './jwt-auth.guard.js';
 export { AdminGuard } from './admin.guard.js';
+export { ModeratorGuard } from './moderator.guard.js';
 export { CurrentUser } from './current-user.decorator.js';

@@ -603,16 +603,16 @@ export class UsersService {
       participantIds = participants.map((p) => p.authorId);
     }
 
-    // Search users matching query
+    // Search users matching query.
+    // SECURITY: match on displayName ONLY. Matching on email allowed anyone to
+    // submit a full/partial email (or domain) and learn whether an active
+    // account exists plus its display name — linking real-world emails to
+    // platform identities (privacy leak / account enumeration). @mention
+    // autocomplete only ever needs display names.
     const users = await this.prisma.user.findMany({
       where: {
         AND: [
-          {
-            OR: [
-              { displayName: { contains: query, mode: 'insensitive' } },
-              { email: { contains: query, mode: 'insensitive' } },
-            ],
-          },
+          { displayName: { contains: query, mode: 'insensitive' } },
           { accountStatus: 'ACTIVE' },
         ],
       },
