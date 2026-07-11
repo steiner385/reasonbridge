@@ -27,7 +27,7 @@ import { AppleOAuthService } from './oauth/apple-oauth.service';
 import { OAuthStateService } from './oauth-state.service';
 import { VerificationService } from './verification.service';
 import { EmailService } from '../services/email.service';
-import { validatePassword, validateEmail } from '@reason-bridge/common';
+import { validatePassword, validateEmail, redactEmail } from '@reason-bridge/common';
 import { SignupRequestDto } from './dto/signup.dto';
 import bcrypt from 'bcrypt';
 import { VerifyEmailRequestDto } from './dto/verify-email.dto';
@@ -64,18 +64,8 @@ interface OnboardingNextAction {
 import jwt from 'jsonwebtoken';
 const { sign: jwtSign } = jwt;
 
-/**
- * Redact email for safe logging (shows first 2 chars and domain)
- * e.g., "user@example.com" -> "us***@example.com"
- */
-function redactEmail(email: string): string {
-  const parts = email.split('@');
-  const local = parts[0];
-  const domain = parts[1];
-  if (!local || !domain) return '***@***';
-  const redactedLocal = local.length > 2 ? `${local.slice(0, 2)}***` : '***';
-  return `${redactedLocal}@${domain}`;
-}
+// redactEmail now lives in @reason-bridge/common so every service shares one
+// implementation (issue #1302).
 
 @Injectable()
 export class AuthService {

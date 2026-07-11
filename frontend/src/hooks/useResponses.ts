@@ -16,10 +16,22 @@ import { useQuery } from '@tanstack/react-query';
 import { responseService } from '../services/responseService';
 import type { ResponseDetail } from '../services/discussionService';
 
+/**
+ * Maximum number of responses to request in a single page.
+ *
+ * Matches the discussion-service clamp (max 500) and the virtual scroller's
+ * advertised "500+ responses" capacity. Issue #1298: the backend previously
+ * defaulted to 100 and silently dropped the newest activity, so we now request
+ * the full page explicitly.
+ */
+export const RESPONSES_PAGE_LIMIT = 500;
+
 export interface UseResponsesOptions {
   enabled?: boolean;
   buildThreadTree?: boolean;
   refetchInterval?: number | false;
+  /** Maximum number of responses to fetch (default {@link RESPONSES_PAGE_LIMIT}). */
+  limit?: number;
 }
 
 /**
@@ -46,12 +58,17 @@ export interface UseResponsesOptions {
  * ```
  */
 export function useResponses(discussionId: string, options: UseResponsesOptions = {}) {
-  const { enabled = true, buildThreadTree = false, refetchInterval = false } = options;
+  const {
+    enabled = true,
+    buildThreadTree = false,
+    refetchInterval = false,
+    limit = RESPONSES_PAGE_LIMIT,
+  } = options;
 
   return useQuery<ResponseDetail[], Error>({
-    queryKey: ['responses', discussionId],
+    queryKey: ['responses', discussionId, limit],
     queryFn: async () => {
-      const responses = await responseService.getDiscussionResponses(discussionId);
+      const responses = await responseService.getDiscussionResponses(discussionId, { limit });
 
       // Optionally build thread tree for nested display
       if (buildThreadTree) {

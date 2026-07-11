@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Param,
+  Query,
   Body,
   HttpCode,
   HttpStatus,
@@ -40,18 +41,33 @@ export class ResponsesController {
 
   /**
    * GET /topics/:topicId/responses
-   * Get all responses for a discussion topic
+   * Get responses for a discussion topic with pagination.
    * Cached for 30 seconds - responses change frequently
    *
    * @param topicId - The ID of the topic to get responses for
+   * @param limit - Maximum number of responses to return (default 100, max 500)
+   * @param offset - Number of responses to skip (default 0)
    * @returns Array of responses for the topic
+   *
+   * @remarks
+   * Issue #1298: the service has always supported limit/offset, but the
+   * controller previously exposed no query params, so the default limit of 100
+   * silently truncated active discussions. These params make pagination
+   * reachable over HTTP; the service clamps limit to [1, 500].
    */
   @Get(':topicId/responses')
   @HttpCode(HttpStatus.OK)
   // @UseInterceptors(CacheInterceptor)  // TEMPORARILY DISABLED
   // @CacheTTL(30000) // 30 seconds in ms
-  async getResponsesForTopic(@Param('topicId') topicId: string): Promise<ResponseDto[]> {
-    return this.responsesService.getResponsesForTopic(topicId);
+  async getResponsesForTopic(
+    @Param('topicId') topicId: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ): Promise<ResponseDto[]> {
+    return this.responsesService.getResponsesForTopic(topicId, {
+      limit: parsePaginationParam(limit),
+      offset: parsePaginationParam(offset),
+    });
   }
 
   /**
@@ -314,7 +330,24 @@ export class ResponsesController {
   })
   async getDiscussionResponses(
     @Param('discussionId') discussionId: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<ResponseDetailDto[]> {
-    return this.responsesService.getDiscussionResponses(discussionId);
+    return this.responsesService.getDiscussionResponses(discussionId, {
+      limit: parsePaginationParam(limit),
+      offset: parsePaginationParam(offset),
+    });
   }
+}
+
+/**
+ * Parse a pagination query param into a positive integer, or undefined when
+ * absent/invalid so the service falls back to its own defaults.
+ */
+function parsePaginationParam(value?: string): number | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }

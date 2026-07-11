@@ -8,9 +8,10 @@ import { AlignmentsController } from './alignments.controller.js';
 import { AlignmentsService } from './alignments.service.js';
 import { AlignmentAggregationService } from './alignment-aggregation.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { AuthModule } from '../auth/index.js';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [AlignmentsController],
   providers: [AlignmentsService, AlignmentAggregationService],
   exports: [AlignmentsService, AlignmentAggregationService],

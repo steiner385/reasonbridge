@@ -25,9 +25,10 @@ const VerificationStatus = {
 // Note: vitest 4.x requires function/class syntax for constructors (not arrow functions)
 vi.mock('@aws-sdk/client-s3', () => ({
   S3Client: vi.fn().mockImplementation(function () {
-    return {};
+    return { send: vi.fn().mockResolvedValue({}) };
   }),
   HeadObjectCommand: vi.fn(),
+  DeleteObjectCommand: vi.fn(),
 }));
 
 describe('VideoUploadService', () => {
@@ -314,24 +315,32 @@ describe('VideoUploadService', () => {
 
   describe('deleteExpiredVideoUploads', () => {
     it('should delete expired video uploads', async () => {
+      const expiredUploads = [
+        { id: 'upload-1', s3Key: 'videos/user-1/upload-1' },
+        { id: 'upload-2', s3Key: 'videos/user-2/upload-2' },
+      ];
+      (mockPrismaService.videoUpload.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        expiredUploads,
+      );
       (mockPrismaService.videoUpload.deleteMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        count: 5,
+        count: 2,
       });
 
       const result = await service.deleteExpiredVideoUploads();
 
-      expect(result).toBe(5);
+      expect(result).toBe(2);
       expect(mockPrismaService.videoUpload.deleteMany).toHaveBeenCalled();
     });
 
     it('should return 0 if no expired uploads', async () => {
-      (mockPrismaService.videoUpload.deleteMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        count: 0,
-      });
+      (mockPrismaService.videoUpload.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        [],
+      );
 
       const result = await service.deleteExpiredVideoUploads();
 
       expect(result).toBe(0);
+      expect(mockPrismaService.videoUpload.deleteMany).not.toHaveBeenCalled();
     });
   });
 

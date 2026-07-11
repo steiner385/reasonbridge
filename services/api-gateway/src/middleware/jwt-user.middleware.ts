@@ -48,8 +48,10 @@ export class JwtUserMiddleware implements NestMiddleware {
     try {
       const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-      // Decode and verify JWT
-      const decoded = jwt.verify(token, this.jwtSecret) as {
+      // Decode and verify JWT.
+      // Pin the algorithm to the symmetric HS256 we sign with, so a future move to
+      // asymmetric keys cannot open an algorithm-confusion path (see issue #1300).
+      const decoded = jwt.verify(token, this.jwtSecret, { algorithms: ['HS256'] }) as {
         sub?: string;
         userId?: string;
         id?: string;

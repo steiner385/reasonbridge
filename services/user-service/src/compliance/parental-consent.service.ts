@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../services/email.service.js';
@@ -84,7 +85,9 @@ export class ParentalConsentService {
    * 4. Sends the consent request email to the parent
    */
   async initiateConsent(userId: string, parentEmail: string): Promise<InitiateConsentResult> {
-    this.logger.log(`Initiating parental consent for user ${userId} to ${parentEmail}`);
+    this.logger.log(
+      `Initiating parental consent for user ${userId} to ${redactEmail(parentEmail)}`,
+    );
 
     // Generate secure token (URL-safe base64, 32 bytes = 43 characters)
     const consentToken = randomBytes(32).toString('base64url');
