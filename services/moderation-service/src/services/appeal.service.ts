@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
 import type { UserTrustUpdatedEvent } from '@reason-bridge/event-schemas';
@@ -68,6 +73,14 @@ export class AppealService {
       throw new BadRequestException(
         'Cannot appeal a moderation action that has already been reversed',
       );
+    }
+
+    // Ownership check: only the user targeted by the action may appeal it.
+    // For USER targets, targetId IS the affected user, so this is an exact check
+    // and prevents unaffected/accomplice accounts from filing appeals to game
+    // status-based enforcement (see getUserBanStatus).
+    if (action.targetType === 'USER' && action.targetId !== appellantId) {
+      throw new ForbiddenException('You can only appeal moderation actions that target you');
     }
 
     // Check if an appeal already exists for this action by this user
@@ -330,6 +343,15 @@ export class AppealService {
       } catch (error) {
         console.error('Failed to publish appeal upheld event:', error);
         // Don't throw - the appeal decision should still be recorded
+      }
+    } else if (request.decision === 'denied' && appeal.moderationAction) {
+      // A denied appeal must return the action to ACTIVE so enforcement resumes,
+      // rather than leaving it stuck in APPEALED indefinitely.
+      if (appeal.moderationAction.status === 'APPEALED') {
+        await this.prisma.moderationAction.update({
+          where: { id: appeal.moderationAction.id },
+          data: { status: 'ACTIVE' },
+        });
       }
     }
 

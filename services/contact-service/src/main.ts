@@ -5,9 +5,9 @@
 
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SERVICE_PORTS } from '@reason-bridge/common';
+import { SERVICE_PORTS, createValidationPipe } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -17,13 +17,8 @@ async function bootstrap() {
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  // Shared platform validation policy (whitelist + forbidNonWhitelisted + transform).
+  app.useGlobalPipes(createValidationPipe());
 
   if (!process.env['SKIP_SWAGGER']) {
     const config = new DocumentBuilder()
