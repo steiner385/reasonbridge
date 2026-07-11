@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
@@ -290,7 +291,7 @@ export class ParentDigestJob {
       text: emailContent.text,
     });
 
-    this.logger.log(`Sent weekly digest to ${data.parentEmail} for child ${data.childName}`);
+    this.logger.log(`Sent weekly digest to ${redactEmail(data.parentEmail)}`);
   }
 
   /**

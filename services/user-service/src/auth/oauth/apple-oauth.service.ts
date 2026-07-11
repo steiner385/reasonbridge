@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { ConfigService } from '@nestjs/config';
 import appleSignin from 'apple-signin-auth';
 import { readFileSync } from 'fs';
@@ -128,7 +129,7 @@ export class AppleOAuthService {
         fullName = `${firstName} ${lastName}`.trim() || undefined;
       }
 
-      this.logger.log(`Apple OAuth successful for email: ${claims.email}`);
+      this.logger.log(`Apple OAuth successful for email: ${redactEmail(claims.email)}`);
 
       return {
         email: claims.email,
@@ -180,7 +181,7 @@ export class AppleOAuthService {
         throw new UnauthorizedException('Email not provided in ID token');
       }
 
-      this.logger.log(`Apple ID token verified for email: ${claims.email}`);
+      this.logger.log(`Apple ID token verified for email: ${redactEmail(claims.email)}`);
 
       return {
         email: claims.email,

@@ -10,8 +10,14 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { setupGracefulShutdown } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { TracingInterceptor } from './observability/index.js';
+import { assertTestModeSafe } from './verification/test-mode.util.js';
 
 async function bootstrap() {
+  // Fail fast on a dangerous env combination before anything else boots
+  // (issue #1305): E2E_MODE=true would enable plaintext OTP storage and the
+  // test-otp disclosure endpoint, which must never happen in production.
+  assertTestModeSafe();
+
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     // Only log errors in test mode to prevent memory leaks from verbose logging
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,

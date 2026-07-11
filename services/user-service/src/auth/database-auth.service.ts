@@ -178,7 +178,10 @@ export class DatabaseAuthService implements IAuthService {
    */
   async refreshAccessToken(refreshToken: string): Promise<RefreshResult> {
     try {
-      const decoded = jwt.verify(refreshToken, this.jwtSecret) as jwt.JwtPayload;
+      // Pin the algorithm to the symmetric HS256 we sign with (issue #1300).
+      const decoded = jwt.verify(refreshToken, this.jwtSecret, {
+        algorithms: ['HS256'],
+      }) as jwt.JwtPayload;
 
       if (decoded['token_use'] !== 'refresh') {
         throw new UnauthorizedException('Invalid refresh token');

@@ -19,6 +19,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AUTH_SERVICE } from './auth.interface.js';
 import { ComplianceModule } from '../compliance/compliance.module.js';
 import { VerificationService } from './verification.service.js';
+import { VerificationTokenCleanupJob } from './verification-token-cleanup.job.js';
 import { EmailService } from '../services/email.service.js';
 import { OAuthStateService } from './oauth-state.service.js';
 import type { VerificationCodeGenerator } from './verification-code-generator.interface.js';
@@ -138,6 +139,7 @@ const verificationCodeGeneratorProvider = {
     RolesGuard,
     // Verification and email services for verify-email and resend-verification endpoints
     VerificationService,
+    VerificationTokenCleanupJob,
     EmailService,
     // OAuth state token management for CSRF protection
     OAuthStateService,

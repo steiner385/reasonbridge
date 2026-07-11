@@ -43,7 +43,9 @@ export class JwtVerificationService {
   constructor(private readonly configService: ConfigService) {
     this.region = this.configService.get<string>('AWS_REGION') ?? 'us-east-1';
 
-    // Determine auth mode
+    // Determine auth mode. Mock auth requires an explicit opt-in; an unset NODE_ENV is
+    // treated as production (fail-closed) so a misconfigured container never silently
+    // downgrades to forgeable HS256 verification.
     const authMode = this.configService.get<string>('AUTH_MODE');
     const nodeEnv = this.configService.get<string>('NODE_ENV');
     this.useMockAuth =
@@ -51,16 +53,19 @@ export class JwtVerificationService {
       authMode === 'mock' ||
       this.configService.get<string>('AUTH_MOCK') === 'true' ||
       nodeEnv === 'test' ||
-      nodeEnv === 'development' ||
-      !nodeEnv;
+      nodeEnv === 'development';
 
     if (this.useMockAuth) {
+      this.logger.warn(
+        'JwtVerificationService is running in MOCK auth mode (local HS256 verification with ' +
+          'JWT_SECRET). This is INSECURE for production. Ensure this is intentional ' +
+          `(AUTH_MODE=${authMode ?? 'unset'}, NODE_ENV=${nodeEnv ?? 'unset'}).`,
+      );
       const secret = this.configService.get<string>('JWT_SECRET');
       if (!secret && nodeEnv !== 'test') {
         throw new Error('JWT_SECRET environment variable is required');
       }
       this.jwtSecret = secret ?? 'mock-jwt-secret-for-testing';
-      this.logger.debug('JwtVerificationService initialized in mock/development mode');
     } else {
       this.userPoolId = this.configService.get<string>('COGNITO_USER_POOL_ID');
       if (!this.userPoolId) {

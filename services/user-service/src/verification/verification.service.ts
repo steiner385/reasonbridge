@@ -13,6 +13,7 @@ import { VerificationType, VerificationStatus, type VerificationRecord } from '@
 import { OtpService } from './services/otp.service.js';
 import { PhoneValidationService } from './services/phone-validation.service.js';
 import { SmsClient } from '../clients/sms.client.js';
+import { isTestMode } from './test-mode.util.js';
 import {
   PhoneVerificationRequestDto,
   PhoneVerificationVerifyDto,
@@ -479,8 +480,10 @@ export class VerificationService {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + this.OTP_EXPIRY_MINUTES);
 
-    // In test/E2E mode, also store plaintext OTP for testing purposes
-    const isTestMode = process.env['NODE_ENV'] === 'test' || process.env['E2E_MODE'] === 'true';
+    // In test/E2E mode, also store plaintext OTP for testing purposes.
+    // isTestMode() is production-safe: a stray E2E_MODE under NODE_ENV=production
+    // is ignored here and rejected at startup (issue #1305).
+    const testMode = isTestMode();
 
     const verification = await this.prisma.verificationRecord.create({
       data: {
@@ -494,13 +497,13 @@ export class VerificationService {
         otpAttempts: 0,
         expiresAt,
         // Store plaintext OTP only in test/E2E mode for automated testing
-        ...(isTestMode && { otpPlaintext: otpCode }),
+        ...(testMode && { otpPlaintext: otpCode }),
       },
     });
 
     // Send OTP via SMS (through notification-service)
     // In dev/test mode without notification-service, also log to console
-    const isDevMode = process.env['NODE_ENV'] === 'development' || isTestMode;
+    const isDevMode = process.env['NODE_ENV'] === 'development' || testMode;
 
     if (isDevMode) {
       this.logger.log(
@@ -656,22 +659,85 @@ export class VerificationService {
    * @returns Object containing the plaintext OTP
    * @throws BadRequestException if not in test mode or OTP not found
    */
-  async getTestOtp(verificationId: string): Promise<{ otp: string }> {
-    const isTestMode = process.env['NODE_ENV'] === 'test' || process.env['E2E_MODE'] === 'true';
-
-    if (!isTestMode) {
+  async getTestOtp(verificationId: string, requesterId: string): Promise<{ otp: string }> {
+    if (!isTestMode()) {
       throw new BadRequestException('Test endpoint not available in production');
     }
 
     const record = await this.prisma.verificationRecord.findUnique({
       where: { id: verificationId },
-      select: { otpPlaintext: true },
+      select: { otpPlaintext: true, userId: true },
     });
 
-    if (!record?.otpPlaintext) {
+    // Ownership check (issue #1305): even in test mode, an authenticated caller
+    // may only read the plaintext OTP for their own verification record.
+    if (!record || record.userId !== requesterId) {
+      throw new BadRequestException('OTP not found for this verification');
+    }
+
+    if (!record.otpPlaintext) {
       throw new BadRequestException('OTP not found for this verification');
     }
 
     return { otp: record.otpPlaintext };
+  }
+
+  /**
+   * Purge PII from expired or consumed phone-verification records (issue #1304).
+   *
+   * @remarks
+   * `VerificationRecord` retains `phoneNumber` (indexed) alongside the hashed
+   * `otpCode` and any test-mode `otpPlaintext`. Once a verification is expired or
+   * finished (VERIFIED / REJECTED / EXPIRED) there is no reason to keep those
+   * values, so this method nulls them while leaving the record itself for audit.
+   * Runs periodically via {@link VerificationRetentionJob}.
+   *
+   * @returns Number of records whose PII was purged
+   */
+  async purgeExpiredVerificationData(): Promise<number> {
+    try {
+      const now = new Date();
+      const result = await this.prisma.verificationRecord.updateMany({
+        where: {
+          // Only rows that still carry PII worth clearing.
+          OR: [
+            { phoneNumber: { not: null } },
+            { otpCode: { not: null } },
+            { otpPlaintext: { not: null } },
+          ],
+          // ...and that are expired or in a terminal state.
+          AND: {
+            OR: [
+              { expiresAt: { lt: now } },
+              { otpExpiresAt: { lt: now } },
+              {
+                status: {
+                  in: [
+                    VerificationStatus.VERIFIED,
+                    VerificationStatus.REJECTED,
+                    VerificationStatus.EXPIRED,
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        data: {
+          phoneNumber: null,
+          otpCode: null,
+          otpPlaintext: null,
+        },
+      });
+
+      if (result.count > 0) {
+        this.logger.log(`Purged PII from ${result.count} expired/consumed verification records`);
+      }
+      return result.count;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to purge expired verification data: ${message}`, stack);
+      return 0;
+    }
   }
 }

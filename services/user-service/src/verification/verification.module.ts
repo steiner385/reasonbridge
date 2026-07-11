@@ -14,6 +14,7 @@ import { VideoUploadService } from './video-upload.service.js';
 import { OtpService } from './services/otp.service.js';
 import { PhoneValidationService } from './services/phone-validation.service.js';
 import { SmsClient } from '../clients/sms.client.js';
+import { VerificationRetentionJob } from './verification-retention.job.js';
 
 /**
  * Verification Module
@@ -31,6 +32,7 @@ import { SmsClient } from '../clients/sms.client.js';
     OtpService,
     PhoneValidationService,
     SmsClient,
+    VerificationRetentionJob,
   ],
   exports: [VerificationService, VideoVerificationService, VideoUploadService],
 })
