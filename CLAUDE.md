@@ -117,8 +117,7 @@ packages/
 ├── event-schemas/       # Event type definitions for service communication
 ├── ai-client/           # AI provider abstraction (OpenAI, Anthropic)
 ├── shared/              # Cross-cutting concerns (logging, config)
-├── testing-utils/       # Shared test utilities
-└── test-utils/          # Additional test helpers
+└── testing-utils/       # Shared test utilities (Prisma mocks, helpers)
 ```
 
 **Workspace Configuration:** `pnpm-workspace.yaml`
