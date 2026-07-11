@@ -21,6 +21,7 @@ describe('ResponsesService - PENDING_REVIEW Status', () => {
   let service: ResponsesService;
   let mockPrisma: any;
   let mockCommonGroundTrigger: any;
+  let mockThreadingService: any;
   let mockModerationClient: any;
 
   beforeEach(() => {
@@ -33,8 +34,9 @@ describe('ResponsesService - PENDING_REVIEW Status', () => {
       response: {
         findUnique: vi.fn(),
         findMany: vi.fn(),
+        // Prior-response existence check for participantCount increments
+        findFirst: vi.fn().mockResolvedValue(null),
         create: vi.fn(),
-        groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
       },
       user: {
         findUnique: vi.fn(),
@@ -62,13 +64,25 @@ describe('ResponsesService - PENDING_REVIEW Status', () => {
       checkAndTrigger: vi.fn().mockResolvedValue(undefined),
     };
 
+    // Mock response threading service
+    mockThreadingService = {
+      validateReplyDepth: vi.fn().mockResolvedValue(undefined),
+      calculateThreadDepth: vi.fn().mockResolvedValue(0),
+      buildThreadTree: vi.fn().mockReturnValue([]),
+    };
+
     // Mock moderation client service
     mockModerationClient = {
       screenContentForChildren: vi.fn().mockResolvedValue({ childSafetyRisk: 'none' }),
       tryQueueChildContent: vi.fn().mockResolvedValue(undefined),
     };
 
-    service = new ResponsesService(mockPrisma, mockCommonGroundTrigger, mockModerationClient);
+    service = new ResponsesService(
+      mockPrisma,
+      mockCommonGroundTrigger,
+      mockThreadingService,
+      mockModerationClient,
+    );
   });
 
   describe('createResponse - Status based on author type', () => {

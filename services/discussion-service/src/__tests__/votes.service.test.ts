@@ -14,6 +14,7 @@ describe('VotesService', () => {
       vote: {
         findUnique: async (_args: any) => null,
         findMany: async (_args: any) => [],
+        groupBy: async (_args: any) => [],
         create: async (_args: any) => null,
         update: async (_args: any) => null,
         delete: async (_args: any) => null,
@@ -169,10 +170,16 @@ describe('VotesService', () => {
     const responseId = 'response-456';
 
     it('should return zero counts for response with no votes', async () => {
-      mockPrisma.vote.findMany = async () => [];
+      let groupByArgs: any;
+      mockPrisma.vote.groupBy = async (args: any) => {
+        groupByArgs = args;
+        return [];
+      };
 
       const result = await service.getVoteSummary(responseId);
 
+      expect(groupByArgs.by).toEqual(['voteType']);
+      expect(groupByArgs.where).toEqual({ responseId });
       expect(result).toEqual({
         upvotes: 0,
         downvotes: 0,
@@ -182,11 +189,9 @@ describe('VotesService', () => {
     });
 
     it('should correctly count upvotes and downvotes', async () => {
-      mockPrisma.vote.findMany = async () => [
-        { userId: 'user-1', voteType: 'UPVOTE' },
-        { userId: 'user-2', voteType: 'UPVOTE' },
-        { userId: 'user-3', voteType: 'UPVOTE' },
-        { userId: 'user-4', voteType: 'DOWNVOTE' },
+      mockPrisma.vote.groupBy = async () => [
+        { voteType: 'UPVOTE', _count: { _all: 3 } },
+        { voteType: 'DOWNVOTE', _count: { _all: 1 } },
       ];
 
       const result = await service.getVoteSummary(responseId);
@@ -201,14 +206,21 @@ describe('VotesService', () => {
 
     it('should return userVote when userId is provided and user has voted', async () => {
       const userId = 'user-2';
-      mockPrisma.vote.findMany = async () => [
-        { userId: 'user-1', voteType: 'UPVOTE' },
-        { userId: 'user-2', voteType: 'DOWNVOTE' },
-        { userId: 'user-3', voteType: 'UPVOTE' },
+      mockPrisma.vote.groupBy = async () => [
+        { voteType: 'UPVOTE', _count: { _all: 2 } },
+        { voteType: 'DOWNVOTE', _count: { _all: 1 } },
       ];
+      let findUniqueArgs: any;
+      mockPrisma.vote.findUnique = async (args: any) => {
+        findUniqueArgs = args;
+        return { voteType: 'DOWNVOTE' };
+      };
 
       const result = await service.getVoteSummary(responseId, userId);
 
+      expect(findUniqueArgs.where).toEqual({
+        userId_responseId: { userId, responseId },
+      });
       expect(result).toEqual({
         upvotes: 2,
         downvotes: 1,
@@ -219,10 +231,8 @@ describe('VotesService', () => {
 
     it('should return userVote as null when userId is provided but user has not voted', async () => {
       const userId = 'user-4';
-      mockPrisma.vote.findMany = async () => [
-        { userId: 'user-1', voteType: 'UPVOTE' },
-        { userId: 'user-2', voteType: 'UPVOTE' },
-      ];
+      mockPrisma.vote.groupBy = async () => [{ voteType: 'UPVOTE', _count: { _all: 2 } }];
+      mockPrisma.vote.findUnique = async () => null;
 
       const result = await service.getVoteSummary(responseId, userId);
 
@@ -234,12 +244,22 @@ describe('VotesService', () => {
       });
     });
 
+    it('should not look up a user vote when no userId is provided', async () => {
+      mockPrisma.vote.groupBy = async () => [{ voteType: 'UPVOTE', _count: { _all: 1 } }];
+      let findUniqueWasCalled = false;
+      mockPrisma.vote.findUnique = async () => {
+        findUniqueWasCalled = true;
+        return { voteType: 'UPVOTE' };
+      };
+
+      const result = await service.getVoteSummary(responseId);
+
+      expect(findUniqueWasCalled).toBe(false);
+      expect(result.userVote).toBeNull();
+    });
+
     it('should handle all downvotes scenario', async () => {
-      mockPrisma.vote.findMany = async () => [
-        { userId: 'user-1', voteType: 'DOWNVOTE' },
-        { userId: 'user-2', voteType: 'DOWNVOTE' },
-        { userId: 'user-3', voteType: 'DOWNVOTE' },
-      ];
+      mockPrisma.vote.groupBy = async () => [{ voteType: 'DOWNVOTE', _count: { _all: 3 } }];
 
       const result = await service.getVoteSummary(responseId);
 
@@ -255,16 +275,21 @@ describe('VotesService', () => {
   describe('getVoteSummaries', () => {
     it('should return summaries for multiple responses', async () => {
       const responseIds = ['response-1', 'response-2', 'response-3'];
-      mockPrisma.vote.findMany = async () => [
-        { responseId: 'response-1', userId: 'user-1', voteType: 'UPVOTE' },
-        { responseId: 'response-1', userId: 'user-2', voteType: 'UPVOTE' },
-        { responseId: 'response-2', userId: 'user-1', voteType: 'DOWNVOTE' },
-        { responseId: 'response-3', userId: 'user-1', voteType: 'UPVOTE' },
-        { responseId: 'response-3', userId: 'user-2', voteType: 'DOWNVOTE' },
-        { responseId: 'response-3', userId: 'user-3', voteType: 'UPVOTE' },
-      ];
+      let groupByArgs: any;
+      mockPrisma.vote.groupBy = async (args: any) => {
+        groupByArgs = args;
+        return [
+          { responseId: 'response-1', voteType: 'UPVOTE', _count: { _all: 2 } },
+          { responseId: 'response-2', voteType: 'DOWNVOTE', _count: { _all: 1 } },
+          { responseId: 'response-3', voteType: 'UPVOTE', _count: { _all: 2 } },
+          { responseId: 'response-3', voteType: 'DOWNVOTE', _count: { _all: 1 } },
+        ];
+      };
 
       const result = await service.getVoteSummaries(responseIds);
+
+      expect(groupByArgs.by).toEqual(['responseId', 'voteType']);
+      expect(groupByArgs.where).toEqual({ responseId: { in: responseIds } });
 
       expect(result.get('response-1')).toEqual({
         upvotes: 2,
@@ -289,13 +314,20 @@ describe('VotesService', () => {
     it('should include userVote for each response when userId is provided', async () => {
       const responseIds = ['response-1', 'response-2'];
       const userId = 'user-1';
-      mockPrisma.vote.findMany = async () => [
-        { responseId: 'response-1', userId: 'user-1', voteType: 'UPVOTE' },
-        { responseId: 'response-1', userId: 'user-2', voteType: 'DOWNVOTE' },
-        { responseId: 'response-2', userId: 'user-2', voteType: 'UPVOTE' },
+      mockPrisma.vote.groupBy = async () => [
+        { responseId: 'response-1', voteType: 'UPVOTE', _count: { _all: 1 } },
+        { responseId: 'response-1', voteType: 'DOWNVOTE', _count: { _all: 1 } },
+        { responseId: 'response-2', voteType: 'UPVOTE', _count: { _all: 1 } },
       ];
+      let findManyArgs: any;
+      mockPrisma.vote.findMany = async (args: any) => {
+        findManyArgs = args;
+        return [{ responseId: 'response-1', voteType: 'UPVOTE' }];
+      };
 
       const result = await service.getVoteSummaries(responseIds, userId);
+
+      expect(findManyArgs.where).toEqual({ userId, responseId: { in: responseIds } });
 
       expect(result.get('response-1')).toEqual({
         upvotes: 1,
@@ -313,7 +345,7 @@ describe('VotesService', () => {
 
     it('should return empty summaries for responses with no votes', async () => {
       const responseIds = ['response-1', 'response-2'];
-      mockPrisma.vote.findMany = async () => [];
+      mockPrisma.vote.groupBy = async () => [];
 
       const result = await service.getVoteSummaries(responseIds);
 
@@ -332,9 +364,16 @@ describe('VotesService', () => {
     });
 
     it('should handle empty responseIds array', async () => {
+      let groupByWasCalled = false;
+      mockPrisma.vote.groupBy = async () => {
+        groupByWasCalled = true;
+        return [];
+      };
+
       const result = await service.getVoteSummaries([]);
 
       expect(result.size).toBe(0);
+      expect(groupByWasCalled).toBe(false);
     });
   });
 

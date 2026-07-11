@@ -4,6 +4,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ResponsesService } from '../responses.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import type { CommonGroundTriggerService } from '../../services/common-ground-trigger.service.js';
+import type { ResponseThreadingService } from '../response-threading.service.js';
 import type { CreateResponseDto } from '../dto/create-response.dto.js';
 import type { UpdateResponseDto } from '../dto/update-response.dto.js';
 
@@ -11,6 +12,7 @@ describe('ResponsesService', () => {
   let service: ResponsesService;
   let prismaService: PrismaService;
   let commonGroundTrigger: CommonGroundTriggerService;
+  let threadingService: ResponseThreadingService;
 
   const mockTopic = {
     id: 'topic-1',
@@ -50,10 +52,11 @@ describe('ResponsesService', () => {
       response: {
         findMany: vi.fn(),
         findUnique: vi.fn(),
+        // Default: no prior response from this author (first-time participant)
+        findFirst: vi.fn().mockResolvedValue(null),
         create: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
-        groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
       },
       responseProposition: {
         createMany: vi.fn(),
@@ -63,13 +66,22 @@ describe('ResponsesService', () => {
       user: {
         findUnique: vi.fn().mockResolvedValue({ isMinor: false }),
       },
+      // createResponse wraps creation + topic stat updates in a transaction;
+      // execute the callback against the same mock client
+      $transaction: vi.fn(async (fn: (tx: PrismaService) => Promise<unknown>) => fn(prismaService)),
     } as unknown as PrismaService;
 
     commonGroundTrigger = {
       checkAndTrigger: vi.fn().mockResolvedValue(undefined),
     } as unknown as CommonGroundTriggerService;
 
-    service = new ResponsesService(prismaService, commonGroundTrigger);
+    threadingService = {
+      validateReplyDepth: vi.fn().mockResolvedValue(undefined),
+      calculateThreadDepth: vi.fn().mockResolvedValue(0),
+      buildThreadTree: vi.fn().mockReturnValue([]),
+    } as unknown as ResponseThreadingService;
+
+    service = new ResponsesService(prismaService, commonGroundTrigger, threadingService);
   });
 
   describe('getResponsesForTopic', () => {
@@ -289,11 +301,8 @@ describe('ResponsesService', () => {
       prismaService.response.create.mockResolvedValue(mockResponse as any);
       prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
       prismaService.discussionTopic.update.mockResolvedValue(mockTopic as any);
-      // Mock groupBy to return 2 unique participants
-      prismaService.response.groupBy.mockResolvedValue([
-        { authorId: 'user-1' },
-        { authorId: 'user-2' },
-      ]);
+      // No prior response from this author in the topic (first-time participant)
+      prismaService.response.findFirst.mockResolvedValue(null);
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
@@ -301,7 +310,25 @@ describe('ResponsesService', () => {
         where: { id: 'topic-1' },
         data: {
           responseCount: { increment: 1 },
-          participantCount: 2,
+          participantCount: { increment: 1 },
+        },
+      });
+    });
+
+    it('should not increment participant count for returning authors', async () => {
+      prismaService.discussionTopic.findUnique.mockResolvedValue(mockTopic as any);
+      prismaService.response.create.mockResolvedValue(mockResponse as any);
+      prismaService.response.findUnique.mockResolvedValue(mockResponse as any);
+      prismaService.discussionTopic.update.mockResolvedValue(mockTopic as any);
+      // Author already has a prior response in this topic
+      prismaService.response.findFirst.mockResolvedValue({ id: 'response-prior' } as any);
+
+      await service.createResponse('topic-1', 'user-1', validDto);
+
+      expect(prismaService.discussionTopic.update).toHaveBeenCalledWith({
+        where: { id: 'topic-1' },
+        data: {
+          responseCount: { increment: 1 },
         },
       });
     });
