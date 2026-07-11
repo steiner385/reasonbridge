@@ -1,0 +1,78 @@
+# syntax=docker/dockerfile:1
+#
+# Production-grade image for a single NestJS microservice.
+#
+# Unlike Dockerfile.service (which is intentionally fat and root-only for E2E),
+# this image:
+#   - runs as a non-root user (USER node)
+#   - sets NODE_ENV=production
+#   - ships ONLY the target service + its production dependencies (via `pnpm deploy`),
+#     not the whole monorepo, dev dependencies, TypeScript sources, or tests
+#   - declares a container HEALTHCHECK
+#
+# Build for a specific service by passing the SERVICE build arg:
+#   docker build -f Dockerfile.service.prod --build-arg SERVICE=user-service \
+#     -t reasonbridge/user-service:latest .
+#
+# See issue #1340 (hardened runtime image) and #1336 (production deploy path).
+
+ARG NODE_VERSION=20-alpine
+
+# ---------------------------------------------------------------------------
+# Stage 1: Build all workspace packages and the target service
+# ---------------------------------------------------------------------------
+FROM node:${NODE_VERSION} AS builder
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+# Install dependencies first for better layer caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY packages/*/package.json ./packages/
+COPY services/*/package.json ./services/
+COPY frontend/package.json ./frontend/
+RUN pnpm install --frozen-lockfile
+
+# Build the shared packages, then the requested service
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm -r --workspace-concurrency=1 --filter="./packages/*" run build
+
+ARG SERVICE
+RUN test -n "${SERVICE}" || (echo "ERROR: --build-arg SERVICE=<service-name> is required" && exit 1)
+RUN pnpm --filter="./services/${SERVICE}" run build
+
+# ---------------------------------------------------------------------------
+# Stage 2: Produce a self-contained, production-only deployment
+# `pnpm deploy` copies only the target package plus its (production) dependencies,
+# with workspace packages resolved into a standalone node_modules.
+# ---------------------------------------------------------------------------
+FROM builder AS pruner
+ARG SERVICE
+RUN pnpm --filter="./services/${SERVICE}" deploy --prod --legacy /app/deploy
+
+# ---------------------------------------------------------------------------
+# Stage 3: Minimal, non-root runtime
+# ---------------------------------------------------------------------------
+FROM node:${NODE_VERSION} AS runtime
+
+ARG SERVICE
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# curl is used by the container HEALTHCHECK
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# The node:alpine image ships a non-root `node` user (uid 1000); own the app dir
+COPY --from=pruner --chown=node:node /app/deploy ./
+
+USER node
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS "http://localhost:${PORT}/health" || exit 1
+
+CMD ["node", "dist/main.js"]

@@ -151,8 +151,9 @@ services:
       RECOMMENDATION_SERVICE_URL: http://recommendation-service:3004
       FACT_CHECK_SERVICE_URL: http://fact-check-service:3006
       ACTIVITY_SERVICE_URL: http://activity-service:3008
-    ports:
-      - '3000:3000'
+    # No host port: E2E traffic reaches the gateway via the nginx frontend on the
+    # reasonbridge-e2e network. Host bindings are opt-in via
+    # docker-compose.e2e.local.yml to avoid parallel-CI port conflicts (#1338).
     depends_on:
       postgres:
         condition: service_healthy
@@ -165,6 +166,14 @@ services:
       discussion-service:
         condition: service_healthy
       notification-service:
+        condition: service_healthy
+      moderation-service:
+        condition: service_healthy
+      recommendation-service:
+        condition: service_healthy
+      fact-check-service:
+        condition: service_healthy
+      activity-service:
         condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
@@ -200,8 +209,6 @@ services:
       COGNITO_USER_POOL_ID: us-east-1_test123
       COGNITO_CLIENT_ID: test_client_id
       COGNITO_REGION: us-east-1
-    ports:
-      - '3001:3001'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
       interval: 5s
@@ -235,23 +242,22 @@ services:
       REDIS_URL: redis://redis:6379
       REDIS_HOST: redis
       REDIS_PORT: '6379'
-      # AWS Bedrock configuration for AI features
+      # AI features run against a deterministic in-process mock in E2E: no host
+      # AWS credentials are mounted and no real Bedrock spend is incurred (#1339).
+      AI_MOCK: 'true'
       AWS_REGION: us-east-1
-      AWS_PROFILE: default
-      # Use cross-region inference profile for on-demand access
+      # Dummy credentials so the AWS SDK never falls back to host/instance
+      # credentials if AI_MOCK is ever disabled.
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
       BEDROCK_MODEL_ID: us.anthropic.claude-3-5-sonnet-20241022-v2:0
       JWT_SECRET: *jwt-secret
-    ports:
-      - '3002:3002'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3002/health']
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 15s
-    volumes:
-      # Mount AWS credentials from host for Bedrock access
-      - ${HOME}/.aws:/root/.aws:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -276,8 +282,6 @@ services:
       REDIS_URL: redis://redis:6379
       ACTIVITY_SERVICE_URL: http://activity-service:3008
       JWT_SECRET: *jwt-secret
-    ports:
-      - '3007:3007'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3007/health']
       interval: 5s
@@ -291,6 +295,9 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
+      # discussion-service posts to ACTIVITY_SERVICE_URL, so wait for it (#1337)
+      activity-service:
+        condition: service_healthy
     mem_limit: 128m
     networks:
       - reasonbridge-e2e
@@ -308,8 +315,6 @@ services:
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:3002
       JWT_SECRET: *jwt-secret
-    ports:
-      - '3003:3003'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3003/health']
       interval: 5s
@@ -340,8 +345,6 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
-    ports:
-      - '3004:3004'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3004/health']
       interval: 5s
@@ -371,8 +374,6 @@ services:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       JWT_SECRET: *jwt-secret
-    ports:
-      - '3005:3005'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3005/health']
       interval: 5s
@@ -402,8 +403,6 @@ services:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:3002
-    ports:
-      - '3006:3006'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3006/health']
       interval: 5s
@@ -434,8 +433,6 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
-    ports:
-      - '3008:3008'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3008/health']
       interval: 5s
@@ -467,8 +464,9 @@ services:
         VITE_API_URL: /api
         VITE_NOTIFICATION_SERVICE_URL: ''
     image: reasonbridge-e2e/frontend:latest
-    ports:
-      - '9080:80'
+    # No host port: the Playwright container reaches the frontend at http://frontend:80
+    # on the reasonbridge-e2e network. Host access is opt-in via
+    # docker-compose.e2e.local.yml to avoid parallel-CI port conflicts (#1338).
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:80']
       interval: 5s
