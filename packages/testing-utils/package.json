@@ -59,7 +59,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@pact-foundation/pact": "^16.3.0",
+    "@pact-foundation/pact": "^17.0.1",
     "@prisma/client": "7.6.0",
     "@prisma/adapter-pg": "^7.6.0",
     "@reason-bridge/common": "workspace:*",
@@ -73,7 +73,7 @@
   "devDependencies": {
     "@types/node": "25.5.2",
     "@types/pg": "^8.20.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "^4.1.2"
   },
   "peerDependencies": {

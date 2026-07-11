@@ -3,28 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { setupGracefulShutdown } from '@reason-bridge/common';
+import { PinoLoggerService, setupGracefulShutdown, createValidationPipe } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { TracingInterceptor } from './observability/index.js';
+import { assertTestModeSafe } from './verification/test-mode.util.js';
 
 async function bootstrap() {
+  // Fail fast on a dangerous env combination before anything else boots
+  // (issue #1305): E2E_MODE=true would enable plaintext OTP storage and the
+  // test-otp disclosure endpoint, which must never happen in production.
+  assertTestModeSafe();
+
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     // Only log errors in test mode to prevent memory leaks from verbose logging
-    logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
+    logger: new PinoLoggerService({ name: 'user-service' }),
   });
 
-  // Enable validation globally
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // Strip properties that don't have decorators
-      forbidNonWhitelisted: true, // Throw error if non-whitelisted properties are present
-      transform: true, // Automatically transform payloads to DTO instances
-    }),
-  );
+  // Enable validation globally using the shared platform policy
+  // (whitelist + forbidNonWhitelisted + transform).
+  app.useGlobalPipes(createValidationPipe());
 
   // OpenAPI/Swagger documentation
   const config = new DocumentBuilder()

@@ -40,6 +40,13 @@ interface DiscussionLayoutContextValue {
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
   togglePanel: (panel: 'left' | 'right') => void;
   setActiveTopic: (topicId: string | null) => void;
+  /**
+   * Whether a left (topic-navigation) panel actually exists in this layout instance.
+   * False when the layout is rendered with `hideSidebar` and no `leftPanel` (e.g. the
+   * discussion page, where the unified sidebar owns navigation). Consumers use this to
+   * avoid rendering a hamburger/overlay control that toggles a non-existent panel (#1376).
+   */
+  hasLeftPanel?: boolean;
   /** Whether left panel overlay is open (tablet/mobile only) */
   isLeftPanelOverlayOpen?: boolean;
   /** Toggle left panel overlay (tablet/mobile only) */

@@ -4,6 +4,7 @@
  */
 
 import { Controller, All, Req, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -11,6 +12,7 @@ import { ProxyService } from './proxy.service.js';
  * Fact-Check Service Proxy Controller
  * Proxies all /fact-check/* requests to the fact-check service
  */
+@ApiTags('fact-check')
 @Controller('fact-check')
 export class FactCheckProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

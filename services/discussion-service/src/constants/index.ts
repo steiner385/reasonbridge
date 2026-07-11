@@ -118,6 +118,10 @@ export const LINK_PREVIEW = {
   CACHE_TTL_MS: 24 * 60 * 60 * 1000,
   /** Timeout for fetching external URLs (ms) */
   FETCH_TIMEOUT_MS: 10000,
+  /** Maximum number of redirect hops to follow (each hop is SSRF re-validated) */
+  MAX_REDIRECTS: 5,
+  /** Maximum HTML body size to download when scraping metadata (bytes) - 2 MB */
+  MAX_BODY_BYTES: 2 * 1024 * 1024,
 } as const;
 
 /**

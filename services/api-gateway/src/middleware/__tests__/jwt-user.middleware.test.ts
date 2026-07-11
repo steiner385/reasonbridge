@@ -60,7 +60,9 @@ describe('JwtUserMiddleware', () => {
 
       middleware.use(mockReq as never, mockRes as never, mockNext);
 
-      expect(jwt.verify).toHaveBeenCalledWith('valid-token', expect.any(String));
+      expect(jwt.verify).toHaveBeenCalledWith('valid-token', expect.any(String), {
+        algorithms: ['HS256'],
+      });
       expect(mockReq.headers['x-user-id']).toBe('user-123');
       expect(mockNext).toHaveBeenCalled();
     });

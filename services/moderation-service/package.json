@@ -43,12 +43,12 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.18",
-    "@pact-foundation/pact": "^16.3.0",
+    "@pact-foundation/pact": "^17.0.1",
     "@types/node": "25.5.2",
     "@types/pg": "^8.20.0",
     "@vitest/ui": "^4.1.2",
     "tsx": "^4.7.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "^4.1.2"
   },
   "engines": {

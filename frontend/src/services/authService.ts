@@ -55,6 +55,20 @@ export interface ErrorResponse {
   statusCode: number;
 }
 
+/**
+ * Response returned by POST /auth/verify-email.
+ *
+ * Mirrors the backend VerifyEmailResponseDto
+ * (services/user-service/src/auth/dto/verify-email.dto.ts) — the endpoint does
+ * NOT return an AuthResponse, so consumers must not read tokens or
+ * onboardingProgress off this shape (issue #1330).
+ */
+export interface VerifyEmailResponse {
+  success: boolean;
+  message: string;
+  emailVerified: boolean;
+}
+
 /** Build an Error that carries an HTTP status and preserves the original cause. */
 function makeAuthError(message: string, cause: unknown, status?: number): Error {
   const error = new Error(message) as Error & { status?: number; cause?: unknown };
@@ -156,17 +170,23 @@ class AuthService {
 
   /**
    * Verify email with 6-digit code
+   *
+   * @returns The backend VerifyEmailResponse ({ success, message, emailVerified }).
    */
-  async verifyEmail(code: string): Promise<AuthResponse> {
+  async verifyEmail(code: string): Promise<VerifyEmailResponse> {
     const email = this.getPendingVerificationEmail();
     if (!email) {
       throw new Error('No pending verification email found. Please sign up again.');
     }
 
     try {
-      const result = await apiClient.post<AuthResponse>('/auth/verify-email', { email, code });
+      const result = await apiClient.post<VerifyEmailResponse>('/auth/verify-email', {
+        email,
+        code,
+      });
 
-      // Clear pending email on success
+      // Only clear the pending email once we have a confirmed success response,
+      // so a failed attempt can still be retried without a "sign up again" dead end.
       this.clearPendingVerificationEmail();
 
       return result;

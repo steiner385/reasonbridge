@@ -4,6 +4,7 @@
  */
 
 import { Controller, Get, Post, Query, Body, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -13,6 +14,7 @@ import { ProxyService } from './proxy.service.js';
  * Proxies activity feed and event endpoints to the activity-service.
  * Part of Issue #245 - Activity feed from followed users
  */
+@ApiTags('activity')
 @Controller()
 export class ActivityProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
@@ -25,13 +27,23 @@ export class ActivityProxyController {
   async getFeed(
     @Query() query: Record<string, string>,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
+    // activity-service authenticates solely via the X-User-Id header (set by the
+    // gateway's JwtUserMiddleware from the Bearer token). ProxyService does not
+    // relay inbound headers automatically, so we must forward it explicitly —
+    // otherwise every /feed request reaches the activity-service without an
+    // identity and is rejected with 401. See topics-proxy.controller for the
+    // canonical pattern.
     const response = await this.proxyService.proxyToActivityService({
       method: 'GET',
       path: '/feed',
       query,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);

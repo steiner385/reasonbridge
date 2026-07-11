@@ -54,6 +54,8 @@ export const QUERY_LIMITS = {
   SLA_BREACH: 500,
   /** Limit for common ground notification queries */
   COMMON_GROUND: 1000,
+  /** Limit for reading back a batch of mention notifications */
+  MENTIONS: 1000,
   /** Limit for parent digest queries */
   PARENT_DIGEST: 10000,
   /** Limit for digest topic queries */

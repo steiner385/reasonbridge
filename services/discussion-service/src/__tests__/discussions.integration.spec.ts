@@ -14,23 +14,42 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { ConfigModule } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
 import { DiscussionsModule } from '../discussions/discussions.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 
+/**
+ * The JwtAuthGuard (from @reason-bridge/common) verifies HS256 tokens signed with
+ * JWT_SECRET (defaulting to 'mock-jwt-secret-for-testing' when NODE_ENV=test) while
+ * running in mock/test auth mode. Generate real signed tokens so authenticated
+ * endpoints resolve the expected user via the `sub` claim.
+ */
+const TEST_JWT_SECRET = process.env['JWT_SECRET'] ?? 'mock-jwt-secret-for-testing';
+const jwtSigner = new JwtService({});
+function bearerFor(userId: string): string {
+  const token = jwtSigner.sign(
+    { sub: userId },
+    { secret: TEST_JWT_SECRET, algorithm: 'HS256', expiresIn: '1h' },
+  );
+  return `Bearer ${token}`;
+}
+
 describe('Discussions API Integration Tests', () => {
   let app: INestApplication;
   let prisma: PrismaService;
 
-  // Test data
-  const testUserId = '00000000-0000-0000-0000-000000000001';
-  const testTopicId = '00000000-0000-0000-0000-000000000002';
-  const unverifiedUserId = '00000000-0000-0000-0000-000000000003';
+  // Test data - must be valid v4 UUIDs (DTOs validate with @IsUUID('4'))
+  const testUserId = '00000000-0000-4000-8000-000000000001';
+  const testTopicId = '00000000-0000-4000-8000-000000000002';
+  const unverifiedUserId = '00000000-0000-4000-8000-000000000003';
+  const nonExistentTopicId = '00000000-0000-4000-8000-000000000999';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [DiscussionsModule, PrismaModule],
+      imports: [ConfigModule.forRoot({ isGlobal: true }), DiscussionsModule, PrismaModule],
     }).compile();
 
     app = moduleFixture.createNestApplication(new FastifyAdapter());
@@ -45,6 +64,9 @@ describe('Discussions API Integration Tests', () => {
     );
 
     await app.init();
+    // Fastify requires the underlying instance to be ready before supertest can
+    // dispatch requests against app.getHttpServer().
+    await app.getHttpAdapter().getInstance().ready();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
 
     // Setup test data
@@ -66,21 +88,7 @@ describe('Discussions API Integration Tests', () => {
   });
 
   async function setupTestData() {
-    // Create test topic
-    await prisma.discussionTopic.upsert({
-      where: { id: testTopicId },
-      update: {},
-      create: {
-        id: testTopicId,
-        title: 'Test Topic',
-        description: 'Topic for integration testing',
-        status: 'ACTIVE',
-        responseCount: 0,
-        participantCount: 0,
-      },
-    });
-
-    // Create verified user
+    // Create verified user (must exist before the topic, which references creatorId)
     await prisma.user.upsert({
       where: { id: testUserId },
       update: {},
@@ -88,8 +96,9 @@ describe('Discussions API Integration Tests', () => {
         id: testUserId,
         email: 'verified@test.com',
         displayName: 'Verified User',
+        cognitoSub: `cognito-${testUserId}`,
         emailVerified: true,
-        authMethod: 'EMAIL',
+        authMethod: 'EMAIL_PASSWORD',
       },
     });
 
@@ -101,8 +110,25 @@ describe('Discussions API Integration Tests', () => {
         id: unverifiedUserId,
         email: 'unverified@test.com',
         displayName: 'Unverified User',
+        cognitoSub: `cognito-${unverifiedUserId}`,
         emailVerified: false,
-        authMethod: 'EMAIL',
+        authMethod: 'EMAIL_PASSWORD',
+      },
+    });
+
+    // Create test topic
+    await prisma.discussionTopic.upsert({
+      where: { id: testTopicId },
+      update: {},
+      create: {
+        id: testTopicId,
+        title: 'Test Topic',
+        description: 'Topic for integration testing',
+        creatorId: testUserId,
+        slug: `test-topic-${testTopicId}`,
+        status: 'ACTIVE',
+        responseCount: 0,
+        participantCount: 0,
       },
     });
   }
@@ -134,7 +160,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(validDiscussionData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(201);
 
       expect(response.body).toMatchObject({
@@ -165,7 +191,7 @@ describe('Discussions API Integration Tests', () => {
       await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
     });
 
@@ -178,7 +204,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
 
       expect(response.body.message).toContain('Title must be at least 10 characters');
@@ -193,7 +219,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
 
       expect(response.body.message).toContain('Title cannot exceed 200 characters');
@@ -210,10 +236,16 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
 
-      expect(response.body.message).toContain('Initial response must be at least 50 characters');
+      // Nested validation errors are prefixed with the property path
+      // (e.g. "initialResponse.Initial response must be at least 50 characters").
+      expect(
+        response.body.message.some((m: string) =>
+          m.includes('Initial response must be at least 50 characters'),
+        ),
+      ).toBe(true);
     });
 
     it('should reject initial response longer than 25000 characters', async () => {
@@ -227,10 +259,15 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
 
-      expect(response.body.message).toContain('Initial response cannot exceed 25,000 characters');
+      // Nested validation errors are prefixed with the property path.
+      expect(
+        response.body.message.some((m: string) =>
+          m.includes('Initial response cannot exceed 25,000 characters'),
+        ),
+      ).toBe(true);
     });
 
     it('should reject more than 10 citations', async () => {
@@ -250,7 +287,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
 
       expect(response.body.message).toContain('Maximum 10 citations allowed');
@@ -273,7 +310,7 @@ describe('Discussions API Integration Tests', () => {
       await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
     });
 
@@ -294,7 +331,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(400);
 
       expect(response.body.message).toContain('Citation URL blocked');
@@ -304,7 +341,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(validDiscussionData)
-        .set('Authorization', `Bearer mock-token-${unverifiedUserId}`)
+        .set('Authorization', bearerFor(unverifiedUserId))
         .expect(403);
 
       expect(response.body.message).toContain('Only verified users can create discussions');
@@ -313,13 +350,13 @@ describe('Discussions API Integration Tests', () => {
     it('should reject request for non-existent topic', async () => {
       const invalidData = {
         ...validDiscussionData,
-        topicId: '00000000-0000-0000-0000-000000000999',
+        topicId: nonExistentTopicId,
       };
 
       await request(app.getHttpServer())
         .post('/discussions')
         .send(invalidData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(404);
     });
 
@@ -327,7 +364,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(validDiscussionData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(201);
 
       const activity = await prisma.participantActivity.findUnique({
@@ -350,7 +387,7 @@ describe('Discussions API Integration Tests', () => {
       await request(app.getHttpServer())
         .post('/discussions')
         .send(validDiscussionData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(201);
 
       const discussionsAfter = await prisma.discussion.count();
@@ -364,7 +401,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/discussions')
         .send(validDiscussionData)
-        .set('Authorization', `Bearer mock-token-${testUserId}`)
+        .set('Authorization', bearerFor(testUserId))
         .expect(201);
 
       const citation = response.body.responses[0].citations[0];
@@ -396,7 +433,7 @@ describe('Discussions API Integration Tests', () => {
       const response = await request(app.getHttpServer()).get('/discussions').expect(200);
 
       expect(response.body.data).toHaveLength(3);
-      expect(response.body.meta).toMatchObject({
+      expect(response.body.pagination).toMatchObject({
         currentPage: 1,
         totalItems: 3,
         itemsPerPage: 50,
@@ -443,7 +480,7 @@ describe('Discussions API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.data).toHaveLength(2);
-      expect(response.body.meta.hasNextPage).toBe(true);
+      expect(response.body.pagination.hasNextPage).toBe(true);
     });
 
     it('should enforce maximum page size of 100', async () => {
@@ -452,7 +489,7 @@ describe('Discussions API Integration Tests', () => {
         .query({ limit: 500 })
         .expect(200);
 
-      expect(response.body.meta.itemsPerPage).toBe(100);
+      expect(response.body.pagination.itemsPerPage).toBe(100);
     });
   });
 });

@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { type Prisma } from '@prisma/client';
+import { redactEmail } from '@reason-bridge/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
 import { PushService, type PushPayload } from './push.service.js';
@@ -176,7 +177,9 @@ export class NotificationDeliveryService {
         deliveredAt: new Date(),
       });
 
-      this.logger.debug(`Email delivered to ${user.email} for notification ${notification.id}`);
+      this.logger.debug(
+        `Email delivered to ${redactEmail(user.email)} for notification ${notification.id}`,
+      );
 
       return {
         channel: 'EMAIL',
@@ -190,7 +193,7 @@ export class NotificationDeliveryService {
         errorMessage,
       });
 
-      this.logger.error(`Email delivery failed for ${user.email}: ${errorMessage}`);
+      this.logger.error(`Email delivery failed for ${redactEmail(user.email)}: ${errorMessage}`);
 
       return {
         channel: 'EMAIL',

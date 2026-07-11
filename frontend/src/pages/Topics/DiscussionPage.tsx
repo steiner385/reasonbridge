@@ -242,6 +242,44 @@ export function DiscussionPage() {
     }
   }, [queryClient, activeTopicId]);
 
+  // Handle top-level response submission (issue #1358).
+  // Previously DiscussionPage never passed onResponseSubmit, so ConversationPanel
+  // fell back to a no-op that cleared the composer without ever calling the API —
+  // silently discarding the single most important action in the product.
+  const handleResponseSubmit = useCallback(
+    async (response: CreateResponseRequest) => {
+      if (!activeTopic?.id) {
+        toast.error('Cannot post response: no active topic selected');
+        return;
+      }
+
+      try {
+        await responseService.createResponse({
+          discussionId: activeTopic.id,
+          content: response.content,
+          citations: response.citedSources?.map((url) => ({ url })),
+          parentResponseId: response.parentId,
+        });
+
+        // Clear composition state after successful submission
+        handleCompositionStateChange(false);
+
+        // Invalidate responses + discussion metadata to reflect the new response
+        await queryClient.invalidateQueries({ queryKey: ['responses', activeTopic.id] });
+        queryClient.invalidateQueries({ queryKey: ['discussions', activeTopic.id] });
+        queryClient.invalidateQueries({ queryKey: ['discussions'] });
+
+        toast.success('Response posted successfully');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to post response';
+        toast.error(message);
+        // Re-throw so CompactComposer preserves the user's text instead of clearing it
+        throw error;
+      }
+    },
+    [activeTopic, queryClient, toast, handleCompositionStateChange],
+  );
+
   // Handle inline reply submission (memoized to prevent unnecessary re-renders)
   const handleReplySubmit = useCallback(
     async (response: CreateResponseRequest) => {
@@ -315,6 +353,7 @@ export function DiscussionPage() {
             height={typeof window !== 'undefined' ? window.innerHeight : 800}
             onPreviewFeedbackChange={handlePreviewFeedbackChange}
             onCompositionStateChange={handleCompositionStateChange}
+            onResponseSubmit={handleResponseSubmit}
             onReplySubmit={handleReplySubmit}
             onRefetchResponses={handleRefetchResponses}
           />

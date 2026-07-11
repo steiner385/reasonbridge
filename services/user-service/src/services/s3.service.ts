@@ -106,6 +106,26 @@ export class S3Service {
   }
 
   /**
+   * Delete an arbitrary object from the bucket by key.
+   *
+   * @param key - S3 object key
+   * @throws {Error} When the delete request fails
+   *
+   * @remarks
+   * A general-purpose primitive used, for example, to remove identity
+   * verification videos during GDPR/COPPA data deletion.
+   */
+  async deleteObject(key: string): Promise<void> {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+
+    await this.s3Client.send(command);
+    this.logger.log(`S3 object deleted successfully: ${key}`);
+  }
+
+  /**
    * Delete avatar from S3
    * @param key - S3 object key
    */

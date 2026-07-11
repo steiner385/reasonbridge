@@ -8,6 +8,8 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { TopicNavigationContent } from '../topics/TopicNavigationContent';
 import { useSidebar } from '../../hooks/useSidebar';
+import { useScrollLock } from '../../hooks/useScrollLock';
+import { useElementHeight } from '../../hooks/useElementHeight';
 import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
@@ -41,6 +43,9 @@ export function MobileDrawer() {
   const drawerRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const [unreadMap, setUnreadMap] = useState<Map<string, boolean>>(new Map());
+  // Live-measured height for the topic virtual list (stays correct after rotation /
+  // keyboard viewport shrink — see #1383).
+  const [topicListRef, topicListHeight] = useElementHeight<HTMLDivElement>(400);
 
   // Fetch topics when in topics mode and drawer is open
   // When not in topics mode or drawer is closed, pass undefined to skip fetching
@@ -113,18 +118,8 @@ export function MobileDrawer() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMobileOpen, closeMobile]);
 
-  // Lock body scroll when drawer is open
-  useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isMobileOpen]);
+  // Lock body scroll when drawer is open (reference-counted — see #1378).
+  useScrollLock(isMobileOpen);
 
   // Focus trap: Keep focus within drawer when open
   useEffect(() => {
@@ -243,14 +238,14 @@ export function MobileDrawer() {
             <CompactSiteNav onNavigate={closeMobile} />
 
             {/* Topic Navigation Content */}
-            <div className="flex-1 overflow-hidden">
+            <div ref={topicListRef} className="flex-1 overflow-hidden">
               <TopicNavigationContent
                 topics={topics}
                 unreadMap={unreadMap}
                 isLoading={isLoading}
                 error={errorMessage}
                 onRetry={() => refetch()}
-                height={typeof window !== 'undefined' ? window.innerHeight - 180 : 400}
+                height={topicListHeight}
                 onTopicSelect={handleTopicSelect}
               />
             </div>

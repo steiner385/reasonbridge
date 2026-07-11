@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registrationSchema, type RegistrationFormData } from '../../schemas/auth';
@@ -282,12 +283,12 @@ function RegistrationForm({
 
           <p className="text-sm text-center text-gray-600 dark:text-gray-300">
             Already have an account?{' '}
-            <a
-              href="/"
+            <Link
+              to="/login"
               className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
               Sign in
-            </a>
+            </Link>
           </p>
         </form>
       </CardBody>

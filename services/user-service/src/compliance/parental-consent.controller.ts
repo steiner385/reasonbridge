@@ -16,6 +16,7 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt-auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { ParentalConsentService } from './parental-consent.service.js';
@@ -58,7 +59,9 @@ export class ParentalConsentController {
     @CurrentUser() jwtPayload: JwtPayload,
     @Body() dto: RequestConsentDto,
   ): Promise<RequestConsentResponseDto> {
-    this.logger.log(`Consent request from user ${jwtPayload.sub} to ${dto.parentEmail}`);
+    this.logger.log(
+      `Consent request from user ${jwtPayload.sub} to ${redactEmail(dto.parentEmail)}`,
+    );
 
     const result = await this.consentService.initiateConsent(jwtPayload.sub, dto.parentEmail);
 

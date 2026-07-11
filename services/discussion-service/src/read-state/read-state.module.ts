@@ -7,9 +7,10 @@ import { Module } from '@nestjs/common';
 import { ReadStateController } from './read-state.controller.js';
 import { ReadStateService } from './read-state.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { AuthModule } from '../auth/index.js';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule],
   controllers: [ReadStateController],
   providers: [ReadStateService],
   exports: [ReadStateService],

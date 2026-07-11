@@ -12,7 +12,7 @@
  * Integrates with Feature 008 (Analytics & Observability) when available
  */
 
-import { Logger as NestLogger } from '@nestjs/common';
+import { createBasePinoLogger } from '@reason-bridge/common';
 
 /**
  * Log levels
@@ -62,10 +62,13 @@ export enum DiscussionEventType {
  * Structured logger for discussion operations
  */
 export class DiscussionLogger {
-  private readonly logger: NestLogger;
+  private readonly logger: ReturnType<typeof createBasePinoLogger>;
 
   constructor(context: string = 'DiscussionService') {
-    this.logger = new NestLogger(context);
+    // Emit genuine single-line JSON via the shared pino logger rather than
+    // JSON.stringify'ing through NestLogger (which produced colourised text
+    // with an embedded, doubly-timestamped JSON blob).
+    this.logger = createBasePinoLogger({ name: 'discussion-service' }).child({ context });
   }
 
   /**
@@ -77,26 +80,22 @@ export class DiscussionLogger {
     message: string,
     context?: LogContext,
   ): void {
-    const logData = {
-      timestamp: new Date().toISOString(),
-      level,
-      eventType,
-      message,
-      ...context,
-    };
+    // pino supplies its own `time` and `level` fields, so only the domain
+    // bindings are merged here (no duplicate timestamp/level).
+    const bindings = { eventType, ...context };
 
     switch (level) {
       case LogLevel.DEBUG:
-        this.logger.debug(JSON.stringify(logData));
+        this.logger.debug(bindings, message);
         break;
       case LogLevel.INFO:
-        this.logger.log(JSON.stringify(logData));
+        this.logger.info(bindings, message);
         break;
       case LogLevel.WARN:
-        this.logger.warn(JSON.stringify(logData));
+        this.logger.warn(bindings, message);
         break;
       case LogLevel.ERROR:
-        this.logger.error(JSON.stringify(logData));
+        this.logger.error(bindings, message);
         break;
     }
   }

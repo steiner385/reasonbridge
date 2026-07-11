@@ -136,9 +136,14 @@ export class VerificationController {
    * }
    */
   @Get('phone/test-otp/:verificationId')
-  async getTestOtp(@Param('verificationId') verificationId: string) {
+  async getTestOtp(
+    @Param('verificationId') verificationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     this.logger.debug(`Test OTP request for verification ${verificationId}`);
-    return this.verificationService.getTestOtp(verificationId);
+    // Pass the authenticated caller so the service can enforce ownership of the
+    // verification record (issue #1305).
+    return this.verificationService.getTestOtp(verificationId, user.sub);
   }
 
   /**

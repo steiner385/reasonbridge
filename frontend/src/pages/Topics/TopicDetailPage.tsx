@@ -4,7 +4,7 @@
  */
 
 import { useParams, Link } from 'react-router-dom';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTopic } from '../../lib/useTopic';
 import { useCommonGroundAnalysis } from '../../lib/useCommonGroundAnalysis';
@@ -45,6 +45,17 @@ function TopicDetailPage() {
 
   // State for edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Composer section target for the mobile "Join Discussion" CTA (#1380)
+  const composerSectionRef = useRef<HTMLDivElement>(null);
+  const handleJoinDiscussion = useCallback(() => {
+    const section = composerSectionRef.current;
+    if (!section) return;
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Focus the composer input so the keyboard opens and the caret is ready.
+    const field = section.querySelector<HTMLElement>('textarea, [contenteditable="true"], input');
+    field?.focus({ preventScroll: true });
+  }, []);
 
   // State for bridging suggestions (populated from API or derived from analysis)
   const [bridgingSuggestions, setBridgingSuggestions] =
@@ -456,7 +467,7 @@ function TopicDetailPage() {
       )}
 
       {/* Response Composer Section */}
-      <div className="mb-6 md:mb-6 pb-20 md:pb-0">
+      <div ref={composerSectionRef} className="mb-6 md:mb-6 pb-20 md:pb-0">
         <Card variant="default" padding="lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Share Your Perspective
@@ -472,7 +483,7 @@ function TopicDetailPage() {
 
       {/* Mobile Action Bar - Fixed bottom CTA on mobile */}
       <MobileActionBar>
-        <Button variant="primary" size="lg" fullWidth>
+        <Button variant="primary" size="lg" fullWidth onClick={handleJoinDiscussion}>
           Join Discussion
         </Button>
       </MobileActionBar>

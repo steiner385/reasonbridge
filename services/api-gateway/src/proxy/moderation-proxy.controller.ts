@@ -4,6 +4,7 @@
  */
 
 import { Controller, All, Req, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -11,6 +12,7 @@ import { ProxyService } from './proxy.service.js';
  * Moderation Service Proxy Controller
  * Proxies all /moderation/* requests to the moderation service
  */
+@ApiTags('moderation')
 @Controller('moderation')
 export class ModerationProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

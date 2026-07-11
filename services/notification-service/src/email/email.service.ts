@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 /**
@@ -102,9 +103,9 @@ export class EmailService implements OnModuleDestroy {
 
     try {
       await this.sesClient.send(command);
-      this.logger.log(`Digest email sent to ${params.to}`);
+      this.logger.log(`Digest email sent to ${redactEmail(params.to)}`);
     } catch (error) {
-      this.logger.error(`Failed to send digest email to ${params.to}:`, error);
+      this.logger.error(`Failed to send digest email to ${redactEmail(params.to)}:`, error);
       throw error;
     }
   }

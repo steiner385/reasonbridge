@@ -6,6 +6,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   Optional,
   UnauthorizedException,
   type CanActivate,
@@ -49,8 +50,12 @@ export interface JwtPayload {
  * - AUTH_MODE=database or AUTH_MODE=mock → mock auth
  * - AUTH_MOCK=true → mock auth
  * - NODE_ENV=test or NODE_ENV=development → mock auth
- * - NODE_ENV not set → mock auth (safe default for dev)
- * - Otherwise → production auth with Cognito JWKS
+ * - Otherwise (including NODE_ENV unset) → production auth with Cognito JWKS
+ *
+ * Mock auth requires an explicit opt-in. An unset NODE_ENV is treated as
+ * production (fail-closed) so a misconfigured container never silently
+ * downgrades to forgeable HS256 verification. Whenever mock auth is active a
+ * loud warning is logged.
  *
  * @example
  * ```typescript
@@ -68,6 +73,7 @@ export interface JwtPayload {
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
   private readonly jwksClient?: jwksClient.JwksClient;
   private readonly userPoolId?: string;
   private readonly region: string;
@@ -94,7 +100,10 @@ export class JwtAuthGuard implements CanActivate {
 
     this.region = getConfig('AWS_REGION') ?? 'us-east-1';
 
-    // Determine auth mode - database auth and mock auth both use local JWT verification
+    // Determine auth mode - database auth and mock auth both use local JWT verification.
+    // Mock auth requires an explicit opt-in; an unset NODE_ENV is treated as production
+    // (fail-closed) so a misconfigured container never silently downgrades to forgeable
+    // HS256 verification.
     const authMode = getConfig('AUTH_MODE');
     const nodeEnv = getConfig('NODE_ENV');
     this.useMockAuth =
@@ -102,11 +111,15 @@ export class JwtAuthGuard implements CanActivate {
       authMode === 'mock' ||
       getConfig('AUTH_MOCK') === 'true' ||
       nodeEnv === 'test' ||
-      nodeEnv === 'development' ||
-      !nodeEnv; // Default to mock auth if NODE_ENV is not set
+      nodeEnv === 'development';
 
     if (this.useMockAuth) {
       // Mock mode - use simple JWT secret
+      this.logger.warn(
+        'JwtAuthGuard is running in MOCK auth mode (local HS256 verification with JWT_SECRET). ' +
+          'This is INSECURE for production. Ensure this is intentional ' +
+          `(AUTH_MODE=${authMode ?? 'unset'}, NODE_ENV=${nodeEnv ?? 'unset'}).`,
+      );
       const secret = getConfig('JWT_SECRET');
       if (!secret && nodeEnv !== 'test') {
         throw new Error('JWT_SECRET environment variable is required');

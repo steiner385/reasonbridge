@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { AlignmentsController } from './alignments.controller.js';
+import type { JwtPayload } from '../auth/index.js';
 
 const createMockAlignmentsService = () => ({
   findUserAlignment: vi.fn(),
   setAlignment: vi.fn(),
   removeAlignment: vi.fn(),
 });
+
+// The controller now derives the user id from the verified JWT payload (issue #1301).
+const asUser = (sub: string): JwtPayload => ({ sub }) as JwtPayload;
 
 describe('AlignmentsController', () => {
   let controller: AlignmentsController;
@@ -29,7 +33,7 @@ describe('AlignmentsController', () => {
       };
       mockAlignmentsService.findUserAlignment.mockResolvedValue(alignment);
 
-      const result = await controller.getUserAlignment('proposition-1', 'user-1');
+      const result = await controller.getUserAlignment('proposition-1', asUser('user-1'));
 
       expect(result).toEqual(alignment);
       expect(mockAlignmentsService.findUserAlignment).toHaveBeenCalledWith(
@@ -41,7 +45,7 @@ describe('AlignmentsController', () => {
     it('should return null when user has no alignment', async () => {
       mockAlignmentsService.findUserAlignment.mockResolvedValue(null);
 
-      const result = await controller.getUserAlignment('proposition-1', 'user-1');
+      const result = await controller.getUserAlignment('proposition-1', asUser('user-1'));
 
       expect(result).toBeNull();
     });
@@ -49,7 +53,7 @@ describe('AlignmentsController', () => {
     it('should pass correct propositionId and userId', async () => {
       mockAlignmentsService.findUserAlignment.mockResolvedValue(null);
 
-      await controller.getUserAlignment('prop-123', 'user-456');
+      await controller.getUserAlignment('prop-123', asUser('user-456'));
 
       expect(mockAlignmentsService.findUserAlignment).toHaveBeenCalledWith('prop-123', 'user-456');
     });
@@ -69,7 +73,7 @@ describe('AlignmentsController', () => {
 
       const result = await controller.setAlignment(
         'proposition-1',
-        'user-1',
+        asUser('user-1'),
         setAlignmentDto as any,
       );
 
@@ -95,7 +99,7 @@ describe('AlignmentsController', () => {
 
       const result = await controller.setAlignment(
         'proposition-1',
-        'user-1',
+        asUser('user-1'),
         setAlignmentDto as any,
       );
 
@@ -113,7 +117,7 @@ describe('AlignmentsController', () => {
 
       const result = await controller.setAlignment(
         'proposition-1',
-        'user-1',
+        asUser('user-1'),
         setAlignmentDto as any,
       );
 
@@ -125,7 +129,7 @@ describe('AlignmentsController', () => {
     it('should remove alignment', async () => {
       mockAlignmentsService.removeAlignment.mockResolvedValue(undefined);
 
-      await controller.removeAlignment('proposition-1', 'user-1');
+      await controller.removeAlignment('proposition-1', asUser('user-1'));
 
       expect(mockAlignmentsService.removeAlignment).toHaveBeenCalledWith('proposition-1', 'user-1');
     });
@@ -133,7 +137,9 @@ describe('AlignmentsController', () => {
     it('should not throw when alignment does not exist', async () => {
       mockAlignmentsService.removeAlignment.mockResolvedValue(undefined);
 
-      await expect(controller.removeAlignment('proposition-1', 'user-1')).resolves.not.toThrow();
+      await expect(
+        controller.removeAlignment('proposition-1', asUser('user-1')),
+      ).resolves.not.toThrow();
     });
   });
 });

@@ -14,6 +14,10 @@
   grid-template-areas: 'left center right';
   /* Account for header (64px) - use negative margin to counteract parent padding */
   height: calc(100vh - 64px);
+  /* Dynamic viewport unit: on mobile browsers 100vh = largest (URL-bar-collapsed)
+     viewport, so the composer hides behind browser chrome. 100dvh tracks the visible
+     viewport; declared after 100vh as a progressive-enhancement fallback (#1377). */
+  height: calc(100dvh - 64px);
   /* Base: counteract px-4 py-6 */
   margin: -1.5rem -1rem;
   width: calc(100% + 2rem);
@@ -272,6 +276,20 @@
     grid-template-columns: 1fr minmax(280px, 320px);
     grid-template-areas: 'center right';
   }
+
+  /* Touch targets on tablet too (768-1279px is a touch breakpoint per useBreakpoint):
+     mirror the mobile 44px floor so icon buttons aren't sub-target on tablet touch
+     devices (WCAG 2.5.5 / #1381). Bare `a` is intentionally excluded: min-width/height
+     have no effect on non-replaced inline links, so inline anchors are sized at the
+     component level instead. */
+  .discussion-layout[data-breakpoint='tablet'] button,
+  .discussion-layout[data-breakpoint='tablet'] [role='button'],
+  .discussion-layout[data-breakpoint='tablet'] [role='tab'],
+  .discussion-layout[data-breakpoint='tablet'] input[type='checkbox'],
+  .discussion-layout[data-breakpoint='tablet'] input[type='radio'] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* Lower tablet range polish (768px - 900px) - give more room to center panel */
@@ -309,6 +327,8 @@
     grid-template-areas: 'center';
     /* Mobile uses same calc as base, margin already handled above */
     height: calc(100vh - 64px);
+    /* dvh fallback so the composer isn't hidden behind mobile browser chrome (#1377) */
+    height: calc(100dvh - 64px);
   }
 
   /* Left panel as slide-in overlay on mobile */

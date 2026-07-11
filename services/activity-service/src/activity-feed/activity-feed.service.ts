@@ -21,7 +21,16 @@ export class ActivityFeedService {
    * Get activity feed for a user showing activities from followed users
    */
   async getFeed(userId: string, query: GetFeedQueryDto): Promise<ActivityFeedResponseDto> {
-    const { limit = 20, cursor } = query;
+    const { cursor } = query;
+
+    // Coerce and bound `limit` defensively. The global ValidationPipe normally
+    // transforms it to an integer via GetFeedQueryDto's @Transform/@IsInt, but
+    // guarding here keeps the service correct even when called without the pipe
+    // (internal callers, unit tests). A raw string would otherwise make
+    // `take: limit + 1` concatenate (e.g. "50" + 1 = "501") and break Prisma.
+    const parsedLimit = Number(query.limit);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(Math.floor(parsedLimit), 100) : 20;
 
     // Step 1: Get IDs of users the current user follows (limit to 1000 most recent)
     // Note: Limiting follows prevents extremely large IN clauses for power users
