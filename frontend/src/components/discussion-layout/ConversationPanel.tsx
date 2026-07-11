@@ -4,6 +4,7 @@
  */
 
 import { useRef, useCallback, useState, useEffect, useLayoutEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ResponseList } from '../responses/ResponseList';
 import { CompactComposer } from '../responses/CompactComposer';
 import { useDiscussionLayout } from '../../contexts/DiscussionLayoutContext';
@@ -73,6 +74,7 @@ export function ConversationPanel({
   const { subscribe } = useWebSocket();
   const { user } = useAuth();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const [newResponseCount, setNewResponseCount] = useState(0);
   const [topicStatusChange, setTopicStatusChange] = useState<{
@@ -161,7 +163,9 @@ export function ConversationPanel({
         await apiClient.patch(`/topics/${topic.id}`, updates);
         toast.success('Topic updated successfully');
         setIsEditModalOpen(false);
-        // Note: Topic data will refresh via WebSocket or page reload
+        // Invalidate topic queries to refresh the UI with updated data
+        await queryClient.invalidateQueries({ queryKey: ['topic', topic.id] });
+        await queryClient.invalidateQueries({ queryKey: ['topics'] });
       } catch (error) {
         toast.error('Failed to update topic');
         throw error;
@@ -169,7 +173,7 @@ export function ConversationPanel({
         setIsEditLoading(false);
       }
     },
-    [topic, toast],
+    [topic, toast, queryClient],
   );
 
   // Wrap onReplySubmit to add auto-scroll after submission
