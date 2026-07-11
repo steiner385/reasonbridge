@@ -3,27 +3,36 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ResponsesService } from './responses.service.js';
 import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 
-const createMockPrismaService = () => ({
-  discussionTopic: {
-    findUnique: vi.fn(),
-    update: vi.fn(),
-  },
-  response: {
-    findMany: vi.fn(),
-    findUnique: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-    groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
-  },
-  responseProposition: {
-    createMany: vi.fn(),
-    deleteMany: vi.fn(),
-  },
-  user: {
-    findUnique: vi.fn(),
-  },
-});
+const createMockPrismaService = () => {
+  const prisma = {
+    discussionTopic: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    response: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      groupBy: vi.fn().mockResolvedValue([{ authorId: 'user-1' }]),
+    },
+    responseProposition: {
+      createMany: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
+    },
+    // Interactive transaction runs the callback against the same mock client.
+    $transaction: vi.fn(),
+  };
+  prisma.$transaction.mockImplementation((callback: (tx: typeof prisma) => unknown) =>
+    callback(prisma),
+  );
+  return prisma;
+};
 
 const createMockCommonGroundTrigger = () => ({
   checkAndTrigger: vi.fn().mockResolvedValue(undefined),
@@ -325,17 +334,36 @@ describe('ResponsesService', () => {
       mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
       mockPrisma.discussionTopic.update.mockResolvedValue({});
       mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
-      // Mock groupBy to return unique participants
-      mockPrisma.response.groupBy.mockResolvedValue([
-        { authorId: 'user-1' },
-        { authorId: 'user-2' },
-      ]);
+      // First-time author: no prior response exists in the topic, so
+      // participantCount is incremented.
+      mockPrisma.response.findFirst.mockResolvedValue(null);
 
       await service.createResponse('topic-1', 'user-1', validDto);
 
       expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith({
         where: { id: 'topic-1' },
-        data: { responseCount: { increment: 1 }, participantCount: 2 },
+        data: { responseCount: { increment: 1 }, participantCount: { increment: 1 } },
+      });
+    });
+
+    it('should not increment participant count for a returning author', async () => {
+      const mockResponse = createMockResponse();
+      mockPrisma.discussionTopic.findUnique.mockResolvedValue({
+        id: 'topic-1',
+        status: 'ACTIVE',
+      });
+      mockPrisma.response.create.mockResolvedValue(mockResponse);
+      mockPrisma.response.findUnique.mockResolvedValue(mockResponse);
+      mockPrisma.discussionTopic.update.mockResolvedValue({});
+      mockPrisma.user.findUnique.mockResolvedValue({ isMinor: false });
+      // Returning author: a prior response already exists in the topic.
+      mockPrisma.response.findFirst.mockResolvedValue({ id: 'prior-response' });
+
+      await service.createResponse('topic-1', 'user-1', validDto);
+
+      expect(mockPrisma.discussionTopic.update).toHaveBeenCalledWith({
+        where: { id: 'topic-1' },
+        data: { responseCount: { increment: 1 } },
       });
     });
 

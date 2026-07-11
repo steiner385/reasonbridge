@@ -195,56 +195,69 @@ export class ResponsesService {
     // Set status based on author type: minors get PENDING_REVIEW, adults get VISIBLE
     const responseStatus = author?.isMinor ? 'PENDING_REVIEW' : 'VISIBLE';
 
-    // Create the response
-    const response = await this.prisma.response.create({
-      data: {
-        topicId,
-        authorId,
-        parentId: createResponseDto.parentId ?? null,
-        content: createResponseDto.content.trim(),
-        citedSources: citedSourcesJson,
-        containsOpinion: createResponseDto.containsOpinion ?? false,
-        containsFactualClaims: createResponseDto.containsFactualClaims ?? false,
-        status: responseStatus,
-        revisionCount: 0,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            displayName: true,
-            avatarUrl: true,
-            email: true,
-            verificationLevel: true,
+    // Create the response, its proposition links, and the topic stat updates
+    // atomically so responseCount and participantCount cannot drift if an
+    // intermediate step fails.
+    const response = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.response.create({
+        data: {
+          topicId,
+          authorId,
+          parentId: createResponseDto.parentId ?? null,
+          content: createResponseDto.content.trim(),
+          citedSources: citedSourcesJson,
+          containsOpinion: createResponseDto.containsOpinion ?? false,
+          containsFactualClaims: createResponseDto.containsFactualClaims ?? false,
+          status: responseStatus,
+          revisionCount: 0,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              displayName: true,
+              avatarUrl: true,
+              email: true,
+              verificationLevel: true,
+            },
           },
         },
-      },
-    });
-
-    // Handle proposition associations if provided
-    if (createResponseDto.propositionIds && createResponseDto.propositionIds.length > 0) {
-      // Create ResponseProposition junction records
-      await this.prisma.responseProposition.createMany({
-        data: createResponseDto.propositionIds.map((propositionId) => ({
-          responseId: response.id,
-          propositionId,
-        })),
-        skipDuplicates: true,
       });
-    }
 
-    // Count unique participants and update topic stats
-    const uniqueParticipants = await this.prisma.response.groupBy({
-      by: ['authorId'],
-      where: { topicId },
-    });
+      // Handle proposition associations if provided
+      if (createResponseDto.propositionIds && createResponseDto.propositionIds.length > 0) {
+        // Create ResponseProposition junction records
+        await tx.responseProposition.createMany({
+          data: createResponseDto.propositionIds.map((propositionId) => ({
+            responseId: created.id,
+            propositionId,
+          })),
+          skipDuplicates: true,
+        });
+      }
 
-    await this.prisma.discussionTopic.update({
-      where: { id: topicId },
-      data: {
-        responseCount: { increment: 1 },
-        participantCount: uniqueParticipants.length,
-      },
+      // Only first-time authors increment participantCount. This EXISTS-style
+      // lookup (backed by the composite (topicId, authorId) index) avoids
+      // re-aggregating every response in the topic on each write, which grew
+      // O(responses) with topic size under the previous groupBy approach.
+      const priorResponse = await tx.response.findFirst({
+        where: {
+          topicId,
+          authorId,
+          id: { not: created.id },
+        },
+        select: { id: true },
+      });
+
+      await tx.discussionTopic.update({
+        where: { id: topicId },
+        data: {
+          responseCount: { increment: 1 },
+          ...(priorResponse ? {} : { participantCount: { increment: 1 } }),
+        },
+      });
+
+      return created;
     });
 
     // Check and trigger common ground analysis if needed

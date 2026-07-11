@@ -81,27 +81,38 @@ export class VotesService {
    * Get vote summary for a response
    */
   async getVoteSummary(responseId: string, userId?: string): Promise<VoteSummaryDto> {
-    const votes = await this.prisma.vote.findMany({
-      where: { responseId },
-    });
+    // Aggregate counts in the database rather than materializing every vote row
+    // and counting in JS. The caller's own vote is fetched with a single
+    // indexed lookup on the (userId, responseId) unique key.
+    const [grouped, userVoteRow] = await Promise.all([
+      this.prisma.vote.groupBy({
+        by: ['voteType'],
+        where: { responseId },
+        _count: { _all: true },
+      }),
+      userId
+        ? this.prisma.vote.findUnique({
+            where: { userId_responseId: { userId, responseId } },
+            select: { voteType: true },
+          })
+        : Promise.resolve(null),
+    ]);
 
-    const upvotes = votes.filter((v: { voteType: string }) => v.voteType === 'UPVOTE').length;
-    const downvotes = votes.filter((v: { voteType: string }) => v.voteType === 'DOWNVOTE').length;
-    const score = upvotes - downvotes;
-
-    let userVote: 'UPVOTE' | 'DOWNVOTE' | null = null;
-    if (userId) {
-      const vote = votes.find((v: { userId: string }) => v.userId === userId);
-      if (vote) {
-        userVote = vote.voteType as 'UPVOTE' | 'DOWNVOTE';
+    let upvotes = 0;
+    let downvotes = 0;
+    for (const group of grouped) {
+      if (group.voteType === 'UPVOTE') {
+        upvotes = group._count._all;
+      } else if (group.voteType === 'DOWNVOTE') {
+        downvotes = group._count._all;
       }
     }
 
     return {
       upvotes,
       downvotes,
-      score,
-      userVote,
+      score: upvotes - downvotes,
+      userVote: (userVoteRow?.voteType as 'UPVOTE' | 'DOWNVOTE' | undefined) ?? null,
     };
   }
 
@@ -112,43 +123,52 @@ export class VotesService {
     responseIds: string[],
     userId?: string,
   ): Promise<Map<string, VoteSummaryDto>> {
-    const votes = await this.prisma.vote.findMany({
-      where: {
-        responseId: {
-          in: responseIds,
-        },
-      },
-    });
-
     const summariesMap = new Map<string, VoteSummaryDto>();
 
-    // Initialize summaries for all responses
+    // Initialize empty summaries so every requested id is present in the result.
     for (const responseId of responseIds) {
-      const responseVotes = votes.filter(
-        (v: { responseId: string }) => v.responseId === responseId,
-      );
-      const upvotes = responseVotes.filter(
-        (v: { voteType: string }) => v.voteType === 'UPVOTE',
-      ).length;
-      const downvotes = responseVotes.filter(
-        (v: { voteType: string }) => v.voteType === 'DOWNVOTE',
-      ).length;
-      const score = upvotes - downvotes;
+      summariesMap.set(responseId, { upvotes: 0, downvotes: 0, score: 0, userVote: null });
+    }
 
-      let userVote: 'UPVOTE' | 'DOWNVOTE' | null = null;
-      if (userId) {
-        const vote = responseVotes.find((v: { userId: string }) => v.userId === userId);
-        if (vote) {
-          userVote = vote.voteType as 'UPVOTE' | 'DOWNVOTE';
-        }
+    if (responseIds.length === 0) {
+      return summariesMap;
+    }
+
+    // One grouped aggregation for all responses (instead of fetching every vote
+    // row and filtering per response in a loop, which was O(responses × votes)),
+    // plus a single targeted lookup for the caller's own votes.
+    const [grouped, userVotes] = await Promise.all([
+      this.prisma.vote.groupBy({
+        by: ['responseId', 'voteType'],
+        where: { responseId: { in: responseIds } },
+        _count: { _all: true },
+      }),
+      userId
+        ? this.prisma.vote.findMany({
+            where: { userId, responseId: { in: responseIds } },
+            select: { responseId: true, voteType: true },
+          })
+        : Promise.resolve([] as { responseId: string; voteType: string }[]),
+    ]);
+
+    for (const group of grouped) {
+      const summary = summariesMap.get(group.responseId);
+      if (!summary) {
+        continue;
       }
+      if (group.voteType === 'UPVOTE') {
+        summary.upvotes = group._count._all;
+      } else if (group.voteType === 'DOWNVOTE') {
+        summary.downvotes = group._count._all;
+      }
+      summary.score = summary.upvotes - summary.downvotes;
+    }
 
-      summariesMap.set(responseId, {
-        upvotes,
-        downvotes,
-        score,
-        userVote,
-      });
+    for (const vote of userVotes) {
+      const summary = summariesMap.get(vote.responseId);
+      if (summary) {
+        summary.userVote = vote.voteType as 'UPVOTE' | 'DOWNVOTE';
+      }
     }
 
     return summariesMap;
