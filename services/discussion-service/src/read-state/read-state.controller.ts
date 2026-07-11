@@ -14,7 +14,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ReadStateService } from './read-state.service.js';
-import type { UpdateReadStateDto } from './dto/update-read-state.dto.js';
+// NOTE: Must be a value import (not `import type`). This class is used as an
+// @Body() parameter type, so `emitDecoratorMetadata` needs the runtime class
+// reference. With verbatimModuleSyntax, `import type` would elide it and tsc
+// would emit `Function` as the paramtype, silently breaking ValidationPipe.
+import { UpdateReadStateDto } from './dto/update-read-state.dto.js';
 import type { ReadStateDto } from './dto/read-state.dto.js';
 
 @Controller('topics')
