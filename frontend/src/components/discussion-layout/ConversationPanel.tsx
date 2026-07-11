@@ -70,7 +70,7 @@ export function ConversationPanel({
   const responseListContainerRef = useRef<HTMLDivElement>(null);
   const { toggleLeftPanelOverlay } = useDiscussionLayout();
   const breakpoint = useBreakpoint();
-  const { subscribe } = useWebSocket();
+  const { subscribe, subscribeToTopic } = useWebSocket();
   const { user } = useAuth();
   const toast = useToast();
 
@@ -106,6 +106,13 @@ export function ConversationPanel({
 
     return () => resizeObserver.disconnect();
   }, []);
+
+  // Join the topic's realtime room so typing/reaction/new-response/status
+  // events for this topic are delivered to the shared connection (issue #1359).
+  useEffect(() => {
+    if (!topic?.id) return undefined;
+    return subscribeToTopic(topic.id);
+  }, [topic?.id, subscribeToTopic]);
 
   // Subscribe to WebSocket messages for new responses
   useEffect(() => {
@@ -198,6 +205,27 @@ export function ConversationPanel({
   const handleDismissStatusChange = useCallback(() => {
     setTopicStatusChange(null);
   }, []);
+
+  // Derive read-only state directly from the fetched topic status so that
+  // archived/locked topics disable posting immediately on load, not only in
+  // response to a live TOPIC_STATUS_CHANGE transition. See issue #1362.
+  const isReadOnly =
+    topic?.status === 'ARCHIVED' ||
+    topic?.status === 'LOCKED' ||
+    topicStatusChange?.newStatus === 'ARCHIVED' ||
+    topicStatusChange?.newStatus === 'LOCKED';
+
+  // Guard against the previous no-op fallback that silently discarded top-level
+  // responses: if a composer is requested but no handler is wired, log loudly
+  // and hide the composer rather than pretending the post succeeded. See #1358.
+  useEffect(() => {
+    if (showComposer && topic && !isReadOnly && !onResponseSubmit) {
+      console.error(
+        'ConversationPanel: showComposer is true but no onResponseSubmit handler was ' +
+          'provided. The top-level composer is hidden to avoid silently discarding responses.',
+      );
+    }
+  }, [showComposer, topic, isReadOnly, onResponseSubmit]);
 
   // Conditional rendering: Empty state when no topic selected
   if (!topic) {
@@ -520,18 +548,30 @@ export function ConversationPanel({
           enableThreading
           height={measuredHeight || 400}
           highlightedResponseIds={highlightedResponseIds}
-          onReplySubmit={handleReplySubmitWithScroll}
+          onReplySubmit={isReadOnly ? undefined : handleReplySubmitWithScroll}
           onPreviewFeedbackChange={onPreviewFeedbackChange}
           compact
         />
       </div>
 
-      {/* Compact Composer (sticky bottom) */}
-      {showComposer && (
+      {/* Read-only notice for archived/locked topics (issue #1362) */}
+      {showComposer && isReadOnly && (
+        <div
+          className="shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 text-center text-sm text-gray-600 dark:text-gray-400"
+          role="status"
+        >
+          This topic is <strong>{(topic.status ?? 'archived').toLowerCase()}</strong> and read-only.
+          You can no longer post responses.
+        </div>
+      )}
+
+      {/* Compact Composer (sticky bottom) — only when we have a real submit
+          handler, so responses are never silently discarded (issue #1358) */}
+      {showComposer && !isReadOnly && onResponseSubmit && (
         <div className="shrink-0 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <CompactComposer
             topicId={topic.id}
-            onSubmit={onResponseSubmit || (() => Promise.resolve())}
+            onSubmit={onResponseSubmit}
             onPreviewFeedbackChange={onPreviewFeedbackChange}
           />
         </div>

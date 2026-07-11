@@ -24,6 +24,7 @@ import { validateCitationUrl } from '../utils/ssrf-validator.js';
 import { RESPONSE_CONSTRAINTS } from '../constants/index.js';
 import { ResponseThreadingService } from './response-threading.service.js';
 import type { ThreadedResponse } from './response-threading.service.js';
+import { DiscussionGateway } from '../gateways/discussion.gateway.js';
 
 // Re-export ThreadedResponse for consumers
 export type { ThreadedResponse } from './response-threading.service.js';
@@ -39,6 +40,7 @@ export class ResponsesService {
     @Inject(ResponseThreadingService)
     private readonly threadingService: ResponseThreadingService,
     @Optional() private readonly moderationClient?: ModerationClientService,
+    @Optional() @Inject(DiscussionGateway) private readonly discussionGateway?: DiscussionGateway,
   ) {}
 
   /**
@@ -292,6 +294,18 @@ export class ResponsesService {
         },
       },
     });
+
+    // Broadcast a realtime new-response event to clients in the topic room so
+    // the "N new responses" banner and sidebar counters update live (#1359).
+    if (this.discussionGateway && completeResponse) {
+      this.discussionGateway.emitNewResponse({
+        topicId: completeResponse.topicId,
+        responseId: completeResponse.id,
+        authorId: completeResponse.authorId,
+        authorName: completeResponse.author?.displayName || 'Anonymous',
+        parentId: completeResponse.parentId ?? undefined,
+      });
+    }
 
     // Map to ResponseDto
     return this.mapToResponseDto(completeResponse!);
