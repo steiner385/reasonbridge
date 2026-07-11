@@ -68,7 +68,7 @@ export function ConversationPanel({
   // CRITICAL: All hooks must be called BEFORE any conditional returns
   // React Error #310 occurs when hooks are called conditionally
   const responseListContainerRef = useRef<HTMLDivElement>(null);
-  const { toggleLeftPanelOverlay } = useDiscussionLayout();
+  const { toggleLeftPanelOverlay, hasLeftPanel } = useDiscussionLayout();
   const breakpoint = useBreakpoint();
   const { subscribe } = useWebSocket();
   const { user } = useAuth();
@@ -84,7 +84,11 @@ export function ConversationPanel({
   // Measured height of the response list container for virtual scrolling
   const [measuredHeight, setMeasuredHeight] = useState<number>(0);
 
-  const showHamburgerMenu = breakpoint === 'tablet' || breakpoint === 'mobile';
+  // Only offer the topic-navigation hamburger when a left panel actually exists.
+  // On the discussion page the layout renders with no left panel, so the button would
+  // toggle a non-existent overlay and do nothing when tapped (#1376).
+  const showHamburgerMenu =
+    hasLeftPanel === true && (breakpoint === 'tablet' || breakpoint === 'mobile');
 
   // Measure the actual available height for the response list container
   // Using ResizeObserver to handle dynamic resizing (window resize, panel resize, etc.)
@@ -271,7 +275,7 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={toggleLeftPanelOverlay}
-              className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
+              className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors xl:hidden"
               aria-label="Open topic navigation"
             >
               <svg
@@ -324,7 +328,7 @@ export function ConversationPanel({
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Edit topic"
                 title="Edit topic"
               >
@@ -492,7 +496,7 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={handleDismissStatusChange}
-              className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               aria-label="Dismiss notification"
             >
               <svg
