@@ -15,6 +15,7 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { isValidUUID } from '@reason-bridge/common';
 import { ProxyService } from './proxy.service.js';
@@ -26,6 +27,7 @@ import { ProxyService } from './proxy.service.js';
  * Handles OAuth connections, contact import, discovery, and invitations.
  * Part of Feature 010 - Social Media Integration (Issue #782)
  */
+@ApiTags('contacts')
 @Controller('contacts')
 export class ContactsProxyController {
   private readonly logger = new Logger(ContactsProxyController.name);

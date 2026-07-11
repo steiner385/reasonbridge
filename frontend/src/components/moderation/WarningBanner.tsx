@@ -12,11 +12,13 @@
  */
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type {
   ModerationAction,
   ModerationActionType,
   ModerationSeverity,
 } from '../../types/moderation';
+import AppealSubmissionForm from './AppealSubmissionForm';
 
 export interface WarningBannerProps {
   /**
@@ -48,6 +50,13 @@ export interface WarningBannerProps {
    * Custom message to display instead of default
    */
   customMessage?: string;
+
+  /**
+   * Whether to show an "Appeal this decision" action. Defaults to true for any
+   * action that has not already been reversed. Set false to hide the appeal
+   * affordance (e.g. purely educational notices). (Issue #1396)
+   */
+  allowAppeal?: boolean;
 }
 
 /**
@@ -232,12 +241,18 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
   className = '',
   showDetails = true,
   customMessage,
+  allowAppeal = true,
 }) => {
   const [isDismissed, setIsDismissed] = useState(false);
+  const [showAppealForm, setShowAppealForm] = useState(false);
+  const [submittedAppealId, setSubmittedAppealId] = useState<string | null>(null);
 
   if (isDismissed) {
     return null;
   }
+
+  // An action can be appealed once, and not after it has already been reversed.
+  const canAppeal = allowAppeal && warning.status !== 'reversed' && submittedAppealId === null;
 
   const styles = getWarningStyles(warning.actionType, warning.severity);
   const textColors = getTextColors(warning.severity);
@@ -290,6 +305,31 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
               )}
             </div>
           )}
+
+          {/* Appeal affordance (Issue #1396) */}
+          {canAppeal && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => setShowAppealForm(true)}
+                className="text-sm font-medium text-primary-600 hover:text-primary-700 underline underline-offset-2"
+              >
+                Appeal this decision
+              </button>
+            </div>
+          )}
+          {submittedAppealId && (
+            <p className={`text-sm mt-3 ${textColors.text}`}>
+              Your appeal has been submitted.{' '}
+              <Link
+                to={`/appeals?appeal=${submittedAppealId}`}
+                className="font-medium text-primary-600 hover:text-primary-700 underline underline-offset-2"
+              >
+                Track its status
+              </Link>
+              .
+            </p>
+          )}
         </div>
 
         {/* Dismiss button */}
@@ -317,6 +357,14 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
           </button>
         )}
       </div>
+
+      {/* Appeal submission modal (Issue #1396) */}
+      <AppealSubmissionForm
+        isOpen={showAppealForm}
+        onClose={() => setShowAppealForm(false)}
+        moderationAction={warning}
+        onSuccess={(appealId) => setSubmittedAppealId(appealId)}
+      />
     </div>
   );
 };

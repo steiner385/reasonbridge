@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ParentalConsentService } from '../parental-consent.service.js';
 
 // Mock data factory
@@ -155,6 +155,31 @@ describe('ParentalConsentService - Child Activity & Consent Withdrawal', () => {
 
       expect(result.childDisplayName).toBe('Anonymous User');
     });
+
+    it('should throw ForbiddenException for an expired token', async () => {
+      const expiredConsent = createMockConsentRecord({
+        tokenExpiresAt: new Date('2024-01-01'),
+      });
+      mockPrisma.parentalConsent.findUnique.mockResolvedValue(expiredConsent);
+
+      await expect(service.getChildActivitySummary('valid-token-abc123')).rejects.toThrow(
+        ForbiddenException,
+      );
+      // Must not fall through to loading the child's activity.
+      expect(mockPrisma.response.count).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException for an already-withdrawn token', async () => {
+      const withdrawnConsent = createMockConsentRecord({
+        withdrawnAt: new Date('2025-02-01'),
+      });
+      mockPrisma.parentalConsent.findUnique.mockResolvedValue(withdrawnConsent);
+
+      await expect(service.getChildActivitySummary('valid-token-abc123')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockPrisma.response.count).not.toHaveBeenCalled();
+    });
   });
 
   describe('withdrawConsentByToken', () => {
@@ -178,6 +203,31 @@ describe('ParentalConsentService - Child Activity & Consent Withdrawal', () => {
       await expect(service.withdrawConsentByToken('invalid-token')).rejects.toThrow(
         NotFoundException,
       );
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException for an expired token', async () => {
+      const expiredConsent = createMockConsentRecord({
+        tokenExpiresAt: new Date('2024-01-01'),
+      });
+      mockPrisma.parentalConsent.findUnique.mockResolvedValue(expiredConsent);
+
+      await expect(service.withdrawConsentByToken('valid-token-abc123')).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('should be idempotent: reject an already-withdrawn token without re-triggering deletion', async () => {
+      const withdrawnConsent = createMockConsentRecord({
+        withdrawnAt: new Date('2025-02-01'),
+      });
+      mockPrisma.parentalConsent.findUnique.mockResolvedValue(withdrawnConsent);
+
+      await expect(service.withdrawConsentByToken('valid-token-abc123')).rejects.toThrow(
+        ForbiddenException,
+      );
+      // A second withdrawal must not re-run the transaction or deletion request.
       expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     });
   });

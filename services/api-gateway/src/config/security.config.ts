@@ -98,21 +98,24 @@ export function getCorsConfig(): CorsConfig {
 export function getHelmetConfig(): FastifyHelmetOptions {
   return {
     // Content Security Policy
-    contentSecurityPolicy: isProduction
-      ? {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Swagger UI
-            imgSrc: ["'self'", 'data:', 'https:'],
-            fontSrc: ["'self'"],
-            connectSrc: ["'self'"],
-            frameSrc: ["'none'"],
-            objectSrc: ["'none'"],
-            upgradeInsecureRequests: [],
-          },
-        }
-      : false, // Disable CSP in development for easier debugging
+    //
+    // Keep CSP enabled in ALL environments so the XSS blast radius is
+    // constrained everywhere, including local dev/testing (issue #1384).
+    // Only `upgradeInsecureRequests` is production-only — in dev the gateway is
+    // served over plain HTTP, and upgrading would break local requests.
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Swagger UI
+        imgSrc: ["'self'", 'data:', 'https:'],
+        fontSrc: ["'self'"],
+        connectSrc: ["'self'"],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        ...(isProduction ? { upgradeInsecureRequests: [] } : {}),
+      },
+    },
 
     // Prevent MIME type sniffing
     // X-Content-Type-Options: nosniff

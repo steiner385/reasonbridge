@@ -31,12 +31,19 @@ const createMockActionsService = () => ({
   rejectAction: vi.fn(),
   getUserActions: vi.fn(),
   sendCoolingOffPrompt: vi.fn(),
-  createAppeal: vi.fn(),
-  getPendingAppeals: vi.fn(),
-  reviewAppeal: vi.fn(),
   createTemporaryBan: vi.fn(),
   getUserBanStatus: vi.fn(),
   autoLiftExpiredBans: vi.fn(),
+});
+
+const createMockAppealService = () => ({
+  createAppeal: vi.fn(),
+  getPendingAppeals: vi.fn(),
+  listAppeals: vi.fn(),
+  listAppealsByAppellant: vi.fn(),
+  reviewAppeal: vi.fn(),
+  assignAppealToModerator: vi.fn(),
+  unassignAppeal: vi.fn(),
 });
 
 describe('ModerationController', () => {
@@ -44,16 +51,22 @@ describe('ModerationController', () => {
   let mockScreeningService: ReturnType<typeof createMockScreeningService>;
   let mockAiReviewService: ReturnType<typeof createMockAiReviewService>;
   let mockActionsService: ReturnType<typeof createMockActionsService>;
+  let mockAppealService: ReturnType<typeof createMockAppealService>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockScreeningService = createMockScreeningService();
     mockAiReviewService = createMockAiReviewService();
     mockActionsService = createMockActionsService();
+    mockAppealService = createMockAppealService();
     controller = new ModerationController(
       mockScreeningService as any,
       mockAiReviewService as any,
       mockActionsService as any,
+      undefined as any, // queueService
+      undefined as any, // safetyReportService
+      undefined as any, // reportService
+      mockAppealService as any,
     );
   });
 
@@ -86,6 +99,8 @@ describe('ModerationController', () => {
         content: 'valid content',
       });
 
+      // camelCase key (current convention) plus deprecated snake_case alias.
+      expect(result.screeningResult).toEqual(screeningResult);
       expect(result.screening_result).toEqual(screeningResult);
       expect(result.recommendations).toEqual(['No action needed']);
     });
@@ -309,17 +324,17 @@ describe('ModerationController', () => {
 
   describe('rejectAction', () => {
     it('should throw BadRequestException if reason is empty', async () => {
-      await expect(controller.rejectAction('action-1', { reason: '  ' })).rejects.toThrow(
+      await expect(controller.rejectAction('action-1', mockUser, { reason: '  ' })).rejects.toThrow(
         'reason is required',
       );
     });
 
-    it('should reject action', async () => {
+    it('should reject action and forward the moderator id', async () => {
       mockActionsService.rejectAction.mockResolvedValue(undefined);
 
-      await controller.rejectAction('action-1', { reason: 'False positive' });
+      await controller.rejectAction('action-1', mockUser, { reason: 'False positive' });
 
-      expect(mockActionsService.rejectAction).toHaveBeenCalledWith('action-1', {
+      expect(mockActionsService.rejectAction).toHaveBeenCalledWith('action-1', 'moderator-1', {
         reason: 'False positive',
       });
     });
@@ -378,14 +393,14 @@ describe('ModerationController', () => {
 
     it('should create appeal', async () => {
       const appealResponse = { id: 'appeal-1', status: 'PENDING' };
-      mockActionsService.createAppeal.mockResolvedValue(appealResponse);
+      mockAppealService.createAppeal.mockResolvedValue(appealResponse);
 
       const result = await controller.createAppeal('action-1', mockUser, {
         reason: 'False positive',
       });
 
       expect(result).toEqual(appealResponse);
-      expect(mockActionsService.createAppeal).toHaveBeenCalledWith('action-1', 'moderator-1', {
+      expect(mockAppealService.createAppeal).toHaveBeenCalledWith('action-1', 'moderator-1', {
         reason: 'False positive',
       });
     });
@@ -394,12 +409,29 @@ describe('ModerationController', () => {
   describe('getPendingAppeals', () => {
     it('should return pending appeals', async () => {
       const appealsResponse = { appeals: [], hasMore: false };
-      mockActionsService.getPendingAppeals.mockResolvedValue(appealsResponse);
+      mockAppealService.getPendingAppeals.mockResolvedValue(appealsResponse);
 
       const result = await controller.getPendingAppeals(10, 'cursor');
 
       expect(result).toEqual(appealsResponse);
-      expect(mockActionsService.getPendingAppeals).toHaveBeenCalledWith(10, 'cursor');
+      expect(mockAppealService.getPendingAppeals).toHaveBeenCalledWith(10, 'cursor');
+    });
+  });
+
+  describe('listMyAppeals', () => {
+    it("should list only the authenticated user's appeals", async () => {
+      const appealsResponse = { appeals: [], nextCursor: null, totalCount: 0 };
+      mockAppealService.listAppealsByAppellant.mockResolvedValue(appealsResponse);
+
+      const result = await controller.listMyAppeals(mockUser, 'pending', 10, 'cursor');
+
+      expect(result).toEqual(appealsResponse);
+      expect(mockAppealService.listAppealsByAppellant).toHaveBeenCalledWith(
+        'moderator-1',
+        'PENDING',
+        10,
+        'cursor',
+      );
     });
   });
 
@@ -421,7 +453,7 @@ describe('ModerationController', () => {
 
     it('should review appeal', async () => {
       const appealResponse = { id: 'appeal-1', decision: 'upheld' };
-      mockActionsService.reviewAppeal.mockResolvedValue(appealResponse);
+      mockAppealService.reviewAppeal.mockResolvedValue(appealResponse);
 
       const result = await controller.reviewAppeal('appeal-1', mockUser, {
         decision: 'upheld',
@@ -429,10 +461,35 @@ describe('ModerationController', () => {
       });
 
       expect(result).toEqual(appealResponse);
-      expect(mockActionsService.reviewAppeal).toHaveBeenCalledWith('appeal-1', 'moderator-1', {
+      expect(mockAppealService.reviewAppeal).toHaveBeenCalledWith('appeal-1', 'moderator-1', {
         decision: 'upheld',
         reasoning: 'Appeal is valid',
       });
+    });
+  });
+
+  describe('assignAppeal / unassignAppeal', () => {
+    it('should claim an appeal for the current moderator', async () => {
+      const appealResponse = { id: 'appeal-1', status: 'under_review' };
+      mockAppealService.assignAppealToModerator.mockResolvedValue(appealResponse);
+
+      const result = await controller.assignAppeal('appeal-1', mockUser);
+
+      expect(result).toEqual(appealResponse);
+      expect(mockAppealService.assignAppealToModerator).toHaveBeenCalledWith(
+        'appeal-1',
+        'moderator-1',
+      );
+    });
+
+    it('should release a claimed appeal back to the queue', async () => {
+      const appealResponse = { id: 'appeal-1', status: 'pending' };
+      mockAppealService.unassignAppeal.mockResolvedValue(appealResponse);
+
+      const result = await controller.unassignAppeal('appeal-1');
+
+      expect(result).toEqual(appealResponse);
+      expect(mockAppealService.unassignAppeal).toHaveBeenCalledWith('appeal-1');
     });
   });
 

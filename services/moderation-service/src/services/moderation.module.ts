@@ -16,6 +16,7 @@ import { EvidencePreservationService } from './evidence-preservation.service.js'
 import { NCMECReportingService } from './ncmec-reporting.service.js';
 import { ComplianceReportService } from './compliance-report.service.js';
 import { ReportService } from './report.service.js';
+import { NotificationServiceClient } from '../clients/notification-service.client.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { QueueModule } from '../queue/queue.module.js';
 
@@ -33,6 +34,7 @@ import { QueueModule } from '../queue/queue.module.js';
     NCMECReportingService,
     ComplianceReportService,
     ReportService,
+    NotificationServiceClient,
   ],
   exports: [
     ContentScreeningService,

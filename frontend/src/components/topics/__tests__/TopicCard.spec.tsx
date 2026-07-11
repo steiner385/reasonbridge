@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import TopicCard from '../TopicCard';
+import { ToastProvider } from '../../../contexts/ToastContext';
 import type { Topic } from '../../../types/topic';
 
 const createMockTopic = (overrides: Partial<Topic> = {}): Topic => ({
@@ -33,7 +34,11 @@ const createMockTopic = (overrides: Partial<Topic> = {}): Topic => ({
 
 // Wrapper component to provide router context
 const renderWithRouter = (ui: React.ReactElement) => {
-  return render(<MemoryRouter>{ui}</MemoryRouter>);
+  return render(
+    <MemoryRouter>
+      <ToastProvider>{ui}</ToastProvider>
+    </MemoryRouter>,
+  );
 };
 
 describe('TopicCard', () => {
@@ -82,21 +87,21 @@ describe('TopicCard', () => {
       const topic = createMockTopic({ status: 'ACTIVE' });
       renderWithRouter(<TopicCard topic={topic} />);
       const statusBadge = screen.getByText('ACTIVE');
-      expect(statusBadge).toHaveClass('bg-green-100', 'text-green-700');
+      expect(statusBadge).toHaveClass('bg-green-100', 'text-green-800');
     });
 
     it('should show SEEDING status with yellow styling', () => {
       const topic = createMockTopic({ status: 'SEEDING' });
       renderWithRouter(<TopicCard topic={topic} />);
       const statusBadge = screen.getByText('SEEDING');
-      expect(statusBadge).toHaveClass('bg-yellow-100', 'text-yellow-700');
+      expect(statusBadge).toHaveClass('bg-yellow-100', 'text-yellow-800');
     });
 
     it('should show ARCHIVED status with gray styling', () => {
       const topic = createMockTopic({ status: 'ARCHIVED' });
       renderWithRouter(<TopicCard topic={topic} />);
       const statusBadge = screen.getByText('ARCHIVED');
-      expect(statusBadge).toHaveClass('bg-gray-100', 'text-gray-700');
+      expect(statusBadge).toHaveClass('bg-gray-100', 'text-gray-800');
     });
   });
 

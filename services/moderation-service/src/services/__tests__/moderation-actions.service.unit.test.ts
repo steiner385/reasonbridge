@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { ModerationActionsService } from '../moderation-actions.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import type { QueueService } from '../../queue/queue.service.js';
@@ -54,8 +54,10 @@ describe('ModerationActionsService', () => {
         count: vi.fn(),
         findMany: vi.fn(),
         findUnique: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        updateMany: vi.fn(),
       },
       appeal: {
         findMany: vi.fn(),
@@ -65,6 +67,9 @@ describe('ModerationActionsService', () => {
       user: {
         update: vi.fn(),
       },
+      // autoLiftExpiredBans wraps per-row updates in a transaction; the mock
+      // simply awaits whatever array of update promises it is handed.
+      $transaction: vi.fn((ops: unknown) => Promise.resolve(ops)),
     } as unknown as PrismaService;
 
     queueService = {
@@ -312,7 +317,10 @@ describe('ModerationActionsService', () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(
         mockModerationAction as any,
       );
-      vi.mocked(prismaService.moderationAction.update).mockResolvedValue(mockApprovedAction as any);
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 1 } as any);
+      vi.mocked(prismaService.moderationAction.findUniqueOrThrow).mockResolvedValue(
+        mockApprovedAction as any,
+      );
 
       const result = await service.approveAction('action-1', 'moderator-1');
 
@@ -330,7 +338,10 @@ describe('ModerationActionsService', () => {
         ...mockApprovedAction,
         reasoning: 'Updated reasoning for the action',
       };
-      vi.mocked(prismaService.moderationAction.update).mockResolvedValue(updatedAction as any);
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 1 } as any);
+      vi.mocked(prismaService.moderationAction.findUniqueOrThrow).mockResolvedValue(
+        updatedAction as any,
+      );
 
       const request: ApproveActionRequest = {
         modifiedReasoning: 'Updated reasoning for the action',
@@ -383,26 +394,45 @@ describe('ModerationActionsService', () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(
         mockModerationAction as any,
       );
-      vi.mocked(prismaService.moderationAction.update).mockResolvedValue({
-        ...mockModerationAction,
-        status: 'REJECTED',
-      } as any);
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 1 } as any);
 
       const request: RejectActionRequest = {
-        rejectReasoning: 'Insufficient evidence for this action',
+        reason: 'Insufficient evidence for this action',
       };
 
-      await expect(service.rejectAction('action-1', request)).resolves.toBeUndefined();
+      await expect(
+        service.rejectAction('action-1', 'moderator-1', request),
+      ).resolves.toBeUndefined();
+
+      // The rejecting moderator is recorded as a queryable audit field, not just
+      // appended to the free-text reasoning (Issue #1320).
+      expect(vi.mocked(prismaService.moderationAction.updateMany)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'action-1', status: 'PENDING' },
+          data: expect.objectContaining({ rejectedById: 'moderator-1', status: 'REVERSED' }),
+        }),
+      );
+    });
+
+    it('should throw ConflictException when the action was already resolved', async () => {
+      vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(
+        mockModerationAction as any,
+      );
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 0 } as any);
+
+      await expect(
+        service.rejectAction('action-1', 'moderator-1', { reason: 'race' }),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw NotFoundException for non-existent action', async () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(null);
 
       const request: RejectActionRequest = {
-        rejectReasoning: 'Invalid action',
+        reason: 'Invalid action',
       };
 
-      await expect(service.rejectAction('non-existent', request)).rejects.toThrow(
+      await expect(service.rejectAction('non-existent', 'moderator-1', request)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -415,10 +445,10 @@ describe('ModerationActionsService', () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(activeAction as any);
 
       const request: RejectActionRequest = {
-        rejectReasoning: 'Cannot reject active action',
+        reason: 'Cannot reject active action',
       };
 
-      await expect(service.rejectAction('action-1', request)).rejects.toThrow(
+      await expect(service.rejectAction('action-1', 'moderator-1', request)).rejects.toThrow(
         new BadRequestException(
           'Action must be in PENDING status to reject, current status: ACTIVE',
         ),
@@ -501,6 +531,55 @@ describe('ModerationActionsService', () => {
       const result = await service.sendCoolingOffPrompt([], 'topic-1', 'Message');
 
       expect(result.sent).toBe(0);
+    });
+  });
+
+  describe('autoLiftExpiredBans (#1295)', () => {
+    it("appends each ban its OWN reasoning, not the first ban's", async () => {
+      const expiredBans = [
+        { id: 'ban-1', reasoning: 'Ban one reason' },
+        { id: 'ban-2', reasoning: 'Ban two reason' },
+        { id: 'ban-3', reasoning: 'Ban three reason' },
+      ];
+      vi.mocked(prismaService.moderationAction.findMany).mockResolvedValue(expiredBans as never);
+      vi.mocked(prismaService.moderationAction.update).mockImplementation(
+        (args) => Promise.resolve(args) as never,
+      );
+
+      const result = await service.autoLiftExpiredBans();
+
+      expect(result).toEqual({ lifted: 3 });
+
+      // Regression guard: the old updateMany applied the FIRST ban's reasoning
+      // to every row. Each row must now be updated individually with its own
+      // reasoning appended.
+      expect(prismaService.moderationAction.update).toHaveBeenCalledTimes(3);
+      expect(prismaService.moderationAction.updateMany).not.toHaveBeenCalled();
+
+      const calls = vi.mocked(prismaService.moderationAction.update).mock.calls;
+      for (const ban of expiredBans) {
+        const call = calls.find((c) => (c[0] as { where: { id: string } }).where.id === ban.id);
+        expect(call, `expected an update for ${ban.id}`).toBeDefined();
+        const data = (call![0] as { data: { status: string; reasoning: string } }).data;
+        expect(data.status).toBe('REVERSED');
+        expect(data.reasoning).toContain(ban.reasoning);
+        expect(data.reasoning).toContain('[AUTOMATICALLY LIFTED');
+        // Must NOT be contaminated with a different ban's reasoning.
+        for (const other of expiredBans) {
+          if (other.id !== ban.id) {
+            expect(data.reasoning).not.toContain(other.reasoning);
+          }
+        }
+      }
+    });
+
+    it('returns { lifted: 0 } and does nothing when no bans are expired', async () => {
+      vi.mocked(prismaService.moderationAction.findMany).mockResolvedValue([] as never);
+
+      const result = await service.autoLiftExpiredBans();
+
+      expect(result).toEqual({ lifted: 0 });
+      expect(prismaService.moderationAction.update).not.toHaveBeenCalled();
     });
   });
 });

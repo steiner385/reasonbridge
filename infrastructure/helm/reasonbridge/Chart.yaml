@@ -1,0 +1,14 @@
+apiVersion: v2
+name: reasonbridge
+description: |
+  ReasonBridge platform Helm chart. Deploys the 9 backend microservices and the
+  frontend to the reason-bridge EKS cluster, and runs Prisma migrations as a gated
+  pre-upgrade Job so the database schema is always applied before service rollout.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - reasonbridge
+  - microservices
+maintainers:
+  - name: Tony Stein

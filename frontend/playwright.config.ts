@@ -24,8 +24,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Skip @ai tests in CI and E2E Docker (they require AWS Bedrock credentials) */
   grep: process.env.CI || process.env.E2E_DOCKER ? /^(?!.*@ai)/ : undefined,
-  /* Retry disabled to prevent crash from accumulated timeout failures */
-  retries: 0,
+  /* Retry once in CI so a single timing miss under load doesn't fail the whole
+   * build outright (see #1348). Local runs keep retries off for fast feedback. */
+  retries: process.env.CI ? 1 : 0,
   /* Limit workers to prevent OOM - 2 in CI, 4 locally (default would use all CPUs) */
   workers: process.env.CI ? 2 : 4,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters

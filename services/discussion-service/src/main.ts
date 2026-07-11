@@ -3,26 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
+import { PinoLoggerService, SERVICE_PORTS, setupGracefulShutdown, createValidationPipe } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { TracingInterceptor } from './observability/index.js';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     // Only log errors in test mode to prevent memory leaks from verbose logging
-    logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
+    logger: new PinoLoggerService({ name: 'discussion-service' }),
   });
 
-  // Enable validation with class-transformer
+  // Enable validation with class-transformer using the shared platform policy
+  // (whitelist + forbidNonWhitelisted). enableImplicitConversion is preserved so
+  // numeric query params continue to coerce from strings to numbers.
   app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: false,
+    createValidationPipe({
       transformOptions: {
         enableImplicitConversion: true,
       },

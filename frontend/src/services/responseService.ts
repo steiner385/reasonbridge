@@ -120,12 +120,33 @@ class ResponseService {
   }
 
   /**
-   * Get all responses for a discussion by topic ID
+   * Get responses for a discussion by topic ID, with optional pagination.
+   *
    * Note: The parameter is named discussionId but actually accepts a topicId
    * for backwards compatibility with existing code.
+   *
+   * Issue #1298: the backend defaults to a limit of 100 ordered oldest-first,
+   * which silently dropped the newest activity in busy discussions. Callers now
+   * pass an explicit limit (up to the backend max of 500) so pagination is
+   * honoured end-to-end instead of being clamped invisibly.
    */
-  async getDiscussionResponses(discussionId: string): Promise<ResponseDetail[]> {
-    const response = await fetch(`${API_BASE_URL}/topics/${discussionId}/responses`, {
+  async getDiscussionResponses(
+    discussionId: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<ResponseDetail[]> {
+    const params = new URLSearchParams();
+    if (options.limit !== undefined) {
+      params.set('limit', String(options.limit));
+    }
+    if (options.offset !== undefined) {
+      params.set('offset', String(options.offset));
+    }
+    const queryString = params.toString();
+    const url = `${API_BASE_URL}/topics/${discussionId}/responses${
+      queryString ? `?${queryString}` : ''
+    }`;
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: this.getAuthHeaders(),
     });

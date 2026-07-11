@@ -15,5 +15,8 @@ export * from './events/index.js';
 export * from './validation/index.js';
 export * from './config/index.js';
 export * from './observability/index.js';
+export * from './logging/index.js';
 export * from './auth/index.js';
 export * from './clients/index.js';
+export * from './pagination/index.js';
+export * from './http/index.js';

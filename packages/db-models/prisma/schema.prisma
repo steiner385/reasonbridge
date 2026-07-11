@@ -80,6 +80,7 @@ model User {
   createdPropositions           Proposition[]
   appeals                       Appeal[]
   moderationApprovals           ModerationAction[]        @relation("ModeratorApproval")
+  moderationRejections          ModerationAction[]        @relation("ModeratorRejection")
   appealReviews                 Appeal[]                  @relation("AppealReviewer")
   topicInterests                TopicInterest[]
   // Feature 009: Discussion Participation
@@ -137,6 +138,9 @@ model User {
   @@index([isMinor])
   @@index([parentConsentStatus])
   @@index([emailHash])
+  /// Speeds up moderator/admin enumeration (e.g. SLA-breach notification sweep),
+  /// which filters role IN ('MODERATOR','ADMIN') AND accountStatus = 'ACTIVE'.
+  @@index([role, accountStatus])
   @@map("users")
 }
 
@@ -910,6 +914,9 @@ model Response {
   @@index([authorId])
   @@index([parentId])
   @@index([topicId, createdAt(sort: Desc)])
+  // Composite index supports the per-author EXISTS check used to maintain
+  // participantCount without aggregating every response in the topic.
+  @@index([topicId, authorId])
   @@index([status])
   @@map("responses")
 }
@@ -1237,6 +1244,8 @@ model ModerationAction {
   aiConfidence  Decimal?             @map("ai_confidence") @db.Decimal(3, 2)
   approvedById  String?              @map("approved_by_id") @db.Uuid
   approvedAt    DateTime?            @map("approved_at")
+  rejectedById  String?              @map("rejected_by_id") @db.Uuid
+  rejectedAt    DateTime?            @map("rejected_at")
   status        ModerationStatus     @default(PENDING)
   createdAt     DateTime             @default(now()) @map("created_at")
   executedAt    DateTime?            @map("executed_at")
@@ -1249,6 +1258,7 @@ model ModerationAction {
 
   // Relations
   approvedBy User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
+  rejectedBy User?    @relation("ModeratorRejection", fields: [rejectedById], references: [id])
   appeals    Appeal[]
 
   @@index([targetType, targetId])
@@ -1630,7 +1640,9 @@ model DataDeletionRequest {
   status       DeletionStatus @default(PENDING)
   deletionLog  Json?          @map("deletion_log")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Retained for COPPA/GDPR legal compliance: use Restrict (not Cascade) so a
+  // user hard-delete cannot silently destroy the required deletion-request trail.
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([status, scheduledFor])
   @@map("data_deletion_requests")
@@ -1693,7 +1705,11 @@ model ComplianceAuditLog {
   timestamp DateTime @default(now())
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Retained for COPPA/GDPR legal compliance: use Restrict (not Cascade) so the
+  // legally required audit trail survives a user hard-delete. IP/user-agent PII
+  // inside `metadata` is stripped separately after the retention window (see
+  // ComplianceAuditService.stripExpiredContactMetadata).
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([userId])
   @@index([action, timestamp])

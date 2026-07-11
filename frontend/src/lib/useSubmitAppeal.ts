@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import type { CreateAppealRequest, CreateAppealResponse } from '../types/moderation';
+import type { Appeal, CreateAppealRequest, CreateAppealResponse } from '../types/moderation';
 import { apiClient } from './api';
 
 export interface UseSubmitAppealState {
@@ -43,12 +43,20 @@ export function useSubmitAppeal(): UseSubmitAppealResult {
     setAppealId(null);
 
     try {
-      const response = await apiClient.post<CreateAppealResponse>('/moderation/appeals', request);
+      // The create-appeal endpoint is POST /moderation/actions/:actionId/appeal
+      // and returns the created appeal directly (not a { appeal, message }
+      // envelope). The previous POST to /moderation/appeals hit a route that
+      // does not accept POST, so appeal submission could never succeed
+      // (Issue #1396).
+      const appeal = await apiClient.post<Appeal>(
+        `/moderation/actions/${request.moderationActionId}/appeal`,
+        { reason: request.reason },
+      );
 
       setIsSuccess(true);
-      setAppealId(response.appeal.id);
+      setAppealId(appeal.id);
 
-      return response;
+      return { appeal, message: 'Appeal submitted successfully' };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit appeal';
       setIsError(true);

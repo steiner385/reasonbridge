@@ -24,6 +24,7 @@ import { validateCitationUrl } from '../utils/ssrf-validator.js';
 import { RESPONSE_CONSTRAINTS } from '../constants/index.js';
 import { ResponseThreadingService } from './response-threading.service.js';
 import type { ThreadedResponse } from './response-threading.service.js';
+import { DiscussionGateway } from '../gateways/discussion.gateway.js';
 
 // Re-export ThreadedResponse for consumers
 export type { ThreadedResponse } from './response-threading.service.js';
@@ -39,6 +40,7 @@ export class ResponsesService {
     @Inject(ResponseThreadingService)
     private readonly threadingService: ResponseThreadingService,
     @Optional() private readonly moderationClient?: ModerationClientService,
+    @Optional() @Inject(DiscussionGateway) private readonly discussionGateway?: DiscussionGateway,
   ) {}
 
   /**
@@ -193,56 +195,69 @@ export class ResponsesService {
     // Set status based on author type: minors get PENDING_REVIEW, adults get VISIBLE
     const responseStatus = author?.isMinor ? 'PENDING_REVIEW' : 'VISIBLE';
 
-    // Create the response
-    const response = await this.prisma.response.create({
-      data: {
-        topicId,
-        authorId,
-        parentId: createResponseDto.parentId ?? null,
-        content: createResponseDto.content.trim(),
-        citedSources: citedSourcesJson,
-        containsOpinion: createResponseDto.containsOpinion ?? false,
-        containsFactualClaims: createResponseDto.containsFactualClaims ?? false,
-        status: responseStatus,
-        revisionCount: 0,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            displayName: true,
-            avatarUrl: true,
-            email: true,
-            verificationLevel: true,
+    // Create the response, its proposition links, and the topic stat updates
+    // atomically so responseCount and participantCount cannot drift if an
+    // intermediate step fails.
+    const response = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.response.create({
+        data: {
+          topicId,
+          authorId,
+          parentId: createResponseDto.parentId ?? null,
+          content: createResponseDto.content.trim(),
+          citedSources: citedSourcesJson,
+          containsOpinion: createResponseDto.containsOpinion ?? false,
+          containsFactualClaims: createResponseDto.containsFactualClaims ?? false,
+          status: responseStatus,
+          revisionCount: 0,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              displayName: true,
+              avatarUrl: true,
+              email: true,
+              verificationLevel: true,
+            },
           },
         },
-      },
-    });
-
-    // Handle proposition associations if provided
-    if (createResponseDto.propositionIds && createResponseDto.propositionIds.length > 0) {
-      // Create ResponseProposition junction records
-      await this.prisma.responseProposition.createMany({
-        data: createResponseDto.propositionIds.map((propositionId) => ({
-          responseId: response.id,
-          propositionId,
-        })),
-        skipDuplicates: true,
       });
-    }
 
-    // Count unique participants and update topic stats
-    const uniqueParticipants = await this.prisma.response.groupBy({
-      by: ['authorId'],
-      where: { topicId },
-    });
+      // Handle proposition associations if provided
+      if (createResponseDto.propositionIds && createResponseDto.propositionIds.length > 0) {
+        // Create ResponseProposition junction records
+        await tx.responseProposition.createMany({
+          data: createResponseDto.propositionIds.map((propositionId) => ({
+            responseId: created.id,
+            propositionId,
+          })),
+          skipDuplicates: true,
+        });
+      }
 
-    await this.prisma.discussionTopic.update({
-      where: { id: topicId },
-      data: {
-        responseCount: { increment: 1 },
-        participantCount: uniqueParticipants.length,
-      },
+      // Only first-time authors increment participantCount. This EXISTS-style
+      // lookup (backed by the composite (topicId, authorId) index) avoids
+      // re-aggregating every response in the topic on each write, which grew
+      // O(responses) with topic size under the previous groupBy approach.
+      const priorResponse = await tx.response.findFirst({
+        where: {
+          topicId,
+          authorId,
+          id: { not: created.id },
+        },
+        select: { id: true },
+      });
+
+      await tx.discussionTopic.update({
+        where: { id: topicId },
+        data: {
+          responseCount: { increment: 1 },
+          ...(priorResponse ? {} : { participantCount: { increment: 1 } }),
+        },
+      });
+
+      return created;
     });
 
     // Check and trigger common ground analysis if needed
@@ -292,6 +307,18 @@ export class ResponsesService {
         },
       },
     });
+
+    // Broadcast a realtime new-response event to clients in the topic room so
+    // the "N new responses" banner and sidebar counters update live (#1359).
+    if (this.discussionGateway && completeResponse) {
+      this.discussionGateway.emitNewResponse({
+        topicId: completeResponse.topicId,
+        responseId: completeResponse.id,
+        authorId: completeResponse.authorId,
+        authorName: completeResponse.author?.displayName || 'Anonymous',
+        parentId: completeResponse.parentId ?? undefined,
+      });
+    }
 
     // Map to ResponseDto
     return this.mapToResponseDto(completeResponse!);
@@ -422,6 +449,24 @@ export class ResponsesService {
         },
       },
     });
+
+    // Re-screen edited content for child safety (grooming detection + minor
+    // routing), mirroring createResponse. Without this, content that already
+    // passed screening — or is pending review — could be edited into unsafe or
+    // policy-violating content that the moderation pipeline never sees.
+    // Fire-and-forget, matching the create path.
+    if (updateResponseDto.content !== undefined) {
+      this.routeChildContentToModeration(
+        responseId,
+        existingResponse.topicId,
+        authorId,
+        updateData.content,
+      ).catch((error) => {
+        this.logger.error('Failed to route edited child content to moderation', error, {
+          metadata: { responseId, topicId: existingResponse.topicId, authorId },
+        });
+      });
+    }
 
     // Handle proposition associations if provided
     if (updateResponseDto.propositionIds !== undefined) {

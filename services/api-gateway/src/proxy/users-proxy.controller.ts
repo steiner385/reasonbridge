@@ -17,10 +17,12 @@ import {
   Logger,
   Inject,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { isValidUUID } from '@reason-bridge/common';
 import { ProxyService } from './proxy.service.js';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersProxyController {
   private readonly logger = new Logger(UsersProxyController.name);
@@ -147,6 +149,7 @@ export class UsersProxyController {
   async getUserContributions(
     @Param('id') id: string,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     if (!isValidUUID(id)) {
@@ -165,7 +168,12 @@ export class UsersProxyController {
     const response = await this.proxyService.proxyToUserService({
       method: 'GET',
       path: `/users/${id}/contributions${queryString}`,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      // Forward the verified viewer id so user-service can enforce the
+      // activityHistory privacy setting (issue #1303).
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);
@@ -178,6 +186,7 @@ export class UsersProxyController {
   async getUserContributionStats(
     @Param('id') id: string,
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
     @Res() res: FastifyReply,
   ) {
     if (!isValidUUID(id)) {
@@ -192,7 +201,12 @@ export class UsersProxyController {
     const response = await this.proxyService.proxyToUserService({
       method: 'GET',
       path: `/users/${id}/contributions/stats`,
-      headers: authHeader ? { Authorization: authHeader } : undefined,
+      // Forward the verified viewer id so user-service can enforce the
+      // activityHistory privacy setting (issue #1303).
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
     });
 
     res.status(response.status).send(response.data);

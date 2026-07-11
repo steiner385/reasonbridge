@@ -11,8 +11,13 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     // Include unit tests only - pact tests run via root vitest.contract.config.ts
-    include: ['src/**/*.test.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**'],
+    include: ['src/**/*.{test,spec}.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/*.integration.test.ts', // Run in integration test phase
+      '**/*.integration.spec.ts', // Run in integration test phase
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

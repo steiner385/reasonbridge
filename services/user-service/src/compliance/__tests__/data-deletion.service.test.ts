@@ -34,10 +34,26 @@ describe('DataDeletionService', () => {
       updateMany: ReturnType<typeof vi.fn>;
       deleteMany: ReturnType<typeof vi.fn>;
     };
+    videoUpload: {
+      findMany: ReturnType<typeof vi.fn>;
+      deleteMany: ReturnType<typeof vi.fn>;
+    };
+    verificationRecord: {
+      deleteMany: ReturnType<typeof vi.fn>;
+    };
+    verificationToken: {
+      deleteMany: ReturnType<typeof vi.fn>;
+    };
+    activityEvent: {
+      deleteMany: ReturnType<typeof vi.fn>;
+    };
     $transaction: ReturnType<typeof vi.fn>;
   };
   let mockAuditService: {
     logAction: ReturnType<typeof vi.fn>;
+  };
+  let mockS3Service: {
+    deleteObject: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -64,6 +80,19 @@ describe('DataDeletionService', () => {
         updateMany: vi.fn(),
         deleteMany: vi.fn(),
       },
+      videoUpload: {
+        findMany: vi.fn().mockResolvedValue([]),
+        deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+      },
+      verificationRecord: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+      },
+      verificationToken: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+      },
+      activityEvent: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+      },
       $transaction: vi.fn((callback) => callback(mockPrisma)),
     };
 
@@ -71,9 +100,14 @@ describe('DataDeletionService', () => {
       logAction: vi.fn().mockResolvedValue({}),
     };
 
+    mockS3Service = {
+      deleteObject: vi.fn().mockResolvedValue(undefined),
+    };
+
     service = new DataDeletionService(
       mockPrisma as unknown as PrismaService,
       mockAuditService as unknown as ComplianceAuditService,
+      mockS3Service as unknown as import('../../services/s3.service.js').S3Service,
     );
   });
 
@@ -250,6 +284,73 @@ describe('DataDeletionService', () => {
 
       expect(result.success).toBe(true);
       expect(result.deletionLog).toBeDefined();
+    });
+
+    it('should null all PII columns and delete verification + activity data', async () => {
+      const requestId = 'request-123';
+      const userId = 'user-123';
+
+      mockPrisma.dataDeletionRequest.findUnique.mockResolvedValue({
+        id: requestId,
+        userId,
+        requestedBy: 'PARENT',
+        scheduledFor: new Date(),
+        status: DeletionStatus.PENDING,
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: userId,
+        email: 'child@example.com',
+        displayName: 'Test Child',
+      });
+      mockPrisma.response.count.mockResolvedValue(0);
+      mockPrisma.discussionTopic.findMany.mockResolvedValue([]);
+      mockPrisma.$transaction.mockImplementation(async (callback) =>
+        typeof callback === 'function' ? callback(mockPrisma) : Promise.all(callback),
+      );
+      mockPrisma.dataDeletionRequest.update.mockResolvedValue({});
+      mockPrisma.parentalConsent.delete.mockResolvedValue({});
+      mockPrisma.user.update.mockResolvedValue({});
+
+      // Verification videos exist in S3.
+      mockPrisma.videoUpload.findMany.mockResolvedValue([
+        { s3Key: 'videos/user-123/a.webm' },
+        { s3Key: 'videos/user-123/b.webm' },
+      ]);
+      mockPrisma.videoUpload.deleteMany.mockResolvedValue({ count: 2 });
+      mockPrisma.verificationRecord.deleteMany.mockResolvedValue({ count: 3 });
+      mockPrisma.verificationToken.deleteMany.mockResolvedValue({ count: 1 });
+      mockPrisma.activityEvent.deleteMany.mockResolvedValue({ count: 7 });
+
+      const result = await service.executeDeletion(requestId);
+
+      // PII columns beyond the original set are now scrubbed.
+      const userUpdateData = mockPrisma.user.update.mock.calls[0]![0].data;
+      expect(userUpdateData).toMatchObject({
+        emailHash: null,
+        parentPhone: null,
+        bio: null,
+        avatarUrl: null,
+        avatarS3Key: null,
+        accountStatus: 'DELETED',
+      });
+
+      // Related records are deleted by userId.
+      expect(mockPrisma.videoUpload.deleteMany).toHaveBeenCalledWith({ where: { userId } });
+      expect(mockPrisma.verificationRecord.deleteMany).toHaveBeenCalledWith({ where: { userId } });
+      expect(mockPrisma.verificationToken.deleteMany).toHaveBeenCalledWith({ where: { userId } });
+      expect(mockPrisma.activityEvent.deleteMany).toHaveBeenCalledWith({ where: { userId } });
+
+      // S3 verification videos are deleted after the DB commit.
+      expect(mockS3Service.deleteObject).toHaveBeenCalledTimes(2);
+      expect(mockS3Service.deleteObject).toHaveBeenCalledWith('videos/user-123/a.webm');
+
+      expect(result.deletionLog).toMatchObject({
+        verificationRecordsDeleted: 3,
+        videoUploadsDeleted: 2,
+        videoObjectsDeleted: 2,
+        verificationTokensDeleted: 1,
+        activityEventsDeleted: 7,
+      });
     });
 
     it('should mark request as FAILED if deletion fails', async () => {

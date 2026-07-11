@@ -4,6 +4,7 @@
  */
 
 import { Controller, Get, Post, Delete, Param, Res, Headers, Body, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -19,9 +20,37 @@ import { ProxyService } from './proxy.service.js';
  * - POST /responses/:id/vote - Vote on a response
  * - DELETE /responses/:id/vote - Remove vote from a response
  */
+@ApiTags('responses')
 @Controller('responses')
 export class ResponsesProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
+
+  /**
+   * POST /responses - Create a top-level response to a discussion
+   *
+   * The frontend (responseService.createResponse) posts here with `discussionId`
+   * in the body. Proxies to discussion-service: POST /topics/responses, which
+   * reads discussionId from the body.
+   */
+  @Post()
+  async createResponse(
+    @Body() body: Record<string, unknown>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'POST',
+      path: '/topics/responses',
+      body,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
 
   /**
    * POST /responses/:responseId/replies - Create a threaded reply to a response

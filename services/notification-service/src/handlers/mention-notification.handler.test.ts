@@ -17,6 +17,8 @@ const createMockPrismaService = () => ({
   },
   notification: {
     create: vi.fn().mockResolvedValue({ id: 'notification-123' }),
+    createMany: vi.fn().mockResolvedValue({ count: 0 }),
+    findMany: vi.fn().mockResolvedValue([]),
   },
 });
 
@@ -209,6 +211,16 @@ describe('MentionNotificationHandler', () => {
           content: '@[Alice](user-1) and @[Bob](user-2), thoughts?',
         }),
       );
+
+      // Notifications are batch-inserted with a single createMany, not N creates.
+      expect(mockPrisma.notification.createMany).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.notification.create).not.toHaveBeenCalled();
+      expect(mockPrisma.notification.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({ userId: 'user-1', type: 'mention' }),
+          expect.objectContaining({ userId: 'user-2', type: 'mention' }),
+        ]),
+      });
 
       expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
       expect(mockGateway.emitToUser).toHaveBeenCalledWith(

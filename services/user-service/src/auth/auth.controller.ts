@@ -12,8 +12,11 @@ import {
   Inject,
   forwardRef,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { Throttle } from '@nestjs/throttler';
+import { DemoBlocklistGuard } from './demo-blocklist.guard.js';
 import { UsersService } from '../users/users.service.js';
 import { THROTTLE_LIMITS } from '../constants/index.js';
 import { LoginDto, LoginResponseDto } from './dto/login.dto.js';
@@ -152,9 +155,14 @@ export class AuthController {
   /**
    * Authenticate user and return tokens
    * Rate limited: 5 attempts per minute to prevent brute force attacks
+   *
+   * DemoBlocklistGuard rejects @reasonbridge.demo credentials in production
+   * (unless DEMO_MODE=true), so seeded demo accounts can never be used to obtain
+   * a session against a real/shared database.
    */
   @Post('login')
   @Throttle({ default: { limit: THROTTLE_LIMITS.LOGIN, ttl: THROTTLE_LIMITS.TTL_MS } })
+  @UseGuards(DemoBlocklistGuard)
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.authenticateUser(loginDto.email, loginDto.password);
@@ -191,7 +199,7 @@ export class AuthController {
   @Throttle({ default: { limit: THROTTLE_LIMITS.VERIFY_EMAIL, ttl: THROTTLE_LIMITS.TTL_MS } })
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body() dto: VerifyEmailRequestDto): Promise<VerifyEmailResponseDto> {
-    this.logger.debug(`Verifying email for: ${dto.email}`);
+    this.logger.debug(`Verifying email for: ${redactEmail(dto.email)}`);
 
     // Verify the token (throws if invalid/expired)
     const userId = await this.verificationService.verifyToken(dto.email, dto.code);
@@ -223,7 +231,7 @@ export class AuthController {
   async resendVerification(
     @Body() dto: ResendVerificationRequestDto,
   ): Promise<ResendVerificationResponseDto> {
-    this.logger.debug(`Resending verification email for: ${dto.email}`);
+    this.logger.debug(`Resending verification email for: ${redactEmail(dto.email)}`);
 
     // Find user by email
     const user = await this.prisma.user.findUnique({

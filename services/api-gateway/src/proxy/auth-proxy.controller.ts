@@ -4,6 +4,7 @@
  */
 
 import { Controller, Post, Body, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { Throttle } from '@nestjs/throttler';
 import { ProxyService } from './proxy.service.js';
@@ -24,11 +25,17 @@ const THROTTLE_LIMITS = {
   resetPassword: isTest ? 10000 : 5, // 5/min in prod
 };
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user account' })
+  @ApiResponse({ status: 201, description: 'Account created; verification email sent' })
+  @ApiResponse({ status: 400, description: 'Validation failed' })
+  @ApiResponse({ status: 409, description: 'Email already registered' })
+  @ApiResponse({ status: 429, description: 'Too many registration attempts' })
   @Throttle({ default: { limit: THROTTLE_LIMITS.register, ttl: 60000 } })
   async register(
     @Body() body: unknown,
@@ -46,6 +53,10 @@ export class AuthProxyController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Authenticate a user and return access/refresh tokens' })
+  @ApiResponse({ status: 200, description: 'Authentication succeeded; tokens returned' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 429, description: 'Too many login attempts' })
   @Throttle({ default: { limit: THROTTLE_LIMITS.login, ttl: 60000 } })
   async login(
     @Body() body: unknown,

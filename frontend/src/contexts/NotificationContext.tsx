@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { Toast } from '../components/notifications/Toast';
 import { ToastContainer } from '../components/notifications/ToastContainer';
 import { NotificationContext } from './NotificationContextFactory';
@@ -35,10 +35,15 @@ function NotificationProviderComponent({ children }: { children: React.ReactNode
     setToasts([]);
   }, []);
 
+  // Memoize the context value so notification state changes only re-render the
+  // ToastContainer, not every consumer of the notification API. See issue #1387.
+  const value = useMemo(
+    () => ({ addNotification, removeNotification, clearNotifications }),
+    [addNotification, removeNotification, clearNotifications],
+  );
+
   return (
-    <NotificationContext.Provider
-      value={{ addNotification, removeNotification, clearNotifications }}
-    >
+    <NotificationContext.Provider value={value}>
       {children}
       <ToastContainer toasts={toasts} onClose={removeNotification} />
     </NotificationContext.Provider>

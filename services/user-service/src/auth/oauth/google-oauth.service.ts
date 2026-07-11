@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { redactEmail } from '@reason-bridge/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 
@@ -96,7 +97,7 @@ export class GoogleOAuthService {
         throw new UnauthorizedException('Invalid Google ID token payload');
       }
 
-      this.logger.log(`Google OAuth successful for email: ${payload.email}`);
+      this.logger.log(`Google OAuth successful for email: ${redactEmail(payload.email)}`);
 
       return {
         email: payload.email,
@@ -153,7 +154,7 @@ export class GoogleOAuthService {
         throw new UnauthorizedException('Invalid Google ID token payload');
       }
 
-      this.logger.log(`Google ID token verified for email: ${payload.email}`);
+      this.logger.log(`Google ID token verified for email: ${redactEmail(payload.email)}`);
 
       return {
         email: payload.email,

@@ -240,31 +240,23 @@ export class RankingService {
    * If no data is available for a signal, it defaults to 0.5 (neutral).
    *
    * Uses parallel queries for votes and feedback to reduce latency by ~33%
-   * (2 sequential queries instead of 3).
+   * (2 sequential queries instead of 3). Both queries filter through the
+   * `response` relation (`response: { authorId }`) so the database performs the
+   * join, rather than fetching up to 10k response IDs into the application and
+   * shipping them back as a large SQL IN-list.
    *
    * @param userId - The user's unique identifier
    * @returns Quality score between 0 and 1
    */
   private async calculateQualityScore(userId: string): Promise<number> {
-    // Get response IDs for this user (required for subsequent queries)
-    const responses = await this.prisma.response.findMany({
-      where: { authorId: userId },
-      select: { id: true },
-      take: 10000, // Limit to prevent unbounded results while allowing accurate metrics
-    });
-
-    if (responses.length === 0) {
-      return 0.5; // Neutral default for users with no responses
-    }
-
-    const responseIds = responses.map((r) => r.id);
-
-    // Run vote and feedback queries in parallel (both depend on responseIds)
+    // Run vote and feedback aggregations in parallel, joining to the user's
+    // responses in the database. Users with no responses simply produce empty
+    // groups, which fall through to the neutral 0.5 defaults below.
     const [voteCounts, feedbackCounts] = await Promise.all([
       this.prisma.vote.groupBy({
         by: ['voteType'],
         where: {
-          responseId: { in: responseIds },
+          response: { authorId: userId },
         },
         _count: {
           id: true,
@@ -273,7 +265,7 @@ export class RankingService {
       this.prisma.feedback.groupBy({
         by: ['userHelpfulRating'],
         where: {
-          responseId: { in: responseIds },
+          response: { authorId: userId },
           userHelpfulRating: { not: null },
         },
         _count: {

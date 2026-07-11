@@ -1,0 +1,44 @@
+# syntax=docker/dockerfile:1
+#
+# Production database-migration image.
+#
+# Runs `prisma migrate deploy` against the production database as a
+# run-to-completion Kubernetes Job that is GATED BEFORE service rollout
+# (see infrastructure/helm/reasonbridge and issue #1336).
+#
+# It contains only the db-models package (Prisma schema + migrations + client)
+# and its dependencies — not the application services.
+
+ARG NODE_VERSION=20-alpine
+
+FROM node:${NODE_VERSION} AS builder
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY packages/*/package.json ./packages/
+COPY services/*/package.json ./services/
+COPY frontend/package.json ./frontend/
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+RUN pnpm install --frozen-lockfile
+# Generates the Prisma client and compiles db-models
+RUN pnpm --filter="./packages/db-models" run build
+
+FROM node:${NODE_VERSION} AS runtime
+
+ENV NODE_ENV=production
+WORKDIR /app/packages/db-models
+
+# Ship the built db-models package (schema + migrations + generated client) and
+# the workspace node_modules that provide the Prisma CLI.
+COPY --from=builder --chown=node:node /app/node_modules /app/node_modules
+COPY --from=builder --chown=node:node /app/packages/db-models /app/packages/db-models
+
+USER node
+
+# `prisma migrate deploy` applies all pending migrations and exits non-zero on
+# failure, which fails the Job and (via the Helm pre-upgrade hook) blocks rollout.
+CMD ["npx", "prisma", "migrate", "deploy"]

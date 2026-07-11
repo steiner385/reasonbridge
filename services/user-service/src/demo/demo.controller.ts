@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { DemoService } from './demo.service.js';
 import { DemoResetService } from './demo-reset.service.js';
+import { shouldAllowDemoCredentials } from '../auth/demo-blocklist.guard.js';
 import {
   DemoDiscussionsResponseDto,
   GetDemoDiscussionsQueryDto,
@@ -65,14 +66,21 @@ export class DemoController {
    * GET /demo/credentials
    * Returns credential hints for all demo personas
    *
-   * No authentication required - public endpoint
-   * Does NOT return actual passwords, only hints
+   * Gated behind demo mode: available in dev/test, and in production only when
+   * DEMO_MODE=true. The response includes a password pattern from which the
+   * seeded demo passwords are derivable, so it must never be exposed on a
+   * shared/production deployment that lacks an explicit demo opt-in.
    *
    * @returns Credential hints with password pattern explanation
+   * @throws {ForbiddenException} When demo mode is not enabled in production
    */
   @Get('credentials')
   @HttpCode(HttpStatus.OK)
   async getDemoCredentials(): Promise<DemoCredentialsResponseDto> {
+    if (!shouldAllowDemoCredentials()) {
+      throw new ForbiddenException('Demo credentials are not available in this environment');
+    }
+
     this.logger.log('GET /demo/credentials - returning credential hints');
 
     return this.demoService.getDemoCredentials();

@@ -46,6 +46,12 @@ export interface RecalculationResult {
 export class RankingCronService {
   private readonly logger = new Logger(RankingCronService.name);
   private readonly BATCH_SIZE = 100;
+  /**
+   * Maximum number of user recalculations run concurrently within a batch.
+   * Bounds the load on the Prisma connection pool and downstream database while
+   * still parallelizing the otherwise strictly-sequential per-user work.
+   */
+  private readonly CONCURRENCY = 10;
   private isRunning = false;
   private lastRecalculation: RecalculationResult | null = null;
 
@@ -133,17 +139,28 @@ export class RankingCronService {
           break;
         }
 
-        // Process each user in the batch
-        for (const user of users) {
-          try {
-            await this.rankingService.recalculateUserRank(user.id);
-            processed++;
-          } catch (error) {
-            errors++;
-            this.logger.error(
-              `Failed to recalculate rank for user ${user.id}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            );
-          }
+        // Process the batch with bounded concurrency instead of one user at a
+        // time, so a batch of N users issues at most CONCURRENCY sets of
+        // queries in flight rather than serializing every round-trip.
+        for (let offset = 0; offset < users.length; offset += this.CONCURRENCY) {
+          const chunk = users.slice(offset, offset + this.CONCURRENCY);
+          const results = await Promise.allSettled(
+            chunk.map((user) => this.rankingService.recalculateUserRank(user.id)),
+          );
+
+          results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+              processed++;
+            } else {
+              errors++;
+              const reason = result.reason;
+              this.logger.error(
+                `Failed to recalculate rank for user ${chunk[index]?.id}: ${
+                  reason instanceof Error ? reason.message : 'Unknown error'
+                }`,
+              );
+            }
+          });
         }
 
         // Update cursor for next batch

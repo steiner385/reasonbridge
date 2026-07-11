@@ -36,8 +36,14 @@ export interface ResponseSearchOptions {
  * Service for response search functionality
  * Feature #1040: Full-Text Search for Discussions
  *
- * Uses PostgreSQL tsvector for full-text search on response content.
- * Supports filtering by topic, author, and pagination.
+ * Note: The original tsvector-based search was removed when the responses
+ * `search_vector` column and its GIN index were dropped in migration
+ * 20260320232632_add_verification_token_type. This implementation uses ILIKE
+ * pattern matching on response content instead — consistent with
+ * TopicsSearchService, which was rewritten the same way. ILIKE `%query%` scans
+ * are backed by the `responses_content_trgm_idx` pg_trgm GIN index (recreated
+ * in migration 20260710_restore_search_trgm_indexes), so they do not force a
+ * sequential scan.
  */
 @Injectable()
 export class ResponsesSearchService {
@@ -46,8 +52,8 @@ export class ResponsesSearchService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
-   * Full-text search using PostgreSQL tsvector
-   * Searches response content and returns ranked results
+   * Full-text search using ILIKE pattern matching on response content.
+   * Returns matching response IDs ordered by recency.
    *
    * @param query - Search query string
    * @param options - Search options (topicId, authorId, limit, offset)
@@ -60,35 +66,16 @@ export class ResponsesSearchService {
     const { topicId, authorId, limit = 20, offset = 0 } = options;
 
     try {
-      // Build dynamic WHERE clause based on options
-      let whereClause = `WHERE r.search_vector @@ plainto_tsquery('english', $1)
-        AND r.status = 'VISIBLE'
-        AND r.deleted_at IS NULL`;
-
-      const params: (string | number)[] = [query];
-      let paramIndex = 2;
-
-      if (topicId) {
-        whereClause += ` AND r.topic_id = $${paramIndex}::uuid`;
-        params.push(topicId);
-        paramIndex++;
-      }
-
-      if (authorId) {
-        whereClause += ` AND r.author_id = $${paramIndex}::uuid`;
-        params.push(authorId);
-        paramIndex++;
-      }
-
+      const { whereClause, params, paramIndex } = this.buildWhereClause(query, topicId, authorId);
       params.push(limit, offset);
 
       const results = await this.prisma.$queryRawUnsafe<Array<{ id: string; rank: number }>>(
         `SELECT
           r.id::text,
-          ts_rank(r.search_vector, plainto_tsquery('english', $1)) as rank
+          1.0::float8 as rank
         FROM responses r
         ${whereClause}
-        ORDER BY rank DESC
+        ORDER BY r.created_at DESC
         LIMIT $${paramIndex}
         OFFSET $${paramIndex + 1}`,
         ...params,
@@ -105,7 +92,7 @@ export class ResponsesSearchService {
 
   /**
    * Search responses with full context (topic info, author, etc.)
-   * Returns enriched results suitable for display
+   * Returns enriched results suitable for display, with a highlighted snippet.
    *
    * @param query - Search query string
    * @param options - Search options
@@ -118,26 +105,7 @@ export class ResponsesSearchService {
     const { topicId, authorId, limit = 20, offset = 0 } = options;
 
     try {
-      // Build dynamic WHERE clause
-      let whereClause = `WHERE r.search_vector @@ plainto_tsquery('english', $1)
-        AND r.status = 'VISIBLE'
-        AND r.deleted_at IS NULL`;
-
-      const params: (string | number)[] = [query];
-      let paramIndex = 2;
-
-      if (topicId) {
-        whereClause += ` AND r.topic_id = $${paramIndex}::uuid`;
-        params.push(topicId);
-        paramIndex++;
-      }
-
-      if (authorId) {
-        whereClause += ` AND r.author_id = $${paramIndex}::uuid`;
-        params.push(authorId);
-        paramIndex++;
-      }
-
+      const { whereClause, params, paramIndex } = this.buildWhereClause(query, topicId, authorId);
       params.push(limit, offset);
 
       const results = await this.prisma.$queryRawUnsafe<
@@ -151,25 +119,22 @@ export class ResponsesSearchService {
           topic_slug: string;
           parent_id: string | null;
           created_at: Date;
-          highlighted_content: string;
         }>
       >(
         `SELECT
           r.id::text,
-          ts_rank(r.search_vector, plainto_tsquery('english', $1)) as rank,
+          1.0::float8 as rank,
           r.content,
           r.author_id::text,
           r.topic_id::text,
           dt.title as topic_title,
           dt.slug as topic_slug,
           r.parent_id::text,
-          r.created_at,
-          ts_headline('english', r.content, plainto_tsquery('english', $1),
-            'StartSel=<mark>, StopSel=</mark>, MaxWords=50, MinWords=20') as highlighted_content
+          r.created_at
         FROM responses r
         JOIN discussion_topics dt ON dt.id = r.topic_id
         ${whereClause}
-        ORDER BY rank DESC
+        ORDER BY r.created_at DESC
         LIMIT $${paramIndex}
         OFFSET $${paramIndex + 1}`,
         ...params,
@@ -187,7 +152,7 @@ export class ResponsesSearchService {
         topicSlug: r.topic_slug,
         parentId: r.parent_id,
         createdAt: r.created_at,
-        highlightedContent: r.highlighted_content,
+        highlightedContent: this.buildHighlight(r.content, query),
       }));
     } catch (error) {
       const err = error as Error;
@@ -210,23 +175,7 @@ export class ResponsesSearchService {
     const { topicId, authorId } = options;
 
     try {
-      let whereClause = `WHERE r.search_vector @@ plainto_tsquery('english', $1)
-        AND r.status = 'VISIBLE'
-        AND r.deleted_at IS NULL`;
-
-      const params: string[] = [query];
-      let paramIndex = 2;
-
-      if (topicId) {
-        whereClause += ` AND r.topic_id = $${paramIndex}::uuid`;
-        params.push(topicId);
-        paramIndex++;
-      }
-
-      if (authorId) {
-        whereClause += ` AND r.author_id = $${paramIndex}::uuid`;
-        params.push(authorId);
-      }
+      const { whereClause, params } = this.buildWhereClause(query, topicId, authorId);
 
       const result = await this.prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
         `SELECT COUNT(*) as count FROM responses r ${whereClause}`,
@@ -239,5 +188,68 @@ export class ResponsesSearchService {
       this.logger.error(`Response count search failed: ${err.message}`, err.stack);
       throw error;
     }
+  }
+
+  /**
+   * Build the shared WHERE clause and bound parameter list for the ILIKE search.
+   * Values are passed as bound parameters ($1, $2, ...) — never interpolated —
+   * so the query is not vulnerable to SQL injection despite $queryRawUnsafe.
+   */
+  private buildWhereClause(
+    query: string,
+    topicId?: string,
+    authorId?: string,
+  ): { whereClause: string; params: (string | number)[]; paramIndex: number } {
+    const searchPattern = `%${query}%`;
+    let whereClause = `WHERE r.content ILIKE $1
+        AND r.status = 'VISIBLE'
+        AND r.deleted_at IS NULL`;
+
+    const params: (string | number)[] = [searchPattern];
+    let paramIndex = 2;
+
+    if (topicId) {
+      whereClause += ` AND r.topic_id = $${paramIndex}::uuid`;
+      params.push(topicId);
+      paramIndex++;
+    }
+
+    if (authorId) {
+      whereClause += ` AND r.author_id = $${paramIndex}::uuid`;
+      params.push(authorId);
+      paramIndex++;
+    }
+
+    return { whereClause, params, paramIndex };
+  }
+
+  /**
+   * Build a highlighted snippet around the first occurrence of the query.
+   * Replaces the DB-side ts_headline that is no longer available without the
+   * tsvector column: extracts a context window and wraps matches in <mark>.
+   */
+  private buildHighlight(content: string, query: string): string {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      return content.length > 300 ? `${content.substring(0, 300)}…` : content;
+    }
+
+    // Escape regex metacharacters so the raw query is matched literally.
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'gi');
+
+    const matchIndex = content.search(regex);
+    const windowRadius = 100;
+    const start = matchIndex >= 0 ? Math.max(0, matchIndex - windowRadius) : 0;
+    const end =
+      matchIndex >= 0
+        ? Math.min(content.length, matchIndex + trimmed.length + windowRadius)
+        : Math.min(content.length, 300);
+
+    let snippet = content.substring(start, end);
+    if (start > 0) snippet = `…${snippet}`;
+    if (end < content.length) snippet = `${snippet}…`;
+
+    return snippet.replace(regex, (match) => `<mark>${match}</mark>`);
   }
 }

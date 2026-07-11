@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DiscussionLayout } from '../../components/discussion-layout/DiscussionLayout';
 import { ConversationPanel } from '../../components/discussion-layout/ConversationPanel';
@@ -34,7 +34,8 @@ import type { CreateResponseRequest } from '../../types/response';
  *
  * **Key Features**:
  * - Preview feedback during composition (displayed in right panel)
- * - Unsaved changes protection when switching topics
+ * - Unsaved changes protection: warns before the page unloads (refresh/close/
+ *   external navigation) while a response is being composed
  * - Proposition/response highlighting and cross-panel interactions
  * - Responsive design (desktop 2-panel, tablet 2-panel, mobile single-panel)
  *
@@ -60,10 +61,6 @@ export function DiscussionPage() {
   const [previewSummary, setPreviewSummary] = useState('');
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewSensitivity, setPreviewSensitivity] = useState<FeedbackSensitivity>('MEDIUM');
-
-  // Unsaved changes confirmation state
-  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
-  const [pendingTopicId, setPendingTopicId] = useState<string | null>(null);
 
   // Memoize query params to prevent creating new object reference on every render
   // This ensures React Query doesn't see a "new" query key each render
@@ -245,6 +242,44 @@ export function DiscussionPage() {
     }
   }, [queryClient, activeTopicId]);
 
+  // Handle top-level response submission (issue #1358).
+  // Previously DiscussionPage never passed onResponseSubmit, so ConversationPanel
+  // fell back to a no-op that cleared the composer without ever calling the API —
+  // silently discarding the single most important action in the product.
+  const handleResponseSubmit = useCallback(
+    async (response: CreateResponseRequest) => {
+      if (!activeTopic?.id) {
+        toast.error('Cannot post response: no active topic selected');
+        return;
+      }
+
+      try {
+        await responseService.createResponse({
+          discussionId: activeTopic.id,
+          content: response.content,
+          citations: response.citedSources?.map((url) => ({ url })),
+          parentResponseId: response.parentId,
+        });
+
+        // Clear composition state after successful submission
+        handleCompositionStateChange(false);
+
+        // Invalidate responses + discussion metadata to reflect the new response
+        await queryClient.invalidateQueries({ queryKey: ['responses', activeTopic.id] });
+        queryClient.invalidateQueries({ queryKey: ['discussions', activeTopic.id] });
+        queryClient.invalidateQueries({ queryKey: ['discussions'] });
+
+        toast.success('Response posted successfully');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to post response';
+        toast.error(message);
+        // Re-throw so CompactComposer preserves the user's text instead of clearing it
+        throw error;
+      }
+    },
+    [activeTopic, queryClient, toast, handleCompositionStateChange],
+  );
+
   // Handle inline reply submission (memoized to prevent unnecessary re-renders)
   const handleReplySubmit = useCallback(
     async (response: CreateResponseRequest) => {
@@ -277,21 +312,28 @@ export function DiscussionPage() {
     [handleCompositionStateChange, activeTopic, queryClient, toast],
   );
 
-  // Handle unsaved changes confirmation
-  const handleConfirmLeave = () => {
-    if (pendingTopicId) {
-      setShowUnsavedChangesDialog(false);
-      setIsComposing(false);
-      // TODO: Navigate to pending topic when navigation API is implemented
-      // navigateToTopic(pendingTopicId);
-      setPendingTopicId(null);
+  // Unsaved-changes protection: while a response is being composed, warn the user
+  // before the browser unloads the page (refresh, tab close, or navigation to an
+  // external URL) so an in-progress draft isn't discarded silently.
+  //
+  // (The previous in-app "switch topics" confirmation dialog was dead code — its
+  // open-state setters were never called and topic switching happens in the
+  // external unified Sidebar, outside this component — so it was removed in
+  // favour of this working guard. See issue #1335.)
+  useEffect(() => {
+    if (!isComposing) {
+      return undefined;
     }
-  };
 
-  const handleCancelLeave = () => {
-    setShowUnsavedChangesDialog(false);
-    setPendingTopicId(null);
-  };
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      // Legacy browsers require returnValue to be set to trigger the prompt.
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isComposing]);
 
   // Data fetching is implemented above via React Query hooks:
   // - usePropositions: fetches propositions for the active topic
@@ -301,45 +343,6 @@ export function DiscussionPage() {
 
   return (
     <FactCheckProvider>
-      {/* Unsaved Changes Confirmation Dialog */}
-      {showUnsavedChangesDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          role="dialog"
-          aria-labelledby="unsaved-changes-title"
-          aria-modal="true"
-        >
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900/50 max-w-md w-full mx-4 p-6">
-            <h2
-              id="unsaved-changes-title"
-              className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2"
-            >
-              Unsaved Changes
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              You have unsaved changes in your response. Are you sure you want to leave? Your
-              changes will be lost.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={handleCancelLeave}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmLeave}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-              >
-                Leave without saving
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <DiscussionLayout
         hideSidebar={true}
         centerPanel={
@@ -350,6 +353,7 @@ export function DiscussionPage() {
             height={typeof window !== 'undefined' ? window.innerHeight : 800}
             onPreviewFeedbackChange={handlePreviewFeedbackChange}
             onCompositionStateChange={handleCompositionStateChange}
+            onResponseSubmit={handleResponseSubmit}
             onReplySubmit={handleReplySubmit}
             onRefetchResponses={handleRefetchResponses}
           />

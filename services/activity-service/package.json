@@ -26,6 +26,7 @@
     "@nestjs/swagger": "^11.4.5",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "7.8.0",
+    "@nestjs/jwt": "11.0.2",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "@willsoto/nestjs-prometheus": "^6.1.0",
@@ -41,7 +42,7 @@
     "@types/node": "25.5.2",
     "@types/pg": "^8.20.0",
     "tsx": "^4.23.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "^4.1.9"
   },
   "engines": {
