@@ -38,11 +38,11 @@
     "seed:generate": "tsx prisma/seed/cli/generate.ts"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.6.0",
-    "@prisma/client": "7.6.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "7.8.0",
     "@reason-bridge/ai-client": "workspace:^",
     "bcrypt": "^6.0.0",
-    "pg": "^8.20.0",
+    "pg": "^8.22.0",
     "uuid": "^14.0.1"
   },
   "devDependencies": {
@@ -50,10 +50,10 @@
     "@types/pg": "^8.20.0",
     "@types/uuid": "^11.0.0",
     "@vitest/coverage-v8": "^4.1.10",
-    "prisma": "7.6.0",
-    "tsx": "^4.19.2",
+    "prisma": "7.8.0",
+    "tsx": "^4.23.0",
     "typescript": "6.0.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.9"
   },
   "peerDependencies": {
     "@reason-bridge/common": "workspace:*"
