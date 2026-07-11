@@ -37,8 +37,9 @@ export interface ModerationActionButtonsProps {
    */
   onError?: (error: string) => void;
   /**
-   * Whether to show reasoning textarea for reject action
-   * @default false
+   * @deprecated A rejection reason is now always required by the backend, so
+   * rejecting always shows the reasoning input. This prop is a no-op kept for
+   * backward compatibility.
    */
   showRejectReasoning?: boolean;
   /**
@@ -68,7 +69,6 @@ export default function ModerationActionButtons({
   onApprove,
   onReject,
   onError,
-  showRejectReasoning = false,
   disabled = false,
   className = '',
   buttonSize = 'sm',
@@ -99,16 +99,23 @@ export default function ModerationActionButtons({
     }
   };
 
-  // Handle rejection
+  // Handle rejection. The backend requires a non-empty reason and returns no
+  // body (Issue #1393), so validate the reason locally and surface the original
+  // action to the callback rather than a non-existent response payload.
   const handleReject = async () => {
+    const reason = rejectReasoning.trim();
+    if (!reason) {
+      setError('Please provide a reason for rejecting this action');
+      return;
+    }
     try {
       setError(null);
       setProcessingAction('reject');
-      const updatedAction = await rejectModerationAction(action.id);
+      await rejectModerationAction(action.id, reason);
       notify.success('Action rejected', `Moderation action rejected successfully`, 3000);
       setRejectReasoning('');
       setShowReasoningInput(false);
-      onReject?.(updatedAction);
+      onReject?.(action);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to reject action';
       setError(errorMessage);
@@ -124,14 +131,15 @@ export default function ModerationActionButtons({
     return null;
   }
 
-  // Show reject reasoning input state
-  if (showRejectReasoning && showReasoningInput) {
+  // Show reject reasoning input state. A reason is required by the backend, so
+  // rejecting always routes through this input (Issue #1393).
+  if (showReasoningInput) {
     return (
       <div className={`space-y-2 ${className}`}>
         <textarea
           value={rejectReasoning}
           onChange={(e) => setRejectReasoning(e.target.value)}
-          placeholder="Provide reasoning for rejecting this action (optional)"
+          placeholder="Provide a reason for rejecting this action"
           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           rows={3}
           disabled={isProcessing}
@@ -186,14 +194,8 @@ export default function ModerationActionButtons({
         </Button>
         <Button
           size={buttonSize}
-          variant={showRejectReasoning ? 'outline' : 'danger'}
-          onClick={() => {
-            if (showRejectReasoning) {
-              setShowReasoningInput(true);
-            } else {
-              handleReject();
-            }
-          }}
+          variant="danger"
+          onClick={() => setShowReasoningInput(true)}
           disabled={isProcessing || disabled}
         >
           {isProcessing && processingAction === 'reject' ? 'Rejecting...' : 'Reject'}

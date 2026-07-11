@@ -16,6 +16,7 @@
 import { useEffect, useState } from 'react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import { ModerationQueueView } from '../../components/moderation';
 import {
   getModerationActions,
@@ -48,6 +49,22 @@ export default function ModerationDashboardPage() {
   const [approvingActionId, setApprovingActionId] = useState<string | null>(null);
   const [rejectingActionId, setRejectingActionId] = useState<string | null>(null);
   const [reviewingAppealId, setReviewingAppealId] = useState<string | null>(null);
+
+  // Reject-reason capture — the backend requires a non-empty reason (Issue #1393).
+  const [rejectTarget, setRejectTarget] = useState<ModerationAction | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState<string | null>(null);
+
+  // Appeal-review capture — the backend requires decision reasoning of at least
+  // DECISION_REASONING_MIN_LENGTH (20) characters for both uphold and deny
+  // (Issue #1394).
+  const DECISION_REASONING_MIN_LENGTH = 20;
+  const [reviewTarget, setReviewTarget] = useState<{
+    appeal: Appeal;
+    decision: 'upheld' | 'denied';
+  } | null>(null);
+  const [reviewReasoning, setReviewReasoning] = useState('');
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   // Load dashboard data
   useEffect(() => {
@@ -89,40 +106,61 @@ export default function ModerationDashboardPage() {
     }
   };
 
-  // Handle action rejection
-  const handleRejectAction = async (actionId: string) => {
+  // Open the reject-reason modal for an action.
+  const openRejectModal = (action: ModerationAction) => {
+    setRejectTarget(action);
+    setRejectReason('');
+    setRejectError(null);
+  };
+
+  // Confirm action rejection with the entered reason.
+  const handleConfirmReject = async () => {
+    if (!rejectTarget) return;
+    const reason = rejectReason.trim();
+    if (!reason) {
+      setRejectError('Please provide a reason for rejecting this action');
+      return;
+    }
+    const actionId = rejectTarget.id;
     try {
       setRejectingActionId(actionId);
-      await rejectModerationAction(actionId);
+      await rejectModerationAction(actionId, reason);
       setActions(actions.filter((a) => a.id !== actionId));
+      setRejectTarget(null);
+      setRejectReason('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reject action');
+      setRejectError(err instanceof Error ? err.message : 'Failed to reject action');
     } finally {
       setRejectingActionId(null);
     }
   };
 
-  // Handle appeal review (upheld)
-  const handleUpholdAppeal = async (appealId: string) => {
-    try {
-      setReviewingAppealId(appealId);
-      await reviewAppeal(appealId, 'upheld');
-      setAppeals(appeals.filter((a) => a.id !== appealId));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to uphold appeal');
-    } finally {
-      setReviewingAppealId(null);
-    }
+  // Open the appeal-review modal with a chosen decision.
+  const openReviewModal = (appeal: Appeal, decision: 'upheld' | 'denied') => {
+    setReviewTarget({ appeal, decision });
+    setReviewReasoning('');
+    setReviewError(null);
   };
 
-  // Handle appeal review (denied)
-  const handleDenyAppeal = async (appealId: string) => {
+  // Confirm an appeal decision with the required reasoning.
+  const handleConfirmReview = async () => {
+    if (!reviewTarget) return;
+    const reasoning = reviewReasoning.trim();
+    if (reasoning.length < DECISION_REASONING_MIN_LENGTH) {
+      setReviewError(
+        `Please provide decision reasoning of at least ${DECISION_REASONING_MIN_LENGTH} characters`,
+      );
+      return;
+    }
+    const appealId = reviewTarget.appeal.id;
     try {
       setReviewingAppealId(appealId);
-      await reviewAppeal(appealId, 'denied');
+      await reviewAppeal(appealId, reviewTarget.decision, reasoning);
       setAppeals(appeals.filter((a) => a.id !== appealId));
+      setReviewTarget(null);
+      setReviewReasoning('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to deny appeal');
+      setReviewError(err instanceof Error ? err.message : 'Failed to record appeal decision');
     } finally {
       setReviewingAppealId(null);
     }
@@ -411,7 +449,7 @@ export default function ModerationDashboardPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleRejectAction(action.id)}
+                              onClick={() => openRejectModal(action)}
                               disabled={rejectingActionId === action.id}
                             >
                               {rejectingActionId === action.id ? 'Rejecting...' : 'Reject'}
@@ -459,7 +497,7 @@ export default function ModerationDashboardPage() {
                               <Button
                                 size="sm"
                                 variant="primary"
-                                onClick={() => handleUpholdAppeal(appeal.id)}
+                                onClick={() => openReviewModal(appeal, 'upheld')}
                                 disabled={reviewingAppealId === appeal.id}
                               >
                                 {reviewingAppealId === appeal.id
@@ -469,7 +507,7 @@ export default function ModerationDashboardPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleDenyAppeal(appeal.id)}
+                                onClick={() => openReviewModal(appeal, 'denied')}
                                 disabled={reviewingAppealId === appeal.id}
                               >
                                 {reviewingAppealId === appeal.id ? 'Processing...' : 'Deny Appeal'}
@@ -610,6 +648,117 @@ export default function ModerationDashboardPage() {
           </Card>
         </div>
       )}
+
+      {/* Reject-reason modal (Issue #1393) */}
+      <Modal
+        isOpen={rejectTarget !== null}
+        onClose={() => setRejectTarget(null)}
+        title="Reject moderation action"
+        size="md"
+        showCloseButton={rejectingActionId === null}
+        closeOnBackdropClick={rejectingActionId === null}
+        closeOnEscape={rejectingActionId === null}
+        footer={
+          <div className="flex gap-3 w-full">
+            <Button
+              variant="outline"
+              onClick={() => setRejectTarget(null)}
+              disabled={rejectingActionId !== null}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmReject}
+              isLoading={rejectingActionId !== null}
+              disabled={rejectingActionId !== null}
+            >
+              Confirm Reject
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Please explain why this recommended action is being rejected.
+          </p>
+          {rejectError && (
+            <div className="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {rejectError}
+            </div>
+          )}
+          <label htmlFor="dashboard-reject-reason" className="sr-only">
+            Reason for rejection
+          </label>
+          <textarea
+            id="dashboard-reject-reason"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Reason for rejecting this action"
+            rows={4}
+            disabled={rejectingActionId !== null}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+      </Modal>
+
+      {/* Appeal-review modal (Issue #1394) */}
+      <Modal
+        isOpen={reviewTarget !== null}
+        onClose={() => setReviewTarget(null)}
+        title={reviewTarget?.decision === 'upheld' ? 'Uphold appeal' : 'Deny appeal'}
+        size="md"
+        showCloseButton={reviewingAppealId === null}
+        closeOnBackdropClick={reviewingAppealId === null}
+        closeOnEscape={reviewingAppealId === null}
+        footer={
+          <div className="flex gap-3 w-full">
+            <Button
+              variant="outline"
+              onClick={() => setReviewTarget(null)}
+              disabled={reviewingAppealId !== null}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={reviewTarget?.decision === 'upheld' ? 'primary' : 'danger'}
+              onClick={handleConfirmReview}
+              isLoading={reviewingAppealId !== null}
+              disabled={reviewingAppealId !== null}
+            >
+              {reviewTarget?.decision === 'upheld' ? 'Uphold appeal' : 'Deny appeal'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {reviewTarget?.decision === 'upheld'
+              ? 'Upholding this appeal reverses the original moderation action. Explain the decision for the record.'
+              : 'Denying this appeal keeps the original moderation action in effect. Explain the decision for the record.'}
+          </p>
+          {reviewError && (
+            <div className="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {reviewError}
+            </div>
+          )}
+          <label htmlFor="dashboard-review-reasoning" className="sr-only">
+            Decision reasoning
+          </label>
+          <textarea
+            id="dashboard-review-reasoning"
+            value={reviewReasoning}
+            onChange={(e) => setReviewReasoning(e.target.value)}
+            placeholder={`Decision reasoning (at least ${DECISION_REASONING_MIN_LENGTH} characters)`}
+            rows={4}
+            disabled={reviewingAppealId !== null}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {reviewReasoning.trim().length}/{DECISION_REASONING_MIN_LENGTH} characters minimum
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -30,8 +30,10 @@ export async function getModerationActions(
   options: {
     status?: ModerationActionStatus;
     severity?: ModerationSeverity;
-    pageSize?: number;
-    page?: number;
+    /** Page size. The backend is cursor-based, not offset/page-based. */
+    limit?: number;
+    /** Opaque cursor (the `nextCursor` returned by a previous page). */
+    cursor?: string;
   } = {},
 ): Promise<ModerationActionListResponse> {
   const params = new URLSearchParams();
@@ -42,11 +44,11 @@ export async function getModerationActions(
   if (options.severity) {
     params.append('severity', options.severity);
   }
-  if (options.pageSize) {
-    params.append('pageSize', String(options.pageSize));
+  if (options.limit) {
+    params.append('limit', String(options.limit));
   }
-  if (options.page) {
-    params.append('page', String(options.page));
+  if (options.cursor) {
+    params.append('cursor', options.cursor);
   }
 
   const queryString = params.toString();
@@ -76,36 +78,71 @@ export async function approveModerationAction(
 }
 
 /**
- * Reject a pending moderation action
+ * Reject a pending moderation action.
+ *
+ * The backend requires a non-empty `reason` and returns no body (204/void), so
+ * callers must collect a rejection reason and must not rely on a returned
+ * action (Issue #1393).
  */
-export async function rejectModerationAction(actionId: string): Promise<ModerationAction> {
-  return apiClient.post<ModerationAction>(`/moderation/actions/${actionId}/reject`, {});
+export async function rejectModerationAction(actionId: string, reason: string): Promise<void> {
+  await apiClient.post<void>(`/moderation/actions/${actionId}/reject`, { reason });
 }
 
 /**
- * Get list of appeals
+ * Build a cursor-based appeal-listing query string shared by the admin and
+ * self-scoped endpoints.
+ */
+function buildAppealQuery(options: { status?: string; limit?: number; cursor?: string }): string {
+  const params = new URLSearchParams();
+  if (options.status) {
+    params.append('status', options.status);
+  }
+  if (options.limit) {
+    params.append('limit', String(options.limit));
+  }
+  if (options.cursor) {
+    params.append('cursor', options.cursor);
+  }
+  return params.toString();
+}
+
+/**
+ * Get list of ALL appeals (moderator/admin view).
+ *
+ * @remarks
+ * This returns every user's appeals and must only be used on admin surfaces.
+ * The user-facing "your appeals" surface must use {@link getMyAppeals}, which
+ * is scoped to the authenticated user (Issue #1396).
  */
 export async function getAppeals(
   options: {
     status?: string;
-    pageSize?: number;
-    page?: number;
+    limit?: number;
+    cursor?: string;
   } = {},
 ): Promise<AppealsListResponse> {
-  const params = new URLSearchParams();
-
-  if (options.status) {
-    params.append('status', options.status);
-  }
-  if (options.pageSize) {
-    params.append('pageSize', String(options.pageSize));
-  }
-  if (options.page) {
-    params.append('page', String(options.page));
-  }
-
-  const queryString = params.toString();
+  const queryString = buildAppealQuery(options);
   const endpoint = queryString ? `/moderation/appeals?${queryString}` : '/moderation/appeals';
+
+  return apiClient.get<AppealsListResponse>(endpoint);
+}
+
+/**
+ * Get the authenticated user's own appeals.
+ *
+ * Scoped server-side to the JWT subject via `/moderation/appeals/me`, so it
+ * cannot leak other users' appeal reasons or moderator decision reasoning
+ * (Issue #1396).
+ */
+export async function getMyAppeals(
+  options: {
+    status?: string;
+    limit?: number;
+    cursor?: string;
+  } = {},
+): Promise<AppealsListResponse> {
+  const queryString = buildAppealQuery(options);
+  const endpoint = queryString ? `/moderation/appeals/me?${queryString}` : '/moderation/appeals/me';
 
   return apiClient.get<AppealsListResponse>(endpoint);
 }
@@ -118,16 +155,22 @@ export async function getAppeal(appealId: string): Promise<Appeal> {
 }
 
 /**
- * Review and decide on an appeal
+ * Review and decide on an appeal.
+ *
+ * @remarks
+ * The backend field is `reasoning` (not `decisionReasoning`) and it is required
+ * — it must be at least DECISION_REASONING_MIN_LENGTH characters. Sending the
+ * wrong field name or omitting it returns 400 and leaves the appeal PENDING
+ * (Issue #1394).
  */
 export async function reviewAppeal(
   appealId: string,
   decision: 'upheld' | 'denied',
-  decisionReasoning?: string,
+  reasoning: string,
 ): Promise<Appeal> {
   return apiClient.post<Appeal>(`/moderation/appeals/${appealId}/review`, {
     decision,
-    decisionReasoning,
+    reasoning,
   });
 }
 
@@ -144,8 +187,8 @@ export async function getQueueStats(): Promise<QueueStats> {
 export async function getCsamReports(
   options: {
     status?: CsamReportStatus;
-    pageSize?: number;
-    page?: number;
+    limit?: number;
+    cursor?: string;
   } = {},
 ): Promise<CsamReportsListResponse> {
   const params = new URLSearchParams();
@@ -153,11 +196,11 @@ export async function getCsamReports(
   if (options.status) {
     params.append('status', options.status);
   }
-  if (options.pageSize) {
-    params.append('pageSize', String(options.pageSize));
+  if (options.limit) {
+    params.append('limit', String(options.limit));
   }
-  if (options.page) {
-    params.append('page', String(options.page));
+  if (options.cursor) {
+    params.append('cursor', options.cursor);
   }
 
   const queryString = params.toString();

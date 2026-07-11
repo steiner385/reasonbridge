@@ -71,11 +71,10 @@ export default function ModerationHistoryView({
         const options: {
           status?: ModerationActionStatus;
           severity?: ModerationSeverity;
-          page?: number;
-          pageSize?: number;
+          limit?: number;
+          cursor?: string;
         } = {
-          page,
-          pageSize,
+          limit: pageSize,
         };
 
         if (statusFilter !== 'all') {
