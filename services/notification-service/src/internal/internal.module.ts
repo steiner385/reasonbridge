@@ -9,6 +9,7 @@ import { PrismaModule } from '../prisma/prisma.module.js';
 import { GatewaysModule } from '../gateways/gateways.module.js';
 import { InternalSmsController } from './internal-sms.controller.js';
 import { InternalSlaBreachController } from './internal-sla-breach.controller.js';
+import { InternalModerationController } from './internal-moderation.controller.js';
 
 /**
  * Internal Module
@@ -19,6 +20,6 @@ import { InternalSlaBreachController } from './internal-sla-breach.controller.js
  */
 @Module({
   imports: [ServicesModule, PrismaModule, GatewaysModule],
-  controllers: [InternalSmsController, InternalSlaBreachController],
+  controllers: [InternalSmsController, InternalSlaBreachController, InternalModerationController],
 })
 export class InternalModule {}

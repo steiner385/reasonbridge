@@ -7,7 +7,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { SERVICE_PORTS, setupGracefulShutdown } from '@reason-bridge/common';
+import { SERVICE_PORTS, setupGracefulShutdown, createValidationPipe } from '@reason-bridge/common';
 import { AppModule } from './app.module.js';
 import { TracingInterceptor } from './observability/index.js';
 
@@ -15,6 +15,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     logger: process.env['NODE_ENV'] === 'test' ? ['error'] : undefined,
   });
+
+  // Shared platform validation policy (whitelist + forbidNonWhitelisted + transform).
+  app.useGlobalPipes(createValidationPipe());
 
   // OpenAPI/Swagger documentation
   const config = new DocumentBuilder()
