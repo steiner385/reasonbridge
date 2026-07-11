@@ -13,6 +13,14 @@
 export const AUTH_TOKENS = {
   /** Default token expiration time in seconds (1 hour) */
   EXPIRES_IN_SECONDS: 3600,
+  /**
+   * Refresh token expiration time in seconds (7 days).
+   *
+   * Shortened from 30 days to reduce the impact of a stolen refresh token
+   * (issue #1384): even if a token is exfiltrated, the window of unauthorized
+   * account access is bounded to one week instead of a month.
+   */
+  REFRESH_EXPIRES_IN_SECONDS: 7 * 24 * 3600,
   /** S3 signed URL expiration time in seconds (1 hour) */
   S3_URL_EXPIRES_IN_SECONDS: 3600,
 } as const;
