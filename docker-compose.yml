@@ -5,9 +5,13 @@ services:
     image: postgres:15-alpine
     container_name: reasonbridge-postgres
     environment:
-      POSTGRES_USER: reasonbridge
-      POSTGRES_PASSWORD: reasonbridge
-      POSTGRES_DB: reasonbridge_dev
+      # Secrets are interpolated from the environment (see .env.example); the
+      # defaults keep local dev working out of the box without a .env file.
+      # Production manifests MUST source these from AWS Secrets Manager rather
+      # than inline literals — see docs/SECRETS.md.
+      POSTGRES_USER: ${POSTGRES_USER:-reasonbridge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reasonbridge}
+      POSTGRES_DB: ${POSTGRES_DB:-reasonbridge_dev}
     ports:
       - '5432:5432'
     volumes:
@@ -42,6 +46,12 @@ services:
       - '4566:4566'
     volumes:
       - localstack_data:/var/lib/localstack
+    # localstack ships curl; mirrors docker-compose.e2e.yml health probe
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4566/_localstack/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -49,6 +59,12 @@ services:
     ports:
       - '1025:1025'
       - '8025:8025'
+    # mailhog is Alpine-based; busybox wget probes the HTTP UI port
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8025/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   jaeger:
     image: jaegertracing/all-in-one:1.53
@@ -58,6 +74,12 @@ services:
     ports:
       - '16686:16686'
       - '4318:4318'
+    # Probe the admin/health port (14269) with busybox wget; no curl in the image
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:14269/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   qdrant:
     image: qdrant/qdrant:v1.7.4
@@ -67,8 +89,13 @@ services:
       - '6334:6334'
     volumes:
       - qdrant_data:/qdrant/storage
+    # The qdrant/qdrant image ships no curl, so the previous curl probe always
+    # errored and left the container permanently 'unhealthy'. The image is
+    # Debian-based and includes bash, so use a dependency-free TCP probe against
+    # the HTTP port. (Qdrant's HTTP health endpoints are /healthz and /readyz,
+    # not /health, so the old URL was wrong too.)
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:6333/health']
+      test: ['CMD-SHELL', "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
-import { authService } from '../services/authService';
+import { discussionRealtime } from '../lib/discussionRealtime';
 
 /**
  * WebSocket message types for real-time updates
@@ -169,6 +169,8 @@ export interface UseWebSocketReturn {
     type: T,
     handler: WebSocketMessageHandler<WebSocketMessageMap[T]>,
   ) => () => void;
+  /** Join a topic room to receive its realtime events (ref-counted) */
+  subscribeToTopic: (topicId: string) => () => void;
   /** Send a message to the server */
   send: (message: WebSocketMessage) => void;
 }
@@ -194,247 +196,55 @@ export interface UseWebSocketReturn {
  * ```
  */
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
-  const {
-    autoConnect = true,
-    autoReconnect = true,
-    reconnectDelay = 3000,
-    maxReconnectAttempts = 5,
-    heartbeatInterval = 30000,
-  } = options;
+  const { autoConnect = true } = options;
 
-  const { user, isAuthenticated } = useAuthContext();
-  const [state, setState] = useState<WebSocketState>('disconnected');
-  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuthContext();
+  const [state, setState] = useState<WebSocketState>(() => discussionRealtime.getState());
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const heartbeatIntervalRef = useRef<number | null>(null);
-  const handlersRef = useRef<Map<WebSocketMessageType, Set<WebSocketMessageHandler>>>(new Map());
+  // Mirror the shared connection's state into local component state. The lazy
+  // useState initializer already reads the current state, and acquire() (which
+  // triggers connecting/connected) runs in a later effect, so subscribing here
+  // reliably captures subsequent transitions.
+  useEffect(() => discussionRealtime.onStateChange(setState), []);
 
-  /**
-   * Get WebSocket URL from environment or construct from current location
-   */
-  const getWebSocketUrl = useCallback(() => {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = import.meta.env['VITE_WS_HOST'] || window.location.host;
-    const wsPath = import.meta.env['VITE_WS_PATH'] || '/ws';
+  // Acquire a reference to the single shared connection while mounted and
+  // authenticated. Ref-counting means every consumer shares ONE socket per tab
+  // instead of opening its own (issue #1360). Releasing on unmount closes the
+  // socket only when the last consumer leaves, and never reconnects afterward.
+  useEffect(() => {
+    if (!autoConnect || !isAuthenticated) return undefined;
+    discussionRealtime.acquire();
+    return () => discussionRealtime.release();
+  }, [autoConnect, isAuthenticated]);
 
-    return `${wsProtocol}//${wsHost}${wsPath}`;
-  }, []);
-
-  /**
-   * Start heartbeat to keep connection alive
-   */
-  const startHeartbeat = useCallback(() => {
-    if (heartbeatIntervalRef.current) {
-      clearInterval(heartbeatIntervalRef.current);
-    }
-
-    heartbeatIntervalRef.current = window.setInterval(() => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'PING' }));
-      }
-    }, heartbeatInterval);
-  }, [heartbeatInterval]);
-
-  /**
-   * Stop heartbeat
-   */
-  const stopHeartbeat = useCallback(() => {
-    if (heartbeatIntervalRef.current) {
-      clearInterval(heartbeatIntervalRef.current);
-      heartbeatIntervalRef.current = null;
-    }
-  }, []);
-
-  /**
-   * Handle incoming WebSocket message
-   */
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data) as { type: string };
-
-      // Ignore PONG responses
-      if (data.type === 'PONG') {
-        return;
-      }
-
-      // Cast to WebSocketMessage after PONG check
-      const message = data as WebSocketMessage;
-
-      // Route message to subscribed handlers
-      const handlers = handlersRef.current.get(message.type);
-      if (handlers) {
-        handlers.forEach((handler) => {
-          try {
-            handler(message);
-          } catch (err) {
-            console.error(`Error in WebSocket handler for ${message.type}:`, err);
-          }
-        });
-      }
-    } catch (err) {
-      console.error('Failed to parse WebSocket message:', err);
-    }
-  }, []);
-
-  /**
-   * Connect to WebSocket server
-   */
-  const connect = useCallback(() => {
-    // Don't connect if already connected or connecting
-    if (wsRef.current?.readyState === WebSocket.OPEN || state === 'connecting') {
-      return;
-    }
-
-    // Don't connect if not authenticated
-    if (!isAuthenticated || !user) {
-      setError('User not authenticated');
-      return;
-    }
-
-    // Get auth token for WebSocket authentication
-    const token = authService.getAuthToken();
-
-    setState('connecting');
-    setError(null);
-
-    try {
-      const wsUrl = getWebSocketUrl();
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        setState('connected');
-        setError(null);
-        reconnectAttemptsRef.current = 0;
-        startHeartbeat();
-
-        // Send authentication token
-        if (token) {
-          ws.send(JSON.stringify({ type: 'AUTH', token }));
-        }
-      };
-
-      ws.onmessage = handleMessage;
-
-      ws.onerror = () => {
-        setState('error');
-        setError('WebSocket connection error');
-        stopHeartbeat();
-      };
-
-      ws.onclose = () => {
-        setState('disconnected');
-        stopHeartbeat();
-
-        // Auto-reconnect if enabled and not max attempts
-        if (autoReconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          reconnectAttemptsRef.current += 1;
-          reconnectTimeoutRef.current = window.setTimeout(() => {
-            connect();
-          }, reconnectDelay);
-        }
-      };
-
-      wsRef.current = ws;
-    } catch (err) {
-      setState('error');
-      setError(err instanceof Error ? err.message : 'Failed to connect to WebSocket');
-    }
-  }, [
-    user,
-    isAuthenticated,
-    state,
-    getWebSocketUrl,
-    handleMessage,
-    startHeartbeat,
-    stopHeartbeat,
-    autoReconnect,
-    maxReconnectAttempts,
-    reconnectDelay,
-  ]);
-
-  /**
-   * Disconnect from WebSocket server
-   */
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-
-    stopHeartbeat();
-
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-
-    setState('disconnected');
-    setError(null);
-    reconnectAttemptsRef.current = 0;
-  }, [stopHeartbeat]);
-
-  /**
-   * Subscribe to WebSocket message type
-   * Returns unsubscribe function
-   */
   const subscribe = useCallback(
     <T extends keyof WebSocketMessageMap>(
       type: T,
       handler: WebSocketMessageHandler<WebSocketMessageMap[T]>,
-    ) => {
-      const handlers = handlersRef.current.get(type) || new Set();
-      handlers.add(handler as WebSocketMessageHandler);
-      handlersRef.current.set(type, handlers);
-
-      // Return unsubscribe function
-      return () => {
-        const currentHandlers = handlersRef.current.get(type);
-        if (currentHandlers) {
-          currentHandlers.delete(handler as WebSocketMessageHandler);
-          if (currentHandlers.size === 0) {
-            handlersRef.current.delete(type);
-          }
-        }
-      };
-    },
+    ) => discussionRealtime.subscribe(type, handler),
     [],
   );
 
-  /**
-   * Send message to WebSocket server
-   */
-  const send = useCallback((message: WebSocketMessage) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
-    } else {
-      console.warn('WebSocket is not connected. Message not sent:', message);
-    }
-  }, []);
+  const subscribeToTopic = useCallback(
+    (topicId: string) => discussionRealtime.subscribeToTopic(topicId),
+    [],
+  );
 
-  /**
-   * Auto-connect on mount if enabled and authenticated
-   */
-  useEffect(() => {
-    if (autoConnect && isAuthenticated) {
-      connect();
-    }
+  const send = useCallback((message: WebSocketMessage) => discussionRealtime.send(message), []);
 
-    return () => {
-      disconnect();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoConnect, isAuthenticated]); // Only depend on autoConnect and isAuthenticated, not connect/disconnect
+  // connect/disconnect are retained for API compatibility; the connection is
+  // managed automatically via ref-counting, so they map to acquire/release.
+  const connect = useCallback(() => discussionRealtime.acquire(), []);
+  const disconnect = useCallback(() => discussionRealtime.release(), []);
 
   return {
     state,
     isConnected: state === 'connected',
-    error,
+    error: state === 'error' ? 'WebSocket connection error' : null,
     connect,
     disconnect,
     subscribe,
+    subscribeToTopic,
     send,
   };
 }

@@ -4,6 +4,7 @@
  */
 
 import { useRef, useCallback, useState, useEffect, useLayoutEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ResponseList } from '../responses/ResponseList';
 import { CompactComposer } from '../responses/CompactComposer';
 import { useDiscussionLayout } from '../../contexts/DiscussionLayoutContext';
@@ -68,11 +69,12 @@ export function ConversationPanel({
   // CRITICAL: All hooks must be called BEFORE any conditional returns
   // React Error #310 occurs when hooks are called conditionally
   const responseListContainerRef = useRef<HTMLDivElement>(null);
-  const { toggleLeftPanelOverlay } = useDiscussionLayout();
+  const { toggleLeftPanelOverlay, hasLeftPanel } = useDiscussionLayout();
   const breakpoint = useBreakpoint();
-  const { subscribe } = useWebSocket();
+  const { subscribe, subscribeToTopic } = useWebSocket();
   const { user } = useAuth();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const [newResponseCount, setNewResponseCount] = useState(0);
   const [topicStatusChange, setTopicStatusChange] = useState<{
@@ -84,7 +86,11 @@ export function ConversationPanel({
   // Measured height of the response list container for virtual scrolling
   const [measuredHeight, setMeasuredHeight] = useState<number>(0);
 
-  const showHamburgerMenu = breakpoint === 'tablet' || breakpoint === 'mobile';
+  // Only offer the topic-navigation hamburger when a left panel actually exists.
+  // On the discussion page the layout renders with no left panel, so the button would
+  // toggle a non-existent overlay and do nothing when tapped (#1376).
+  const showHamburgerMenu =
+    hasLeftPanel === true && (breakpoint === 'tablet' || breakpoint === 'mobile');
 
   // Measure the actual available height for the response list container
   // Using ResizeObserver to handle dynamic resizing (window resize, panel resize, etc.)
@@ -106,6 +112,13 @@ export function ConversationPanel({
 
     return () => resizeObserver.disconnect();
   }, []);
+
+  // Join the topic's realtime room so typing/reaction/new-response/status
+  // events for this topic are delivered to the shared connection (issue #1359).
+  useEffect(() => {
+    if (!topic?.id) return undefined;
+    return subscribeToTopic(topic.id);
+  }, [topic?.id, subscribeToTopic]);
 
   // Subscribe to WebSocket messages for new responses
   useEffect(() => {
@@ -161,7 +174,9 @@ export function ConversationPanel({
         await apiClient.patch(`/topics/${topic.id}`, updates);
         toast.success('Topic updated successfully');
         setIsEditModalOpen(false);
-        // Note: Topic data will refresh via WebSocket or page reload
+        // Invalidate topic queries to refresh the UI with updated data
+        await queryClient.invalidateQueries({ queryKey: ['topic', topic.id] });
+        await queryClient.invalidateQueries({ queryKey: ['topics'] });
       } catch (error) {
         toast.error('Failed to update topic');
         throw error;
@@ -169,7 +184,7 @@ export function ConversationPanel({
         setIsEditLoading(false);
       }
     },
-    [topic, toast],
+    [topic, toast, queryClient],
   );
 
   // Wrap onReplySubmit to add auto-scroll after submission
@@ -198,6 +213,27 @@ export function ConversationPanel({
   const handleDismissStatusChange = useCallback(() => {
     setTopicStatusChange(null);
   }, []);
+
+  // Derive read-only state directly from the fetched topic status so that
+  // archived/locked topics disable posting immediately on load, not only in
+  // response to a live TOPIC_STATUS_CHANGE transition. See issue #1362.
+  const isReadOnly =
+    topic?.status === 'ARCHIVED' ||
+    topic?.status === 'LOCKED' ||
+    topicStatusChange?.newStatus === 'ARCHIVED' ||
+    topicStatusChange?.newStatus === 'LOCKED';
+
+  // Guard against the previous no-op fallback that silently discarded top-level
+  // responses: if a composer is requested but no handler is wired, log loudly
+  // and hide the composer rather than pretending the post succeeded. See #1358.
+  useEffect(() => {
+    if (showComposer && topic && !isReadOnly && !onResponseSubmit) {
+      console.error(
+        'ConversationPanel: showComposer is true but no onResponseSubmit handler was ' +
+          'provided. The top-level composer is hidden to avoid silently discarding responses.',
+      );
+    }
+  }, [showComposer, topic, isReadOnly, onResponseSubmit]);
 
   // Conditional rendering: Empty state when no topic selected
   if (!topic) {
@@ -271,7 +307,7 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={toggleLeftPanelOverlay}
-              className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
+              className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors xl:hidden"
               aria-label="Open topic navigation"
             >
               <svg
@@ -324,7 +360,7 @@ export function ConversationPanel({
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Edit topic"
                 title="Edit topic"
               >
@@ -492,7 +528,7 @@ export function ConversationPanel({
             <button
               type="button"
               onClick={handleDismissStatusChange}
-              className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               aria-label="Dismiss notification"
             >
               <svg
@@ -520,18 +556,30 @@ export function ConversationPanel({
           enableThreading
           height={measuredHeight || 400}
           highlightedResponseIds={highlightedResponseIds}
-          onReplySubmit={handleReplySubmitWithScroll}
+          onReplySubmit={isReadOnly ? undefined : handleReplySubmitWithScroll}
           onPreviewFeedbackChange={onPreviewFeedbackChange}
           compact
         />
       </div>
 
-      {/* Compact Composer (sticky bottom) */}
-      {showComposer && (
+      {/* Read-only notice for archived/locked topics (issue #1362) */}
+      {showComposer && isReadOnly && (
+        <div
+          className="shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 text-center text-sm text-gray-600 dark:text-gray-400"
+          role="status"
+        >
+          This topic is <strong>{(topic.status ?? 'archived').toLowerCase()}</strong> and read-only.
+          You can no longer post responses.
+        </div>
+      )}
+
+      {/* Compact Composer (sticky bottom) — only when we have a real submit
+          handler, so responses are never silently discarded (issue #1358) */}
+      {showComposer && !isReadOnly && onResponseSubmit && (
         <div className="shrink-0 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <CompactComposer
             topicId={topic.id}
-            onSubmit={onResponseSubmit || (() => Promise.resolve())}
+            onSubmit={onResponseSubmit}
             onPreviewFeedbackChange={onPreviewFeedbackChange}
           />
         </div>

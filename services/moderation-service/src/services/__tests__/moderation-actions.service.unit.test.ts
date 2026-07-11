@@ -67,6 +67,9 @@ describe('ModerationActionsService', () => {
       user: {
         update: vi.fn(),
       },
+      // autoLiftExpiredBans wraps per-row updates in a transaction; the mock
+      // simply awaits whatever array of update promises it is handed.
+      $transaction: vi.fn((ops: unknown) => Promise.resolve(ops)),
     } as unknown as PrismaService;
 
     queueService = {
@@ -528,6 +531,55 @@ describe('ModerationActionsService', () => {
       const result = await service.sendCoolingOffPrompt([], 'topic-1', 'Message');
 
       expect(result.sent).toBe(0);
+    });
+  });
+
+  describe('autoLiftExpiredBans (#1295)', () => {
+    it("appends each ban its OWN reasoning, not the first ban's", async () => {
+      const expiredBans = [
+        { id: 'ban-1', reasoning: 'Ban one reason' },
+        { id: 'ban-2', reasoning: 'Ban two reason' },
+        { id: 'ban-3', reasoning: 'Ban three reason' },
+      ];
+      vi.mocked(prismaService.moderationAction.findMany).mockResolvedValue(expiredBans as never);
+      vi.mocked(prismaService.moderationAction.update).mockImplementation(
+        (args) => Promise.resolve(args) as never,
+      );
+
+      const result = await service.autoLiftExpiredBans();
+
+      expect(result).toEqual({ lifted: 3 });
+
+      // Regression guard: the old updateMany applied the FIRST ban's reasoning
+      // to every row. Each row must now be updated individually with its own
+      // reasoning appended.
+      expect(prismaService.moderationAction.update).toHaveBeenCalledTimes(3);
+      expect(prismaService.moderationAction.updateMany).not.toHaveBeenCalled();
+
+      const calls = vi.mocked(prismaService.moderationAction.update).mock.calls;
+      for (const ban of expiredBans) {
+        const call = calls.find((c) => (c[0] as { where: { id: string } }).where.id === ban.id);
+        expect(call, `expected an update for ${ban.id}`).toBeDefined();
+        const data = (call![0] as { data: { status: string; reasoning: string } }).data;
+        expect(data.status).toBe('REVERSED');
+        expect(data.reasoning).toContain(ban.reasoning);
+        expect(data.reasoning).toContain('[AUTOMATICALLY LIFTED');
+        // Must NOT be contaminated with a different ban's reasoning.
+        for (const other of expiredBans) {
+          if (other.id !== ban.id) {
+            expect(data.reasoning).not.toContain(other.reasoning);
+          }
+        }
+      }
+    });
+
+    it('returns { lifted: 0 } and does nothing when no bans are expired', async () => {
+      vi.mocked(prismaService.moderationAction.findMany).mockResolvedValue([] as never);
+
+      const result = await service.autoLiftExpiredBans();
+
+      expect(result).toEqual({ lifted: 0 });
+      expect(prismaService.moderationAction.update).not.toHaveBeenCalled();
     });
   });
 });

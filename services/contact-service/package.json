@@ -28,19 +28,19 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "fastify": "^5.8.4",
-    "googleapis": "^171.4.0",
+    "googleapis": "^173.0.0",
     "jwks-rsa": "4.0.1",
     "pg": "^8.20.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.17",
     "@nestjs/testing": "^11.1.18",
-    "@pact-foundation/pact": "^16.3.0",
+    "@pact-foundation/pact": "^17.0.1",
     "@types/node": "^25.5.2",
     "@types/pg": "^8.20.0",
     "@vitest/coverage-v8": "^2.1.8",
     "tsx": "^4.21.0",
-    "typescript": "^5.7.3",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.2"
   }
 }

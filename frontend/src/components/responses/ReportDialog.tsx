@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export type ReportReason = 'SPAM' | 'HARASSMENT' | 'MISINFORMATION' | 'HATE_SPEECH' | 'OTHER';
 
@@ -80,16 +81,8 @@ const ReportDialog: React.FC<ReportDialogProps> = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, isSubmitting, onClose]);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  // Reference-counted lock so a still-open drawer/modal keeps scroll locked (#1378).
+  useScrollLock(isOpen);
 
   const handleSubmit = () => {
     requireAuth(async () => {

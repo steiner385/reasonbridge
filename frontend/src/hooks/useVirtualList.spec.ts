@@ -105,37 +105,41 @@ describe('useVirtualList', () => {
 
   describe('Resize handling', () => {
     it('should update container height on window resize when height not provided', () => {
-      const { result, rerender } = renderHook(() => useVirtualList(50, { itemHeight: 80 }));
+      vi.useFakeTimers();
+      try {
+        const { result } = renderHook(() => useVirtualList(50, { itemHeight: 80 }));
 
-      const initialHeight = result.current.containerHeight;
+        const initialHeight = result.current.containerHeight;
 
-      // Mock container ref with getBoundingClientRect
-      const mockElement = {
-        getBoundingClientRect: () => ({ top: 100 }),
-        scrollTo: vi.fn(),
-      };
-      (result.current.containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
-        mockElement;
+        // Mock container ref with getBoundingClientRect
+        const mockElement = {
+          getBoundingClientRect: () => ({ top: 100 }),
+          scrollTo: vi.fn(),
+        };
+        (result.current.containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
+          mockElement as unknown as HTMLDivElement;
 
-      // Change window height
-      Object.defineProperty(window, 'innerHeight', {
-        writable: true,
-        value: 1200,
-      });
+        // Change window height
+        Object.defineProperty(window, 'innerHeight', {
+          writable: true,
+          configurable: true,
+          value: 1200,
+        });
 
-      // Trigger resize event
-      act(() => {
-        window.dispatchEvent(new Event('resize'));
-      });
+        // Trigger resize event and flush the 150ms debounce inside act so the
+        // resulting setState is applied.
+        act(() => {
+          window.dispatchEvent(new Event('resize'));
+          vi.advanceTimersByTime(150);
+        });
 
-      // Wait for debounced update (150ms)
-      vi.advanceTimersByTime(150);
-
-      rerender();
-
-      // Height should update based on new window height and element position
-      // availableHeight = 1200 - 100 - 20 = 1080
-      expect(result.current.containerHeight).toBeGreaterThan(initialHeight);
+        // Height should update based on new window height and element position.
+        // availableHeight = 1200 - 100 - 20 = 1080 (> initial 800)
+        expect(result.current.containerHeight).toBe(1080);
+        expect(result.current.containerHeight).toBeGreaterThan(initialHeight);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should not update container height on resize when height is explicitly provided', () => {

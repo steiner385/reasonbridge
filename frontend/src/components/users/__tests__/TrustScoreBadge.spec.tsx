@@ -173,25 +173,25 @@ describe('TrustScoreBadge', () => {
     it('should show verification badge by default', () => {
       const user = createMockUser({ verificationLevel: VerificationLevel.BASIC });
       render(<TrustScoreBadge user={user} />);
-      expect(screen.getByText('Basic')).toBeInTheDocument();
+      expect(screen.getByTestId('verification-level')).toHaveTextContent('BASIC');
     });
 
-    it('should show "Verified" for VERIFIED_HUMAN level', () => {
+    it('should show "VERIFIED HUMAN" for VERIFIED_HUMAN level', () => {
       const user = createMockUser({ verificationLevel: VerificationLevel.VERIFIED_HUMAN });
       render(<TrustScoreBadge user={user} />);
-      expect(screen.getByText('Verified')).toBeInTheDocument();
+      expect(screen.getByTestId('verification-level')).toHaveTextContent('VERIFIED HUMAN');
     });
 
-    it('should show "Enhanced" for ENHANCED level', () => {
+    it('should show "ENHANCED" for ENHANCED level', () => {
       const user = createMockUser({ verificationLevel: VerificationLevel.ENHANCED });
       render(<TrustScoreBadge user={user} />);
-      expect(screen.getByText('Enhanced')).toBeInTheDocument();
+      expect(screen.getByTestId('verification-level')).toHaveTextContent('ENHANCED');
     });
 
     it('should hide verification badge when showVerification is false', () => {
       const user = createMockUser({ verificationLevel: VerificationLevel.VERIFIED_HUMAN });
       render(<TrustScoreBadge user={user} showVerification={false} />);
-      expect(screen.queryByText('Verified')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('verification-level')).not.toBeInTheDocument();
     });
   });
 

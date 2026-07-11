@@ -24,6 +24,33 @@ export class ResponsesProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
 
   /**
+   * POST /responses - Create a top-level response to a discussion
+   *
+   * The frontend (responseService.createResponse) posts here with `discussionId`
+   * in the body. Proxies to discussion-service: POST /topics/responses, which
+   * reads discussionId from the body.
+   */
+  @Post()
+  async createResponse(
+    @Body() body: Record<string, unknown>,
+    @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-user-id') userId: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
+    const response = await this.proxyService.proxyToDiscussionService({
+      method: 'POST',
+      path: '/topics/responses',
+      body,
+      headers: {
+        ...(authHeader && { Authorization: authHeader }),
+        ...(userId && { 'X-User-Id': userId }),
+      },
+    });
+
+    res.status(response.status).send(response.data);
+  }
+
+  /**
    * POST /responses/:responseId/replies - Create a threaded reply to a response
    *
    * Proxies to discussion-service: POST /responses/:responseId/replies

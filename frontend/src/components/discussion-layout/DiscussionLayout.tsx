@@ -98,6 +98,10 @@ export function DiscussionLayout({
   const breakpoint = useBreakpoint();
   const [isLeftPanelOverlayOpen, setIsLeftPanelOverlayOpen] = useState(false);
 
+  // A left panel only exists when it isn't hidden AND content was actually provided.
+  // The overlay/hamburger/swipe affordances are meaningless without it (#1376).
+  const hasLeftPanel = !hideSidebar && leftPanel != null;
+
   // Close overlay when breakpoint changes to desktop
   useEffect(() => {
     if (breakpoint === 'desktop') {
@@ -119,7 +123,11 @@ export function DiscussionLayout({
   // Swipe gesture handlers (mobile/tablet only)
   const swipeHandlers = useSwipeable({
     onSwipedRight: () => {
-      if ((breakpoint === 'tablet' || breakpoint === 'mobile') && !isLeftPanelOverlayOpen) {
+      if (
+        hasLeftPanel &&
+        (breakpoint === 'tablet' || breakpoint === 'mobile') &&
+        !isLeftPanelOverlayOpen
+      ) {
         setIsLeftPanelOverlayOpen(true);
       }
     },
@@ -145,6 +153,7 @@ export function DiscussionLayout({
       setPanelWidth,
       togglePanel,
       setActiveTopic,
+      hasLeftPanel,
       isLeftPanelOverlayOpen,
       toggleLeftPanelOverlay: handleToggleLeftPanelOverlay,
       closeLeftPanelOverlay: handleCloseLeftPanelOverlay,
@@ -157,6 +166,7 @@ export function DiscussionLayout({
       setPanelWidth,
       togglePanel,
       setActiveTopic,
+      hasLeftPanel,
       isLeftPanelOverlayOpen,
       handleToggleLeftPanelOverlay,
       handleCloseLeftPanelOverlay,

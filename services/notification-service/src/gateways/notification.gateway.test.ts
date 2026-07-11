@@ -39,24 +39,18 @@ describe('NotificationGateway', () => {
   });
 
   describe('handleConnection', () => {
-    it('should log client connection', () => {
+    it('should handle client connection without throwing', () => {
       const mockSocket = createMockSocket();
 
-      gateway.handleConnection(mockSocket as any);
-
-      // No assertions needed - just verify it doesn't throw
-      expect(true).toBe(true);
+      expect(() => gateway.handleConnection(mockSocket as any)).not.toThrow();
     });
   });
 
   describe('handleDisconnect', () => {
-    it('should log client disconnection', () => {
+    it('should handle client disconnection without throwing', () => {
       const mockSocket = createMockSocket();
 
-      gateway.handleDisconnect(mockSocket as any);
-
-      // No assertions needed - just verify it doesn't throw
-      expect(true).toBe(true);
+      expect(() => gateway.handleDisconnect(mockSocket as any)).not.toThrow();
     });
   });
 

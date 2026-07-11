@@ -127,8 +127,22 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
     );
   }
 
-  // Legacy fallback: use avatarUrl or Gravatar
-  const fallbackSrc = user.avatarUrl || getGravatarUrl(user.email);
+  // Legacy fallback: use avatarUrl or Gravatar (if email is available)
+  // Note: Public profile API may not include email for privacy reasons
+  const fallbackSrc = user.avatarUrl || (user.email ? getGravatarUrl(user.email) : null);
+
+  // If no fallback source (no avatar and no email), show default icon
+  if (!fallbackSrc) {
+    return (
+      <div className={baseClasses} {...testAttributes}>
+        <UserIcon
+          className={`${iconSizeClasses[size]} text-gray-400 dark:text-gray-500`}
+          aria-hidden="true"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={baseClasses} {...testAttributes}>
       <img

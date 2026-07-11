@@ -578,21 +578,26 @@ export class ModerationActionsService {
       return { lifted: 0 };
     }
 
-    // Update all expired bans to REVERSED status
-    if (expiredBans.length > 0) {
-      await this.prisma.moderationAction.updateMany({
-        where: {
-          id: {
-            in: expiredBans.map((b) => b.id),
+    // Update each expired ban to REVERSED status individually.
+    //
+    // NOTE: Do NOT use updateMany here. updateMany applies one literal `data`
+    // payload to every matched row, so appending `expiredBans[0].reasoning`
+    // would overwrite EVERY ban's original moderation reasoning with the first
+    // ban's text — permanently corrupting the audit trail across unrelated
+    // users and offenses. Per-row updates inside a single transaction let each
+    // ban keep its own reasoning while remaining atomic.
+    await this.prisma.$transaction(
+      expiredBans.map((ban) =>
+        this.prisma.moderationAction.update({
+          where: { id: ban.id },
+          data: {
+            status: 'REVERSED',
+            liftedAt: now,
+            reasoning: `${ban.reasoning}\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]`,
           },
-        },
-        data: {
-          status: 'REVERSED',
-          liftedAt: now,
-          reasoning: `${expiredBans[0]!.reasoning}\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]`,
-        },
-      });
-    }
+        }),
+      ),
+    );
 
     return { lifted: expiredBans.length };
   }

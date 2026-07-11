@@ -17,13 +17,16 @@ import {
   SignUpCommand,
   ConfirmSignUpCommand,
   ResendConfirmationCodeCommand,
+  ForgotPasswordCommand,
+  ConfirmForgotPasswordCommand,
   type InitiateAuthCommandInput,
   type AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';
-import type { AuthResult, RefreshResult } from './auth.interface.js';
+import { BadRequestException } from '@nestjs/common';
+import type { IAuthService, AuthResult, RefreshResult } from './auth.interface.js';
 
 @Injectable()
-export class CognitoService implements OnModuleDestroy {
+export class CognitoService implements IAuthService, OnModuleDestroy {
   private readonly logger = new Logger(CognitoService.name);
   private readonly cognitoClient: CognitoIdentityProviderClient;
   private readonly userPoolId: string;
@@ -226,6 +229,67 @@ export class CognitoService implements OnModuleDestroy {
    */
   async initiateAuth(email: string, password: string): Promise<AuthResult> {
     return this.authenticateUser(email, password);
+  }
+
+  /**
+   * Request a password reset code from Cognito.
+   *
+   * Always resolves successfully (even for unknown accounts) to prevent email
+   * enumeration; Cognito delivers the reset code to the account owner.
+   *
+   * @param email - The email address requesting a password reset
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    try {
+      const command = new ForgotPasswordCommand({
+        ClientId: this.clientId,
+        Username: email,
+      });
+      await this.cognitoClient.send(command);
+    } catch (error: unknown) {
+      // Suppress errors that would reveal whether an account exists.
+      const errorObj = error as { name?: string };
+      if (
+        errorObj.name === 'UserNotFoundException' ||
+        errorObj.name === 'InvalidParameterException'
+      ) {
+        return;
+      }
+      this.logger.warn(`Cognito forgot-password request failed: ${errorObj.name ?? 'unknown'}`);
+    }
+  }
+
+  /**
+   * Confirm a password reset with a Cognito verification code.
+   *
+   * @param email - The account email address
+   * @param code - The confirmation code Cognito emailed to the user
+   * @param newPassword - The new password to set
+   * @throws {UnauthorizedException} When the code is invalid or expired
+   * @throws {BadRequestException} When the new password does not meet requirements
+   */
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    try {
+      const command = new ConfirmForgotPasswordCommand({
+        ClientId: this.clientId,
+        Username: email,
+        ConfirmationCode: code,
+        Password: newPassword,
+      });
+      await this.cognitoClient.send(command);
+    } catch (error: unknown) {
+      const errorObj = error as { name?: string; message?: string };
+      if (errorObj.name === 'CodeMismatchException') {
+        throw new UnauthorizedException('Invalid password reset code');
+      }
+      if (errorObj.name === 'ExpiredCodeException') {
+        throw new UnauthorizedException('Password reset code has expired');
+      }
+      if (errorObj.name === 'InvalidPasswordException') {
+        throw new BadRequestException(errorObj.message || 'Password does not meet requirements');
+      }
+      throw new UnauthorizedException('Password reset failed');
+    }
   }
 
   /**

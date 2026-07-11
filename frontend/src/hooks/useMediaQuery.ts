@@ -20,17 +20,32 @@ import { useState, useEffect } from 'react';
  * ```
  */
 export function useMediaQuery(query: string): boolean {
-  // Initialize with false to avoid hydration mismatch (SSR compatibility)
-  const [matches, setMatches] = useState<boolean>(false);
+  // Initialize synchronously from the real match so the first committed frame is correct.
+  // This is a client-only SPA (no SSR/hydration), so the previous deferred `setTimeout(0)`
+  // default of `false` produced a one-frame desktop layout on phones (#1382). Mirrors
+  // useBreakpoint, which already initializes synchronously from window.innerWidth.
+  const [matches, setMatches] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return false; // SSR / non-browser fallback
+    }
+    return window.matchMedia(query).matches;
+  });
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return undefined;
+    }
+
     // Create MediaQueryList object
     const mediaQuery = window.matchMedia(query);
 
-    // Set initial value asynchronously to avoid cascading renders
-    const initTimer = setTimeout(() => {
-      setMatches(mediaQuery.matches);
-    }, 0);
+    // Re-sync in case the query changed or the viewport shifted before this effect ran.
+    // Wrapped in a helper + functional no-op form (mirrors useBreakpoint) so it doesn't
+    // trigger a cascading render.
+    const sync = () => {
+      setMatches((prev) => (prev !== mediaQuery.matches ? mediaQuery.matches : prev));
+    };
+    sync();
 
     // Create event listener for changes
     const handleChange = (event: MediaQueryListEvent) => {
@@ -47,7 +62,6 @@ export function useMediaQuery(query: string): boolean {
 
     // Cleanup
     return () => {
-      clearTimeout(initTimer);
       if (mediaQuery.removeEventListener) {
         mediaQuery.removeEventListener('change', handleChange);
       } else {

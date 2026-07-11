@@ -19,6 +19,8 @@ import { ParentalDashboardController } from './parental-dashboard.controller.js'
 import { ComplianceController } from './compliance.controller.js';
 import { AdminGuard } from './guards/admin.guard.js';
 import { EmailService } from '../services/email.service.js';
+import { S3Service } from '../services/s3.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { GeoModule } from '../geo/index.js';
@@ -43,9 +45,16 @@ import { GeoModule } from '../geo/index.js';
     ConfigModule,
     GeoModule,
     JwtModule.register({
-      // JWT secret is required for JwtService to work properly
-      // JwtAuthGuard will use this for mock/database auth modes
-      secret: process.env['JWT_SECRET'] || 'default-dev-secret',
+      // JWT secret is required for JwtService to work properly.
+      // Fail fast outside of tests instead of silently using a committed secret;
+      // the test fallback matches JwtAuthGuard so tokens verify end-to-end.
+      secret: (() => {
+        const secret = process.env['JWT_SECRET'];
+        if (!secret && process.env['NODE_ENV'] !== 'test') {
+          throw new Error('JWT_SECRET environment variable is required');
+        }
+        return secret ?? 'mock-jwt-secret-for-testing';
+      })(),
       signOptions: { algorithm: 'HS256' },
     }),
   ],
@@ -56,18 +65,24 @@ import { GeoModule } from '../geo/index.js';
     ParentalConsentService,
     ComplianceAuditService,
     ComplianceReportService,
-    DataDeletionService,
     DataDeletionJob,
     AgeReverificationJob,
     EmailService,
+    S3Service,
     AdminGuard,
-    // Factory provider that explicitly injects dependencies
-    // This bypasses NestJS's reflection-based DI which can hang with @Optional() decorators
+    // Factory providers that explicitly inject dependencies.
+    // This bypasses NestJS's reflection-based DI which can hang with @Optional() decorators.
     {
       provide: JwtAuthGuard,
       useFactory: (jwtService: JwtService, configService: ConfigService) =>
         new JwtAuthGuard(jwtService, configService),
       inject: [JwtService, ConfigService],
+    },
+    {
+      provide: DataDeletionService,
+      useFactory: (prisma: PrismaService, audit: ComplianceAuditService, s3Service: S3Service) =>
+        new DataDeletionService(prisma, audit, s3Service),
+      inject: [PrismaService, ComplianceAuditService, S3Service],
     },
   ],
   exports: [

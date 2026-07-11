@@ -11,6 +11,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
 import { useTopics } from '../../lib/useTopics';
+import { useElementHeight } from '../../hooks/useElementHeight';
 import Avatar from '../ui/Avatar';
 import { Navigation } from './Navigation';
 import { CompactSiteNav } from './CompactSiteNav';
@@ -39,6 +40,9 @@ export function Sidebar() {
   const { activeTopicId } = useTopicNavigation();
   const { subscribe } = useWebSocket();
   const [unreadMap, setUnreadMap] = useState<Map<string, boolean>>(new Map());
+  // Live-measured height for the topic virtual list (stays correct after rotation /
+  // keyboard viewport shrink — see #1383).
+  const [topicListRef, topicListHeight] = useElementHeight<HTMLDivElement>(600);
 
   // Fetch topics when in topics mode
   // When not in topics mode, pass undefined to skip fetching
@@ -125,14 +129,14 @@ export function Sidebar() {
 
         {/* Topic Navigation Content - hidden when collapsed */}
         {!isCollapsed && (
-          <div className="flex-1 overflow-hidden">
+          <div ref={topicListRef} className="flex-1 overflow-hidden">
             <TopicNavigationContent
               topics={topics}
               unreadMap={unreadMap}
               isLoading={isLoading}
               error={errorMessage}
               onRetry={() => refetch()}
-              height={typeof window !== 'undefined' ? window.innerHeight - 120 : 600}
+              height={topicListHeight}
             />
           </div>
         )}

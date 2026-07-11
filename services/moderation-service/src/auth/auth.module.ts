@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { AdminGuard } from './admin.guard.js';
+import { ModeratorGuard } from './moderator.guard.js';
 
 /**
  * Authentication module for moderation-service.
@@ -39,7 +40,8 @@ import { AdminGuard } from './admin.guard.js';
       inject: [JwtService, ConfigService],
     },
     AdminGuard,
+    ModeratorGuard,
   ],
-  exports: [JwtAuthGuard, AdminGuard, JwtModule],
+  exports: [JwtAuthGuard, AdminGuard, ModeratorGuard, JwtModule],
 })
 export class AuthModule {}
