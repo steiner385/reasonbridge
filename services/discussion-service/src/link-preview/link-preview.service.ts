@@ -92,17 +92,38 @@ export class LinkPreviewService {
       };
     }
 
-    // Step 3: Fetch Open Graph metadata
+    // Step 3: Fetch the HTML ourselves with SSRF-safe redirect handling, then
+    // let ogs parse the already-fetched HTML. This prevents ogs/undici from
+    // making its own request that would (a) follow 30x redirects to internal
+    // targets and (b) independently re-resolve DNS (TOCTOU rebinding).
+    let html: string;
     try {
-      const { result, error } = await ogs({
-        url: validation.normalizedUrl,
-        timeout: LINK_PREVIEW.FETCH_TIMEOUT_MS,
-        fetchOptions: {
-          headers: {
-            'User-Agent': 'ReasonBridge-LinkPreview/1.0 (+https://reasonbridge.com)',
-          },
+      html = await this.fetchHtmlSafely(validation.normalizedUrl);
+    } catch (fetchError) {
+      const message = fetchError instanceof Error ? fetchError.message : String(fetchError);
+      const isTimeout =
+        message.includes('timeout') || message.includes('ETIMEDOUT') || message.includes('aborted');
+      const isBlocked = message.startsWith('SSRF_BLOCKED:');
+
+      this.logger.warn(`Failed to fetch HTML for ${url}: ${message}`);
+      return {
+        success: false,
+        error: {
+          url,
+          error: isBlocked
+            ? 'URL redirects to a blocked destination'
+            : isTimeout
+              ? 'Request timed out'
+              : 'Failed to fetch link metadata',
+          code: isBlocked ? 'BLOCKED' : isTimeout ? 'TIMEOUT' : 'FETCH_FAILED',
         },
-      });
+      };
+    }
+
+    try {
+      // Pass ONLY html (no url) so ogs parses the provided markup and can never
+      // fall back to performing its own unvalidated network request.
+      const { result, error } = await ogs({ html });
 
       if (error || !result.success) {
         this.logger.warn(`Failed to fetch OG data for ${url}: ${result.error || 'Unknown error'}`);
@@ -154,6 +175,100 @@ export class LinkPreviewService {
         },
       };
     }
+  }
+
+  /**
+   * Fetch a URL's HTML while defending against SSRF via redirects and DNS
+   * rebinding.
+   *
+   * @remarks
+   * Redirects are NOT followed automatically. Instead, each hop is re-run
+   * through {@link validateCitationUrl} before being fetched, so a validated
+   * public URL cannot bounce the request to an internal address (e.g. the cloud
+   * metadata endpoint). The response body is capped to prevent unbounded reads.
+   *
+   * @param initialUrl - The already-normalized, already-validated starting URL
+   * @returns The fetched HTML as a string
+   * @throws {Error} `SSRF_BLOCKED:<reason>` when a (redirect) hop fails validation
+   * @throws {Error} When the request times out, errors, or returns a non-OK status
+   */
+  private async fetchHtmlSafely(initialUrl: string): Promise<string> {
+    let currentUrl = initialUrl;
+
+    for (let hop = 0; hop <= LINK_PREVIEW.MAX_REDIRECTS; hop++) {
+      // Re-validate every hop (including redirects) against SSRF threats.
+      const validation = await validateCitationUrl(currentUrl);
+      if (!isSafeUrl(validation)) {
+        throw new Error(`SSRF_BLOCKED:${validation.error ?? 'blocked'}`);
+      }
+
+      const response = await fetch(currentUrl, {
+        method: 'GET',
+        redirect: 'manual', // Do not auto-follow; we validate each hop ourselves.
+        signal: AbortSignal.timeout(LINK_PREVIEW.FETCH_TIMEOUT_MS),
+        headers: {
+          'User-Agent': 'ReasonBridge-LinkPreview/1.0 (+https://reasonbridge.com)',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+      });
+
+      // Handle redirects manually so each destination is re-validated.
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('location');
+        if (!location) {
+          throw new Error(`Redirect (${response.status}) without Location header`);
+        }
+        // Resolve relative redirects against the current URL.
+        currentUrl = new URL(location, currentUrl).href;
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Upstream returned status ${response.status}`);
+      }
+
+      // Reject obviously oversized bodies up front when advertised.
+      const contentLength = Number(response.headers.get('content-length') ?? '0');
+      if (contentLength > LINK_PREVIEW.MAX_BODY_BYTES) {
+        throw new Error('Response body exceeds maximum allowed size');
+      }
+
+      return await this.readCappedText(response);
+    }
+
+    throw new Error(`Too many redirects (>${LINK_PREVIEW.MAX_REDIRECTS})`);
+  }
+
+  /**
+   * Read a response body as text, capped at {@link LINK_PREVIEW.MAX_BODY_BYTES}
+   * to guard against unbounded/streamed downloads.
+   */
+  private async readCappedText(response: Response): Promise<string> {
+    if (!response.body) {
+      return '';
+    }
+
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          total += value.byteLength;
+          if (total > LINK_PREVIEW.MAX_BODY_BYTES) {
+            throw new Error('Response body exceeds maximum allowed size');
+          }
+          chunks.push(value);
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    return Buffer.concat(chunks).toString('utf-8');
   }
 
   /**

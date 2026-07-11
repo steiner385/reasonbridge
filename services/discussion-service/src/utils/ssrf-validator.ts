@@ -44,25 +44,32 @@ export interface SSRFValidationResult {
 }
 
 /**
- * Private IP ranges (RFC 1918, localhost, link-local, multicast)
+ * Private/reserved IPv4 ranges (RFC 1918, loopback, link-local, CGNAT, etc.)
  */
-const PRIVATE_IP_RANGES = [
-  // IPv4
+const PRIVATE_IPV4_RANGES = [
   /^127\./, // Loopback (127.0.0.0/8)
   /^10\./, // Private (10.0.0.0/8)
   /^172\.(1[6-9]|2\d|3[01])\./, // Private (172.16.0.0/12)
   /^192\.168\./, // Private (192.168.0.0/16)
-  /^169\.254\./, // Link-local (169.254.0.0/16)
-  /^224\./, // Multicast (224.0.0.0/4)
+  /^169\.254\./, // Link-local (169.254.0.0/16) — includes cloud metadata 169.254.169.254
+  /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./, // Carrier-grade NAT (100.64.0.0/10)
+  /^192\.0\.0\./, // IETF protocol assignments (192.0.0.0/24)
+  /^(22[4-9]|23\d)\./, // Multicast (224.0.0.0/4 → 224-239)
+  /^(24\d|25[0-5])\./, // Reserved / broadcast (240.0.0.0/4 → 240-255)
   /^0\./, // "This" network (0.0.0.0/8)
-  /^255\./, // Broadcast
+];
 
-  // IPv6
+/**
+ * Private/reserved IPv6 ranges
+ */
+const PRIVATE_IPV6_RANGES = [
   /^::1$/, // Loopback
+  /^::$/, // Unspecified
   /^fe80:/i, // Link-local
-  /^fc00:/i, // Unique local address
-  /^fd00:/i, // Unique local address
+  /^fc00:/i, // Unique local address (fc00::/7)
+  /^fd[0-9a-f]{2}:/i, // Unique local address (fd00::/8)
   /^ff00:/i, // Multicast
+  /^fe[89ab][0-9a-f]:/i, // Link-local variants (fe80::/10)
 ];
 
 /**
@@ -71,10 +78,41 @@ const PRIVATE_IP_RANGES = [
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 
 /**
- * Checks if an IP address is in a private range
+ * Extract the embedded IPv4 address from an IPv4-mapped/compatible IPv6
+ * address (e.g. `::ffff:169.254.169.254` or `::ffff:a9fe:a9fe`).
+ * Returns null when the address does not embed an IPv4 address.
+ */
+function extractMappedIpv4(ip: string): string | null {
+  const lower = ip.toLowerCase();
+  // Dotted-quad form: ::ffff:169.254.169.254 or ::169.254.169.254
+  const dotted = lower.match(/(?:::ffff:|::)((?:\d{1,3}\.){3}\d{1,3})$/);
+  if (dotted && dotted[1]) {
+    return dotted[1];
+  }
+  // Hex form: ::ffff:a9fe:a9fe → a9fe:a9fe → 169.254.169.254
+  const hex = lower.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (hex && hex[1] && hex[2]) {
+    const high = parseInt(hex[1], 16);
+    const low = parseInt(hex[2], 16);
+    return `${(high >> 8) & 0xff}.${high & 0xff}.${(low >> 8) & 0xff}.${low & 0xff}`;
+  }
+  return null;
+}
+
+/**
+ * Checks if an IP address (IPv4 or IPv6, including IPv4-mapped IPv6) is in a
+ * private or otherwise reserved range that must never be fetched server-side.
  */
 function isPrivateIP(ip: string): boolean {
-  return PRIVATE_IP_RANGES.some((range) => range.test(ip));
+  // Reject IPv4-mapped/compatible IPv6 by checking the embedded IPv4 too.
+  const mapped = extractMappedIpv4(ip);
+  if (mapped && (PRIVATE_IPV4_RANGES.some((r) => r.test(mapped)) || isIP(mapped) === 0)) {
+    return true;
+  }
+  if (PRIVATE_IPV4_RANGES.some((range) => range.test(ip))) {
+    return true;
+  }
+  return PRIVATE_IPV6_RANGES.some((range) => range.test(ip));
 }
 
 /**
@@ -170,13 +208,20 @@ export async function validateCitationUrl(urlString: string): Promise<SSRFValida
     };
   }
 
-  // Layer 5: DNS resolution to detect private IPs behind public domains
+  // Layer 5: DNS resolution to detect private IPs behind public domains.
+  // Resolve BOTH A (IPv4) and AAAA (IPv6) records and check EVERY address — a
+  // host with multiple records (or an AAAA-only record) must not be able to
+  // slip a private address past a check that only inspects the first A record.
   let resolvedIp: string;
   try {
-    // Resolve hostname to IP addresses
-    const addresses = await dns.resolve(hostname, 'A');
+    const [aRecords, aaaaRecords] = await Promise.all([
+      dns.resolve4(hostname).catch(() => [] as string[]),
+      dns.resolve6(hostname).catch(() => [] as string[]),
+    ]);
 
-    if (!addresses || addresses.length === 0) {
+    const addresses = [...aRecords, ...aaaaRecords].filter(Boolean);
+
+    if (addresses.length === 0) {
       return {
         safe: false,
         originalUrl: urlString,
@@ -186,20 +231,22 @@ export async function validateCitationUrl(urlString: string): Promise<SSRFValida
       };
     }
 
-    // Use first resolved IP
-    resolvedIp = addresses[0] || '';
-
-    // Check if resolved IP is private (DNS rebinding attack)
-    if (isPrivateIP(resolvedIp)) {
+    // Reject if ANY resolved address is private/reserved (DNS rebinding defense).
+    const privateAddress = addresses.find((addr) => isPrivateIP(addr));
+    if (privateAddress) {
       return {
         safe: false,
         originalUrl: urlString,
         normalizedUrl,
-        resolvedIp,
-        error: `Hostname resolves to private IP: ${hostname} → ${resolvedIp}`,
+        resolvedIp: privateAddress,
+        error: `Hostname resolves to private IP: ${hostname} → ${privateAddress}`,
         threat: 'PRIVATE_IP',
       };
     }
+
+    // Pin to the first validated address so callers can connect to the exact IP
+    // that was checked, defeating TOCTOU DNS-rebinding at fetch time.
+    resolvedIp = addresses[0] as string;
   } catch (error) {
     // DNS resolution failed - domain doesn't exist or DNS error
     return {
