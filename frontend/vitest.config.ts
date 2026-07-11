@@ -57,11 +57,20 @@ export default defineConfig({
         'src/test/**',
         'src/setupTests.ts',
       ],
+      thresholds: {
+        lines: 40,
+        functions: 35,
+        branches: 30,
+        statements: 40,
+      },
     },
 
     // JUnit XML output for CI/CD
+    // Note: path is relative to the frontend/ directory; uses frontend-junit.xml
+    // to avoid colliding with the repo-root coverage/junit.xml that the unused
+    // root vitest.config.ts would write.
     outputFile: {
-      junit: '../coverage/junit.xml',
+      junit: '../coverage/frontend-junit.xml',
     },
   },
 });
