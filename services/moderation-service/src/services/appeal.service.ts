@@ -7,10 +7,13 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
   ConflictException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
+import { NotificationServiceClient } from '../clients/notification-service.client.js';
 import type { UserTrustUpdatedEvent } from '@reason-bridge/event-schemas';
 import { MODERATION_EVENT_TYPES } from '@reason-bridge/event-schemas';
 import type {
@@ -35,6 +38,9 @@ export class AppealService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queueService: QueueService,
+    // Optional so unit tests that construct the service directly keep working;
+    // when present, appellants are notified of appeal decisions.
+    @Optional() private readonly notificationClient?: NotificationServiceClient,
   ) {}
 
   /**
@@ -73,6 +79,14 @@ export class AppealService {
       throw new BadRequestException(
         'Cannot appeal a moderation action that has already been reversed',
       );
+    }
+
+    // Ownership check: only the user targeted by the action may appeal it.
+    // For USER targets, targetId IS the affected user, so this is an exact check
+    // and prevents unaffected/accomplice accounts from filing appeals to game
+    // status-based enforcement (see getUserBanStatus).
+    if (action.targetType === 'USER' && action.targetId !== appellantId) {
+      throw new ForbiddenException('You can only appeal moderation actions that target you');
     }
 
     // Check if an appeal already exists for this action by this user. There is
@@ -445,7 +459,31 @@ export class AppealService {
         console.error('Failed to publish appeal upheld event:', error);
         // Don't throw - the appeal decision should still be recorded
       }
+    } else if (request.decision === 'denied' && appeal.moderationAction) {
+      // A denied appeal must return the action to ACTIVE so enforcement resumes,
+      // rather than leaving it stuck in APPEALED indefinitely.
+      if (appeal.moderationAction.status === 'APPEALED') {
+        await this.prisma.moderationAction.update({
+          where: { id: appeal.moderationAction.id },
+          data: { status: 'ACTIVE' },
+        });
+      }
     }
+
+    // Notify the appellant of the outcome (best-effort). The Appeal Status page
+    // promises "You will receive a notification when your appeal has been
+    // reviewed" — this fulfils that promise for both upheld and denied decisions.
+    const upheld = request.decision === 'upheld';
+    await this.notificationClient?.trySendModerationNotification({
+      userId: appeal.appellantId,
+      type: 'appeal_decision',
+      title: upheld ? 'Your appeal was upheld' : 'Your appeal was denied',
+      body: upheld
+        ? `Your appeal has been reviewed and upheld. The moderation action has been reversed.\n\nReviewer note: ${request.reasoning}`
+        : `Your appeal has been reviewed and denied. The moderation action remains in effect.\n\nReviewer note: ${request.reasoning}`,
+      actionUrl: `/appeal/${appealId}`,
+      metadata: { appealId, decision: newStatus },
+    });
 
     return this.mapAppealToResponse(updatedAppeal);
   }

@@ -218,28 +218,15 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundError'
 
-  /{id}/archive:
-    post:
+  /{id}/status:
+    patch:
       tags: [Topic Lifecycle]
-      summary: Archive a topic
-      operationId: archiveTopic
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/TopicId'
-      responses:
-        '200':
-          description: Topic archived successfully
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-
-  /{id}/lock:
-    post:
-      tags: [Topic Lifecycle]
-      summary: Lock a topic (prevent new discussions)
-      operationId: lockTopic
+      summary: Update topic status (archive, lock, reopen, seed)
+      description: >
+        Single lifecycle endpoint that transitions a topic between SEEDING,
+        ACTIVE, ARCHIVED and LOCKED. Replaces the earlier separate
+        archive/lock/reopen routes.
+      operationId: updateTopicStatus
       security:
         - bearerAuth: []
       parameters:
@@ -251,36 +238,25 @@ paths:
             schema:
               type: object
               properties:
-                reason:
+                status:
                   type: string
-                  maxLength: 500
-              required: [reason]
+                  enum: [SEEDING, ACTIVE, ARCHIVED, LOCKED]
+              required: [status]
       responses:
         '200':
-          description: Topic locked successfully
+          description: Topic status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDetail'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
         '404':
           $ref: '#/components/responses/NotFoundError'
 
-  /{id}/reopen:
-    post:
-      tags: [Topic Lifecycle]
-      summary: Reopen an archived or locked topic
-      operationId: reopenTopic
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/TopicId'
-      responses:
-        '200':
-          description: Topic reopened successfully
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-
-  /{id}/edits:
+  /{id}/history:
     get:
       tags: [Topics]
       summary: Get topic edit history

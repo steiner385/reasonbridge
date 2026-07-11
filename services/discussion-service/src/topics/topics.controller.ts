@@ -21,6 +21,7 @@ import {
 // TEMPORARILY DISABLED for debugging hang issue
 // import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Throttle } from '@nestjs/throttler';
+import { parsePositiveInt } from '@reason-bridge/common';
 import type { FastifyReply as Response } from 'fastify';
 import { TopicsService } from './topics.service.js';
 import { GetTopicsQueryDto } from './dto/get-topics-query.dto.js';
@@ -177,7 +178,9 @@ export class TopicsController {
     @Param('id') id: string,
     @Query('limit') limit?: string,
   ): Promise<import('./topics-edit.service.js').TopicEditRecord[]> {
-    const limitNum = limit ? parseInt(limit, 10) : 50;
+    // Guard against NaN/negative/oversized limits (e.g. ?limit=abc) instead of
+    // letting a raw parseInt flow into the query.
+    const limitNum = parsePositiveInt(limit, 50, { min: 1, max: 100 });
     return this.topicsService.getTopicEditHistory(id, limitNum);
   }
 
@@ -230,7 +233,9 @@ export class TopicsController {
     @Param('id') id: string,
     @Query('days') days?: string,
   ): Promise<import('./topics-analytics.service.js').TopicAnalyticsResponse> {
-    const daysBack = days ? parseInt(days, 10) : 30;
+    // Guard against NaN/negative/oversized values (e.g. ?days=abc) that would
+    // otherwise propagate NaN into date arithmetic and yield an Invalid Date range.
+    const daysBack = parsePositiveInt(days, 30, { min: 1, max: 365 });
     return this.analyticsService.getTopicAnalytics(id, daysBack);
   }
 

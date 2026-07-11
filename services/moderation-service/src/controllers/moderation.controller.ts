@@ -73,6 +73,12 @@ export interface ScreenContentRequest {
 }
 
 export interface ScreenContentResponse {
+  /** Screening outcome (camelCase, current convention). */
+  screeningResult: ScreeningResult;
+  /**
+   * @deprecated Use `screeningResult`. This snake_case alias is emitted for a
+   * deprecation window for existing consumers and will be removed.
+   */
   screening_result: ScreeningResult;
   recommendations: string[];
 }
@@ -114,6 +120,8 @@ export class ModerationController {
     const recommendations = this.screeningService.getRecommendations(screening_result);
 
     return {
+      screeningResult: screening_result,
+      // Deprecated alias retained for backward compatibility; prefer screeningResult.
       screening_result,
       recommendations,
     };

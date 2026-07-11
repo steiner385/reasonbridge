@@ -4,6 +4,7 @@
  */
 
 import { Controller, All, Req, Res, Headers, Inject } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service.js';
 
@@ -11,6 +12,7 @@ import { ProxyService } from './proxy.service.js';
  * Notification Service Proxy Controller
  * Proxies all /notifications/* requests to the notification service
  */
+@ApiTags('notifications')
 @Controller('notifications')
 export class NotificationProxyController {
   constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}

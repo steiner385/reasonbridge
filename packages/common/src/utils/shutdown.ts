@@ -4,6 +4,7 @@
  */
 
 import type { INestApplication } from '@nestjs/common';
+import { createShutdownLogger } from '../logging/index.js';
 
 /**
  * Configuration for graceful shutdown
@@ -13,7 +14,7 @@ export interface GracefulShutdownConfig {
   serviceName: string;
   /** Timeout in milliseconds before forcing shutdown (default: 10000) */
   timeoutMs?: number;
-  /** Custom logger (default: console) */
+  /** Custom logger (default: shared structured JSON logger). */
   logger?: {
     log: (message: string) => void;
     warn: (message: string) => void;
@@ -51,7 +52,10 @@ const DEFAULT_SHUTDOWN_TIMEOUT_MS = 10000;
  * ```
  */
 export function setupGracefulShutdown(app: INestApplication, config: GracefulShutdownConfig): void {
-  const { serviceName, timeoutMs = DEFAULT_SHUTDOWN_TIMEOUT_MS, logger = console } = config;
+  const { serviceName, timeoutMs = DEFAULT_SHUTDOWN_TIMEOUT_MS } = config;
+  // Default to the shared structured JSON logger so shutdown events are
+  // machine-parseable in log aggregation rather than raw console text.
+  const logger = config.logger ?? createShutdownLogger({ name: serviceName });
 
   // Enable NestJS shutdown hooks (calls OnModuleDestroy, beforeApplicationShutdown, etc.)
   app.enableShutdownHooks();

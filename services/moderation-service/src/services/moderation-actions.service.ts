@@ -8,9 +8,11 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { QueueService } from '../queue/queue.service.js';
+import { NotificationServiceClient } from '../clients/notification-service.client.js';
 import type { ModerationActionRequestedEvent } from '@reason-bridge/event-schemas';
 import { MODERATION_EVENT_TYPES } from '@reason-bridge/event-schemas';
 import type {
@@ -54,7 +56,50 @@ export class ModerationActionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queueService: QueueService,
+    // Optional so unit tests that construct the service directly (and the SLA
+    // job wiring) keep working; when present, affected users are notified of
+    // actions and appeal decisions.
+    @Optional() private readonly notificationClient?: NotificationServiceClient,
   ) {}
+
+  /**
+   * Human-readable label for a moderation action type, used in notifications.
+   */
+  private describeActionType(actionType: string): string {
+    const labels: Record<string, string> = {
+      EDUCATE: 'an educational notice',
+      WARN: 'a warning',
+      HIDE: 'content hidden',
+      REMOVE: 'content removed',
+      SUSPEND: 'a suspension',
+      BAN: 'a ban',
+    };
+    return labels[actionType.toUpperCase()] ?? 'a moderation action';
+  }
+
+  /**
+   * Notify the user targeted by a moderation action (USER targets only, since
+   * that is the only case where targetId is directly a user id). Fire-and-forget.
+   */
+  private async notifyActionTarget(action: {
+    id: string;
+    targetType: string;
+    targetId: string;
+    actionType: string;
+    reasoning: string;
+  }): Promise<void> {
+    if (action.targetType !== 'USER') {
+      return;
+    }
+    await this.notificationClient?.trySendModerationNotification({
+      userId: action.targetId,
+      type: 'moderation_action',
+      title: `A moderator issued ${this.describeActionType(action.actionType)}`,
+      body: `${action.reasoning}\n\nIf you believe this was a mistake, you can appeal this decision.`,
+      actionUrl: `/appeal/${action.id}`,
+      metadata: { moderationActionId: action.id, actionType: action.actionType },
+    });
+  }
 
   /**
    * List moderation actions with optional filters
@@ -184,6 +229,10 @@ export class ModerationActionsService {
       // Log error but don't fail the request - moderation action is created
       console.error('Failed to publish moderation action event', error);
     }
+
+    // Notify the affected user (best-effort) so warn/hide/suspend/ban are no
+    // longer silent to the person they target.
+    await this.notifyActionTarget(action);
 
     return this.mapModerationActionToResponse(action);
   }
@@ -382,9 +431,20 @@ export class ModerationActionsService {
     topicId: string,
     prompt: string,
   ): Promise<CoolingOffPromptResponse> {
-    // This is a non-punitive intervention
-    // In a full implementation, this would create notification records
-    // For now, we'll just track that the action was taken
+    // Non-punitive intervention: actually deliver a notification to each targeted
+    // user (best-effort) rather than silently claiming success. `sent` reflects
+    // the number of recipients the prompt was dispatched to.
+    if (userIds.length > 0) {
+      await this.notificationClient?.trySendModerationNotification({
+        userIds,
+        type: 'cooling_off',
+        title: 'A moderator has asked you to take a break',
+        body: prompt,
+        actionUrl: `/topics/${topicId}`,
+        metadata: { topicId, kind: 'cooling_off' },
+      });
+    }
+
     return {
       sent: userIds.length,
     };
@@ -549,6 +609,9 @@ export class ModerationActionsService {
       console.error('Failed to publish temporary ban event', error);
     }
 
+    // Notify the banned user (best-effort) with appeal instructions.
+    await this.notifyActionTarget(action);
+
     return this.mapModerationActionToResponse(action);
   }
 
@@ -616,7 +679,11 @@ export class ModerationActionsService {
         targetId: userId,
         targetType: 'USER',
         actionType: 'BAN',
-        status: 'ACTIVE',
+        // Enforcement must not be suspended merely because an appeal was filed:
+        // an APPEALED ban is still in effect until it is UPHELD (→ REVERSED) or
+        // the appeal is DENIED (→ restored to ACTIVE). Counting both ACTIVE and
+        // APPEALED closes the "file an appeal to lift the ban" bypass.
+        status: { in: ['ACTIVE', 'APPEALED'] },
       },
       include: {
         approvedBy: {

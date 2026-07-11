@@ -450,6 +450,24 @@ export class ResponsesService {
       },
     });
 
+    // Re-screen edited content for child safety (grooming detection + minor
+    // routing), mirroring createResponse. Without this, content that already
+    // passed screening — or is pending review — could be edited into unsafe or
+    // policy-violating content that the moderation pipeline never sees.
+    // Fire-and-forget, matching the create path.
+    if (updateResponseDto.content !== undefined) {
+      this.routeChildContentToModeration(
+        responseId,
+        existingResponse.topicId,
+        authorId,
+        updateData.content,
+      ).catch((error) => {
+        this.logger.error('Failed to route edited child content to moderation', error, {
+          metadata: { responseId, topicId: existingResponse.topicId, authorId },
+        });
+      });
+    }
+
     // Handle proposition associations if provided
     if (updateResponseDto.propositionIds !== undefined) {
       // Delete existing associations

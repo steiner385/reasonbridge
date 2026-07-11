@@ -31,6 +31,28 @@ export interface SlaBreachNotificationResponse {
 }
 
 /**
+ * Payload for a moderation-driven user notification (action taken, appeal
+ * decided, or cooling-off prompt). Provide either `userId` or `userIds`.
+ */
+export interface ModerationNotificationPayload {
+  userId?: string;
+  userIds?: string[];
+  type: string;
+  title: string;
+  body: string;
+  actionUrl?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Response from the moderation notification endpoint.
+ */
+export interface ModerationNotificationResponse {
+  success: boolean;
+  notificationsSent: number;
+}
+
+/**
  * HTTP client for sending notifications to notification-service.
  *
  * Uses fire-and-forget pattern for resilience - failures are logged but don't
@@ -149,6 +171,56 @@ export class NotificationServiceClient {
         this.logger.warn('Request to send SLA breach notification timed out');
       } else {
         this.logger.warn(`Error sending SLA breach notification: ${(error as Error).message}`);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Send a moderation-driven notification to the affected user(s).
+   *
+   * Used to notify a user when a moderation action is taken against them, when
+   * their appeal is decided, or when a cooling-off prompt is issued.
+   *
+   * @param payload - The notification content and recipient(s)
+   * @returns Response with the number of notifications created, or null on error
+   *
+   * @remarks
+   * Fire-and-forget pattern: logs errors but doesn't throw. Named with "try"
+   * prefix to indicate this behaviour, so a notification-service outage never
+   * blocks the moderation action or appeal decision itself.
+   */
+  async trySendModerationNotification(
+    payload: ModerationNotificationPayload,
+  ): Promise<ModerationNotificationResponse | null> {
+    const recipients = payload.userIds ?? (payload.userId ? [payload.userId] : []);
+    if (recipients.length === 0) {
+      return { success: true, notificationsSent: 0 };
+    }
+
+    try {
+      const response = await this.fetchWithTimeout(
+        `${this.baseUrl}/internal/moderation-notification`,
+        {
+          method: 'POST',
+          headers: this.buildHeaders(),
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!response.ok) {
+        this.logger.warn(`Failed to send moderation notification: ${response.status}`);
+        return null;
+      }
+
+      const result = (await response.json()) as ModerationNotificationResponse;
+      this.logger.log(`Moderation notification sent: ${result.notificationsSent} notification(s)`);
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.logger.warn('Request to send moderation notification timed out');
+      } else {
+        this.logger.warn(`Error sending moderation notification: ${(error as Error).message}`);
       }
       return null;
     }

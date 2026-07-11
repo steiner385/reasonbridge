@@ -14,6 +14,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TopicDraftsService } from './topic-drafts.service.js';
 import { SaveTopicDraftDto } from './dto/topic-draft.dto.js';
@@ -46,7 +47,7 @@ export class TopicDraftsController {
   ): Promise<TopicDraftResponseDto> {
     const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
+      throw new UnauthorizedException('User ID not found in request. Authentication required.');
     }
     return this.draftsService.saveDraft(userId, dto);
   }
@@ -61,7 +62,7 @@ export class TopicDraftsController {
   ): Promise<TopicDraftsListResponseDto> {
     const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
+      throw new UnauthorizedException('User ID not found in request. Authentication required.');
     }
     return this.draftsService.getDrafts(userId);
   }
@@ -77,7 +78,7 @@ export class TopicDraftsController {
   ): Promise<TopicDraftResponseDto> {
     const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
+      throw new UnauthorizedException('User ID not found in request. Authentication required.');
     }
     return this.draftsService.getDraft(userId, draftId);
   }
@@ -94,7 +95,7 @@ export class TopicDraftsController {
   ): Promise<void> {
     const userId = getUserIdFromRequest(userIdHeader, req);
     if (!userId) {
-      throw new Error('User ID not found in request. Authentication required.');
+      throw new UnauthorizedException('User ID not found in request. Authentication required.');
     }
     return this.draftsService.deleteDraft(userId, draftId);
   }
