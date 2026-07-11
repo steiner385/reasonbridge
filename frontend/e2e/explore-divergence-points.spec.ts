@@ -39,13 +39,12 @@ test.describe('Explore Divergence Points', () => {
         timeout: 10000,
       });
 
-      // Divergence points section should be visible
-      const _divergenceSection = page
+      // Divergence points section should be visible on the topic detail page
+      const divergenceSection = page
         .locator('[data-testid="divergence-points"]')
         .or(page.locator('text=/divergence|genuine disagree/i').first());
 
-      // Should render without error
-      expect(true).toBe(true);
+      await expect(divergenceSection.first()).toBeVisible({ timeout: 5000 });
     }
   });
 
@@ -108,16 +107,14 @@ test.describe('Explore Divergence Points', () => {
       if (cardCount > 0) {
         const firstCard = divergenceCards.first();
 
-        // Should have polarization score/badge
+        // A divergence card should carry a polarization score badge and/or a
+        // color-coded indicator.
         const polarizationBadge = firstCard.locator('[data-testid="polarization-score"]');
-        const _hasBadge = (await polarizationBadge.count()) > 0;
-
-        // Should have color-coded indicator
         const colorIndicator = firstCard.locator('[data-testid="polarization-indicator"]');
-        const _hasIndicator = (await colorIndicator.count()) > 0;
+        const hasBadge = (await polarizationBadge.count()) > 0;
+        const hasIndicator = (await colorIndicator.count()) > 0;
 
-        // Page should render without error
-        expect(true).toBe(true);
+        expect(hasBadge || hasIndicator).toBe(true);
       }
     }
   });

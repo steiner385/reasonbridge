@@ -167,19 +167,23 @@ test.describe('Response Voting', () => {
    * - Unit tests: frontend/src/components/responses/__tests__/VoteButtons.test.tsx
    * - Above E2E tests cover upvote/downvote/toggle with real backend
    */
+  // Mock-dependent tests (tracked in #1349): these need page.route() request
+  // interception to simulate specific vote-count/API states. Marked test.fixme
+  // so they surface as known-unimplemented work rather than a describe-level
+  // runtime skip that hides them entirely.
   test.describe('Mock-dependent tests', () => {
-    test.skip(true, 'Mock-only tests - simulates specific API states');
-
-    test('should display vote counts on responses', async () => {
-      // This test requires mocked vote counts to verify display
+    test.fixme('should display vote counts on responses', async () => {
+      // TODO(#1349): intercept the responses request with page.route() and
+      // return known vote counts to assert their display.
     });
 
-    test('should show visual indicator for user vote state', async () => {
-      // This test requires mocked initial vote state
+    test.fixme('should show visual indicator for user vote state', async () => {
+      // TODO(#1349): intercept with a mocked initial vote state.
     });
 
-    test('should update vote count optimistically', async () => {
-      // This test requires mocked delayed API response to verify optimistic updates
+    test.fixme('should update vote count optimistically', async () => {
+      // TODO(#1349): intercept with a delayed API response to assert the
+      // optimistic update then reconciliation.
     });
   });
 });

@@ -259,18 +259,19 @@ test.describe('Response Posting Flow', () => {
     expect(hasParticipants || hasResponses).toBeTruthy();
   });
 
-  // ERROR CONDITION TESTS
-  // These tests require specific error scenarios that can't be reliably tested
-  // against a real backend. They should be tested via integration tests with
-  // controlled backend state or moved to unit tests.
+  // ERROR CONDITION TESTS (tracked in #1349)
+  // These need deterministic backend errors, achievable with page.route()
+  // request interception (see preview-feedback.spec.ts for the pattern).
+  // Marked test.fixme so they surface as known-unimplemented work rather than
+  // silently-green skips.
 
-  test.skip('should show error message on API failure', async () => {
-    // REQUIRES MOCK: Can't reliably cause API failures in E2E
-    // Move to integration tests or mock in specific test setup
+  test.fixme('should show error message on API failure', async () => {
+    // TODO(#1349): intercept the create-response request with page.route() and
+    // fulfill a 500 to assert the error UI.
   });
 
-  test.skip('should show rate limit error when exceeded', async () => {
-    // REQUIRES MOCK: Can't reliably trigger rate limits in E2E
-    // Would require posting 10+ responses in rapid succession
+  test.fixme('should show rate limit error when exceeded', async () => {
+    // TODO(#1349): intercept the create-response request with page.route() and
+    // fulfill a 429 to assert the rate-limit UI.
   });
 });

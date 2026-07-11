@@ -12,6 +12,13 @@
 # layer caching across builds with different COMPOSE_PROJECT_NAME values.
 # Without explicit image names, each unique project name would rebuild all images.
 
+# Shared JWT secret for the E2E stack. Defined once as a YAML anchor and
+# referenced by every service instead of copy-pasting the literal six times.
+# Interpolated from the environment so CI/local runs can override it, while the
+# default keeps the throwaway E2E value working with no .env file. Production
+# services must source JWT secrets from AWS Secrets Manager (see docs/SECRETS.md).
+x-jwt-secret: &jwt-secret ${JWT_SECRET:-mock-jwt-secret-for-e2e-testing}
+
 services:
   # ============================================================================
   # Infrastructure Services
@@ -132,7 +139,7 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      JWT_SECRET: *jwt-secret
       USER_SERVICE_URL: http://user-service:3001
       # Increase timeouts for E2E tests - services may be slower during cold start
       USER_SERVICE_TIMEOUT: 15000
@@ -186,7 +193,7 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       # Use database authentication for demo environment (supports bcrypt password hashes)
       AUTH_MODE: 'database'
-      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      JWT_SECRET: *jwt-secret
       # Fixed verification code for E2E testing (enables full signup flow testing)
       E2E_VERIFICATION_CODE: '123456'
       # Cognito configuration (fallback, not used when AUTH_MOCK=true)
@@ -233,7 +240,7 @@ services:
       AWS_PROFILE: default
       # Use cross-region inference profile for on-demand access
       BEDROCK_MODEL_ID: us.anthropic.claude-3-5-sonnet-20241022-v2:0
-      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      JWT_SECRET: *jwt-secret
     ports:
       - '3002:3002'
     healthcheck:
@@ -268,7 +275,7 @@ services:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       ACTIVITY_SERVICE_URL: http://activity-service:3008
-      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      JWT_SECRET: *jwt-secret
     ports:
       - '3007:3007'
     healthcheck:
@@ -300,7 +307,7 @@ services:
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:3002
-      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      JWT_SECRET: *jwt-secret
     ports:
       - '3003:3003'
     healthcheck:
@@ -363,7 +370,7 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://reasonbridge_test:reasonbridge_test@postgres:5432/reasonbridge_test
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: mock-jwt-secret-for-e2e-testing
+      JWT_SECRET: *jwt-secret
     ports:
       - '3005:3005'
     healthcheck:

@@ -75,11 +75,11 @@ describe('Skeleton', () => {
       expect(skeleton).not.toHaveClass('animate-pulse');
     });
 
-    it('should apply pulse animation when shimmer is requested', () => {
-      // shimmer falls back to pulse in current implementation
+    it('should apply shimmer animation classes when shimmer is requested', () => {
       render(<Skeleton animation="shimmer" data-testid="skeleton" />);
       const skeleton = screen.getByTestId('skeleton');
-      expect(skeleton).toHaveClass('animate-pulse');
+      expect(skeleton).toHaveClass('before:animate-shimmer', 'overflow-hidden');
+      expect(skeleton).not.toHaveClass('animate-pulse');
     });
   });
 

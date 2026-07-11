@@ -87,13 +87,12 @@ test.describe('Fact-Check Feature', () => {
     if (await factCheckButton.isVisible()) {
       await factCheckButton.click();
 
-      // Wait for results to load
-      await page.waitForTimeout(3000); // Allow time for API response
-
-      // Check for results or no-results message
+      // Wait for one of the outcome states to render instead of a fixed sleep:
+      // results, an explicit "no results" message, or an error message.
       const results = response.locator('[data-testid="fact-check-results"]');
       const noResults = response.locator('text=/no fact.?check.*found/i');
       const errorMessage = response.locator('text=/error.*fact.?check/i');
+      await expect(results.or(noResults).or(errorMessage).first()).toBeVisible({ timeout: 15000 });
 
       const hasResults = await results.isVisible().catch(() => false);
       const hasNoResults = await noResults.isVisible().catch(() => false);
