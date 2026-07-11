@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { getAppeals, getModerationAction } from '../../lib/moderation-api';
+import { getMyAppeals, getModerationAction } from '../../lib/moderation-api';
 import type { Appeal, ModerationAction, AppealStatus } from '../../types/moderation';
 
 /**
@@ -172,8 +172,10 @@ function AppealDetailCard({
                   >
                     <div className="mb-2">
                       <div className="text-sm text-gray-600 dark:text-gray-400">Decision</div>
-                      <p className="text-gray-900 dark:text-gray-100 font-semibold capitalize">
-                        {appeal.status === 'upheld' ? 'Original action upheld' : 'Appeal denied'}
+                      <p className="text-gray-900 dark:text-gray-100 font-semibold">
+                        {appeal.status === 'upheld'
+                          ? 'Appeal upheld — the moderation action has been reversed'
+                          : 'Appeal denied — the original action remains in effect'}
                       </p>
                     </div>
                     <div>
@@ -222,7 +224,7 @@ export default function AppealStatusPage() {
         setLoading(true);
         setError(null);
 
-        const response = await getAppeals(filterStatus === 'all' ? {} : { status: filterStatus });
+        const response = await getMyAppeals(filterStatus === 'all' ? {} : { status: filterStatus });
         setAppeals(response?.appeals ?? []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load appeals');
@@ -340,10 +342,12 @@ export default function AppealStatusPage() {
             • <strong>Under Review:</strong> Our moderation team is actively reviewing your appeal
           </p>
           <p>
-            • <strong>Upheld:</strong> The original moderation action has been confirmed
+            • <strong>Upheld:</strong> Your appeal was successful — the original moderation action
+            has been reversed
           </p>
           <p>
-            • <strong>Denied:</strong> Your appeal has been reviewed and the decision has been made
+            • <strong>Denied:</strong> Your appeal was reviewed and the original moderation action
+            remains in effect
           </p>
           <p className="mt-4">
             You will receive a notification when your appeal has been reviewed. If you have

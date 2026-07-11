@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { ModerationActionsService } from '../moderation-actions.service.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import type { QueueService } from '../../queue/queue.service.js';
@@ -54,6 +54,7 @@ describe('ModerationActionsService', () => {
         count: vi.fn(),
         findMany: vi.fn(),
         findUnique: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
         updateMany: vi.fn(),
@@ -316,7 +317,10 @@ describe('ModerationActionsService', () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(
         mockModerationAction as any,
       );
-      vi.mocked(prismaService.moderationAction.update).mockResolvedValue(mockApprovedAction as any);
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 1 } as any);
+      vi.mocked(prismaService.moderationAction.findUniqueOrThrow).mockResolvedValue(
+        mockApprovedAction as any,
+      );
 
       const result = await service.approveAction('action-1', 'moderator-1');
 
@@ -334,7 +338,10 @@ describe('ModerationActionsService', () => {
         ...mockApprovedAction,
         reasoning: 'Updated reasoning for the action',
       };
-      vi.mocked(prismaService.moderationAction.update).mockResolvedValue(updatedAction as any);
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 1 } as any);
+      vi.mocked(prismaService.moderationAction.findUniqueOrThrow).mockResolvedValue(
+        updatedAction as any,
+      );
 
       const request: ApproveActionRequest = {
         modifiedReasoning: 'Updated reasoning for the action',
@@ -387,26 +394,45 @@ describe('ModerationActionsService', () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(
         mockModerationAction as any,
       );
-      vi.mocked(prismaService.moderationAction.update).mockResolvedValue({
-        ...mockModerationAction,
-        status: 'REJECTED',
-      } as any);
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 1 } as any);
 
       const request: RejectActionRequest = {
-        rejectReasoning: 'Insufficient evidence for this action',
+        reason: 'Insufficient evidence for this action',
       };
 
-      await expect(service.rejectAction('action-1', request)).resolves.toBeUndefined();
+      await expect(
+        service.rejectAction('action-1', 'moderator-1', request),
+      ).resolves.toBeUndefined();
+
+      // The rejecting moderator is recorded as a queryable audit field, not just
+      // appended to the free-text reasoning (Issue #1320).
+      expect(vi.mocked(prismaService.moderationAction.updateMany)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'action-1', status: 'PENDING' },
+          data: expect.objectContaining({ rejectedById: 'moderator-1', status: 'REVERSED' }),
+        }),
+      );
+    });
+
+    it('should throw ConflictException when the action was already resolved', async () => {
+      vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(
+        mockModerationAction as any,
+      );
+      vi.mocked(prismaService.moderationAction.updateMany).mockResolvedValue({ count: 0 } as any);
+
+      await expect(
+        service.rejectAction('action-1', 'moderator-1', { reason: 'race' }),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw NotFoundException for non-existent action', async () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(null);
 
       const request: RejectActionRequest = {
-        rejectReasoning: 'Invalid action',
+        reason: 'Invalid action',
       };
 
-      await expect(service.rejectAction('non-existent', request)).rejects.toThrow(
+      await expect(service.rejectAction('non-existent', 'moderator-1', request)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -419,10 +445,10 @@ describe('ModerationActionsService', () => {
       vi.mocked(prismaService.moderationAction.findUnique).mockResolvedValue(activeAction as any);
 
       const request: RejectActionRequest = {
-        rejectReasoning: 'Cannot reject active action',
+        reason: 'Cannot reject active action',
       };
 
-      await expect(service.rejectAction('action-1', request)).rejects.toThrow(
+      await expect(service.rejectAction('action-1', 'moderator-1', request)).rejects.toThrow(
         new BadRequestException(
           'Action must be in PENDING status to reject, current status: ACTIVE',
         ),

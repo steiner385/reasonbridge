@@ -80,6 +80,7 @@ model User {
   createdPropositions           Proposition[]
   appeals                       Appeal[]
   moderationApprovals           ModerationAction[]        @relation("ModeratorApproval")
+  moderationRejections          ModerationAction[]        @relation("ModeratorRejection")
   appealReviews                 Appeal[]                  @relation("AppealReviewer")
   topicInterests                TopicInterest[]
   // Feature 009: Discussion Participation
@@ -1240,6 +1241,8 @@ model ModerationAction {
   aiConfidence  Decimal?             @map("ai_confidence") @db.Decimal(3, 2)
   approvedById  String?              @map("approved_by_id") @db.Uuid
   approvedAt    DateTime?            @map("approved_at")
+  rejectedById  String?              @map("rejected_by_id") @db.Uuid
+  rejectedAt    DateTime?            @map("rejected_at")
   status        ModerationStatus     @default(PENDING)
   createdAt     DateTime             @default(now()) @map("created_at")
   executedAt    DateTime?            @map("executed_at")
@@ -1252,6 +1255,7 @@ model ModerationAction {
 
   // Relations
   approvedBy User?    @relation("ModeratorApproval", fields: [approvedById], references: [id])
+  rejectedBy User?    @relation("ModeratorRejection", fields: [rejectedById], references: [id])
   appeals    Appeal[]
 
   @@index([targetType, targetId])

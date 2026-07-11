@@ -21,6 +21,7 @@ import type {
 } from '../services/ai-review.service.js';
 import { AIReviewService } from '../services/ai-review.service.js';
 import { ModerationActionsService } from '../services/moderation-actions.service.js';
+import { AppealService } from '../services/appeal.service.js';
 import { ModerationQueueService } from '../services/moderation-queue.service.js';
 import type { QueueStats } from '../services/moderation-queue.service.js';
 import { SafetyReportService } from '../services/safety-report.service.js';
@@ -85,6 +86,7 @@ export class ModerationController {
     private readonly queueService: ModerationQueueService,
     private readonly safetyReportService: SafetyReportService,
     private readonly reportService: ReportService,
+    private readonly appealService: AppealService,
   ) {}
 
   @Post('screen')
@@ -238,13 +240,14 @@ export class ModerationController {
   @UseGuards(JwtAuthGuard, ModeratorGuard)
   async rejectAction(
     @Param('actionId') actionId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() request: RejectActionRequest,
   ): Promise<void> {
     if (!request.reason || request.reason.trim().length === 0) {
       throw new BadRequestException('reason is required');
     }
 
-    return this.actionsService.rejectAction(actionId, request);
+    return this.actionsService.rejectAction(actionId, user.sub, request);
   }
 
   @Get('users/:userId/actions')
@@ -297,7 +300,7 @@ export class ModerationController {
       throw new BadRequestException('reason is required');
     }
 
-    return this.actionsService.createAppeal(actionId, user.sub, request);
+    return this.appealService.createAppeal(actionId, user.sub, request);
   }
 
   @Get('appeals/pending')
@@ -306,7 +309,32 @@ export class ModerationController {
     @Query('limit') limit: number = 20,
     @Query('cursor') cursor?: string,
   ): Promise<ListAppealResponse> {
-    return this.actionsService.getPendingAppeals(limit, cursor);
+    return this.appealService.getPendingAppeals(limit, cursor);
+  }
+
+  /**
+   * List the authenticated user's own appeals.
+   *
+   * Scoped to the JWT subject so the "your appeals" surface can no longer leak
+   * every user's appeal reason and moderator decision reasoning (Issue #1396).
+   * Declared before the unscoped `GET appeals` handler; both paths are static
+   * so ordering is unambiguous.
+   */
+  @Get('appeals/me')
+  @UseGuards(JwtAuthGuard)
+  async listMyAppeals(
+    @CurrentUser() user: JwtPayload,
+    @Query('status') status?: string,
+    @Query('limit') limit: number = 20,
+    @Query('cursor') cursor?: string,
+  ): Promise<ListAppealResponse> {
+    const statusEnum = status?.toUpperCase() as
+      | 'PENDING'
+      | 'UNDER_REVIEW'
+      | 'UPHELD'
+      | 'DENIED'
+      | undefined;
+    return this.appealService.listAppealsByAppellant(user.sub, statusEnum, limit, cursor);
   }
 
   @Get('appeals')
@@ -322,7 +350,7 @@ export class ModerationController {
       | 'UPHELD'
       | 'DENIED'
       | undefined;
-    return this.actionsService.listAppeals(statusEnum, limit, cursor);
+    return this.appealService.listAppeals(statusEnum, limit, cursor);
   }
 
   @Post('appeals/:appealId/review')
@@ -340,7 +368,31 @@ export class ModerationController {
       throw new BadRequestException('reasoning is required');
     }
 
-    return this.actionsService.reviewAppeal(appealId, user.sub, request);
+    return this.appealService.reviewAppeal(appealId, user.sub, request);
+  }
+
+  /**
+   * Claim an appeal for review (PENDING → UNDER_REVIEW).
+   *
+   * Makes the previously-unreachable UNDER_REVIEW state usable so two
+   * moderators don't unknowingly review the same appeal (Issue #1320).
+   */
+  @Post('appeals/:appealId/assign')
+  @UseGuards(JwtAuthGuard)
+  async assignAppeal(
+    @Param('appealId') appealId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<AppealResponse> {
+    return this.appealService.assignAppealToModerator(appealId, user.sub);
+  }
+
+  /**
+   * Release a claimed appeal back to the queue (UNDER_REVIEW → PENDING).
+   */
+  @Post('appeals/:appealId/unassign')
+  @UseGuards(JwtAuthGuard)
+  async unassignAppeal(@Param('appealId') appealId: string): Promise<AppealResponse> {
+    return this.appealService.unassignAppeal(appealId);
   }
 
   @Post('bans/temporary')
