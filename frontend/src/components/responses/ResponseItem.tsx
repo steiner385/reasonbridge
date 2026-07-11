@@ -26,7 +26,7 @@
  * to visually flow together.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import Card from '../ui/Card';
@@ -98,7 +98,7 @@ export interface ResponseItemProps {
   onThreadCollapse?: (threadId: string) => void;
 }
 
-export function ResponseItem({
+function ResponseItemBase({
   response,
   discussionId,
   showReplies = false,
@@ -761,3 +761,7 @@ export function ResponseItem({
     </div>
   );
 }
+
+// Memoized export — prevents re-renders from the 1Hz typing-indicator interval
+// and any other state churn in ResponseList that doesn't change this row's props.
+export const ResponseItem = memo(ResponseItemBase);

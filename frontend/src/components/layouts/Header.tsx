@@ -46,7 +46,8 @@ export function Header() {
               onClick={toggleMobile}
               className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               aria-label="Toggle mobile menu"
-              aria-expanded={false}
+              aria-expanded={isMobileOpen}
+              aria-controls="mobile-drawer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

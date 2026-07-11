@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DEMO_CREDENTIALS } from '@reason-bridge/common/config';
 import { useAuth } from '../hooks/useAuth';
@@ -41,6 +41,8 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const openModal = useCallback(() => {
     setIsOpen(true);
@@ -69,6 +71,44 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closeModal]);
+
+  // Focus trap: store trigger focus, focus email input, trap Tab, restore on close (WCAG 2.4.3)
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return undefined;
+
+    previousFocusRef.current = document.activeElement as HTMLElement;
+
+    // Focus the email field so keyboard users can start typing immediately.
+    const emailInput = dialogRef.current.querySelector<HTMLElement>('#login-email');
+    emailInput?.focus();
+
+    const FOCUSABLE =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleTab);
+    return () => {
+      document.removeEventListener('keydown', handleTab);
+      previousFocusRef.current?.focus();
+    };
+  }, [isOpen]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +154,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
           data-testid="login-modal"
         >
           <div
+            ref={dialogRef}
             className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >

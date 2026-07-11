@@ -183,6 +183,7 @@ export function MobileDrawer() {
 
       {/* Drawer - z-[100] to stay above backdrop */}
       <aside
+        id="mobile-drawer"
         ref={drawerRef}
         tabIndex={-1}
         className={`

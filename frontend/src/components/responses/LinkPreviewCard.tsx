@@ -159,6 +159,8 @@ const LinkPreviewCard: React.FC<LinkPreviewCardProps> = ({
                 src={preview.favicon}
                 alt=""
                 className="w-4 h-4 rounded-sm"
+                loading="lazy"
+                decoding="async"
                 onError={() => setFaviconError(true)}
               />
             ) : (
