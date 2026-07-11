@@ -143,7 +143,10 @@ function ForgotPasswordPage() {
           </CardHeader>
 
           <CardBody>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* noValidate: let React Hook Form + Zod surface inline errors instead of
+                native browser bubbles (type="email"/required would otherwise block
+                submission before the resolver runs). */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               {submitError && (
                 <div
                   className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-4"
