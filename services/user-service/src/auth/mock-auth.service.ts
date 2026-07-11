@@ -128,7 +128,7 @@ export class MockAuthService implements IAuthService {
         sub: foundUser.sub,
         token_use: 'refresh',
         iat: now,
-        exp: now + 30 * 24 * 3600, // 30 days
+        exp: now + AUTH_TOKENS.REFRESH_EXPIRES_IN_SECONDS, // 7 days (issue #1384)
       },
       this.jwtSecret,
     );
