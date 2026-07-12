@@ -7,17 +7,23 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: delete-branch-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   delete-branch:
-    if: github.event.pull_request.merged == true
-    runs-on: [self-hosted, linux]
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
     steps:
+      # gh api is used instead of octokit/request-action because the latter
+      # percent-encodes `/` in path placeholders, so branch names containing
+      # slashes (feature/x, ccswitch/y) hit a nonexistent ref and the delete
+      # 404s. Refs may legitimately contain slashes in the URL path.
       - name: Delete head branch
-        uses: octokit/request-action@v2.x
-        with:
-          route: DELETE /repos/{owner}/{repo}/git/refs/heads/{branch}
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
-          branch: ${{ github.event.pull_request.head.ref }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${HEAD_REF}" \
+            || echo "Branch already deleted or protected — nothing to do"

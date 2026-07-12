@@ -142,7 +142,7 @@ export default function NotificationsPage() {
                     >
                       {notification.message}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
                       {notification.timestamp}
                     </p>
                   </div>
@@ -151,7 +151,9 @@ export default function NotificationsPage() {
 
               {/* Unread indicator */}
               {!notification.read && (
-                <div className="h-2 w-2 rounded-full bg-blue-600" aria-label="Unread" />
+                <div className="h-2 w-2 rounded-full bg-blue-600">
+                  <span className="sr-only">Unread</span>
+                </div>
               )}
             </div>
           </div>

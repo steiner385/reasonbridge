@@ -84,7 +84,9 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
-    mem_limit: 256m
+    # LocalStack 3.0 with s3,sqs,sns,ses needs ~400MB; 256m gets it OOM-killed
+    # (exit 247) during startup. See CLAUDE.md E2E fix #4.
+    mem_limit: 512m
     networks:
       - reasonbridge-e2e
 
@@ -265,7 +267,9 @@ services:
         condition: service_healthy
       db-seed:
         condition: service_completed_successfully
-    mem_limit: 128m
+    # ai-service loads Bedrock mocks and claim-extraction models at boot;
+    # 128m gets it OOM-killed (exit 137) during startup.
+    mem_limit: 256m
     networks:
       - reasonbridge-e2e
 
@@ -298,7 +302,8 @@ services:
       # discussion-service posts to ACTIVITY_SERVICE_URL, so wait for it (#1337)
       activity-service:
         condition: service_healthy
-    mem_limit: 128m
+    # The largest service; 128m gets it OOM-killed (exit 137) during startup.
+    mem_limit: 256m
     networks:
       - reasonbridge-e2e
 

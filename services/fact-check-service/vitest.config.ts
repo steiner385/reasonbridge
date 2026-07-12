@@ -29,7 +29,7 @@ export default defineConfig({
     },
     reporters: ['default', 'junit'],
     outputFile: {
-      junit: './coverage/junit.xml',
+      junit: './coverage/junit-unit.xml',
     },
     deps: {
       // Inline @nestjs/cache-manager to resolve ESM/CJS module issues

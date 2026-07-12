@@ -21,7 +21,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import { CitationInputDto } from '../../dto/citation-input.dto.js';
 
 /**
@@ -71,9 +71,26 @@ export class CreateResponseDto {
   @IsUUID('4')
   parentResponseId?: string;
 
-  // Service-layer properties (mapped from API properties)
-  parentId?: string; // Maps from parentResponseId
-  citedSources?: string[]; // Maps from citations
+  @ApiPropertyOptional({
+    description:
+      'Optional parent response ID for threaded replies (alias of parentResponseId used by the topic-scoped route)',
+    example: '660e8400-e29b-41d4-a716-446655440001',
+    format: 'uuid',
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID('4')
+  parentId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Optional cited source URLs (alias of citations used by the topic-scoped route)',
+    type: [String],
+    maxItems: 10,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  citedSources?: string[];
 
   @ApiPropertyOptional({
     description: 'Whether the response contains opinion',
@@ -102,3 +119,15 @@ export class CreateResponseDto {
   @IsUUID('4', { each: true })
   propositionIds?: string[];
 }
+
+/**
+ * Request body for the topic-scoped creation route
+ * (POST /topics/:topicId/responses).
+ *
+ * The topic id comes from the URL path, so no discussionId is required
+ * in the body. All other fields (and their validation) are inherited
+ * from CreateResponseDto.
+ */
+export class CreateTopicResponseDto extends OmitType(CreateResponseDto, [
+  'discussionId',
+] as const) {}

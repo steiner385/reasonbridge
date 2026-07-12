@@ -8,7 +8,7 @@
  *
  * This module provides the MSW server setup for API mocking in tests.
  */
-import { setupServer, type SetupServerApi } from 'msw/node';
+import { setupServer, type SetupServer } from 'msw/node';
 import { type RequestHandler } from 'msw';
 import { defaultHandlers } from './handlers.js';
 
@@ -16,12 +16,12 @@ import { defaultHandlers } from './handlers.js';
  * MSW server instance for Node.js tests
  * Initialized with default handlers
  */
-export const server: SetupServerApi = setupServer(...defaultHandlers);
+export const server: SetupServer = setupServer(...defaultHandlers);
 
 /**
  * Create a new MSW server with custom handlers
  */
-export function createServer(handlers: RequestHandler[] = defaultHandlers): SetupServerApi {
+export function createServer(handlers: RequestHandler[] = defaultHandlers): SetupServer {
   return setupServer(...handlers);
 }
 

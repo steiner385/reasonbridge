@@ -47,7 +47,7 @@ export default defineConfig({
     },
     reporters: ['default', 'junit'],
     outputFile: {
-      junit: './coverage/junit.xml',
+      junit: './coverage/junit-unit.xml',
     },
   },
   ssr: {

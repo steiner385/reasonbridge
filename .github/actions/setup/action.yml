@@ -1,0 +1,25 @@
+name: Setup workspace
+description: >-
+  Install Node 20 + pnpm (version from the packageManager field), restore the
+  pnpm store cache, install dependencies with a frozen lockfile, and build the
+  shared workspace packages (includes Prisma client generation).
+
+runs:
+  using: composite
+  steps:
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Build shared packages
+      shell: bash
+      run: pnpm --filter "./packages/*" -r run build
