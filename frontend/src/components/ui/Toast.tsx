@@ -132,10 +132,12 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
     ),
   };
 
+  // error/warning demand immediate attention (assertive); success/info are polite
+  const role = variant === 'error' || variant === 'warning' ? 'alert' : 'status';
+
   return (
     <div
-      role="alert"
-      aria-live="polite"
+      role={role}
       aria-atomic="true"
       className={`
         flex items-start gap-3 p-4 rounded-lg border-l-4 shadow-lg dark:shadow-gray-900/50
@@ -152,7 +154,7 @@ function Toast({ id, message, variant, duration = 5000, onDismiss }: ToastProps)
       {/* Dismiss Button */}
       <button
         onClick={() => onDismiss(id)}
-        className="shrink-0 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+        className="shrink-0 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
         aria-label="Dismiss notification"
       >
         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

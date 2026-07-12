@@ -100,7 +100,7 @@ export function useVirtualList(itemCount: number, config: VirtualListConfig): Us
     updateHeight();
 
     // Update on resize with debounce
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const debouncedUpdate = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(updateHeight, 150);

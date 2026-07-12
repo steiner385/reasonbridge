@@ -203,7 +203,7 @@ const ThreadedResponseDisplay: React.FC<ThreadedResponseDisplayProps> = ({
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 text-lg">No responses yet</p>
-        <p className="text-gray-400 text-sm mt-2">Be the first to share your thoughts!</p>
+        <p className="text-gray-500 text-sm mt-2">Be the first to share your thoughts!</p>
       </div>
     );
   }
