@@ -253,7 +253,7 @@ export function TopicEditHistory({ topicId, limit = 50 }: TopicEditHistoryProps)
           />
         </svg>
         <p className="mt-2 text-sm text-gray-500">No edit history available</p>
-        <p className="text-xs text-gray-400 mt-1">This topic has not been edited yet</p>
+        <p className="text-xs text-gray-500 mt-1">This topic has not been edited yet</p>
       </div>
     );
   }

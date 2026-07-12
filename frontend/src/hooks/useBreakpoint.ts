@@ -41,7 +41,7 @@ export function useBreakpoint(): Breakpoint {
     updateBreakpoint();
 
     // Add resize listener with debounce
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const debouncedUpdate = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(updateBreakpoint, 100);

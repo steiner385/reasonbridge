@@ -55,7 +55,7 @@ interface DiscussionLayoutProps {
  * **Mobile (<768px)**:
  * - Only center panel visible by default
  * - Left panel as slide-in overlay (same as tablet)
- * - Right panel content moved to accordion sections within center panel
+ * - Right panel rendered inline below the center panel (accordion variant from MetadataPanel)
  * - 44px minimum touch targets for WCAG 2.1 AA compliance
  *
  * **Key Features**:
@@ -234,6 +234,15 @@ export function DiscussionLayout({
           aria-label="Discussion conversation"
         >
           {centerPanel}
+          {/* On mobile the right aside is display:none, so render metadata inline here */}
+          {breakpoint === 'mobile' && rightPanel && (
+            <section
+              className="discussion-layout__panel--mobile-metadata"
+              aria-label="Discussion metadata and analysis"
+            >
+              {rightPanel}
+            </section>
+          )}
         </main>
 
         {/* Right Panel - Metadata (or Collapsed Bar) */}

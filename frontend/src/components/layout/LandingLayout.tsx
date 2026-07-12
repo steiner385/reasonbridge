@@ -25,7 +25,13 @@ interface LandingLayoutProps {
  * - Avoid duplicate headers/footers from App.tsx
  */
 export const LandingLayout: React.FC<LandingLayoutProps> = ({ children }) => {
-  return <div className="min-h-screen flex flex-col">{children}</div>;
+  return (
+    <div className="min-h-screen flex flex-col">
+      <main id="main-content" className="flex flex-col flex-1">
+        {children}
+      </main>
+    </div>
+  );
 };
 
 export default LandingLayout;
