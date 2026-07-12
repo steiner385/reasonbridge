@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
-import { List } from 'react-window';
+import { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { Topic } from '../../types/topic';
 import { TopicListItem } from './TopicListItem';
 
@@ -30,7 +30,8 @@ export interface TopicListProps {
 
 /**
  * Virtualized topic list component
- * Efficiently renders large lists of topics using react-window
+ * Efficiently renders large lists of topics using @tanstack/react-virtual
+ * (migrated from react-window in #1390 — same API surface, one fewer dep)
  * Supports virtual scrolling for 500+ topics at 60fps
  */
 export function TopicList({
@@ -42,41 +43,14 @@ export function TopicList({
   height,
   className = '',
 }: TopicListProps) {
-  // Memoize row renderer to prevent unnecessary re-renders
-  const Row = useMemo(() => {
-    const RowComponent = ({
-      index,
-      style,
-      ariaAttributes,
-    }: {
-      index: number;
-      style: React.CSSProperties;
-      ariaAttributes: {
-        'aria-posinset': number;
-        'aria-setsize': number;
-        role: 'listitem';
-      };
-    }) => {
-      const topic = topics[index];
-      if (!topic) return null;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-      const isActive = activeTopicId === topic.id;
-      const hasUnread = unreadMap.get(topic.id) || false;
-
-      return (
-        <div style={style} {...ariaAttributes}>
-          <TopicListItem
-            topic={topic}
-            isActive={isActive}
-            hasUnread={hasUnread}
-            onClick={onTopicClick}
-          />
-        </div>
-      );
-    };
-    RowComponent.displayName = 'TopicRow';
-    return RowComponent;
-  }, [topics, activeTopicId, onTopicClick, unreadMap]);
+  const virtualizer = useVirtualizer({
+    count: topics.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => itemHeight,
+    overscan: 5,
+  });
 
   // Empty state
   if (topics.length === 0) {
@@ -106,16 +80,47 @@ export function TopicList({
     );
   }
 
+  const virtualItems = virtualizer.getVirtualItems();
+
   return (
-    <div className={`topic-list ${className}`} data-testid="topic-list" aria-label="Topic list">
-      <List<Record<string, never>>
-        defaultHeight={height}
-        rowCount={topics.length}
-        rowHeight={itemHeight}
-        overscanCount={5}
-        rowComponent={Row}
-        rowProps={{} as Record<string, never>}
-      />
+    <div
+      ref={scrollContainerRef}
+      className={`topic-list ${className}`}
+      data-testid="topic-list"
+      aria-label="Topic list"
+      style={{ height, overflowY: 'auto' }}
+    >
+      <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }} role="list">
+        {virtualItems.map((virtualItem) => {
+          const topic = topics[virtualItem.index];
+          if (!topic) return null;
+          const isActive = activeTopicId === topic.id;
+          const hasUnread = unreadMap.get(topic.id) ?? false;
+
+          return (
+            <div
+              key={virtualItem.key}
+              style={{
+                position: 'absolute',
+                top: virtualItem.start,
+                left: 0,
+                width: '100%',
+                height: virtualItem.size,
+              }}
+              role="listitem"
+              aria-posinset={virtualItem.index + 1}
+              aria-setsize={topics.length}
+            >
+              <TopicListItem
+                topic={topic}
+                isActive={isActive}
+                hasUnread={hasUnread}
+                onClick={onTopicClick}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

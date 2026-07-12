@@ -26,7 +26,7 @@
  * to visually flow together.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import Card from '../ui/Card';
@@ -98,7 +98,7 @@ export interface ResponseItemProps {
   onThreadCollapse?: (threadId: string) => void;
 }
 
-export function ResponseItem({
+export const ResponseItem = memo(function ResponseItem({
   response,
   discussionId,
   showReplies = false,
@@ -760,4 +760,5 @@ export function ResponseItem({
       />
     </div>
   );
-}
+});
+ResponseItem.displayName = 'ResponseItem';

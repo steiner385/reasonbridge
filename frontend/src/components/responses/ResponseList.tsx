@@ -76,7 +76,7 @@ export function ResponseList({
   enableThreading = false,
   height = 600,
   estimatedItemHeight,
-  highlightedResponseIds = new Set(),
+  highlightedResponseIds,
   onReplySubmit,
   onPreviewFeedbackChange,
   compact = false,
@@ -197,7 +197,7 @@ export function ResponseList({
 
       const grouped = groupedResponses[index];
       const response = grouped.response;
-      const isHighlighted = highlightedResponseIds.has(response.id);
+      const isHighlighted = highlightedResponseIds?.has(response.id) ?? false;
       const showDivider = index === newMessagesDividerIndex;
 
       return (
