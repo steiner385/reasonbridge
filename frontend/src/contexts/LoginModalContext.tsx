@@ -42,7 +42,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
   const location = useLocation();
   const { login } = useAuth();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const openModal = useCallback(() => {
     setIsOpen(true);
@@ -72,59 +72,41 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closeModal]);
 
-  // Focus management (WCAG 2.1 AA):
-  // - Move focus into the dialog when it opens
-  // - Trap Tab / Shift+Tab cycles within the dialog while open
-  // - Restore focus to the triggering element when it closes
+  // Focus trap: store trigger focus, focus email input, trap Tab, restore on close (WCAG 2.4.3)
   useEffect(() => {
-    if (!isOpen) return undefined;
+    if (!isOpen || !dialogRef.current) return undefined;
 
-    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+    previousFocusRef.current = document.activeElement as HTMLElement;
 
-    const getFocusable = (): HTMLElement[] => {
-      if (!dialogRef.current) return [];
-      return Array.from(
-        dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((el) => !el.hasAttribute('disabled'));
-    };
+    // Focus the email field so keyboard users can start typing immediately.
+    const emailInput = dialogRef.current.querySelector<HTMLElement>('#login-email');
+    emailInput?.focus();
 
-    // Move initial focus into the dialog
-    getFocusable()[0]?.focus();
+    const FOCUSABLE =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
     const handleTab = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return;
-
-      const focusable = getFocusable();
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE);
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (!first || !last) return;
-
-      const active = document.activeElement;
-
-      // If focus somehow escaped the dialog, pull it back in
-      if (!active || !dialogRef.current?.contains(active)) {
-        event.preventDefault();
-        (event.shiftKey ? last : first).focus();
-        return;
-      }
-
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
       }
     };
 
     document.addEventListener('keydown', handleTab);
     return () => {
       document.removeEventListener('keydown', handleTab);
-      // Restore focus to the element that opened the modal
-      previouslyFocusedRef.current?.focus();
-      previouslyFocusedRef.current = null;
+      previousFocusRef.current?.focus();
     };
   }, [isOpen]);
 
@@ -173,6 +155,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
           data-testid="login-modal"
         >
           <div
+            ref={dialogRef}
             className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >

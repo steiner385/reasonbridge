@@ -117,6 +117,8 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
             src={urls.jpg}
             alt={user.displayName}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               // Fallback to icon if image fails to load
               e.currentTarget.style.display = 'none';
@@ -149,6 +151,8 @@ export function Avatar({ user, size = 'md', className = '' }: AvatarProps) {
         src={fallbackSrc}
         alt={user.displayName}
         className="w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
         onError={(e) => {
           // Fallback to icon if image fails to load
           e.currentTarget.style.display = 'none';

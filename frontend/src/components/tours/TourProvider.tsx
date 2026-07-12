@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { Joyride, STATUS, EVENTS, type EventData, type Step } from 'react-joyride';
+import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { STATUS, EVENTS, type EventData, type Step } from 'react-joyride';
 import {
   type TourId,
   getTourSteps,
@@ -14,6 +14,9 @@ import {
   resetAllTours,
 } from './tourSteps';
 import { TourContext, type TourContextValue } from './useTour';
+
+// Lazy-load the heavy Joyride UI; STATUS/EVENTS are tiny constants, kept eager.
+const LazyJoyride = lazy(() => import('react-joyride').then((m) => ({ default: m.Joyride })));
 
 /**
  * Props for TourProvider
@@ -139,62 +142,67 @@ export function TourProvider({ children }: TourProviderProps) {
   return (
     <TourContext.Provider value={contextValue}>
       {children}
-      <Joyride
-        steps={steps}
-        run={isRunning}
-        continuous
-        scrollToFirstStep
-        onEvent={handleJoyrideCallback}
-        locale={{
-          back: 'Back',
-          close: 'Close',
-          last: 'Finish',
-          next: 'Next',
-          skip: 'Skip tour',
-        }}
-        options={{
-          zIndex: 10000,
-          primaryColor: '#2563eb', // primary-600
-          textColor: '#1f2937', // gray-800
-          backgroundColor: '#ffffff',
-          arrowColor: '#ffffff',
-          overlayColor: 'rgba(0, 0, 0, 0.5)',
-          overlayClickAction: false,
-          buttons: ['back', 'close', 'primary', 'skip'],
-          showProgress: true,
-        }}
-        styles={{
-          tooltip: {
-            borderRadius: 8,
-            padding: 16,
-          },
-          tooltipTitle: {
-            fontSize: 16,
-            fontWeight: 600,
-            marginBottom: 8,
-          },
-          tooltipContent: {
-            fontSize: 14,
-            lineHeight: 1.5,
-          },
-          buttonPrimary: {
-            backgroundColor: '#2563eb',
-            borderRadius: 6,
-            padding: '8px 16px',
-            fontSize: 14,
-            fontWeight: 500,
-          },
-          buttonBack: {
-            color: '#4b5563',
-            marginRight: 8,
-            fontSize: 14,
-          },
-          buttonSkip: {
-            color: '#9ca3af',
-            fontSize: 14,
-          },
-        }}
-      />
+      {/* Only render Joyride when a tour is active — keeps it out of the initial bundle */}
+      {isRunning && (
+        <Suspense fallback={null}>
+          <LazyJoyride
+            steps={steps}
+            run={isRunning}
+            continuous
+            scrollToFirstStep
+            onEvent={handleJoyrideCallback}
+            locale={{
+              back: 'Back',
+              close: 'Close',
+              last: 'Finish',
+              next: 'Next',
+              skip: 'Skip tour',
+            }}
+            options={{
+              zIndex: 10000,
+              primaryColor: '#2563eb', // primary-600
+              textColor: '#1f2937', // gray-800
+              backgroundColor: '#ffffff',
+              arrowColor: '#ffffff',
+              overlayColor: 'rgba(0, 0, 0, 0.5)',
+              overlayClickAction: false,
+              buttons: ['back', 'close', 'primary', 'skip'],
+              showProgress: true,
+            }}
+            styles={{
+              tooltip: {
+                borderRadius: 8,
+                padding: 16,
+              },
+              tooltipTitle: {
+                fontSize: 16,
+                fontWeight: 600,
+                marginBottom: 8,
+              },
+              tooltipContent: {
+                fontSize: 14,
+                lineHeight: 1.5,
+              },
+              buttonPrimary: {
+                backgroundColor: '#2563eb',
+                borderRadius: 6,
+                padding: '8px 16px',
+                fontSize: 14,
+                fontWeight: 500,
+              },
+              buttonBack: {
+                color: '#4b5563',
+                marginRight: 8,
+                fontSize: 14,
+              },
+              buttonSkip: {
+                color: '#9ca3af',
+                fontSize: 14,
+              },
+            }}
+          />
+        </Suspense>
+      )}
     </TourContext.Provider>
   );
 }

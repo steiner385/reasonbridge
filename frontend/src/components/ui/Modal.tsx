@@ -71,6 +71,7 @@ const Modal: React.FC<ModalProps> = ({
   'data-testid': dataTestId,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   // Handle escape key
   useEffect(() => {
@@ -90,36 +91,46 @@ const Modal: React.FC<ModalProps> = ({
   // overlays don't clobber each other's lock — see #1378).
   useScrollLock(isOpen);
 
-  // Focus trap
+  // Focus trap: store trigger focus, focus first element, trap Tab, restore on close.
+  // Focusable elements are re-queried inside the keydown handler to handle dynamic content.
   useEffect(() => {
     if (!isOpen || !modalRef.current) return;
 
-    const focusableElements = modalRef.current.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    // Store the element that had focus before the modal opened so we can restore it.
+    previousFocusRef.current = document.activeElement as HTMLElement;
+
+    const FOCUSABLE =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
     const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-
+      if (e.key !== 'Tab' || !modalRef.current) return;
+      // Re-query on each keydown to reflect dynamic content changes.
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
       if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
+        if (document.activeElement === first) {
           e.preventDefault();
-          lastElement?.focus();
+          last?.focus();
         }
       } else {
-        if (document.activeElement === lastElement) {
+        if (document.activeElement === last) {
           e.preventDefault();
-          firstElement?.focus();
+          first?.focus();
         }
       }
     };
 
-    document.addEventListener('keydown', handleTab);
-    firstElement?.focus();
+    // Focus the first focusable element in the modal.
+    const focusable = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE);
+    focusable[0]?.focus();
 
-    return () => document.removeEventListener('keydown', handleTab);
+    document.addEventListener('keydown', handleTab);
+    return () => {
+      document.removeEventListener('keydown', handleTab);
+      // Restore focus to the trigger element so keyboard users can continue from where they were.
+      previousFocusRef.current?.focus();
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
