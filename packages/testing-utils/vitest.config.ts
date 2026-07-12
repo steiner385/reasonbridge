@@ -12,6 +12,9 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.ts'],
     // Integration tests require database - run separately in CI
     exclude: ['**/node_modules/**', '**/dist/**', '**/*.integration.test.ts'],
-    reporters: ['default'],
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: './coverage/junit-unit.xml',
+    },
   },
 });

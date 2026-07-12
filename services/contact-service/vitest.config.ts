@@ -23,6 +23,10 @@ export default defineConfig({
         statements: 50,
       },
     },
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: './coverage/junit-unit.xml',
+    },
   },
   resolve: {
     alias: {
