@@ -5,9 +5,21 @@
 
 import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { HealthCheckService, HealthCheck, HttpHealthIndicator } from '@nestjs/terminus';
 import type { HealthCheckResult } from '@nestjs/terminus';
+
+/** Response shape for the liveness and readiness probes. */
+class HealthCheckResponse {
+  @ApiProperty({ example: 'ok', description: 'Probe status' })
+  status!: string;
+
+  @ApiProperty({ example: '2026-07-11T12:00:00.000Z', description: 'ISO-8601 response time' })
+  timestamp!: string;
+
+  @ApiProperty({ example: 'api-gateway', description: 'Reporting service name' })
+  service!: string;
+}
 
 /**
  * Health Check Controller

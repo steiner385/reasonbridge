@@ -49,6 +49,10 @@ test-results/
 tmp/
 temp/
 
+# Vite/Vitest transient config bundles (leftover from crashed vitest runs)
+*.timestamp-*.mjs
+vite.config.*.timestamp-*
+
 # Git worktrees
 .worktrees/
 

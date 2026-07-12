@@ -13,34 +13,34 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@nestjs/cache-manager": "^3.1.0",
-    "@nestjs/common": "^11.1.18",
-    "@nestjs/config": "^4.0.3",
-    "@nestjs/core": "^11.1.18",
+    "@nestjs/cache-manager": "^3.1.3",
+    "@nestjs/common": "^11.1.27",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.1.27",
     "@nestjs/jwt": "11.0.2",
-    "@nestjs/platform-fastify": "^11.1.18",
-    "@nestjs/swagger": "^11.2.6",
+    "@nestjs/platform-fastify": "^11.1.27",
+    "@nestjs/swagger": "^11.4.5",
     "@nestjs/throttler": "^6.5.0",
-    "@prisma/adapter-pg": "^7.6.0",
-    "@prisma/client": "7.6.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "7.8.0",
     "@reason-bridge/common": "workspace:*",
     "@reason-bridge/db-models": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
-    "fastify": "^5.8.4",
+    "fastify": "^5.10.0",
     "googleapis": "^173.0.0",
-    "jwks-rsa": "4.0.1",
-    "pg": "^8.20.0"
+    "jwks-rsa": "4.1.0",
+    "pg": "^8.22.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.17",
-    "@nestjs/testing": "^11.1.18",
+    "@nestjs/cli": "^11.0.23",
+    "@nestjs/testing": "^11.1.27",
     "@pact-foundation/pact": "^17.0.1",
     "@types/node": "^25.5.2",
     "@types/pg": "^8.20.0",
-    "@vitest/coverage-v8": "^2.1.8",
-    "tsx": "^4.21.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.9"
   }
 }

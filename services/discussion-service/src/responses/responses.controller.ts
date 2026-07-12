@@ -23,7 +23,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ResponsesService } from './responses.service.js';
 import { ContentModerationService } from './services/content-moderation.service.js';
-import { CreateResponseDto } from './dto/create-response.dto.js';
+import { CreateResponseDto, CreateTopicResponseDto } from './dto/create-response.dto.js';
 import { ReplyToResponseDto } from './dto/reply-to-response.dto.js';
 import { UpdateResponseDto } from './dto/update-response.dto.js';
 import { ResponseDetailDto } from './dto/response-detail.dto.js';
@@ -85,7 +85,7 @@ export class ResponsesController {
   async createResponse(
     @Param('topicId') topicId: string,
     @CurrentUser() user: JwtPayload,
-    @Body() createResponseDto: CreateResponseDto,
+    @Body() createResponseDto: CreateTopicResponseDto,
   ): Promise<ResponseDto> {
     return this.responsesService.createResponse(topicId, user.sub, createResponseDto);
   }

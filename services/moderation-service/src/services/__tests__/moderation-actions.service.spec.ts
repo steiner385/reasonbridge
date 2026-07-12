@@ -38,6 +38,7 @@ describe('ModerationActionsService', () => {
         create: vi.fn(),
         update: vi.fn(),
       },
+      $transaction: vi.fn().mockImplementation((operations) => Promise.all(operations)),
     };
 
     queueService = {
@@ -573,14 +574,30 @@ describe('ModerationActionsService', () => {
       ];
 
       prismaService.moderationAction.findMany.mockResolvedValue(expiredBans);
-      prismaService.moderationAction.updateMany.mockResolvedValue({
-        count: 2,
-      });
 
       const result = await service.autoLiftExpiredBans();
 
       expect(result.lifted).toBe(2);
-      expect(prismaService.moderationAction.updateMany).toHaveBeenCalled();
+      expect(prismaService.$transaction).toHaveBeenCalledTimes(1);
+      expect(prismaService.moderationAction.update).toHaveBeenCalledTimes(2);
+      expect(prismaService.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: 'ban-1' },
+        data: {
+          status: 'REVERSED',
+          liftedAt: expect.any(Date),
+          reasoning:
+            'Temporary ban for 7 days\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]',
+        },
+      });
+      expect(prismaService.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: 'ban-2' },
+        data: {
+          status: 'REVERSED',
+          liftedAt: expect.any(Date),
+          reasoning:
+            'Another temporary ban\n\n[AUTOMATICALLY LIFTED: Temporary ban duration expired]',
+        },
+      });
     });
 
     it('should return 0 if no bans are expired', async () => {

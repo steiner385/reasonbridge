@@ -45,6 +45,17 @@ export default defineConfig({
       '**/*.integration.spec.ts', // Run in integration test phase (src/**)
       '**/__benchmarks__/**', // Run separately: pnpm test:benchmarks
     ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      exclude: ['node_modules/**', 'dist/**', '**/*.d.ts', '**/*.test.ts', '**/*.spec.ts'],
+      thresholds: {
+        lines: 50,
+        functions: 45,
+        branches: 40,
+        statements: 50,
+      },
+    },
     reporters: ['default', 'junit'],
     outputFile: {
       junit: './coverage/junit.xml',
