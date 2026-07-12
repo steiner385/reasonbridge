@@ -1023,10 +1023,13 @@ gh api repos/steiner385/reasonbridge/branches/main/protection/required_status_ch
 2. **2026-01-28 - PR #709**: Merged while the overall pipeline status was still pending, which
    later failed. Lesson: also require the aggregate gate (`CI`) so the whole pipeline must finish.
 
+3. **2026-07-11 - Force-merge of 24 open PRs**: At the repo owner's explicit request, all open PRs (#1262, #1270–#1279, #1398–#1410) were admin-merged to main while the required `jenkins/e2e` check was failing. `enforce_admins` was temporarily disabled to permit `gh pr merge --admin`, then re-enabled immediately after; the required status check contexts themselves were never modified. Ten PRs required manual conflict resolution on their branches before merging (appeal-service refactor overlap, `useResponses` cache-key fix, per-service `main.ts` import unions, pnpm lockfile regeneration for Dependabot bumps). Because CI was bypassed, the first post-merge main builds must be watched and any failures fixed forward.
+
 **Configuration Evolution:**
 
 - 2026-01-24: Required jenkins/lint, jenkins/unit-tests, jenkins/integration
 - 2026-01-28: Re-added jenkins/ci as fourth required check
+- 2026-07-11: `enforce_admins` temporarily disabled and restored same-session for an owner-requested force-merge (see incident 3); final state verified as `enforce_admins: true` with the required contexts intact
 - 2026-07-11: Migrated to GitHub Actions contexts: Lint, Unit Tests, Integration Tests, E2E Tests, CI
 
 ## Playwright E2E Testing
