@@ -13,7 +13,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AppealService } from '../../services/appeal.service.js';
-import { ModerationActionsService } from '../../services/moderation-actions.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { QueueService } from '../../queue/queue.service.js';
 import {
@@ -30,7 +29,6 @@ import {
 
 describe('Appeal Process Integration Tests', () => {
   let appealService: AppealService;
-  let moderationActionsService: ModerationActionsService;
   let mockPrisma: any;
   let mockQueueService: any;
 
@@ -49,10 +47,12 @@ describe('Appeal Process Integration Tests', () => {
       moderationAction: {
         create: vi.fn(),
         findUnique: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
         findFirst: vi.fn(),
         findMany: vi.fn(),
         update: vi.fn(),
-        updateMany: vi.fn(),
+        // Conditional writes (race-safe transitions) report the matched row count
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         count: vi.fn().mockResolvedValue(0),
         groupBy: vi.fn().mockResolvedValue([]),
         aggregate: vi.fn().mockResolvedValue({ _avg: { aiConfidence: null } }),
@@ -60,8 +60,10 @@ describe('Appeal Process Integration Tests', () => {
       appeal: {
         create: vi.fn(),
         findUnique: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
         findMany: vi.fn(),
         update: vi.fn(),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         count: vi.fn().mockResolvedValue(0),
         groupBy: vi.fn().mockResolvedValue([]),
       },
@@ -69,14 +71,11 @@ describe('Appeal Process Integration Tests', () => {
         findUnique: vi.fn(),
       },
     };
+    // Interactive transactions execute the callback against the same mock client
+    mockPrisma.$transaction = vi.fn(async (callback: any) => callback(mockPrisma));
 
-    // Create service instances
+    // Create service instance (appeal workflow now lives on AppealService)
     appealService = new AppealService(
-      mockPrisma as unknown as PrismaService,
-      mockQueueService as unknown as QueueService,
-    );
-
-    moderationActionsService = new ModerationActionsService(
       mockPrisma as unknown as PrismaService,
       mockQueueService as unknown as QueueService,
     );
@@ -111,7 +110,8 @@ describe('Appeal Process Integration Tests', () => {
           status: 'UNDER_REVIEW',
         },
       });
-      expect(result.status).toBe('UNDER_REVIEW');
+      // API contract surfaces enum values in lower case
+      expect(result.status).toBe('under_review');
       expect(result.reviewerId).toBe(testModeratorId);
     });
 
@@ -138,7 +138,8 @@ describe('Appeal Process Integration Tests', () => {
           status: 'PENDING',
         },
       });
-      expect(result.status).toBe('PENDING');
+      // API contract surfaces enum values in lower case
+      expect(result.status).toBe('pending');
       expect(result.reviewerId).toBeNull();
     });
 
@@ -197,12 +198,15 @@ describe('Appeal Process Integration Tests', () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(null);
       mockPrisma.appeal.create.mockResolvedValue(newAppeal);
 
-      const createResult = await moderationActionsService.createAppeal(
-        testModerationActionId,
-        testUserId,
-        { reason: 'I believe this moderation action was taken in error and should be reversed.' },
-      );
+      const createResult = await appealService.createAppeal(testModerationActionId, testUserId, {
+        reason: 'I believe this moderation action was taken in error and should be reversed.',
+      });
       expect(createResult.status).toBe('pending');
+      // Appeal creation flips the action to APPEALED atomically
+      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: testModerationActionId },
+        data: { status: 'APPEALED' },
+      });
 
       // Step 2: Assign to moderator
       mockPrisma.appeal.findUnique.mockResolvedValue(newAppeal);
@@ -218,9 +222,9 @@ describe('Appeal Process Integration Tests', () => {
         'lifecycle-appeal-1',
         testModeratorId,
       );
-      expect(assignResult.status).toBe('UNDER_REVIEW');
+      expect(assignResult.status).toBe('under_review');
 
-      // Step 3: Review and uphold (using AppealService which allows UNDER_REVIEW status)
+      // Step 3: Review and uphold (AppealService allows UNDER_REVIEW status)
       const appealWithAction = {
         ...assignedAppeal,
         moderationAction: { ...activeAction, id: testModerationActionId, status: 'APPEALED' },
@@ -233,21 +237,25 @@ describe('Appeal Process Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
-      mockPrisma.appeal.update.mockResolvedValue(upheldAppeal);
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...activeAction,
-        status: 'REVERSED',
-      });
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(upheldAppeal);
 
       mockQueueService.publishEvent.mockClear();
+      mockPrisma.moderationAction.updateMany.mockClear();
 
-      // Use AppealService.reviewAppeal which allows UNDER_REVIEW status
       const reviewResult = await appealService.reviewAppeal('lifecycle-appeal-1', testModeratorId, {
         decision: 'upheld',
         reasoning: 'Upon review, the original action was inappropriate and should be reversed.',
       });
 
-      expect(reviewResult.status).toBe('UPHELD');
+      expect(reviewResult.status).toBe('upheld');
+      // Upheld appeal reverses the action via a conditional (race-safe) write
+      expect(mockPrisma.moderationAction.updateMany).toHaveBeenCalledWith({
+        where: { id: testModerationActionId, status: 'APPEALED' },
+        data: expect.objectContaining({
+          status: 'REVERSED',
+          reasoning: expect.stringContaining('[APPEAL UPHELD:'),
+        }),
+      });
       expect(mockQueueService.publishEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'user.trust.updated',
@@ -273,7 +281,7 @@ describe('Appeal Process Integration Tests', () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(null);
       mockPrisma.appeal.create.mockResolvedValue(newAppeal);
 
-      await moderationActionsService.createAppeal(testModerationActionId, testUserId, {
+      await appealService.createAppeal(testModerationActionId, testUserId, {
         reason: 'I believe this moderation action was taken in error and should be reversed.',
       });
 
@@ -289,7 +297,7 @@ describe('Appeal Process Integration Tests', () => {
 
       await appealService.assignAppealToModerator('lifecycle-appeal-2', testModeratorId);
 
-      // Step 3: Review and deny (using AppealService which allows UNDER_REVIEW status)
+      // Step 3: Review and deny (AppealService allows UNDER_REVIEW status)
       const appealWithAction = {
         ...assignedAppeal,
         moderationAction: { ...activeAction, id: testModerationActionId, status: 'APPEALED' },
@@ -302,22 +310,27 @@ describe('Appeal Process Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
-      mockPrisma.appeal.update.mockResolvedValue(deniedAppeal);
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(deniedAppeal);
 
       mockQueueService.publishEvent.mockClear();
       mockPrisma.moderationAction.update.mockClear();
+      mockPrisma.moderationAction.updateMany.mockClear();
 
-      // Use AppealService.reviewAppeal which allows UNDER_REVIEW status
       const reviewResult = await appealService.reviewAppeal('lifecycle-appeal-2', testModeratorId, {
         decision: 'denied',
         reasoning: 'The original moderation decision was correct and will be maintained.',
       });
 
-      expect(reviewResult.status).toBe('DENIED');
+      expect(reviewResult.status).toBe('denied');
       // No trust update event for denied appeals
       expect(mockQueueService.publishEvent).not.toHaveBeenCalled();
-      // Moderation action should NOT be updated during review for denied appeals
-      expect(mockPrisma.moderationAction.update).not.toHaveBeenCalled();
+      // A denied appeal must NOT reverse the action — instead it restores the
+      // APPEALED action to ACTIVE so enforcement resumes
+      expect(mockPrisma.moderationAction.updateMany).not.toHaveBeenCalled();
+      expect(mockPrisma.moderationAction.update).toHaveBeenCalledWith({
+        where: { id: testModerationActionId },
+        data: { status: 'ACTIVE' },
+      });
     });
   });
 
@@ -465,7 +478,10 @@ describe('Appeal Process Integration Tests', () => {
   });
 
   describe('Re-Appeal After Denial', () => {
-    it('should allow new appeal after previous denial', async () => {
+    it('should reject re-appeal after previous denial (one appeal per action per user)', async () => {
+      // The Appeal model has a @@unique([moderationActionId, appellantId])
+      // constraint, so a resolved (DENIED) appeal blocks re-appealing with an
+      // explicit 409 instead of an unhandled P2002 → 500 (Issue #1316).
       const activeAction = createMockModerationAction({
         status: 'ACTIVE', // Back to ACTIVE after denial
       });
@@ -475,27 +491,19 @@ describe('Appeal Process Integration Tests', () => {
         decisionReasoning: 'Previous denial reasoning',
         resolvedAt: new Date(),
       });
-      const newAppeal = createMockAppeal({
-        id: 'new-appeal',
-        status: 'PENDING',
-      });
 
       mockPrisma.moderationAction.findUnique.mockResolvedValue(activeAction);
       mockPrisma.appeal.findUnique.mockResolvedValue(previousDeniedAppeal);
-      mockPrisma.appeal.create.mockResolvedValue(newAppeal);
 
-      const result = await moderationActionsService.createAppeal(
-        testModerationActionId,
-        testUserId,
-        {
+      await expect(
+        appealService.createAppeal(testModerationActionId, testUserId, {
           reason:
             'I have new evidence that supports my appeal and would like to request a re-review.',
-        },
+        }),
+      ).rejects.toThrow(
+        'You have already appealed this moderation action and it has been resolved',
       );
-
-      expect(result.status).toBe('pending');
-      expect(result.id).toBe('new-appeal');
-      expect(mockPrisma.appeal.create).toHaveBeenCalled();
+      expect(mockPrisma.appeal.create).not.toHaveBeenCalled();
     });
 
     it('should prevent re-appeal while previous appeal is still pending', async () => {
@@ -510,7 +518,7 @@ describe('Appeal Process Integration Tests', () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(pendingAppeal);
 
       await expect(
-        moderationActionsService.createAppeal(testModerationActionId, testUserId, {
+        appealService.createAppeal(testModerationActionId, testUserId, {
           reason: 'Trying to create duplicate appeal while one is pending.',
         }),
       ).rejects.toThrow('An appeal for this moderation action is already pending review');
@@ -529,7 +537,7 @@ describe('Appeal Process Integration Tests', () => {
       mockPrisma.appeal.findUnique.mockResolvedValue(underReviewAppeal);
 
       await expect(
-        moderationActionsService.createAppeal(testModerationActionId, testUserId, {
+        appealService.createAppeal(testModerationActionId, testUserId, {
           reason: 'Trying to create duplicate appeal while one is under review.',
         }),
       ).rejects.toThrow('An appeal for this moderation action is already pending review');
@@ -545,7 +553,7 @@ describe('Appeal Process Integration Tests', () => {
       mockPrisma.moderationAction.findUnique.mockResolvedValue(activeAction);
 
       await expect(
-        moderationActionsService.createAppeal(testModerationActionId, testUserId, {
+        appealService.createAppeal(testModerationActionId, testUserId, {
           reason: 'Too short',
         }),
       ).rejects.toThrow('Appeal reason must be at least 20 characters long');
@@ -559,7 +567,7 @@ describe('Appeal Process Integration Tests', () => {
       mockPrisma.moderationAction.findUnique.mockResolvedValue(activeAction);
 
       await expect(
-        moderationActionsService.createAppeal(testModerationActionId, testUserId, {
+        appealService.createAppeal(testModerationActionId, testUserId, {
           reason: 'a'.repeat(5001),
         }),
       ).rejects.toThrow('Appeal reason cannot exceed 5000 characters');
@@ -567,7 +575,7 @@ describe('Appeal Process Integration Tests', () => {
 
     it('should validate decision reasoning minimum length', async () => {
       await expect(
-        moderationActionsService.reviewAppeal(testAppealId, testModeratorId, {
+        appealService.reviewAppeal(testAppealId, testModeratorId, {
           decision: 'upheld',
           reasoning: 'Too short',
         }),
@@ -576,7 +584,7 @@ describe('Appeal Process Integration Tests', () => {
 
     it('should validate decision reasoning maximum length', async () => {
       await expect(
-        moderationActionsService.reviewAppeal(testAppealId, testModeratorId, {
+        appealService.reviewAppeal(testAppealId, testModeratorId, {
           decision: 'denied',
           reasoning: 'a'.repeat(2001),
         }),
@@ -617,14 +625,22 @@ describe('Appeal Process Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(pendingAppeal);
-      mockPrisma.appeal.update.mockResolvedValue(deniedAppeal);
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(deniedAppeal);
 
-      const result = await moderationActionsService.reviewAppeal(testAppealId, testModeratorId, {
+      const result = await appealService.reviewAppeal(testAppealId, testModeratorId, {
         decision: 'denied',
         reasoning: 'Direct review without formal assignment step.',
       });
 
       expect(result.status).toBe('denied');
+      // The decision is a conditional write guarded on a reviewable status
+      expect(mockPrisma.appeal.updateMany).toHaveBeenCalledWith({
+        where: { id: testAppealId, status: { in: ['PENDING', 'UNDER_REVIEW'] } },
+        data: expect.objectContaining({
+          status: 'DENIED',
+          reviewerId: testModeratorId,
+        }),
+      });
     });
 
     it('should allow reviewing UNDER_REVIEW appeal', async () => {
@@ -641,11 +657,7 @@ describe('Appeal Process Integration Tests', () => {
       };
 
       mockPrisma.appeal.findUnique.mockResolvedValue(underReviewAppeal);
-      mockPrisma.appeal.update.mockResolvedValue(upheldAppeal);
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...underReviewAppeal.moderationAction,
-        status: 'REVERSED',
-      });
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue(upheldAppeal);
 
       // Use AppealService which allows UNDER_REVIEW status
       const result = await appealService.reviewAppeal(testAppealId, testModeratorId, {
@@ -653,7 +665,7 @@ describe('Appeal Process Integration Tests', () => {
         reasoning: 'Upon careful review, the appeal has merit.',
       });
 
-      expect(result.status).toBe('UPHELD');
+      expect(result.status).toBe('upheld');
     });
   });
 
@@ -665,17 +677,13 @@ describe('Appeal Process Integration Tests', () => {
       });
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
-      mockPrisma.appeal.update.mockResolvedValue({
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue({
         ...appealWithAction,
         status: 'UPHELD',
         resolvedAt: new Date(),
       });
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...appealWithAction.moderationAction,
-        status: 'REVERSED',
-      });
 
-      await moderationActionsService.reviewAppeal(testAppealId, testModeratorId, {
+      await appealService.reviewAppeal(testAppealId, testModeratorId, {
         decision: 'upheld',
         reasoning: 'Appeal is valid and should be upheld.',
       });
@@ -699,13 +707,13 @@ describe('Appeal Process Integration Tests', () => {
       });
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
-      mockPrisma.appeal.update.mockResolvedValue({
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue({
         ...appealWithAction,
         status: 'DENIED',
         resolvedAt: new Date(),
       });
 
-      await moderationActionsService.reviewAppeal(testAppealId, testModeratorId, {
+      await appealService.reviewAppeal(testAppealId, testModeratorId, {
         decision: 'denied',
         reasoning: 'The appeal does not have sufficient merit.',
       });
@@ -720,21 +728,17 @@ describe('Appeal Process Integration Tests', () => {
       });
 
       mockPrisma.appeal.findUnique.mockResolvedValue(appealWithAction);
-      mockPrisma.appeal.update.mockResolvedValue({
+      mockPrisma.appeal.findUniqueOrThrow.mockResolvedValue({
         ...appealWithAction,
         status: 'UPHELD',
         resolvedAt: new Date(),
-      });
-      mockPrisma.moderationAction.update.mockResolvedValue({
-        ...appealWithAction.moderationAction,
-        status: 'REVERSED',
       });
       mockQueueService.publishEvent.mockRejectedValue(new Error('Queue unavailable'));
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Should not throw even if event publishing fails
-      const result = await moderationActionsService.reviewAppeal(testAppealId, testModeratorId, {
+      const result = await appealService.reviewAppeal(testAppealId, testModeratorId, {
         decision: 'upheld',
         reasoning: 'Appeal is valid despite queue issues.',
       });

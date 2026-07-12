@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DEMO_CREDENTIALS } from '@reason-bridge/common/config';
 import { useAuth } from '../hooks/useAuth';
@@ -41,6 +41,8 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   const openModal = useCallback(() => {
     setIsOpen(true);
@@ -69,6 +71,62 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closeModal]);
+
+  // Focus management (WCAG 2.1 AA):
+  // - Move focus into the dialog when it opens
+  // - Trap Tab / Shift+Tab cycles within the dialog while open
+  // - Restore focus to the triggering element when it closes
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+    const getFocusable = (): HTMLElement[] => {
+      if (!dialogRef.current) return [];
+      return Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute('disabled'));
+    };
+
+    // Move initial focus into the dialog
+    getFocusable()[0]?.focus();
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusable();
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+
+      const active = document.activeElement;
+
+      // If focus somehow escaped the dialog, pull it back in
+      if (!active || !dialogRef.current?.contains(active)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+        return;
+      }
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleTab);
+    return () => {
+      document.removeEventListener('keydown', handleTab);
+      // Restore focus to the element that opened the modal
+      previouslyFocusedRef.current?.focus();
+      previouslyFocusedRef.current = null;
+    };
+  }, [isOpen]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +164,7 @@ export function LoginModalProvider({ children }: { children: React.ReactNode }) 
       {/* Login Modal */}
       {isOpen && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
           onClick={closeModal}
           role="dialog"

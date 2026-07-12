@@ -5,6 +5,7 @@
 
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import sharp from 'sharp';
+import type { Metadata } from 'sharp';
 
 export interface ProcessedImage {
   size: 'small' | 'medium' | 'large';
@@ -40,7 +41,7 @@ export class ImageProcessorService {
     }
 
     // Validate image
-    let metadata: sharp.Metadata;
+    let metadata: Metadata;
     try {
       metadata = await sharp(input).metadata();
     } catch (error) {

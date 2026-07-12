@@ -38,6 +38,20 @@ describe('Responses Search Integration Tests (#1290)', () => {
     prisma = moduleRef.get<PrismaService>(PrismaService);
     searchService = moduleRef.get<ResponsesSearchService>(ResponsesSearchService);
 
+    // User must exist first: DiscussionTopic.creatorId is a required FK.
+    await prisma.user.upsert({
+      where: { id: testUserId },
+      update: {},
+      create: {
+        id: testUserId,
+        email: 'search-user@test.com',
+        cognitoSub: 'search-test-cognito-sub-1290',
+        displayName: 'Search Test User',
+        emailVerified: true,
+        authMethod: 'EMAIL_PASSWORD',
+      },
+    });
+
     await prisma.discussionTopic.upsert({
       where: { id: testTopicId },
       update: {},
@@ -45,21 +59,11 @@ describe('Responses Search Integration Tests (#1290)', () => {
         id: testTopicId,
         title: 'Search Test Topic',
         description: 'Topic for response search integration testing',
+        slug: 'search-test-topic-1290',
+        creatorId: testUserId,
         status: 'ACTIVE',
         responseCount: 0,
         participantCount: 0,
-      },
-    });
-
-    await prisma.user.upsert({
-      where: { id: testUserId },
-      update: {},
-      create: {
-        id: testUserId,
-        email: 'search-user@test.com',
-        displayName: 'Search Test User',
-        emailVerified: true,
-        authMethod: 'EMAIL',
       },
     });
 
@@ -118,6 +122,7 @@ describe('Responses Search Integration Tests (#1290)', () => {
 
     const [first] = results;
     expect(first!.topicTitle).toBe('Search Test Topic');
+    expect(first!.topicSlug).toBe('search-test-topic-1290');
     expect(first!.topicId).toBe(testTopicId);
     // Highlighting wraps the matched term in <mark>.
     expect(first!.highlightedContent).toContain('<mark>');
