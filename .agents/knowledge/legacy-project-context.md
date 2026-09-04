@@ -1,0 +1,1305 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+reasonBridge is a **Rational Discussion Platform** built with modern web technologies. The application provides tools for structured debates, claim validation, bias detection, and common ground discovery.
+
+**Stack**: React 18 + TypeScript 5 + Vite (frontend), Node.js 20 LTS (runtime), pnpm (package manager)
+
+**Purpose**: Enable constructive discourse through AI-powered analysis, structured argumentation, and evidence-based discussions.
+
+## Core Principles
+
+### The Boy Scout Rule: Always Leave the Codebase Better
+
+**CRITICAL**: When working on any task, you MUST fix any failures, issues, TODOs, or problems you encounter, **regardless of whether you caused them**.
+
+**Philosophy**:
+
+- If you find a failing test → fix it
+- If you encounter a build error → fix it
+- If you discover a bug → fix it
+- If you see a TODO that's blocking progress → address it
+- If E2E tests fail for "unrelated reasons" → those reasons are now related
+
+**This is non-negotiable**. Do not:
+
+- ❌ Say "this is a pre-existing issue"
+- ❌ Say "this is unrelated to our changes"
+- ❌ Say "this was already broken"
+- ❌ Leave problems for later
+
+**Instead**:
+
+- ✅ Fix the problem you found
+- ✅ Ensure the system works end-to-end
+- ✅ Leave the codebase in a better state than you found it
+
+**Example**: If you're fixing TypeScript errors and discover E2E tests failing due to a missing module export, you fix BOTH the TypeScript errors AND the module export issue. The task isn't complete until the full pipeline passes.
+
+**No Excuses**: The phrase "this is a pre-existing issue" is not an acceptable response. If you encounter 131 failing test files due to module resolution issues that existed before you started, you fix all 131 files. The user hired you to make the codebase work, not to explain why it doesn't.
+
+## Architecture
+
+### Frontend Structure
+
+The application uses a component-based architecture with React 18:
+
+```
+src/
+├── components/          # Reusable React components
+│   ├── alignments/      # Moral Foundation Theory alignment displays
+│   ├── auth/            # Authentication (Login, Register, PasswordReset)
+│   ├── common-ground/   # Common ground detection and visualization
+│   ├── feedback/        # AI feedback display and analysis
+│   ├── moderation/      # Content moderation and appeals
+│   ├── notifications/   # Real-time notification system
+│   ├── profile/         # User profile management
+│   ├── propositions/    # Argument propositions and structure
+│   ├── responses/       # Response threading and management
+│   ├── search/          # Search UI and filters
+│   ├── topics/          # Discussion topic management
+│   ├── ui/              # Base UI primitives (Button, Modal, etc.)
+│   ├── users/           # User lists and displays
+│   └── verification/    # Phone/email verification flows
+├── contexts/            # React Context providers (Auth, Theme, etc.)
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions and API client
+├── pages/               # Top-level route pages
+│   ├── Admin/           # Admin dashboard
+│   ├── Appeal/          # Moderation appeals
+│   ├── Auth/            # Auth flows
+│   ├── Profile/         # User profiles
+│   ├── Settings/        # User settings
+│   ├── Topics/          # Topic pages
+│   └── Verification/    # Verification flows
+├── routes/              # React Router configuration
+├── test/                # Test utilities and mocks
+└── types/               # TypeScript type definitions
+```
+
+### Backend Architecture (Microservices)
+
+The backend follows a microservices architecture using NestJS:
+
+```
+services/
+├── api-gateway/         # Central API gateway, routing, auth middleware
+├── user-service/        # User management, authentication, profiles
+├── discussion-service/  # Topics, propositions, responses, threading
+├── ai-service/          # AI-powered analysis (bias detection, common ground)
+├── moderation-service/  # Content moderation, appeals, reporting
+├── notification-service/# Real-time notifications, email, push
+├── fact-check-service/  # Claim verification, source validation
+├── recommendation-service/ # Content recommendations, discovery
+└── activity-service/    # Activity feed, user activity tracking
+```
+
+**Service Communication:**
+
+- Synchronous: HTTP/REST between services via API Gateway
+- Asynchronous: Event-driven via Redis pub/sub and AWS SQS/SNS (LocalStack in dev)
+
+**Infrastructure Services:**
+
+- **PostgreSQL 15**: Primary database (Prisma ORM)
+- **Redis 7**: Caching, sessions, pub/sub
+- **LocalStack**: AWS services emulation (S3, SQS, SNS)
+
+### Shared Packages (Monorepo)
+
+```
+packages/
+├── common/              # Shared utilities, constants, types
+├── db-models/           # Prisma schema and database models
+├── event-schemas/       # Event type definitions for service communication
+├── ai-client/           # AI provider abstraction (OpenAI, Anthropic)
+├── shared/              # Cross-cutting concerns (logging, config)
+└── testing-utils/       # Shared test utilities (Prisma mocks, helpers)
+```
+
+**Workspace Configuration:** `pnpm-workspace.yaml`
+
+- `packages/*` - Shared libraries
+- `services/*` - Backend microservices
+- `frontend` - React frontend
+- `e2e` - End-to-end tests
+
+### Technology Decisions
+
+**Frontend Framework**: React 18
+
+- Reason: Mature ecosystem, concurrent rendering, strong TypeScript support
+- Hooks-based architecture for state management
+
+**Build Tool**: Vite
+
+- Reason: Fast HMR, ESM-native, excellent dev experience
+- Configuration: `vite.config.ts`
+
+**Language**: TypeScript 5.x
+
+- Reason: Type safety, IDE support, refactoring confidence
+- Strict mode enabled for maximum safety
+
+**Package Manager**: pnpm 9.x
+
+- Reason: Fast, disk-efficient, workspace support
+- Lockfile: `pnpm-lock.yaml` (always use frozen lockfile in CI)
+
+**Styling**: Tailwind CSS 3.x
+
+- Reason: Utility-first, consistent design system, small bundle
+- Configuration: `tailwind.config.js`
+
+**Testing**:
+
+- Unit/Integration: Vitest 2.x (fast, ESM-native, Vite integration)
+- E2E: Playwright 1.58.x (cross-browser, reliable, great DX)
+- Coverage: @vitest/coverage-v8
+
+**Code Quality**:
+
+- ESLint 8.x (Airbnb config + TypeScript rules)
+- Prettier 3.x (formatting)
+- Husky 9.x (Git hooks)
+- lint-staged (staged file linting)
+
+**CI/CD**: GitHub Actions (`.github/workflows/ci.yml`)
+
+- Parallel jobs: lint, unit, integration, contract, E2E, build + aggregate `CI` gate
+- Branch protection via required status checks
+- GitHub-hosted `ubuntu-latest` runners (free for this public repo)
+
+### UI/UX Implementation Patterns
+
+The frontend implements a comprehensive set of UI/UX patterns for consistent, accessible, and performant user experiences.
+
+**Component Architecture:**
+
+```
+frontend/src/components/
+├── ui/                      # Base UI primitives
+│   ├── Button.tsx           # Primary interactive element with variants
+│   ├── Input.tsx            # Form inputs with validation display
+│   ├── Card.tsx             # Container with elevation variants
+│   ├── Modal.tsx            # Dialog overlays with focus trap
+│   ├── SearchInput.tsx      # Specialized search with debounce
+│   ├── FilterPanel.tsx      # Collapsible filter container
+│   ├── TagFilter.tsx        # Multi-select tag filtering
+│   ├── LoadingSpinner.tsx   # Loading indicators
+│   ├── ProgressBar.tsx      # Progress visualization
+│   ├── Toast.tsx            # Notification toasts
+│   ├── ErrorState.tsx       # Error display with retry
+│   ├── EmptyState.tsx       # Empty state placeholders
+│   └── Typography.tsx       # Rich text content wrapper
+├── layouts/                 # Layout components
+│   ├── Header.tsx           # Persistent top navigation
+│   ├── Sidebar.tsx          # Collapsible desktop sidebar
+│   ├── MobileDrawer.tsx     # Slide-out mobile menu
+│   ├── Navigation.tsx       # Shared nav content
+│   ├── AppLayout.tsx        # Main application shell
+│   └── MobileActionBar.tsx  # Fixed bottom mobile actions
+├── error/                   # Error handling
+│   └── ErrorBoundary.tsx    # React error boundary
+└── skeletons/               # Loading placeholders
+    ├── SkeletonText.tsx     # Text shimmer
+    ├── SkeletonCard.tsx     # Card shimmer
+    └── TopicCardSkeleton.tsx # Topic-specific skeleton
+```
+
+**Key Patterns:**
+
+1. **Dark Mode Support**
+   - All components use Tailwind's `dark:` modifier for dark mode variants
+   - Theme preference persisted in localStorage via ThemeContext
+   - System preference detection with `prefers-color-scheme` media query
+   - Preload script in index.html prevents dark mode flash on load
+   - 200ms CSS transitions for smooth theme switching
+
+2. **Responsive Design**
+   - Mobile-first approach using Tailwind breakpoints (sm:, md:, lg:)
+   - Touch-friendly 44px+ minimum tap targets (WCAG 2.1 compliance)
+   - Fluid typography using CSS clamp() for smooth text scaling
+   - Safe area support for notched devices (env(safe-area-inset-bottom))
+   - Collapsible navigation on mobile, persistent on desktop
+
+3. **Loading States**
+   - Shimmer animations for skeleton screens (gradient-based)
+   - 100ms delay before showing skeletons (prevents flash)
+   - LoadingSpinner for indeterminate operations
+   - ProgressBar for determinate operations
+   - Skeleton variants match actual content shape
+
+4. **Error Handling**
+   - ErrorBoundary catches JavaScript errors in component tree
+   - Toast notifications for user feedback (success, error, warning, info)
+   - ErrorState component for retry-able errors
+   - EmptyState component for "no data" scenarios
+   - Form validation errors inline with React Hook Form
+
+5. **Form Validation**
+   - React Hook Form for performant form state management
+   - Zod schemas for type-safe validation
+   - Inline error messages below inputs
+   - Real-time validation on blur
+   - Clear validation state indicators
+
+6. **Accessibility**
+   - ARIA attributes on all interactive elements (aria-label, aria-expanded, aria-current)
+   - Keyboard navigation support (Tab, Shift+Tab, Enter, Escape, Arrow keys)
+   - Focus trap in modals and mobile drawer
+   - Body scroll lock when overlays open
+   - WCAG AA color contrast ratios (4.5:1 for text)
+   - Semantic HTML (nav, main, header, button, etc.)
+
+7. **Search & Filtering**
+   - Debounced search input (500ms default delay)
+   - Search with clear button and loading state
+   - FilterPanel with apply/reset actions
+   - TagFilter with multi-select checkboxes
+   - Sort options with direction toggle (asc/desc)
+   - Active filters display with badges
+
+8. **Onboarding**
+   - React Joyride for guided tours
+   - Tour progress tracked in localStorage
+   - Multiple tour types (home, topics, discussion, profile)
+   - data-tour attributes for stable element targeting
+   - Skip, reset, and completion tracking
+
+9. **Typography & Readability**
+   - Reading width constraints (65ch max for prose)
+   - Enhanced line heights (1.7 for paragraphs)
+   - Text wrapping: balance for headings, pretty for paragraphs
+   - Typography component for rich content
+   - Fluid font sizes for responsive text scaling
+
+**Usage Examples:**
+
+```typescript
+// Dark mode-aware button
+import { Button } from '@/components/ui';
+<Button variant="primary" size="md">Save Changes</Button>
+
+// Search with debouncing
+import { SearchInput } from '@/components/ui';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [query, setQuery] = useState('');
+const debouncedQuery = useDebounce(query, 500);
+
+<SearchInput
+  value={query}
+  onChange={setQuery}
+  placeholder="Search topics..."
+  isLoading={isSearching}
+/>
+
+// Toast notifications
+import { useToast } from '@/contexts/ToastContext';
+const toast = useToast();
+toast.success('Saved successfully!');
+toast.error('Failed to save changes');
+
+// Loading states
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import { TopicCardSkeleton } from '@/components/ui/skeletons';
+
+const showSkeleton = useDelayedLoading(isLoading);
+{showSkeleton && <TopicCardSkeleton />}
+{!showSkeleton && data && <TopicCard topic={data} />}
+
+// Form validation
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '@/schemas/auth';
+
+const { register, handleSubmit, formState: { errors } } = useForm({
+  resolver: zodResolver(loginSchema),
+});
+
+<Input
+  label="Email"
+  {...register('email')}
+  error={errors.email?.message}
+/>
+```
+
+**Performance Considerations:**
+
+- Shimmer animations use CSS transforms (GPU-accelerated)
+- Debounced search prevents API spam
+- Delayed loading prevents layout shift
+- Lazy loading for routes and heavy components
+- Bundle size monitoring (<500KB gzipped)
+
+### Development Workflow
+
+1. **Local Development**:
+
+   ```bash
+   pnpm install          # Install dependencies
+   pnpm dev              # Start dev server (http://localhost:5173)
+   pnpm test:unit:watch  # Watch mode for tests
+   ```
+
+2. **Code Quality**:
+
+   ```bash
+   pnpm lint             # Check linting
+   pnpm format:check     # Check formatting
+   pnpm typecheck        # TypeScript validation
+   pnpm test:unit        # Run unit tests
+   pnpm test:e2e         # Run E2E tests
+   ```
+
+3. **Pre-commit Hooks**: Automatically run on `git commit`
+   - Secrets scanning
+   - Code duplication detection
+   - Console statement detection
+   - Forbidden imports check
+   - Linting and formatting (via lint-staged)
+
+## Implementation Patterns
+
+### Responsive Layout Pattern
+
+The discussion page implements a **three-panel responsive layout** that adapts across devices:
+
+**Pattern**: Grid-based layout with breakpoint-specific behavior
+
+```tsx
+// Desktop: All 3 panels visible side-by-side
+// Tablet: Center + right panels, left panel as overlay
+// Mobile: Center panel only, right panel content moved to accordions
+
+<DiscussionLayout
+  leftPanel={<TopicNavigation />}
+  centerPanel={<ConversationThread />}
+  rightPanel={<Metadata />}
+/>
+```
+
+**Key Components**:
+
+- `DiscussionLayout.tsx` (src/components/discussion-layout/) - Responsive container with breakpoint logic
+- `useBreakpoint.ts` (src/hooks/) - Debounced viewport width detection (mobile <768px, tablet 768-1279px, desktop ≥1280px)
+
+**Accessibility**:
+
+- WCAG 2.1 AA compliant (44px minimum touch targets on mobile)
+- ARIA attributes for overlays, panels, and interactive elements
+- Keyboard navigation (Escape key to close overlays)
+
+### Virtual Scrolling with react-window v2
+
+For handling 500+ items at 60fps, use react-window v2's `List` component:
+
+**Pattern**: Render only visible items + overscan buffer
+
+```tsx
+import { List } from 'react-window';
+
+const Row = useMemo(
+  () =>
+    ({
+      index,
+      style,
+      ariaAttributes,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+      ariaAttributes: {
+        'aria-posinset': number;
+        'aria-setsize': number;
+        role: 'listitem';
+      };
+    }) => (
+      <div style={style} {...ariaAttributes}>
+        <YourItemComponent item={items[index]} />
+      </div>
+    ),
+  [items],
+);
+
+<List<{}> // Explicit generic type for empty rowProps
+  defaultHeight={600}
+  rowCount={items.length}
+  rowHeight={80}
+  overscanCount={5}
+  rowComponent={Row}
+  rowProps={{}} // Required in v2, pass {} if no custom props
+/>;
+```
+
+**react-window v2 API Changes**:
+
+- `FixedSizeList` → `List` (new unified component)
+- Props: `height` → `defaultHeight`, `itemCount` → `rowCount`, `itemSize` → `rowHeight`
+- Render pattern: children render function → `rowComponent` prop
+- `rowProps` is **required** (pass `{}` if no custom props)
+- `ariaAttributes` auto-injected (spread onto row container for accessibility)
+
+**Bundle Impact**: react-window adds only 5.65 KB gzipped (well within performance budget)
+
+### Real-Time Updates with WebSocket
+
+Pattern for subscribing to real-time events:
+
+**Hook**: `useWebSocket.ts` (src/hooks/) - Connection management, reconnection, heartbeat
+
+```tsx
+const { state, isConnected, subscribe } = useWebSocket({
+  autoConnect: true,
+  autoReconnect: true,
+  reconnectDelay: 3000,
+  maxReconnectAttempts: 5,
+});
+
+useEffect(() => {
+  // Subscribe to message types
+  const unsubscribe = subscribe('NEW_RESPONSE', (message) => {
+    // Update UI with new response
+    refetch(); // Trigger react-query refetch
+  });
+  return unsubscribe;
+}, [subscribe, refetch]);
+```
+
+**WebSocket Message Types**:
+
+- `NEW_RESPONSE` - New response posted
+- `COMMON_GROUND_UPDATE` - AI analysis completed
+- `TOPIC_STATUS_CHANGE` - Topic archived/active status change
+- `RESPONSE_DELETED`, `RESPONSE_UPDATED` - Content modifications
+
+**Type Safety**: Use type guards for union message types
+
+```tsx
+subscribe('TOPIC_STATUS_CHANGE', (message) => {
+  // Add type guard to narrow union type
+  if (message.type === 'TOPIC_STATUS_CHANGE' && message.payload.topicId === topic.id) {
+    // TypeScript now knows message.payload structure
+    setTopicStatus(message.payload.newStatus);
+  }
+});
+```
+
+### State Management with React Query
+
+Pattern for server state management:
+
+**Hook Structure**: `useTopics.ts`, `useResponses.ts` (src/hooks/)
+
+```tsx
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+export function useResponses(discussionId: string, options = {}) {
+  const queryClient = useQueryClient();
+
+  // Query with cache key
+  const query = useQuery({
+    queryKey: ['responses', discussionId],
+    queryFn: () => discussionService.getResponses(discussionId),
+    staleTime: 30000, // 30 seconds
+  });
+
+  // Optimistic updates with rollback
+  const createMutation = useMutation({
+    mutationFn: discussionService.createResponse,
+    onMutate: async (newResponse) => {
+      await queryClient.cancelQueries(['responses', discussionId]);
+      const previousData = queryClient.getQueryData(['responses', discussionId]);
+
+      // Optimistic update
+      queryClient.setQueryData(['responses', discussionId], (old) => [
+        ...old,
+        { ...newResponse, id: 'temp-id' },
+      ]);
+
+      return { previousData }; // Rollback context
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      queryClient.setQueryData(['responses', discussionId], context.previousData);
+    },
+    onSuccess: () => {
+      // Invalidate to refetch with real data
+      queryClient.invalidateQueries(['responses', discussionId]);
+    },
+  });
+
+  return { ...query, createResponse: createMutation.mutate };
+}
+```
+
+### URL-Based Navigation
+
+Pattern for client-side navigation without page reloads:
+
+**Hook**: `useTopicNavigation.ts` (src/hooks/)
+
+```tsx
+const { activeTopicId, navigateToTopic, clearTopic } = useTopicNavigation();
+
+// URL pattern: /discussions?topic=<topicId>
+// Updates URL and syncs with React state
+navigateToTopic('topic-123'); // Updates ?topic= param
+```
+
+**Benefits**:
+
+- Browser back/forward work correctly
+- Direct links to specific topics
+- No full page reloads (SPA experience)
+- State synced with URL via `useSearchParams`
+
+### Component Documentation with TSDoc
+
+All new components and hooks include comprehensive TSDoc comments:
+
+**Pattern**:
+
+````tsx
+/**
+ * Brief one-line description
+ *
+ * @remarks
+ * Detailed explanation with:
+ * - **Key Features**: Bullet list of main capabilities
+ * - **Desktop/Tablet/Mobile**: Responsive behavior breakdown
+ * - **Performance**: Optimization notes (virtual scrolling, etc.)
+ *
+ * @param props - Component props
+ * @returns Rendered component
+ *
+ * @example
+ * ```tsx
+ * <DiscussionPage discussionId="disc-123" />
+ * ```
+ */
+````
+
+**Where to Document**:
+
+- Major components: Pages, layouts, complex widgets
+- Custom hooks: State management, data fetching, utilities
+- Shared utilities: Helper functions used across multiple files
+
+**What to Include**:
+
+- Purpose and use case
+- Responsive behavior if applicable
+- Performance characteristics (virtual scrolling, memoization)
+- Integration points (WebSocket, React Query, etc.)
+- Example usage
+
+### TypeScript Strict Mode Practices
+
+**Environment Variables**: Use bracket notation for index signatures
+
+```tsx
+// ❌ Incorrect
+const host = import.meta.env.VITE_WS_HOST;
+
+// ✅ Correct (TypeScript strict mode)
+const host = import.meta.env['VITE_WS_HOST'];
+```
+
+**Unused Variables**: Prefix with underscore if destructured but unused
+
+```tsx
+const { itemHeight, overscanCount: _overscanCount = 3 } = config;
+```
+
+**Union Type Narrowing**: Always use type guards
+
+```tsx
+// For discriminated unions
+if (message.type === 'NEW_RESPONSE') {
+  // TypeScript narrows message.payload type
+  console.log(message.payload.responseId);
+}
+```
+
+### Cross-Panel Interactions
+
+Pattern for coordinating state across multiple panels:
+
+**Approach**: Lift state to common ancestor (DiscussionPage.tsx)
+
+```tsx
+function DiscussionPage() {
+  const [highlightedResponseIds, setHighlightedResponseIds] = useState<Set<string>>(new Set());
+
+  return (
+    <DiscussionLayout
+      leftPanel={<TopicNav />}
+      centerPanel={<ConversationThread highlightedResponseIds={highlightedResponseIds} />}
+      rightPanel={
+        <PropositionList
+          onPropositionClick={(responseIds) => {
+            // Highlight responses in center panel
+            setHighlightedResponseIds(new Set(responseIds));
+          }}
+        />
+      }
+    />
+  );
+}
+```
+
+**Use Cases**:
+
+- Proposition → Response highlighting
+- Preview feedback (composer → metadata panel)
+- Topic selection (left panel → center panel)
+
+### Error Handling Patterns (Backend Services)
+
+The backend services use three primary error handling patterns. Understanding when to use each pattern ensures consistent, predictable behavior across the codebase.
+
+**1. Throw Immediately (Default for Public APIs)**
+
+Use when the caller MUST handle the error case. This is the default pattern for operations where failure is exceptional and requires immediate attention.
+
+```typescript
+// Method naming: get*() - throws if not found
+async getUserById(id: string): Promise<User> {
+  const user = await this.userRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new NotFoundException(`User with ID ${id} not found`);
+  }
+  return user;
+}
+```
+
+- **When to use**: Required resource lookups, validation failures, authorization checks
+- **Caller expectation**: Must handle the exception or let it propagate to error middleware
+
+**2. Return Null/Empty (Query Operations)**
+
+Use when not finding data is a valid outcome, not an error. Common for search, lookup, and optional relationship queries.
+
+```typescript
+// Method naming: find*() - returns null/undefined if not found
+async findUserByEmail(email: string): Promise<User | null> {
+  return this.userRepository.findOne({ where: { email } });
+}
+
+// Method naming: list*() or get*s() - returns empty array if none found
+async listUsersByRole(role: string): Promise<User[]> {
+  return this.userRepository.find({ where: { role } });
+}
+```
+
+- **When to use**: Optional resource lookups, search queries, relationship traversal
+- **Caller expectation**: Check for null/empty before using the result
+
+**3. Fire-and-Forget (Background/Optional Operations)**
+
+Use when operation failure should not affect the main flow. Common for analytics, notifications, and audit logging.
+
+```typescript
+// Method naming: try*() - logs errors, never throws
+async tryUpdateActivityFeed(userId: string, action: string): Promise<void> {
+  try {
+    await this.activityService.record(userId, action);
+  } catch (error) {
+    this.logger.warn(`Failed to update activity feed: ${error.message}`, {
+      userId,
+      action,
+    });
+    // Swallow error - don't affect main operation
+  }
+}
+```
+
+- **When to use**: Analytics, notifications, audit logging, cache updates
+- **Caller expectation**: Operation is best-effort; failure is logged but not propagated
+
+**Pattern Selection Guide**
+
+| Scenario                               | Pattern         | Method Prefix   | Returns                    |
+| -------------------------------------- | --------------- | --------------- | -------------------------- |
+| Required resource lookup               | Throw           | `get*`          | Entity or throws           |
+| Optional resource lookup               | Return null     | `find*`         | Entity \| null             |
+| Collection query                       | Return empty    | `list*`/`get*s` | Array (may be empty)       |
+| Side effect (analytics, notifications) | Fire-and-forget | `try*`          | void                       |
+| Batch operations with partial success  | Return partial  | varies          | Array with status per item |
+
+**Current Codebase Notes**
+
+The existing codebase has some inconsistencies with these patterns:
+
+- Some `find*` methods at service level throw instead of returning null
+- No `try*` methods exist yet (fire-and-forget uses inline try/catch)
+- UUID validation throws in some places, returns false in others
+
+New code should follow these conventions. Existing code can be migrated gradually as files are touched.
+
+### JSDoc Documentation Standards
+
+All public methods in backend services should include JSDoc documentation with the following tags.
+
+**Required Tags for Public Methods**
+
+```typescript
+/**
+ * Brief one-line description of what the method does.
+ *
+ * @param id - The user's unique identifier (UUID format)
+ * @param options - Optional query parameters
+ * @returns The user entity with profile data populated
+ * @throws {NotFoundException} When user with given ID doesn't exist
+ * @throws {ForbiddenException} When caller lacks permission to view user
+ */
+async getUserById(id: string, options?: QueryOptions): Promise<User> {
+  // implementation
+}
+```
+
+**Tag Reference**
+
+| Tag         | Required      | Description                                 |
+| ----------- | ------------- | ------------------------------------------- |
+| Description | Yes           | First line, no tag needed                   |
+| `@param`    | Yes           | Each parameter with type hint and meaning   |
+| `@returns`  | Yes           | Return type and what it represents          |
+| `@throws`   | If applicable | Each exception type with condition          |
+| `@remarks`  | Optional      | Additional context, caveats, or usage notes |
+| `@example`  | Optional      | Code example for complex methods            |
+
+**@throws Format**
+
+Always specify the exception class and the condition that triggers it:
+
+```typescript
+// Good - specific condition
+@throws {NotFoundException} When user with given ID doesn't exist
+
+// Good - multiple conditions for same exception type
+@throws {BadRequestException} When email format is invalid
+@throws {BadRequestException} When password doesn't meet requirements
+
+// Avoid - too vague
+@throws {Error} When something goes wrong
+```
+
+**When to Skip JSDoc**
+
+- Private methods (unless complex logic warrants documentation)
+- Simple getters/setters with obvious purpose
+- Methods where the signature is completely self-documenting
+- Test files
+
+**Example: Full Documentation**
+
+````typescript
+/**
+ * Creates a new user account with email verification.
+ *
+ * @remarks
+ * The user will receive a verification email after creation.
+ * Account remains inactive until email is verified.
+ *
+ * @param dto - User registration data
+ * @returns The created user (without password hash)
+ * @throws {ConflictException} When email is already registered
+ * @throws {BadRequestException} When password doesn't meet requirements
+ *
+ * @example
+ * ```typescript
+ * const user = await usersService.createUser({
+ *   email: 'user@example.com',
+ *   password: 'SecurePass123!',
+ *   displayName: 'John Doe',
+ * });
+ * ```
+ */
+async createUser(dto: CreateUserDto): Promise<User> {
+  // implementation
+}
+````
+
+### Request Validation Policy (Backend Services)
+
+All backend services standardize on a single global `ValidationPipe` policy via the
+shared helper `createValidationPipe()` in `@reason-bridge/common` (`packages/common/src/http`):
+
+- `whitelist: true` — strip properties without validation decorators.
+- `forbidNonWhitelisted: true` — reject requests containing unknown fields with a 400.
+- `transform: true` — transform plain payloads into DTO instances.
+
+Rationale: a typo'd or extra field returns a clear `400` rather than being silently
+stripped, which is safer for API consumers. Bootstrap each service with:
+
+```typescript
+import { createValidationPipe } from '@reason-bridge/common';
+
+app.useGlobalPipes(createValidationPipe());
+// discussion-service preserves implicit numeric conversion for query params:
+app.useGlobalPipes(createValidationPipe({ transformOptions: { enableImplicitConversion: true } }));
+```
+
+**Exception — the API gateway does NOT register this pipe.** Its proxy controllers bind
+raw `@Body() body: Record<string, any>` payloads with no DTO, so `whitelist: true` would
+strip every field. The gateway forwards bodies verbatim and relies on downstream services
+to validate.
+
+### Pagination Contract (List Endpoints)
+
+A shared pagination contract lives in `@reason-bridge/common` (`packages/common/src/pagination`):
+`PaginatedResponse<T>` / `PaginationMeta` types plus `parsePositiveInt`,
+`normalizeOffsetPagination`, and `buildOffsetMeta` helpers. New list endpoints should adopt
+the `{ data, meta }` envelope; existing endpoints can migrate incrementally. Always validate
+numeric query params (limit/offset/page/days) with `parsePositiveInt` (or a DTO) instead of
+raw `parseInt`, which can produce `NaN`/negative values that corrupt queries and date math.
+
+## API Versioning
+
+The API gateway uses **URI-based versioning** (`app.enableVersioning({ type: VersioningType.URI, ... })` in `services/api-gateway/src/main.ts`).
+
+- **Policy**: The default version list is `[VERSION_NEUTRAL, '1']`, so every gateway route is served BOTH at its original unversioned path (e.g. `/auth/login`) and at a versioned path (`/v1/auth/login`). This gives existing consumers — including the frontend `/api` base — a deprecation window with no breaking change.
+- **Adding a breaking change**: introduce it under a new version (`@Version('2')` on the specific handler, or `defaultVersion` bump) while keeping the prior version's route as a deprecated alias for the transition window.
+- **Proxying**: gateway proxy controllers hardcode each downstream `path` (e.g. `/auth/login`), so the `/vN` segment is consumed by the gateway router and never forwarded to downstream services (which remain unversioned internally).
+
+## Observability & Logging
+
+All services log structured JSON via the shared `PinoLoggerService` from `@reason-bridge/common` (`packages/common/src/logging/`), passed into `NestFactory.create({ logger })` and `setupGracefulShutdown`. Output is single-line JSON in production (machine-parseable for CloudWatch/Loki), pretty in development, and error-level-only under tests. The gateway binds `correlationId`/`traceparent` from the AsyncLocalStorage request context onto every log line via the logger's `contextProvider`.
+
+## Speckit Workflow
+
+The project uses a structured feature development process through Claude Code slash commands:
+
+### Feature Development Flow
+
+1. `/speckit.specify <description>` - Create feature specification from natural language
+2. `/speckit.clarify` - Identify and resolve underspecified areas in the spec
+3. `/speckit.plan` - Generate implementation plan with technical design artifacts
+4. `/speckit.tasks` - Break plan into actionable, dependency-ordered tasks
+5. `/speckit.implement` - Execute tasks from tasks.md
+6. `/speckit.taskstoissues` - Convert tasks to GitHub issues
+
+### Supporting Commands
+
+- `/speckit.checklist` - Generate custom checklist for a feature
+- `/speckit.analyze` - Cross-artifact consistency check across spec.md, plan.md, tasks.md
+- `/speckit.constitution` - Create/update project constitution (core principles)
+
+### Directory Structure
+
+```
+specs/[###-feature-name]/
+├── spec.md              # Feature specification
+├── plan.md              # Implementation plan
+├── research.md          # Phase 0 research output
+├── data-model.md        # Entity definitions
+├── quickstart.md        # Getting started guide
+├── contracts/           # API contracts (OpenAPI/GraphQL)
+├── tasks.md             # Task breakdown
+└── checklists/          # Validation checklists
+```
+
+### Key Principles
+
+- **Specs are WHAT, not HOW**: Specifications focus on user needs and business value, avoiding implementation details
+- **User stories must be independently testable**: Each story should be a viable MVP slice
+- **Maximum 3 [NEEDS CLARIFICATION] markers**: Make informed guesses for everything else
+- **Success criteria must be technology-agnostic and measurable**
+
+## Helper Scripts
+
+Located in `.specify/scripts/bash/`:
+
+- `create-new-feature.sh` - Initialize new feature branch and spec directory
+- `setup-plan.sh` - Set up planning phase, returns JSON with paths
+- `update-agent-context.sh` - Update agent-specific context files
+- `check-prerequisites.sh` - Verify required tools are installed
+
+## Git Commit Policy
+
+**IMPORTANT: Pre-commit hooks are mandatory quality gates and MUST NOT be bypassed.**
+
+- **NEVER use `git commit --no-verify` or `git commit -n`** in any agentic coding session or manual commits
+- **NEVER use `git push --no-verify`** to bypass pre-push checks
+- All commits must pass pre-commit hooks to ensure code quality, security, and test health
+- If a pre-commit hook fails:
+  1. Read the error message carefully
+  2. Fix the issue in your code
+  3. Stage the fixed changes
+  4. Commit again
+- **Alternative for full test runs:** Use `FULL_TEST=true git commit -m "message"` if you need comprehensive testing before release
+- **Recommended:** Use `npm run commit` to ensure safe commits (runs git commit with hook verification guaranteed)
+
+Bypassing hooks defeats the purpose of code quality enforcement and can introduce:
+
+- Leaked secrets and credentials
+- Code duplication issues
+- TypeScript type errors
+- Broken tests
+- Console debugging statements in production code
+- Formatting inconsistencies
+
+## GitHub Actions CI/CD
+
+CI runs on GitHub Actions with GitHub-hosted runners (`ubuntu-latest`). The repo is
+public, so runner minutes are free. Migrated from Jenkins in 2026-07 (the Jenkins
+server no longer exists); design record:
+`docs/superpowers/specs/2026-07-11-github-actions-migration-design.md`.
+
+**Workflow:** `.github/workflows/ci.yml`
+
+- **Triggers**: `pull_request`, `push` to `main`, and manual `workflow_dispatch`
+- **Concurrency**: newer pushes cancel in-flight runs for the same ref (except `main`)
+- **Shared setup**: `.github/actions/setup` composite action — pnpm (version from
+  the `packageManager` field) + Node 20 + pnpm store cache + frozen-lockfile
+  install + shared package build (includes Prisma client generation)
+
+**Jobs (run in parallel; job name = status check context):**
+
+| Job               | What it runs                                                                                             |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Lint              | `pnpm run lint` + `pnpm typecheck`                                                                       |
+| Unit Tests        | `pnpm run test:unit -- --coverage` (Bedrock mocked; no AWS credentials in CI)                            |
+| Integration Tests | `docker-compose.test.yml` services + `prisma db push` + `vitest --config vitest.integration.config.ts`   |
+| Contract Tests    | `pnpm run test:contract` (Pact mock servers, no Docker services)                                         |
+| E2E Tests         | full compose stack + Playwright on the runner (see Playwright section); skipped for `staging/*` branches |
+| Build             | frontend production build (shared packages built in setup)                                               |
+| CI                | aggregate gate — fails if any needed job failed or was cancelled; skipped jobs count as OK               |
+
+**Debugging:**
+
+- View runs: `gh run list --workflow=ci.yml` / `gh run view <id> --log-failed`
+- Artifacts: unit coverage, integration JUnit XML, Playwright report + test-results
+- E2E failures dump the last 100 lines of every compose service's logs
+- Local reproduction: run the same commands from `.github/workflows/ci.yml` locally
+  (they are the standard `pnpm run ...` scripts)
+
+## GitHub Branch Protection
+
+**CRITICAL: Branch protection contexts must match the job names in `.github/workflows/ci.yml`.**
+Renaming a job in the workflow without updating branch protection will block all merges.
+
+**Required Status Checks for `main` branch (Defense-in-Depth):**
+
+```json
+{
+  "contexts": ["Lint", "Unit Tests", "Integration Tests", "E2E Tests", "CI"],
+  "strict": true
+}
+```
+
+**Why this configuration:**
+
+- Individual pre-merge checks (Lint, Unit Tests, Integration Tests, E2E Tests) plus
+  the aggregate `CI` gate that requires every job to finish without failure
+- **Strict mode**: PRs must be up-to-date with the base branch
+- A **skipped** required check (e.g. E2E Tests on `staging/*` branches) counts as
+  satisfied — this is native GitHub Actions behavior, no manual status posting needed
+- `Contract Tests` and `Build` run but are not required (parity with the old Jenkins
+  setup, where contract tests were soft-failing)
+
+**Verification:**
+
+```bash
+gh api repos/steiner385/reasonbridge/branches/main/protection/required_status_checks --jq '.contexts'
+# Expected output: ["Lint","Unit Tests","Integration Tests","E2E Tests","CI"]
+```
+
+**NEVER modify branch protection without:**
+
+1. Verifying the new status check context matches a job name that actually reports on PRs
+2. Testing with a dummy PR that auto-merge correctly waits for all checks
+3. Documenting the change and reason in this file
+
+**Incident References (from the Jenkins era; the failure modes still generalize):**
+
+1. **2026-01-24 - PR #668**: Merged with a failing test because protection required only an
+   after-merge status. Lesson: require the individual pre-merge checks.
+2. **2026-01-28 - PR #709**: Merged while the overall pipeline status was still pending, which
+   later failed. Lesson: also require the aggregate gate (`CI`) so the whole pipeline must finish.
+
+3. **2026-07-11 - Force-merge of 24 open PRs**: At the repo owner's explicit request, all open PRs (#1262, #1270–#1279, #1398–#1410) were admin-merged to main while the required `jenkins/e2e` check was failing. `enforce_admins` was temporarily disabled to permit `gh pr merge --admin`, then re-enabled immediately after; the required status check contexts themselves were never modified. Ten PRs required manual conflict resolution on their branches before merging (appeal-service refactor overlap, `useResponses` cache-key fix, per-service `main.ts` import unions, pnpm lockfile regeneration for Dependabot bumps). Because CI was bypassed, the first post-merge main builds must be watched and any failures fixed forward.
+
+**Configuration Evolution:**
+
+- 2026-01-24: Required jenkins/lint, jenkins/unit-tests, jenkins/integration
+- 2026-01-28: Re-added jenkins/ci as fourth required check
+- 2026-07-11: `enforce_admins` temporarily disabled and restored same-session for an owner-requested force-merge (see incident 3); final state verified as `enforce_admins: true` with the required contexts intact
+- 2026-07-11: Migrated to GitHub Actions contexts: Lint, Unit Tests, Integration Tests, E2E Tests, CI
+
+## Playwright E2E Testing
+
+**IMPORTANT: NEVER use `npx playwright test --debug` or `--headed` flags.**
+
+- These flags require interactive input (clicking, keyboard input) which disrupts autonomous workflows
+- Debug mode opens a browser GUI that blocks execution until manual interaction
+- Always run Playwright in headless mode for CI and agentic sessions
+
+**Correct usage:**
+
+```bash
+# Run all E2E tests
+npx playwright test
+
+# Run specific test file
+npx playwright test frontend/e2e/login-form.spec.ts
+
+# Run with verbose output (safe for automation)
+npx playwright test --reporter=list
+
+# Generate HTML report after run
+npx playwright show-report
+```
+
+**For debugging test failures:**
+
+- Use `console.log()` statements in tests (remove before committing)
+- Check Playwright HTML reports: `npx playwright show-report`
+- Use `page.screenshot()` to capture state at specific points
+- Review trace files if `trace: 'on-first-retry'` is configured
+
+**E2E Login Wait Pattern:**
+
+When tests perform login via modal and navigate to authenticated pages, always use the 3-line wait pattern to ensure authentication state stabilizes:
+
+```typescript
+// Wait for login to complete and modal to close
+await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 });
+
+// Wait for navigation and authentication state to stabilize
+await page.waitForURL(/(\/$|\/topics)/, { timeout: 10000 });
+await page.waitForLoadState('networkidle');
+await page.waitForTimeout(200); // Critical: Allow token storage and state propagation to complete
+```
+
+**Why this pattern:**
+
+1. `waitForURL` - Ensures navigation completed
+2. `waitForLoadState('networkidle')` - Waits for all network requests (including `/users/me` profile fetch)
+3. `waitForTimeout(200)` - Allows async localStorage token writes and React state propagation via `setTimeout(..., 0)`
+
+**Reference**: user-registration-login-flow.spec.ts:135-139
+
+**CI/CD E2E Configuration (GitHub Actions):**
+
+The `E2E Tests` job in `.github/workflows/ci.yml` runs Playwright directly on the
+`ubuntu-latest` runner — no Playwright Docker container:
+
+- The E2E stack starts via `docker-compose.e2e.yml` + `docker-compose.e2e.local.yml`
+  (the local overlay publishes the frontend on `:9080`; safe because each workflow
+  run owns the whole VM)
+- `npx playwright install --with-deps chromium` installs the browser matching the
+  workspace-pinned `@playwright/test` version — the old image/package version-match
+  requirement is gone
+- Tests run from `frontend/` with `PLAYWRIGHT_BASE_URL=http://localhost:9080`,
+  `E2E_DOCKER=true`, `SKIP_GLOBAL_SETUP_WAIT=true` (the workflow waits for readiness)
+- Accessibility tests run afterwards as a non-blocking step
+  (`npx playwright test --config playwright.a11y.config.ts`)
+
+**Historical Issues (Jenkins era — the containerized-Playwright architecture they
+describe no longer applies, but the failure modes are educational):**
+
+1. **OOM Killer (Exit Code 137)** - Fixed 2026-01-24 15:49 UTC:
+   - Main branch builds #48 and #50 failed with exit code 137 (OOM killer)
+   - **Root cause**: npm install @playwright/test downloading 400MB browser binaries caused memory spikes
+   - **Solution**: Use pre-installed Playwright from official Docker image, only install project dependencies
+   - **Result**: Eliminated intermittent E2E failures, reduced memory pressure on Jenkins agents
+
+2. **DNS Resolution (net::ERR_NAME_NOT_RESOLVED)** - Fixed 2026-01-24 16:05 UTC:
+   - PR #672 build #1: 14 tests in view-common-ground-summary.spec.ts failed with `net::ERR_NAME_NOT_RESOLVED at http://frontend/topics`
+   - **Root cause**: PLAYWRIGHT_BASE_URL environment variable not passed correctly to docker exec process
+   - **Solution**: Use `docker exec -e PLAYWRIGHT_BASE_URL=http://frontend:80` instead of export inside bash script
+   - **Result**: All 14 tests now resolve correct baseURL for navigation
+
+3. **Port Already Allocated (E2E Start Failure)** - Fixed 2026-01-24 16:27 UTC:
+   - PR #672 build #2: Docker Compose failed with `Bind for 0.0.0.0:3004 failed: port is already allocated`
+   - **Root cause**: Crashed/killed containers leave processes holding E2E ports; aggressive cleanup only removed containers by name, not port-based processes
+   - **Solution**: Enhanced `aggressiveE2ECleanup()` to kill processes on E2E ports (3001-3007, 5000, 9080) using lsof before starting environment
+   - **Result**: Port conflicts resolved, environment starts cleanly
+
+4. **Host OOM Killer (Exit Code 137 Despite Low Container Memory)** - Fixed 2026-01-24 19:30 UTC:
+   - PR #672 build #4: E2E tests crashed with exit code 137 (OOM) after only 2 tests, despite container showing 486MB/4GB (11.89%) usage
+   - **Root cause**: Host system memory pressure causing Linux OOM killer to terminate Docker containers; E2E environment (7 Node.js services + postgres + redis + localstack + nginx + Playwright) consumed ~2.5-3GB unbounded, competing with other Jenkins builds
+   - **Solution**: Added explicit memory limits to all docker-compose.e2e.yml services (postgres: 256m, redis: 128m, localstack: 512m, each Node.js service: 256m, nginx: 64m) to prevent bloat and ensure predictable resource usage (~3GB total + 4GB Playwright = 7GB max)
+   - **Result**: Services cannot exceed limits, host OOM pressure eliminated, predictable memory footprint
+
+5. **Playwright Version Mismatch (Executable Not Found)** - Fixed 2026-01-28 14:20 UTC:
+   - PR #706: All 381 E2E tests failed in 1-2ms each with exit code 1 (not OOM)
+   - **Error**: `browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1208/...`
+   - **Root cause**: Project's `@playwright/test` was updated to v1.58.0 but Docker image was still v1.57.0; Playwright requires exact version match between npm package and Docker image
+   - **Solution**: Updated Docker image from `mcr.microsoft.com/playwright:v1.57.0-noble` to `v1.58.0-noble` in jenkins-lib
+   - **Result**: 312 E2E tests pass with normal execution times (200-250ms per test)
+   - **Lesson**: When updating `@playwright/test` version, always update the Docker image version in jenkins-lib to match
+
+6. **Recurring OOM from Test Volume and npm Install** - Fixed 2026-01-31 16:45 UTC:
+   - PR #730: E2E tests repeatedly failing with exit code 137 (OOM) despite previous fixes
+   - **Root causes**:
+     - Running 1302 tests (3 browsers × 434 tests) overwhelmed the 2GB Playwright container
+     - `npm install allure-playwright` during test startup caused memory spikes
+     - Corrupted pnpm symlinks caused install failures requiring retries
+   - **Solutions**:
+     - Reduced to chromium-only in CI (434 tests vs 1302) via `playwright.config.ts`
+     - Skip allure-playwright reporter in CI (conditional reporter config)
+     - Increased Playwright container memory from 2GB to 4GB
+     - Added pnpm install retry mechanism (3 attempts) with cache clearing
+     - Reduced Jenkins agents from 8 to 3 to free memory headroom
+   - **Result**: 320 E2E tests pass in 2.7 minutes with no OOM errors
+   - **Lesson**: E2E stability requires balancing test coverage with resource constraints; prefer fewer reliable tests over many flaky tests
+
+7. **npm Workspace Protocol Error (EUNSUPPORTEDPROTOCOL)** - Fixed 2026-03-03 20:30 UTC:
+   - Build #364: E2E tests failed with exit code 1 immediately after container setup
+   - **Error**: `npm error Unsupported URL Type "workspace:": workspace:*`
+   - **Root cause**: Frontend's package.json was copied to Playwright container, but it contains pnpm workspace references (`"@reason-bridge/common": "workspace:*"`) that npm cannot process
+   - **Solution**: Move package.json aside before `npm install @playwright/test`, restore after (jenkins-lib change)
+   - **Result**: npm install succeeds without workspace: protocol conflicts
+   - **Lesson**: When copying files to isolated containers, be aware of monorepo-specific dependencies that may not work with vanilla npm
+
+8. **Missing @axe-core/playwright Dependency** - Fixed 2026-03-03 20:55 UTC:
+   - Build #366: E2E tests failed immediately with exit code 1 after only ~2 minutes
+   - **Error**: `Cannot find package '@axe-core/playwright' imported from /app/frontend/e2e/helpers/accessibility.ts`
+   - **Root cause**: After moving package.json aside (fix #7), npm only installs `@playwright/test` but the E2E tests also import `@axe-core/playwright` for accessibility testing
+   - **Solution**: Add `@axe-core/playwright` to the npm install command alongside `@playwright/test`
+   - **Result**: All E2E test dependencies are available in the container
+   - **Lesson**: When installing dependencies in isolated containers, ensure ALL imported packages are explicitly installed
+
+## Active Technologies
+
+- TypeScript 5.9.3 (strict mode), React 19.2.4, Node.js 20 LTS (NestJS backend) + React Query 5.90.21, React Hook Form 7.71.2, Zod 4.3.5, Tailwind CSS 3.4.19, Socket.io-client 4.8.3 (001-profile-page)
+- PostgreSQL 15 via Prisma ORM (existing User, UserRank, TopicExpertise, UserFollow models) (001-profile-page)
+
+- **TypeScript 5.7.3** - Node.js 20 LTS (backend), React 18 (frontend)
+- **PostgreSQL 15** - Primary database with Prisma ORM
+- **Redis 7** - Caching, sessions, pub/sub messaging
+- **Playwright 1.58.0** - E2E testing (chromium-only in CI)
+- **Vitest 2.x** - Unit and integration testing
+- **pnpm 9.x** - Package management (workspace monorepo)
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: `pnpm install` fails with "lockfile is out of date"
+**Solution**: Run `pnpm install --no-frozen-lockfile` locally, commit updated `pnpm-lock.yaml`
+
+**Issue**: Build fails with "Cannot find module" for NestJS packages
+**Solution**:
+
+- Run `pnpm install` to ensure all workspace dependencies are linked
+- Check that service's `package.json` lists the missing dependency
+- Rebuild shared packages: `pnpm -r --filter="@reason-bridge/*" build`
+
+**Issue**: TypeScript errors about missing types
+**Solution**:
+
+- Check `node_modules/@types` directories exist
+- Run `pnpm install` to refresh types
+- Restart TypeScript server in IDE
+
+**Issue**: Pre-commit hooks fail
+**Solution**:
+
+- **NEVER bypass with `--no-verify`**
+- Read the error message carefully
+- Fix the reported issue (e.g., remove console.log, fix formatting)
+- Stage fixes and commit again
+- For full test run: `FULL_TEST=true git commit -m "message"`
+
+**Issue**: Vite dev server won't start
+**Solution**:
+
+- Check port 5173 is not already in use: `lsof -i :5173`
+- Clear Vite cache: `rm -rf node_modules/.vite`
+- Restart with `pnpm dev`
+
+**Issue**: Tests fail with "Cannot find module"
+**Solution**:
+
+- Ensure all test files have `.spec.ts` or `.test.ts` extension
+- Check import paths use correct relative paths
+- Verify `vitest.config.ts` has correct `resolve.alias` settings
+
+**Issue**: E2E tests timeout
+**Solution**:
+
+- Ensure headless mode (never use `--debug` or `--headed` in CI)
+- Check `playwright.config.ts` timeout settings
+- Verify test selectors are stable (use `data-testid` attributes)
+- Review Playwright HTML reports: `npx playwright show-report`
+
+**Issue**: E2E tests fail with exit code 137 (OOM)
+**Solution**:
+
+- Verify only chromium runs in CI (not all 3 browsers)
+- Ensure allure-playwright is skipped in CI (check reporter config)
+- Check `mem_limit` values in `docker-compose.e2e.yml` if a service is being killed
+- If recurring, consider reducing parallel test workers
+
+**Issue**: CI fails but passes locally
+**Solution**:
+
+- Check the failing job's logs: `gh run view <run-id> --log-failed`
+- Verify environment variables are set correctly in `.github/workflows/ci.yml`
+- Ensure Docker services started (`docker compose ... up -d --wait` step output)
+- Test with frozen lockfile: `pnpm install --frozen-lockfile`
+
+**Issue**: PR cannot merge - status checks pending
+**Solution**:
+
+- Wait for all GitHub Actions jobs to complete
+- Required checks: `Lint`, `Unit Tests`, `Integration Tests`, `E2E Tests`, `CI`
+- If checks fail, fix issues and push new commits
+- PR must be up-to-date with base branch (strict mode)
+
+### Debugging Workflow
+
+1. **Identify the Error**:
+   - Read error message completely
+   - Check file and line number
+   - Review recent changes
+
+2. **Reproduce Locally**:
+   - Pull latest changes
+   - Install dependencies
+   - Run the failing command locally
+
+3. **Fix and Verify**:
+   - Make minimal fix
+   - Run tests to verify fix
+   - Ensure no regressions
+
+4. **Commit and Push**:
+   - Commit with clear message
+   - Push to trigger CI
+   - Verify CI passes
+
+### Getting Help
+
+- **CI Logs**: `gh run list --workflow=ci.yml` / `gh run view <id> --log-failed` (or the Actions tab)
+- **CI Setup Guide**: `.github/CI_SETUP.md`
+- **Local Reproduction**: run the same `pnpm run ...` commands from `.github/workflows/ci.yml` locally
+
+## Recent Changes
+
+- 001-profile-page: Added TypeScript 5.9.3 (strict mode), React 19.2.4, Node.js 20 LTS (NestJS backend) + React Query 5.90.21, React Hook Form 7.71.2, Zod 4.3.5, Tailwind CSS 3.4.19, Socket.io-client 4.8.3
+
+- **2026-03-02**: Jenkins CI stability improvements
+  - Fixed PhoneVerificationButton test timeout (PR #975)
+  - Added Docker image pull retry mechanism (3 retries with 5s delay)
+  - Added Docker health check and system prune before image pulls
+  - Added catchError protection to Build stage
+- **2026-02-18**: Added AI/LLM testing infrastructure and documentation
+  - Bedrock response mock fixtures, prompt snapshot tests, schema validation
+  - Claim extractor service with 7 claim types, golden tests, latency benchmarks
+  - Activity service for user activity feed tracking (port 3008)
+  - Created deployment documentation (docs/DEPLOYMENT.md)
+  - Created quickstart guide (docs/QUICKSTART.md)
+  - Three-panel responsive layout (desktop/tablet/mobile breakpoints)
+  - Virtual scrolling with react-window v2.2.6 (5.65 KB gzipped)
+  - Real-time updates via WebSocket (new responses, status changes)
+  - Added comprehensive implementation patterns to CLAUDE.md
+  - All Phase 9 polish tasks complete (TSDoc, bundle validation)
