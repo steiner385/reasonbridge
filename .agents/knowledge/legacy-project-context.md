@@ -1025,12 +1025,32 @@ gh api repos/steiner385/reasonbridge/branches/main/protection/required_status_ch
 
 3. **2026-07-11 - Force-merge of 24 open PRs**: At the repo owner's explicit request, all open PRs (#1262, #1270–#1279, #1398–#1410) were admin-merged to main while the required `jenkins/e2e` check was failing. `enforce_admins` was temporarily disabled to permit `gh pr merge --admin`, then re-enabled immediately after; the required status check contexts themselves were never modified. Ten PRs required manual conflict resolution on their branches before merging (appeal-service refactor overlap, `useResponses` cache-key fix, per-service `main.ts` import unions, pnpm lockfile regeneration for Dependabot bumps). Because CI was bypassed, the first post-merge main builds must be watched and any failures fixed forward.
 
+4. **2026-09-04 - Issue #1426, CI/CD Doctor "demote" verdict rejected**: The automated
+   CI/CD Doctor (propose mode) filed issue #1426 proposing to demote the aggregate `CI`
+   check from required status checks as "flaky." Investigation of `gh run list` /
+   `gh run view --log-failed` across all recent `CI` failures (runs 29158939546,
+   29159177440, 29161642676, 29174265835, 29176953994, 29178106107) found the `ci` job
+   itself is a pure ~5-minute `needs:`-gated aggregation step (see `.github/workflows/ci.yml`)
+   with no test execution of its own, so it cannot be nondeterministically flaky. Every
+   failure traced to a real, reproducible failure in a dependent job (e.g. genuine
+   accessibility-test regressions on `fix/accessibility-mobile-audit`, caught correctly
+   pre-merge). `.flaky-tests.json` (the quarantine tracker referenced by legacy Jenkins
+   tooling) has zero entries, so there is no independent evidence of flaky tests driving
+   these failures either. Demoting `CI` would also silently stop blocking merges on
+   `Contract Tests` / `Build` failures, since those two jobs are only enforced via the
+   `CI` aggregate today (see "Why this configuration" above) — this is the same failure
+   mode as incident 2 (PR #709). **Verdict: kept `CI` required; no branch protection
+   change made.** If real flakiness is later found in a specific job (e.g. E2E), address
+   it in that job directly rather than by weakening the aggregate gate.
+
 **Configuration Evolution:**
 
 - 2026-01-24: Required jenkins/lint, jenkins/unit-tests, jenkins/integration
 - 2026-01-28: Re-added jenkins/ci as fourth required check
 - 2026-07-11: `enforce_admins` temporarily disabled and restored same-session for an owner-requested force-merge (see incident 3); final state verified as `enforce_admins: true` with the required contexts intact
 - 2026-07-11: Migrated to GitHub Actions contexts: Lint, Unit Tests, Integration Tests, E2E Tests, CI
+- 2026-09-04: Investigated and rejected a proposal (issue #1426) to demote `CI` from
+  required status checks; contexts unchanged (see incident 4)
 
 ## Playwright E2E Testing
 
