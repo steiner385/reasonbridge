@@ -56,6 +56,18 @@ jobs:
           path: coverage/
           retention-days: 7
           if-no-files-found: ignore
+      # JUnit is written by the vitest configs (reporters: ['default','junit']):
+      # the root run to coverage/, the separate db-models run to its package dir.
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-unit
+          path: |
+            coverage/junit-unit.xml
+            packages/db-models/test-results/junit-unit.xml
+          retention-days: 7
+          if-no-files-found: warn
 
   integration-tests:
     name: Integration Tests
@@ -75,14 +87,14 @@ jobs:
         env:
           INTEGRATION_TEST_DB_READY: 'true'
         run: npx vitest run --config vitest.integration.config.ts
-      - name: Upload test results
+      - name: Upload JUnit results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-results
+          name: junit-integration
           path: coverage/integration-junit.xml
           retention-days: 7
-          if-no-files-found: ignore
+          if-no-files-found: warn
       - name: Stop test services
         if: always()
         run: docker compose -f docker-compose.test.yml down -v
@@ -96,6 +108,14 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Run contract tests
         run: pnpm run test:contract
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-contract
+          path: coverage/contract-junit.xml
+          retention-days: 7
+          if-no-files-found: warn
 
   e2e-tests:
     name: E2E Tests
@@ -148,7 +168,13 @@ jobs:
           E2E_DOCKER: 'true'
           PLAYWRIGHT_BASE_URL: http://localhost:9080
           SKIP_GLOBAL_SETUP_WAIT: 'true'
-        run: npx playwright test
+        # Both Playwright configs write playwright-report/junit.xml, so copy
+        # each run's report aside before the next run overwrites it.
+        run: |
+          rc=0
+          npx playwright test || rc=$?
+          cp playwright-report/junit.xml junit-e2e.xml || true
+          exit $rc
 
       # Advisory, like the old jenkins/accessibility status: report, don't block.
       - name: Accessibility tests (non-blocking)
@@ -158,7 +184,11 @@ jobs:
           E2E_DOCKER: 'true'
           PLAYWRIGHT_BASE_URL: http://localhost:9080
           SKIP_GLOBAL_SETUP_WAIT: 'true'
-        run: npx playwright test --config playwright.a11y.config.ts
+        run: |
+          rc=0
+          npx playwright test --config playwright.a11y.config.ts || rc=$?
+          cp playwright-report/junit.xml junit-e2e-a11y.xml || true
+          exit $rc
 
       - name: Dump service logs on failure
         if: failure()
@@ -174,6 +204,17 @@ jobs:
             frontend/test-results/
           retention-days: 7
           if-no-files-found: ignore
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-e2e
+          path: |
+            frontend/junit-e2e.xml
+            frontend/junit-e2e-a11y.xml
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: Stop E2E stack
         if: always()
